@@ -1,0 +1,45 @@
+import type { Metadata } from "next";
+import ContactClient from "@/components/ContactClient";
+
+export const metadata: Metadata = {
+  title: "Contact | Web Growth — Request a Quote",
+  description:
+    "Request a quote from Web Growth. Tell us what you need and we’ll respond with next steps and a clear proposal.",
+  keywords: [
+    "contact web growth",
+    "request a quote",
+    "web design quote",
+    "website design proposal",
+    "landing page quote",
+    "website redesign quote",
+  ],
+  alternates: {
+    canonical: "https://webgrowth.info/contact",
+  },
+  openGraph: {
+    title: "Contact Web Growth",
+    description: "Request a quote and get a clear proposal with next steps.",
+    url: "https://webgrowth.info/contact",
+    siteName: "Web Growth",
+    images: [
+      {
+        url: "https://webgrowth.info/images/placeholder.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Contact Web Growth",
+      },
+    ],
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Contact Web Growth",
+    description: "Request a quote and get next steps.",
+    images: ["https://webgrowth.info/images/placeholder.jpg"],
+  },
+  robots: { index: true, follow: true },
+};
+
+export default function ContactPage() {
+  return <ContactClient />;
+}
