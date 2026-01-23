@@ -94,7 +94,7 @@ export default function BusinessWebsiteDesignClient() {
             <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-black/40">
               <div
                 className="h-[360px] bg-cover bg-center opacity-80"
-                style={{ backgroundImage: "url(/images/placeholder.jpg)" }}
+                style={{ backgroundImage: "url(/images/services/services-business.png)" }}
               />
               <div className="absolute inset-0 bg-black/35" />
             </div>
@@ -107,7 +107,7 @@ export default function BusinessWebsiteDesignClient() {
         <div className="problem mx-auto max-w-4xl px-6">
           <SectionHeading
             eyebrow="THE PROBLEM"
-            title="Most business websites look fine — but don’t work"
+            title="Most business websites look fine, but don’t work"
             description="Many websites fail because they focus on visuals instead of clarity and structure."
           />
 
@@ -152,7 +152,7 @@ export default function BusinessWebsiteDesignClient() {
           <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-black/40">
             <div
               className="h-[420px] bg-cover bg-center opacity-80"
-              style={{ backgroundImage: "url(/images/placeholder.jpg)" }}
+              style={{ backgroundImage: "url(/images/services/services-business-2.png)" }}
             />
             <div className="absolute inset-0 bg-black/35" />
           </div>
@@ -231,7 +231,7 @@ export default function BusinessWebsiteDesignClient() {
             primaryHref="/contact?service=Business Website Design"
             secondaryCtaText="View Services"
             secondaryHref="/services"
-            imageUrl="/images/placeholder.jpg"
+            imageUrl="/images/services/services-business-cta.png"
           />
         </div>
       </section>

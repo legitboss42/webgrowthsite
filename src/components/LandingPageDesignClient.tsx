@@ -134,7 +134,7 @@ export default function LandingPageDesignClient() {
             <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-black/40">
               <div
                 className="h-[360px] bg-cover bg-center opacity-80"
-                style={{ backgroundImage: "url(/images/placeholder.jpg)" }}
+                style={{ backgroundImage: "url(/images/services/services-landing-2.png)" }}
               />
               <div className="absolute inset-0 bg-black/35" />
             </div>
@@ -155,7 +155,7 @@ export default function LandingPageDesignClient() {
             {[
               "The headline is vague and doesn’t match the ad message",
               "Too many distractions (menus, multiple offers, clutter)",
-              "No proof — visitors don’t trust the offer",
+              "No proof, visitors don’t trust the offer",
               "Slow load speed on mobile",
               "Weak CTA placement and poor flow",
             ].map((item) => (
@@ -219,7 +219,7 @@ export default function LandingPageDesignClient() {
             <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-black/40">
               <div
                 className="h-[420px] bg-cover bg-center opacity-80"
-                style={{ backgroundImage: "url(/images/placeholder.jpg)" }}
+                style={{ backgroundImage: "url(/images/services/services-landing-2.png)" }}
               />
               <div className="absolute inset-0 bg-black/35" />
               <div className="absolute bottom-4 left-4 right-4 rounded-xl border border-white/10 bg-black/55 p-4 text-sm text-white/70">
@@ -279,7 +279,7 @@ export default function LandingPageDesignClient() {
               {
                 question: "Can you connect the landing page to a form or WhatsApp?",
                 answer:
-                  "Yes. The CTA can go to a form, WhatsApp, booking link, or checkout — depending on your goal.",
+                  "Yes. The CTA can go to a form, WhatsApp, booking link, or checkout, depending on your goal.",
               },
               {
                 question: "Do you build multiple landing pages for A/B testing?",
@@ -296,13 +296,13 @@ export default function LandingPageDesignClient() {
         <div className="mx-auto max-w-6xl px-6">
           <CTASection
             eyebrow="READY"
-            title="Stop wasting clicks — build a page that converts"
+            title="Stop wasting clicks, build a page that converts"
             description="If you’re paying for traffic (ads or attention), your landing page needs to do its job. We’ll build it properly."
             primaryCtaText="Request a Quote"
             primaryHref="/contact?service=Landing Page Design"
             secondaryCtaText="View Services"
             secondaryHref="/services"
-            imageUrl="/images/placeholder.jpg"
+            imageUrl="/images/services/services-landing-cta.png"
           />
         </div>
       </section>

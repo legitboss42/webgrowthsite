@@ -1,33 +1,49 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import "./globals.css";
+import Script from "next/script";
 
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-
-const inter = Inter({
-  subsets: ["latin"],
-  display: "swap",
-});
+import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Web Growth | Web Design Focused on Real Results",
+  title: "Web Growth — High-Performance Websites",
   description:
-    "Web Growth designs high-performing websites that look premium, load fast, and convert visitors into enquiries.",
+    "We design conversion-focused, high-performance websites that drive real business growth.",
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <head>
+        {/* Google Analytics 4 */}
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-Q8RFZ4LTLB"
+          strategy="afterInteractive"
+        />
+
+        <Script id="ga4-init" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-Q8RFZ4LTLB', {
+              page_path: window.location.pathname,
+            });
+          `}
+        </Script>
+      </head>
+
+      <body>
         <Header />
-        <main className="pt-28">
-          {children}
-        </main>
+        <main className="pt-28">{children}</main>
         <Footer />
       </body>
     </html>

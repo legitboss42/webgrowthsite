@@ -19,7 +19,7 @@ const symptomDetails: Record<
   { title: string; text: string; causes: string[]; fixes: string[] }
 > = {
   "Slow loading": {
-    title: "Your site loads slowly — people leave",
+    title: "Your site loads slowly, people leave",
     text: "Speed is not a “nice to have.” Slow load time kills intent and trust, especially on mobile networks.",
     causes: ["Huge images", "Too many scripts", "Heavy page builder output", "No caching"],
     fixes: ["Image compression + correct sizing", "Script cleanup", "Caching + CDN strategy", "Performance pass per page"],
@@ -68,7 +68,7 @@ export default function PerformanceOptimisationClient() {
       {
         question: "Do you guarantee a specific Google score?",
         answer:
-          "No — that’s fake marketing. Scores vary by device, network, and page complexity. We focus on meaningful improvements that users feel.",
+          "No, that’s fake marketing. Scores vary by device, network, and page complexity. We focus on meaningful improvements that users feel.",
       },
     ],
     []
@@ -134,11 +134,11 @@ export default function PerformanceOptimisationClient() {
                 SPEED & PERFORMANCE OPTIMISATION
               </div>
               <h1 className="mt-4 text-4xl md:text-5xl font-semibold leading-tight">
-                Make your website faster — and stop losing customers.
+                Make your website faster, and stop losing customers.
               </h1>
               <p className="mt-6 text-lg text-white/70 leading-relaxed">
                 Slow sites lose money quietly. We optimise speed and performance
-                so your website loads fast, feels smooth, and converts better —
+                so your website loads fast, feels smooth, and converts better,
                 especially on mobile.
               </p>
 
@@ -162,7 +162,7 @@ export default function PerformanceOptimisationClient() {
             <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-black/40">
               <div
                 className="h-[360px] bg-cover bg-center opacity-80"
-                style={{ backgroundImage: "url(/images/placeholder.jpg)" }}
+                style={{ backgroundImage: "url(/images/services/services-speed.png)" }}
               />
               <div className="absolute inset-0 bg-black/35" />
             </div>
@@ -176,7 +176,7 @@ export default function PerformanceOptimisationClient() {
           <SectionHeading
             eyebrow="DIAGNOSIS"
             title="What symptom are you seeing?"
-            description="Pick what you’re dealing with. We’ll fix the cause — not just the surface."
+            description="Pick what you’re dealing with. We’ll fix the cause, not just the surface."
           />
 
           <div className="mt-10 flex flex-wrap gap-2">
@@ -244,12 +244,9 @@ export default function PerformanceOptimisationClient() {
             <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-black/40">
               <div
                 className="h-[420px] bg-cover bg-center opacity-80"
-                style={{ backgroundImage: "url(/images/placeholder.jpg)" }}
+                style={{ backgroundImage: "url(/images/services/services-speed-2.png)" }}
               />
               <div className="absolute inset-0 bg-black/35" />
-              <div className="absolute bottom-4 left-4 right-4 rounded-xl border border-white/10 bg-black/55 p-4 text-sm text-white/70">
-                Placeholder image: speed report / performance graph / Lighthouse view.
-              </div>
             </div>
           </div>
         </div>
@@ -307,7 +304,7 @@ export default function PerformanceOptimisationClient() {
             primaryHref="/contact?service=Speed & Performance Optimisation"
             secondaryCtaText="View Services"
             secondaryHref="/services"
-            imageUrl="/images/placeholder.jpg"
+            imageUrl="/images/services/services-cta.png"
           />
         </div>
       </section>

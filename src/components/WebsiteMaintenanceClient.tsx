@@ -79,12 +79,12 @@ export default function WebsiteMaintenanceClient() {
       {
         question: "What counts as a ‘minor edit’?",
         answer:
-          "Small updates like changing text, swapping images, updating a section, adding a small block — not new pages or major redesign work.",
+          "Small updates like changing text, swapping images, updating a section, adding a small block, not new pages or major redesign work.",
       },
       {
         question: "Can I cancel anytime?",
         answer:
-          "Yes. Maintenance is flexible. If you stop, you still keep your website — you’re just no longer on active support.",
+          "Yes. Maintenance is flexible. If you stop, you still keep your website, you’re just no longer on active support.",
       },
     ],
     []
@@ -153,7 +153,7 @@ export default function WebsiteMaintenanceClient() {
                 Keep your website secure, updated, and reliable.
               </h1>
               <p className="mt-6 text-lg text-white/70 leading-relaxed">
-                Websites break quietly — until it becomes a disaster. Maintenance
+                Websites break quietly, until it becomes a disaster. Maintenance
                 prevents downtime, security issues, and performance decay. We keep
                 your site stable and improve it over time.
               </p>
@@ -178,7 +178,7 @@ export default function WebsiteMaintenanceClient() {
             <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-black/40">
               <div
                 className="h-[360px] bg-cover bg-center opacity-80"
-                style={{ backgroundImage: "url(/images/placeholder.jpg)" }}
+                style={{ backgroundImage: "url(/images/services/services-maintenance.png)" }}
               />
               <div className="absolute inset-0 bg-black/35" />
             </div>
@@ -191,7 +191,7 @@ export default function WebsiteMaintenanceClient() {
         <div className="why mx-auto max-w-4xl px-6">
           <SectionHeading
             eyebrow="WHY IT MATTERS"
-            title="Most websites don’t die — they slowly rot"
+            title="Most websites don’t die, they slowly rot"
             description="Maintenance prevents the silent problems that cost you money."
           />
 
@@ -275,12 +275,9 @@ export default function WebsiteMaintenanceClient() {
             <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-black/40">
               <div
                 className="h-[420px] bg-cover bg-center opacity-80"
-                style={{ backgroundImage: "url(/images/placeholder.jpg)" }}
+                style={{ backgroundImage: "url(/images/services/services-maintenance-2.png)" }}
               />
               <div className="absolute inset-0 bg-black/35" />
-              <div className="absolute bottom-4 left-4 right-4 rounded-xl border border-white/10 bg-black/55 p-4 text-sm text-white/70">
-                Placeholder image: dashboard / monitoring / support UI.
-              </div>
             </div>
           </div>
         </div>
@@ -311,7 +308,7 @@ export default function WebsiteMaintenanceClient() {
             primaryHref="/contact?service=Website Maintenance & Support"
             secondaryCtaText="View Services"
             secondaryHref="/services"
-            imageUrl="/images/placeholder.jpg"
+            imageUrl="/images/services/services-cta.png"
           />
         </div>
       </section>

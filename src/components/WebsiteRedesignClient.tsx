@@ -15,8 +15,8 @@ const painDetails: Record<
   { title: string; text: string; fixes: string[] }
 > = {
   "Outdated design": {
-    title: "Your site looks old — people don’t trust it",
-    text: "Design is a trust signal. If your site feels outdated, visitors assume your business is outdated too — even if you’re excellent.",
+    title: "Your site looks old, people don’t trust it",
+    text: "Design is a trust signal. If your site feels outdated, visitors assume your business is outdated too, even if you’re excellent.",
     fixes: ["Modern layout + typography", "Better spacing and hierarchy", "Trust signals placed correctly"],
   },
   "Low enquiries": {
@@ -25,7 +25,7 @@ const painDetails: Record<
     fixes: ["Clear messaging flow", "Proof + credibility blocks", "Strong CTA placement"],
   },
   "Slow site": {
-    title: "Your site is slow — visitors bounce",
+    title: "Your site is slow, visitors bounce",
     text: "Speed affects conversions. If your site loads slowly on mobile, you’re bleeding potential customers without knowing it.",
     fixes: ["Image + asset optimisation", "Performance pass", "Cleaner page build"],
   },
@@ -105,7 +105,7 @@ export default function WebsiteRedesignClient() {
               </h1>
               <p className="mt-6 text-lg text-white/70 leading-relaxed">
                 If your site feels outdated, slow, or doesn’t convert, a redesign
-                isn’t “cosmetic” — it’s business. We redesign websites with better
+                isn’t “cosmetic”, it’s business. We redesign websites with better
                 structure, stronger trust, and cleaner conversion flow.
               </p>
 
@@ -129,7 +129,7 @@ export default function WebsiteRedesignClient() {
             <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-black/40">
               <div
                 className="h-[360px] bg-cover bg-center opacity-80"
-                style={{ backgroundImage: "url(/images/placeholder.jpg)" }}
+                style={{ backgroundImage: "url(/images/services/services-redesign.png)" }}
               />
               <div className="absolute inset-0 bg-black/35" />
             </div>
@@ -143,7 +143,7 @@ export default function WebsiteRedesignClient() {
           <SectionHeading
             eyebrow="DIAGNOSIS"
             title="What’s wrong with your current site?"
-            description="Pick the problem that feels most accurate. This is how we approach redesign — by fixing what’s actually broken."
+            description="Pick the problem that feels most accurate. This is how we approach redesign, by fixing what’s actually broken."
           />
 
           <div className="mt-10 flex flex-wrap gap-2">
@@ -197,12 +197,9 @@ export default function WebsiteRedesignClient() {
             <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-black/40">
               <div
                 className="h-[420px] bg-cover bg-center opacity-80"
-                style={{ backgroundImage: "url(/images/placeholder.jpg)" }}
+                style={{ backgroundImage: "url(/images/services/services-redesign-2.png)" }}
               />
               <div className="absolute inset-0 bg-black/35" />
-              <div className="absolute bottom-4 left-4 right-4 rounded-xl border border-white/10 bg-black/55 p-4 text-sm text-white/70">
-                Placeholder image: before/after redesign comparison.
-              </div>
             </div>
           </div>
         </div>
@@ -308,7 +305,7 @@ export default function WebsiteRedesignClient() {
             primaryHref="/contact?service=Website Redesign"
             secondaryCtaText="View Services"
             secondaryHref="/services"
-            imageUrl="/images/placeholder.jpg"
+            imageUrl="/images/services/services-redesign-cta.png"
           />
         </div>
       </section>

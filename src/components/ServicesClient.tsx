@@ -29,16 +29,16 @@ export default function ServicesClient() {
         slug: "/services/business-website-design",
         serviceParam: "Business Website Design",
         bullets: ["Modern structure", "Mobile-first", "SEO-ready foundation"],
-        image: "/images/placeholder.jpg",
+        image: "/images/services/services-business.png",
       },
       {
         title: "Landing Page Design",
         short:
-          "Conversion-focused landing pages for campaigns, ads, and offers — built to convert.",
+          "Conversion-focused landing pages for campaigns, ads, and offers, built to convert.",
         slug: "/services/landing-page-design",
         serviceParam: "Landing Page Design",
         bullets: ["Message match", "Strong CTA flow", "Fast mobile load"],
-        image: "/images/placeholder.jpg",
+        image: "/images/services/services-landing.png",
       },
       {
         title: "Website Redesign",
@@ -47,25 +47,25 @@ export default function ServicesClient() {
         slug: "/services/website-redesign",
         serviceParam: "Website Redesign",
         bullets: ["Better structure", "Improved trust", "Cleaner conversion path"],
-        image: "/images/placeholder.jpg",
+        image: "/images/services/services-redesign.png",
       },
       {
         title: "E-commerce Website Design",
         short:
-          "Online stores built to earn trust and make buying simple — product pages + checkout done right.",
+          "Online stores built to earn trust and make buying simple + product pages + checkout done right.",
         slug: "/services/ecommerce-website-design",
         serviceParam: "E-commerce Website Design",
         bullets: ["Product UX", "Trust signals", "Checkout clarity"],
-        image: "/images/placeholder.jpg",
+        image: "/images/services/services-ecommerce.png",
       },
       {
         title: "Website Maintenance & Support",
         short:
-          "Monthly care to keep your website secure, updated, fast, and reliable — no surprises.",
+          "Monthly care to keep your website secure, updated, fast, and reliable, no surprises.",
         slug: "/services/website-maintenance",
         serviceParam: "Website Maintenance & Support",
         bullets: ["Updates + backups", "Security checks", "Ongoing fixes"],
-        image: "/images/placeholder.jpg",
+        image: "/images/services/services-maintenance.png",
       },
       {
         title: "Speed & Performance Optimisation",
@@ -74,16 +74,16 @@ export default function ServicesClient() {
         slug: "/services/performance-optimisation",
         serviceParam: "Speed & Performance Optimisation",
         bullets: ["Speed audit", "Asset cleanup", "Core Web Vitals improvements"],
-        image: "/images/placeholder.jpg",
+        image: "/images/services/services-speed.png",
       },
       {
         title: "Website Audit & Consultation",
         short:
-          "A clear diagnosis of what’s blocking results — plus a practical plan to fix it.",
+          "A clear diagnosis of what’s blocking results, plus a practical plan to fix it.",
         slug: "/services/website-audit",
         serviceParam: "Website Audit & Consultation",
         bullets: ["Clarity + trust", "Conversion flow", "SEO + performance basics"],
-        image: "/images/placeholder.jpg",
+        image: "/images/services/services-audit.png",
       },
     ],
     []
@@ -187,12 +187,10 @@ export default function ServicesClient() {
             <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-black/40">
               <div
                 className="h-[360px] bg-cover bg-center opacity-80"
-                style={{ backgroundImage: "url(/images/placeholder.jpg)" }}
+                style={{ backgroundImage: "url(/images/services/services-hero.png)" }}
               />
               <div className="absolute inset-0 bg-black/35" />
-              <div className="absolute bottom-4 left-4 right-4 rounded-xl border border-white/10 bg-black/55 p-4 text-sm text-white/70">
-                Placeholder image: collage of web UI mockups.
-              </div>
+             
             </div>
           </div>
         </div>
@@ -223,9 +221,6 @@ export default function ServicesClient() {
                       style={{ backgroundImage: `url(${s.image})` }}
                     />
                     <div className="absolute inset-0 bg-black/45" />
-                    <div className="absolute bottom-3 left-3 right-3 rounded-xl border border-white/10 bg-black/55 p-3 text-xs text-white/70">
-                      Placeholder image
-                    </div>
                   </div>
 
                   <div className="md:col-span-3 p-7">
@@ -279,7 +274,7 @@ export default function ServicesClient() {
             primaryHref="/contact"
             secondaryCtaText="Website Audit"
             secondaryHref="/services/website-audit"
-            imageUrl="/images/placeholder.jpg"
+            imageUrl="/images/services/services-cta.png"
           />
         </div>
       </section>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import Link from "next/link";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
@@ -55,7 +56,11 @@ export default function HomeClient() {
     }
 
     // Helper: reveal section content
-    const reveal = (selector: string, triggerEl: HTMLElement | null, stagger = 0) => {
+    const reveal = (
+      selector: string,
+      triggerEl: HTMLElement | null,
+      stagger = 0
+    ) => {
       if (!triggerEl) return;
       gsap.fromTo(
         selector,
@@ -142,19 +147,20 @@ export default function HomeClient() {
           </h1>
 
           <p className="mt-6 text-white/70 max-w-2xl mx-auto leading-relaxed text-lg">
-            Your business deserves a website that doesn’t just look good, but attracts
-            customers, builds trust, and supports real growth.
+            Your business deserves a website that doesn’t just look good, but
+            attracts customers, builds trust, and supports real growth.
           </p>
 
           <div className="mt-10 flex justify-center">
-            <a
-              href="#contact"
+            {/* CHANGED: go to the contact page, not #contact */}
+            <Link
+              href="/contact"
               className="hero-cta inline-flex items-center justify-center rounded-md
                          bg-emerald-600 px-8 py-4 text-base font-semibold text-white
                          transition-colors hover:bg-emerald-500"
             >
               Request a Quote
-            </a>
+            </Link>
           </div>
         </div>
       </section>
@@ -187,7 +193,7 @@ export default function HomeClient() {
                 title="Business Website Design"
                 description="A clean, fast website that positions your business professionally and converts visitors into enquiries."
                 imageUrl="/images/services/service-1.png"
-                href="/services"
+                href="/services/business-website-design"
               />
             </div>
 
@@ -196,7 +202,7 @@ export default function HomeClient() {
                 title="Landing Pages"
                 description="Focused pages built for campaigns, ads, and offers — designed to push one action and win leads."
                 imageUrl="/images/services/service-2.png"
-                href="/services"
+                href="/services/landing-page-design"
               />
             </div>
 
@@ -205,9 +211,19 @@ export default function HomeClient() {
                 title="Website Redesign"
                 description="Transform an outdated website into a modern, structured platform that performs better."
                 imageUrl="/images/services/service-3.png"
-                href="/services"
+                href="/services/website-redesign"
               />
             </div>
+          </div>
+
+          {/* ADDED: View more services button */}
+          <div className="services-head mt-10 flex justify-center">
+            <Link
+              href="/services"
+              className="inline-flex items-center gap-2 rounded-full border border-emerald-500/40 bg-emerald-500/10 px-6 py-3 text-sm font-semibold text-emerald-200 hover:bg-emerald-500/15 transition"
+            >
+              View more services →
+            </Link>
           </div>
         </div>
       </section>
@@ -255,9 +271,18 @@ export default function HomeClient() {
           <div className="about-block mt-12 rounded-2xl border border-white/10 bg-black/40 backdrop-blur p-8">
             <h3 className="text-xl font-semibold">How it works</h3>
             <ol className="mt-4 grid gap-3 text-white/70">
-              <li><span className="text-white font-semibold">1.</span> Quick discovery: goals, audience, and what success looks like.</li>
-              <li><span className="text-white font-semibold">2.</span> Design + build: we craft the layout, copy flow, and interactions.</li>
-              <li><span className="text-white font-semibold">3.</span> Launch + refine: performance checks, final polish, and go live.</li>
+              <li>
+                <span className="text-white font-semibold">1.</span> Quick
+                discovery: goals, audience, and what success looks like.
+              </li>
+              <li>
+                <span className="text-white font-semibold">2.</span> Design +
+                build: we craft the layout, copy flow, and interactions.
+              </li>
+              <li>
+                <span className="text-white font-semibold">3.</span> Launch +
+                refine: performance checks, final polish, and go live.
+              </li>
             </ol>
           </div>
         </div>
@@ -308,7 +333,7 @@ export default function HomeClient() {
                   client={cs.client}
                   summary={cs.summary}
                   results={cs.results}
-                  imageUrl="/images/placeholder.png"
+                  imageUrl="/images/portfolio/portfolio-1.png"
                   href="/portfolio"
                 />
               </div>
@@ -323,7 +348,7 @@ export default function HomeClient() {
               primaryHref="/contact"
               secondaryCtaText="View Portfolio"
               secondaryHref="/portfolio"
-              imageUrl="/images/placeholder.png"
+              imageUrl="/images/portfolio/portfolio-4.png"
             />
           </div>
         </div>
@@ -360,9 +385,7 @@ export default function HomeClient() {
 
             <div className="contact-block rounded-2xl border border-white/10 bg-black/40 backdrop-blur p-7">
               <h3 className="text-xl font-semibold">WhatsApp</h3>
-              <p className="mt-2 text-white/65">
-                Quick chat for clarity before starting.
-              </p>
+              <p className="mt-2 text-white/65">Quick chat for clarity before starting.</p>
               <a
                 className="mt-5 inline-flex text-emerald-400 font-semibold hover:text-emerald-300 transition"
                 href="https://wa.me/234XXXXXXXXXX"
@@ -382,7 +405,7 @@ export default function HomeClient() {
               primaryHref="/contact"
               secondaryCtaText="See Pricing"
               secondaryHref="/pricing"
-              imageUrl="/images/placeholder.png"
+              imageUrl="/images/portfolio/portfolio-cta.png"
             />
           </div>
         </div>

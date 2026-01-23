@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 export default function Footer() {
   return (
     <footer className="border-t border-white/10 bg-black">
@@ -18,10 +20,21 @@ export default function Footer() {
           <div className="md:justify-self-center">
             <div className="text-white font-semibold">Links</div>
             <div className="mt-3 flex flex-col gap-2 text-white/60">
-              <a className="hover:text-white transition" href="#services">Services</a>
-              <a className="hover:text-white transition" href="#about">About</a>
-              <a className="hover:text-white transition" href="#portfolio">Portfolio</a>
-              <a className="hover:text-white transition" href="#contact">Contact</a>
+              <Link className="hover:text-white transition" href="/services">
+                Services
+              </Link>
+              <Link className="hover:text-white transition" href="/about">
+                About
+              </Link>
+              <Link className="hover:text-white transition" href="/portfolio">
+                Portfolio
+              </Link>
+              <Link className="hover:text-white transition" href="/contact">
+                Contact
+              </Link>
+              <Link className="hover:text-white transition" href="/pricing">
+                Pricing
+              </Link>
             </div>
           </div>
 
@@ -31,7 +44,10 @@ export default function Footer() {
             <div className="mt-3 space-y-2 text-white/60">
               <div>
                 <span className="text-white/70">Email: </span>
-                <a className="hover:text-white transition" href="mailto:admin@webgrowth.info">
+                <a
+                  className="hover:text-white transition"
+                  href="mailto:admin@webgrowth.info"
+                >
                   admin@webgrowth.info
                 </a>
               </div>
@@ -39,7 +55,7 @@ export default function Footer() {
                 <span className="text-white/70">WhatsApp: </span>
                 <a
                   className="hover:text-white transition"
-                  href="https://wa.me/234XXXXXXXXXX"
+                  href="https://wa.me/2348066706336"
                   target="_blank"
                   rel="noreferrer"
                 >
@@ -50,11 +66,18 @@ export default function Footer() {
           </div>
         </div>
 
+        {/* Bottom bar */}
         <div className="mt-10 flex flex-col gap-3 border-t border-white/10 pt-6 text-sm text-white/50 md:flex-row md:items-center md:justify-between">
-          <div>© {new Date().getFullYear()} Web Growth. All rights reserved.</div>
+          <div>
+            © {new Date().getFullYear()} Web Growth. All rights reserved.
+          </div>
           <div className="flex gap-4">
-            <a className="hover:text-white transition" href="#">Privacy</a>
-            <a className="hover:text-white transition" href="#">Terms</a>
+            <Link className="hover:text-white transition" href="/privacy">
+              Privacy Policy
+            </Link>
+            <Link className="hover:text-white transition" href="/terms">
+              Terms of Service
+            </Link>
           </div>
         </div>
       </div>

@@ -164,7 +164,7 @@ export default function WebsiteAuditClient() {
             <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-black/40">
               <div
                 className="h-[360px] bg-cover bg-center opacity-80"
-                style={{ backgroundImage: "url(/images/placeholder.jpg)" }}
+                style={{ backgroundImage: "url(/images/services/services-audit.png)" }}
               />
               <div className="absolute inset-0 bg-black/35" />
             </div>
@@ -246,12 +246,9 @@ export default function WebsiteAuditClient() {
             <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-black/40">
               <div
                 className="h-[420px] bg-cover bg-center opacity-80"
-                style={{ backgroundImage: "url(/images/placeholder.jpg)" }}
+                style={{ backgroundImage: "url(/images/services/services-audit-2.png)" }}
               />
               <div className="absolute inset-0 bg-black/35" />
-              <div className="absolute bottom-4 left-4 right-4 rounded-xl border border-white/10 bg-black/55 p-4 text-sm text-white/70">
-                Placeholder image: audit checklist / report / analysis UI.
-              </div>
             </div>
           </div>
         </div>
@@ -307,7 +304,7 @@ export default function WebsiteAuditClient() {
             primaryHref="/contact?service=Website Audit & Consultation"
             secondaryCtaText="View Portfolio"
             secondaryHref="/portfolio"
-            imageUrl="/images/placeholder.jpg"
+            imageUrl="/images/services/services-cta.png"
           />
         </div>
       </section>

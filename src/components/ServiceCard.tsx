@@ -1,3 +1,6 @@
+import React from "react";
+import Link from "next/link";
+
 interface ServiceCardProps {
   title: string;
   description: string;
@@ -11,15 +14,10 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
   description,
   imageUrl = "/images/placeholder.png",
   href,
-  className
+  className,
 }) => {
-  const CardComponent = href ? 'a' : 'div';
-
-  return (
-    <CardComponent
-      className={`group relative overflow-hidden rounded-2xl border border-white/10 bg-black/40 hover:-translate-y-2 transition-transform duration-300 ${className || ''}`}
-      {...(href ? { href } : {})}
-    >
+  const content = (
+    <>
       {/* Background image */}
       <div
         className="absolute inset-0 bg-cover bg-center scale-110 opacity-60 transition-transform duration-700 group-hover:scale-125"
@@ -34,23 +32,33 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
 
       {/* Card content */}
       <div className="relative z-10 p-7">
-        <h3 className="text-xl font-semibold">
-          {title}
-        </h3>
+        <h3 className="text-xl font-semibold text-white">{title}</h3>
 
-        <p className="mt-3 text-white/65 leading-relaxed">
-          {description}
-        </p>
+        <p className="mt-3 text-white/65 leading-relaxed">{description}</p>
 
         <div className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-emerald-400">
           Learn more
-          <span className="transition-transform group-hover:translate-x-1">
-            →
-          </span>
+          <span className="transition-transform group-hover:translate-x-1">→</span>
         </div>
       </div>
-    </CardComponent>
+    </>
   );
+
+  const baseClass =
+    "group relative overflow-hidden rounded-2xl border border-white/10 bg-black/40 hover:-translate-y-2 transition-transform duration-300";
+  const combinedClass = `${baseClass} ${className || ""}`;
+
+  // If it's a link card, use Next Link (best for routing + prefetch)
+  if (href) {
+    return (
+      <Link href={href} className={combinedClass} aria-label={`Learn more about ${title}`}>
+        {content}
+      </Link>
+    );
+  }
+
+  // Otherwise render a non-clickable card
+  return <div className={combinedClass}>{content}</div>;
 };
 
 export default ServiceCard;

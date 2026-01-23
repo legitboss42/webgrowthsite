@@ -17,7 +17,7 @@ type ValueItem = {
 const values: ValueItem[] = [
   {
     title: "Strategy first",
-    text: "We don’t start with colours. We start with outcomes. Your site is structured around what matters: enquiries, bookings, credibility, or sales — not vanity.",
+    text: "We don’t start with colours. We start with outcomes. Your site is structured around what matters: enquiries, bookings, credibility, or sales, not vanity.",
     icon: "strategy",
   },
   {
@@ -36,7 +36,7 @@ const faqs = [
   {
     question: "What makes Web Growth different from a typical “web designer”?",
     answer:
-      "Most designers focus on visuals alone. We focus on outcomes: structure, clarity, performance, and trust. A website can look nice and still fail — we build for results.",
+      "Most designers focus on visuals alone. We focus on outcomes: structure, clarity, performance, and trust. A website can look nice and still fail, we build for results.",
   },
   {
     question: "Do you build with WordPress or custom code?",
@@ -115,22 +115,22 @@ export default function AboutClient() {
       {
         title: "Discovery",
         text: "We get clear on your audience, your offer, and what success looks like. No guesswork. No “just vibes.”",
-        img: "/images/placeholder.jpg",
+        img: "/images/about/about-discovery.png",
       },
       {
         title: "Structure",
         text: "We plan the sections, messaging hierarchy, and conversion flow so the site actually guides visitors.",
-        img: "/images/placeholder.jpg",
+        img: "/images/about/about-structure.png",
       },
       {
         title: "Design + Build",
-        text: "We design and build with performance and clarity in mind — then add controlled interaction where it adds value.",
-        img: "/images/placeholder.jpg",
+        text: "We design and build with performance and clarity in mind, then add controlled interaction where it adds value.",
+        img: "/images/about/about-design.png",
       },
       {
         title: "Launch + Refine",
-        text: "We polish, test, and launch. Then we refine based on feedback and reality — not assumptions.",
-        img: "/images/placeholder.jpg",
+        text: "We polish, test, and launch. Then we refine based on feedback and reality, not assumptions.",
+        img: "/images/about/about-launch.png",
       },
     ],
     []
@@ -248,7 +248,7 @@ export default function AboutClient() {
               <div className="about-parallax relative overflow-hidden rounded-2xl border border-white/10 bg-black/40">
                 <div
                   className="h-[320px] md:h-[420px] bg-cover bg-center opacity-80"
-                  style={{ backgroundImage: "url(/images/placeholder.jpg)" }}
+                  style={{ backgroundImage: "url(/images/about/about-hero.png)" }}
                 />
                 <div className="absolute inset-0 bg-black/35" />
               </div>
@@ -319,7 +319,7 @@ export default function AboutClient() {
                 </p>
                 <p>
                   Web Growth is built around fixing that. We focus on clarity first,
-                  then design, then performance — and then we add interaction where it supports the message.
+                  then design, then performance, and then we add interaction where it supports the message.
                 </p>
                 <p>
                   The result is a site that feels premium, loads fast, and makes your business
@@ -332,12 +332,10 @@ export default function AboutClient() {
             <div className="about-parallax relative overflow-hidden rounded-2xl border border-white/10 bg-black/40">
               <div
                 className="h-[360px] md:h-[460px] bg-cover bg-center opacity-80"
-                style={{ backgroundImage: "url(/images/placeholder.jpg)" }}
+                style={{ backgroundImage: "url(/images/about/about-nice.png)" }}
               />
               <div className="absolute inset-0 bg-black/35" />
-              <div className="absolute bottom-4 left-4 right-4 rounded-xl border border-white/10 bg-black/55 p-4 text-sm text-white/70">
-                Placeholder image area — use a strong brand/tech visual or behind-the-scenes studio vibe.
-              </div>
+              
             </div>
           </div>
         </div>
@@ -386,7 +384,6 @@ export default function AboutClient() {
                 </p>
 
                 <div className="mt-6 rounded-xl border border-white/10 bg-black/30 p-4 text-sm text-white/60">
-                  Interactive note: this section uses simple state-based tabs. It’s lightweight, fast, and feels “alive” without being noisy.
                 </div>
               </div>
             </div>
@@ -399,8 +396,8 @@ export default function AboutClient() {
               />
               <div className="absolute inset-0 bg-black/35" />
               <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between rounded-xl border border-white/10 bg-black/55 p-4 text-sm text-white/70">
-                <span>Step {activeStep + 1} visual placeholder</span>
-                <span className="text-emerald-400 font-semibold">Replace later →</span>
+                <span> {activeStep + 1}  </span>
+                <span className="text-emerald-400 font-semibold"></span>
               </div>
             </div>
           </div>
@@ -435,7 +432,7 @@ export default function AboutClient() {
             primaryHref="/contact"
             secondaryCtaText="See Pricing"
             secondaryHref="/pricing"
-            imageUrl="/images/placeholder.jpg"
+            imageUrl="/images/about/about-cta.png"
           />
         </div>
       </section>
