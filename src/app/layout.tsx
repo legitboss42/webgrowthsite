@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Script from "next/script";
-
+import { SpeedInsights } from "@vercel/speed-insights/next"
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import "./globals.css";
