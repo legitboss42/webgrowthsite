@@ -3,7 +3,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 
-const FORM_ENDPOINT = "https://formspree.io/f/xgoanbnr"; // <-- replace
+const FORM_ENDPOINT = "https://formspree.io/f/xgoanbnr"; // your Formspree form URL
+
+type Status = "idle" | "sending" | "success" | "error";
 
 export default function ContactClient() {
   const searchParams = useSearchParams();
@@ -26,12 +28,10 @@ export default function ContactClient() {
   const [service, setService] = useState("");
   const [message, setMessage] = useState("");
 
-  const [status, setStatus] = useState<"idle" | "sending" | "success" | "error">(
-    "idle"
-  );
+  const [status, setStatus] = useState<Status>("idle");
   const [statusMsg, setStatusMsg] = useState("");
 
-  // Prefill service from URL
+  // Prefill service from URL (?service=Landing%20Page%20Design)
   useEffect(() => {
     const s = searchParams.get("service");
     if (!s) return;
@@ -45,12 +45,12 @@ export default function ContactClient() {
     setService(match ?? decoded);
   }, [searchParams, serviceOptions]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (!FORM_ENDPOINT || FORM_ENDPOINT.includes("XXXXXXX")) {
+    if (!FORM_ENDPOINT) {
       setStatus("error");
-      setStatusMsg("Form endpoint not set. Add your Formspree URL.");
+      setStatusMsg("Form endpoint not set.");
       return;
     }
 
@@ -74,12 +74,13 @@ export default function ContactClient() {
       });
 
       if (!res.ok) {
-        // Formspree returns JSON, but keep this robust
         let errText = "Failed to send. Try again.";
         try {
           const data = await res.json();
           if (data?.errors?.length) errText = data.errors[0].message || errText;
-        } catch {}
+        } catch {
+          // ignore JSON parse failure
+        }
         setStatus("error");
         setStatusMsg(errText);
         return;
@@ -88,14 +89,14 @@ export default function ContactClient() {
       setStatus("success");
       setStatusMsg("Message sent. We’ll reply shortly.");
 
-      // clear
+      // clear fields
       setName("");
       setEmail("");
-      setMessage("");
       setService("");
+      setMessage("");
     } catch {
       setStatus("error");
-      setStatusMsg("Network error. Check connection and try again.");
+      setStatusMsg("Network error. Check your connection and try again.");
     }
   };
 
@@ -108,7 +109,6 @@ export default function ContactClient() {
           Tell us what you need. We’ll respond with the right next step.
         </p>
 
-        {/* Status box */}
         {status !== "idle" ? (
           <div
             className={[
