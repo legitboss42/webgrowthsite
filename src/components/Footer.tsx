@@ -2,7 +2,28 @@
 
 import Link from "next/link";
 
+const WHATSAPP_NUMBER = "2348066706336";
+const WHATSAPP_MESSAGE = "Hello, I’d like to request a quote for a website.";
+
+function buildWhatsAppUrl() {
+  const text = encodeURIComponent(WHATSAPP_MESSAGE);
+  return `https://wa.me/${WHATSAPP_NUMBER}?text=${text}`;
+}
+
+function trackWhatsApp(location: string) {
+  if (typeof window === "undefined") return;
+
+  // GTM/GA4 via dataLayer
+  (window as any).dataLayer = (window as any).dataLayer || [];
+  (window as any).dataLayer.push({
+    event: "whatsapp_click",
+    location,
+  });
+}
+
 export default function Footer() {
+  const whatsappUrl = buildWhatsAppUrl();
+
   return (
     <footer className="border-t border-white/10 bg-black">
       <div className="mx-auto max-w-6xl px-6 py-14">
@@ -11,7 +32,7 @@ export default function Footer() {
           <div>
             <div className="text-white font-semibold">Web Growth</div>
             <p className="mt-3 text-white/60 leading-relaxed">
-              We design professional websites focused on real results — clarity,
+              We design professional websites focused on real results, clarity,
               usability, and performance.
             </p>
           </div>
@@ -51,13 +72,15 @@ export default function Footer() {
                   admin@webgrowth.info
                 </a>
               </div>
+
               <div>
                 <span className="text-white/70">WhatsApp: </span>
                 <a
                   className="hover:text-white transition"
-                  href="https://wa.me/2348066706336"
+                  href={whatsappUrl}
                   target="_blank"
                   rel="noreferrer"
+                  onClick={() => trackWhatsApp("footer")}
                 >
                   Chat on WhatsApp
                 </a>
@@ -68,9 +91,7 @@ export default function Footer() {
 
         {/* Bottom bar */}
         <div className="mt-10 flex flex-col gap-3 border-t border-white/10 pt-6 text-sm text-white/50 md:flex-row md:items-center md:justify-between">
-          <div>
-            © {new Date().getFullYear()} Web Growth. All rights reserved.
-          </div>
+          <div>© {new Date().getFullYear()} Web Growth. All rights reserved.</div>
           <div className="flex gap-4">
             <Link className="hover:text-white transition" href="/privacy">
               Privacy Policy
