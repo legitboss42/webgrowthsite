@@ -3,6 +3,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 
+const FORM_ENDPOINT = "https://formspree.io/f/xgoanbnr"; // <-- replace
+
 export default function ContactClient() {
   const searchParams = useSearchParams();
 
@@ -21,8 +23,13 @@ export default function ContactClient() {
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [message, setMessage] = useState("");
   const [service, setService] = useState("");
+  const [message, setMessage] = useState("");
+
+  const [status, setStatus] = useState<"idle" | "sending" | "success" | "error">(
+    "idle"
+  );
+  const [statusMsg, setStatusMsg] = useState("");
 
   // Prefill service from URL
   useEffect(() => {
@@ -38,47 +45,89 @@ export default function ContactClient() {
     setService(match ?? decoded);
   }, [searchParams, serviceOptions]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const payload = {
-      name,
-      email,
-      service,
-      message,
-    };
+    if (!FORM_ENDPOINT || FORM_ENDPOINT.includes("XXXXXXX")) {
+      setStatus("error");
+      setStatusMsg("Form endpoint not set. Add your Formspree URL.");
+      return;
+    }
 
-    console.log("Form submission:", payload);
+    setStatus("sending");
+    setStatusMsg("");
 
-    // TEMP: replace later with email / API / backend
-    alert("Form submitted (check console)");
+    try {
+      const res = await fetch(FORM_ENDPOINT, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          name,
+          email,
+          service,
+          message,
+          _subject: `New Web Growth Quote Request — ${service || "No service selected"}`,
+        }),
+      });
 
-    setName("");
-    setEmail("");
-    setMessage("");
-    setService("");
+      if (!res.ok) {
+        // Formspree returns JSON, but keep this robust
+        let errText = "Failed to send. Try again.";
+        try {
+          const data = await res.json();
+          if (data?.errors?.length) errText = data.errors[0].message || errText;
+        } catch {}
+        setStatus("error");
+        setStatusMsg(errText);
+        return;
+      }
+
+      setStatus("success");
+      setStatusMsg("Message sent. We’ll reply shortly.");
+
+      // clear
+      setName("");
+      setEmail("");
+      setMessage("");
+      setService("");
+    } catch {
+      setStatus("error");
+      setStatusMsg("Network error. Check connection and try again.");
+    }
   };
 
   return (
     <div className="bg-black text-white py-24">
       <div className="mx-auto max-w-4xl px-6">
-        <h1 className="text-4xl md:text-5xl font-semibold">
-          Request a Quote
-        </h1>
+        <h1 className="text-4xl md:text-5xl font-semibold">Request a Quote</h1>
 
         <p className="mt-4 text-white/70 text-lg">
           Tell us what you need. We’ll respond with the right next step.
         </p>
 
-        <form
-          onSubmit={handleSubmit}
-          className="mt-12 space-y-6"
-        >
+        {/* Status box */}
+        {status !== "idle" ? (
+          <div
+            className={[
+              "mt-8 rounded-xl border p-4 text-sm",
+              status === "success"
+                ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-200"
+                : status === "error"
+                ? "border-red-500/30 bg-red-500/10 text-red-200"
+                : "border-white/10 bg-white/5 text-white/70",
+            ].join(" ")}
+          >
+            {status === "sending" ? "Sending..." : statusMsg}
+          </div>
+        ) : null}
+
+        <form onSubmit={handleSubmit} className="mt-12 space-y-6">
           {/* Name */}
           <div>
-            <label className="block text-sm mb-2 text-white/70">
-              Your Name
-            </label>
+            <label className="block text-sm mb-2 text-white/70">Your Name</label>
             <input
               type="text"
               required
@@ -104,9 +153,7 @@ export default function ContactClient() {
 
           {/* Service */}
           <div>
-            <label className="block text-sm mb-2 text-white/70">
-              Service
-            </label>
+            <label className="block text-sm mb-2 text-white/70">Service</label>
             <select
               value={service}
               onChange={(e) => setService(e.target.value)}
@@ -124,8 +171,7 @@ export default function ContactClient() {
               ))}
 
               {/* Preserve custom service if passed */}
-              {service &&
-              !serviceOptions.includes(service) ? (
+              {service && !serviceOptions.includes(service) ? (
                 <option value={service} className="bg-black">
                   {service}
                 </option>
@@ -144,15 +190,22 @@ export default function ContactClient() {
               onChange={(e) => setMessage(e.target.value)}
               className="w-full rounded-md border border-white/10 bg-black/40 px-4 py-3 text-white"
               placeholder="Briefly describe what you need…"
+              required
             />
           </div>
 
           {/* Submit */}
           <button
             type="submit"
-            className="w-full rounded-md bg-emerald-600 px-6 py-4 text-sm font-semibold text-white hover:bg-emerald-500 transition"
+            disabled={status === "sending"}
+            className={[
+              "w-full rounded-md px-6 py-4 text-sm font-semibold text-white transition",
+              status === "sending"
+                ? "bg-emerald-600/60 cursor-not-allowed"
+                : "bg-emerald-600 hover:bg-emerald-500",
+            ].join(" ")}
           >
-            Send Request
+            {status === "sending" ? "Sending..." : "Send Request"}
           </button>
         </form>
       </div>
