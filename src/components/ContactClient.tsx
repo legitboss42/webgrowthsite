@@ -1,14 +1,15 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 
-const FORM_ENDPOINT = "https://formspree.io/f/xgoanbnr"; // your Formspree form URL
+const FORM_ENDPOINT = "https://formspree.io/f/xgoanbnr";
 
 type Status = "idle" | "sending" | "success" | "error";
 
 export default function ContactClient() {
   const searchParams = useSearchParams();
+  const router = useRouter();
 
   const serviceOptions = useMemo(
     () => [
@@ -31,13 +32,12 @@ export default function ContactClient() {
   const [status, setStatus] = useState<Status>("idle");
   const [statusMsg, setStatusMsg] = useState("");
 
-  // Prefill service from URL (?service=Landing%20Page%20Design)
+  // Prefill service from URL (?service=...)
   useEffect(() => {
     const s = searchParams.get("service");
     if (!s) return;
 
     const decoded = decodeURIComponent(s);
-
     const match = serviceOptions.find(
       (opt) => opt.toLowerCase() === decoded.toLowerCase()
     );
@@ -45,14 +45,8 @@ export default function ContactClient() {
     setService(match ?? decoded);
   }, [searchParams, serviceOptions]);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!FORM_ENDPOINT) {
-      setStatus("error");
-      setStatusMsg("Form endpoint not set.");
-      return;
-    }
 
     setStatus("sending");
     setStatusMsg("");
@@ -69,47 +63,49 @@ export default function ContactClient() {
           email,
           service,
           message,
-          _subject: `New Web Growth Quote Request — ${service || "No service selected"}`,
+          _subject: `New Web Growth Quote Request — ${
+            service || "No service selected"
+          }`,
         }),
       });
 
       if (!res.ok) {
-        let errText = "Failed to send. Try again.";
+        let err = "Failed to send. Try again.";
         try {
           const data = await res.json();
-          if (data?.errors?.length) errText = data.errors[0].message || errText;
-        } catch {
-          // ignore JSON parse failure
-        }
+          if (data?.errors?.length) err = data.errors[0].message;
+        } catch {}
         setStatus("error");
-        setStatusMsg(errText);
+        setStatusMsg(err);
         return;
       }
 
+      // SUCCESS
       setStatus("success");
-      setStatusMsg("Message sent. We’ll reply shortly.");
 
-      // clear fields
-      setName("");
-      setEmail("");
-      setService("");
-      setMessage("");
+      // redirect to thank-you page (client-side, works on Vercel + prod)
+      setTimeout(() => {
+        router.push("/contact/thanks");
+      }, 800);
     } catch {
       setStatus("error");
-      setStatusMsg("Network error. Check your connection and try again.");
+      setStatusMsg("Network error. Please try again.");
     }
   };
 
   return (
     <div className="bg-black text-white py-24">
       <div className="mx-auto max-w-4xl px-6">
-        <h1 className="text-4xl md:text-5xl font-semibold">Request a Quote</h1>
+        <h1 className="text-4xl md:text-5xl font-semibold">
+          Request a Quote
+        </h1>
 
         <p className="mt-4 text-white/70 text-lg">
           Tell us what you need. We’ll respond with the right next step.
         </p>
 
-        {status !== "idle" ? (
+        {/* Status message */}
+        {status !== "idle" && (
           <div
             className={[
               "mt-8 rounded-xl border p-4 text-sm",
@@ -120,14 +116,20 @@ export default function ContactClient() {
                 : "border-white/10 bg-white/5 text-white/70",
             ].join(" ")}
           >
-            {status === "sending" ? "Sending..." : statusMsg}
+            {status === "sending"
+              ? "Sending..."
+              : status === "success"
+              ? "Message sent. Redirecting..."
+              : statusMsg}
           </div>
-        ) : null}
+        )}
 
         <form onSubmit={handleSubmit} className="mt-12 space-y-6">
           {/* Name */}
           <div>
-            <label className="block text-sm mb-2 text-white/70">Your Name</label>
+            <label className="block text-sm mb-2 text-white/70">
+              Your Name
+            </label>
             <input
               type="text"
               required
@@ -153,11 +155,13 @@ export default function ContactClient() {
 
           {/* Service */}
           <div>
-            <label className="block text-sm mb-2 text-white/70">Service</label>
+            <label className="block text-sm mb-2 text-white/70">
+              Service
+            </label>
             <select
+              required
               value={service}
               onChange={(e) => setService(e.target.value)}
-              required
               className="w-full rounded-md border border-white/10 bg-black/40 px-4 py-3 text-white"
             >
               <option value="" disabled>
@@ -170,12 +174,11 @@ export default function ContactClient() {
                 </option>
               ))}
 
-              {/* Preserve custom service if passed */}
-              {service && !serviceOptions.includes(service) ? (
+              {service && !serviceOptions.includes(service) && (
                 <option value={service} className="bg-black">
                   {service}
                 </option>
-              ) : null}
+              )}
             </select>
           </div>
 
@@ -186,11 +189,11 @@ export default function ContactClient() {
             </label>
             <textarea
               rows={5}
+              required
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               className="w-full rounded-md border border-white/10 bg-black/40 px-4 py-3 text-white"
               placeholder="Briefly describe what you need…"
-              required
             />
           </div>
 
