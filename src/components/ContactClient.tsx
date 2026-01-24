@@ -7,6 +7,22 @@ const FORM_ENDPOINT = "https://formspree.io/f/xgoanbnr";
 
 type Status = "idle" | "sending" | "success" | "error";
 
+// ---- Analytics helpers (safe)
+function pushToDataLayer(eventName: string, payload: Record<string, any>) {
+  if (typeof window === "undefined") return;
+  const w = window as any;
+  w.dataLayer = w.dataLayer || [];
+  w.dataLayer.push({ event: eventName, ...payload });
+}
+
+function fireGtagEvent(eventName: string, params: Record<string, any>) {
+  if (typeof window === "undefined") return;
+  const w = window as any;
+  if (typeof w.gtag === "function") {
+    w.gtag("event", eventName, params);
+  }
+}
+
 export default function ContactClient() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -73,17 +89,33 @@ export default function ContactClient() {
         let err = "Failed to send. Try again.";
         try {
           const data = await res.json();
-          if (data?.errors?.length) err = data.errors[0].message;
+          if (data?.errors?.length) err = data.errors[0].message || err;
         } catch {}
         setStatus("error");
         setStatusMsg(err);
         return;
       }
 
-      // SUCCESS
+      // ✅ SUCCESS
       setStatus("success");
 
-      // redirect to thank-you page (client-side, works on Vercel + prod)
+      // --- Conversion tracking (fires once, only on success)
+      const leadPayload = {
+        form_name: "contact_quote",
+        service: service || "(none)",
+        page_path: typeof window !== "undefined" ? window.location.pathname : "",
+      };
+
+      // GTM path (recommended)
+      pushToDataLayer("wg_lead", leadPayload);
+
+      // GA4 direct (if gtag exists)
+      fireGtagEvent("generate_lead", {
+        ...leadPayload,
+        method: "formspree",
+      });
+
+      // redirect to thank-you page
       setTimeout(() => {
         router.push("/contact/thanks");
       }, 800);
@@ -96,9 +128,7 @@ export default function ContactClient() {
   return (
     <div className="bg-black text-white py-24">
       <div className="mx-auto max-w-4xl px-6">
-        <h1 className="text-4xl md:text-5xl font-semibold">
-          Request a Quote
-        </h1>
+        <h1 className="text-4xl md:text-5xl font-semibold">Request a Quote</h1>
 
         <p className="mt-4 text-white/70 text-lg">
           Tell us what you need. We’ll respond with the right next step.
@@ -127,9 +157,7 @@ export default function ContactClient() {
         <form onSubmit={handleSubmit} className="mt-12 space-y-6">
           {/* Name */}
           <div>
-            <label className="block text-sm mb-2 text-white/70">
-              Your Name
-            </label>
+            <label className="block text-sm mb-2 text-white/70">Your Name</label>
             <input
               type="text"
               required
@@ -155,9 +183,7 @@ export default function ContactClient() {
 
           {/* Service */}
           <div>
-            <label className="block text-sm mb-2 text-white/70">
-              Service
-            </label>
+            <label className="block text-sm mb-2 text-white/70">Service</label>
             <select
               required
               value={service}
