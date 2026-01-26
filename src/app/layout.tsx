@@ -93,6 +93,7 @@ export default function RootLayout({
         <Header />
         <main className="pt-28">{children}</main>
         <Footer />
+        <SpeedInsights />
       </body>
     </html>
   );
