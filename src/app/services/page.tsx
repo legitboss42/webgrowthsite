@@ -12,7 +12,11 @@ export const metadata: Metadata = {
 };
 
 export default async function Page() {
-  const services = await sanityClient.fetch(SERVICES_QUERY, {}, { next: { revalidate: 60 } });
+  const services = await sanityClient.fetch(
+    SERVICES_QUERY,
+    {},
+    { next: { revalidate: 60 } }
+  );
 
-  return <ServicesClient services={services} />;
+  return <ServicesClient services={services ?? []} />;
 }
