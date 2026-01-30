@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
 import ServicesClient from "@/components/ServicesClient";
-import { sanityClient } from "@/sanity/lib/client";
-import { SERVICES_QUERY } from "@/sanity/lib/queries";
 
 export const metadata: Metadata = {
   title: "Services | Web Growth",
@@ -11,12 +9,6 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true },
 };
 
-export default async function Page() {
-  const services = await sanityClient.fetch(
-    SERVICES_QUERY,
-    {},
-    { next: { revalidate: 60 } }
-  );
-
-  return <ServicesClient services={services ?? []} />;
+export default function Page() {
+  return <ServicesClient />;
 }
