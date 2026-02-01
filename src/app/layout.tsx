@@ -18,6 +18,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <head>
+        {/* Impact.com verification */}
+        <meta
+          name="impact-site-verification"
+          content="f14352c8-ac00-4455-ad6a-4c0615d5653b"
+        />
+
+        {/* Google Tag Manager */}
         <Script
           id="gtm"
           strategy="afterInteractive"
@@ -34,6 +41,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
 
       <body>
+        {/* GTM noscript */}
         <noscript>
           <iframe
             src={`https://www.googletagmanager.com/ns.html?id=${GTM_ID}`}
