@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import type { Post, Category } from "../../lib/posts";
 import { gsap } from "gsap";
 
@@ -152,7 +153,8 @@ export default function BlogClient({ posts }: Props) {
             </h1>
 
             <p data-hero-item className="mt-6 text-lg text-white/70 leading-relaxed">
-              Practical web design, SEO, performance and conversion strategy — written for business owners and builders.
+              Practical web design, SEO, performance and conversion strategy — written for business
+              owners and builders.
             </p>
 
             <div data-hero-item className="mt-10 flex flex-col gap-3 sm:flex-row">
@@ -266,10 +268,29 @@ export default function BlogClient({ posts }: Props) {
               className="group relative overflow-hidden rounded-2xl border border-white/10 bg-black/40
                          transition-all duration-300 hover:-translate-y-1 hover:border-emerald-500/25 hover:bg-black/55"
             >
+              {/* COVER IMAGE */}
+              {p.cover ? (
+                <Link href={`/blog/${p.slug}`} className="block">
+                  <div className="relative aspect-[16/9] overflow-hidden border-b border-white/10 bg-white/5">
+                    <Image
+                      src={p.cover}
+                      alt={p.title}
+                      fill
+                      className="object-cover opacity-95 group-hover:opacity-100 transition"
+                      sizes="(max-width: 768px) 100vw, 50vw"
+                      priority={false}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+                  </div>
+                </Link>
+              ) : null}
+
+              {/* hover glow */}
               <div className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition">
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(16,185,129,0.12),transparent_60%)]" />
               </div>
 
+              {/* shimmer */}
               <div className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition">
                 <div className="absolute -left-1/3 top-0 h-full w-1/3 rotate-12 bg-white/8 blur-2xl translate-x-[-70%] group-hover:translate-x-[340%] transition duration-[1100ms]" />
               </div>
