@@ -57,7 +57,11 @@ function slugifyHeading(text: string) {
     .replace(/(^-|-$)/g, "");
 }
 
-// TOC only from "##"
+function isLeadMagnetHeading(text: string) {
+  return text.trim().toLowerCase() === "lead magnet";
+}
+
+// TOC only from "##" (and we EXCLUDE Lead magnet)
 function extractHeadings(content: string) {
   const lines = content.split("\n").map((l) => l.trim());
   const headings: Array<{ text: string; id: string }> = [];
@@ -65,11 +69,29 @@ function extractHeadings(content: string) {
   for (const l of lines) {
     if (l.startsWith("## ")) {
       const text = l.replace(/^##\s+/, "").trim();
+      if (isLeadMagnetHeading(text)) continue; // ✅ hide Lead magnet from sidebar/TOC
       headings.push({ text, id: slugifyHeading(text) });
     }
   }
 
   return headings;
+}
+
+/**
+ * LEAD MAGNET SYNTAX (in your post.content):
+ *
+ * [LEAD|Button Text|/downloads/file.pdf]
+ *
+ * Example:
+ * [LEAD|Download the Free Hosting Checklist (PDF)|/downloads/hosting-checklist.pdf]
+ *
+ * This line will NOT display as text in the article.
+ * It will render as an animated CTA button block.
+ */
+function parseLeadMagnet(line: string) {
+  const m = line.match(/^\[LEAD\|([^|]+)\|([^\]]+)\]$/);
+  if (!m) return null;
+  return { label: m[1].trim(), href: m[2].trim() };
 }
 
 type Block =
@@ -80,16 +102,25 @@ type Block =
   | { type: "ol"; items: string[] }
   | { type: "callout"; tone: "tip" | "note" | "warn"; text: string }
   | { type: "hr" }
-  | { type: "card"; title: string; lines: string[] };
+  | { type: "img"; src: string; alt: string }
+  | { type: "card"; title: string; lines: string[] }
+  | { type: "lead"; label: string; href: string };
 
 function renderContent(content: string) {
   const lines = content.split("\n");
-  const blocks: Block[] = [];
 
+  // inline image syntax: ![alt](src)
+  const imageRegex = /^!\[([^\]]*)\]\(([^)]+)\)$/;
+
+  const blocks: Block[] = [];
   let i = 0;
+
+  // ✅ when true, we hide EVERYTHING in this section except the [LEAD|..|..] button
+  let hideUntilNextSection = false;
 
   const takeParagraph = () => {
     const para: string[] = [];
+
     while (i < lines.length) {
       const nxtRaw = lines[i] ?? "";
       const nxt = nxtRaw.trim();
@@ -103,11 +134,20 @@ function renderContent(content: string) {
       if (/^\d+[\)\.]\s+/.test(nxt)) break;
       if (nxt.startsWith("👉")) break;
       if (/^(note:|NOTE:|warning:|WARNING:)/.test(nxt)) break;
+      if (imageRegex.test(nxt)) break;
+      if (parseLeadMagnet(nxt)) break;
+
+      // ✅ if we're inside "Lead magnet" section, ignore paragraphs
+      if (hideUntilNextSection) {
+        i += 1;
+        continue;
+      }
 
       para.push(nxt);
       i += 1;
     }
-    if (para.length) blocks.push({ type: "p", text: para.join(" ") });
+
+    if (!hideUntilNextSection && para.length) blocks.push({ type: "p", text: para.join(" ") });
   };
 
   while (i < lines.length) {
@@ -115,6 +155,52 @@ function renderContent(content: string) {
     const line = raw.trim();
 
     if (!line) {
+      i += 1;
+      continue;
+    }
+
+    // ✅ New section headings toggle the "Lead magnet hidden section" mode
+    if (line.startsWith("## ") || line.startsWith("# ")) {
+      const text = line.replace(/^#{1,2}\s+/, "").trim();
+
+      // Turn on hide mode ONLY for "Lead magnet"
+      if (isLeadMagnetHeading(text)) {
+        hideUntilNextSection = true;
+        i += 1;
+        continue; // ✅ do NOT render the "Lead magnet" heading
+      }
+
+      // Any other heading ends the hidden section
+      hideUntilNextSection = false;
+
+      // render heading
+      blocks.push({ type: "h2", text, id: slugifyHeading(text) });
+      i += 1;
+      continue;
+    }
+
+    // ✅ Lead magnet line -> render as button block (even if hidden section is on)
+    const lead = parseLeadMagnet(line);
+    if (lead) {
+      blocks.push({ type: "lead", label: lead.label, href: lead.href });
+      i += 1;
+      continue;
+    }
+
+    // ✅ If we're inside Lead magnet section, hide everything else
+    if (hideUntilNextSection) {
+      i += 1;
+      continue;
+    }
+
+    // inline image
+    const imgMatch = line.match(imageRegex);
+    if (imgMatch) {
+      blocks.push({
+        type: "img",
+        alt: (imgMatch[1] || "Blog image").trim(),
+        src: imgMatch[2].trim(),
+      });
       i += 1;
       continue;
     }
@@ -157,23 +243,7 @@ function renderContent(content: string) {
       continue;
     }
 
-    // headings
-    if (line.startsWith("## ")) {
-      const text = line.replace(/^##\s+/, "").trim();
-      blocks.push({ type: "h2", text, id: slugifyHeading(text) });
-      i += 1;
-      continue;
-    }
-
-    // treat # as h2 for your content style
-    if (line.startsWith("# ")) {
-      const text = line.replace(/^#\s+/, "").trim();
-      blocks.push({ type: "h2", text, id: slugifyHeading(text) });
-      i += 1;
-      continue;
-    }
-
-    // support ### as a “card section”
+    // ✅ support ### (subheadings -> card)
     if (line.startsWith("### ")) {
       const title = line.replace(/^###\s+/, "").trim();
       i += 1;
@@ -189,6 +259,8 @@ function renderContent(content: string) {
         if (nxt.startsWith("## ")) break;
         if (nxt.startsWith("# ")) break;
         if (nxt === "---") break;
+        if (imageRegex.test(nxt)) break;
+        if (parseLeadMagnet(nxt)) break;
 
         if (nxt.startsWith("👉") || /^(note:|NOTE:|warning:|WARNING:)/.test(nxt)) break;
 
@@ -232,10 +304,8 @@ function renderContent(content: string) {
   }
 
   const calloutStyles = (tone: "tip" | "note" | "warn") => {
-    if (tone === "tip")
-      return "border-emerald-400/25 bg-emerald-500/10 text-emerald-50";
-    if (tone === "warn")
-      return "border-red-400/25 bg-red-500/10 text-red-50";
+    if (tone === "tip") return "border-emerald-400/25 bg-emerald-500/10 text-emerald-50";
+    if (tone === "warn") return "border-red-400/25 bg-red-500/10 text-red-50";
     return "border-white/15 bg-white/5 text-white";
   };
 
@@ -264,6 +334,22 @@ function renderContent(content: string) {
           );
         }
 
+        if (b.type === "lead") {
+          return (
+            <div key={idx} className="rounded-2xl border border-emerald-400/20 bg-emerald-500/10 p-6">
+              <Link
+                href={b.href}
+                className="group relative inline-flex w-full items-center justify-center overflow-hidden rounded-xl bg-emerald-600 px-5 py-4 text-sm font-semibold text-white transition hover:bg-emerald-500"
+              >
+                {/* animated sheen */}
+                <span className="pointer-events-none absolute -left-1/3 top-0 h-full w-1/3 rotate-12 bg-white/25 blur-xl translate-x-[-70%] group-hover:translate-x-[340%] transition duration-[1100ms]" />
+                <span className="relative">{b.label}</span>
+              </Link>
+              <div className="mt-3 text-xs text-white/55">Instant download. No spam. Just the file.</div>
+            </div>
+          );
+        }
+
         if (b.type === "card") {
           return (
             <div
@@ -286,15 +372,29 @@ function renderContent(content: string) {
 
         if (b.type === "callout") {
           return (
-            <div
-              key={idx}
-              className={["rounded-2xl border p-5", calloutStyles(b.tone)].join(" ")}
-            >
+            <div key={idx} className={["rounded-2xl border p-5", calloutStyles(b.tone)].join(" ")}>
               <div className="text-sm uppercase tracking-widest opacity-70">
                 {b.tone === "tip" ? "Tip" : b.tone === "warn" ? "Warning" : "Note"}
               </div>
               <div className="mt-2 text-white/80">{b.text}</div>
             </div>
+          );
+        }
+
+        if (b.type === "img") {
+          return (
+            <figure key={idx} className="overflow-hidden rounded-2xl border border-white/10 bg-white/5">
+              <div className="relative aspect-[16/9] w-full">
+                <Image
+                  src={b.src}
+                  alt={b.alt}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, 768px"
+                />
+              </div>
+              {/* captions OFF by default */}
+            </figure>
           );
         }
 
@@ -336,6 +436,9 @@ function renderContent(content: string) {
   );
 }
 
+/* ======================================================
+   WhatsApp
+====================================================== */
 const WHATSAPP_NUMBER = "2348066706336";
 const WHATSAPP_MESSAGE = "Hello, I’d like to request a quote for a website.";
 
@@ -469,7 +572,7 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
                 </div>
               )}
 
-              {/* ✅ Put back the “Request a Quote” sidebar card */}
+              {/* Request a Quote card */}
               <div className="mt-6 rounded-xl border border-emerald-400/20 bg-emerald-500/10 p-5">
                 <div className="text-sm font-semibold text-white">Request a Quote</div>
                 <p className="mt-2 text-sm text-white/70">
@@ -498,11 +601,6 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
                 <div className="mt-4 text-xs text-white/55">
                   Typical reply time: <span className="text-white/80">same day</span>.
                 </div>
-              </div>
-
-              <div className="mt-6 text-xs text-white/45">
-                Pro tip: add callouts in content with <span className="text-white">👉</span> or{" "}
-                <span className="text-white">NOTE:</span>
               </div>
             </div>
           </aside>

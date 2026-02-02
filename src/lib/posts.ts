@@ -1,67 +1,71 @@
 export type Category = "Conversion" | "Performance" | "Strategy" | "SEO" | "UX";
 
-export type AffiliateBlock = {
-  title: string;
-  description: string;
-  url: string;
-  cta: string;
-};
-
 export type Post = {
   slug: string;
   title: string;
   excerpt: string;
-  date: string; // ISO string
+  date: string;
   category: Category;
   tags: string[];
   readTime: string;
   content: string;
 
-  // Optional extras
-  cover?: string; // e.g. "/images/blog/leads.png"
-  affiliate?: AffiliateBlock; // you can re-enable later if you want
+  cover?: string;
 };
 
 const POSTS: Post[] = [
+
   // =================================================
-  // MONEY POST #1 — HOSTING (Affiliate REMOVED)
+  // POST 1 — HOSTING (Authority version)
   // =================================================
   {
     slug: "best-web-hosting-for-small-business-websites",
     title: "Best Web Hosting for Small Business Websites (Fast, Cheap & Reliable)",
     excerpt:
-      "Slow hosting quietly kills your sales. Here’s how to choose fast, affordable and reliable hosting for small business websites — plus the best providers in 2026.",
+      "Slow hosting quietly kills your sales. Learn how to choose fast, reliable hosting that improves SEO, conversions and trust — plus the best options for small businesses.",
     date: "2026-02-01",
     category: "Performance",
-    tags: ["Hosting", "Tools", "Speed", "SEO"],
+    tags: ["Hosting", "Speed", "SEO"],
     readTime: "9 min read",
     cover: "/images/blog/hosting.png",
 
-    // ❌ affiliate removed
-
     content: `# Slow hosting is silently killing your sales
 
-Bad hosting quietly murders conversions.
+Most small business owners obsess over design.
 
-- slow pages
-- high bounce rates
-- poor SEO
-- lost trust
+Colors.
+Logos.
+Fonts.
+
+Meanwhile their site takes **5 seconds to load**.
+
+Visitors leave.
+Google ranks them lower.
+Sales disappear.
+
+Bad hosting is the quiet business killer nobody talks about.
+
+![Modern server racks glowing emerald green, cinematic datacenter, premium tech aesthetic, 16:9](/images/blog/hosting-hero.png)
 
 ## Why hosting matters more than design
 
-Hosting controls:
+Your hosting controls:
 
 - speed
 - uptime
 - security
 - SEO
+- trust
 
-If your site loads in 4 seconds, half your visitors disappear.
+If your site loads slowly, everything else collapses.
 
-No design can fix slow.
+Speed is not a “nice to have”.
+
+It’s survival.
 
 ## Must-have features
+
+Never choose hosting without:
 
 - SSD storage
 - 99.9% uptime
@@ -70,93 +74,175 @@ No design can fix slow.
 - CDN
 - Fast support
 
-## Solid hosting options most small businesses use
+Anything less is gambling.
+
+## Solid options most small businesses use
 
 ### Hostinger
-
 Cheap + surprisingly fast
 
 ### Bluehost
-
-Beginner friendly
+Beginner friendly + stable
 
 ### Cloudways
-
 Blazing fast performance
 
-## Quick setup
+## Quick setup plan
 
-1) Buy hosting
-2) Install site
-3) Enable SSL
-4) Optimise images
-5) Launch`,
+1) Buy hosting  
+2) Install your site  
+3) Enable SSL  
+4) Optimise images  
+5) Launch  
+
+Done.
+
+## Free download
+
+👉 **Free Hosting Setup Checklist (PDF)**  
+Step-by-step list so you don’t miss anything.
+
+## FAQ
+
+### Does hosting affect SEO?
+Yes. Speed directly affects rankings.
+
+### Can cheap hosting work?
+Yes, if optimized. Just avoid ultra-budget junk.
+
+### When should I upgrade?
+When traffic or sales grow consistently.
+
+Speed wins. Always.
+`,
   },
 
   // =================================================
-  // MONEY POST #2 — WEBSITE BUILDERS (Affiliate REMOVED)
+  // POST 2 — WEBSITE BUILDERS (FULL LONG FORM)
   // =================================================
   {
     slug: "best-website-builders-for-small-business-2026",
     title: "Best Website Builders for Small Business (Fast, Affordable & Easy in 2026)",
     excerpt:
-      "Choosing the wrong website builder wastes time and kills conversions. Here are the best builders based on speed, cost and real business results.",
-    date: "2026-02-01",
+      "Trying to choose between WordPress, Webflow or Wix? This guide compares speed, SEO, cost and ease so you pick the right builder without wasting time or money.",
+    date: "2026-02-05",
     category: "Strategy",
-    tags: ["Tools", "Website Builder", "Small Business"],
+    tags: ["Website Builder", "Tools", "Small Business", "SEO"],
     readTime: "10 min read",
     cover: "/images/blog/builders.png",
 
-    // ❌ affiliate removed
+    content: `![Clean modern workspace with laptop showing website builder dashboard, emerald accent lighting, professional aesthetic, 16:9](/images/blog/builders-hero.png)
 
-    content: `# Most small business websites fail before they even launch
+# Best Website Builders for Small Business
 
-Not because of design.
+Most websites don’t fail because of design.
 
-Because they chose the wrong builder.
+They fail because they chose the wrong foundation.
+
+The wrong builder.
+
+Pick wrong and everything becomes painful:
 
 - slow pages
-- bloated templates
-- hidden fees
 - poor SEO
+- hidden costs
+- limited flexibility
+
+Pick right and growth becomes easy.
 
 ## Why your builder matters
 
 Your builder controls:
 
 - speed
-- SEO
-- mobile performance
+- Google rankings
+- monthly cost
 - editing ease
 - scalability
 
-Bad builder = permanent pain.
+Bad builder = permanent struggle.
 
-## Best website builders
+## What a good builder must give you
 
-### 1) WordPress (Best long term)
+- fast loading
+- mobile responsive
+- clean URLs
+- meta tags
+- SSL
+- easy editing
 
-Unlimited flexibility + best SEO
+No compromises.
 
-### 2) Webflow (Best design + speed)
+---
 
-Modern + very fast
+## WordPress (Best long term + SEO)
 
-### 3) Wix (Best beginner option)
+![Minimal WordPress dashboard, clean UI, green accent lighting, 16:9](/images/blog/wordpress.png)
 
-Easiest setup
+- unlimited flexibility
+- best SEO
+- lowest long-term cost
+- full ownership
 
-## How to choose
+If you want traffic from Google, this is usually the best choice.
 
-Small budget → Wix  
-Serious SEO → WordPress  
-Premium design → Webflow  
+---
 
-Speed beats perfection.`,
+## Webflow (Best design + speed)
+
+![Modern Webflow interface, sleek layout builder, futuristic glow, 16:9](/images/blog/webflow.png)
+
+- beautiful design
+- extremely fast
+- hosting included
+- premium feel
+
+Great for agencies and startups.
+
+---
+
+## Wix (Best for beginners)
+
+![Simple drag-and-drop website builder UI, beginner friendly, bright clean layout, 16:9](/images/blog/wix.png)
+
+- easiest setup
+- no tech skills needed
+- quick launch
+
+Good starter option, limited long term.
+
+---
+
+## Quick decision rule
+
+Beginner → Wix  
+SEO + growth → WordPress  
+Premium look → Webflow  
+
+Done.
+
+## Lead magnet
+
+👉 **Free Website Builder Decision Checklist (PDF)**  
+Answer 10 questions → instantly know which builder to choose.
+
+## FAQ
+
+### Which builder ranks best on Google?
+WordPress consistently wins.
+
+### Is Wix bad?
+Not bad, just limited.
+
+### Can I switch later?
+Yes, but it’s painful and expensive.
+
+Choose once. Choose right.
+`,
   },
 
   // =================================================
-  // AUTHORITY POSTS (Trust builders)
+  // AUTHORITY POSTS
   // =================================================
   {
     slug: "why-your-site-isnt-getting-leads",
@@ -165,9 +251,10 @@ Speed beats perfection.`,
       "Most websites fail for boring reasons: unclear offer, weak CTA, slow pages, and zero trust signals.",
     date: "2026-01-20",
     category: "Conversion",
-    tags: ["Strategy", "Messaging", "Trust"],
+    tags: ["Strategy", "Leads", "Messaging"],
     readTime: "6 min read",
     cover: "/images/blog/leads.png",
+
     content: `## The real problem
 
 Your website isn’t doing the sales job.
@@ -179,21 +266,24 @@ Your website isn’t doing the sales job.
 
 ## Fix order
 
-1) Clarify offer
-2) Add proof
-3) Make CTA obvious
-4) Improve speed`,
+1) Clarify offer  
+2) Add proof  
+3) Make CTA obvious  
+4) Improve speed
+`,
   },
 
   {
     slug: "speed-checklist-core-web-vitals",
     title: "Speed Checklist: Core Web Vitals That Actually Matter",
-    excerpt: "A practical checklist to improve LCP, INP and CLS without guessing.",
+    excerpt:
+      "A practical checklist to improve LCP, INP and CLS without guessing.",
     date: "2026-01-10",
     category: "Performance",
     tags: ["SEO", "Speed"],
     readTime: "7 min read",
     cover: "/images/blog/speed.png",
+
     content: `## The only 3 metrics that matter
 
 - LCP
@@ -202,9 +292,10 @@ Your website isn’t doing the sales job.
 
 ## Quick wins
 
-1) Compress images
-2) Reduce JS
-3) Preload fonts`,
+1) Compress images  
+2) Reduce JS  
+3) Preload fonts
+`,
   },
 
   {
@@ -217,13 +308,15 @@ Your website isn’t doing the sales job.
     tags: ["Conversion", "Layout"],
     readTime: "5 min read",
     cover: "/images/blog/homepage.png",
+
     content: `## Use this order
 
-1) Clear headline
-2) Proof
-3) Services
-4) Process
-5) CTA`,
+1) Clear headline  
+2) Proof  
+3) Services  
+4) Process  
+5) CTA
+`,
   },
 ];
 
