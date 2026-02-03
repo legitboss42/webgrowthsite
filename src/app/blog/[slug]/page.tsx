@@ -93,11 +93,39 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
   const post = getPost(params.slug);
   if (!post) return notFound();
 
+  const base = "https://webgrowth.info";
+  const canonical = `${base}/blog/${post.slug}`;
+
+  const articleJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: post.title,
+    description: post.excerpt,
+    datePublished: post.date,
+    dateModified: post.date,
+    mainEntityOfPage: canonical,
+    author: {
+      "@type": "Organization",
+      name: "Web Growth",
+      url: base,
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "Web Growth",
+      url: base,
+    },
+    image: post.cover ? [`${base}${post.cover}`] : undefined,
+  };
+
   const headings = extractHeadings(post.content);
   const whatsappUrl = buildWhatsAppUrl();
 
   return (
     <article className="bg-black text-white">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
+      />
       {/* HERO */}
       <section className="relative overflow-hidden border-b border-white/10">
         <div className="absolute inset-0">
