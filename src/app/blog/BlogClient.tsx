@@ -34,7 +34,10 @@ export default function BlogClient({ posts }: Props) {
 
   const tags = useMemo(() => {
     const set = new Set<string>();
-    posts.forEach((p: Post) => p.tags.forEach((t: string) => set.add(t)));
+
+    // ✅ SAFE: if tags missing, treat as []
+    posts.forEach((p: Post) => (p.tags ?? []).forEach((t: string) => set.add(t)));
+
     return ["All", ...Array.from(set).sort((a, b) => a.localeCompare(b))];
   }, [posts]);
 
@@ -42,12 +45,14 @@ export default function BlogClient({ posts }: Props) {
     const q = query.trim().toLowerCase();
 
     return posts.filter((p: Post) => {
+      const safeTags = p.tags ?? [];
+
       const matchesQuery =
         !q ||
         p.title.toLowerCase().includes(q) ||
         p.excerpt.toLowerCase().includes(q) ||
         p.category.toLowerCase().includes(q) ||
-        p.tags.join(" ").toLowerCase().includes(q);
+        safeTags.join(" ").toLowerCase().includes(q); // ✅ SAFE
 
       const matchesCategory =
         filterMode !== "Category" || activeCategory === "All"
@@ -55,7 +60,7 @@ export default function BlogClient({ posts }: Props) {
           : p.category === activeCategory;
 
       const matchesTag =
-        filterMode !== "Tag" || activeTag === "All" ? true : p.tags.includes(activeTag);
+        filterMode !== "Tag" || activeTag === "All" ? true : safeTags.includes(activeTag); // ✅ SAFE
 
       const matchesMode = filterMode === "All" ? true : matchesCategory && matchesTag;
 
@@ -84,7 +89,15 @@ export default function BlogClient({ posts }: Props) {
       gsap.fromTo(
         "[data-card]",
         { opacity: 0, y: 18, filter: "blur(6px)" },
-        { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.65, stagger: 0.06, ease: "power3.out", delay: 0.15 }
+        {
+          opacity: 1,
+          y: 0,
+          filter: "blur(0px)",
+          duration: 0.65,
+          stagger: 0.06,
+          ease: "power3.out",
+          delay: 0.15,
+        }
       );
     }, root);
 
@@ -261,75 +274,81 @@ export default function BlogClient({ posts }: Props) {
         </div>
 
         <div className="mt-10 grid gap-6 md:grid-cols-2">
-          {filtered.map((p: Post) => (
-            <article
-              key={p.slug}
-              data-card
-              className="group relative overflow-hidden rounded-2xl border border-white/10 bg-black/40
-                         transition-all duration-300 hover:-translate-y-1 hover:border-emerald-500/25 hover:bg-black/55"
-            >
-              {/* COVER IMAGE */}
-              {p.cover ? (
-                <Link href={`/blog/${p.slug}`} className="block">
-                  <div className="relative aspect-[16/9] overflow-hidden border-b border-white/10 bg-white/5">
-                    <Image
-                      src={p.cover}
-                      alt={p.title}
-                      fill
-                      className="object-cover opacity-95 group-hover:opacity-100 transition"
-                      sizes="(max-width: 768px) 100vw, 50vw"
-                      priority={false}
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
-                  </div>
-                </Link>
-              ) : null}
+          {filtered.map((p: Post) => {
+            const safeTags = p.tags ?? []; // ✅ SAFE
 
-              {/* hover glow */}
-              <div className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition">
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(16,185,129,0.12),transparent_60%)]" />
-              </div>
-
-              {/* shimmer */}
-              <div className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition">
-                <div className="absolute -left-1/3 top-0 h-full w-1/3 rotate-12 bg-white/8 blur-2xl translate-x-[-70%] group-hover:translate-x-[340%] transition duration-[1100ms]" />
-              </div>
-
-              <div className="relative p-7">
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="rounded-full border border-emerald-400/25 bg-emerald-500/10 px-2.5 py-1 text-xs text-emerald-200">
-                    {p.category}
-                  </span>
-                  {p.tags.map((t: string) => (
-                    <span
-                      key={t}
-                      className="rounded-full border border-white/10 bg-black/40 px-2.5 py-1 text-xs text-white/65"
-                    >
-                      {t}
-                    </span>
-                  ))}
-                </div>
-
-                <h3 className="mt-5 text-xl font-semibold leading-snug">{p.title}</h3>
-                <p className="mt-3 text-white/70 leading-relaxed">{p.excerpt}</p>
-
-                <div className="mt-6 flex items-center justify-between text-sm text-white/55">
-                  <div className="flex items-center gap-3">
-                    <span>{new Date(p.date).toLocaleDateString()}</span>
-                    <span className="h-1 w-1 rounded-full bg-white/30" />
-                    <span>{p.readTime}</span>
-                  </div>
-
-                  <Link
-                    href={`/blog/${p.slug}`}
-                    className="rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-white/80 hover:bg-black/45 hover:text-white transition"
-                  >
-                    Read →
+            return (
+              <article
+                key={p.slug}
+                data-card
+                className="group relative overflow-hidden rounded-2xl border border-white/10 bg-black/40
+                           transition-all duration-300 hover:-translate-y-1 hover:border-emerald-500/25 hover:bg-black/55"
+              >
+                {/* COVER IMAGE */}
+                {p.cover ? (
+                  <Link href={`/blog/${p.slug}`} className="block">
+                    <div className="relative aspect-[16/9] overflow-hidden border-b border-white/10 bg-white/5">
+                      <Image
+                        src={p.cover}
+                        alt={p.title}
+                        fill
+                        className="object-cover opacity-95 group-hover:opacity-100 transition"
+                        sizes="(max-width: 768px) 100vw, 50vw"
+                        priority={false}
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+                    </div>
                   </Link>
+                ) : null}
+
+                {/* hover glow */}
+                <div className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition">
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(16,185,129,0.12),transparent_60%)]" />
                 </div>
-              </div>
-            </article>
-          ))}
+
+                {/* shimmer */}
+                <div className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition">
+                  <div className="absolute -left-1/3 top-0 h-full w-1/3 rotate-12 bg-white/8 blur-2xl translate-x-[-70%] group-hover:translate-x-[340%] transition duration-[1100ms]" />
+                </div>
+
+                <div className="relative p-7">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="rounded-full border border-emerald-400/25 bg-emerald-500/10 px-2.5 py-1 text-xs text-emerald-200">
+                      {p.category}
+                    </span>
+
+                    {/* ✅ SAFE */}
+                    {safeTags.map((t: string) => (
+                      <span
+                        key={t}
+                        className="rounded-full border border-white/10 bg-black/40 px-2.5 py-1 text-xs text-white/65"
+                      >
+                        {t}
+                      </span>
+                    ))}
+                  </div>
+
+                  <h3 className="mt-5 text-xl font-semibold leading-snug">{p.title}</h3>
+                  <p className="mt-3 text-white/70 leading-relaxed">{p.excerpt}</p>
+
+                  <div className="mt-6 flex items-center justify-between text-sm text-white/55">
+                    <div className="flex items-center gap-3">
+                      <span>{new Date(p.date).toLocaleDateString()}</span>
+                      <span className="h-1 w-1 rounded-full bg-white/30" />
+                      <span>{p.readTime}</span>
+                    </div>
+
+                    <Link
+                      href={`/blog/${p.slug}`}
+                      className="rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-white/80 hover:bg-black/45 hover:text-white transition"
+                    >
+                      Read →
+                    </Link>
+                  </div>
+                </div>
+              </article>
+            );
+          })}
         </div>
 
         {filtered.length === 0 && (
