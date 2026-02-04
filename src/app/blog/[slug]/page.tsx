@@ -5,6 +5,7 @@ import Link from "next/link";
 
 import { getPosts, getPost, type Post } from "../../../lib/posts";
 import BlogPostClient from "./BlogPostClient";
+import SocialShareDock from "@/components/SocialShareDock";
 
 export function generateStaticParams() {
   const posts = getPosts();
@@ -230,11 +231,21 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
 
       {/* BODY */}
       <section className="mx-auto max-w-6xl px-6 py-16">
-        <div className="grid gap-10 lg:grid-cols-[1fr_340px]">
+        <div className="grid gap-10 lg:grid-cols-[72px_1fr_340px]">
+          {/* Share rail */}
+          <div className="hidden lg:block">
+            <SocialShareDock title={post.title} excerpt={post.excerpt} slug={post.slug} />
+          </div>
+
           {/* Main content */}
           <div className="max-w-3xl">
             {/* ✅ Client renderer (Lead buttons + modal + MailerLite) */}
             <BlogPostClient content={post.content} />
+
+            {/* Mobile share dock shows here */}
+            <div className="lg:hidden">
+              <SocialShareDock title={post.title} excerpt={post.excerpt} slug={post.slug} />
+            </div>
 
             <div className="mt-14 rounded-2xl border border-white/10 bg-white/5 p-7">
               <h3 className="text-xl font-semibold text-white">
