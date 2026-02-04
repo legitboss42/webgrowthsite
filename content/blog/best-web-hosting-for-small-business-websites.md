@@ -44,6 +44,8 @@ And most people don’t even know it’s happening.
 
 ---
 
+If speed matters, follow this [Core Web Vitals speed checklist](/blog/how-to-make-your-website-load-fast).
+
 ## Why hosting matters more than design
 
 Here’s the uncomfortable truth.
@@ -124,6 +126,8 @@ Lower rankings = less traffic.
 Less traffic = fewer sales.
 
 Hosting is literally connected to your revenue graph.
+
+For a full plan, use this [small business SEO checklist](/blog/small-business-website-seo-checklist).
 
 ---
 
@@ -337,6 +341,10 @@ That’s why hosting is such a high-leverage move.
 
 ---
 
+Still choosing your platform? Read the [best website builders guide](/blog/how-to-build-a-small-business-website-that-converts).
+
+Once traffic comes, youâ€™ll need conversions â€” hereâ€™s why [websites fail to get leads](/blog/why-your-website-isnt-getting-leads).
+
 ## When should you upgrade?
 
 Upgrade when:
@@ -352,7 +360,7 @@ If your business depends on your website, cheap hosting is negligence.
 ---
 
 ## Lead magnet
-[LEAD|Download the Free Hosting Setup Checklist (PDF)|/downloads/hosting-checklist.pdf]
+[LEAD|Download the Hosting Setup Checklist (PDF)|/downloads/hosting-checklist.pdf]
 
 ---
 
@@ -372,3 +380,13 @@ That’s the entire game.
 Choose speed.
 
 Every time.
+
+If you want this handled for you, [request a quote](/contact).
+
+---
+
+## Related reads
+
+- [Why Your Website Isnâ€™t Getting Leads](/blog/why-your-website-isnt-getting-leads)
+- [Speed Checklist That Improves Rankings](/blog/how-to-make-your-website-load-fast)
+- [Homepage Structure That Converts](/blog/homepage-structure-that-converts-visitors-into-customers)

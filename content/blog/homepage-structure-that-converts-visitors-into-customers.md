@@ -42,6 +42,8 @@ Let’s fix it properly.
 
 ---
 
+If leads are the goal, start with [Why Your Website Isnâ€™t Getting Leads](/blog/why-your-website-isnt-getting-leads).
+
 ## Brutal truth first
 
 Visitors don’t read.
@@ -89,6 +91,8 @@ If a section doesn’t help that goal, it’s clutter.
 Delete it.
 
 ---
+
+If you need a focused offer page, read the [high-converting landing pages guide](/blog/high-converting-landing-pages-guide).
 
 ## The perfect homepage blueprint
 
@@ -399,8 +403,12 @@ Always the headline first.
 
 ---
 
+Once it converts, build follow-up with [email marketing for small business](/blog/email-marketing-for-small-business).
+
+And make sure it loads fast with the [Core Web Vitals speed checklist](/blog/how-to-make-your-website-load-fast).
+
 ## Lead magnet
-[LEAD|Download the Homepage Conversion Blueprint (PDF)|/downloads/homepage-blueprint.pdf]
+[LEAD|Download the Homepage Wireframe Template (PDF)|/downloads/homepage-wireframe.pdf]
 
 ---
 
@@ -420,3 +428,13 @@ That’s it.
 Sales psychology beats aesthetics.
 
 Every single time.
+
+If you want this handled for you, [request a quote](/contact).
+
+---
+
+## Related reads
+
+- [Why Your Website Isn’t Getting Leads](/blog/why-your-website-isnt-getting-leads)
+- [Speed Checklist That Improves Rankings](/blog/how-to-make-your-website-load-fast)
+- [Homepage Structure That Converts](/blog/homepage-structure-that-converts-visitors-into-customers)

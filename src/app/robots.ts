@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 
 export default function robots(): MetadataRoute.Robots {
+  const base = "https://webgrowth.info";
   return {
     rules: [
       {
@@ -8,6 +9,6 @@ export default function robots(): MetadataRoute.Robots {
         allow: "/",
       },
     ],
-    sitemap: "https://webgrowth.info/sitemap.xml",
+    sitemap: `${base}/sitemap.xml`,
   };
 }

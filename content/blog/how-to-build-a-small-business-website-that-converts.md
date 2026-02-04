@@ -42,6 +42,8 @@ Today we fix that.
 
 ---
 
+If you havenâ€™t chosen infrastructure yet, start with the [best hosting guide](/blog/best-web-hosting-for-small-business-websites).
+
 ## First principle: your website is not art
 
 Let’s kill the fantasy first.
@@ -92,6 +94,8 @@ If any of these are unclear → bounce.
 No second chances.
 
 ---
+
+For a deeper breakdown, see the [homepage structure that converts](/blog/homepage-structure-that-converts-visitors-into-customers).
 
 ## Section 1: The headline (this matters more than everything else)
 
@@ -385,6 +389,8 @@ Always test.
 
 ---
 
+If youâ€™re getting traffic but no enquiries, read [Why Your Website Isnâ€™t Getting Leads](/blog/why-your-website-isnt-getting-leads).
+
 ## The simple high-converting structure
 
 Here’s the blueprint:
@@ -405,8 +411,10 @@ That’s what works.
 
 ---
 
+To make sure it ranks, use the [small business SEO checklist](/blog/small-business-website-seo-checklist).
+
 ## Lead magnet
-[LEAD|Download the Website Conversion Blueprint (PDF)|/downloads/conversion-blueprint.pdf]
+[LEAD|Download the Website Builder Decision Guide (PDF)|/downloads/builder-decision-checklist.pdf]
 
 ---
 
@@ -433,3 +441,13 @@ It’s just missing fundamentals.
 Fix the fundamentals.
 
 Money follows.
+
+If you want this handled for you, [request a quote](/contact).
+
+---
+
+## Related reads
+
+- [Why Your Website Isnâ€™t Getting Leads](/blog/why-your-website-isnt-getting-leads)
+- [Speed Checklist That Improves Rankings](/blog/how-to-make-your-website-load-fast)
+- [Homepage Structure That Converts](/blog/homepage-structure-that-converts-visitors-into-customers)

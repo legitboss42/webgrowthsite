@@ -56,6 +56,8 @@ Let’s break it down.
 
 ---
 
+Start with the [small business SEO checklist](/blog/small-business-website-seo-checklist) to cover the basics.
+
 ## Why local SEO is insanely powerful
 
 When someone searches locally, they’re not browsing.
@@ -116,6 +118,8 @@ If you optimize for these three, you win.
 If you ignore them, you vanish.
 
 ---
+
+Make sure your homepage converts that traffic with a [homepage structure that converts](/blog/homepage-structure-that-converts-visitors-into-customers).
 
 ## Step 1: Create or fix your Google Business Profile
 
@@ -536,8 +540,12 @@ Always.
 
 ---
 
+If traffic isnâ€™t turning into enquiries, read [Why Your Website Isnâ€™t Getting Leads](/blog/why-your-website-isnt-getting-leads).
+
+And make sure the foundation is solid with the [best hosting guide](/blog/best-web-hosting-for-small-business-websites).
+
 ## Lead magnet
-[LEAD|Download the Local SEO Setup Checklist (PDF)|/downloads/local-seo-checklist.pdf]
+[LEAD|Download the Google Maps Ranking Guide (PDF)|/downloads/local-seo-guide.pdf]
 
 ---
 
@@ -558,6 +566,16 @@ Automatically.
 No chasing.
 
 No begging.
+
+If you want this handled for you, [request a quote](/contact).
+
+---
+
+## Related reads
+
+- [Why Your Website Isn’t Getting Leads](/blog/why-your-website-isnt-getting-leads)
+- [Speed Checklist That Improves Rankings](/blog/how-to-make-your-website-load-fast)
+- [Homepage Structure That Converts](/blog/homepage-structure-that-converts-visitors-into-customers)
 
 Just steady inbound enquiries.
 

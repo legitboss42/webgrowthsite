@@ -40,6 +40,8 @@ Just mechanics.
 
 ---
 
+Start with the [homepage structure that converts](/blog/homepage-structure-that-converts-visitors-into-customers).
+
 ## The uncomfortable truth
 
 Visitors decide in 5 seconds:
@@ -108,6 +110,8 @@ Clarity beats creativity.
 Always.
 
 ---
+
+If you need a focused offer page, read the [high-converting landing pages guide](/blog/high-converting-landing-pages-guide).
 
 ## Problem 2: You look like everyone else
 
@@ -238,6 +242,8 @@ Speed is money.
 
 ---
 
+Use the [Core Web Vitals speed checklist](/blog/how-to-make-your-website-load-fast) to fix performance leaks fast.
+
 ## Problem 6: Too many distractions
 
 Popups.
@@ -348,6 +354,8 @@ Leads follow.
 
 ---
 
+Once leads come in, follow up with [email marketing for small business](/blog/email-marketing-for-small-business) to turn them into sales.
+
 ## Lead magnet
 [LEAD|Download the Website Conversion Checklist (PDF)|/downloads/conversion-checklist.pdf]
 
@@ -376,3 +384,13 @@ They fail because basics are ignored.
 Fix the basics.
 
 Leads become predictable.
+
+If you want this handled for you, [request a quote](/contact).
+
+---
+
+## Related reads
+
+- [Why Your Website Isnâ€™t Getting Leads](/blog/why-your-website-isnt-getting-leads)
+- [Speed Checklist That Improves Rankings](/blog/how-to-make-your-website-load-fast)
+- [Homepage Structure That Converts](/blog/homepage-structure-that-converts-visitors-into-customers)

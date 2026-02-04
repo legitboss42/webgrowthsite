@@ -44,6 +44,8 @@ Just practical steps that actually move the needle.
 
 ---
 
+If your foundation is weak, start with the [best hosting guide](/blog/best-web-hosting-for-small-business-websites).
+
 ## First: understand what “slow” really means
 
 People think:
@@ -95,6 +97,8 @@ Design without speed is decoration.
 Speed is survival.
 
 ---
+
+To keep rankings climbing, follow the [small business SEO checklist](/blog/small-business-website-seo-checklist).
 
 ## Step 1: Test your current speed
 
@@ -326,6 +330,10 @@ Measure.
 
 ---
 
+If youâ€™re still deciding on your platform, read the [best website builders guide](/blog/how-to-build-a-small-business-website-that-converts).
+
+And if traffic isnâ€™t converting yet, see [Why Your Website Isnâ€™t Getting Leads](/blog/why-your-website-isnt-getting-leads).
+
 ## Quick reality check
 
 Speed optimization is not:
@@ -348,7 +356,7 @@ Huge results.
 ---
 
 ## Lead magnet
-[LEAD|Download the Website Speed Optimization Checklist (PDF)|/downloads/speed-checklist.pdf]
+[LEAD|Download the Core Web Vitals Speed Checklist (PDF)|/downloads/speed-checklist.pdf]
 
 ---
 
@@ -377,3 +385,13 @@ Every time.
 Make it fast first.
 
 Then worry about everything else.
+
+If you want this handled for you, [request a quote](/contact).
+
+---
+
+## Related reads
+
+- [Why Your Website Isnâ€™t Getting Leads](/blog/why-your-website-isnt-getting-leads)
+- [Speed Checklist That Improves Rankings](/blog/how-to-make-your-website-load-fast)
+- [Homepage Structure That Converts](/blog/homepage-structure-that-converts-visitors-into-customers)

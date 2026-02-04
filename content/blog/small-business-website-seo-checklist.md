@@ -40,6 +40,8 @@ Just a straight checklist that actually works.
 
 ---
 
+For local visibility, read the [Google Maps ranking guide](/blog/local-seo-for-small-business-google-maps-ranking-guide).
+
 ## First, understand what Google really wants
 
 Google is not your enemy.
@@ -91,6 +93,8 @@ If you don’t have these, rankings suffer instantly.
 No exceptions.
 
 ---
+
+Use this [Core Web Vitals speed checklist](/blog/how-to-make-your-website-load-fast) to fix performance fast.
 
 ## Step 2: Speed is your unfair advantage
 
@@ -325,6 +329,8 @@ Data wins. Guessing loses.
 
 ---
 
+Strong rankings still need conversions, so build a [homepage structure that converts](/blog/homepage-structure-that-converts-visitors-into-customers).
+
 ## Quick reality check
 
 SEO is not:
@@ -346,8 +352,10 @@ And extremely profitable.
 
 ---
 
+Traffic without enquiries is a leak â€” fix it with [Why Your Website Isnâ€™t Getting Leads](/blog/why-your-website-isnt-getting-leads).
+
 ## Lead magnet
-[LEAD|Download the Complete Small Business SEO Checklist (PDF)|/downloads/seo-checklist.pdf]
+[LEAD|Download the Complete SEO Checklist (PDF)|/downloads/seo-checklist.pdf]
 
 ---
 
@@ -374,3 +382,13 @@ That alone puts you ahead of 80% of competitors.
 SEO isn’t complicated.
 
 It’s just discipline.
+
+If you want this handled for you, [request a quote](/contact).
+
+---
+
+## Related reads
+
+- [Why Your Website Isn’t Getting Leads](/blog/why-your-website-isnt-getting-leads)
+- [Speed Checklist That Improves Rankings](/blog/how-to-make-your-website-load-fast)
+- [Homepage Structure That Converts](/blog/homepage-structure-that-converts-visitors-into-customers)

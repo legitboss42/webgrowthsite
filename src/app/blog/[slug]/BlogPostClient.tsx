@@ -2,7 +2,8 @@
 
 import Image from "next/image";
 import Script from "next/script";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
+import LeadMagnetCTA from "@/components/LeadMagnetCTA";
 
 type Block =
   | { type: "h2"; text: string; id: string }
@@ -233,6 +234,48 @@ function renderBlocks(content: string) {
   return blocks;
 }
 
+function renderInline(text: string) {
+  const parts: ReactNode[] = [];
+  const regex = /\[([^\]]+)\]\(([^)]+)\)/g;
+  let lastIndex = 0;
+  let match: RegExpExecArray | null;
+  let key = 0;
+
+  while ((match = regex.exec(text)) !== null) {
+    const [full, label, href] = match;
+    const start = match.index;
+    const end = start + full.length;
+
+    if (start > lastIndex) {
+      parts.push(text.slice(lastIndex, start));
+    }
+
+    const isExternal = /^https?:\/\//i.test(href);
+    const rel = isExternal ? "noreferrer noopener sponsored" : undefined;
+    const target = isExternal ? "_blank" : undefined;
+
+    parts.push(
+      <a
+        key={`link-${key++}`}
+        href={href}
+        target={target}
+        rel={rel}
+        className="text-emerald-300 hover:text-emerald-200 underline underline-offset-4"
+      >
+        {label}
+      </a>
+    );
+
+    lastIndex = end;
+  }
+
+  if (lastIndex < text.length) {
+    parts.push(text.slice(lastIndex));
+  }
+
+  return parts.length ? parts : text;
+}
+
 /* ======================================================
    MailerLite Embed (cleaned)
    - We keep the required structure + action URL.
@@ -349,29 +392,7 @@ export default function BlogPostClient({ content }: { content: string }) {
           }
 
           if (b.type === "lead") {
-            return (
-              <div
-                key={idx}
-                className="rounded-2xl border border-emerald-400/20 bg-emerald-500/10 p-6"
-              >
-                <button
-                  type="button"
-                  onClick={() => {
-                    setDownloadHref(b.href);
-                    setModalTitle(b.label);
-                    setOpen(true);
-                  }}
-                  className="group relative inline-flex w-full items-center justify-center overflow-hidden rounded-xl bg-emerald-600 px-5 py-4 text-sm font-semibold text-white transition hover:bg-emerald-500"
-                >
-                  <span className="pointer-events-none absolute -left-1/3 top-0 h-full w-1/3 rotate-12 bg-white/25 blur-xl translate-x-[-70%] group-hover:translate-x-[340%] transition duration-[1100ms]" />
-                  <span className="relative">{b.label}</span>
-                </button>
-
-                <div className="mt-3 text-xs text-white/55">
-                  Opens a quick form → then starts the download.
-                </div>
-              </div>
-            );
+            return <LeadMagnetCTA key={idx} label={b.label} href={b.href} />;
           }
 
           if (b.type === "button") {
@@ -405,7 +426,7 @@ export default function BlogPostClient({ content }: { content: string }) {
                   <div className="mt-3 space-y-2 text-white/75">
                     {b.lines.map((ln, i2) => (
                       <p key={i2} className="leading-relaxed">
-                        {ln}
+                        {renderInline(ln)}
                       </p>
                     ))}
                   </div>
@@ -423,7 +444,7 @@ export default function BlogPostClient({ content }: { content: string }) {
                 <div className="text-sm uppercase tracking-widest opacity-70">
                   {b.tone === "tip" ? "Tip" : b.tone === "warn" ? "Warning" : "Note"}
                 </div>
-                <div className="mt-2 text-white/80">{b.text}</div>
+                <div className="mt-2 text-white/80">{renderInline(b.text)}</div>
               </div>
             );
           }
@@ -454,7 +475,7 @@ export default function BlogPostClient({ content }: { content: string }) {
                 {b.items.map((it) => (
                   <li key={it} className="flex gap-3">
                     <span className="mt-[9px] h-2 w-2 rounded-full bg-emerald-400/80" />
-                    <span className="text-white/75">{it}</span>
+                    <span className="text-white/75">{renderInline(it)}</span>
                   </li>
                 ))}
               </ul>
@@ -469,7 +490,7 @@ export default function BlogPostClient({ content }: { content: string }) {
                     <span className="mt-[1px] inline-flex h-7 w-7 items-center justify-center rounded-full border border-white/10 bg-white/5 text-xs text-white/70">
                       {n + 1}
                     </span>
-                    <span className="text-white/75">{it}</span>
+                    <span className="text-white/75">{renderInline(it)}</span>
                   </li>
                 ))}
               </ol>
@@ -479,7 +500,7 @@ export default function BlogPostClient({ content }: { content: string }) {
           // paragraph
           return (
             <p key={idx} className="text-white/75 text-[17px] leading-[1.85]">
-              {b.text}
+              {renderInline(b.text)}
             </p>
           );
         })}

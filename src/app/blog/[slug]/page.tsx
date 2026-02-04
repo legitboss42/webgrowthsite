@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 
-import { getPosts, getPost } from "../../../lib/posts";
+import { getPosts, getPost, type Post } from "../../../lib/posts";
 import BlogPostClient from "./BlogPostClient";
 
 export function generateStaticParams() {
@@ -78,6 +78,33 @@ function extractHeadings(content: string) {
   return headings;
 }
 
+function getRelatedPosts(current: Post, limit = 3): Post[] {
+  const all = getPosts().filter((p) => p.slug !== current.slug);
+  const currentTags = new Set(current.tags);
+
+  const overlap = (p: Post) => p.tags.reduce((n, t) => n + (currentTags.has(t) ? 1 : 0), 0);
+
+  const byCategory = all
+    .filter((p) => p.category === current.category)
+    .sort((a, b) => overlap(b) - overlap(a) || (a.date < b.date ? 1 : -1));
+
+  const byTags = all
+    .filter((p) => p.category !== current.category && overlap(p) > 0)
+    .sort((a, b) => overlap(b) - overlap(a) || (a.date < b.date ? 1 : -1));
+
+  const related: Post[] = [];
+  const seen = new Set<string>();
+
+  for (const p of [...byCategory, ...byTags]) {
+    if (seen.has(p.slug)) continue;
+    related.push(p);
+    seen.add(p.slug);
+    if (related.length >= limit) break;
+  }
+
+  return related;
+}
+
 /* ======================================================
    WhatsApp
 ====================================================== */
@@ -93,38 +120,46 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
   const post = getPost(params.slug);
   if (!post) return notFound();
 
-  const base = "https://webgrowth.info";
-  const canonical = `${base}/blog/${post.slug}`;
+  const headings = extractHeadings(post.content);
+  const whatsappUrl = buildWhatsAppUrl();
+  const relatedPosts = getRelatedPosts(post, 3);
 
-  const articleJsonLd = {
+  const SITE_URL = "https://webgrowth.info";
+  const canonicalUrl = `${SITE_URL}/blog/${post.slug}`;
+
+  const schema = {
     "@context": "https://schema.org",
     "@type": "Article",
     headline: post.title,
     description: post.excerpt,
     datePublished: post.date,
     dateModified: post.date,
-    mainEntityOfPage: canonical,
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": canonicalUrl,
+    },
     author: {
       "@type": "Organization",
       name: "Web Growth",
-      url: base,
+      url: SITE_URL,
     },
     publisher: {
       "@type": "Organization",
       name: "Web Growth",
-      url: base,
+      url: SITE_URL,
+      logo: {
+        "@type": "ImageObject",
+        url: `${SITE_URL}/images/brand/web-growth-logo.png`,
+      },
     },
-    image: post.cover ? [`${base}${post.cover}`] : undefined,
+    image: post.cover ? [`${SITE_URL}${post.cover}`] : undefined,
   };
-
-  const headings = extractHeadings(post.content);
-  const whatsappUrl = buildWhatsAppUrl();
 
   return (
     <article className="bg-black text-white">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
       />
       {/* HERO */}
       <section className="relative overflow-hidden border-b border-white/10">
@@ -284,6 +319,37 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
           </aside>
         </div>
       </section>
+
+      {relatedPosts.length ? (
+        <section className="mx-auto max-w-6xl px-6 pb-20">
+          <div className="rounded-2xl border border-white/10 bg-black/40 p-7">
+            <h2 className="text-2xl font-semibold text-white">Related posts</h2>
+            <p className="mt-2 text-white/65">
+              More articles to help you get better rankings and more leads.
+            </p>
+
+            <div className="mt-6 grid gap-6 md:grid-cols-3">
+              {relatedPosts.map((p) => (
+                <Link
+                  key={p.slug}
+                  href={`/blog/${p.slug}`}
+                  className="group rounded-2xl border border-white/10 bg-white/5 p-6 hover:border-emerald-500/25 transition"
+                >
+                  <div className="text-xs text-white/55">
+                    {p.category} â€¢ {new Date(p.date).toLocaleDateString()}
+                  </div>
+                  <div className="mt-2 text-lg font-semibold text-white group-hover:text-emerald-200 transition">
+                    {p.title}
+                  </div>
+                  <p className="mt-2 text-sm text-white/70 leading-relaxed">
+                    {p.excerpt}
+                  </p>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      ) : null}
     </article>
   );
 }

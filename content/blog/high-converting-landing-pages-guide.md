@@ -36,6 +36,8 @@ Let’s fix that properly.
 
 ---
 
+If youâ€™re getting visitors but no enquiries, read [Why Your Website Isnâ€™t Getting Leads](/blog/why-your-website-isnt-getting-leads).
+
 ## First principle: clarity beats beauty
 
 Visitors don’t read.
@@ -63,6 +65,8 @@ Every time.
 ## What is a landing page really?
 
 Not your homepage.
+
+If you need a high-performing homepage instead, see [Homepage Structure That Converts](/blog/homepage-structure-that-converts-visitors-into-customers).
 
 Not your about page.
 
@@ -356,6 +360,8 @@ They care about themselves.
 
 Harsh but true.
 
+Pair your landing page with follow-up by reading [Email Marketing for Small Business](/blog/email-marketing-for-small-business).
+
 ---
 
 ## Speed = conversions
@@ -363,6 +369,8 @@ Harsh but true.
 Every extra second reduces conversions.
 
 Facts.
+
+For technical fixes, use the [Speed Checklist That Improves Rankings](/blog/how-to-make-your-website-load-fast).
 
 So:
 
@@ -462,7 +470,7 @@ Cut what doesn’t perform.
 ---
 
 ## Lead magnet
-[LEAD|Download the High-Converting Landing Page Template (PDF)|/downloads/landing-page-template.pdf]
+[LEAD|Download the Landing Page Blueprint Template (PDF)|/downloads/landing-page-template.pdf]
 
 ---
 
@@ -481,3 +489,13 @@ A bad one burns it.
 Build the page like your income depends on it.
 
 Because it does.
+
+Need a landing page built for you? [Request a quote](/contact).
+
+---
+
+## Related reads
+
+- [Why Your Website Isn’t Getting Leads](/blog/why-your-website-isnt-getting-leads)
+- [Speed Checklist That Improves Rankings](/blog/how-to-make-your-website-load-fast)
+- [Homepage Structure That Converts](/blog/homepage-structure-that-converts-visitors-into-customers)

@@ -221,6 +221,7 @@ A domain alone doesn’t run a website.
 
 Hosting is the engine.
 
+If you want a full comparison, read the [best web hosting guide for small businesses](/blog/best-web-hosting-for-small-business-websites).
 
 Think:
 
@@ -281,6 +282,7 @@ More power.
 More flexibility.  
 More performance.
 
+Speed matters for rankings and conversions—see the [website speed checklist](/blog/how-to-make-your-website-load-fast).
 
 If you’re serious about speed or running multiple sites, VPS wins.
 
@@ -451,6 +453,7 @@ Follow this exactly:
 5. Pick theme  
 6. Launch  
 
+Not sure which platform to build on? Start with the [small business website builder guide](/blog/how-to-build-a-small-business-website-that-converts).
 
 Total time: ~30 minutes
 
@@ -463,6 +466,7 @@ Don’t.
 
 Launch first. Improve later.
 
+After launch, follow the [SEO checklist for small businesses](/blog/small-business-website-seo-checklist).
 
 ---
 
@@ -497,3 +501,13 @@ If you want something affordable, reliable and beginner-friendly, Namecheap is o
 
 
 Start small. Ship fast. Grow later.
+
+Need help launching? [Request a quote](/contact).
+
+---
+
+## Related reads
+
+- [Why Your Website Isn’t Getting Leads](/blog/why-your-website-isnt-getting-leads)
+- [Speed Checklist That Improves Rankings](/blog/how-to-make-your-website-load-fast)
+- [Homepage Structure That Converts](/blog/homepage-structure-that-converts-visitors-into-customers)

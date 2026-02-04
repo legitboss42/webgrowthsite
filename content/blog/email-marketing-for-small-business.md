@@ -44,6 +44,8 @@ Email fixes that.
 
 ---
 
+If your site isnâ€™t converting yet, read [Why Your Website Isnâ€™t Getting Leads](/blog/why-your-website-isnt-getting-leads).
+
 ## Why email still beats everything
 
 People keep saying:
@@ -80,6 +82,8 @@ That’s powerful.
 
 ---
 
+If you need a focused offer page, read the [high-converting landing pages guide](/blog/high-converting-landing-pages-guide).
+
 ## The money math nobody shows you
 
 Let’s make this boring and practical.
@@ -109,6 +113,8 @@ Most businesses don’t fail because of bad traffic.
 They fail because they never follow up.
 
 ---
+
+Fix your first impression with a [homepage structure that converts](/blog/homepage-structure-that-converts-visitors-into-customers).
 
 ## Why most websites waste visitors
 
@@ -533,8 +539,10 @@ Predictable income.
 
 ---
 
+Still choosing your platform? Read the [best website builders guide](/blog/how-to-build-a-small-business-website-that-converts).
+
 ## Lead magnet
-[LEAD|Download the 5-Email Automation Template Pack (PDF)|/downloads/email-automation-templates.pdf]
+[LEAD|Download 5 High-Converting Email Templates (PDF)|/downloads/email-templates.pdf]
 
 ---
 
@@ -553,4 +561,14 @@ It’s infrastructure.
 Build it once.
 
 Let it work forever.
+
+If you want this handled for you, [request a quote](/contact).
+
+---
+
+## Related reads
+
+- [Why Your Website Isn’t Getting Leads](/blog/why-your-website-isnt-getting-leads)
+- [Speed Checklist That Improves Rankings](/blog/how-to-make-your-website-load-fast)
+- [Homepage Structure That Converts](/blog/homepage-structure-that-converts-visitors-into-customers)
 
