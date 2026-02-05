@@ -1,6 +1,25 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  async redirects() {
+    return [
+      {
+        source: "/services/website-maintenance-and-support",
+        destination: "/services/website-maintenance",
+        permanent: true,
+      },
+      {
+        source: "/services/speed-and-performance-optimization",
+        destination: "/services/performance-optimisation",
+        permanent: true,
+      },
+      {
+        source: "/services/website-audit-and-consultation",
+        destination: "/services/website-audit",
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default nextConfig;
