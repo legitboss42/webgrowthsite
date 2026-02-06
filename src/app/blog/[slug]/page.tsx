@@ -84,14 +84,19 @@ function getRelatedPosts(current: Post, limit = 3): Post[] {
   const currentTags = new Set(current.tags);
 
   const overlap = (p: Post) => p.tags.reduce((n, t) => n + (currentTags.has(t) ? 1 : 0), 0);
+  const toTime = (value?: string) => {
+    if (!value) return 0;
+    const time = new Date(value).getTime();
+    return Number.isNaN(time) ? 0 : time;
+  };
 
   const byCategory = all
     .filter((p) => p.category === current.category)
-    .sort((a, b) => overlap(b) - overlap(a) || (a.date < b.date ? 1 : -1));
+    .sort((a, b) => overlap(b) - overlap(a) || toTime(b.date) - toTime(a.date));
 
   const byTags = all
     .filter((p) => p.category !== current.category && overlap(p) > 0)
-    .sort((a, b) => overlap(b) - overlap(a) || (a.date < b.date ? 1 : -1));
+    .sort((a, b) => overlap(b) - overlap(a) || toTime(b.date) - toTime(a.date));
 
   const related: Post[] = [];
   const seen = new Set<string>();

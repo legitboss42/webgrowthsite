@@ -1,4 +1,4 @@
----
+﻿---
 title: How to Build High-Converting Landing Pages (Turn Visitors Into Enquiries Automatically)
 excerpt: Traffic is useless without conversions. Learn the exact landing page structure, copy psychology and layout that turns visitors into leads and sales.
 date: 2026-02-03
@@ -16,45 +16,45 @@ Most websites look nice.
 
 Almost none convert.
 
-That’s the uncomfortable truth.
+Thatâ€™s the uncomfortable truth.
 
-Design ≠ sales.
+Design â‰  sales.
 
-Pretty ≠ profitable.
+Pretty â‰  profitable.
 
 A landing page has only one job:
 
 Get the visitor to take ONE action.
 
-If it doesn’t…
+If it doesnâ€™tâ€¦
 
-It’s decoration.
+Itâ€™s decoration.
 
-And decoration doesn’t pay bills.
+And decoration doesnâ€™t pay bills.
 
-Let’s fix that properly.
+Letâ€™s fix that properly.
 
 ---
 
-If youâ€™re getting visitors but no enquiries, read [Why Your Website Isnâ€™t Getting Leads](/blog/why-your-website-isnt-getting-leads).
+If youÃ¢â‚¬â„¢re getting visitors but no enquiries, read [Why Your Website IsnÃ¢â‚¬â„¢t Getting Leads](/blog/why-your-website-isnt-getting-leads).
 
 ## First principle: clarity beats beauty
 
-Visitors don’t read.
+Visitors donâ€™t read.
 
 They scan.
 
-They decide in 3–5 seconds:
+They decide in 3â€“5 seconds:
 
-“Is this for me or not?”
+â€œIs this for me or not?â€
 
-If your message isn’t instantly obvious…
+If your message isnâ€™t instantly obviousâ€¦
 
 They leave.
 
 Not because they hate you.
 
-Because they’re busy.
+Because theyâ€™re busy.
 
 Clarity wins.
 
@@ -95,7 +95,7 @@ Everything else dies.
 
 Steal this.
 
-Don’t reinvent.
+Donâ€™t reinvent.
 
 This structure has sold billions online.
 
@@ -113,13 +113,13 @@ Welcome to our website
 Nobody cares.
 
 Good:
-Get 5–10 New Clients Every Month Without Running Ads
+Get 5â€“10 New Clients Every Month Without Running Ads
 
 Now you have attention.
 
 Formula:
 
-Clear result + who it’s for + time frame or benefit
+Clear result + who itâ€™s for + time frame or benefit
 
 Example:
 Web Design for Clinics That Want More Bookings in 30 Days
@@ -160,11 +160,11 @@ Humans trust what they see.
 
 So show:
 
-• screenshots  
-• results  
-• mockups  
-• before/after  
-• real projects  
+â€¢ screenshots  
+â€¢ results  
+â€¢ mockups  
+â€¢ before/after  
+â€¢ real projects  
 
 Not stock photos of smiling people shaking hands.
 
@@ -184,7 +184,7 @@ Feature:
 Fast hosting
 
 Benefit:
-Your site loads instantly so visitors don’t leave
+Your site loads instantly so visitors donâ€™t leave
 
 Feature:
 SEO
@@ -194,7 +194,7 @@ Customers find you on Google without paying ads
 
 Always translate:
 
-Feature → what it does → why it matters
+Feature â†’ what it does â†’ why it matters
 
 Because customers buy outcomes.
 
@@ -208,19 +208,19 @@ This is where trust explodes.
 
 Add:
 
-• testimonials  
-• reviews  
-• numbers  
-• logos  
-• case studies  
+â€¢ testimonials  
+â€¢ reviews  
+â€¢ numbers  
+â€¢ logos  
+â€¢ case studies  
 
 Example:
 
-“We got 47 enquiries in the first month.”
+â€œWe got 47 enquiries in the first month.â€
 
 That line sells more than any design trick.
 
-Because it’s proof.
+Because itâ€™s proof.
 
 Proof kills doubt.
 
@@ -234,11 +234,11 @@ What they get
 How it works  
 What happens next  
 
-Don’t make people guess.
+Donâ€™t make people guess.
 
 Confusion kills conversions.
 
-Spell it out like you’re talking to a tired 10-year-old.
+Spell it out like youâ€™re talking to a tired 10-year-old.
 
 Because most visitors skim like one.
 
@@ -252,10 +252,10 @@ So remove risk.
 
 Examples:
 
-• free consultation  
-• money-back guarantee  
-• no contract  
-• cancel anytime  
+â€¢ free consultation  
+â€¢ money-back guarantee  
+â€¢ no contract  
+â€¢ cancel anytime  
 
 Lower risk = higher conversions.
 
@@ -281,7 +281,7 @@ Start My Project
 
 Make it about THEM.
 
-“My” converts better than “your”.
+â€œMyâ€ converts better than â€œyourâ€.
 
 Tiny detail.
 
@@ -295,10 +295,10 @@ This is where most people fail.
 
 They add:
 
-• 12 links  
-• full navigation  
-• footer junk  
-• random pages  
+â€¢ 12 links  
+â€¢ full navigation  
+â€¢ footer junk  
+â€¢ random pages  
 
 Now visitors wander.
 
@@ -318,11 +318,11 @@ Most traffic is mobile.
 
 So:
 
-• big buttons  
-• short text  
-• stacked sections  
-• fast load  
-• no tiny fonts  
+â€¢ big buttons  
+â€¢ short text  
+â€¢ stacked sections  
+â€¢ fast load  
+â€¢ no tiny fonts  
 
 If it sucks on mobile, you lose half your sales.
 
@@ -374,10 +374,10 @@ For technical fixes, use the [Speed Checklist That Improves Rankings](/blog/how-
 
 So:
 
-• compress images  
-• remove heavy scripts  
-• lazy load media  
-• use good hosting  
+â€¢ compress images  
+â€¢ remove heavy scripts  
+â€¢ lazy load media  
+â€¢ use good hosting  
 
 Fast pages feel trustworthy.
 
@@ -389,7 +389,7 @@ Humans are weird like that.
 
 ## A simple landing page formula
 
-If you’re overwhelmed, use this:
+If youâ€™re overwhelmed, use this:
 
 Headline  
 Subheadline  
@@ -399,7 +399,7 @@ Proof
 Process  
 CTA  
 
-That’s enough.
+Thatâ€™s enough.
 
 No fancy tricks needed.
 
@@ -409,13 +409,13 @@ Just clarity.
 
 ## The silent killer: too much text
 
-People don’t read essays.
+People donâ€™t read essays.
 
 Break content into:
 
-• short blocks  
-• bullets  
-• sections  
+â€¢ short blocks  
+â€¢ bullets  
+â€¢ sections  
 
 White space sells.
 
@@ -433,11 +433,11 @@ Never assume.
 
 Test:
 
-• headlines  
-• buttons  
-• images  
-• layouts  
-• offers  
+â€¢ headlines  
+â€¢ buttons  
+â€¢ images  
+â€¢ layouts  
+â€¢ offers  
 
 Small tweaks can double conversions.
 
@@ -451,21 +451,21 @@ Not guessing.
 
 ## Final mindset shift
 
-Your landing page isn’t art.
+Your landing page isnâ€™t art.
 
-It’s a machine.
+Itâ€™s a machine.
 
 Machines are judged by output.
 
 Not beauty.
 
-If it converts, it’s good.
+If it converts, itâ€™s good.
 
-If it doesn’t, it’s trash.
+If it doesnâ€™t, itâ€™s trash.
 
 Be ruthless.
 
-Cut what doesn’t perform.
+Cut what doesnâ€™t perform.
 
 ---
 
@@ -496,6 +496,6 @@ Need a landing page built for you? [Request a quote](/contact).
 
 ## Related reads
 
-- [Why Your Website Isn’t Getting Leads](/blog/why-your-website-isnt-getting-leads)
+- [Why Your Website Isnâ€™t Getting Leads](/blog/why-your-website-isnt-getting-leads)
 - [Speed Checklist That Improves Rankings](/blog/how-to-make-your-website-load-fast)
 - [Homepage Structure That Converts](/blog/homepage-structure-that-converts-visitors-into-customers)

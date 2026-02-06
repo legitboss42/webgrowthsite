@@ -43,7 +43,17 @@ export function getPosts(): Post[] {
     } as Post;
   });
 
-  return posts.sort((a, b) => (a.date < b.date ? 1 : -1));
+  const toTime = (value?: string) => {
+    if (!value) return 0;
+    const time = new Date(value).getTime();
+    return Number.isNaN(time) ? 0 : time;
+  };
+
+  return posts.sort((a, b) => {
+    const diff = toTime(b.date) - toTime(a.date);
+    if (diff !== 0) return diff;
+    return a.title.localeCompare(b.title);
+  });
 }
 
 export function getPost(slug: string): Post | undefined {

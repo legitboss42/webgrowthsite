@@ -1,6 +1,6 @@
----
+﻿---
 title: Homepage Structure That Converts Visitors Into Customers (Proven Layout Blueprint)
-excerpt: Your homepage is not decoration. It’s a sales page. This guide shows the exact homepage structure that turns random visitors into enquiries and paying customers.
+excerpt: Your homepage is not decoration. Itâ€™s a sales page. This guide shows the exact homepage structure that turns random visitors into enquiries and paying customers.
 date: 2026-02-03
 category: UX
 tags: ["Conversion", "Homepage", "UX", "Sales Psychology"]
@@ -14,11 +14,11 @@ cover: /images/blog/homepage.png
 
 Most small business websites look pretty.
 
-Pretty doesn’t pay rent.
+Pretty doesnâ€™t pay rent.
 
-Pretty doesn’t generate enquiries.
+Pretty doesnâ€™t generate enquiries.
 
-Pretty doesn’t close sales.
+Pretty doesnâ€™t close sales.
 
 Pretty is decoration.
 
@@ -30,23 +30,23 @@ Nothing else.
 
 Not impress designers.
 Not win awards.
-Not look “cool”.
+Not look â€œcoolâ€.
 
 Just convert.
 
-If your homepage isn’t generating enquiries, it’s not a design problem.
+If your homepage isnâ€™t generating enquiries, itâ€™s not a design problem.
 
-It’s a structure problem.
+Itâ€™s a structure problem.
 
-Let’s fix it properly.
+Letâ€™s fix it properly.
 
 ---
 
-If leads are the goal, start with [Why Your Website Isnâ€™t Getting Leads](/blog/why-your-website-isnt-getting-leads).
+If leads are the goal, start with [Why Your Website IsnÃ¢â‚¬â„¢t Getting Leads](/blog/why-your-website-isnt-getting-leads).
 
 ## Brutal truth first
 
-Visitors don’t read.
+Visitors donâ€™t read.
 
 They scan.
 
@@ -54,11 +54,11 @@ They judge your site in 3 seconds.
 
 In those 3 seconds they subconsciously ask:
 
-• What is this?  
-• Is this for me?  
-• Can I trust them?  
+â€¢ What is this?  
+â€¢ Is this for me?  
+â€¢ Can I trust them?  
 
-If you fail any one of those…
+If you fail any one of thoseâ€¦
 
 They leave.
 
@@ -74,19 +74,19 @@ Treat it like one.
 
 A homepage is not:
 
-❌ a gallery  
-❌ a company history page  
-❌ a playground for animations  
+âŒ a gallery  
+âŒ a company history page  
+âŒ a playground for animations  
 
 It is:
 
-✅ a guided persuasion system  
+âœ… a guided persuasion system  
 
 Every section must push toward one goal:
 
 Contact you.
 
-If a section doesn’t help that goal, it’s clutter.
+If a section doesnâ€™t help that goal, itâ€™s clutter.
 
 Delete it.
 
@@ -96,7 +96,7 @@ If you need a focused offer page, read the [high-converting landing pages guide]
 
 ## The perfect homepage blueprint
 
-Here’s the structure that works for almost every service business:
+Hereâ€™s the structure that works for almost every service business:
 
 1) Hero (clear offer)
 2) Proof
@@ -113,7 +113,7 @@ Linear.
 
 Psychological.
 
-Let’s break it down.
+Letâ€™s break it down.
 
 ---
 
@@ -125,7 +125,7 @@ Most businesses screw this up immediately.
 
 They write:
 
-“Welcome to our website”
+â€œWelcome to our websiteâ€
 
 Which means absolutely nothing.
 
@@ -153,12 +153,12 @@ Always.
 
 ### Include:
 
-• headline  
-• subheadline  
-• one strong CTA  
-• simple visual  
+â€¢ headline  
+â€¢ subheadline  
+â€¢ one strong CTA  
+â€¢ simple visual  
 
-That’s it.
+Thatâ€™s it.
 
 Not 6 buttons.
 
@@ -172,25 +172,25 @@ One action.
 
 Nobody trusts strangers.
 
-So immediately after your promise…
+So immediately after your promiseâ€¦
 
 Prove it.
 
 Add:
 
-• testimonials  
-• star ratings  
-• client logos  
-• numbers  
-• screenshots  
+â€¢ testimonials  
+â€¢ star ratings  
+â€¢ client logos  
+â€¢ numbers  
+â€¢ screenshots  
 
 Example:
 
-“Trusted by 120+ small businesses”
+â€œTrusted by 120+ small businessesâ€
 
 or
 
-“Generated 2,400+ enquiries last year”
+â€œGenerated 2,400+ enquiries last yearâ€
 
 Specific proof beats vague claims.
 
@@ -200,7 +200,7 @@ Always.
 
 ## Section 3: Services (what you actually do)
 
-Now that they trust you a little…
+Now that they trust you a littleâ€¦
 
 Explain what you offer.
 
@@ -212,13 +212,13 @@ Simple blocks.
 
 Each service should be:
 
-• short title  
-• one sentence  
-• clear benefit  
+â€¢ short title  
+â€¢ one sentence  
+â€¢ clear benefit  
 
 Not technical jargon.
 
-Visitors don’t care how something works.
+Visitors donâ€™t care how something works.
 
 They care what they get.
 
@@ -234,15 +234,15 @@ This is where conversions explode.
 
 Bad:
 
-“We use modern frameworks”
+â€œWe use modern frameworksâ€
 
 Nobody cares.
 
 Good:
 
-“Your site loads under 2 seconds so customers don’t leave”
+â€œYour site loads under 2 seconds so customers donâ€™t leaveâ€
 
-That’s money language.
+Thatâ€™s money language.
 
 Translate features into outcomes.
 
@@ -292,9 +292,9 @@ If they see others happy, they assume safety.
 
 Add:
 
-• real photos  
-• real names  
-• real results  
+â€¢ real photos  
+â€¢ real names  
+â€¢ real results  
 
 Fake testimonials destroy trust.
 
@@ -306,9 +306,9 @@ Never do it.
 
 Every visitor has silent doubts:
 
-• Is this expensive?
-• How long does it take?
-• What if it doesn’t work?
+â€¢ Is this expensive?
+â€¢ How long does it take?
+â€¢ What if it doesnâ€™t work?
 
 Answer them before they ask.
 
@@ -322,13 +322,13 @@ Simple.
 
 ## Section 8: Final CTA (close the deal)
 
-After building trust…
+After building trustâ€¦
 
 Ask clearly.
 
-Don’t whisper.
+Donâ€™t whisper.
 
-Don’t be shy.
+Donâ€™t be shy.
 
 Tell them exactly what to do.
 
@@ -344,9 +344,9 @@ Big.
 
 Impossible to miss.
 
-Because at this point they’re ready.
+Because at this point theyâ€™re ready.
 
-Don’t make them hunt.
+Donâ€™t make them hunt.
 
 ---
 
@@ -354,12 +354,12 @@ Don’t make them hunt.
 
 Avoid these like plague:
 
-❌ autoplay videos  
-❌ sliders  
-❌ too many fonts  
-❌ 12 CTAs  
-❌ paragraphs of text  
-❌ slow loading  
+âŒ autoplay videos  
+âŒ sliders  
+âŒ too many fonts  
+âŒ 12 CTAs  
+âŒ paragraphs of text  
+âŒ slow loading  
 
 Complexity confuses.
 
@@ -371,9 +371,9 @@ Confusion kills conversions.
 
 Every section must answer:
 
-“Does this help someone trust me more or take action faster?”
+â€œDoes this help someone trust me more or take action faster?â€
 
-If not…
+If notâ€¦
 
 Delete it.
 
@@ -391,9 +391,9 @@ Hide it.
 
 Ask:
 
-“What does this business do?”
+â€œWhat does this business do?â€
 
-If they can’t answer clearly…
+If they canâ€™t answer clearlyâ€¦
 
 Your homepage failed.
 
@@ -414,16 +414,16 @@ And make sure it loads fast with the [Core Web Vitals speed checklist](/blog/how
 
 ## Final thought
 
-You don’t need fancy design.
+You donâ€™t need fancy design.
 
 You need:
 
-• clarity  
-• proof  
-• structure  
-• strong CTA  
+â€¢ clarity  
+â€¢ proof  
+â€¢ structure  
+â€¢ strong CTA  
 
-That’s it.
+Thatâ€™s it.
 
 Sales psychology beats aesthetics.
 
@@ -435,6 +435,6 @@ If you want this handled for you, [request a quote](/contact).
 
 ## Related reads
 
-- [Why Your Website Isn’t Getting Leads](/blog/why-your-website-isnt-getting-leads)
+- [Why Your Website Isnâ€™t Getting Leads](/blog/why-your-website-isnt-getting-leads)
 - [Speed Checklist That Improves Rankings](/blog/how-to-make-your-website-load-fast)
 - [Homepage Structure That Converts](/blog/homepage-structure-that-converts-visitors-into-customers)

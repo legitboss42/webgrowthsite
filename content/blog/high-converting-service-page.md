@@ -2,7 +2,7 @@
 slug: "high-converting-service-page"
 title: "The High-Converting Service Page Blueprint (Stop Losing Leads)"
 excerpt: "Most service pages are digital brochures that no one reads. Here is the engineering architecture for a page that actually converts traffic into revenue."
-date: "2023-10-25"
+date: 2026-02-06
 category: "Conversion"
 tags: ["UX", "Sales", "Strategy", "Next.js"]
 readTime: "12 min read"

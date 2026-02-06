@@ -1,4 +1,4 @@
----
+﻿---
 title: Small Business Website SEO Checklist (Rank Higher on Google Without Paying for Ads)
 excerpt: Most small business websites never rank on Google because they miss simple SEO basics. This step-by-step checklist shows exactly what to fix so your site gets traffic and enquiries consistently.
 date: 2026-02-03
@@ -18,15 +18,15 @@ Or complicated.
 
 Or expensive.
 
-It’s not.
+Itâ€™s not.
 
-It’s mostly boring fundamentals.
+Itâ€™s mostly boring fundamentals.
 
 And 90% of small business sites fail because they ignore those basics.
 
 Not because Google hates them.
 
-Not because they need “advanced strategies”.
+Not because they need â€œadvanced strategiesâ€.
 
 They just skipped the simple stuff.
 
@@ -50,14 +50,14 @@ Google has one job:
 
 Show users the best answer.
 
-That’s it.
+Thatâ€™s it.
 
 If your site:
 
-• loads fast  
-• is clear  
-• answers questions  
-• is trustworthy  
+â€¢ loads fast  
+â€¢ is clear  
+â€¢ answers questions  
+â€¢ is trustworthy  
 
 Google rewards you.
 
@@ -73,22 +73,22 @@ Nothing mystical.
 
 ## Step 1: Fix your technical foundation
 
-Before content, before keywords, before anything…
+Before content, before keywords, before anythingâ€¦
 
 Your site must be technically clean.
 
-Otherwise you’re pouring water into a leaking bucket.
+Otherwise youâ€™re pouring water into a leaking bucket.
 
 ### Must-haves:
 
-• HTTPS (SSL)
-• Fast hosting
-• Mobile friendly
-• No broken links
-• Sitemap.xml
-• Robots.txt
+â€¢ HTTPS (SSL)
+â€¢ Fast hosting
+â€¢ Mobile friendly
+â€¢ No broken links
+â€¢ Sitemap.xml
+â€¢ Robots.txt
 
-If you don’t have these, rankings suffer instantly.
+If you donâ€™t have these, rankings suffer instantly.
 
 No exceptions.
 
@@ -108,12 +108,12 @@ So slow = double damage.
 
 ### Quick wins:
 
-• compress images  
-• use WebP  
-• lazy load images  
-• remove heavy plugins  
-• use CDN  
-• good hosting  
+â€¢ compress images  
+â€¢ use WebP  
+â€¢ lazy load images  
+â€¢ remove heavy plugins  
+â€¢ use CDN  
+â€¢ good hosting  
 
 Aim for under 2 seconds.
 
@@ -137,23 +137,23 @@ Type your service.
 
 Look at:
 
-• autocomplete suggestions  
-• “People also ask”  
-• related searches  
+â€¢ autocomplete suggestions  
+â€¢ â€œPeople also askâ€  
+â€¢ related searches  
 
 These are literally what people type.
 
-That’s free keyword research.
+Thatâ€™s free keyword research.
 
 Example:
 
-“website design london”
+â€œwebsite design londonâ€
 
 Google suggests:
 
-• website design london prices  
-• affordable website design london  
-• small business website design  
+â€¢ website design london prices  
+â€¢ affordable website design london  
+â€¢ small business website design  
 
 Boom.
 
@@ -177,10 +177,10 @@ Each page targets ONE topic.
 
 Example:
 
-Homepage → website design  
-Blog post → website design prices  
-Blog post → website speed tips  
-Blog post → SEO checklist  
+Homepage â†’ website design  
+Blog post â†’ website design prices  
+Blog post â†’ website speed tips  
+Blog post â†’ SEO checklist  
 
 Focused pages rank easier.
 
@@ -192,7 +192,7 @@ Always.
 
 Stop stuffing keywords.
 
-Google isn’t stupid.
+Google isnâ€™t stupid.
 
 And humans hate robotic text.
 
@@ -226,8 +226,8 @@ Use:
 
 This helps:
 
-• users skim  
-• Google understand your page  
+â€¢ users skim  
+â€¢ Google understand your page  
 
 Messy structure = messy rankings.
 
@@ -247,13 +247,13 @@ Link your posts together.
 
 Example:
 
-Hosting post → link to speed post  
-Speed post → link to SEO post  
-SEO post → link to builders post  
+Hosting post â†’ link to speed post  
+Speed post â†’ link to SEO post  
+SEO post â†’ link to builders post  
 
 This tells Google:
 
-“These pages are related and important.”
+â€œThese pages are related and important.â€
 
 Result:
 
@@ -269,19 +269,19 @@ Use them.
 
 Backlinks = trust votes.
 
-You don’t need hundreds.
+You donâ€™t need hundreds.
 
 Start small:
 
-• business directories  
-• Google Business Profile  
-• local listings  
-• partners  
-• friends’ sites  
+â€¢ business directories  
+â€¢ Google Business Profile  
+â€¢ local listings  
+â€¢ partners  
+â€¢ friendsâ€™ sites  
 
-Even 10–20 quality links help massively.
+Even 10â€“20 quality links help massively.
 
-Small businesses don’t need crazy link building.
+Small businesses donâ€™t need crazy link building.
 
 Just legitimacy.
 
@@ -311,19 +311,19 @@ Than:
 
 Install:
 
-• Google Analytics  
-• Google Search Console  
+â€¢ Google Analytics  
+â€¢ Google Search Console  
 
 Watch:
 
-• impressions  
-• clicks  
-• keywords  
-• pages ranking  
+â€¢ impressions  
+â€¢ clicks  
+â€¢ keywords  
+â€¢ pages ranking  
 
 Double down on what works.
 
-Improve what doesn’t.
+Improve what doesnâ€™t.
 
 Data wins. Guessing loses.
 
@@ -335,24 +335,24 @@ Strong rankings still need conversions, so build a [homepage structure that conv
 
 SEO is not:
 
-❌ hacks  
-❌ secret tools  
-❌ expensive courses  
+âŒ hacks  
+âŒ secret tools  
+âŒ expensive courses  
 
-It’s:
+Itâ€™s:
 
-✅ speed  
-✅ clarity  
-✅ useful content  
-✅ consistency  
+âœ… speed  
+âœ… clarity  
+âœ… useful content  
+âœ… consistency  
 
-That’s boring.
+Thatâ€™s boring.
 
 And extremely profitable.
 
 ---
 
-Traffic without enquiries is a leak â€” fix it with [Why Your Website Isnâ€™t Getting Leads](/blog/why-your-website-isnt-getting-leads).
+Traffic without enquiries is a leak Ã¢â‚¬â€ fix it with [Why Your Website IsnÃ¢â‚¬â„¢t Getting Leads](/blog/why-your-website-isnt-getting-leads).
 
 ## Lead magnet
 [LEAD|Download the Complete SEO Checklist (PDF)|/downloads/seo-checklist.pdf]
@@ -362,7 +362,7 @@ Traffic without enquiries is a leak â€” fix it with [Why Your Website Isnâ
 ## FAQ
 
 ### How long does SEO take?
-Usually 2–4 months for visible results.
+Usually 2â€“4 months for visible results.
 
 ### Do I need ads too?
 Ads are optional. SEO is long-term free traffic.
@@ -379,9 +379,9 @@ Do the basics better than everyone else.
 
 That alone puts you ahead of 80% of competitors.
 
-SEO isn’t complicated.
+SEO isnâ€™t complicated.
 
-It’s just discipline.
+Itâ€™s just discipline.
 
 If you want this handled for you, [request a quote](/contact).
 
@@ -389,6 +389,6 @@ If you want this handled for you, [request a quote](/contact).
 
 ## Related reads
 
-- [Why Your Website Isn’t Getting Leads](/blog/why-your-website-isnt-getting-leads)
+- [Why Your Website Isnâ€™t Getting Leads](/blog/why-your-website-isnt-getting-leads)
 - [Speed Checklist That Improves Rankings](/blog/how-to-make-your-website-load-fast)
 - [Homepage Structure That Converts](/blog/homepage-structure-that-converts-visitors-into-customers)
