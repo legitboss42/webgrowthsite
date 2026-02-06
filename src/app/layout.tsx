@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import Script from "next/script";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -7,7 +7,7 @@ import Analytics from "@/app/components/Analytics";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Web Growth — High-Performance Websites",
+  title: "Web Growth - High-Performance Websites",
   description:
     "We design conversion-focused, high-performance websites that drive real business growth.",
   robots: { index: true, follow: true },
@@ -63,3 +63,5 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     </html>
   );
 }
+
+

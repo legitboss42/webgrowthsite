@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useRef } from "react";
 import Link from "next/link";
@@ -183,7 +183,7 @@ export default function HomeClient() {
             <SectionHeading
               eyebrow="SERVICES"
               title="What We Build"
-              description="Websites designed to attract customers, build trust, and support real growth — not just look good."
+              description="Websites designed to attract customers, build trust, and support real growth - not just look good."
             />
           </div>
 
@@ -200,7 +200,7 @@ export default function HomeClient() {
             <div className="service-card">
               <ServiceCard
                 title="Landing Pages"
-                description="Focused pages built for campaigns, ads, and offers — designed to push one action and win leads."
+                description="Focused pages built for campaigns, ads, and offers - designed to push one action and win leads."
                 imageUrl="/images/services/service-2.png"
                 href="/services/landing-page-design"
               />
@@ -247,7 +247,7 @@ export default function HomeClient() {
             {[
               {
                 title: "Strategy first",
-                text: "We structure your site around goals: enquiries, bookings, sales, or credibility — whatever actually moves your business.",
+                text: "We structure your site around goals: enquiries, bookings, sales, or credibility - whatever actually moves your business.",
               },
               {
                 title: "Design that converts",
@@ -413,3 +413,5 @@ export default function HomeClient() {
     </main>
   );
 }
+
+

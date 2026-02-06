@@ -1,10 +1,10 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import AboutClient from "@/components/AboutClient";
 
 export const metadata: Metadata = {
   title: "About Web Growth | Modern Web Design Focused on Results",
   description:
-    "Learn about Web Growth — a web design studio focused on building modern, high-performance websites that attract customers, build trust, and support real growth.",
+    "Learn about Web Growth - a web design studio focused on building modern, high-performance websites that attract customers, build trust, and support real growth.",
   keywords: [
     "about web growth",
     "web design agency",
@@ -20,7 +20,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "About Web Growth",
     description:
-      "Modern web design with clarity, performance, and real results — not just pretty pages.",
+      "Modern web design with clarity, performance, and real results - not just pretty pages.",
     url: "https://webgrowth.info/about",
     siteName: "Web Growth",
     images: [
@@ -46,3 +46,5 @@ export const metadata: Metadata = {
 export default function AboutPage() {
   return <AboutClient />;
 }
+
+

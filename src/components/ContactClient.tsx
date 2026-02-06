@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
@@ -79,7 +79,7 @@ export default function ContactClient() {
           email,
           service,
           message,
-          _subject: `New Web Growth Quote Request — ${
+          _subject: `New Web Growth Quote Request - ${
             service || "No service selected"
           }`,
         }),
@@ -241,3 +241,5 @@ export default function ContactClient() {
     </div>
   );
 }
+
+

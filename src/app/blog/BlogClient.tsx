@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
@@ -166,7 +166,7 @@ export default function BlogClient({ posts }: Props) {
             </h1>
 
             <p data-hero-item className="mt-6 text-lg text-white/70 leading-relaxed">
-              Practical web design, SEO, performance and conversion strategy — written for business
+              Practical web design, SEO, performance and conversion strategy - written for business
               owners and builders.
             </p>
 
@@ -360,3 +360,5 @@ export default function BlogClient({ posts }: Props) {
     </div>
   );
 }
+
+

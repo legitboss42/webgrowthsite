@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+﻿import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
@@ -300,7 +300,7 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
               <div className="mt-6 rounded-xl border border-emerald-400/20 bg-emerald-500/10 p-5">
                 <div className="text-sm font-semibold text-white">Request a Quote</div>
                 <p className="mt-2 text-sm text-white/70">
-                  Want a fast website that generates enquiries? Tell us what you do and what you need —
+                  Want a fast website that generates enquiries? Tell us what you do and what you need  - 
                   we’ll reply with the best plan.
                 </p>
 
@@ -364,3 +364,4 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
     </article>
   );
 }
+

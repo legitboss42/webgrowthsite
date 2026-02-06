@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { gsap } from "gsap";
@@ -28,7 +28,7 @@ const focusMap: Record<
   },
   "Conversion Flow": {
     title: "Conversion Flow Audit",
-    text: "This checks whether your website has a clear path to action: enquiry, booking, purchase, or signup — and removes friction.",
+    text: "This checks whether your website has a clear path to action: enquiry, booking, purchase, or signup - and removes friction.",
     checks: ["CTA clarity", "CTA placement", "Forms friction", "Page distractions"],
     outputs: ["CTA improvement plan", "Friction removal checklist", "Conversion path map"],
   },
@@ -70,7 +70,7 @@ export default function WebsiteAuditClient() {
       {
         question: "Can you audit WordPress, Divi, or custom sites?",
         answer:
-          "Yes. The audit focuses on user experience, performance, and structure — regardless of platform.",
+          "Yes. The audit focuses on user experience, performance, and structure - regardless of platform.",
       },
     ],
     []
@@ -136,11 +136,11 @@ export default function WebsiteAuditClient() {
                 WEBSITE AUDIT & CONSULTATION
               </div>
               <h1 className="mt-4 text-4xl md:text-5xl font-semibold leading-tight">
-                Get a clear diagnosis — and a plan that actually fixes things.
+                Get a clear diagnosis - and a plan that actually fixes things.
               </h1>
               <p className="mt-6 text-lg text-white/70 leading-relaxed">
                 If your website isn’t getting enquiries, isn’t ranking, or feels slow,
-                you don’t need guesses — you need a diagnosis. We audit your website
+                you don’t need guesses - you need a diagnosis. We audit your website
                 and give you a practical plan to improve results.
               </p>
 
@@ -299,7 +299,7 @@ export default function WebsiteAuditClient() {
           <CTASection
             eyebrow="READY"
             title="Stop guessing. Get a real diagnosis."
-            description="If your website isn’t performing, we’ll show you exactly what’s wrong — and what to fix first."
+            description="If your website isn’t performing, we’ll show you exactly what’s wrong - and what to fix first."
             primaryCtaText="Request an Audit"
             primaryHref="/contact?service=Website Audit & Consultation"
             secondaryCtaText="View Portfolio"
@@ -311,3 +311,5 @@ export default function WebsiteAuditClient() {
     </div>
   );
 }
+
+

@@ -1,8 +1,8 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import PortfolioClient from "@/components/PortfolioClient";
 
 export const metadata: Metadata = {
-  title: "Portfolio | Web Growth — Case Studies & Results",
+  title: "Portfolio | Web Growth - Case Studies & Results",
   description:
     "Explore Web Growth portfolio case studies: modern websites, landing pages, and redesigns built for clarity, trust, and real business results.",
   keywords: [
@@ -44,3 +44,5 @@ export const metadata: Metadata = {
 export default function PortfolioPage() {
   return <PortfolioClient />;
 }
+
+

@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 // If the file is actually named PerfomanceOptimisationClient.tsx (note the missing 'r'), update the import:
 import PerformanceOptimisationClient from "@/components/PerformanceOptimisationClient";
 
@@ -20,7 +20,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Speed & Performance Optimisation | Web Growth",
     description:
-      "Make your website faster and smoother — reduce bounce and improve conversions.",
+      "Make your website faster and smoother - reduce bounce and improve conversions.",
     url: "https://webgrowth.info/services/performance-optimisation",
     siteName: "Web Growth",
     images: [
@@ -39,3 +39,5 @@ export const metadata: Metadata = {
 export default function Page() {
   return <PerformanceOptimisationClient />;
 }
+
+

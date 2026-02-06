@@ -1,8 +1,8 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import PricingClient from "@/components/PricingClient";
 
 export const metadata: Metadata = {
-  title: "Pricing | Web Growth — Transparent Website Packages",
+  title: "Pricing | Web Growth - Transparent Website Packages",
   description:
     "Clear website design packages from Web Growth. Choose a package, see what’s included, and request a quote with next steps.",
   alternates: { canonical: "https://webgrowth.info/pricing" },
@@ -34,3 +34,5 @@ export const metadata: Metadata = {
 export default function PricingPage() {
   return <PricingClient />;
 }
+
+

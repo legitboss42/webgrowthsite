@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
   const body = await req.json().catch(() => ({}));
@@ -19,7 +19,7 @@ export async function POST(req: Request) {
         "Contact (form + WhatsApp)",
       ],
       homepageCopy: {
-        headline: `${businessName} — built to attract customers and convert.`,
+        headline: `${businessName} - built to attract customers and convert.`,
         subheadline:
           "Clear messaging, trust signals, and a simple path to contact you.",
         cta: "Request a Quote",
@@ -32,3 +32,5 @@ export async function POST(req: Request) {
     ],
   });
 }
+
+

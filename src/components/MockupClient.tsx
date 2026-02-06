@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
@@ -161,7 +161,7 @@ export default function MockupClient() {
           <div>
             <div className="text-white font-semibold">Mockup Builder (Template Preview)</div>
             <div className="text-white/60 text-sm">
-              This is a visual preview inside your site — no AI images, just your existing library.
+              This is a visual preview inside your site - no AI images, just your existing library.
             </div>
           </div>
 
@@ -340,3 +340,5 @@ export default function MockupClient() {
     </main>
   );
 }
+
+

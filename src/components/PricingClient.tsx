@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -413,11 +413,11 @@ export default function PricingClient() {
             <div className="mt-8 grid gap-4">
               <FAQItem
                 q="Is this a get-rich-quick thing?"
-                a="No. A website is a growth asset — it helps you look credible, communicate clearly, and convert visitors into enquiries. Results depend on your offer, messaging, traffic, and consistency."
+                a="No. A website is a growth asset - it helps you look credible, communicate clearly, and convert visitors into enquiries. Results depend on your offer, messaging, traffic, and consistency."
               />
               <FAQItem
                 q="Do you include domain and hosting in the package price?"
-                a="No — domain and hosting are billed separately so you always control your accounts. We can recommend a provider and guide setup (Namecheap, Bluehost, or Hostinger)."
+                a="No - domain and hosting are billed separately so you always control your accounts. We can recommend a provider and guide setup (Namecheap, Bluehost, or Hostinger)."
               />
               <FAQItem
                 q="How much is an extra page?"
@@ -429,7 +429,7 @@ export default function PricingClient() {
               />
               <FAQItem
                 q="Do you do e-commerce?"
-                a="Yes — but it’s scoped separately depending on products, payment flow, and required integrations. If you want it, request a quote and we’ll scope it properly."
+                a="Yes - but it’s scoped separately depending on products, payment flow, and required integrations. If you want it, request a quote and we’ll scope it properly."
               />
               <FAQItem
                 q="How do updates work after launch?"
@@ -442,3 +442,5 @@ export default function PricingClient() {
     </main>
   );
 }
+
+

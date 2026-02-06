@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { gsap } from "gsap";
@@ -75,7 +75,7 @@ export default function PortfolioClient() {
         client: "Local Business",
         type: "Redesign",
         summary:
-          "Updated an outdated site into a modern layout with stronger proof and clearer CTAs — without bloating the experience.",
+          "Updated an outdated site into a modern layout with stronger proof and clearer CTAs - without bloating the experience.",
         results: ["Modern UI", "Stronger proof", "Clear CTA flow"],
         stack: ["UI refresh", "Trust signals", "CTA placement"],
         imageUrl: "/images/portfolio/portfolio-7.png",
@@ -288,7 +288,7 @@ export default function PortfolioClient() {
             {[
               {
                 title: "Clarity",
-                text: "Visitors should understand what you do in seconds — that’s where conversions start.",
+                text: "Visitors should understand what you do in seconds - that’s where conversions start.",
               },
               {
                 title: "Trust",
@@ -326,3 +326,5 @@ export default function PortfolioClient() {
     </div>
   );
 }
+
+

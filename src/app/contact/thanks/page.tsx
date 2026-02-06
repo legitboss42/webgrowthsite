@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect } from "react";
 
@@ -33,7 +33,7 @@ export default function ContactThanksPage() {
         <div className="mt-10 space-y-3 rounded-xl border border-white/10 bg-white/5 p-6">
           <p className="text-white/80">While you wait:</p>
           <ul className="list-disc pl-6 text-white/70 space-y-2">
-            <li>Check your email — we may ask 1–2 quick questions.</li>
+            <li>Check your email - we may ask 1–2 quick questions.</li>
             <li>If it’s urgent, message us on WhatsApp.</li>
             <li>Review our services to confirm what you want.</li>
           </ul>
@@ -58,3 +58,5 @@ export default function ContactThanksPage() {
     </div>
   );
 }
+
+

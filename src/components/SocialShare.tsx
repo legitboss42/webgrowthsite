@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useMemo } from "react";
 
@@ -14,7 +14,7 @@ export default function SocialShare({ title, excerpt, slug }: Props) {
   const url = `${SITE_URL}/blog/${slug}`;
 
   // short summary the user shares
-  const text = `${title} — ${excerpt}`;
+  const text = `${title} - ${excerpt}`;
 
   const links = useMemo(
     () => ({
@@ -71,3 +71,5 @@ export default function SocialShare({ title, excerpt, slug }: Props) {
     </div>
   );
 }
+
+

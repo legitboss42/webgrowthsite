@@ -1,10 +1,10 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import HomeClient from "@/components/HomeClient";
 
 export const metadata: Metadata = {
   title: "Web Growth | Web Design Agency for Real Results",
   description:
-    "Web Growth designs professional websites focused on real results — websites that attract customers, build trust, and support real growth.",
+    "Web Growth designs professional websites focused on real results - websites that attract customers, build trust, and support real growth.",
   keywords: [
     "web design agency",
     "website design",
@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Web Growth | Web Design Agency for Real Results",
     description:
-      "Professional websites that don’t just look good — they attract customers, build trust, and support real growth.",
+      "Professional websites that don’t just look good - they attract customers, build trust, and support real growth.",
     url: "https://webgrowth.info/",
     siteName: "Web Growth",
     images: [
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Web Growth | Web Design Agency",
     description:
-      "Professional websites focused on real results — clarity, usability, performance.",
+      "Professional websites focused on real results - clarity, usability, performance.",
     images: ["https://webgrowth.info/images/placeholder.png"],
   },
   robots: {
@@ -48,3 +48,5 @@ export const metadata: Metadata = {
 export default function Page() {
   return <HomeClient />;
 }
+
+

@@ -1,10 +1,10 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import WebsiteAuditClient from "@/components/WebsiteAuditClient";
 
 export const metadata: Metadata = {
   title: "Website Audit & Consultation | Web Growth",
   description:
-    "Website audit and consultation to diagnose what’s blocking results: clarity, UX, trust, SEO foundations, and performance — with an actionable plan.",
+    "Website audit and consultation to diagnose what’s blocking results: clarity, UX, trust, SEO foundations, and performance - with an actionable plan.",
   keywords: [
     "website audit",
     "website consultation",
@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Website Audit & Consultation | Web Growth",
     description:
-      "A clear diagnosis of what’s wrong with your site — plus a practical plan to fix it.",
+      "A clear diagnosis of what’s wrong with your site - plus a practical plan to fix it.",
     url: "https://webgrowth.info/services/website-audit",
     siteName: "Web Growth",
     images: [
@@ -38,3 +38,5 @@ export const metadata: Metadata = {
 export default function Page() {
   return <WebsiteAuditClient />;
 }
+
+

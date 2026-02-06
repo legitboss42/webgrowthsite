@@ -1,9 +1,9 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import { Suspense } from "react";
 import ContactClient from "@/components/ContactClient";
 
 export const metadata: Metadata = {
-  title: "Contact | Web Growth — Request a Quote",
+  title: "Contact | Web Growth - Request a Quote",
   description:
     "Request a quote from Web Growth. Tell us what you need and we’ll respond with next steps and a clear proposal.",
   keywords: [
@@ -54,3 +54,5 @@ export default function ContactPage() {
     </Suspense>
   );
 }
+
+

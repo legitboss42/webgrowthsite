@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useMemo } from "react";
 
@@ -67,7 +67,7 @@ function IconTelegram(props: { className?: string }) {
 
 export default function SocialShareDock({ title, excerpt, slug }: Props) {
   const url = `${SITE_URL}/blog/${slug}`;
-  const text = `${title} — ${excerpt}`;
+  const text = `${title} - ${excerpt}`;
 
   const links = useMemo(
     () => ({
@@ -237,3 +237,5 @@ export default function SocialShareDock({ title, excerpt, slug }: Props) {
     </>
   );
 }
+
+
