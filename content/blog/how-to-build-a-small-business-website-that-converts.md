@@ -1,4 +1,4 @@
----
+﻿---
 title: How to Build a Small Business Website That Actually Converts Visitors Into Customers
 excerpt: Most small business websites look good but don’t sell. Learn the exact structure, psychology and layout that turns visitors into enquiries automatically.
 date: 2026-02-02
@@ -28,7 +28,7 @@ That’s not a website.
 
 That’s digital furniture.
 
-A real website is a **sales machine**.
+A real website is a sales machine.
 
 If your site isn’t generating enquiries while you sleep, it’s broken.
 
@@ -121,7 +121,7 @@ No fluff.
 
 Formula:
 
-**We help [who] get [result] without [pain]**
+We help [who] get [result] without [pain]
 
 Example:
 
@@ -451,3 +451,4 @@ If you want this handled for you, [request a quote](/contact).
 - [Why Your Website Isnâ€™t Getting Leads](/blog/why-your-website-isnt-getting-leads)
 - [Speed Checklist That Improves Rankings](/blog/how-to-make-your-website-load-fast)
 - [Homepage Structure That Converts](/blog/homepage-structure-that-converts-visitors-into-customers)
+

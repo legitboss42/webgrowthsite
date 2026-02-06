@@ -1,4 +1,4 @@
----
+﻿---
 title: Why Your Website Isn’t Getting Leads (And How to Fix It Step-by-Step)
 excerpt: Getting traffic but no enquiries? Your website has hidden conversion leaks. Learn exactly what kills leads and how to fix them using this practical system.
 date: 2026-02-03
@@ -22,7 +22,7 @@ Your colors are not the problem.
 
 Your logo is not the problem.
 
-Your **sales system is broken**.
+Your sales system is broken.
 
 Most small business websites are pretty brochures.
 
@@ -394,3 +394,4 @@ If you want this handled for you, [request a quote](/contact).
 - [Why Your Website Isnâ€™t Getting Leads](/blog/why-your-website-isnt-getting-leads)
 - [Speed Checklist That Improves Rankings](/blog/how-to-make-your-website-load-fast)
 - [Homepage Structure That Converts](/blog/homepage-structure-that-converts-visitors-into-customers)
+
