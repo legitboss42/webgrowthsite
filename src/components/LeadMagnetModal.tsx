@@ -25,6 +25,11 @@ export default function LeadMagnetModal({
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
+  // 1. CONFIG: Your live domain for the email link
+  // This is needed so the link in the email is clickable (e.g. https://webgrowth.info/...)
+  const domain = "https://webgrowth.info";
+  const fullDownloadUrl = `${domain}${downloadUrl}`;
+
   const canSubmit = useMemo(
     () => email.trim().length > 3 && email.includes("@"),
     [email],
@@ -56,6 +61,9 @@ export default function LeadMagnetModal({
       // MailerLite JSONP endpoint accepts POST with fields[email]
       const body = new URLSearchParams();
       body.set("fields[email]", email);
+      // 2. LOGIC: Inject the specific file link into MailerLite
+      // You must create a custom field in MailerLite called "download_link" for this to work
+      body.set("fields[download_link]", fullDownloadUrl);
       body.set("ml-submit", "1");
       body.set("anticsrf", "true");
 
