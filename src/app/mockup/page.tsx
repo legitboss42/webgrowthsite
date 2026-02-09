@@ -1,4 +1,4 @@
-import MockupClient from "../../components/MockupClient";
+import { notFound } from "next/navigation";
 
 export const metadata = {
   title: "Website Mockup Preview | Web Growth",
@@ -6,5 +6,5 @@ export const metadata = {
 };
 
 export default function MockupPage() {
-  return <MockupClient />;
+  notFound();
 }
