@@ -1,7 +1,8 @@
 import type { MetadataRoute } from "next";
 
+const BASE_URL = "https://webgrowth.info";
+
 export default function robots(): MetadataRoute.Robots {
-  const base = "https://webgrowth.info";
   return {
     rules: [
       {
@@ -9,6 +10,6 @@ export default function robots(): MetadataRoute.Robots {
         allow: "/",
       },
     ],
-    sitemap: `${base}/sitemap.xml`,
+    sitemap: `${BASE_URL}/sitemap.xml`,
   };
 }
