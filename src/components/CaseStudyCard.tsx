@@ -6,6 +6,7 @@ interface CaseStudyCardProps {
   imageUrl?: string;
   href?: string;
   className?: string;
+  headingLevel?: "h2" | "h3" | "h4";
 }
 
 const CaseStudyCard: React.FC<CaseStudyCardProps> = ({
@@ -15,13 +16,15 @@ const CaseStudyCard: React.FC<CaseStudyCardProps> = ({
   results,
   imageUrl = "/images/placeholder.png",
   href,
-  className
+  className,
+  headingLevel = "h3",
 }) => {
-  const CardComponent = href ? 'a' : 'div';
+  const CardComponent = href ? "a" : "div";
+  const HeadingTag = headingLevel;
 
   return (
     <CardComponent
-      className={`group relative overflow-hidden rounded-2xl border border-white/10 bg-black/40 hover:-translate-y-2 transition-transform duration-300 ${className || ''}`}
+      className={`group relative overflow-hidden rounded-2xl border border-white/10 bg-black/40 hover:-translate-y-2 transition-transform duration-300 ${className || ""}`}
       {...(href ? { href } : {})}
     >
       {/* Image header */}
@@ -38,7 +41,7 @@ const CaseStudyCard: React.FC<CaseStudyCardProps> = ({
       {/* Body */}
       <div className="p-6">
         {client && <p className="text-sm text-emerald-400 mb-2">{client}</p>}
-        <h3 className="text-xl font-semibold mb-3">{title}</h3>
+        <HeadingTag className="text-xl font-semibold mb-3">{title}</HeadingTag>
         <p className="text-white/70 leading-relaxed mb-4">{summary}</p>
         {results && results.length > 0 && (
           <div className="flex flex-wrap gap-2">

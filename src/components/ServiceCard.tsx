@@ -7,6 +7,7 @@ interface ServiceCardProps {
   imageUrl?: string;
   href?: string;
   className?: string;
+  headingLevel?: "h2" | "h3" | "h4";
 }
 
 const ServiceCard: React.FC<ServiceCardProps> = ({
@@ -15,7 +16,10 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
   imageUrl = "/images/placeholder.png",
   href,
   className,
+  headingLevel = "h3",
 }) => {
+  const HeadingTag = headingLevel;
+
   const content = (
     <>
       {/* Background image */}
@@ -32,13 +36,15 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
 
       {/* Card content */}
       <div className="relative z-10 p-7">
-        <h3 className="text-xl font-semibold text-white">{title}</h3>
+        <HeadingTag className="text-xl font-semibold text-white">{title}</HeadingTag>
 
         <p className="mt-3 text-white/65 leading-relaxed">{description}</p>
 
         <div className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-emerald-400">
           Learn more
-          <span className="transition-transform group-hover:translate-x-1">→</span>
+          <span className="transition-transform group-hover:translate-x-1" aria-hidden="true">
+            {"->"}
+          </span>
         </div>
       </div>
     </>
@@ -48,16 +54,10 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
     "group relative overflow-hidden rounded-2xl border border-white/10 bg-black/40 hover:-translate-y-2 transition-transform duration-300";
   const combinedClass = `${baseClass} ${className || ""}`;
 
-  // If it's a link card, use Next Link (best for routing + prefetch)
   if (href) {
-    return (
-      <Link href={href} className={combinedClass} aria-label={`Learn more about ${title}`}>
-        {content}
-      </Link>
-    );
+    return <Link href={href} className={combinedClass}>{content}</Link>;
   }
 
-  // Otherwise render a non-clickable card
   return <div className={combinedClass}>{content}</div>;
 };
 

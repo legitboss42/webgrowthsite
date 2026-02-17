@@ -156,8 +156,8 @@ export default function HomeClient() {
             <Link
               href="/contact"
               className="hero-cta inline-flex items-center justify-center rounded-md
-                         bg-emerald-600 px-8 py-4 text-base font-semibold text-white
-                         transition-colors hover:bg-emerald-500"
+                         bg-emerald-700 px-8 py-4 text-base font-semibold text-white
+                         transition-colors hover:bg-emerald-600"
             >
               Request a Quote
             </Link>
@@ -194,6 +194,7 @@ export default function HomeClient() {
                 description="A clean, fast website that positions your business professionally and converts visitors into enquiries."
                 imageUrl="/images/services/service-1.png"
                 href="/services/business-website-design"
+                headingLevel="h2"
               />
             </div>
 
@@ -203,6 +204,7 @@ export default function HomeClient() {
                 description="Focused pages built for campaigns, ads, and offers - designed to push one action and win leads."
                 imageUrl="/images/services/service-2.png"
                 href="/services/landing-page-design"
+                headingLevel="h2"
               />
             </div>
 
@@ -212,6 +214,7 @@ export default function HomeClient() {
                 description="Transform an outdated website into a modern, structured platform that performs better."
                 imageUrl="/images/services/service-3.png"
                 href="/services/website-redesign"
+                headingLevel="h2"
               />
             </div>
           </div>
@@ -262,14 +265,14 @@ export default function HomeClient() {
                 key={item.title}
                 className="about-block rounded-2xl border border-white/10 bg-black/40 backdrop-blur p-7"
               >
-                <h3 className="text-xl font-semibold">{item.title}</h3>
+                <h2 className="text-xl font-semibold">{item.title}</h2>
                 <p className="mt-3 text-white/65 leading-relaxed">{item.text}</p>
               </div>
             ))}
           </div>
 
           <div className="about-block mt-12 rounded-2xl border border-white/10 bg-black/40 backdrop-blur p-8">
-            <h3 className="text-xl font-semibold">How it works</h3>
+            <h2 className="text-xl font-semibold">How it works</h2>
             <ol className="mt-4 grid gap-3 text-white/70">
               <li>
                 <span className="text-white font-semibold">1.</span> Quick
@@ -335,6 +338,7 @@ export default function HomeClient() {
                   results={cs.results}
                   imageUrl="/images/portfolio/portfolio-1.png"
                   href="/portfolio"
+                  headingLevel="h2"
                 />
               </div>
             ))}
@@ -371,7 +375,7 @@ export default function HomeClient() {
 
           <div className="mt-12 grid gap-6 md:grid-cols-2">
             <div className="contact-block rounded-2xl border border-white/10 bg-black/40 backdrop-blur p-7">
-              <h3 className="text-xl font-semibold">Email</h3>
+              <h2 className="text-xl font-semibold">Email</h2>
               <p className="mt-2 text-white/65">
                 For proposals, questions, and project details.
               </p>
@@ -384,7 +388,7 @@ export default function HomeClient() {
             </div>
 
             <div className="contact-block rounded-2xl border border-white/10 bg-black/40 backdrop-blur p-7">
-              <h3 className="text-xl font-semibold">WhatsApp</h3>
+              <h2 className="text-xl font-semibold">WhatsApp</h2>
               <p className="mt-2 text-white/65">Quick chat for clarity before starting.</p>
               <a
                 className="mt-5 inline-flex text-emerald-400 font-semibold hover:text-emerald-300 transition"

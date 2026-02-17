@@ -175,7 +175,7 @@ export default function Header() {
               href="/contact"
               className={[
                 "hidden md:inline-flex items-center justify-center rounded-md px-4 text-sm font-semibold text-white transition",
-                scrolled ? "py-2 bg-emerald-600 hover:bg-emerald-500" : "py-2.5 bg-emerald-600/90 hover:bg-emerald-500",
+                scrolled ? "py-2 bg-emerald-700 hover:bg-emerald-600" : "py-2.5 bg-emerald-700/95 hover:bg-emerald-600",
               ].join(" ")}
             >
               Request a Quote
@@ -264,7 +264,7 @@ export default function Header() {
                   <Link
                     href="/contact"
                     onClick={() => setMenuOpen(false)}
-                    className="mt-2 inline-flex items-center justify-center rounded-md bg-emerald-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-emerald-500"
+                    className="mt-2 inline-flex items-center justify-center rounded-md bg-emerald-700 px-4 py-3 text-sm font-semibold text-white transition hover:bg-emerald-600"
                   >
                     Request a Quote
                   </Link>

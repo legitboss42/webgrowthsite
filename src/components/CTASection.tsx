@@ -33,7 +33,7 @@ const CTASection: React.FC<CTASectionProps> = ({
             <div className="mt-8 flex flex-col sm:flex-row gap-4">
               <a
                 href={primaryHref}
-                className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-4 px-8 rounded-lg transition-colors text-center"
+                className="bg-emerald-700 hover:bg-emerald-600 text-white font-semibold py-4 px-8 rounded-lg transition-colors text-center"
               >
                 {primaryCtaText}
               </a>
