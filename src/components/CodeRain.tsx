@@ -17,13 +17,13 @@ export default function CodeRain() {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    let width = (canvas.width = window.innerWidth);
-    let height = (canvas.height = window.innerHeight);
+    let width = canvas.width = window.innerWidth;
+    let height = canvas.height = window.innerHeight;
 
     const letters = "01<>/{}[]$#@";
     const fontSize = 14;
-    const columns = Math.floor(width / fontSize);
-    const drops = Array(columns).fill(1);
+    let columns = Math.floor(width / fontSize);
+    let drops = Array(columns).fill(1);
 
     ctx.font = `${fontSize}px monospace`;
 
@@ -49,7 +49,7 @@ export default function CodeRain() {
     };
 
     // Start animation only when hero is in view
-    ScrollTrigger.create({
+    const st = ScrollTrigger.create({
       trigger: canvas,
       start: "top bottom",
       end: "bottom top",
@@ -76,6 +76,8 @@ export default function CodeRain() {
     const handleResize = () => {
       width = canvas.width = window.innerWidth;
       height = canvas.height = window.innerHeight;
+      columns = Math.floor(width / fontSize);
+      drops = Array(columns).fill(1);
     };
 
     window.addEventListener("resize", handleResize);
@@ -83,7 +85,7 @@ export default function CodeRain() {
     return () => {
       if (animationRef.current) cancelAnimationFrame(animationRef.current);
       window.removeEventListener("resize", handleResize);
-      ScrollTrigger.getAll().forEach((t) => t.kill());
+      st.kill();
     };
   }, []);
 

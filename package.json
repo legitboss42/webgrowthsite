@@ -11,6 +11,8 @@
     "magnets:watch": "node scripts/watch-magnets.mjs"
   },
   "dependencies": {
+    "@vercel/analytics": "^1.6.1",
+    "@vercel/speed-insights": "^1.3.1",
     "gray-matter": "^4.0.3",
     "gsap": "^3.14.2",
     "next": "14.2.5",

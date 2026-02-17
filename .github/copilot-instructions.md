@@ -16,10 +16,9 @@ Purpose: quickly orient AI coding agents to the repo so they can be productive w
 - The repo uses `next@14`, `react@19`, and TypeScript — prefer `npm` but other package managers may work.
 
 3. Project-specific conventions & patterns
-- App router: pages are folder-based. Example service page: [src/app/services/performance-optimisation/page.tsx](src/app/services/performance-optimisation/page.tsx#L1).
+- App router: pages are folder-based. Example service page: /src/app/services/performance-optimisation/page.tsx.
 - Exported metadata: pages commonly export `export const metadata: Metadata = { ... }` — use Next's `Metadata` type when editing.
 - Client components: filenames often end with `Client` (e.g., `PerformanceOptimisationClient.tsx`) and are imported from `@/components`. Keep PascalCase names and exact spellings.
-- Component location: always check `src/components` for shared components. Example directory reference: [src/components](src/components).
 
 4. Common pitfalls discovered in this repo
 - Import/name typos: imports use `@/components/PerformanceOptimisationClient` but the component file may be misspelled (e.g., `PerfomanceOptimisationClient.tsx`). If you see "Cannot find module '@/components/...'" verify exact filename in `src/components` and match spelling/casing or rename the file to match imports.
@@ -27,7 +26,7 @@ Purpose: quickly orient AI coding agents to the repo so they can be productive w
 
 5. Integration points & external deps
 - Uses `gsap` for animations; look for GSAP usage in `src/components/CodeRain.tsx` or similar files.
-- Tailwind + PostCSS are used — global styles in [src/app/globals.css](src/app/globals.css#L1).
+- Tailwind + PostCSS are used — global styles in /src/app/globals.css.
 - Next image assets are referenced under `public/images/...` and canonical URLs are used in metadata.
 
 6. How to implement small fixes (example)

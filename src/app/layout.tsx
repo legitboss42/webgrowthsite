@@ -1,8 +1,9 @@
-﻿import type { Metadata } from "next";
+﻿﻿import type { Metadata } from "next";
 import Script from "next/script";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import Analytics from "@/app/components/Analytics";
+import { SpeedInsights } from "@vercel/speed-insights/next";
+import { Analytics } from "@vercel/analytics/react";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -49,6 +50,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
       <body>
         <Analytics />
+        <SpeedInsights />
         {/* GTM noscript */}
         <noscript>
           <iframe
