@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 interface CaseStudyCardProps {
   title: string;
   client?: string;
@@ -29,9 +31,14 @@ const CaseStudyCard: React.FC<CaseStudyCardProps> = ({
     >
       {/* Image header */}
       <div className="relative aspect-video overflow-hidden">
-        <div
-          className="absolute inset-0 bg-cover bg-center scale-110 transition-transform duration-700 group-hover:scale-125"
-          style={{ backgroundImage: `url(${imageUrl})` }}
+        <Image
+          src={imageUrl}
+          alt=""
+          fill
+          loading="lazy"
+          quality={60}
+          sizes="(max-width: 768px) 100vw, 33vw"
+          className="absolute inset-0 scale-110 object-cover object-center transition-transform duration-700 group-hover:scale-125"
         />
         <div className="absolute inset-0 bg-black/50" />
         {/* Glow effect */}

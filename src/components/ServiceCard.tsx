@@ -1,5 +1,6 @@
 import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 
 interface ServiceCardProps {
   title: string;
@@ -23,9 +24,14 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
   const content = (
     <>
       {/* Background image */}
-      <div
-        className="absolute inset-0 bg-cover bg-center scale-110 opacity-60 transition-transform duration-700 group-hover:scale-125"
-        style={{ backgroundImage: `url(${imageUrl})` }}
+      <Image
+        src={imageUrl}
+        alt=""
+        fill
+        loading="lazy"
+        quality={60}
+        sizes="(max-width: 768px) 100vw, 33vw"
+        className="absolute inset-0 scale-110 object-cover object-center opacity-60 transition-transform duration-700 group-hover:scale-125"
       />
 
       {/* Dark overlay */}

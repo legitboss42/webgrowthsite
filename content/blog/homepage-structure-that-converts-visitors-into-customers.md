@@ -1,4 +1,4 @@
-﻿﻿﻿﻿---
+---
 title: Homepage Structure That Converts Visitors Into Customers (Proven Layout Blueprint)
 excerpt: Your homepage is not decoration. It’s a sales page. This guide shows the exact homepage structure that turns random visitors into enquiries and paying customers.
 date: 2026-02-03
@@ -46,7 +46,7 @@ If leads are the goal, start with [Why Your Website Isn’t Getting Leads](/blog
 
 ## Brutal truth first
 
-Visitors donâ€™t read.
+Visitors don’t read.
 
 They scan.
 
@@ -435,5 +435,5 @@ If you want this handled for you, [request a quote](/contact).
 
 ## Related reads
 
-- [Why Your Website Isnâ€™t Getting Leads](/blog/why-your-website-isnt-getting-leads)
+- [Why Your Website Isn’t Getting Leads](/blog/why-your-website-isnt-getting-leads)
 - [Speed Checklist That Improves Rankings](/blog/how-to-make-your-website-load-fast)

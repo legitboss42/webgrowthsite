@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
@@ -127,9 +128,14 @@ export default function HomeClient() {
         className="relative h-screen flex items-center justify-center overflow-hidden"
       >
         {/* Laptop background (placeholder) */}
-        <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: "url(/images/hero/Hero-Image-1.png)" }}
+        <Image
+          src="/images/hero/Hero-Image-1.png"
+          alt=""
+          fill
+          priority
+          quality={70}
+          sizes="100vw"
+          className="absolute inset-0 object-cover object-center"
         />
 
         {/* Overlay */}
@@ -172,9 +178,14 @@ export default function HomeClient() {
         className="relative min-h-screen overflow-hidden py-28 bg-gray-950"
       >
         {/* Background layer for parallax */}
-        <div
-          className="services-bg absolute inset-0 scale-110 bg-cover bg-center opacity-70"
-          style={{ backgroundImage: "url(/images/backgrounds/services-bg.png)" }}
+        <Image
+          src="/images/backgrounds/services-bg.png"
+          alt=""
+          fill
+          loading="lazy"
+          quality={60}
+          sizes="100vw"
+          className="services-bg absolute inset-0 scale-110 object-cover object-center opacity-70"
         />
         <div className="absolute inset-0 bg-black/70" />
 

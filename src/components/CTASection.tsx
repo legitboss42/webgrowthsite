@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 interface CTASectionProps {
   eyebrow?: string;
   title: string;
@@ -48,10 +50,17 @@ const CTASection: React.FC<CTASectionProps> = ({
 
           {/* Image placeholder */}
           <div className="relative">
-            <div
-              className="aspect-video bg-cover bg-center rounded-2xl border border-white/10"
-              style={{ backgroundImage: `url(${imageUrl})` }}
-            />
+            <div className="relative aspect-video overflow-hidden rounded-2xl border border-white/10">
+              <Image
+                src={imageUrl}
+                alt=""
+                fill
+                loading="lazy"
+                quality={65}
+                sizes="(max-width: 768px) 100vw, 50vw"
+                className="object-cover object-center"
+              />
+            </div>
           </div>
         </div>
       </div>

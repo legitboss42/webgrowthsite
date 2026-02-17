@@ -25,9 +25,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           content="f14352c8-ac00-4455-ad6a-4c0615d5653b"
         />
 
-        {/* Google AdSense verification */}
-        <script
-          async
+        {/* Google AdSense */}
+        <Script
+          id="adsense"
+          strategy="lazyOnload"
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4073948936216175"
           crossOrigin="anonymous"
         />
