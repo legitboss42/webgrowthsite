@@ -18,17 +18,6 @@ const nextConfig = {
         destination: "https://webgrowth.info/services/website-audit",
         permanent: true,
       },
-      {
-        source: "/:path*",
-        has: [
-          {
-            type: "host",
-            value: "www.webgrowth.info",
-          },
-        ],
-        destination: "https://webgrowth.info/:path*",
-        permanent: true,
-      },
     ];
   },
 };

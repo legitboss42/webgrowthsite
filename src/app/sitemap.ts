@@ -1,7 +1,20 @@
 import type { MetadataRoute } from "next";
+import { headers } from "next/headers";
 import { getPosts } from "@/lib/posts";
 
-const BASE_URL = "https://webgrowth.info";
+const DEFAULT_BASE_URL = "https://webgrowth.info";
+const ALLOWED_HOSTS = new Set(["webgrowth.info", "www.webgrowth.info"]);
+
+function getBaseUrl() {
+  const requestHeaders = headers();
+  const rawHost = requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host");
+  if (!rawHost) return DEFAULT_BASE_URL;
+
+  const host = rawHost.toLowerCase().split(":")[0];
+  if (!ALLOWED_HOSTS.has(host)) return DEFAULT_BASE_URL;
+
+  return `https://${host}`;
+}
 
 function toValidDate(value?: string): Date | undefined {
   if (!value) return undefined;
@@ -19,26 +32,28 @@ function safeGetPosts() {
 }
 
 export default function sitemap(): MetadataRoute.Sitemap {
+  const baseUrl = getBaseUrl();
+
   const staticRoutes: MetadataRoute.Sitemap = [
-    { url: `${BASE_URL}/` },
-    { url: `${BASE_URL}/about` },
-    { url: `${BASE_URL}/portfolio` },
-    { url: `${BASE_URL}/pricing` },
-    { url: `${BASE_URL}/blog` },
-    { url: `${BASE_URL}/services` },
-    { url: `${BASE_URL}/contact` },
-    { url: `${BASE_URL}/privacy` },
-    { url: `${BASE_URL}/terms` },
+    { url: `${baseUrl}/` },
+    { url: `${baseUrl}/about` },
+    { url: `${baseUrl}/portfolio` },
+    { url: `${baseUrl}/pricing` },
+    { url: `${baseUrl}/blog` },
+    { url: `${baseUrl}/services` },
+    { url: `${baseUrl}/contact` },
+    { url: `${baseUrl}/privacy` },
+    { url: `${baseUrl}/terms` },
   ];
 
   const serviceRoutes: MetadataRoute.Sitemap = [
-    { url: `${BASE_URL}/services/business-website-design` },
-    { url: `${BASE_URL}/services/landing-page-design` },
-    { url: `${BASE_URL}/services/website-redesign` },
-    { url: `${BASE_URL}/services/ecommerce-website-design` },
-    { url: `${BASE_URL}/services/website-maintenance` },
-    { url: `${BASE_URL}/services/performance-optimisation` },
-    { url: `${BASE_URL}/services/website-audit` },
+    { url: `${baseUrl}/services/business-website-design` },
+    { url: `${baseUrl}/services/landing-page-design` },
+    { url: `${baseUrl}/services/website-redesign` },
+    { url: `${baseUrl}/services/ecommerce-website-design` },
+    { url: `${baseUrl}/services/website-maintenance` },
+    { url: `${baseUrl}/services/performance-optimisation` },
+    { url: `${baseUrl}/services/website-audit` },
   ];
 
   const posts = safeGetPosts();
@@ -47,8 +62,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     .map((p) => {
       const lastModified = toValidDate(p.date);
       return lastModified
-        ? { url: `${BASE_URL}/blog/${p.slug}`, lastModified }
-        : { url: `${BASE_URL}/blog/${p.slug}` };
+        ? { url: `${baseUrl}/blog/${p.slug}`, lastModified }
+        : { url: `${baseUrl}/blog/${p.slug}` };
     });
 
   return [...staticRoutes, ...serviceRoutes, ...postRoutes];
