@@ -63,6 +63,12 @@ function isLeadMagnetHeading(text: string) {
   return text.trim().toLowerCase() === "lead magnet";
 }
 
+function getSafeTags(post: Pick<Post, "tags">): string[] {
+  return Array.isArray(post.tags)
+    ? post.tags.filter((tag): tag is string => typeof tag === "string")
+    : [];
+}
+
 // TOC only from "##" (exclude "Lead magnet")
 function extractHeadings(content: string) {
   const lines = content.split("\n").map((l) => l.trim());
@@ -81,9 +87,10 @@ function extractHeadings(content: string) {
 
 function getRelatedPosts(current: Post, limit = 3): Post[] {
   const all = getPosts().filter((p) => p.slug !== current.slug);
-  const currentTags = new Set(current.tags);
+  const currentTags = new Set(getSafeTags(current));
 
-  const overlap = (p: Post) => p.tags.reduce((n, t) => n + (currentTags.has(t) ? 1 : 0), 0);
+  const overlap = (p: Post) =>
+    getSafeTags(p).reduce((n, t) => n + (currentTags.has(t) ? 1 : 0), 0);
   const toTime = (value?: string) => {
     if (!value) return 0;
     const time = new Date(value).getTime();
@@ -191,7 +198,7 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
             </p>
 
             <div className="mt-8 flex flex-wrap gap-2">
-              {post.tags.map((t) => (
+              {getSafeTags(post).map((t) => (
                 <span
                   key={t}
                   className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/70"

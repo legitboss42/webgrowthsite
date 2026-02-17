@@ -13,7 +13,7 @@ Purpose: quickly orient AI coding agents to the repo so they can be productive w
 - Build: `npm run build` (runs `next build`).
 - Start production: `npm run start`.
 - Lint: `npm run lint` (ESLint).
-- The repo uses `next@16`, `react@19`, and TypeScript — prefer `npm` but other package managers may work.
+- The repo uses `next@14`, `react@19`, and TypeScript — prefer `npm` but other package managers may work.
 
 3. Project-specific conventions & patterns
 - App router: pages are folder-based. Example service page: [src/app/services/performance-optimisation/page.tsx](src/app/services/performance-optimisation/page.tsx#L1).

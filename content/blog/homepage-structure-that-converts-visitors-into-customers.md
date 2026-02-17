@@ -1,6 +1,6 @@
-﻿---
+﻿﻿---
 title: Homepage Structure That Converts Visitors Into Customers (Proven Layout Blueprint)
-excerpt: Your homepage is not decoration. Itâ€™s a sales page. This guide shows the exact homepage structure that turns random visitors into enquiries and paying customers.
+excerpt: Your homepage is not decoration. It’s a sales page. This guide shows the exact homepage structure that turns random visitors into enquiries and paying customers.
 date: 2026-02-03
 category: UX
 tags: ["Conversion", "Homepage", "UX", "Sales Psychology"]
@@ -14,11 +14,11 @@ cover: /images/blog/homepage.png
 
 Most small business websites look pretty.
 
-Pretty doesnâ€™t pay rent.
+Pretty doesn’t pay rent.
 
-Pretty doesnâ€™t generate enquiries.
+Pretty doesn’t generate enquiries.
 
-Pretty doesnâ€™t close sales.
+Pretty doesn’t close sales.
 
 Pretty is decoration.
 
@@ -30,11 +30,11 @@ Nothing else.
 
 Not impress designers.
 Not win awards.
-Not look â€œcoolâ€.
+Not look “cool”.
 
 Just convert.
 
-If your homepage isnâ€™t generating enquiries, itâ€™s not a design problem.
+If your homepage isn’t generating enquiries, it’s not a design problem.
 
 Itâ€™s a structure problem.
 
@@ -42,7 +42,7 @@ Letâ€™s fix it properly.
 
 ---
 
-If leads are the goal, start with [Why Your Website IsnÃ¢â‚¬â„¢t Getting Leads](/blog/why-your-website-isnt-getting-leads).
+If leads are the goal, start with [Why Your Website Isn’t Getting Leads](/blog/why-your-website-isnt-getting-leads).
 
 ## Brutal truth first
 
@@ -54,11 +54,11 @@ They judge your site in 3 seconds.
 
 In those 3 seconds they subconsciously ask:
 
-â€¢ What is this?  
-â€¢ Is this for me?  
-â€¢ Can I trust them?  
+• What is this?
+• Is this for me?
+• Can I trust them?
 
-If you fail any one of thoseâ€¦
+If you fail any one of those…
 
 They leave.
 
@@ -74,19 +74,19 @@ Treat it like one.
 
 A homepage is not:
 
-âŒ a gallery  
-âŒ a company history page  
-âŒ a playground for animations  
+❌ a gallery
+❌ a company history page
+❌ a playground for animations
 
 It is:
 
-âœ… a guided persuasion system  
+✅ a guided persuasion system
 
 Every section must push toward one goal:
 
 Contact you.
 
-If a section doesnâ€™t help that goal, itâ€™s clutter.
+If a section doesn’t help that goal, it’s clutter.
 
 Delete it.
 
@@ -125,7 +125,7 @@ Most businesses screw this up immediately.
 
 They write:
 
-â€œWelcome to our websiteâ€
+“Welcome to our website”
 
 Which means absolutely nothing.
 
@@ -153,12 +153,12 @@ Always.
 
 ### Include:
 
-â€¢ headline  
-â€¢ subheadline  
-â€¢ one strong CTA  
-â€¢ simple visual  
+• headline
+• subheadline
+• one strong CTA
+• simple visual
 
-Thatâ€™s it.
+That’s it.
 
 Not 6 buttons.
 
@@ -178,19 +178,19 @@ Prove it.
 
 Add:
 
-â€¢ testimonials  
-â€¢ star ratings  
-â€¢ client logos  
-â€¢ numbers  
-â€¢ screenshots  
+• testimonials
+• star ratings
+• client logos
+• numbers
+• screenshots
 
 Example:
 
-â€œTrusted by 120+ small businessesâ€
+“Trusted by 120+ small businesses”
 
 or
 
-â€œGenerated 2,400+ enquiries last yearâ€
+“Generated 2,400+ enquiries last year”
 
 Specific proof beats vague claims.
 
@@ -212,13 +212,13 @@ Simple blocks.
 
 Each service should be:
 
-â€¢ short title  
-â€¢ one sentence  
-â€¢ clear benefit  
+• short title
+• one sentence
+• clear benefit
 
 Not technical jargon.
 
-Visitors donâ€™t care how something works.
+Visitors don’t care how something works.
 
 They care what they get.
 
@@ -234,13 +234,13 @@ This is where conversions explode.
 
 Bad:
 
-â€œWe use modern frameworksâ€
+“We use modern frameworks”
 
 Nobody cares.
 
 Good:
 
-â€œYour site loads under 2 seconds so customers donâ€™t leaveâ€
+“Your site loads under 2 seconds so customers don’t leave”
 
 Thatâ€™s money language.
 
@@ -292,9 +292,9 @@ If they see others happy, they assume safety.
 
 Add:
 
-â€¢ real photos  
-â€¢ real names  
-â€¢ real results  
+• real photos
+• real names
+• real results
 
 Fake testimonials destroy trust.
 
@@ -306,9 +306,9 @@ Never do it.
 
 Every visitor has silent doubts:
 
-â€¢ Is this expensive?
-â€¢ How long does it take?
-â€¢ What if it doesnâ€™t work?
+• Is this expensive?
+• How long does it take?
+• What if it doesn’t work?
 
 Answer them before they ask.
 
@@ -326,9 +326,9 @@ After building trustâ€¦
 
 Ask clearly.
 
-Donâ€™t whisper.
+Don’t whisper.
 
-Donâ€™t be shy.
+Don’t be shy.
 
 Tell them exactly what to do.
 
@@ -344,9 +344,9 @@ Big.
 
 Impossible to miss.
 
-Because at this point theyâ€™re ready.
+Because at this point they’re ready.
 
-Donâ€™t make them hunt.
+Don’t make them hunt.
 
 ---
 
@@ -354,12 +354,12 @@ Donâ€™t make them hunt.
 
 Avoid these like plague:
 
-âŒ autoplay videos  
-âŒ sliders  
-âŒ too many fonts  
-âŒ 12 CTAs  
-âŒ paragraphs of text  
-âŒ slow loading  
+❌ autoplay videos
+❌ sliders
+❌ too many fonts
+❌ 12 CTAs
+❌ paragraphs of text
+❌ slow loading
 
 Complexity confuses.
 
@@ -371,9 +371,9 @@ Confusion kills conversions.
 
 Every section must answer:
 
-â€œDoes this help someone trust me more or take action faster?â€
+“Does this help someone trust me more or take action faster?”
 
-If notâ€¦
+If not…
 
 Delete it.
 
@@ -391,9 +391,9 @@ Hide it.
 
 Ask:
 
-â€œWhat does this business do?â€
+“What does this business do?”
 
-If they canâ€™t answer clearlyâ€¦
+If they can’t answer clearly…
 
 Your homepage failed.
 
@@ -418,12 +418,12 @@ You donâ€™t need fancy design.
 
 You need:
 
-â€¢ clarity  
-â€¢ proof  
-â€¢ structure  
-â€¢ strong CTA  
+• clarity
+• proof
+• structure
+• strong CTA
 
-Thatâ€™s it.
+That’s it.
 
 Sales psychology beats aesthetics.
 
