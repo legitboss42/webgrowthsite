@@ -1,16 +1,12 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 export default function CodeRain() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const animationRef = useRef<number | null>(null);
 
   useEffect(() => {
-    gsap.registerPlugin(ScrollTrigger);
-
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -48,30 +44,31 @@ export default function CodeRain() {
       animationRef.current = requestAnimationFrame(loop);
     };
 
-    // Start animation only when hero is in view
-    const st = ScrollTrigger.create({
-      trigger: canvas,
-      start: "top bottom",
-      end: "bottom top",
-      onEnter: () => {
-        if (!animationRef.current) loop();
-      },
-      onLeave: () => {
-        if (animationRef.current) {
-          cancelAnimationFrame(animationRef.current);
-          animationRef.current = null;
+    const start = () => {
+      if (!animationRef.current) loop();
+    };
+
+    const stop = () => {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+        animationRef.current = null;
+      }
+    };
+
+    let inView = false;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        inView = Boolean(entry?.isIntersecting);
+        if (inView && document.visibilityState === "visible") {
+          start();
+          return;
         }
+        stop();
       },
-      onEnterBack: () => {
-        if (!animationRef.current) loop();
-      },
-      onLeaveBack: () => {
-        if (animationRef.current) {
-          cancelAnimationFrame(animationRef.current);
-          animationRef.current = null;
-        }
-      },
-    });
+      { threshold: 0.01 }
+    );
+
+    observer.observe(canvas);
 
     const handleResize = () => {
       width = canvas.width = window.innerWidth;
@@ -80,12 +77,22 @@ export default function CodeRain() {
       drops = Array(columns).fill(1);
     };
 
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible" && inView) {
+        start();
+        return;
+      }
+      stop();
+    };
+
     window.addEventListener("resize", handleResize);
+    document.addEventListener("visibilitychange", handleVisibility);
 
     return () => {
-      if (animationRef.current) cancelAnimationFrame(animationRef.current);
+      stop();
+      observer.disconnect();
       window.removeEventListener("resize", handleResize);
-      st.kill();
+      document.removeEventListener("visibilitychange", handleVisibility);
     };
   }, []);
 

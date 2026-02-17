@@ -150,7 +150,8 @@ export default function Header() {
               alt="Web Growth"
               width={220}
               height={48}
-              priority
+              sizes="(max-width: 768px) 160px, 220px"
+              quality={60}
               className={["w-auto transition-all duration-300", scrolled ? "h-7 md:h-8" : "h-8 md:h-9"].join(" ")}
               style={{
                 filter: "saturate(1.15) contrast(1.05) brightness(1.05)",

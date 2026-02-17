@@ -1,152 +1,39 @@
-﻿"use client";
-
-import { useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 import CodeRain from "@/components/CodeRain";
+import HomeAnimations from "@/components/HomeAnimations";
 import SectionHeading from "@/components/SectionHeading";
 import ServiceCard from "@/components/ServiceCard";
 import CaseStudyCard from "@/components/CaseStudyCard";
 import CTASection from "@/components/CTASection";
 
 export default function HomeClient() {
-  const heroRef = useRef<HTMLElement | null>(null);
-  const servicesRef = useRef<HTMLElement | null>(null);
-  const aboutRef = useRef<HTMLElement | null>(null);
-  const portfolioRef = useRef<HTMLElement | null>(null);
-  const contactRef = useRef<HTMLElement | null>(null);
-
-  useEffect(() => {
-    gsap.registerPlugin(ScrollTrigger);
-
-    const reduceMotion =
-      typeof window !== "undefined" &&
-      window.matchMedia &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-    if (reduceMotion) return;
-
-    const hero = heroRef.current;
-    const services = servicesRef.current;
-    const about = aboutRef.current;
-    const portfolio = portfolioRef.current;
-    const contact = contactRef.current;
-
-    // Hero exit on scroll
-    if (hero) {
-      gsap.to(hero, {
-        opacity: 0,
-        y: -180,
-        scrollTrigger: {
-          trigger: hero,
-          start: "top top",
-          end: "bottom top",
-          scrub: true,
-        },
-      });
-
-      // CTA entrance on load (premium cue)
-      gsap.fromTo(
-        ".hero-cta",
-        { opacity: 0, y: 26 },
-        { opacity: 1, y: 0, duration: 0.8, ease: "power3.out", delay: 0.8 }
-      );
-    }
-
-    // Helper: reveal section content
-    const reveal = (
-      selector: string,
-      triggerEl: HTMLElement | null,
-      stagger = 0
-    ) => {
-      if (!triggerEl) return;
-      gsap.fromTo(
-        selector,
-        { opacity: 0, y: 90, scale: 0.98, filter: "blur(6px)" },
-        {
-          opacity: 1,
-          y: 0,
-          scale: 1,
-          filter: "blur(0px)",
-          duration: 1,
-          ease: "power3.out",
-          stagger,
-          scrollTrigger: {
-            trigger: triggerEl,
-            start: "top 75%",
-          },
-        }
-      );
-    };
-
-    // Services: header + cards stagger
-    reveal(".services-head", services, 0);
-    reveal(".service-card", services, 0.14);
-
-    // Services background parallax
-    if (services) {
-      gsap.fromTo(
-        ".services-bg",
-        { y: -40 },
-        {
-          y: 40,
-          ease: "none",
-          scrollTrigger: {
-            trigger: services,
-            start: "top bottom",
-            end: "bottom top",
-            scrub: true,
-          },
-        }
-      );
-    }
-
-    // About: reveal blocks
-    reveal(".about-block", about, 0.12);
-
-    // Portfolio: cards stagger
-    reveal(".case-card", portfolio, 0.14);
-
-    // Contact: reveal
-    reveal(".contact-block", contact, 0.12);
-
-    ScrollTrigger.refresh();
-
-    return () => {
-      ScrollTrigger.getAll().forEach((t) => t.kill());
-    };
-  }, []);
-
   return (
     <main className="min-h-screen bg-black text-white">
+      <HomeAnimations />
+
       {/* HERO */}
       <section
-        ref={heroRef}
+        id="home-hero"
         className="relative h-screen flex items-center justify-center overflow-hidden"
       >
-        {/* Laptop background (placeholder) */}
         <Image
           src="/images/hero/Hero-Image-1.png"
           alt=""
           fill
           priority
-          quality={70}
+          quality={62}
           sizes="100vw"
           className="absolute inset-0 object-cover object-center"
         />
 
-        {/* Overlay */}
         <div className="absolute inset-0 bg-black/65" />
 
-        {/* Code rain */}
         <div className="absolute inset-0 mix-blend-screen pointer-events-none">
           <CodeRain />
         </div>
 
-        {/* Foreground */}
         <div className="relative z-10 text-center px-6">
           <h1 className="text-4xl md:text-6xl font-bold leading-tight max-w-4xl mx-auto">
             We Design Professional Websites Focused On Real Results
@@ -158,7 +45,6 @@ export default function HomeClient() {
           </p>
 
           <div className="mt-10 flex justify-center">
-            {/* CHANGED: go to the contact page, not #contact */}
             <Link
               href="/contact"
               className="hero-cta inline-flex items-center justify-center rounded-md
@@ -173,17 +59,15 @@ export default function HomeClient() {
 
       {/* SERVICES */}
       <section
-        ref={servicesRef}
         id="services"
         className="relative min-h-screen overflow-hidden py-28 bg-gray-950"
       >
-        {/* Background layer for parallax */}
         <Image
           src="/images/backgrounds/services-bg.png"
           alt=""
           fill
           loading="lazy"
-          quality={60}
+          quality={52}
           sizes="100vw"
           className="services-bg absolute inset-0 scale-110 object-cover object-center opacity-70"
         />
@@ -230,24 +114,19 @@ export default function HomeClient() {
             </div>
           </div>
 
-          {/* ADDED: View more services button */}
           <div className="services-head mt-10 flex justify-center">
             <Link
               href="/services"
               className="inline-flex items-center gap-2 rounded-full border border-emerald-500/40 bg-emerald-500/10 px-6 py-3 text-sm font-semibold text-emerald-200 hover:bg-emerald-500/15 transition"
             >
-              View more services →
+              View more services {"->"}
             </Link>
           </div>
         </div>
       </section>
 
       {/* ABOUT */}
-      <section
-        ref={aboutRef}
-        id="about"
-        className="relative min-h-screen bg-black py-28"
-      >
+      <section id="about" className="relative min-h-screen bg-black py-28">
         <div className="mx-auto max-w-6xl px-6">
           <div className="about-block max-w-2xl mx-auto">
             <SectionHeading
@@ -303,11 +182,7 @@ export default function HomeClient() {
       </section>
 
       {/* PORTFOLIO PREVIEW */}
-      <section
-        ref={portfolioRef}
-        id="portfolio"
-        className="relative min-h-screen bg-gray-950 py-28"
-      >
+      <section id="portfolio" className="relative min-h-screen bg-gray-950 py-28">
         <div className="mx-auto max-w-6xl px-6">
           <div className="about-block max-w-2xl mx-auto">
             <SectionHeading
@@ -370,11 +245,7 @@ export default function HomeClient() {
       </section>
 
       {/* CONTACT PREVIEW */}
-      <section
-        ref={contactRef}
-        id="contact"
-        className="relative min-h-screen bg-black py-28"
-      >
+      <section id="contact" className="relative min-h-screen bg-black py-28">
         <div className="mx-auto max-w-6xl px-6">
           <div className="contact-block max-w-2xl mx-auto">
             <SectionHeading
@@ -394,7 +265,7 @@ export default function HomeClient() {
                 className="mt-5 inline-flex text-emerald-400 font-semibold hover:text-emerald-300 transition"
                 href="mailto:admin@webgrowth.info"
               >
-                admin@webgrowth.info →
+                admin@webgrowth.info {"->"}
               </a>
             </div>
 
@@ -407,7 +278,7 @@ export default function HomeClient() {
                 target="_blank"
                 rel="noreferrer"
               >
-                Chat on WhatsApp →
+                Chat on WhatsApp {"->"}
               </a>
             </div>
           </div>
@@ -428,5 +299,3 @@ export default function HomeClient() {
     </main>
   );
 }
-
-
