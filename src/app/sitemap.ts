@@ -1,6 +1,8 @@
 import type { MetadataRoute } from "next";
 import { getPosts } from "@/lib/posts";
 
+export const dynamic = "force-static";
+
 const BASE_URL = "https://webgrowth.info";
 
 function toValidDate(value?: string): Date | undefined {
