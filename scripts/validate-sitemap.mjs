@@ -2,10 +2,15 @@ import fs from "fs";
 import path from "path";
 
 const root = process.cwd();
-const sitemapPath = path.join(root, "src", "app", "sitemap.ts");
+const metadataSitemapPath = path.join(root, "src", "app", "sitemap.ts");
+const routeSitemapPath = path.join(root, "src", "app", "sitemap.xml", "route.ts");
 const servicesDir = path.join(root, "src", "app", "services");
 const publicRobots = path.join(root, "public", "robots.txt");
 const publicSitemap = path.join(root, "public", "sitemap.xml");
+
+const sitemapPath = fs.existsSync(routeSitemapPath)
+  ? routeSitemapPath
+  : metadataSitemapPath;
 
 function fail(message) {
   console.error(`SITEMAP CHECK FAILED: ${message}`);
@@ -13,7 +18,7 @@ function fail(message) {
 }
 
 if (!fs.existsSync(sitemapPath)) {
-  fail("Missing src/app/sitemap.ts");
+  fail("Missing sitemap source (expected src/app/sitemap.ts or src/app/sitemap.xml/route.ts)");
 }
 
 // Guard against stale static files
@@ -53,7 +58,7 @@ const missingOnDisk = [...serviceSlugsFromSitemap].filter(
 if (missingInSitemap.length || missingOnDisk.length) {
   const details = [
     missingInSitemap.length
-      ? `Missing in sitemap.ts: ${missingInSitemap.join(", ")}`
+      ? `Missing in sitemap source: ${missingInSitemap.join(", ")}`
       : null,
     missingOnDisk.length
       ? `Missing on disk: ${missingOnDisk.join(", ")}`
