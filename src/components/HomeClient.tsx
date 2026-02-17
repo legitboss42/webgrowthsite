@@ -1,12 +1,19 @@
 import Link from "next/link";
 import Image from "next/image";
+import dynamic from "next/dynamic";
 
-import CodeRain from "@/components/CodeRain";
-import HomeAnimations from "@/components/HomeAnimations";
 import SectionHeading from "@/components/SectionHeading";
 import ServiceCard from "@/components/ServiceCard";
 import CaseStudyCard from "@/components/CaseStudyCard";
 import CTASection from "@/components/CTASection";
+
+const HomeAnimations = dynamic(() => import("@/components/HomeAnimations"), {
+  ssr: false,
+});
+
+const CodeRain = dynamic(() => import("@/components/CodeRain"), {
+  ssr: false,
+});
 
 export default function HomeClient() {
   return (
