@@ -6,6 +6,8 @@ export const metadata: Metadata = {
   description:
     "Conversion-focused landing page design for ads, campaigns, and offers. Built to load fast, communicate clearly, and turn clicks into leads.",
   keywords: [
+    "web design",
+    "web design services",
     "landing page design",
     "conversion landing page",
     "campaign landing page",
@@ -31,6 +33,13 @@ export const metadata: Metadata = {
       },
     ],
     type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Landing Page Design | Web Growth",
+    description:
+      "Conversion-focused landing page web design services for campaigns and lead generation.",
+    images: ["https://webgrowth.info/images/placeholder.jpg"],
   },
   robots: { index: true, follow: true },
 };

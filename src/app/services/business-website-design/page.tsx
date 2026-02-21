@@ -6,6 +6,8 @@ export const metadata: Metadata = {
   description:
     "Professional business website design focused on clarity, trust, speed, and real results. Built to attract customers and support growth.",
   keywords: [
+    "web design",
+    "web design services",
     "business website design",
     "professional website design",
     "company website design",
@@ -31,6 +33,13 @@ export const metadata: Metadata = {
       },
     ],
     type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Business Website Design | Web Growth",
+    description:
+      "Professional web design services for businesses that want more enquiries and stronger trust.",
+    images: ["https://webgrowth.info/images/placeholder.jpg"],
   },
   robots: { index: true, follow: true },
 };

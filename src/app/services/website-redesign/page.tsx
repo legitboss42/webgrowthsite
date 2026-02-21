@@ -6,6 +6,8 @@ export const metadata: Metadata = {
   description:
     "Website redesign focused on clarity, trust, speed, and conversions. Upgrade an outdated site into a modern experience that performs.",
   keywords: [
+    "web design",
+    "web design services",
     "website redesign",
     "website revamp",
     "modern website redesign",
@@ -30,6 +32,13 @@ export const metadata: Metadata = {
       },
     ],
     type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Website Redesign | Web Growth",
+    description:
+      "Website redesign services to improve trust, user experience, speed, and conversions.",
+    images: ["https://webgrowth.info/images/placeholder.jpg"],
   },
   robots: { index: true, follow: true },
 };

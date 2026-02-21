@@ -1,4 +1,4 @@
-﻿import type { Metadata } from "next";
+import type { Metadata } from "next";
 import HomeClient from "@/components/HomeClient";
 
 export const metadata: Metadata = {
@@ -6,6 +6,8 @@ export const metadata: Metadata = {
   description:
     "Web Growth designs professional websites focused on real results - websites that attract customers, build trust, and support real growth.",
   keywords: [
+    "web design",
+    "web design services",
     "web design agency",
     "website design",
     "landing pages",

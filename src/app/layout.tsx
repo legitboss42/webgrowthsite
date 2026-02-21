@@ -1,4 +1,4 @@
-﻿import type { Metadata } from "next";
+import type { Metadata } from "next";
 import Script from "next/script";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -10,6 +10,41 @@ export const metadata: Metadata = {
   title: "Web Growth - High-Performance Websites",
   description:
     "We design conversion-focused, high-performance websites that drive real business growth.",
+  metadataBase: new URL("https://webgrowth.info"),
+  alternates: {
+    canonical: "https://webgrowth.info/",
+  },
+  keywords: [
+    "web design",
+    "web design services",
+    "website design",
+    "web design agency",
+    "business website design",
+    "website redesign",
+  ],
+  openGraph: {
+    title: "Web Growth | Web Design Services for Real Business Growth",
+    description:
+      "Conversion-focused web design services that help businesses attract customers, build trust, and grow.",
+    url: "https://webgrowth.info/",
+    siteName: "Web Growth",
+    images: [
+      {
+        url: "https://webgrowth.info/images/placeholder.png",
+        width: 1200,
+        height: 630,
+        alt: "Web Growth web design services",
+      },
+    ],
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Web Growth | Web Design Services",
+    description:
+      "High-performance, conversion-focused websites for businesses that want real growth.",
+    images: ["https://webgrowth.info/images/placeholder.png"],
+  },
   robots: { index: true, follow: true },
 };
 

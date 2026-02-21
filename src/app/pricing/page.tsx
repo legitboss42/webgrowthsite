@@ -1,16 +1,24 @@
-﻿import type { Metadata } from "next";
+import type { Metadata } from "next";
 import PricingClient from "@/components/PricingClient";
 
 export const metadata: Metadata = {
-  title: "Pricing | Web Growth - Transparent Website Packages",
+  title: "Web Design Pricing | Web Growth - Transparent Website Packages",
   description:
-    "Clear website design packages from Web Growth. Choose a package, see what’s included, and request a quote with next steps.",
+    "Transparent web design pricing from Web Growth. Compare website design packages, see what’s included, and request a quote.",
+  keywords: [
+    "web design",
+    "web design pricing",
+    "website design cost",
+    "website design packages",
+    "web design services",
+    "business website pricing",
+  ],
   alternates: { canonical: "https://webgrowth.info/pricing" },
   robots: { index: true, follow: true },
   openGraph: {
-    title: "Web Growth Pricing",
+    title: "Web Design Pricing | Web Growth",
     description:
-      "Transparent website packages with clear deliverables, timelines, and optional add-ons.",
+      "Transparent web design packages with clear deliverables, timelines, and add-ons.",
     url: "https://webgrowth.info/pricing",
     siteName: "Web Growth",
     images: [
@@ -18,15 +26,15 @@ export const metadata: Metadata = {
         url: "https://webgrowth.info/images/placeholder.png",
         width: 1200,
         height: 630,
-        alt: "Web Growth Pricing",
+        alt: "Web Growth web design pricing",
       },
     ],
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Web Growth Pricing",
-    description: "Transparent website packages with clear deliverables.",
+    title: "Web Design Pricing | Web Growth",
+    description: "Transparent web design pricing and clear package deliverables.",
     images: ["https://webgrowth.info/images/placeholder.png"],
   },
 };

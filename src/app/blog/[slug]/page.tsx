@@ -1,4 +1,4 @@
-﻿import { notFound } from "next/navigation";
+import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
@@ -26,9 +26,25 @@ export function generateMetadata({
     };
   }
 
+  const postKeywords = Array.from(
+    new Set([
+      "web design",
+      "web design services",
+      "website design",
+      "small business website",
+      post.category.toLowerCase(),
+      ...getSafeTags(post).map((tag) => tag.toLowerCase()),
+    ])
+  );
+
+  const socialImage = post.cover
+    ? `https://webgrowth.info${post.cover}`
+    : "https://webgrowth.info/images/placeholder.png";
+
   return {
     title: `${post.title} | Web Growth`,
     description: post.excerpt,
+    keywords: postKeywords,
     alternates: { canonical: `https://webgrowth.info/blog/${post.slug}` },
     robots: { index: true, follow: true },
     openGraph: {
@@ -37,16 +53,20 @@ export function generateMetadata({
       url: `https://webgrowth.info/blog/${post.slug}`,
       siteName: "Web Growth",
       type: "article",
-      images: post.cover
-        ? [
-            {
-              url: `https://webgrowth.info${post.cover}`,
-              width: 1200,
-              height: 630,
-              alt: post.title,
-            },
-          ]
-        : undefined,
+      images: [
+        {
+          url: socialImage,
+          width: 1200,
+          height: 630,
+          alt: post.title,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: post.title,
+      description: post.excerpt,
+      images: [socialImage],
     },
   };
 }

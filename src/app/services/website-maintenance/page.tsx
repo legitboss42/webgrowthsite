@@ -1,4 +1,4 @@
-﻿import type { Metadata } from "next";
+import type { Metadata } from "next";
 import WebsiteMaintenanceClient from "@/components/WebsiteMaintenanceClient";
 
 export const metadata: Metadata = {
@@ -6,6 +6,8 @@ export const metadata: Metadata = {
   description:
     "Website maintenance and support to keep your site secure, updated, fast, and reliable - with monthly care that prevents surprises.",
   keywords: [
+    "web design",
+    "web design services",
     "website maintenance",
     "website support",
     "wordpress maintenance",
@@ -31,6 +33,13 @@ export const metadata: Metadata = {
       },
     ],
     type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Website Maintenance & Support | Web Growth",
+    description:
+      "Ongoing website support to keep your web design secure, updated, and fast.",
+    images: ["https://webgrowth.info/images/placeholder.jpg"],
   },
   robots: { index: true, follow: true },
 };

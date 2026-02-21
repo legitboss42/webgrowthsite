@@ -1,4 +1,4 @@
-﻿import type { Metadata } from "next";
+import type { Metadata } from "next";
 import AboutClient from "@/components/AboutClient";
 
 export const metadata: Metadata = {
@@ -6,6 +6,8 @@ export const metadata: Metadata = {
   description:
     "Learn about Web Growth - a web design studio focused on building modern, high-performance websites that attract customers, build trust, and support real growth.",
   keywords: [
+    "web design",
+    "web design services",
     "about web growth",
     "web design agency",
     "website design studio",
