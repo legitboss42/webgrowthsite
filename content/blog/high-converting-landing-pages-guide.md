@@ -5,12 +5,12 @@ date: 2026-02-03
 category: Conversion
 tags: ["Landing Pages", "Conversion", "Sales", "Marketing"]
 readTime: 23 min read
-cover: /images/blog/landing-pages.png
+cover: /images/blog/landing-pages.webp
 ---
 
 # How to Build High-Converting Landing Pages
 
-![Minimal dark landing page UI mockup glowing emerald green, analytics charts rising, premium aesthetic, 16:9](/images/blog/landing-hero.png)
+![Minimal dark landing page UI mockup glowing emerald green, analytics charts rising, premium aesthetic, 16:9](/images/blog/landing-hero.webp)
 
 Most websites look nice.
 
@@ -154,7 +154,7 @@ Always.
 
 ## Section 3: Visual proof
 
-![Clean dashboard showing leads increasing graph, modern workspace, 16:9](/images/blog/landing-proof.png)
+![Clean dashboard showing leads increasing graph, modern workspace, 16:9](/images/blog/landing-proof.webp)
 
 Humans trust what they see.
 

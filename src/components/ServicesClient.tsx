@@ -34,7 +34,7 @@ export default function ServicesClient({ services: servicesProp }: Props) {
         slug: "/services/business-website-design",
         serviceParam: "Business Website Design",
         bullets: ["Modern structure", "Mobile-first", "SEO-ready foundation"],
-        image: "/images/services/services-business.png",
+        image: "/images/services/services-business.webp",
       },
       {
         title: "Landing Page Design",
@@ -43,7 +43,7 @@ export default function ServicesClient({ services: servicesProp }: Props) {
         slug: "/services/landing-page-design",
         serviceParam: "Landing Page Design",
         bullets: ["Message match", "Strong CTA flow", "Fast mobile load"],
-        image: "/images/services/services-landing.png",
+        image: "/images/services/services-landing.webp",
       },
       {
         title: "Website Redesign",
@@ -52,7 +52,7 @@ export default function ServicesClient({ services: servicesProp }: Props) {
         slug: "/services/website-redesign",
         serviceParam: "Website Redesign",
         bullets: ["Better structure", "Improved trust", "Cleaner conversion path"],
-        image: "/images/services/services-redesign.png",
+        image: "/images/services/services-redesign.webp",
       },
       {
         title: "E-commerce Website Design",
@@ -61,7 +61,7 @@ export default function ServicesClient({ services: servicesProp }: Props) {
         slug: "/services/ecommerce-website-design",
         serviceParam: "E-commerce Website Design",
         bullets: ["Product UX", "Trust signals", "Checkout clarity"],
-        image: "/images/services/services-ecommerce.png",
+        image: "/images/services/services-ecommerce.webp",
       },
       {
         title: "Website Maintenance & Support",
@@ -70,7 +70,7 @@ export default function ServicesClient({ services: servicesProp }: Props) {
         slug: "/services/website-maintenance",
         serviceParam: "Website Maintenance & Support",
         bullets: ["Updates + backups", "Security checks", "Ongoing fixes"],
-        image: "/images/services/services-maintenance.png",
+        image: "/images/services/services-maintenance.webp",
       },
       {
         title: "Speed & Performance Optimisation",
@@ -79,7 +79,7 @@ export default function ServicesClient({ services: servicesProp }: Props) {
         slug: "/services/performance-optimisation",
         serviceParam: "Speed & Performance Optimisation",
         bullets: ["Speed audit", "Asset cleanup", "Core Web Vitals improvements"],
-        image: "/images/services/services-speed.png",
+        image: "/images/services/services-speed.webp",
       },
       {
         title: "Website Audit & Consultation",
@@ -88,7 +88,7 @@ export default function ServicesClient({ services: servicesProp }: Props) {
         slug: "/services/website-audit",
         serviceParam: "Website Audit & Consultation",
         bullets: ["Clarity + trust", "Conversion flow", "SEO + performance basics"],
-        image: "/images/services/services-audit.png",
+        image: "/images/services/services-audit.webp",
       },
     ],
     []
@@ -194,7 +194,7 @@ export default function ServicesClient({ services: servicesProp }: Props) {
               <div
                 className="h-[360px] bg-cover bg-center opacity-80"
                 style={{
-                  backgroundImage: "url(/images/services/services-hero.png)",
+                  backgroundImage: "url(/images/services/services-hero.webp)",
                 }}
               />
               <div className="absolute inset-0 bg-black/35" />
@@ -285,7 +285,7 @@ export default function ServicesClient({ services: servicesProp }: Props) {
             primaryHref="/contact"
             secondaryCtaText="Website Audit"
             secondaryHref="/services/website-audit"
-            imageUrl="/images/services/services-cta.png"
+            imageUrl="/images/services/services-cta.webp"
           />
         </div>
       </section>

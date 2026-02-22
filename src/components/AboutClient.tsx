@@ -115,22 +115,22 @@ export default function AboutClient() {
       {
         title: "Discovery",
         text: "We get clear on your audience, your offer, and what success looks like. No guesswork. No “just vibes.”",
-        img: "/images/about/about-discovery.png",
+        img: "/images/about/about-discovery.webp",
       },
       {
         title: "Structure",
         text: "We plan the sections, messaging hierarchy, and conversion flow so the site actually guides visitors.",
-        img: "/images/about/about-structure.png",
+        img: "/images/about/about-structure.webp",
       },
       {
         title: "Design + Build",
         text: "We design and build with performance and clarity in mind, then add controlled interaction where it adds value.",
-        img: "/images/about/about-design.png",
+        img: "/images/about/about-design.webp",
       },
       {
         title: "Launch + Refine",
         text: "We polish, test, and launch. Then we refine based on feedback and reality, not assumptions.",
-        img: "/images/about/about-launch.png",
+        img: "/images/about/about-launch.webp",
       },
     ],
     []
@@ -248,7 +248,7 @@ export default function AboutClient() {
               <div className="about-parallax relative overflow-hidden rounded-2xl border border-white/10 bg-black/40">
                 <div
                   className="h-[320px] md:h-[420px] bg-cover bg-center opacity-80"
-                  style={{ backgroundImage: "url(/images/about/about-hero.png)" }}
+                  style={{ backgroundImage: "url(/images/about/about-hero.webp)" }}
                 />
                 <div className="absolute inset-0 bg-black/35" />
               </div>
@@ -332,7 +332,7 @@ export default function AboutClient() {
             <div className="about-parallax relative overflow-hidden rounded-2xl border border-white/10 bg-black/40">
               <div
                 className="h-[360px] md:h-[460px] bg-cover bg-center opacity-80"
-                style={{ backgroundImage: "url(/images/about/about-nice.png)" }}
+                style={{ backgroundImage: "url(/images/about/about-nice.webp)" }}
               />
               <div className="absolute inset-0 bg-black/35" />
               
@@ -432,7 +432,7 @@ export default function AboutClient() {
             primaryHref="/contact"
             secondaryCtaText="See Pricing"
             secondaryHref="/pricing"
-            imageUrl="/images/about/about-cta.png"
+            imageUrl="/images/about/about-cta.webp"
           />
         </div>
       </section>

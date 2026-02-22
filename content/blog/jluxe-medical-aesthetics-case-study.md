@@ -6,7 +6,7 @@ date: "2026-02-07"
 category: "Case Study"
 tags: ["Next.js", "Local SEO", "Strategy", "Client Work"]
 readTime: "18 min read"
-cover: "/images/portfolio/portfolio-1.png"
+cover: "/images/portfolio/portfolio-1.webp"
 ---
 
 The medical aesthetics market in London is a war zone.
@@ -219,7 +219,7 @@ We captured the user while their dopamine was high.
 
 We launched the new system in late 2025. The data speaks for itself.
 
-![Google Lighthouse Perfect 100 Score](/images/blog/lighthouse-perfect.png)
+![Google Lighthouse Perfect 100 Score](/images/blog/lighthouse-perfect.webp)
 
 Caption: The green across the board standard
 

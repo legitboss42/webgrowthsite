@@ -87,7 +87,7 @@ export default function EcommerceWebsiteDesignClient() {
           {/* Image placeholder */}
           <div className="relative h-[380px] rounded-2xl border border-white/10 bg-black/40 overflow-hidden">
             <div className="absolute inset-0 bg-cover bg-center opacity-80"
-              style={{ backgroundImage: "url(/images/services/services-ecommerce-2.png)" }}
+              style={{ backgroundImage: "url(/images/services/services-ecommerce-2.webp)" }}
             />
             <div className="absolute inset-0 bg-black/40" />
           </div>
@@ -188,7 +188,7 @@ export default function EcommerceWebsiteDesignClient() {
             primaryHref="/contact?service=E-commerce Website Design"
             secondaryCtaText="View Services"
             secondaryHref="/services"
-            imageUrl="/images/services/services-ecommerce-cta.png"
+            imageUrl="/images/services/services-ecommerce-cta.webp"
           />
         </div>
       </section>

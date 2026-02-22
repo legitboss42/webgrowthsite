@@ -5,12 +5,12 @@ date: 2026-02-03
 category: SEO
 tags: ["SEO", "Google", "Traffic", "Small Business"]
 readTime: 18 min read
-cover: /images/blog/seo.png
+cover: /images/blog/seo.webp
 ---
 
 # Small Business Website SEO Checklist (Rank Higher on Google Without Paying for Ads)
 
-![Laptop showing Google search rankings graph rising, green glow, modern workspace, 16:9](/images/blog/seo-hero.png)
+![Laptop showing Google search rankings graph rising, green glow, modern workspace, 16:9](/images/blog/seo-hero.webp)
 
 Most small business owners think SEO is magic.
 
@@ -98,7 +98,7 @@ Use this [Core Web Vitals speed checklist](/blog/how-to-make-your-website-load-f
 
 ## Step 2: Speed is your unfair advantage
 
-![Speed performance dashboard, neon green metrics, futuristic tech, 16:9](/images/blog/seo-speed.png)
+![Speed performance dashboard, neon green metrics, futuristic tech, 16:9](/images/blog/seo-speed.webp)
 
 Google uses speed as a ranking factor.
 

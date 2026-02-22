@@ -94,7 +94,7 @@ export default function BusinessWebsiteDesignClient() {
             <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-black/40">
               <div
                 className="h-[360px] bg-cover bg-center opacity-80"
-                style={{ backgroundImage: "url(/images/services/services-business.png)" }}
+                style={{ backgroundImage: "url(/images/services/services-business.webp)" }}
               />
               <div className="absolute inset-0 bg-black/35" />
             </div>
@@ -152,7 +152,7 @@ export default function BusinessWebsiteDesignClient() {
           <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-black/40">
             <div
               className="h-[420px] bg-cover bg-center opacity-80"
-              style={{ backgroundImage: "url(/images/services/services-business-2.png)" }}
+              style={{ backgroundImage: "url(/images/services/services-business-2.webp)" }}
             />
             <div className="absolute inset-0 bg-black/35" />
           </div>
@@ -231,7 +231,7 @@ export default function BusinessWebsiteDesignClient() {
             primaryHref="/contact?service=Business Website Design"
             secondaryCtaText="View Services"
             secondaryHref="/services"
-            imageUrl="/images/services/services-business-cta.png"
+            imageUrl="/images/services/services-business-cta.webp"
           />
         </div>
       </section>

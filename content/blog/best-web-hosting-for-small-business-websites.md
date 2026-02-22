@@ -5,12 +5,12 @@ date: 2026-02-01
 category: Performance
 tags: [Hosting, Speed, SEO, Small Business, Website Speed]
 readTime: 18 min read
-cover: /images/blog/hosting.png
+cover: /images/blog/hosting.webp
 ---
 
 # Slow hosting is silently killing your sales
 
-![Modern server racks glowing emerald green, cinematic datacenter lighting, premium tech aesthetic, 16:9](/images/blog/hosting-hero.png)
+![Modern server racks glowing emerald green, cinematic datacenter lighting, premium tech aesthetic, 16:9](/images/blog/hosting-hero.webp)
 
 Most small business owners obsess over the wrong things.
 
@@ -232,7 +232,7 @@ It’s where you protect income.
 
 ## Hosting providers that actually work
 
-![Clean laptop with hosting dashboard analytics and speed graphs, green glow aesthetic, 16:9](/images/blog/hosting-dashboard.png)
+![Clean laptop with hosting dashboard analytics and speed graphs, green glow aesthetic, 16:9](/images/blog/hosting-dashboard.webp)
 
 These are generally reliable choices:
 

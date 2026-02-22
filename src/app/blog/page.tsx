@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     siteName: "Web Growth",
     images: [
       {
-        url: "https://webgrowth.info/images/placeholder.png",
+        url: "https://webgrowth.info/images/placeholder.webp",
         width: 1200,
         height: 630,
         alt: "Web Growth web design blog",
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
     title: "Web Design Blog | Web Growth",
     description:
       "Web design, SEO, and conversion strategy articles for business growth.",
-    images: ["https://webgrowth.info/images/placeholder.png"],
+    images: ["https://webgrowth.info/images/placeholder.webp"],
   },
   robots: { index: true, follow: true },
 };

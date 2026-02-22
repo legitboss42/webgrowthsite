@@ -5,12 +5,12 @@ date: 2026-02-03
 category: UX
 tags: ["Conversion", "Homepage", "UX", "Sales Psychology"]
 readTime: 21 min read
-cover: /images/blog/homepage.png
+cover: /images/blog/homepage.webp
 ---
 
 # Homepage Structure That Converts Visitors Into Customers
 
-![Clean modern website wireframe layout glowing green on dark screen, professional design aesthetic, 16:9](/images/blog/homepage-hero.png)
+![Clean modern website wireframe layout glowing green on dark screen, professional design aesthetic, 16:9](/images/blog/homepage-hero.webp)
 
 Most small business websites look pretty.
 
@@ -119,7 +119,7 @@ Let’s break it down.
 
 ## Section 1: Hero (clarity beats creativity)
 
-![Bold headline on laptop screen, minimal layout, strong contrast, 16:9](/images/blog/hero-section.png)
+![Bold headline on laptop screen, minimal layout, strong contrast, 16:9](/images/blog/hero-section.webp)
 
 Most businesses screw this up immediately.
 
@@ -252,7 +252,7 @@ Every time.
 
 ## Section 5: Process (reduce fear)
 
-![Step-by-step roadmap graphic, clean icons, dark theme with green glow, 16:9](/images/blog/process.png)
+![Step-by-step roadmap graphic, clean icons, dark theme with green glow, 16:9](/images/blog/process.webp)
 
 People fear complexity.
 

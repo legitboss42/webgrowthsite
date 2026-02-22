@@ -1,9 +1,9 @@
-﻿"use client";
+"use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type MouseEvent } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import type { Post, Category } from "../../lib/posts";
+import type { Post } from "../../lib/posts";
 import { gsap } from "gsap";
 
 type Props = {
@@ -12,6 +12,28 @@ type Props = {
 
 type FilterMode = "All" | "Category" | "Tag";
 
+const CATEGORY_ORDER = [
+  "Series",
+  "Case Study",
+  "Strategy",
+  "SEO",
+  "Conversion",
+  "Performance",
+  "UX",
+  "Automation",
+] as const;
+
+function formatPostDate(value: string) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+
+  return date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
 export default function BlogClient({ posts }: Props) {
   const rootRef = useRef<HTMLDivElement | null>(null);
   const glowRef = useRef<HTMLDivElement | null>(null);
@@ -19,23 +41,26 @@ export default function BlogClient({ posts }: Props) {
 
   const [query, setQuery] = useState("");
   const [filterMode, setFilterMode] = useState<FilterMode>("All");
-  const [activeCategory, setActiveCategory] = useState<Category | "All">("All");
+  const [activeCategory, setActiveCategory] = useState<string>("All");
   const [activeTag, setActiveTag] = useState<string>("All");
 
   const categories = useMemo(() => {
-    const set = new Set<Category>();
-    posts.forEach((p: Post) => set.add(p.category));
+    const set = new Set<string>();
+    posts.forEach((p: Post) => {
+      if (p.category) set.add(p.category);
+    });
 
-    const ordered: Category[] = ["Conversion", "Performance", "Strategy", "SEO", "UX"];
-    const present = ordered.filter((c) => set.has(c));
+    const orderedPresent = CATEGORY_ORDER.filter((c) => set.has(c));
+    const extraCategories = Array.from(set)
+      .filter((c) => !CATEGORY_ORDER.includes(c as (typeof CATEGORY_ORDER)[number]))
+      .sort((a, b) => a.localeCompare(b));
 
-    return ["All", ...present] as const;
+    return ["All", ...orderedPresent, ...extraCategories];
   }, [posts]);
 
   const tags = useMemo(() => {
     const set = new Set<string>();
 
-    // ✅ SAFE: if tags missing, treat as []
     posts.forEach((p: Post) => (p.tags ?? []).forEach((t: string) => set.add(t)));
 
     return ["All", ...Array.from(set).sort((a, b) => a.localeCompare(b))];
@@ -52,7 +77,7 @@ export default function BlogClient({ posts }: Props) {
         p.title.toLowerCase().includes(q) ||
         p.excerpt.toLowerCase().includes(q) ||
         p.category.toLowerCase().includes(q) ||
-        safeTags.join(" ").toLowerCase().includes(q); // ✅ SAFE
+        safeTags.join(" ").toLowerCase().includes(q);
 
       const matchesCategory =
         filterMode !== "Category" || activeCategory === "All"
@@ -60,13 +85,16 @@ export default function BlogClient({ posts }: Props) {
           : p.category === activeCategory;
 
       const matchesTag =
-        filterMode !== "Tag" || activeTag === "All" ? true : safeTags.includes(activeTag); // ✅ SAFE
+        filterMode !== "Tag" || activeTag === "All" ? true : safeTags.includes(activeTag);
 
       const matchesMode = filterMode === "All" ? true : matchesCategory && matchesTag;
 
       return matchesQuery && matchesMode;
     });
   }, [posts, query, filterMode, activeCategory, activeTag]);
+
+  const featuredPost = filtered[0];
+  const listPosts = filtered.slice(1);
 
   useEffect(() => {
     const reduceMotion =
@@ -82,8 +110,8 @@ export default function BlogClient({ posts }: Props) {
     const ctx = gsap.context(() => {
       gsap.fromTo(
         "[data-hero-item]",
-        { opacity: 0, y: 24, filter: "blur(8px)" },
-        { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.9, stagger: 0.08, ease: "power3.out" }
+        { opacity: 0, y: 20, filter: "blur(8px)" },
+        { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.8, stagger: 0.07, ease: "power3.out" }
       );
 
       gsap.fromTo(
@@ -93,10 +121,10 @@ export default function BlogClient({ posts }: Props) {
           opacity: 1,
           y: 0,
           filter: "blur(0px)",
-          duration: 0.65,
-          stagger: 0.06,
+          duration: 0.62,
+          stagger: 0.05,
           ease: "power3.out",
-          delay: 0.15,
+          delay: 0.12,
         }
       );
     }, root);
@@ -116,24 +144,23 @@ export default function BlogClient({ posts }: Props) {
     gsap.fromTo(
       "[data-card]",
       { opacity: 0, y: 14, filter: "blur(6px)" },
-      { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.55, stagger: 0.04, ease: "power3.out" }
+      { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.5, stagger: 0.035, ease: "power3.out" }
     );
   }, [query, filterMode, activeCategory, activeTag, filtered.length]);
 
-  function onHeroMouseMove(e: React.MouseEvent<HTMLElement>) {
+  function onHeroMouseMove(e: MouseEvent<HTMLElement>) {
     const glow = glowRef.current;
     const hero = heroRef.current;
     if (!glow || !hero) return;
 
-    const r = hero.getBoundingClientRect();
-    const x = ((e.clientX - r.left) / r.width) * 100;
-    const y = ((e.clientY - r.top) / r.height) * 100;
-    glow.style.background = `radial-gradient(circle at ${x}% ${y}%, rgba(16,185,129,0.18), transparent 55%)`;
+    const rect = hero.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    glow.style.background = `radial-gradient(circle at ${x}% ${y}%, rgba(255,255,255,0.12), transparent 58%)`;
   }
 
   return (
     <div ref={rootRef} className="min-h-screen bg-black text-white">
-      {/* HERO */}
       <section
         ref={heroRef}
         onMouseMove={onHeroMouseMove}
@@ -141,130 +168,111 @@ export default function BlogClient({ posts }: Props) {
       >
         <div className="absolute inset-0">
           <div ref={glowRef} className="absolute inset-0" />
-          <div className="absolute -top-24 left-1/2 h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-emerald-500/10 blur-3xl" />
-          <div className="absolute -bottom-40 right-[-120px] h-[520px] w-[520px] rounded-full bg-emerald-500/10 blur-3xl" />
-
-          <div
-            className="absolute inset-0 opacity-[0.12]"
-            style={{
-              backgroundImage:
-                "linear-gradient(to right, rgba(255,255,255,0.08) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.08) 1px, transparent 1px)",
-              backgroundSize: "42px 42px",
-            }}
-          />
-          <div className="absolute inset-0 bg-black/40" />
+          <div className="absolute -top-24 left-1/2 h-[500px] w-[500px] -translate-x-1/2 rounded-full bg-white/8 blur-3xl" />
+          <div className="absolute inset-0 bg-black/45" />
         </div>
 
-        <div className="relative mx-auto max-w-6xl px-6 py-20">
-          <div className="max-w-3xl">
-            <div data-hero-item className="text-sm tracking-[0.25em] text-white/55">
-              BLOG
+        <div className="relative mx-auto max-w-6xl px-6 py-14">
+          <div className="grid gap-6 lg:grid-cols-[1fr_auto] lg:items-end">
+            <div className="max-w-3xl">
+              <div data-hero-item className="text-xs tracking-[0.22em] text-white/55">
+                BLOG
+              </div>
+              <h1 data-hero-item className="mt-3 text-3xl md:text-5xl font-semibold leading-tight">
+                Structured insights for redesign, SEO, and conversion growth.
+              </h1>
+              <p data-hero-item className="mt-4 text-white/70">
+                Same strategy content, now arranged like an editorial board: one lead story plus a
+                clean card grid.
+              </p>
             </div>
 
-            <h1 data-hero-item className="mt-4 text-4xl md:text-5xl font-semibold leading-tight">
-              Growth notes for people who want results, not vibes.
-            </h1>
-
-            <p data-hero-item className="mt-6 text-lg text-white/70 leading-relaxed">
-              Practical web design, SEO, performance and conversion strategy - written for business
-              owners and builders.
-            </p>
-
-            <div data-hero-item className="mt-10 flex flex-col gap-3 sm:flex-row">
-              <div className="flex-1 rounded-xl border border-white/10 bg-black/40 px-4 py-3">
+            <div data-hero-item className="w-full max-w-sm lg:w-[340px]">
+              <div className="rounded-xl border border-white/15 bg-black/40 px-4 py-3">
                 <input
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Search posts (e.g. SEO, speed, leads)…"
-                  className="w-full bg-transparent text-white placeholder:text-white/40 outline-none"
+                  placeholder="Search posts"
+                  className="w-full bg-transparent text-sm text-white placeholder:text-white/45 outline-none"
                 />
               </div>
-
-              <Link
-                href="/contact"
-                className="rounded-xl bg-emerald-600 px-6 py-3 text-sm font-semibold text-white text-center hover:bg-emerald-500 transition"
-              >
-                Work with Web Growth
-              </Link>
             </div>
+          </div>
 
-            {/* Filter mode toggle */}
-            <div data-hero-item className="mt-6 flex flex-wrap gap-2">
-              {(["All", "Category", "Tag"] as const).map((m) => {
-                const active = m === filterMode;
+          <div data-hero-item className="mt-6 flex flex-wrap gap-2">
+            {(["All", "Category", "Tag"] as const).map((mode) => {
+              const active = mode === filterMode;
+              return (
+                <button
+                  key={mode}
+                  onClick={() => {
+                    setFilterMode(mode);
+                    if (mode !== "Category") setActiveCategory("All");
+                    if (mode !== "Tag") setActiveTag("All");
+                  }}
+                  className={[
+                    "rounded-full px-3 py-1.5 text-xs border transition",
+                    active
+                      ? "border-white/45 bg-white/10 text-white"
+                      : "border-white/15 bg-black/35 text-white/70 hover:text-white hover:bg-white/5",
+                  ].join(" ")}
+                >
+                  {mode}
+                </button>
+              );
+            })}
+          </div>
+
+          {filterMode === "Category" && (
+            <div data-hero-item className="mt-3 flex flex-wrap gap-2">
+              {categories.map((category) => {
+                const active = category === activeCategory;
                 return (
                   <button
-                    key={m}
-                    onClick={() => {
-                      setFilterMode(m);
-                      if (m !== "Category") setActiveCategory("All");
-                      if (m !== "Tag") setActiveTag("All");
-                    }}
+                    key={category}
+                    onClick={() => setActiveCategory(category)}
                     className={[
                       "rounded-full px-3 py-1.5 text-xs border transition",
                       active
-                        ? "border-emerald-400/40 bg-emerald-500/15 text-emerald-200"
-                        : "border-white/10 bg-black/30 text-white/65 hover:bg-black/45 hover:text-white/80",
+                        ? "border-white/45 bg-white/10 text-white"
+                        : "border-white/15 bg-black/35 text-white/70 hover:text-white hover:bg-white/5",
                     ].join(" ")}
                   >
-                    {m}
+                    {category}
                   </button>
                 );
               })}
             </div>
+          )}
 
-            {filterMode === "Category" && (
-              <div data-hero-item className="mt-4 flex flex-wrap gap-2">
-                {categories.map((c) => {
-                  const active = c === activeCategory;
-                  return (
-                    <button
-                      key={c}
-                      onClick={() => setActiveCategory(c)}
-                      className={[
-                        "rounded-full px-3 py-1.5 text-xs border transition",
-                        active
-                          ? "border-emerald-400/40 bg-emerald-500/15 text-emerald-200"
-                          : "border-white/10 bg-black/30 text-white/65 hover:bg-black/45 hover:text-white/80",
-                      ].join(" ")}
-                    >
-                      {c}
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-
-            {filterMode === "Tag" && (
-              <div data-hero-item className="mt-4 flex flex-wrap gap-2">
-                {tags.map((t: string) => {
-                  const active = t === activeTag;
-                  return (
-                    <button
-                      key={t}
-                      onClick={() => setActiveTag(t)}
-                      className={[
-                        "rounded-full px-3 py-1.5 text-xs border transition",
-                        active
-                          ? "border-emerald-400/40 bg-emerald-500/15 text-emerald-200"
-                          : "border-white/10 bg-black/30 text-white/65 hover:bg-black/45 hover:text-white/80",
-                      ].join(" ")}
-                    >
-                      {t}
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-          </div>
+          {filterMode === "Tag" && (
+            <div data-hero-item className="mt-3 flex flex-wrap gap-2">
+              {tags.map((tag) => {
+                const active = tag === activeTag;
+                return (
+                  <button
+                    key={tag}
+                    onClick={() => setActiveTag(tag)}
+                    className={[
+                      "rounded-full px-3 py-1.5 text-xs border transition",
+                      active
+                        ? "border-white/45 bg-white/10 text-white"
+                        : "border-white/15 bg-black/35 text-white/70 hover:text-white hover:bg-white/5",
+                    ].join(" ")}
+                  >
+                    {tag}
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
       </section>
 
-      {/* LIST */}
-      <section className="mx-auto max-w-6xl px-6 py-16">
-        <div className="flex items-end justify-between gap-4">
+      <section className="mx-auto max-w-6xl px-6 py-12">
+        <div className="mb-6 flex items-end justify-between gap-4">
           <div>
-            <div className="text-sm text-white/50">Latest</div>
+            <div className="text-xs tracking-[0.2em] text-white/45">LATEST</div>
             <h2 className="mt-2 text-2xl font-semibold">Articles</h2>
           </div>
           <div className="text-sm text-white/55">
@@ -273,86 +281,119 @@ export default function BlogClient({ posts }: Props) {
           </div>
         </div>
 
-        <div className="mt-10 grid gap-6 md:grid-cols-2">
-          {filtered.map((p: Post) => {
-            const safeTags = p.tags ?? []; // ✅ SAFE
+        {featuredPost ? (
+          <article
+            data-card
+            className="group overflow-hidden rounded-3xl border border-white/15 bg-black/45"
+          >
+            <div className="grid lg:grid-cols-[1.25fr_1fr]">
+              <Link href={`/blog/${featuredPost.slug}`} className="relative block min-h-[250px] lg:min-h-[370px]">
+                {featuredPost.cover ? (
+                  <Image
+                    src={featuredPost.cover}
+                    alt={featuredPost.title}
+                    fill
+                    className="object-cover opacity-95 group-hover:opacity-100 transition"
+                    sizes="(max-width: 1024px) 100vw, 60vw"
+                    priority={false}
+                  />
+                ) : (
+                  <div className="absolute inset-0 bg-white/5" />
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/15 to-transparent" />
+              </Link>
 
-            return (
-              <article
-                key={p.slug}
-                data-card
-                className="group relative overflow-hidden rounded-2xl border border-white/10 bg-black/40
-                           transition-all duration-300 hover:-translate-y-1 hover:border-emerald-500/25 hover:bg-black/55"
-              >
-                {/* COVER IMAGE */}
-                {p.cover ? (
-                  <Link href={`/blog/${p.slug}`} className="block">
-                    <div className="relative aspect-[16/9] overflow-hidden border-b border-white/10 bg-white/5">
-                      <Image
-                        src={p.cover}
-                        alt={p.title}
-                        fill
-                        className="object-cover opacity-95 group-hover:opacity-100 transition"
-                        sizes="(max-width: 768px) 100vw, 50vw"
-                        priority={false}
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
-                    </div>
-                  </Link>
-                ) : null}
-
-                {/* hover glow */}
-                <div className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition">
-                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(16,185,129,0.12),transparent_60%)]" />
+              <div className="p-6 lg:p-8">
+                <div className="flex flex-wrap items-center gap-2 text-xs text-white/65">
+                  <span className="rounded-full border border-white/25 bg-white/10 px-2.5 py-1 text-white">
+                    {featuredPost.category}
+                  </span>
+                  <span>{formatPostDate(featuredPost.date)}</span>
+                  <span className="h-1 w-1 rounded-full bg-white/35" />
+                  <span>{featuredPost.readTime}</span>
                 </div>
 
-                {/* shimmer */}
-                <div className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition">
-                  <div className="absolute -left-1/3 top-0 h-full w-1/3 rotate-12 bg-white/8 blur-2xl translate-x-[-70%] group-hover:translate-x-[340%] transition duration-[1100ms]" />
-                </div>
+                <h3 className="mt-4 text-2xl md:text-3xl font-semibold leading-tight">
+                  {featuredPost.title}
+                </h3>
+                <p className="mt-4 text-white/75 leading-relaxed">{featuredPost.excerpt}</p>
 
-                <div className="relative p-7">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="rounded-full border border-emerald-400/25 bg-emerald-500/10 px-2.5 py-1 text-xs text-emerald-200">
-                      {p.category}
-                    </span>
-
-                    {/* ✅ SAFE */}
-                    {safeTags.map((t: string) => (
+                <div className="mt-6 flex items-center justify-between gap-3">
+                  <div className="flex flex-wrap gap-2">
+                    {(featuredPost.tags ?? []).slice(0, 2).map((tag) => (
                       <span
-                        key={t}
-                        className="rounded-full border border-white/10 bg-black/40 px-2.5 py-1 text-xs text-white/65"
+                        key={tag}
+                        className="rounded-full border border-white/15 bg-black/30 px-2.5 py-1 text-xs text-white/65"
                       >
-                        {t}
+                        {tag}
                       </span>
                     ))}
                   </div>
 
-                  <h3 className="mt-5 text-xl font-semibold leading-snug">{p.title}</h3>
-                  <p className="mt-3 text-white/70 leading-relaxed">{p.excerpt}</p>
+                  <Link
+                    href={`/blog/${featuredPost.slug}`}
+                    className="rounded-lg border border-white/20 bg-black/35 px-3.5 py-2 text-xs font-semibold text-white/85 hover:bg-white/10 transition"
+                  >
+                    Read article →
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </article>
+        ) : null}
 
-                  <div className="mt-6 flex items-center justify-between text-sm text-white/55">
-                    <div className="flex items-center gap-3">
-                      <span>{new Date(p.date).toLocaleDateString()}</span>
-                      <span className="h-1 w-1 rounded-full bg-white/30" />
-                      <span>{p.readTime}</span>
-                    </div>
+        {listPosts.length ? (
+          <div className="mt-6 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+            {listPosts.map((post) => (
+              <article
+                key={post.slug}
+                data-card
+                className="group overflow-hidden rounded-2xl border border-white/12 bg-black/40 transition-all duration-300 hover:-translate-y-0.5 hover:border-white/25"
+              >
+                <Link href={`/blog/${post.slug}`} className="block">
+                  <div className="relative aspect-[16/10] overflow-hidden border-b border-white/10 bg-white/5">
+                    {post.cover ? (
+                      <Image
+                        src={post.cover}
+                        alt={post.title}
+                        fill
+                        className="object-cover opacity-95 group-hover:opacity-100 transition"
+                        sizes="(max-width: 1024px) 100vw, 33vw"
+                        priority={false}
+                      />
+                    ) : null}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/10 to-transparent" />
+                  </div>
+                </Link>
 
+                <div className="p-5">
+                  <div className="flex items-center justify-between gap-3 text-[11px] text-white/60">
+                    <span className="rounded-full border border-white/20 bg-white/10 px-2 py-0.5 text-[10px] uppercase tracking-wide text-white">
+                      {post.category}
+                    </span>
+                    <span>{formatPostDate(post.date)}</span>
+                  </div>
+
+                  <h3 className="mt-3 text-lg font-semibold leading-snug">{post.title}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-white/72">{post.excerpt}</p>
+
+                  <div className="mt-5 flex items-center justify-between text-xs text-white/60">
+                    <span>{post.readTime}</span>
                     <Link
-                      href={`/blog/${p.slug}`}
-                      className="rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-white/80 hover:bg-black/45 hover:text-white transition"
+                      href={`/blog/${post.slug}`}
+                      className="font-semibold text-white/85 hover:text-white transition"
                     >
                       Read →
                     </Link>
                   </div>
                 </div>
               </article>
-            );
-          })}
-        </div>
+            ))}
+          </div>
+        ) : null}
 
         {filtered.length === 0 && (
-          <div className="mt-12 rounded-2xl border border-white/10 bg-black/40 p-8 text-white/70">
+          <div className="mt-8 rounded-2xl border border-white/12 bg-black/45 p-8 text-white/70">
             No posts match that search. Try a different keyword or clear filters.
           </div>
         )}
@@ -360,5 +401,4 @@ export default function BlogClient({ posts }: Props) {
     </div>
   );
 }
-
 

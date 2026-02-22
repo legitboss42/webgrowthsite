@@ -14,7 +14,7 @@ interface ServiceCardProps {
 const ServiceCard: React.FC<ServiceCardProps> = ({
   title,
   description,
-  imageUrl = "/images/placeholder.png",
+  imageUrl = "/images/placeholder.webp",
   href,
   className,
   headingLevel = "h3",

@@ -39,7 +39,7 @@ export function generateMetadata({
 
   const socialImage = post.cover
     ? `https://webgrowth.info${post.cover}`
-    : "https://webgrowth.info/images/placeholder.png";
+    : "https://webgrowth.info/images/placeholder.webp";
 
   return {
     title: `${post.title} | Web Growth`,
@@ -182,7 +182,7 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
       url: SITE_URL,
       logo: {
         "@type": "ImageObject",
-        url: `${SITE_URL}/images/brand/web-growth-logo.png`,
+        url: `${SITE_URL}/images/brand/web-growth-logo.webp`,
       },
     },
     image: post.cover ? [`${SITE_URL}${post.cover}`] : undefined,

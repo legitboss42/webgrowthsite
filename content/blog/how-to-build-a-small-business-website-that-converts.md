@@ -5,12 +5,12 @@ date: 2026-02-02
 category: Conversion
 tags: ["Conversion", "UX", "Sales", "Website Strategy", "Small Business"]
 readTime: 18 min read
-cover: /images/blog/converting-website.png
+cover: /images/blog/converting-website.webp
 ---
 
 # How to Build a Small Business Website That Actually Converts Visitors Into Customers
 
-![Modern clean business website mockup on laptop with green accent lighting, conversion concept, 16:9](/images/blog/conversion-hero.png)
+![Modern clean business website mockup on laptop with green accent lighting, conversion concept, 16:9](/images/blog/conversion-hero.webp)
 
 Most small business websites are decoration.
 
@@ -135,7 +135,7 @@ Always.
 
 ## Section 2: Proof immediately after
 
-![Happy client analytics dashboard with rising conversions, green charts, 16:9](/images/blog/proof-section.png)
+![Happy client analytics dashboard with rising conversions, green charts, 16:9](/images/blog/proof-section.webp)
 
 Trust must appear early.
 
@@ -259,7 +259,7 @@ Done.
 
 ## Section 6: Speed is conversion
 
-![Website speedometer gauge showing fast loading, neon green, 16:9](/images/blog/speed-conversion.png)
+![Website speedometer gauge showing fast loading, neon green, 16:9](/images/blog/speed-conversion.webp)
 
 Slow sites kill sales.
 

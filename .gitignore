@@ -39,3 +39,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# images (keep PNG originals local only)
+assets/png-archive/
+*.png

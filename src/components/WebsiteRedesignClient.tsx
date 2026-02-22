@@ -129,7 +129,7 @@ export default function WebsiteRedesignClient() {
             <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-black/40">
               <div
                 className="h-[360px] bg-cover bg-center opacity-80"
-                style={{ backgroundImage: "url(/images/services/services-redesign.png)" }}
+                style={{ backgroundImage: "url(/images/services/services-redesign.webp)" }}
               />
               <div className="absolute inset-0 bg-black/35" />
             </div>
@@ -197,7 +197,7 @@ export default function WebsiteRedesignClient() {
             <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-black/40">
               <div
                 className="h-[420px] bg-cover bg-center opacity-80"
-                style={{ backgroundImage: "url(/images/services/services-redesign-2.png)" }}
+                style={{ backgroundImage: "url(/images/services/services-redesign-2.webp)" }}
               />
               <div className="absolute inset-0 bg-black/35" />
             </div>
@@ -305,7 +305,7 @@ export default function WebsiteRedesignClient() {
             primaryHref="/contact?service=Website Redesign"
             secondaryCtaText="View Services"
             secondaryHref="/services"
-            imageUrl="/images/services/services-redesign-cta.png"
+            imageUrl="/images/services/services-redesign-cta.webp"
           />
         </div>
       </section>

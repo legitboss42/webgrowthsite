@@ -5,12 +5,12 @@ date: 2026-02-03
 category: Performance
 tags: ["Speed", "Performance", "Core Web Vitals", "SEO"]
 readTime: 20 min read
-cover: /images/blog/speed.png
+cover: /images/blog/speed.webp
 ---
 
 # How to Make Your Website Load Fast (Complete Speed Optimization Guide)
 
-![Speed gauge dashboard glowing neon green, futuristic performance concept, 16:9](/images/blog/speed-hero.png)
+![Speed gauge dashboard glowing neon green, futuristic performance concept, 16:9](/images/blog/speed-hero.webp)
 
 Letâ€™s be blunt.
 
@@ -134,7 +134,7 @@ Thatâ€™s it.
 
 ## Step 2: Fix images first (biggest win)
 
-![Large photos compressing into smaller files, digital optimization concept, 16:9](/images/blog/image-compression.png)
+![Large photos compressing into smaller files, digital optimization concept, 16:9](/images/blog/image-compression.webp)
 
 Images are usually 70â€“80% of page size.
 

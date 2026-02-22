@@ -51,16 +51,16 @@ function buildMockup(input: MockupInput): Mockup {
   // Existing image pool (use what you already have)
   const images = {
     hero: {
-      aesthetic_clinic: "/images/portfolio/jluxe-mockup.png",
-      service_business: "/images/portfolio/service-upgrade.png",
-      ecommerce_store: "/images/services/services-ecommerce.png",
-      agency: "/images/hero/Hero-Image-1.png",
-      restaurant: "/images/backgrounds/services-bg.png",
+      aesthetic_clinic: "/images/portfolio/jluxe-mockup.webp",
+      service_business: "/images/portfolio/service-upgrade.webp",
+      ecommerce_store: "/images/services/services-ecommerce.webp",
+      agency: "/images/hero/Hero-Image-1.webp",
+      restaurant: "/images/backgrounds/services-bg.webp",
     },
-    service1: "/images/services/services-business.png",
-    service2: "/images/services/services-landing.png",
-    service3: "/images/services/services-redesign.png",
-    cta: "/images/services/services-cta.png",
+    service1: "/images/services/services-business.webp",
+    service2: "/images/services/services-landing.webp",
+    service3: "/images/services/services-redesign.webp",
+    cta: "/images/services/services-cta.webp",
   };
 
   const accent: Theme["accent"] =

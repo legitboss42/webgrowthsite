@@ -22,7 +22,7 @@ export const metadata: Metadata = {
     siteName: "Web Growth",
     images: [
       {
-        url: "https://webgrowth.info/images/placeholder.png",
+        url: "https://webgrowth.info/images/placeholder.webp",
         width: 1200,
         height: 630,
         alt: "Web Growth privacy policy",
@@ -35,7 +35,7 @@ export const metadata: Metadata = {
     title: "Privacy Policy | Web Growth",
     description:
       "How Web Growth handles and protects data collected through our website and services.",
-    images: ["https://webgrowth.info/images/placeholder.png"],
+    images: ["https://webgrowth.info/images/placeholder.webp"],
   },
 };
 

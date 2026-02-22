@@ -26,7 +26,7 @@ export default function HomeClient() {
         className="relative h-screen flex items-center justify-center overflow-hidden"
       >
         <Image
-          src="/images/hero/Hero-Image-1.png"
+          src="/images/hero/Hero-Image-1.webp"
           alt=""
           fill
           priority
@@ -70,7 +70,7 @@ export default function HomeClient() {
         className="relative min-h-screen overflow-hidden py-28 bg-gray-950"
       >
         <Image
-          src="/images/backgrounds/services-bg.png"
+          src="/images/backgrounds/services-bg.webp"
           alt=""
           fill
           loading="lazy"
@@ -94,7 +94,7 @@ export default function HomeClient() {
               <ServiceCard
                 title="Business Website Design"
                 description="A clean, fast website that positions your business professionally and converts visitors into enquiries."
-                imageUrl="/images/services/service-1.png"
+                imageUrl="/images/services/service-1.webp"
                 href="/services/business-website-design"
                 headingLevel="h2"
               />
@@ -104,7 +104,7 @@ export default function HomeClient() {
               <ServiceCard
                 title="Landing Pages"
                 description="Focused pages built for campaigns, ads, and offers - designed to push one action and win leads."
-                imageUrl="/images/services/service-2.png"
+                imageUrl="/images/services/service-2.webp"
                 href="/services/landing-page-design"
                 headingLevel="h2"
               />
@@ -114,7 +114,7 @@ export default function HomeClient() {
               <ServiceCard
                 title="Website Redesign"
                 description="Transform an outdated website into a modern, structured platform that performs better."
-                imageUrl="/images/services/service-3.png"
+                imageUrl="/images/services/service-3.webp"
                 href="/services/website-redesign"
                 headingLevel="h2"
               />
@@ -229,7 +229,7 @@ export default function HomeClient() {
                   client={cs.client}
                   summary={cs.summary}
                   results={cs.results}
-                  imageUrl="/images/portfolio/portfolio-1.png"
+                  imageUrl="/images/portfolio/portfolio-1.webp"
                   href="/portfolio"
                   headingLevel="h2"
                 />
@@ -245,7 +245,7 @@ export default function HomeClient() {
               primaryHref="/contact"
               secondaryCtaText="View Portfolio"
               secondaryHref="/portfolio"
-              imageUrl="/images/portfolio/portfolio-4.png"
+              imageUrl="/images/portfolio/portfolio-4.webp"
             />
           </div>
         </div>
@@ -298,7 +298,7 @@ export default function HomeClient() {
               primaryHref="/contact"
               secondaryCtaText="See Pricing"
               secondaryHref="/pricing"
-              imageUrl="/images/portfolio/portfolio-cta.png"
+              imageUrl="/images/portfolio/portfolio-cta.webp"
             />
           </div>
         </div>

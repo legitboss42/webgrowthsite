@@ -6,7 +6,7 @@ date: "2026-02-07"
 category: "Performance"
 tags: ["Hosting", "Speed", "Infrastructure", "Cloudways"]
 readTime: "15 min read"
-cover: "/images/blog/cloud-infrastructure.png"
+cover: "/images/blog/cloud-infrastructure.webp"
 ---
 
 If you are building a digital business, your hosting is not a utility. It is your foundation.
@@ -62,7 +62,7 @@ Why is Cloudways faster? It's not magic; it's the stack.
 
 When you launch a server on Cloudways, you aren't just getting file storage. You are getting a pre-configured performance stack known as "ThunderStack."
 
-![The Cloudways ThunderStack Architecture](/images/blog/cloudways-stack.png)
+![The Cloudways ThunderStack Architecture](/images/blog/cloudways-stack.webp)
 
 Caption: The Engineering Stack Behind the Speed
 
@@ -88,7 +88,7 @@ I harp on speed because it is the single highest-ROI lever you can pull.
 
 Google's Core Web Vitals update made "Loading Speed" a ranking factor. If your site takes longer than 2.5 seconds to load (LCP), Google explicitly demotes you in search results.
 
-![Speed Comparison Graph: Shared vs Cloud](/images/blog/speed-comparison.png)
+![Speed Comparison Graph: Shared vs Cloud](/images/blog/speed-comparison.webp)
 
 Caption: Average TTFB: Shared Hosting vs. Cloudways
 

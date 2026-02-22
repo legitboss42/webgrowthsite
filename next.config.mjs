@@ -18,6 +18,11 @@ const nextConfig = {
         destination: "https://webgrowth.info/services/website-audit",
         permanent: true,
       },
+      {
+        source: "/images/:path*.png",
+        destination: "/images/:path*.webp",
+        permanent: true,
+      },
     ];
   },
 };

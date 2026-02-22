@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     siteName: "Web Growth",
     images: [
       {
-        url: "https://webgrowth.info/images/placeholder.png",
+        url: "https://webgrowth.info/images/placeholder.webp",
         width: 1200,
         height: 630,
         alt: "Web Growth web design pricing",
@@ -35,7 +35,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Web Design Pricing | Web Growth",
     description: "Transparent web design pricing and clear package deliverables.",
-    images: ["https://webgrowth.info/images/placeholder.png"],
+    images: ["https://webgrowth.info/images/placeholder.webp"],
   },
 };
 

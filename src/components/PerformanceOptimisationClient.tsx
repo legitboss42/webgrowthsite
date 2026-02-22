@@ -162,7 +162,7 @@ export default function PerformanceOptimisationClient() {
             <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-black/40">
               <div
                 className="h-[360px] bg-cover bg-center opacity-80"
-                style={{ backgroundImage: "url(/images/services/services-speed.png)" }}
+                style={{ backgroundImage: "url(/images/services/services-speed.webp)" }}
               />
               <div className="absolute inset-0 bg-black/35" />
             </div>
@@ -244,7 +244,7 @@ export default function PerformanceOptimisationClient() {
             <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-black/40">
               <div
                 className="h-[420px] bg-cover bg-center opacity-80"
-                style={{ backgroundImage: "url(/images/services/services-speed-2.png)" }}
+                style={{ backgroundImage: "url(/images/services/services-speed-2.webp)" }}
               />
               <div className="absolute inset-0 bg-black/35" />
             </div>
@@ -304,7 +304,7 @@ export default function PerformanceOptimisationClient() {
             primaryHref="/contact?service=Speed & Performance Optimisation"
             secondaryCtaText="View Services"
             secondaryHref="/services"
-            imageUrl="/images/services/services-cta.png"
+            imageUrl="/images/services/services-cta.webp"
           />
         </div>
       </section>

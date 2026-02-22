@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿﻿import type { Metadata } from "next";
 import Script from "next/script";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -30,7 +30,7 @@ export const metadata: Metadata = {
     siteName: "Web Growth",
     images: [
       {
-        url: "https://webgrowth.info/images/placeholder.png",
+        url: "https://webgrowth.info/images/placeholder.webp",
         width: 1200,
         height: 630,
         alt: "Web Growth web design services",
@@ -43,7 +43,7 @@ export const metadata: Metadata = {
     title: "Web Growth | Web Design Services",
     description:
       "High-performance, conversion-focused websites for businesses that want real growth.",
-    images: ["https://webgrowth.info/images/placeholder.png"],
+    images: ["https://webgrowth.info/images/placeholder.webp"],
   },
   robots: { index: true, follow: true },
 };

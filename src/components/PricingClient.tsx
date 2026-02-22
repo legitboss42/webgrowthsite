@@ -336,9 +336,9 @@ export default function PricingClient() {
 
               <div className="mt-6 grid gap-6 md:grid-cols-3">
                 {[
-                  { name: "Namecheap", src: "/images/brand/namecheap.png" },
-                  { name: "Bluehost", src: "/images/brand/bluehost.png" },
-                  { name: "Hostinger", src: "/images/brand/hostinger.png" },
+                  { name: "Namecheap", src: "/images/brand/namecheap.webp" },
+                  { name: "Bluehost", src: "/images/brand/bluehost.webp" },
+                  { name: "Hostinger", src: "/images/brand/hostinger.webp" },
                 ].map((p) => (
                   <div
                     key={p.name}

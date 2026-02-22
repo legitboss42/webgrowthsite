@@ -6,7 +6,7 @@ date: 2026-02-06
 category: "Conversion"
 tags: ["UX", "Sales", "Strategy", "Next.js"]
 readTime: "12 min read"
-cover: "/images/blog/service-blueprint.png"
+cover: "/images/blog/service-blueprint.webp"
 ---
 
 Stop treating your service page like a resume.
@@ -109,7 +109,7 @@ If you sell "The Growth Architecture System," you are a category of one.
 
 You need to productize your service into a System.
 
-![The 4-Step Growth Architecture Diagram](/images/blog/growth-process.png)
+![The 4-Step Growth Architecture Diagram](/images/blog/growth-process.webp)
 
 Caption: The Web Growth Architecture System.
 
@@ -203,7 +203,7 @@ You don't need to guess where things go. I have built a wireframe that maps this
 
 It's the exact layout I use for $5,000+ projects.
 
-![Preview of the Service Page Wireframe PDF on a laptop](/images/blog/wireframe-preview.png)
+![Preview of the Service Page Wireframe PDF on a laptop](/images/blog/wireframe-preview.webp)
 
 Caption: The Service Page Wireframe preview.
 

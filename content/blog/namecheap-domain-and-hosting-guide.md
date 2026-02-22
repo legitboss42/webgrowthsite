@@ -5,10 +5,10 @@ date: 2026-02-02
 category: Strategy
 tags: ["Namecheap", "Domains", "Hosting", "VPS", "Website Setup", "Tools"]
 readTime: 16 min read
-cover: /images/blog/namecheap-hero.png
+cover: /images/blog/namecheap-hero.webp
 ---
 
-![Modern laptop on dark desk buying a domain name online, green glow lighting, clean tech aesthetic, 16:9](/images/blog/namecheap-hero.png)
+![Modern laptop on dark desk buying a domain name online, green glow lighting, clean tech aesthetic, 16:9](/images/blog/namecheap-hero.webp)
 
 
 # Namecheap Domain and Hosting Review: The Smart, Affordable Way to Launch Your Website in 2026
@@ -128,7 +128,7 @@ Affordable. Straightforward. No nonsense.
 ## Step 1: Buy your domain (first thing always)
 
 
-![Typing domain name into search bar on laptop screen, clean modern UI, emerald accent glow, 16:9](/images/blog/namecheap-domain-search.png)
+![Typing domain name into search bar on laptop screen, clean modern UI, emerald accent glow, 16:9](/images/blog/namecheap-domain-search.webp)
 
 
 Your domain is your address.
@@ -266,7 +266,7 @@ Most people should start here.
 ### VPS Hosting (power + control)
 
 
-![Server dashboard interface with performance graphs glowing green, high performance tech vibe, 16:9](/images/blog/namecheap-vps.png)
+![Server dashboard interface with performance graphs glowing green, high performance tech vibe, 16:9](/images/blog/namecheap-vps.webp)
 
 
 Best for:

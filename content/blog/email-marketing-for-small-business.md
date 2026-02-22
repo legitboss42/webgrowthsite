@@ -5,10 +5,10 @@ date: 2026-02-02
 category: Strategy
 tags: ["Email Marketing", "Leads", "Automation", "Funnels", "Growth"]
 readTime: 18 min read
-cover: /images/blog/email-marketing.png
+cover: /images/blog/email-marketing.webp
 ---
 
-![Modern laptop showing email analytics dashboard with green glow, notifications rising, clean workspace aesthetic, 16:9](/images/blog/email-hero.png)
+![Modern laptop showing email analytics dashboard with green glow, notifications rising, clean workspace aesthetic, 16:9](/images/blog/email-hero.webp)
 
 # Email Marketing for Small Businesses
 
@@ -523,7 +523,7 @@ Consistency wins.
 
 ## Inline example
 
-![Simple email dashboard analytics graph trending upward, emerald green line chart, clean minimal UI, 16:9](/images/blog/email-analytics.png)
+![Simple email dashboard analytics graph trending upward, emerald green line chart, clean minimal UI, 16:9](/images/blog/email-analytics.webp)
 
 If you do this right, your dashboard slowly looks like this.
 

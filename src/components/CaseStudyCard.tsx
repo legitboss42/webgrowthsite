@@ -16,7 +16,7 @@ const CaseStudyCard: React.FC<CaseStudyCardProps> = ({
   client,
   summary,
   results,
-  imageUrl = "/images/placeholder.png",
+  imageUrl = "/images/placeholder.webp",
   href,
   className,
   headingLevel = "h3",

@@ -5,12 +5,12 @@ date: 2026-02-03
 category: Conversion
 tags: ["Conversion", "Leads", "Sales", "Website Strategy"]
 readTime: 18 min read
-cover: /images/blog/leads.png
+cover: /images/blog/leads.webp
 ---
 
 # Why Your Website Isn’t Getting Leads (And How to Fix It Step-by-Step)
 
-![Frustrated business owner looking at analytics with zero conversions, dark desk, green glow, cinematic 16:9](/images/blog/leads-hero.png)
+![Frustrated business owner looking at analytics with zero conversions, dark desk, green glow, cinematic 16:9](/images/blog/leads-hero.webp)
 
 Let’s be blunt.
 
@@ -214,7 +214,7 @@ Confusion kills conversions.
 
 ## Problem 5: Your site is slow
 
-![Website speed gauge glowing green, performance concept, 16:9](/images/blog/site-speed.png)
+![Website speed gauge glowing green, performance concept, 16:9](/images/blog/site-speed.webp)
 
 Speed is invisible but deadly.
 

@@ -5,7 +5,7 @@ date: 2026-02-19
 category: Strategy
 tags: ["Website Redesign", "Conversion", "UX", "SEO", "Small Business"]
 readTime: 14 min read
-cover: /images/blog/redesign-checklist-cover-generated.png
+cover: /images/blog/redesign-checklist-cover-generated.webp
 ---
 
 # Website Redesign Checklist for Small Businesses
@@ -31,7 +31,7 @@ This checklist gives you a practical order of operations so your redesign improv
 
 If your current site is also slow, pair this with the [website speed guide](/blog/how-to-make-your-website-load-fast) before launch.
 
-![Website redesign checklist wireframe focused on clear messaging and conversion flow](/images/blog/redesign-checklist-cover-generated.png)
+![Website redesign checklist wireframe focused on clear messaging and conversion flow](/images/blog/redesign-checklist-cover-generated.webp)
 
 ## Step 1: Decide if you need a full website redesign or a focused fix
 
@@ -114,7 +114,7 @@ Use:
 
 Do not hide all proof on a single testimonials page.
 
-![Service page proof section with testimonials and trust signals to improve lead conversion](/images/blog/redesign-checklist-proof-generated.png)
+![Service page proof section with testimonials and trust signals to improve lead conversion](/images/blog/redesign-checklist-proof-generated.webp)
 
 ## Step 6: Fix mobile UX before desktop polish
 
@@ -150,7 +150,7 @@ Common wins:
 
 If hosting is the bottleneck, review the [best hosting guide](/blog/best-web-hosting-for-small-business-websites).
 
-![Website speed dashboard highlighting Core Web Vitals during redesign optimization](/images/blog/redesign-checklist-speed-generated.png)
+![Website speed dashboard highlighting Core Web Vitals during redesign optimization](/images/blog/redesign-checklist-speed-generated.webp)
 
 ## Step 8: Preserve and improve SEO foundations
 
@@ -169,7 +169,7 @@ Then confirm:
 
 Use the [small business SEO checklist](/blog/small-business-website-seo-checklist) to validate details.
 
-![SEO and performance checklist view showing metadata, indexing and technical audit priorities](/images/blog/redesign-checklist-seo-generated.png)
+![SEO and performance checklist view showing metadata, indexing and technical audit priorities](/images/blog/redesign-checklist-seo-generated.webp)
 
 ## Step 9: Instrument analytics before launch
 

@@ -134,7 +134,7 @@ export default function LandingPageDesignClient() {
             <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-black/40">
               <div
                 className="h-[360px] bg-cover bg-center opacity-80"
-                style={{ backgroundImage: "url(/images/services/services-landing-2.png)" }}
+                style={{ backgroundImage: "url(/images/services/services-landing-2.webp)" }}
               />
               <div className="absolute inset-0 bg-black/35" />
             </div>
@@ -219,7 +219,7 @@ export default function LandingPageDesignClient() {
             <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-black/40">
               <div
                 className="h-[420px] bg-cover bg-center opacity-80"
-                style={{ backgroundImage: "url(/images/services/services-landing-2.png)" }}
+                style={{ backgroundImage: "url(/images/services/services-landing-2.webp)" }}
               />
               <div className="absolute inset-0 bg-black/35" />
               <div className="absolute bottom-4 left-4 right-4 rounded-xl border border-white/10 bg-black/55 p-4 text-sm text-white/70">
@@ -302,7 +302,7 @@ export default function LandingPageDesignClient() {
             primaryHref="/contact?service=Landing Page Design"
             secondaryCtaText="View Services"
             secondaryHref="/services"
-            imageUrl="/images/services/services-landing-cta.png"
+            imageUrl="/images/services/services-landing-cta.webp"
           />
         </div>
       </section>

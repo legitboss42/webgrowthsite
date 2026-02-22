@@ -421,7 +421,7 @@ export default function BlogPostClient({ content }: { content: string }) {
                 key={idx}
                 className="rounded-2xl border border-white/10 bg-white/5 p-6 hover:border-emerald-500/25 transition"
               >
-                <div className="text-lg font-semibold text-white">{b.title}</div>
+                <h3 className="text-lg font-semibold text-white">{b.title}</h3>
                 {b.lines.length ? (
                   <div className="mt-3 space-y-2 text-white/75">
                     {b.lines.map((ln, i2) => (

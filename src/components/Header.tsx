@@ -146,7 +146,7 @@ export default function Header() {
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3">
             <Image
-              src="/images/brand/web-growth-logo.png"
+              src="/images/brand/web-growth-logo.webp"
               alt="Web Growth"
               width={220}
               height={48}

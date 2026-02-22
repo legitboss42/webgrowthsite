@@ -6,7 +6,7 @@ date: "2026-02-08"
 category: "Automation"
 tags: ["Email Marketing", "Next.js", "System", "Revenue"]
 readTime: "16 min read"
-cover: "/images/blog/automation-flow.png"
+cover: "/images/blog/automation-flow.webp"
 ---
 
 There is a lie in the agency world that says: "To make more money, you need to hustle more."
@@ -61,7 +61,7 @@ You must own your domain and authenticate it.
 - DKIM (DomainKeys Identified Mail): "This email was not tampered with."
 - DMARC: "If the email fails checks, reject it."
 
-![DNS Records for Email Deliverability](/images/blog/deliverability-dns.png)
+![DNS Records for Email Deliverability](/images/blog/deliverability-dns.webp)
 
 The DNA of a High-Deliverability Domain.
 

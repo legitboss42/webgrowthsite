@@ -5,12 +5,12 @@ date: 2026-02-15
 category: Strategy
 tags: ["Strategy", "Website Launch", "Conversion", "SEO", "Small Business"]
 readTime: 16 min read
-cover: /images/blog/growth-process.png
+cover: /images/blog/growth-process.webp
 ---
 
 # Website Launch Checklist for Small Businesses (Avoid Expensive Mistakes on Day One)
 
-![Project launch board showing checklist, analytics, and website preview on laptop, green accents, 16:9](/images/blog/growth-process.png)
+![Project launch board showing checklist, analytics, and website preview on laptop, green accents, 16:9](/images/blog/growth-process.webp)
 
 Most small business websites do not fail at design.
 

@@ -164,7 +164,7 @@ export default function WebsiteAuditClient() {
             <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-black/40">
               <div
                 className="h-[360px] bg-cover bg-center opacity-80"
-                style={{ backgroundImage: "url(/images/services/services-audit.png)" }}
+                style={{ backgroundImage: "url(/images/services/services-audit.webp)" }}
               />
               <div className="absolute inset-0 bg-black/35" />
             </div>
@@ -246,7 +246,7 @@ export default function WebsiteAuditClient() {
             <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-black/40">
               <div
                 className="h-[420px] bg-cover bg-center opacity-80"
-                style={{ backgroundImage: "url(/images/services/services-audit-2.png)" }}
+                style={{ backgroundImage: "url(/images/services/services-audit-2.webp)" }}
               />
               <div className="absolute inset-0 bg-black/35" />
             </div>
@@ -304,7 +304,7 @@ export default function WebsiteAuditClient() {
             primaryHref="/contact?service=Website Audit & Consultation"
             secondaryCtaText="View Portfolio"
             secondaryHref="/portfolio"
-            imageUrl="/images/services/services-cta.png"
+            imageUrl="/images/services/services-cta.webp"
           />
         </div>
       </section>

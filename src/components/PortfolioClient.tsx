@@ -38,7 +38,7 @@ export default function PortfolioClient() {
           "Rebuilt the layout for trust, improved mobile experience, and refined the booking flow so visitors know exactly what to do next.",
         results: ["Improved clarity", "Better mobile UX", "Stronger conversion flow"],
         stack: ["Design System", "Performance Pass", "SEO-ready structure"],
-        imageUrl: "/images/portfolio/portfolio-1.png",
+        imageUrl: "/images/portfolio/portfolio-1.webp",
       },
       {
         title: "Campaign Landing Page",
@@ -48,7 +48,7 @@ export default function PortfolioClient() {
           "Created a focused landing page built around one goal: leads. Tight messaging, strong hierarchy, and fast load speed.",
         results: ["Higher intent clicks", "Cleaner messaging", "Fast load time"],
         stack: ["Landing Page UX", "CTA strategy", "Speed optimization"],
-        imageUrl: "/images/portfolio/portfolio-2.png",
+        imageUrl: "/images/portfolio/portfolio-2.webp",
       },
       {
         title: "Business Website Build",
@@ -58,7 +58,7 @@ export default function PortfolioClient() {
           "Designed a modern business website that communicates value quickly and positions the brand as credible and premium.",
         results: ["Premium look", "Clear sections", "Better trust signals"],
         stack: ["Information architecture", "Copy structure", "Mobile-first"],
-        imageUrl: "/images/portfolio/portfolio-5.png",
+        imageUrl: "/images/portfolio/portfolio-5.webp",
       },
       {
         title: "Small Store Setup",
@@ -68,7 +68,7 @@ export default function PortfolioClient() {
           "Planned a clean store structure, simplified product pages, and a checkout flow designed to reduce hesitation.",
         results: ["Cleaner product UX", "Better structure", "Trust-first checkout"],
         stack: ["Store structure", "Product page UX", "Checkout flow"],
-        imageUrl: "/images/portfolio/portfolio-6.png",
+        imageUrl: "/images/portfolio/portfolio-6.webp",
       },
       {
         title: "Service Website Upgrade",
@@ -78,7 +78,7 @@ export default function PortfolioClient() {
           "Updated an outdated site into a modern layout with stronger proof and clearer CTAs - without bloating the experience.",
         results: ["Modern UI", "Stronger proof", "Clear CTA flow"],
         stack: ["UI refresh", "Trust signals", "CTA placement"],
-        imageUrl: "/images/portfolio/portfolio-7.png",
+        imageUrl: "/images/portfolio/portfolio-7.webp",
       },
       {
         title: "Offer Landing Page",
@@ -88,7 +88,7 @@ export default function PortfolioClient() {
           "Built a landing page for a specific offer with a direct conversion path and minimal distraction.",
         results: ["Focused message", "Simple flow", "Lead-ready"],
         stack: ["Offer positioning", "CTA flow", "Mobile-first"],
-        imageUrl: "/images/portfolio/portfolio-8.png",
+        imageUrl: "/images/portfolio/portfolio-8.webp",
       },
     ],
     []
@@ -195,7 +195,7 @@ export default function PortfolioClient() {
             <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-black/40">
               <div
                 className="h-[320px] md:h-[420px] bg-cover bg-center opacity-80"
-                style={{ backgroundImage: "url(/images/portfolio/portfolio-hero.png)" }}
+                style={{ backgroundImage: "url(/images/portfolio/portfolio-hero.webp)" }}
               />
               <div className="absolute inset-0 bg-black/35" />
             </div>
@@ -318,7 +318,7 @@ export default function PortfolioClient() {
               primaryHref="/contact"
               secondaryCtaText="View Pricing"
               secondaryHref="/pricing"
-              imageUrl="/images/portfolio/portfolio-cta-2.png"
+              imageUrl="/images/portfolio/portfolio-cta-2.webp"
             />
           </div>
         </div>

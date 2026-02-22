@@ -5,10 +5,10 @@ date: 2026-02-02
 category: SEO
 tags: ["Local SEO", "Google Maps", "Traffic", "Leads", "Small Business"]
 readTime: 19 min read
-cover: /images/blog/local-seo.png
+cover: /images/blog/local-seo.webp
 ---
 
-![City map with glowing location pins and search results floating above, emerald green highlights, modern tech aesthetic, 16:9](/images/blog/local-seo-hero.png)
+![City map with glowing location pins and search results floating above, emerald green highlights, modern tech aesthetic, 16:9](/images/blog/local-seo-hero.webp)
 
 # Local SEO for Small Businesses
 
@@ -387,7 +387,7 @@ More fish caught.
 
 ## Example structure
 
-![Simple wireframe of local service page layout with sections highlighted, green accent, clean minimal design, 16:9](/images/blog/local-page-layout.png)
+![Simple wireframe of local service page layout with sections highlighted, green accent, clean minimal design, 16:9](/images/blog/local-page-layout.webp)
 
 Each page should have:
 
