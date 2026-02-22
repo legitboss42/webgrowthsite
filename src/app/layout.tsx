@@ -61,9 +61,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
 
         {/* Google AdSense */}
-        <Script
-          id="adsense"
-          strategy="afterInteractive"
+        <script
+          async
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4073948936216175"
           crossOrigin="anonymous"
         />
@@ -112,7 +111,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 headers: {
                   'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ page_url: currentUrl }),
+                body: JSON.stringify({
+                  page_url: currentUrl,
+                  referrer: document.referrer || "Direct",
+                }),
               }).catch(function(error) {
                 console.log('Analytics error:', error);
               });
