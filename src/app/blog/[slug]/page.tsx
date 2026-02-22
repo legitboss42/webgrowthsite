@@ -379,7 +379,7 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
                   className="group rounded-2xl border border-white/10 bg-white/5 p-6 hover:border-emerald-500/25 transition"
                 >
                   <div className="text-xs text-white/55">
-                    {p.category} â€¢ {new Date(p.date).toLocaleDateString()}
+                    {p.category} | {new Date(p.date).toLocaleDateString()}
                   </div>
                   <div className="mt-2 text-lg font-semibold text-white group-hover:text-emerald-200 transition">
                     {p.title}
