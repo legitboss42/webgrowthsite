@@ -100,6 +100,25 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Header />
         <main className="pt-28">{children}</main>
         <Footer />
+
+        {/* Analytics spy script */}
+        <Script id="analytics-spy" strategy="afterInteractive">
+          {`
+            (function() {
+              const currentUrl = window.location.href;
+
+              fetch('https://analytics-dashboard-fqnf.vercel.app/track', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ page_url: currentUrl }),
+              }).catch(function(error) {
+                console.log('Analytics error:', error);
+              });
+            })();
+          `}
+        </Script>
       </body>
     </html>
   );
