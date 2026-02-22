@@ -107,7 +107,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             (function() {
               const currentUrl = window.location.href;
 
-              fetch('https://analytics-dashboard-fqnf.vercel.app/track', {
+              fetch('https://analytics-dashboard-fqnf.vercel.app/api/track', {
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json',
