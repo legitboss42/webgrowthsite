@@ -8,13 +8,21 @@ export default function HomeAnimations() {
   useEffect(() => {
     let disposed = false;
     let cleanup: (() => void) | undefined;
+    let kickoffTimer: number | undefined;
 
     const setup = async () => {
       const reduceMotion =
         window.matchMedia &&
         window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const saveData = (navigator as Navigator & { connection?: { saveData?: boolean } })
+        .connection?.saveData === true;
+      const lowMemory =
+        typeof (navigator as Navigator & { deviceMemory?: number }).deviceMemory === "number" &&
+        ((navigator as Navigator & { deviceMemory?: number }).deviceMemory as number) <= 4;
+      const lowCpu = typeof navigator.hardwareConcurrency === "number" && navigator.hardwareConcurrency <= 4;
+      const smallViewport = window.innerWidth < 1024;
 
-      if (reduceMotion || disposed) return;
+      if (reduceMotion || saveData || lowMemory || lowCpu || smallViewport || disposed) return;
 
       const [{ gsap }, { ScrollTrigger }] = await Promise.all([
         import("gsap"),
@@ -118,10 +126,14 @@ export default function HomeAnimations() {
       };
     };
 
-    void setup();
+    // Delay animation engine setup so initial rendering wins on mobile/slow CPUs.
+    kickoffTimer = window.setTimeout(() => {
+      void setup();
+    }, 1200);
 
     return () => {
       disposed = true;
+      if (kickoffTimer) window.clearTimeout(kickoffTimer);
       cleanup?.();
     };
   }, []);

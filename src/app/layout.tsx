@@ -50,6 +50,7 @@ export const metadata: Metadata = {
 };
 
 const GTM_ID = "GTM-TKSB7S75";
+const IS_PRODUCTION = process.env.NODE_ENV === "production";
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -61,65 +62,75 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           content="f14352c8-ac00-4455-ad6a-4c0615d5653b"
         />
 
-        {/* Google AdSense */}
-        <script
-          async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4073948936216175"
-          crossOrigin="anonymous"
-        />
-
-        {/* Google Tag Manager */}
-        <Script
-          id="gtm"
-          strategy="afterInteractive"
-          dangerouslySetInnerHTML={{
-            __html: `
-              (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-              new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-              j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-              'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-              })(window,document,'script','dataLayer','${GTM_ID}');
-            `,
-          }}
-        />
+        {IS_PRODUCTION && (
+          <>
+            {/* Defer heavy third-party scripts to protect initial rendering. */}
+            <Script
+              id="gtm"
+              strategy="lazyOnload"
+              dangerouslySetInnerHTML={{
+                __html: `
+                  (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+                  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+                  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+                  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+                  })(window,document,'script','dataLayer','${GTM_ID}');
+                `,
+              }}
+            />
+          </>
+        )}
       </head>
 
       <body>
         <Analytics />
         <SpeedInsights />
-        {/* GTM noscript */}
-        <noscript>
-          <iframe
-            src={`https://www.googletagmanager.com/ns.html?id=${GTM_ID}`}
-            height="0"
-            width="0"
-            style={{ display: "none", visibility: "hidden" }}
-          />
-        </noscript>
+        {IS_PRODUCTION && (
+          <noscript>
+            <iframe
+              src={`https://www.googletagmanager.com/ns.html?id=${GTM_ID}`}
+              height="0"
+              width="0"
+              style={{ display: "none", visibility: "hidden" }}
+            />
+          </noscript>
+        )}
 
         <Header />
         <main className="pt-28">{children}</main>
         <Footer />
         <WebVitals />
 
-        {/* Analytics spy script */}
-        <Script id="analytics-spy" strategy="afterInteractive">
+        {/* Send lightweight tracking after load and preferably during idle time. */}
+        <Script id="analytics-spy" strategy="lazyOnload">
           {`
             (function() {
-              const currentUrl = window.location.href;
-
-              fetch('https://analytics-dashboard-fqnf.vercel.app/api/track', {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                  page_url: currentUrl,
+              const run = function() {
+                const payload = JSON.stringify({
+                  page_url: window.location.href,
                   referrer: document.referrer || "Direct",
-                }),
-              }).catch(function(error) {
-                console.log('Analytics error:', error);
-              });
+                });
+                const endpoint = 'https://analytics-dashboard-fqnf.vercel.app/api/track';
+
+                if (navigator.sendBeacon) {
+                  navigator.sendBeacon(endpoint, new Blob([payload], { type: 'application/json' }));
+                  return;
+                }
+
+                fetch(endpoint, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: payload,
+                  keepalive: true,
+                }).catch(function() {});
+              };
+
+              if ('requestIdleCallback' in window) {
+                requestIdleCallback(run, { timeout: 2000 });
+                return;
+              }
+
+              setTimeout(run, 1200);
             })();
           `}
         </Script>

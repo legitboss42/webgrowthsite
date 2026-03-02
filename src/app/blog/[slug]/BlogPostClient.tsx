@@ -375,6 +375,13 @@ export default function BlogPostClient({ content }: { content: string }) {
 
   return (
     <>
+      <Script
+        id="adsense-blog"
+        strategy="lazyOnload"
+        src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4073948936216175"
+        crossOrigin="anonymous"
+      />
+
       <div className="mt-10 space-y-7 text-white/80 leading-relaxed">
         {blocks.map((b, idx) => {
           if (b.type === "hr") return <div key={idx} className="my-10 h-px bg-white/10" />;
