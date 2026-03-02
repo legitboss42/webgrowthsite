@@ -5,7 +5,6 @@ import { useEffect, useRef } from "react";
 export default function CodeRain() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const animationRef = useRef<number | null>(null);
-  const idleTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -17,15 +16,8 @@ export default function CodeRain() {
     const reduceMotion =
       window.matchMedia &&
       window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const saveData = (navigator as Navigator & { connection?: { saveData?: boolean } })
-      .connection?.saveData === true;
-    const lowMemory =
-      typeof (navigator as Navigator & { deviceMemory?: number }).deviceMemory === "number" &&
-      ((navigator as Navigator & { deviceMemory?: number }).deviceMemory as number) <= 4;
-    const lowCpu = typeof navigator.hardwareConcurrency === "number" && navigator.hardwareConcurrency <= 4;
-    const smallViewport = window.innerWidth < 1024;
 
-    if (reduceMotion || saveData || lowMemory || lowCpu || smallViewport) {
+    if (reduceMotion) {
       return;
     }
 
@@ -36,8 +28,6 @@ export default function CodeRain() {
     const fontSize = 14;
     let columns = Math.floor(width / fontSize);
     let drops = Array(columns).fill(1);
-    const frameInterval = 1000 / 24;
-    let lastFrameTime = 0;
 
     ctx.font = `${fontSize}px monospace`;
 
@@ -57,18 +47,13 @@ export default function CodeRain() {
       }
     };
 
-    const loop = (timestamp: number) => {
-      if (timestamp - lastFrameTime >= frameInterval) {
-        draw();
-        lastFrameTime = timestamp;
-      }
+    const loop = () => {
+      draw();
       animationRef.current = requestAnimationFrame(loop);
     };
 
     const start = () => {
-      if (!animationRef.current) {
-        animationRef.current = requestAnimationFrame(loop);
-      }
+      if (!animationRef.current) loop();
     };
 
     const stop = () => {
@@ -83,10 +68,7 @@ export default function CodeRain() {
       ([entry]) => {
         inView = Boolean(entry?.isIntersecting);
         if (inView && document.visibilityState === "visible") {
-          if (idleTimerRef.current) {
-            window.clearTimeout(idleTimerRef.current);
-          }
-          idleTimerRef.current = window.setTimeout(start, 600);
+          start();
           return;
         }
         stop();
@@ -116,10 +98,6 @@ export default function CodeRain() {
 
     return () => {
       stop();
-      if (idleTimerRef.current) {
-        window.clearTimeout(idleTimerRef.current);
-        idleTimerRef.current = null;
-      }
       observer.disconnect();
       window.removeEventListener("resize", handleResize);
       document.removeEventListener("visibilitychange", handleVisibility);
