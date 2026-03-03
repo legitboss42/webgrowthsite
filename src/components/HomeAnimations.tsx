@@ -40,7 +40,7 @@ export default function HomeAnimations() {
         addAnimation(
           gsap.to(hero, {
             opacity: 0,
-            y: -180,
+            y: -120,
             scrollTrigger: {
               trigger: hero,
               start: "top top",
@@ -52,9 +52,65 @@ export default function HomeAnimations() {
 
         addAnimation(
           gsap.fromTo(
+            ".hero-kicker",
+            { opacity: 0, y: 16 },
+            { opacity: 1, y: 0, duration: 0.55, ease: "power3.out", delay: 0.2 }
+          )
+        );
+
+        addAnimation(
+          gsap.fromTo(
+            ".hero-title",
+            { opacity: 0, y: 26 },
+            { opacity: 1, y: 0, duration: 0.75, ease: "power3.out", delay: 0.32 }
+          )
+        );
+
+        addAnimation(
+          gsap.fromTo(
+            ".hero-copy",
+            { opacity: 0, y: 18 },
+            { opacity: 1, y: 0, duration: 0.7, ease: "power3.out", delay: 0.46 }
+          )
+        );
+
+        addAnimation(
+          gsap.fromTo(
+            ".hero-meta",
+            { opacity: 0, y: 14 },
+            { opacity: 1, y: 0, duration: 0.55, ease: "power3.out", delay: 0.6 }
+          )
+        );
+
+        addAnimation(
+          gsap.fromTo(
+            ".hero-stat",
+            { opacity: 0, y: 18, scale: 0.98 },
+            {
+              opacity: 1,
+              y: 0,
+              scale: 1,
+              duration: 0.6,
+              ease: "power3.out",
+              stagger: 0.1,
+              delay: 0.62,
+            }
+          )
+        );
+
+        addAnimation(
+          gsap.fromTo(
             ".hero-cta",
             { opacity: 0, y: 24 },
-            { opacity: 1, y: 0, duration: 0.8, ease: "power3.out", delay: 0.8 }
+            { opacity: 1, y: 0, duration: 0.7, ease: "power3.out", delay: 0.7 }
+          )
+        );
+
+        addAnimation(
+          gsap.fromTo(
+            ".hero-aside",
+            { opacity: 0, x: 26, scale: 0.99 },
+            { opacity: 1, x: 0, scale: 1, duration: 0.85, ease: "power3.out", delay: 0.52 }
           )
         );
       }

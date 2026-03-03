@@ -126,12 +126,12 @@ export default function PricingClient() {
     () => [
       {
         name: "Starter",
-        price: "₦150,000",
+        price: "$150",
         bestFor: "New businesses needing a clean, credible online presence.",
         timeline: "7–10 days",
         highlights: [
           "Up to 5 pages",
-          "₦20,000 per extra page",
+          "$20 per extra page",
           "Mobile-first build",
           "Basic SEO setup",
           "Fast performance baseline",
@@ -147,12 +147,12 @@ export default function PricingClient() {
       },
       {
         name: "Growth",
-        price: "₦250,000",
+        price: "$250",
         bestFor: "Businesses that want stronger conversion + better brand presence.",
         timeline: "10–14 days",
         highlights: [
           "Up to 8 pages",
-          "₦20,000 per extra page",
+          "$20 per extra page",
           "More animations/interactions",
           "Better content sections",
           "On-page SEO polish",
@@ -169,12 +169,12 @@ export default function PricingClient() {
       },
       {
         name: "Pro",
-        price: "₦400,000",
+        price: "$400",
         bestFor: "Brands that want premium design, stronger storytelling, and scale.",
         timeline: "2–3 weeks",
         highlights: [
           "Up to 12 pages",
-          "₦20,000 per extra page",
+          "$20 per extra page",
           "Premium UI + motion",
           "Stronger funnel structure",
           "Advanced SEO foundations",
@@ -361,7 +361,7 @@ export default function PricingClient() {
               <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
                 <div className="text-sm font-semibold text-white">Common add-ons</div>
                 <ul className="mt-4 space-y-2">
-                  <CheckItem>Extra pages / new sections (₦20,000 per page)</CheckItem>
+                  <CheckItem>Extra pages / new sections ($20 per page)</CheckItem>
                   <CheckItem>Copywriting / content polishing</CheckItem>
                   <CheckItem>Logo / brand assets (basic)</CheckItem>
                   <CheckItem>Booking setup (Calendly / WhatsApp / external tools)</CheckItem>
@@ -421,7 +421,7 @@ export default function PricingClient() {
               />
               <FAQItem
                 q="How much is an extra page?"
-                a="₦20,000 per extra page across all packages."
+                a="$20 per extra page across all packages."
               />
               <FAQItem
                 q="Can I pay in milestones?"

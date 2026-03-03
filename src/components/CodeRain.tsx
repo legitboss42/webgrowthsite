@@ -13,14 +13,6 @@ export default function CodeRain() {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    const reduceMotion =
-      window.matchMedia &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-    if (reduceMotion) {
-      return;
-    }
-
     let width = (canvas.width = window.innerWidth);
     let height = (canvas.height = window.innerHeight);
 
