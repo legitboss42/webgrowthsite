@@ -2,13 +2,16 @@ import type { Metadata } from "next";
 import LandingPageDesignClient from "@/components/LandingPageDesignClient";
 
 export const metadata: Metadata = {
-  title: "Landing Page Design | Web Growth",
+  title: "Landing Page Design and Funnel Architecture | Web Growth",
   description:
-    "Conversion-focused landing page design for ads, campaigns, and offers. Built to load fast, communicate clearly, and turn clicks into leads.",
+    "Landing page design and funnel architecture for ads, campaigns, and offers. Built to load fast, guide user flow, and convert high-intent traffic into leads.",
   keywords: [
     "web design",
     "web design services",
     "landing page design",
+    "funnel architecture",
+    "sales funnel design",
+    "lead generation funnel",
     "conversion landing page",
     "campaign landing page",
     "lead generation landing page",
@@ -19,9 +22,9 @@ export const metadata: Metadata = {
     canonical: "https://webgrowth.info/services/landing-page-design",
   },
   openGraph: {
-    title: "Landing Page Design | Web Growth",
+    title: "Landing Page Design and Funnel Architecture | Web Growth",
     description:
-      "Landing pages built for one job: convert visitors into leads, bookings, or sales.",
+      "Landing pages and funnel architecture built to convert visitors into leads, bookings, or sales.",
     url: "https://webgrowth.info/services/landing-page-design",
     siteName: "Web Growth",
     images: [
@@ -36,9 +39,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Landing Page Design | Web Growth",
+    title: "Landing Page Design and Funnel Architecture | Web Growth",
     description:
-      "Conversion-focused landing page web design services for campaigns and lead generation.",
+      "Conversion-focused landing page and funnel architecture services for campaigns and lead generation.",
     images: ["https://webgrowth.info/images/placeholder.jpg"],
   },
   robots: { index: true, follow: true },

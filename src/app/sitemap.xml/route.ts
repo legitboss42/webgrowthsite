@@ -25,6 +25,15 @@ const SERVICE_ROUTES = [
   "/services/website-maintenance",
   "/services/performance-optimisation",
   "/services/website-audit",
+  "/services/email-marketing-setup-strategy",
+  "/services/search-engine-optimisation",
+  "/services/google-my-business-setup-optimisation",
+  "/services/booking-platform-setup-integration",
+  "/services/crm-system-setup-configuration",
+  "/services/marketing-automation-build-implementation",
+  "/services/analytics-tracking-setup",
+  "/services/domain-registration-hosting-guidance",
+  "/services/lead-magnet-strategy-build",
 ];
 
 type SitemapUrl = {

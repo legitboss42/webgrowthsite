@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useMemo, useRef } from "react";
 import Link from "next/link";
@@ -7,6 +7,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 import SectionHeading from "@/components/SectionHeading";
 import CTASection from "@/components/CTASection";
+import { NEW_SERVICES_LIST } from "@/lib/newServiceConfigs";
 
 export type Service = {
   title: string;
@@ -39,10 +40,10 @@ export default function ServicesClient({ services: servicesProp }: Props) {
       {
         title: "Landing Page Design",
         short:
-          "Conversion-focused landing pages for campaigns, ads, and offers, built to convert.",
+          "Conversion-focused landing page design and funnel architecture for campaigns, ads, and offers.",
         slug: "/services/landing-page-design",
         serviceParam: "Landing Page Design",
-        bullets: ["Message match", "Strong CTA flow", "Fast mobile load"],
+        bullets: ["Message match", "Funnel architecture", "Fast mobile load"],
         image: "/images/services/services-landing.webp",
       },
       {
@@ -84,7 +85,7 @@ export default function ServicesClient({ services: servicesProp }: Props) {
       {
         title: "Website Audit & Consultation",
         short:
-          "A clear diagnosis of what’s blocking results, plus a practical plan to fix it.",
+          "A clear diagnosis of what is blocking results, plus a practical plan to fix it.",
         slug: "/services/website-audit",
         serviceParam: "Website Audit & Consultation",
         bullets: ["Clarity + trust", "Conversion flow", "SEO + performance basics"],
@@ -94,7 +95,17 @@ export default function ServicesClient({ services: servicesProp }: Props) {
     []
   );
 
-  const services = servicesProp?.length ? servicesProp : fallbackServices;
+  const services = useMemo<Service[]>(() => {
+    const base = servicesProp?.length ? servicesProp : fallbackServices;
+    const merged = [...base, ...NEW_SERVICES_LIST];
+    const bySlug = new Map<string, Service>();
+
+    merged.forEach((service) => {
+      bySlug.set(service.slug, service);
+    });
+
+    return Array.from(bySlug.values());
+  }, [fallbackServices, servicesProp]);
 
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
@@ -169,7 +180,7 @@ export default function ServicesClient({ services: servicesProp }: Props) {
                 Web design services built for real business outcomes.
               </h1>
               <p className="mt-6 text-lg text-white/70 leading-relaxed">
-                We don’t sell “pretty websites.” We build clear, trustworthy,
+                We do not sell pretty websites. We build clear, trustworthy,
                 performance-aware web experiences that help businesses attract
                 customers and grow.
               </p>
@@ -292,3 +303,4 @@ export default function ServicesClient({ services: servicesProp }: Props) {
     </div>
   );
 }
+

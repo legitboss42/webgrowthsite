@@ -106,11 +106,11 @@ export default function LandingPageDesignClient() {
                 LANDING PAGE DESIGN
               </div>
               <h1 className="mt-4 text-4xl md:text-5xl font-semibold leading-tight">
-                Landing pages built for one job: convert.
+                Landing page design and funnel architecture built to convert.
               </h1>
               <p className="mt-6 text-lg text-white/70 leading-relaxed">
                 Ads and campaigns waste money when the landing page is weak.
-                We design high-conversion landing pages that load fast,
+                We design high-conversion pages and funnel flow that load fast,
                 communicate clearly, and guide visitors to take action.
               </p>
 
