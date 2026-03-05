@@ -30,3 +30,49 @@ body {
     "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell,
     "Open Sans", "Helvetica Neue", sans-serif;
 }
+
+.latest-headline-ticker {
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.latest-headline-track {
+  display: flex;
+  width: 200vw;
+  min-width: 200%;
+  justify-content: flex-start;
+  animation: latest-headline-scroll 22s linear infinite;
+  will-change: transform;
+}
+
+.latest-headline-item {
+  display: inline-flex;
+  align-items: center;
+  width: 100vw;
+  justify-content: flex-start;
+  gap: 0.75rem;
+  flex-shrink: 0;
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+  box-sizing: border-box;
+}
+
+.latest-headline-ticker:hover .latest-headline-track,
+.latest-headline-ticker:focus-within .latest-headline-track {
+  animation-play-state: paused;
+}
+
+@keyframes latest-headline-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .latest-headline-track {
+    animation: none;
+  }
+}

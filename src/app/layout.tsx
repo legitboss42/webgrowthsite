@@ -2,6 +2,7 @@
 import Script from "next/script";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { getPosts } from "@/lib/posts";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/react";
 import { WebVitals } from "./components/WebVitals";
@@ -52,7 +53,24 @@ export const metadata: Metadata = {
 const GTM_ID = "GTM-TKSB7S75";
 const IS_PRODUCTION = process.env.NODE_ENV === "production";
 
+type LatestPostHeadline = {
+  slug: string;
+  title: string;
+} | null;
+
+function getLatestPostHeadline(): LatestPostHeadline {
+  try {
+    const latest = getPosts()[0];
+    if (!latest?.slug || !latest?.title) return null;
+    return { slug: latest.slug, title: latest.title };
+  } catch {
+    return null;
+  }
+}
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const latestPost = getLatestPostHeadline();
+
   return (
     <html lang="en">
       <head>
@@ -96,8 +114,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </noscript>
         )}
 
-        <Header />
-        <main className="pt-28">{children}</main>
+        <Header latestPost={latestPost ?? undefined} />
+        <main className={latestPost ? "pt-40" : "pt-28"}>{children}</main>
         <Footer />
         <WebVitals />
 
