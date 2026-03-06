@@ -20,7 +20,7 @@ const CTASection: React.FC<CTASectionProps> = ({
   primaryHref = "/contact",
   secondaryCtaText = "View Portfolio",
   secondaryHref = "/portfolio",
-  imageUrl = "/images/placeholder.webp",
+  imageUrl = "/images/hero/Hero-Image-1.webp",
   className
 }) => {
   return (

@@ -16,7 +16,7 @@ const CaseStudyCard: React.FC<CaseStudyCardProps> = ({
   client,
   summary,
   results,
-  imageUrl = "/images/placeholder.webp",
+  imageUrl = "/images/hero/Hero-Image-1.webp",
   href,
   className,
   headingLevel = "h3",
@@ -26,7 +26,7 @@ const CaseStudyCard: React.FC<CaseStudyCardProps> = ({
 
   return (
     <CardComponent
-      className={`group relative overflow-hidden rounded-2xl border border-white/10 bg-black/40 hover:-translate-y-2 transition-transform duration-300 ${className || ""}`}
+      className={`group relative flex h-full flex-col overflow-hidden rounded-2xl border border-white/10 bg-black/40 transition-transform duration-300 hover:-translate-y-2 ${className || ""}`}
       {...(href ? { href } : {})}
     >
       {/* Image header */}
@@ -46,12 +46,12 @@ const CaseStudyCard: React.FC<CaseStudyCardProps> = ({
       </div>
 
       {/* Body */}
-      <div className="p-6">
+      <div className="flex flex-1 flex-col p-6">
         {client && <p className="text-sm text-emerald-400 mb-2">{client}</p>}
         <HeadingTag className="text-xl font-semibold mb-3">{title}</HeadingTag>
         <p className="text-white/70 leading-relaxed mb-4">{summary}</p>
         {results && results.length > 0 && (
-          <div className="flex flex-wrap gap-2">
+          <div className="mt-auto flex flex-wrap gap-2 pt-4">
             {results.map((result, index) => (
               <span key={index} className="px-3 py-1 bg-emerald-600/20 text-emerald-400 text-xs rounded-full">
                 {result}

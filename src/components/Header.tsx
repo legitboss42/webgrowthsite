@@ -194,6 +194,7 @@ export default function Header({ latestPost }: { latestPost?: LatestPostHeadline
 
           {/* Desktop Nav */}
           <nav className="hidden md:flex items-center gap-8">
+            <NavLink href="/launch" label="Launch" />
             <NavLink href="/services" label="Services" />
             <NavLink href="/about" label="About" />
             <NavLink href="/portfolio" label="Portfolio" />
@@ -264,6 +265,11 @@ export default function Header({ latestPost }: { latestPost?: LatestPostHeadline
               <div className="rounded-xl border border-white/10 bg-black/80 backdrop-blur p-5">
                 <div className="flex flex-col gap-4">
                   <NavLink
+                    href="/launch"
+                    label="Launch"
+                    onClick={() => setMenuOpen(false)}
+                  />
+                  <NavLink
                     href="/services"
                     label="Services"
                     onClick={() => setMenuOpen(false)}
@@ -286,6 +292,11 @@ export default function Header({ latestPost }: { latestPost?: LatestPostHeadline
                   <NavLink
                     href="/pricing"
                     label="Pricing"
+                    onClick={() => setMenuOpen(false)}
+                  />
+                  <NavLink
+                    href="/faq"
+                    label="FAQ"
                     onClick={() => setMenuOpen(false)}
                   />
                   <NavLink

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Download Ready | Web Growth",
+  title: "Download Ready",
   description: "Thank-you and download confirmation page for Web Growth resources.",
   robots: {
     index: false,

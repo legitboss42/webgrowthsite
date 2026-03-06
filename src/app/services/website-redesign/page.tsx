@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import WebsiteRedesignClient from "@/components/WebsiteRedesignClient";
 
 export const metadata: Metadata = {
-  title: "Website Redesign | Web Growth",
+  title: "Website Redesign",
   description:
     "Website redesign focused on clarity, trust, speed, and conversions. Upgrade an outdated site into a modern experience that performs.",
   keywords: [
@@ -18,14 +18,14 @@ export const metadata: Metadata = {
     canonical: "https://webgrowth.info/services/website-redesign",
   },
   openGraph: {
-    title: "Website Redesign | Web Growth",
+    title: "Website Redesign",
     description:
       "Transform an outdated website into a modern, fast, trust-building experience.",
     url: "https://webgrowth.info/services/website-redesign",
     siteName: "Web Growth",
     images: [
       {
-        url: "https://webgrowth.info/images/placeholder.jpg",
+        url: "https://webgrowth.info/images/hero/Hero-Image-1.webp",
         width: 1200,
         height: 630,
         alt: "Website Redesign",
@@ -35,10 +35,10 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Website Redesign | Web Growth",
+    title: "Website Redesign",
     description:
       "Website redesign services to improve trust, user experience, speed, and conversions.",
-    images: ["https://webgrowth.info/images/placeholder.jpg"],
+    images: ["https://webgrowth.info/images/hero/Hero-Image-1.webp"],
   },
   robots: { index: true, follow: true },
 };

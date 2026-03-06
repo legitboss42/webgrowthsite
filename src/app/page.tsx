@@ -1,53 +1,75 @@
-﻿import type { Metadata } from "next";
-import HomeClient from "@/components/HomeClient";
+import FAQSection from "@/components/FAQSection";
+import FinalCTASection from "@/components/FinalCTASection";
+import HeroSection from "@/components/HeroSection";
+import PricingSection from "@/components/PricingSection";
+import SocialProofSection from "@/components/SocialProofSection";
+import StructuredData from "@/components/StructuredData";
+import WhatYouGetSection from "@/components/WhatYouGetSection";
+import {
+  launchFaqs,
+  pricingTiers,
+  socialProofCards,
+  whatYouGetItems,
+} from "@/lib/launchOffer";
+import {
+  buildPageMetadata,
+  buildProfessionalServiceSchema,
+  launchKeywordSet,
+} from "@/lib/seo";
+import { buildWhatsAppUrl } from "@/lib/site";
 
-export const metadata: Metadata = {
-  title: "Web Design Services | Get a Professional Website Live in 48 Hours",
-  description:
-    "Web design services for small businesses: launch a professional website in 48 hours with domain guidance, hosting + SSL, and a high-converting one-page site.",
+const pageDescription =
+  "Website design in 48 hours for businesses in Nigeria and international clients who need a professional one-page website live fast with domain guidance, hosting, and basic SEO handled.";
+
+export const metadata = buildPageMetadata({
+  title: "Website Design in 48 Hours",
+  description: pageDescription,
+  path: "/",
   keywords: [
-    "web design",
-    "website design",
-    "web design services",
-    "48 hour website launch",
-    "one page website",
-    "small business website launch",
-    "small business web design",
-    "fast web design service",
-    "website setup service",
-    "conversion-focused website",
+    ...launchKeywordSet,
+    "website design nigeria",
+    "professional website launch",
+    "one-page website service",
   ],
-  alternates: {
-    canonical: "https://webgrowth.info/",
-  },
-  openGraph: {
-    title: "Web Design Services | 48-Hour Website Launch",
-    description:
-      "Web design services with domain guidance, hosting + SSL, and a high-converting one-page website launch service.",
-    url: "https://webgrowth.info/",
-    siteName: "Web Growth",
-    images: [
-      {
-        url: "https://webgrowth.info/images/placeholder.webp",
-        width: 1200,
-        height: 630,
-        alt: "48-hour website launch service",
-      },
-    ],
-    type: "website",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Web Design Services | 48-Hour Website Launch",
-    description: "Fast web design service for direct outreach traffic.",
-    images: ["https://webgrowth.info/images/placeholder.webp"],
-  },
-  robots: {
-    index: true,
-    follow: true,
-  },
-};
+  image: "/images/hero/Hero-Image-1.webp",
+});
 
 export default function Page() {
-  return <HomeClient />;
+  return (
+    <>
+      <StructuredData data={buildProfessionalServiceSchema("/", pageDescription)} />
+
+      <main className="relative overflow-x-clip bg-[#050806] text-white">
+        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.028)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.018)_1px,transparent_1px)] bg-[size:42px_42px] opacity-25" />
+
+        <HeroSection
+          eyebrow="48-Hour Website Launch"
+          title="Website Design in 48 Hours | Get a Professional Website Live Fast"
+          description="Domain + hosting + a high-converting one-page site - done for you."
+          primaryLabel="Start Now"
+          primaryHref={buildWhatsAppUrl(
+            "Hello, I want to get started with website design in 48 hours."
+          )}
+          secondaryLabel="See What's Included"
+          secondaryHref="#inclusions"
+          trustLine="Fast turnaround | Mobile-first | Simple pricing"
+          locationNote="Built for businesses in Nigeria, Lagos, and international clients who want a remote launch partner without agency drag."
+          asideTitle="Launch sequence"
+          asideItems={[
+            "Offer, structure, and conversion path locked in quickly.",
+            "Domain, hosting, page build, and SEO basics handled in one flow.",
+            "Launch-ready delivery so you can start sending traffic immediately.",
+          ]}
+          showCodeRain
+          showHomeAnimations
+        />
+
+        <WhatYouGetSection items={whatYouGetItems} />
+        <PricingSection tiers={pricingTiers} />
+        <SocialProofSection cards={socialProofCards} />
+        <FAQSection items={launchFaqs} />
+        <FinalCTASection />
+      </main>
+    </>
+  );
 }

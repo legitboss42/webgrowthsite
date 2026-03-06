@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import type { Post } from "../../lib/posts";
 import { gsap } from "gsap";
+import BlogInlineCTA from "@/components/BlogInlineCTA";
 
 type Props = {
   posts: Post[];
@@ -270,6 +271,10 @@ export default function BlogClient({ posts }: Props) {
       </section>
 
       <section className="mx-auto max-w-6xl px-6 py-12">
+        <div className="mb-8">
+          <BlogInlineCTA />
+        </div>
+
         <div className="mb-6 flex items-end justify-between gap-4">
           <div>
             <div className="text-xs tracking-[0.2em] text-white/45">LATEST</div>
@@ -397,8 +402,13 @@ export default function BlogClient({ posts }: Props) {
             No posts match that search. Try a different keyword or clear filters.
           </div>
         )}
+
+        {filtered.length > 0 ? (
+          <div className="mt-10">
+            <BlogInlineCTA compact />
+          </div>
+        ) : null}
       </section>
     </div>
   );
 }
-

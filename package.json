@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "node scripts/validate-sitemap.mjs && next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint .",
     "magnets:build": "node scripts/build-magnets.mjs",
     "magnets:watch": "node scripts/watch-magnets.mjs"
   },

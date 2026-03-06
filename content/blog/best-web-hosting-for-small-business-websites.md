@@ -343,7 +343,7 @@ That’s why hosting is such a high-leverage move.
 
 Still choosing your platform? Read the [best website builders guide](/blog/how-to-build-a-small-business-website-that-converts).
 
-Once traffic comes, youâ€™ll need conversions â€” hereâ€™s why [websites fail to get leads](/blog/why-your-website-isnt-getting-leads).
+Once traffic comes, you'll need conversions - here's why [websites fail to get leads](/blog/why-your-website-isnt-getting-leads).
 
 ## When should you upgrade?
 

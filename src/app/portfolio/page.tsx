@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import PortfolioClient from "@/components/PortfolioClient";
 
 export const metadata: Metadata = {
-  title: "Web Design Portfolio | Web Growth - Case Studies & Results",
+  title: "Web Design Portfolio - Case Studies & Results",
   description:
     "Explore Web Growth web design portfolio case studies: modern websites, landing pages, and redesigns built for clarity, trust, and real business results.",
   keywords: [
@@ -19,14 +19,14 @@ export const metadata: Metadata = {
     canonical: "https://webgrowth.info/portfolio",
   },
   openGraph: {
-    title: "Web Design Portfolio | Web Growth",
+    title: "Web Design Portfolio",
     description:
       "Case studies and examples of premium websites built for performance and conversions.",
     url: "https://webgrowth.info/portfolio",
     siteName: "Web Growth",
     images: [
       {
-        url: "https://webgrowth.info/images/placeholder.jpg",
+        url: "https://webgrowth.info/images/hero/Hero-Image-1.webp",
         width: 1200,
         height: 630,
         alt: "Web Growth Portfolio",
@@ -36,9 +36,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Web Design Portfolio | Web Growth",
+    title: "Web Design Portfolio",
     description: "Case studies and results from our web design work.",
-    images: ["https://webgrowth.info/images/placeholder.jpg"],
+    images: ["https://webgrowth.info/images/hero/Hero-Image-1.webp"],
   },
   robots: { index: true, follow: true },
 };

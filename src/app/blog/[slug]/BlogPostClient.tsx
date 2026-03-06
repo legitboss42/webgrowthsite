@@ -4,6 +4,7 @@ import Image from "next/image";
 import Script from "next/script";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import LeadMagnetCTA from "@/components/LeadMagnetCTA";
+import BlogInlineCTA from "@/components/BlogInlineCTA";
 
 type Block =
   | { type: "h2"; text: string; id: string }
@@ -353,6 +354,7 @@ function MailerLiteForm({ downloadHref }: { downloadHref: string }) {
 
 export default function BlogPostClient({ content }: { content: string }) {
   const blocks = useMemo(() => renderBlocks(content), [content]);
+  const inlineCtaIndex = blocks.length > 5 ? 4 : 2;
 
   const [open, setOpen] = useState(false);
   const [downloadHref, setDownloadHref] = useState("/downloads/placeholder.pdf");
@@ -373,6 +375,133 @@ export default function BlogPostClient({ content }: { content: string }) {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
+  const renderBlockNode = (b: Block, idx: number) => {
+    if (b.type === "hr") return <div key={idx} className="my-10 h-px bg-white/10" />;
+
+    if (b.type === "h2") {
+      return (
+        <h2
+          key={idx}
+          id={b.id}
+          className="scroll-mt-32 text-2xl md:text-3xl font-semibold text-white mt-12"
+        >
+          {b.text}
+        </h2>
+      );
+    }
+
+    if (b.type === "lead") {
+      return <LeadMagnetCTA key={idx} label={b.label} href={b.href} />;
+    }
+
+    if (b.type === "button") {
+      const isExternal = /^https?:\/\//i.test(b.href);
+      const rel = isExternal ? "noreferrer noopener sponsored" : undefined;
+      const target = isExternal ? "_blank" : undefined;
+
+      return (
+        <div key={idx} className="rounded-2xl border border-emerald-400/20 bg-emerald-500/10 p-6">
+          <a
+            href={b.href}
+            target={target}
+            rel={rel}
+            className="group relative inline-flex w-full items-center justify-center overflow-hidden rounded-xl bg-emerald-600 px-5 py-4 text-sm font-semibold text-white transition hover:bg-emerald-500"
+          >
+            <span className="pointer-events-none absolute -left-1/3 top-0 h-full w-1/3 rotate-12 bg-white/25 blur-xl translate-x-[-70%] group-hover:translate-x-[340%] transition duration-[1100ms]" />
+            <span className="relative">{b.label}</span>
+          </a>
+        </div>
+      );
+    }
+
+    if (b.type === "card") {
+      return (
+        <div
+          key={idx}
+          className="rounded-2xl border border-white/10 bg-white/5 p-6 hover:border-emerald-500/25 transition"
+        >
+          <h3 className="text-lg font-semibold text-white">{b.title}</h3>
+          {b.lines.length ? (
+            <div className="mt-3 space-y-2 text-white/75">
+              {b.lines.map((ln, i2) => (
+                <p key={i2} className="leading-relaxed">
+                  {renderInline(ln)}
+                </p>
+              ))}
+            </div>
+          ) : null}
+        </div>
+      );
+    }
+
+    if (b.type === "callout") {
+      return (
+        <div
+          key={idx}
+          className={["rounded-2xl border p-5", calloutStyles(b.tone)].join(" ")}
+        >
+          <div className="text-sm uppercase tracking-widest opacity-70">
+            {b.tone === "tip" ? "Tip" : b.tone === "warn" ? "Warning" : "Note"}
+          </div>
+          <div className="mt-2 text-white/80">{renderInline(b.text)}</div>
+        </div>
+      );
+    }
+
+    if (b.type === "img") {
+      return (
+        <figure
+          key={idx}
+          className="overflow-hidden rounded-2xl border border-white/10 bg-white/5"
+        >
+          <div className="relative aspect-[16/9] w-full">
+            <Image
+              src={b.src}
+              alt={b.alt}
+              fill
+              className="object-cover"
+              sizes="(max-width: 768px) 100vw, 768px"
+            />
+          </div>
+        </figure>
+      );
+    }
+
+    if (b.type === "ul") {
+      return (
+        <ul key={idx} className="space-y-3">
+          {b.items.map((it) => (
+            <li key={it} className="flex gap-3">
+              <span className="mt-[9px] h-2 w-2 rounded-full bg-emerald-400/80" />
+              <span className="text-white/75">{renderInline(it)}</span>
+            </li>
+          ))}
+        </ul>
+      );
+    }
+
+    if (b.type === "ol") {
+      return (
+        <ol key={idx} className="space-y-3">
+          {b.items.map((it, n) => (
+            <li key={it} className="flex gap-3">
+              <span className="mt-[1px] inline-flex h-7 w-7 items-center justify-center rounded-full border border-white/10 bg-white/5 text-xs text-white/70">
+                {n + 1}
+              </span>
+              <span className="text-white/75">{renderInline(it)}</span>
+            </li>
+          ))}
+        </ol>
+      );
+    }
+
+    return (
+      <p key={idx} className="text-white/75 text-[17px] leading-[1.85]">
+        {renderInline(b.text)}
+      </p>
+    );
+  };
+
   return (
     <>
       <Script
@@ -383,134 +512,11 @@ export default function BlogPostClient({ content }: { content: string }) {
       />
 
       <div className="mt-10 space-y-7 text-white/80 leading-relaxed">
-        {blocks.map((b, idx) => {
-          if (b.type === "hr") return <div key={idx} className="my-10 h-px bg-white/10" />;
-
-          if (b.type === "h2") {
-            return (
-              <h2
-                key={idx}
-                id={b.id}
-                className="scroll-mt-32 text-2xl md:text-3xl font-semibold text-white mt-12"
-              >
-                {b.text}
-              </h2>
-            );
-          }
-
-          if (b.type === "lead") {
-            return <LeadMagnetCTA key={idx} label={b.label} href={b.href} />;
-          }
-
-          if (b.type === "button") {
-            const isExternal = /^https?:\/\//i.test(b.href);
-            const rel = isExternal ? "noreferrer noopener sponsored" : undefined;
-            const target = isExternal ? "_blank" : undefined;
-
-            return (
-              <div key={idx} className="rounded-2xl border border-emerald-400/20 bg-emerald-500/10 p-6">
-                <a
-                  href={b.href}
-                  target={target}
-                  rel={rel}
-                  className="group relative inline-flex w-full items-center justify-center overflow-hidden rounded-xl bg-emerald-600 px-5 py-4 text-sm font-semibold text-white transition hover:bg-emerald-500"
-                >
-                  <span className="pointer-events-none absolute -left-1/3 top-0 h-full w-1/3 rotate-12 bg-white/25 blur-xl translate-x-[-70%] group-hover:translate-x-[340%] transition duration-[1100ms]" />
-                  <span className="relative">{b.label}</span>
-                </a>
-              </div>
-            );
-          }
-
-          if (b.type === "card") {
-            return (
-              <div
-                key={idx}
-                className="rounded-2xl border border-white/10 bg-white/5 p-6 hover:border-emerald-500/25 transition"
-              >
-                <h3 className="text-lg font-semibold text-white">{b.title}</h3>
-                {b.lines.length ? (
-                  <div className="mt-3 space-y-2 text-white/75">
-                    {b.lines.map((ln, i2) => (
-                      <p key={i2} className="leading-relaxed">
-                        {renderInline(ln)}
-                      </p>
-                    ))}
-                  </div>
-                ) : null}
-              </div>
-            );
-          }
-
-          if (b.type === "callout") {
-            return (
-              <div
-                key={idx}
-                className={["rounded-2xl border p-5", calloutStyles(b.tone)].join(" ")}
-              >
-                <div className="text-sm uppercase tracking-widest opacity-70">
-                  {b.tone === "tip" ? "Tip" : b.tone === "warn" ? "Warning" : "Note"}
-                </div>
-                <div className="mt-2 text-white/80">{renderInline(b.text)}</div>
-              </div>
-            );
-          }
-
-          if (b.type === "img") {
-            return (
-              <figure
-                key={idx}
-                className="overflow-hidden rounded-2xl border border-white/10 bg-white/5"
-              >
-                <div className="relative aspect-[16/9] w-full">
-                  <Image
-                    src={b.src}
-                    alt={b.alt}
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 768px) 100vw, 768px"
-                  />
-                </div>
-                {/* captions OFF by default */}
-              </figure>
-            );
-          }
-
-          if (b.type === "ul") {
-            return (
-              <ul key={idx} className="space-y-3">
-                {b.items.map((it) => (
-                  <li key={it} className="flex gap-3">
-                    <span className="mt-[9px] h-2 w-2 rounded-full bg-emerald-400/80" />
-                    <span className="text-white/75">{renderInline(it)}</span>
-                  </li>
-                ))}
-              </ul>
-            );
-          }
-
-          if (b.type === "ol") {
-            return (
-              <ol key={idx} className="space-y-3">
-                {b.items.map((it, n) => (
-                  <li key={it} className="flex gap-3">
-                    <span className="mt-[1px] inline-flex h-7 w-7 items-center justify-center rounded-full border border-white/10 bg-white/5 text-xs text-white/70">
-                      {n + 1}
-                    </span>
-                    <span className="text-white/75">{renderInline(it)}</span>
-                  </li>
-                ))}
-              </ol>
-            );
-          }
-
-          // paragraph
-          return (
-            <p key={idx} className="text-white/75 text-[17px] leading-[1.85]">
-              {renderInline(b.text)}
-            </p>
-          );
-        })}
+        {blocks.slice(0, inlineCtaIndex).map((b, idx) => renderBlockNode(b, idx))}
+        <BlogInlineCTA compact />
+        {blocks
+          .slice(inlineCtaIndex)
+          .map((b, idx) => renderBlockNode(b, idx + inlineCtaIndex))}
       </div>
 
       {/* ===========================

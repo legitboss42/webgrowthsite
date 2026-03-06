@@ -3,7 +3,7 @@
 import Link from "next/link";
 
 const WHATSAPP_NUMBER = "2348066706336";
-const WHATSAPP_MESSAGE = "Hello, I’d like to request a quote for a website.";
+const WHATSAPP_MESSAGE = "Hello, I'd like to request a quote for a website.";
 
 function buildWhatsAppUrl() {
   const text = encodeURIComponent(WHATSAPP_MESSAGE);
@@ -13,8 +13,9 @@ function buildWhatsAppUrl() {
 function trackWhatsApp(location: string) {
   if (typeof window === "undefined") return;
 
-  (window as any).dataLayer = (window as any).dataLayer || [];
-  (window as any).dataLayer.push({
+  (window as Window & { dataLayer?: Array<Record<string, unknown>> }).dataLayer =
+    (window as Window & { dataLayer?: Array<Record<string, unknown>> }).dataLayer || [];
+  (window as Window & { dataLayer?: Array<Record<string, unknown>> }).dataLayer?.push({
     event: "whatsapp_click",
     location,
   });
@@ -27,49 +28,44 @@ export default function Footer() {
     <footer className="border-t border-white/10 bg-black">
       <div className="mx-auto max-w-6xl px-6 py-14">
         <div className="grid gap-10 md:grid-cols-3">
-
-          {/* Brand */}
           <div>
             <div className="text-white font-semibold">Web Growth</div>
             <p className="mt-3 text-white/60 leading-relaxed">
-              We design professional websites focused on real results, clarity,
-              usability, and performance.
+              We build fast, conversion-focused websites for businesses in Nigeria and international clients that need a credible launch without unnecessary complexity.
             </p>
           </div>
 
-          {/* Links */}
           <div className="md:justify-self-center">
             <div className="text-white font-semibold">Links</div>
 
             <div className="mt-3 flex flex-col gap-2 text-white/60">
+              <Link className="hover:text-white transition" href="/launch">
+                Launch
+              </Link>
               <Link className="hover:text-white transition" href="/services">
                 Services
               </Link>
-
               <Link className="hover:text-white transition" href="/about">
                 About
               </Link>
-
               <Link className="hover:text-white transition" href="/portfolio">
                 Portfolio
               </Link>
-
-              {/* ✅ Added Blog */}
               <Link className="hover:text-white transition" href="/blog">
                 Blog
               </Link>
-
               <Link className="hover:text-white transition" href="/pricing">
                 Pricing
               </Link>
-
+              <Link className="hover:text-white transition" href="/faq">
+                FAQ
+              </Link>
               <Link className="hover:text-white transition" href="/contact">
                 Contact
               </Link>
             </div>
           </div>
 
-          {/* Contact */}
           <div className="md:justify-self-end">
             <div className="text-white font-semibold">Contact</div>
 
@@ -100,7 +96,6 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* Bottom bar */}
         <div className="mt-10 flex flex-col gap-3 border-t border-white/10 pt-6 text-sm text-white/50 md:flex-row md:items-center md:justify-between">
           <div>© {new Date().getFullYear()} Web Growth. All rights reserved.</div>
 

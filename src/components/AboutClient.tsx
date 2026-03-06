@@ -7,6 +7,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import SectionHeading from "@/components/SectionHeading";
 import CTASection from "@/components/CTASection";
 import FAQAccordion from "@/components/FAQAccordion";
+import BlogInlineCTA from "@/components/BlogInlineCTA";
 
 type ValueItem = {
   title: string;
@@ -424,6 +425,9 @@ export default function AboutClient() {
       {/* CTA */}
       <section className="py-24">
         <div className="mx-auto max-w-6xl px-6">
+          <div className="mb-10">
+            <BlogInlineCTA />
+          </div>
           <CTASection
             eyebrow="READY"
             title="Let’s build a website your customers take seriously"

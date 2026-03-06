@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
@@ -7,19 +7,20 @@ const FORM_ENDPOINT = "https://formspree.io/f/xgoanbnr";
 
 type Status = "idle" | "sending" | "success" | "error";
 
-// ---- Analytics helpers (safe)
-function pushToDataLayer(eventName: string, payload: Record<string, any>) {
+function pushToDataLayer(eventName: string, payload: Record<string, unknown>) {
   if (typeof window === "undefined") return;
-  const w = window as any;
-  w.dataLayer = w.dataLayer || [];
-  w.dataLayer.push({ event: eventName, ...payload });
+  const win = window as Window & { dataLayer?: Array<Record<string, unknown>> };
+  win.dataLayer = win.dataLayer || [];
+  win.dataLayer.push({ event: eventName, ...payload });
 }
 
-function fireGtagEvent(eventName: string, params: Record<string, any>) {
+function fireGtagEvent(eventName: string, params: Record<string, unknown>) {
   if (typeof window === "undefined") return;
-  const w = window as any;
-  if (typeof w.gtag === "function") {
-    w.gtag("event", eventName, params);
+  const win = window as Window & {
+    gtag?: (action: string, event: string, payload: Record<string, unknown>) => void;
+  };
+  if (typeof win.gtag === "function") {
+    win.gtag("event", eventName, params);
   }
 }
 
@@ -29,41 +30,40 @@ export default function ContactClient() {
 
   const serviceOptions = useMemo(
     () => [
+      "Launch ($150)",
+      "Launch + Blog ($250)",
       "Business Website Design",
       "Landing Page Design",
       "Website Redesign",
-      "E-commerce Website Design",
-      "Website Maintenance & Support",
-      "Speed & Performance Optimisation",
-      "Website Audit & Consultation",
+      "Search Engine Optimisation (SEO)",
+      "Lead Magnet Strategy and Build",
     ],
     []
   );
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [service, setService] = useState("");
-  const [message, setMessage] = useState("");
-
+  const [service, setService] = useState("Launch ($150)");
+  const [message, setMessage] = useState(
+    "I want a professional website live fast. Here are the basics of my business:"
+  );
   const [status, setStatus] = useState<Status>("idle");
   const [statusMsg, setStatusMsg] = useState("");
 
-  // Prefill service from URL (?service=...)
   useEffect(() => {
-    const s = searchParams.get("service");
-    if (!s) return;
+    const selected = searchParams.get("service");
+    if (!selected) return;
 
-    const decoded = decodeURIComponent(s);
+    const decoded = decodeURIComponent(selected);
     const match = serviceOptions.find(
-      (opt) => opt.toLowerCase() === decoded.toLowerCase()
+      (option) => option.toLowerCase() === decoded.toLowerCase()
     );
 
     setService(match ?? decoded);
   }, [searchParams, serviceOptions]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-
     setStatus("sending");
     setStatusMsg("");
 
@@ -79,43 +79,33 @@ export default function ContactClient() {
           email,
           service,
           message,
-          _subject: `New Web Growth Quote Request - ${
-            service || "No service selected"
-          }`,
+          _subject: `New Web Growth Launch Request - ${service}`,
         }),
       });
 
       if (!res.ok) {
-        let err = "Failed to send. Try again.";
+        let errorMessage = "Failed to send. Try again.";
         try {
           const data = await res.json();
-          if (data?.errors?.length) err = data.errors[0].message || err;
+          if (data?.errors?.length) {
+            errorMessage = data.errors[0].message || errorMessage;
+          }
         } catch {}
         setStatus("error");
-        setStatusMsg(err);
+        setStatusMsg(errorMessage);
         return;
       }
 
-      // ✅ SUCCESS
       setStatus("success");
-
-      // --- Conversion tracking (fires once, only on success)
       const leadPayload = {
-        form_name: "contact_quote",
-        service: service || "(none)",
+        form_name: "launch_contact",
+        service,
         page_path: typeof window !== "undefined" ? window.location.pathname : "",
       };
 
-      // GTM path (recommended)
       pushToDataLayer("wg_lead", leadPayload);
+      fireGtagEvent("generate_lead", { ...leadPayload, method: "formspree" });
 
-      // GA4 direct (if gtag exists)
-      fireGtagEvent("generate_lead", {
-        ...leadPayload,
-        method: "formspree",
-      });
-
-      // redirect to thank-you page
       setTimeout(() => {
         router.push("/contact/thanks");
       }, 800);
@@ -123,123 +113,99 @@ export default function ContactClient() {
       setStatus("error");
       setStatusMsg("Network error. Please try again.");
     }
-  };
+  }
 
   return (
-    <div className="bg-black text-white py-24">
-      <div className="mx-auto max-w-4xl px-6">
-        <h1 className="text-4xl md:text-5xl font-semibold">Request a Quote</h1>
+    <div className="rounded-2xl border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.045),rgba(255,255,255,0.015))] p-7 shadow-[0_18px_44px_rgba(0,0,0,0.22)]">
+      <h2 className="text-2xl font-semibold tracking-[-0.01em] text-white">
+        Start your launch request
+      </h2>
+      <p className="mt-3 text-sm leading-6 text-white/70">
+        Send the basics. You will get a clear response on scope, timing, and what is needed to launch.
+      </p>
 
-        <p className="mt-4 text-white/70 text-lg">
-          Tell us what you need. We’ll respond with the right next step.
-        </p>
-
-        {/* Status message */}
-        {status !== "idle" && (
-          <div
-            className={[
-              "mt-8 rounded-xl border p-4 text-sm",
-              status === "success"
-                ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-200"
-                : status === "error"
+      {status !== "idle" ? (
+        <div
+          className={[
+            "mt-6 rounded-xl border p-4 text-sm",
+            status === "success"
+              ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-200"
+              : status === "error"
                 ? "border-red-500/30 bg-red-500/10 text-red-200"
                 : "border-white/10 bg-white/5 text-white/70",
-            ].join(" ")}
-          >
-            {status === "sending"
-              ? "Sending..."
-              : status === "success"
+          ].join(" ")}
+        >
+          {status === "sending"
+            ? "Sending..."
+            : status === "success"
               ? "Message sent. Redirecting..."
               : statusMsg}
-          </div>
-        )}
+        </div>
+      ) : null}
 
-        <form onSubmit={handleSubmit} className="mt-12 space-y-6">
-          {/* Name */}
-          <div>
-            <label className="block text-sm mb-2 text-white/70">Your Name</label>
-            <input
-              type="text"
-              required
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full rounded-md border border-white/10 bg-black/40 px-4 py-3 text-white"
-            />
-          </div>
+      <form onSubmit={handleSubmit} className="mt-8 space-y-5">
+        <div>
+          <label className="mb-2 block text-sm text-white/70">Your name</label>
+          <input
+            type="text"
+            required
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="w-full rounded-xl border border-white/10 bg-black/40 px-4 py-3 text-white outline-none"
+          />
+        </div>
 
-          {/* Email */}
-          <div>
-            <label className="block text-sm mb-2 text-white/70">
-              Email Address
-            </label>
-            <input
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full rounded-md border border-white/10 bg-black/40 px-4 py-3 text-white"
-            />
-          </div>
+        <div>
+          <label className="mb-2 block text-sm text-white/70">Email address</label>
+          <input
+            type="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full rounded-xl border border-white/10 bg-black/40 px-4 py-3 text-white outline-none"
+          />
+        </div>
 
-          {/* Service */}
-          <div>
-            <label className="block text-sm mb-2 text-white/70">Service</label>
-            <select
-              required
-              value={service}
-              onChange={(e) => setService(e.target.value)}
-              className="w-full rounded-md border border-white/10 bg-black/40 px-4 py-3 text-white"
-            >
-              <option value="" disabled>
-                Select a service
-              </option>
-
-              {serviceOptions.map((opt) => (
-                <option key={opt} value={opt} className="bg-black">
-                  {opt}
-                </option>
-              ))}
-
-              {service && !serviceOptions.includes(service) && (
-                <option value={service} className="bg-black">
-                  {service}
-                </option>
-              )}
-            </select>
-          </div>
-
-          {/* Message */}
-          <div>
-            <label className="block text-sm mb-2 text-white/70">
-              Project Details
-            </label>
-            <textarea
-              rows={5}
-              required
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              className="w-full rounded-md border border-white/10 bg-black/40 px-4 py-3 text-white"
-              placeholder="Briefly describe what you need…"
-            />
-          </div>
-
-          {/* Submit */}
-          <button
-            type="submit"
-            disabled={status === "sending"}
-            className={[
-              "w-full rounded-md px-6 py-4 text-sm font-semibold text-white transition",
-              status === "sending"
-                ? "bg-emerald-600/60 cursor-not-allowed"
-                : "bg-emerald-600 hover:bg-emerald-500",
-            ].join(" ")}
+        <div>
+          <label className="mb-2 block text-sm text-white/70">Service</label>
+          <select
+            required
+            value={service}
+            onChange={(e) => setService(e.target.value)}
+            className="w-full rounded-xl border border-white/10 bg-black/40 px-4 py-3 text-white outline-none"
           >
-            {status === "sending" ? "Sending..." : "Send Request"}
-          </button>
-        </form>
-      </div>
+            {serviceOptions.map((option) => (
+              <option key={option} value={option} className="bg-black">
+                {option}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="mb-2 block text-sm text-white/70">Project details</label>
+          <textarea
+            rows={5}
+            required
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            className="w-full rounded-xl border border-white/10 bg-black/40 px-4 py-3 text-white outline-none"
+          />
+        </div>
+
+        <button
+          type="submit"
+          disabled={status === "sending"}
+          className={[
+            "w-full rounded-xl px-6 py-4 text-sm font-semibold text-white transition",
+            status === "sending"
+              ? "cursor-not-allowed bg-emerald-600/60"
+              : "bg-emerald-700 hover:bg-emerald-600",
+          ].join(" ")}
+        >
+          {status === "sending" ? "Sending..." : "Send Request"}
+        </button>
+      </form>
     </div>
   );
 }
-
-

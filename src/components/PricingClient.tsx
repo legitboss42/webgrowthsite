@@ -1,5 +1,6 @@
 ﻿"use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { gsap } from "gsap";
@@ -344,11 +345,12 @@ export default function PricingClient() {
                     key={p.name}
                     className="rounded-2xl border border-white/10 bg-white/5 p-6 flex items-center gap-4"
                   >
-                    <img
+                    <Image
                       src={p.src}
                       alt={`${p.name} logo`}
+                      width={140}
+                      height={40}
                       className="h-10 w-auto object-contain opacity-90"
-                      loading="lazy"
                     />
                     <div className="text-white font-semibold">{p.name}</div>
                   </div>

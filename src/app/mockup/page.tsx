@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 
 export const metadata = {
-  title: "Website Mockup Preview | Web Growth",
+  title: "Website Mockup Preview",
   robots: { index: false, follow: false },
 };
 

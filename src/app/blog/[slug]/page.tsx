@@ -1,15 +1,23 @@
-import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 
-import { getPosts, getPost, type Post } from "../../../lib/posts";
 import BlogPostClient from "./BlogPostClient";
+import RelatedServiceCTA from "@/components/RelatedServiceCTA";
 import SocialShareDock from "@/components/SocialShareDock";
+import { getPost, getPosts, type Post } from "@/lib/posts";
+import { buildPageMetadata } from "@/lib/seo";
+import {
+  buildWhatsAppUrl,
+  DEFAULT_OG_IMAGE,
+  SITE_NAME,
+  SITE_URL,
+} from "@/lib/site";
 
 export function generateStaticParams() {
   const posts = getPosts();
-  return posts.map((p) => ({ slug: p.slug }));
+  return posts.map((post) => ({ slug: post.slug }));
 }
 
 export function generateMetadata({
@@ -21,7 +29,7 @@ export function generateMetadata({
 
   if (!post) {
     return {
-      title: "Post not found | Web Growth",
+      title: "Post not found",
       robots: { index: false, follow: false },
     };
   }
@@ -37,38 +45,14 @@ export function generateMetadata({
     ])
   );
 
-  const socialImage = post.cover
-    ? `https://webgrowth.info${post.cover}`
-    : "https://webgrowth.info/images/placeholder.webp";
-
-  return {
-    title: `${post.title} | Web Growth`,
+  return buildPageMetadata({
+    title: post.title,
     description: post.excerpt,
+    path: `/blog/${post.slug}`,
     keywords: postKeywords,
-    alternates: { canonical: `https://webgrowth.info/blog/${post.slug}` },
-    robots: { index: true, follow: true },
-    openGraph: {
-      title: post.title,
-      description: post.excerpt,
-      url: `https://webgrowth.info/blog/${post.slug}`,
-      siteName: "Web Growth",
-      type: "article",
-      images: [
-        {
-          url: socialImage,
-          width: 1200,
-          height: 630,
-          alt: post.title,
-        },
-      ],
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: post.title,
-      description: post.excerpt,
-      images: [socialImage],
-    },
-  };
+    image: post.cover || DEFAULT_OG_IMAGE,
+    type: "article",
+  });
 }
 
 function slugifyHeading(text: string) {
@@ -89,28 +73,32 @@ function getSafeTags(post: Pick<Post, "tags">): string[] {
     : [];
 }
 
-// TOC only from "##" (exclude "Lead magnet")
 function extractHeadings(content: string) {
-  const lines = content.split("\n").map((l) => l.trim());
+  const lines = content.split("\n").map((line) => line.trim());
   const headings: Array<{ text: string; id: string }> = [];
 
-  for (const l of lines) {
-    if (l.startsWith("## ")) {
-      const text = l.replace(/^##\s+/, "").trim();
-      if (isLeadMagnetHeading(text)) continue;
-      headings.push({ text, id: slugifyHeading(text) });
-    }
+  for (const line of lines) {
+    if (!line.startsWith("## ")) continue;
+
+    const text = line.replace(/^##\s+/, "").trim();
+    if (isLeadMagnetHeading(text)) continue;
+
+    headings.push({ text, id: slugifyHeading(text) });
   }
 
   return headings;
 }
 
 function getRelatedPosts(current: Post, limit = 3): Post[] {
-  const all = getPosts().filter((p) => p.slug !== current.slug);
+  const all = getPosts().filter((post) => post.slug !== current.slug);
   const currentTags = new Set(getSafeTags(current));
 
-  const overlap = (p: Post) =>
-    getSafeTags(p).reduce((n, t) => n + (currentTags.has(t) ? 1 : 0), 0);
+  const overlap = (post: Post) =>
+    getSafeTags(post).reduce(
+      (count, tag) => count + (currentTags.has(tag) ? 1 : 0),
+      0
+    );
+
   const toTime = (value?: string) => {
     if (!value) return 0;
     const time = new Date(value).getTime();
@@ -118,35 +106,26 @@ function getRelatedPosts(current: Post, limit = 3): Post[] {
   };
 
   const byCategory = all
-    .filter((p) => p.category === current.category)
+    .filter((post) => post.category === current.category)
     .sort((a, b) => overlap(b) - overlap(a) || toTime(b.date) - toTime(a.date));
 
   const byTags = all
-    .filter((p) => p.category !== current.category && overlap(p) > 0)
+    .filter((post) => post.category !== current.category && overlap(post) > 0)
     .sort((a, b) => overlap(b) - overlap(a) || toTime(b.date) - toTime(a.date));
 
   const related: Post[] = [];
   const seen = new Set<string>();
 
-  for (const p of [...byCategory, ...byTags]) {
-    if (seen.has(p.slug)) continue;
-    related.push(p);
-    seen.add(p.slug);
+  for (const post of [...byCategory, ...byTags]) {
+    if (seen.has(post.slug)) continue;
+
+    related.push(post);
+    seen.add(post.slug);
+
     if (related.length >= limit) break;
   }
 
   return related;
-}
-
-/* ======================================================
-   WhatsApp
-====================================================== */
-const WHATSAPP_NUMBER = "2348066706336";
-const WHATSAPP_MESSAGE = "Hello, I’d like to request a quote for a website.";
-
-function buildWhatsAppUrl() {
-  const text = encodeURIComponent(WHATSAPP_MESSAGE);
-  return `https://wa.me/${WHATSAPP_NUMBER}?text=${text}`;
 }
 
 export default function BlogPostPage({ params }: { params: { slug: string } }) {
@@ -154,10 +133,10 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
   if (!post) return notFound();
 
   const headings = extractHeadings(post.content);
-  const whatsappUrl = buildWhatsAppUrl();
   const relatedPosts = getRelatedPosts(post, 3);
-
-  const SITE_URL = "https://webgrowth.info";
+  const whatsappUrl = buildWhatsAppUrl(
+    "Hello, I'd like to request a quote for a website."
+  );
   const canonicalUrl = `${SITE_URL}/blog/${post.slug}`;
 
   const schema = {
@@ -173,19 +152,19 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
     },
     author: {
       "@type": "Organization",
-      name: "Web Growth",
+      name: SITE_NAME,
       url: SITE_URL,
     },
     publisher: {
       "@type": "Organization",
-      name: "Web Growth",
+      name: SITE_NAME,
       url: SITE_URL,
       logo: {
         "@type": "ImageObject",
         url: `${SITE_URL}/images/brand/web-growth-logo.webp`,
       },
     },
-    image: post.cover ? [`${SITE_URL}${post.cover}`] : undefined,
+    image: [`${SITE_URL}${post.cover || DEFAULT_OG_IMAGE}`],
   };
 
   return (
@@ -194,7 +173,7 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
       />
-      {/* HERO */}
+
       <section className="relative overflow-hidden border-b border-white/10">
         <div className="absolute inset-0">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(16,185,129,0.14),transparent_55%)]" />
@@ -205,25 +184,25 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
         <div className="relative mx-auto max-w-6xl px-6 py-16">
           <div className="max-w-3xl">
             <div className="text-sm text-white/55">
-              {new Date(post.date).toLocaleDateString()} • {post.readTime} •{" "}
+              {new Date(post.date).toLocaleDateString()} | {post.readTime} |{" "}
               <span className="text-emerald-200">{post.category}</span>
             </div>
 
-            <h1 className="mt-4 text-4xl md:text-6xl font-semibold leading-tight">
+            <h1 className="mt-4 text-4xl font-semibold leading-tight md:text-6xl">
               {post.title}
             </h1>
 
-            <p className="mt-6 text-white/70 text-lg leading-relaxed">
+            <p className="mt-6 text-lg leading-relaxed text-white/70">
               {post.excerpt}
             </p>
 
             <div className="mt-8 flex flex-wrap gap-2">
-              {getSafeTags(post).map((t) => (
+              {getSafeTags(post).map((tag) => (
                 <span
-                  key={t}
+                  key={tag}
                   className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/70"
                 >
-                  {t}
+                  {tag}
                 </span>
               ))}
             </div>
@@ -231,21 +210,21 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
             <div className="mt-10 flex gap-3">
               <Link
                 href="/blog"
-                className="rounded-md border border-white/10 bg-black/30 px-5 py-3 text-sm font-semibold text-white/85 hover:bg-black/45 transition"
+                className="rounded-md border border-white/10 bg-black/30 px-5 py-3 text-sm font-semibold text-white/85 transition hover:bg-black/45"
               >
-                ← Back to Blog
+                Back to Blog
               </Link>
               <Link
-                href="/contact"
-                className="rounded-md bg-emerald-600 px-5 py-3 text-sm font-semibold text-white hover:bg-emerald-500 transition"
+                href="/launch"
+                className="rounded-md bg-emerald-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-500"
               >
-                Request a Quote
+                Launch in 48 Hours
               </Link>
             </div>
           </div>
 
           {post.cover ? (
-            <div className="mt-12 overflow-hidden rounded-2xl border border-white/10 max-w-3xl">
+            <div className="mt-12 max-w-3xl overflow-hidden rounded-2xl border border-white/10">
               <div className="relative aspect-[16/9]">
                 <Image
                   src={post.cover}
@@ -261,63 +240,45 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
         </div>
       </section>
 
-      {/* BODY */}
       <section className="mx-auto max-w-6xl px-6 py-16">
         <div className="grid gap-10 lg:grid-cols-[72px_1fr_340px]">
-          {/* Share rail */}
           <div className="hidden lg:block">
-            <SocialShareDock title={post.title} excerpt={post.excerpt} slug={post.slug} />
+            <SocialShareDock
+              title={post.title}
+              excerpt={post.excerpt}
+              slug={post.slug}
+            />
           </div>
 
-          {/* Main content */}
           <div className="max-w-3xl">
-            {/* ✅ Client renderer (Lead buttons + modal + MailerLite) */}
             <BlogPostClient content={post.content} />
 
-            {/* Mobile share dock shows here */}
             <div className="lg:hidden">
-              <SocialShareDock title={post.title} excerpt={post.excerpt} slug={post.slug} />
+              <SocialShareDock
+                title={post.title}
+                excerpt={post.excerpt}
+                slug={post.slug}
+              />
             </div>
 
-            <div className="mt-14 rounded-2xl border border-white/10 bg-white/5 p-7">
-              <h3 className="text-xl font-semibold text-white">
-                Want this done for you?
-              </h3>
-              <p className="mt-2 text-white/70">
-                If you want a website that actually converts visitors into enquiries, we can build it.
-              </p>
-
-              <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-                <Link
-                  href="/contact"
-                  className="rounded-md bg-emerald-600 px-6 py-3 text-sm font-semibold text-white text-center hover:bg-emerald-500 transition"
-                >
-                  Request a Quote
-                </Link>
-                <Link
-                  href="/services"
-                  className="rounded-md border border-white/10 bg-black/30 px-6 py-3 text-sm font-semibold text-white/85 text-center hover:bg-black/45 transition"
-                >
-                  View Services
-                </Link>
-              </div>
+            <div className="mt-14">
+              <RelatedServiceCTA />
             </div>
           </div>
 
-          {/* Sidebar */}
-          <aside className="lg:sticky lg:top-32 h-fit">
+          <aside className="h-fit lg:sticky lg:top-32">
             <div className="rounded-2xl border border-white/10 bg-black/40 p-6">
               <div className="text-sm font-semibold text-white">On this page</div>
 
               {headings.length ? (
                 <div className="mt-4 space-y-2">
-                  {headings.map((h) => (
+                  {headings.map((heading) => (
                     <a
-                      key={h.id}
-                      href={`#${h.id}`}
-                      className="block text-sm text-white/65 hover:text-white transition"
+                      key={heading.id}
+                      href={`#${heading.id}`}
+                      className="block text-sm text-white/65 transition hover:text-white"
                     >
-                      {h.text}
+                      {heading.text}
                     </a>
                   ))}
                 </div>
@@ -328,18 +289,17 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
                 </div>
               )}
 
-              {/* Request a Quote card */}
               <div className="mt-6 rounded-xl border border-emerald-400/20 bg-emerald-500/10 p-5">
                 <div className="text-sm font-semibold text-white">Request a Quote</div>
                 <p className="mt-2 text-sm text-white/70">
-                  Want a fast website that generates enquiries? Tell us what you do and what you need  - 
-                  we’ll reply with the best plan.
+                  Want a fast website that generates enquiries? Tell us what you
+                  do and what you need. We will reply with the best plan.
                 </p>
 
                 <div className="mt-4 grid gap-3">
                   <Link
                     href="/contact"
-                    className="inline-flex w-full items-center justify-center rounded-md bg-emerald-600 px-4 py-3 text-sm font-semibold text-white hover:bg-emerald-500 transition"
+                    className="inline-flex w-full items-center justify-center rounded-md bg-emerald-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-emerald-500"
                   >
                     Request a Quote
                   </Link>
@@ -348,7 +308,7 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
                     href={whatsappUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex w-full items-center justify-center rounded-md border border-white/10 bg-black/30 px-4 py-3 text-sm font-semibold text-white/85 hover:bg-black/45 transition"
+                    className="inline-flex w-full items-center justify-center rounded-md border border-white/10 bg-black/30 px-4 py-3 text-sm font-semibold text-white/85 transition hover:bg-black/45"
                   >
                     Chat on WhatsApp
                   </a>
@@ -372,20 +332,21 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
             </p>
 
             <div className="mt-6 grid gap-6 md:grid-cols-3">
-              {relatedPosts.map((p) => (
+              {relatedPosts.map((relatedPost) => (
                 <Link
-                  key={p.slug}
-                  href={`/blog/${p.slug}`}
-                  className="group rounded-2xl border border-white/10 bg-white/5 p-6 hover:border-emerald-500/25 transition"
+                  key={relatedPost.slug}
+                  href={`/blog/${relatedPost.slug}`}
+                  className="group rounded-2xl border border-white/10 bg-white/5 p-6 transition hover:border-emerald-500/25"
                 >
                   <div className="text-xs text-white/55">
-                    {p.category} | {new Date(p.date).toLocaleDateString()}
+                    {relatedPost.category} |{" "}
+                    {new Date(relatedPost.date).toLocaleDateString()}
                   </div>
-                  <div className="mt-2 text-lg font-semibold text-white group-hover:text-emerald-200 transition">
-                    {p.title}
+                  <div className="mt-2 text-lg font-semibold text-white transition group-hover:text-emerald-200">
+                    {relatedPost.title}
                   </div>
-                  <p className="mt-2 text-sm text-white/70 leading-relaxed">
-                    {p.excerpt}
+                  <p className="mt-2 text-sm leading-relaxed text-white/70">
+                    {relatedPost.excerpt}
                   </p>
                 </Link>
               ))}
@@ -396,4 +357,3 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
     </article>
   );
 }
-

@@ -1,61 +1,109 @@
-import type { Metadata } from "next";
 import { Suspense } from "react";
 import ContactClient from "@/components/ContactClient";
+import PricingSection from "@/components/PricingSection";
+import FinalCTASection from "@/components/FinalCTASection";
+import StructuredData from "@/components/StructuredData";
+import { pricingTiers } from "@/lib/launchOffer";
+import { buildPageMetadata, buildProfessionalServiceSchema } from "@/lib/seo";
+import {
+  buildWhatsAppUrl,
+  CONTACT_EMAIL,
+  CONTACT_EMAIL_HREF,
+} from "@/lib/site";
 
-export const metadata: Metadata = {
-  title: "Contact Web Growth | Request a Web Design Quote",
-  description:
-    "Request a web design quote from Web Growth. Tell us what you need and get clear next steps for your website project.",
+const pageDescription =
+  "Contact Web Growth to start a fast website launch for your business in Nigeria or remotely, with direct WhatsApp access, email, and a simple lead form.";
+
+export const metadata = buildPageMetadata({
+  title: "Contact Web Growth",
+  description: pageDescription,
+  path: "/contact",
   keywords: [
-    "web design",
-    "web design quote",
-    "web design services",
+    "contact web designer nigeria",
+    "request website launch quote",
     "contact web growth",
-    "request a quote",
-    "website design proposal",
-    "landing page quote",
-    "website redesign quote",
   ],
-  alternates: {
-    canonical: "https://webgrowth.info/contact",
-  },
-  openGraph: {
-    title: "Contact Web Growth | Web Design Quote",
-    description:
-      "Request a quote for web design services and get a clear proposal with next steps.",
-    url: "https://webgrowth.info/contact",
-    siteName: "Web Growth",
-    images: [
-      {
-        url: "https://webgrowth.info/images/placeholder.jpg",
-        width: 1200,
-        height: 630,
-        alt: "Contact Web Growth",
-      },
-    ],
-    type: "website",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Contact Web Growth | Web Design Quote",
-    description: "Request a web design quote and get next steps.",
-    images: ["https://webgrowth.info/images/placeholder.jpg"],
-  },
-  robots: { index: true, follow: true },
-};
+});
 
 export default function ContactPage() {
   return (
-    <Suspense
-      fallback={
-        <div className="min-h-[60vh] flex items-center justify-center">
-          <span className="opacity-70">Loading…</span>
-        </div>
-      }
-    >
-      <ContactClient />
-    </Suspense>
+    <>
+      <StructuredData data={buildProfessionalServiceSchema("/contact", pageDescription)} />
+
+      <main className="bg-[#050806] text-white">
+        <section className="border-b border-white/10 py-20">
+          <div className="mx-auto max-w-6xl px-6">
+            <div className="grid gap-8 lg:grid-cols-[1fr_0.9fr]">
+              <div className="max-w-3xl">
+                <p className="text-xs uppercase tracking-[0.2em] text-emerald-300/80">Contact</p>
+                <h1 className="mt-4 text-balance text-4xl font-semibold leading-tight tracking-[-0.02em] md:text-6xl">
+                  Start your fast website launch
+                </h1>
+                <p className="mt-4 max-w-2xl text-lg leading-7 text-white/72">
+                  If you want a professional site live fast for Nigeria-based or international customers, send the basics and get a direct response.
+                </p>
+
+                <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                  <a
+                    href={buildWhatsAppUrl(
+                      "Hello, I want to start website design in 48 hours."
+                    )}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex min-h-12 items-center justify-center rounded-xl bg-emerald-700 px-8 py-3 text-base font-semibold text-white shadow-[0_14px_34px_rgba(5,150,105,0.25)] transition-colors hover:bg-emerald-600"
+                  >
+                    Start Now
+                  </a>
+                  <a
+                    href={CONTACT_EMAIL_HREF}
+                    className="inline-flex min-h-12 items-center justify-center rounded-xl border border-white/25 bg-black/35 px-8 py-3 text-base font-semibold text-white transition-colors hover:border-white/40 hover:bg-black/50"
+                  >
+                    Email Us
+                  </a>
+                </div>
+
+                <div className="mt-8 rounded-2xl border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.045),rgba(255,255,255,0.015))] p-6 shadow-[0_18px_44px_rgba(0,0,0,0.22)]">
+                  <p className="text-xs uppercase tracking-[0.18em] text-emerald-200/90">Direct contact</p>
+                  <p className="mt-3 text-sm leading-6 text-white/75">
+                    Email:{" "}
+                    <a href={CONTACT_EMAIL_HREF} className="text-emerald-300 hover:text-emerald-200">
+                      {CONTACT_EMAIL}
+                    </a>
+                  </p>
+                  <p className="mt-2 text-sm leading-6 text-white/75">
+                    WhatsApp:{" "}
+                    <a
+                      href="https://wa.me/2348066706336"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-emerald-300 hover:text-emerald-200"
+                    >
+                      https://wa.me/2348066706336
+                    </a>
+                  </p>
+                </div>
+              </div>
+
+              <Suspense
+                fallback={
+                  <div className="rounded-2xl border border-white/10 bg-white/5 p-6 text-white/70">
+                    Loading form...
+                  </div>
+                }
+              >
+                <ContactClient />
+              </Suspense>
+            </div>
+          </div>
+        </section>
+
+        <PricingSection
+          tiers={pricingTiers}
+          title="Pick the package before you submit"
+          description="This keeps the enquiry clear and speeds up the reply."
+        />
+        <FinalCTASection title="Prefer a direct message instead of the form?" />
+      </main>
+    </>
   );
 }
-
-

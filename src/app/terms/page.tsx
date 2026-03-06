@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import TermsClient from "@/components/TermsClient";
 
 export const metadata: Metadata = {
-  title: "Terms of Service | Web Growth",
+  title: "Terms of Service",
   description:
     "Web Growth Terms of Service. Clear terms for using our website and working with us on web design and development projects.",
   keywords: [
@@ -15,14 +15,14 @@ export const metadata: Metadata = {
   alternates: { canonical: "https://webgrowth.info/terms" },
   robots: { index: true, follow: true },
   openGraph: {
-    title: "Terms of Service | Web Growth",
+    title: "Terms of Service",
     description:
       "Clear terms for using our website and working with Web Growth on projects.",
     url: "https://webgrowth.info/terms",
     siteName: "Web Growth",
     images: [
       {
-        url: "https://webgrowth.info/images/placeholder.webp",
+        url: "https://webgrowth.info/images/hero/Hero-Image-1.webp",
         width: 1200,
         height: 630,
         alt: "Web Growth terms of service",
@@ -32,10 +32,10 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Terms of Service | Web Growth",
+    title: "Terms of Service",
     description:
       "Terms for using Web Growth and working with us on web design projects.",
-    images: ["https://webgrowth.info/images/placeholder.webp"],
+    images: ["https://webgrowth.info/images/hero/Hero-Image-1.webp"],
   },
 };
 

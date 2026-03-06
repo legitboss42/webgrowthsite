@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import WebsiteAuditClient from "@/components/WebsiteAuditClient";
 
 export const metadata: Metadata = {
-  title: "Website Audit & Consultation | Web Growth",
+  title: "Website Audit & Consultation",
   description:
     "Website audit and consultation to diagnose what’s blocking results: clarity, UX, trust, SEO foundations, and performance - with an actionable plan.",
   keywords: [
@@ -19,14 +19,14 @@ export const metadata: Metadata = {
     canonical: "https://webgrowth.info/services/website-audit",
   },
   openGraph: {
-    title: "Website Audit & Consultation | Web Growth",
+    title: "Website Audit & Consultation",
     description:
       "A clear diagnosis of what’s wrong with your site - plus a practical plan to fix it.",
     url: "https://webgrowth.info/services/website-audit",
     siteName: "Web Growth",
     images: [
       {
-        url: "https://webgrowth.info/images/placeholder.jpg",
+        url: "https://webgrowth.info/images/hero/Hero-Image-1.webp",
         width: 1200,
         height: 630,
         alt: "Website Audit & Consultation",
@@ -36,10 +36,10 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Website Audit & Consultation | Web Growth",
+    title: "Website Audit & Consultation",
     description:
       "Expert website audits covering SEO, UX, trust, and performance gaps that block growth.",
-    images: ["https://webgrowth.info/images/placeholder.jpg"],
+    images: ["https://webgrowth.info/images/hero/Hero-Image-1.webp"],
   },
   robots: { index: true, follow: true },
 };

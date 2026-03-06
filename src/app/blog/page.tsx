@@ -1,49 +1,21 @@
-import type { Metadata } from "next";
 import BlogClient from "./BlogClient";
 import { getPosts } from "../../lib/posts";
+import { buildPageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Web Design Blog | Web Growth",
+export const metadata = buildPageMetadata({
+  title: "Web Design Blog",
   description:
-    "Practical web design, SEO, conversion, and performance guides for business owners who want more leads from their website.",
+    "Practical articles on web design, SEO, launch strategy, and conversion for businesses in Nigeria and international markets that want more enquiries.",
+  path: "/blog",
   keywords: [
-    "web design",
     "web design blog",
-    "web design services",
-    "website SEO",
-    "landing page optimization",
     "small business website tips",
+    "website launch strategy",
+    "seo for service businesses",
   ],
-  alternates: { canonical: "https://webgrowth.info/blog" },
-  openGraph: {
-    title: "Web Design Blog | Web Growth",
-    description:
-      "Actionable articles on web design, SEO, and conversion strategy to help businesses rank and generate leads.",
-    url: "https://webgrowth.info/blog",
-    siteName: "Web Growth",
-    images: [
-      {
-        url: "https://webgrowth.info/images/placeholder.webp",
-        width: 1200,
-        height: 630,
-        alt: "Web Growth web design blog",
-      },
-    ],
-    type: "website",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Web Design Blog | Web Growth",
-    description:
-      "Web design, SEO, and conversion strategy articles for business growth.",
-    images: ["https://webgrowth.info/images/placeholder.webp"],
-  },
-  robots: { index: true, follow: true },
-};
+});
 
 export default function BlogPage() {
   const posts = getPosts();
   return <BlogClient posts={posts} />;
 }
-
-
