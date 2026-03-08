@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import Image from "next/image";
+import Link from "next/link";
 import dynamic from "next/dynamic";
 
 const HomeAnimations = dynamic(() => import("@/components/HomeAnimations"), {
@@ -44,8 +44,7 @@ function ActionLink({
     : "inline-flex min-h-12 w-full items-center justify-center rounded-xl border border-white/25 bg-black/35 px-8 py-3 text-base font-semibold text-white transition-colors hover:border-white/40 hover:bg-black/50 sm:w-auto";
   const isInternalRoute = href.startsWith("/");
   const isInPageAnchor = href.startsWith("#") || /^\/[^?#]*#/.test(href);
-  const isDirectAction =
-    href.startsWith("mailto:") || href.startsWith("tel:");
+  const isDirectAction = href.startsWith("mailto:") || href.startsWith("tel:");
 
   if (isInternalRoute && !isInPageAnchor) {
     return (
@@ -130,26 +129,51 @@ export default function HeroSection({
 
             <p className="mt-4 text-sm text-white/65">{trustLine}</p>
 
-            <div className="mt-8 max-w-2xl rounded-2xl border border-white/15 bg-[linear-gradient(180deg,rgba(255,255,255,0.045),rgba(255,255,255,0.015))] p-5 text-left shadow-[0_18px_50px_rgba(0,0,0,0.25)]">
-              <p className="text-xs uppercase tracking-[0.16em] text-emerald-200">
-                Best fit
-              </p>
-              <p className="mt-2 text-sm leading-7 text-white/78">{locationNote}</p>
+            <div className="relative mt-8 max-w-2xl overflow-hidden rounded-2xl border border-emerald-400/30 bg-[radial-gradient(circle_at_14%_-20%,rgba(16,185,129,0.26),rgba(4,18,14,0.9)_45%,rgba(2,8,7,0.98)_100%)] p-5 text-left shadow-[0_18px_50px_rgba(0,0,0,0.25)]">
+              <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(115deg,rgba(16,185,129,0.08)_0%,transparent_46%,rgba(16,185,129,0.04)_100%)]" />
+              <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:24px_24px] opacity-15" />
+
+              <div className="relative z-10">
+                <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-emerald-200">
+                  [ BEST FIT ]
+                </p>
+                <p className="mt-2 text-sm leading-7 text-white/82">{locationNote}</p>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <span className="rounded-full border border-white/25 bg-black/45 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.12em] text-white/80">
+                    Nigeria
+                  </span>
+                  <span className="rounded-full border border-white/25 bg-black/45 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.12em] text-white/80">
+                    Remote
+                  </span>
+                  <span className="rounded-full border border-white/25 bg-black/45 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.12em] text-white/80">
+                    International
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
 
-          <aside className="rounded-2xl border border-white/15 bg-[linear-gradient(180deg,rgba(255,255,255,0.045),rgba(255,255,255,0.015))] p-7 shadow-[0_18px_50px_rgba(0,0,0,0.25)]">
-            <p className="text-xs uppercase tracking-[0.18em] text-emerald-200">{asideTitle}</p>
+          <aside className="relative overflow-hidden rounded-2xl border border-emerald-400/28 bg-[radial-gradient(circle_at_14%_-20%,rgba(16,185,129,0.24),rgba(4,16,13,0.9)_45%,rgba(2,8,7,0.98)_100%)] p-7 shadow-[0_18px_50px_rgba(0,0,0,0.25)]">
+            <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(115deg,rgba(16,185,129,0.08)_0%,transparent_46%,rgba(16,185,129,0.04)_100%)]" />
+            <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:22px_22px] opacity-15" />
+
+            <p className="relative z-10 font-mono text-[11px] uppercase tracking-[0.2em] text-emerald-200/95">
+              [ {asideTitle} ]
+            </p>
             <ul className="mt-6 space-y-4">
               {asideItems.map((item, index) => (
                 <li
                   key={item}
-                  className="rounded-xl border border-white/10 bg-black/35 px-4 py-3"
+                  className="relative overflow-hidden rounded-xl border border-emerald-400/22 bg-black/35 shadow-[0_10px_24px_rgba(0,0,0,0.2)]"
                 >
-                  <p className="text-sm font-semibold text-emerald-200/95">
-                    {String(index + 1).padStart(2, "0")}
-                  </p>
-                  <p className="mt-1 text-sm leading-6 text-white/70">{item}</p>
+                  <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(115deg,rgba(16,185,129,0.08)_0%,transparent_46%,rgba(16,185,129,0.03)_100%)]" />
+                  <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.015)_1px,transparent_1px)] bg-[size:20px_20px] opacity-15" />
+                  <div className="relative z-10 px-4 py-3">
+                    <span className="inline-flex items-center rounded-md border border-white/20 bg-black/45 px-2 py-1 font-mono text-[11px] font-semibold text-emerald-200/95">
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
+                    <p className="mt-2 text-sm leading-6 text-white/84">{item}</p>
+                  </div>
                 </li>
               ))}
             </ul>

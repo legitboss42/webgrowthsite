@@ -93,13 +93,17 @@ export default function PricingPage() {
                 {pricingHighlights.map((item) => (
                   <div
                     key={item.label}
-                    className="rounded-2xl border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.055),rgba(255,255,255,0.015))] p-5 shadow-[0_18px_44px_rgba(0,0,0,0.22)]"
+                    className="relative overflow-hidden rounded-2xl border border-emerald-400/24 bg-[radial-gradient(circle_at_16%_-10%,rgba(16,185,129,0.21),rgba(3,14,11,0.94)_46%,rgba(2,8,7,0.98)_100%)] p-5 shadow-[0_18px_44px_rgba(0,0,0,0.22)]"
                   >
-                    <p className="text-xs uppercase tracking-[0.14em] text-emerald-200/85">
-                      {item.label}
-                    </p>
-                    <p className="mt-3 text-xl font-semibold text-white">{item.value}</p>
-                    <p className="mt-2 text-sm leading-6 text-white/65">{item.note}</p>
+                    <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(115deg,rgba(16,185,129,0.08)_0%,transparent_46%,rgba(16,185,129,0.04)_100%)]" />
+                    <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:22px_22px] opacity-15" />
+                    <div className="relative z-10">
+                      <p className="text-xs uppercase tracking-[0.14em] text-emerald-200/85">
+                        {item.label}
+                      </p>
+                      <p className="mt-3 text-xl font-semibold text-white">{item.value}</p>
+                      <p className="mt-2 text-sm leading-6 text-white/68">{item.note}</p>
+                    </div>
                   </div>
                 ))}
               </div>

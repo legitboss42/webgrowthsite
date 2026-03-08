@@ -62,11 +62,14 @@ export default function SocialProofSection({
                   className="h-full"
                 />
 
-                <div className="overflow-hidden rounded-2xl border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.015))] shadow-[0_16px_40px_rgba(0,0,0,0.22)]">
+                <div className="relative overflow-hidden rounded-2xl border border-emerald-400/24 bg-[radial-gradient(circle_at_16%_-10%,rgba(16,185,129,0.21),rgba(3,14,11,0.94)_46%,rgba(2,8,7,0.98)_100%)] shadow-[0_16px_40px_rgba(0,0,0,0.22)]">
+                  <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(115deg,rgba(16,185,129,0.08)_0%,transparent_46%,rgba(16,185,129,0.04)_100%)]" />
+                  <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:22px_22px] opacity-15" />
+
                   <button
                     type="button"
                     onClick={() => toggleCard(item.title)}
-                    className="flex w-full items-center justify-between gap-3 px-5 py-4 text-left"
+                    className="relative z-10 flex w-full items-center justify-between gap-3 px-5 py-4 text-left"
                     aria-expanded={isOpen}
                   >
                     <span className="inline-flex rounded-full border border-white/10 bg-black/55 px-3 py-1 text-xs uppercase tracking-[0.12em] text-emerald-200/90">
@@ -74,7 +77,7 @@ export default function SocialProofSection({
                     </span>
                     <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-emerald-300/90 transition hover:text-emerald-200">
                       {isOpen ? "Hide Actions" : "Show Actions"}
-                      <span aria-hidden="true">{isOpen ? "−" : "+"}</span>
+                      <span aria-hidden="true">{isOpen ? "-" : "+"}</span>
                     </span>
                   </button>
 
@@ -85,11 +88,11 @@ export default function SocialProofSection({
                     ].join(" ")}
                   >
                     <div className="overflow-hidden">
-                      <div className="border-t border-white/10 px-5 pb-5 pt-4">
+                      <div className="relative z-10 border-t border-white/15 px-5 pb-5 pt-4">
                         <p className="text-sm font-semibold text-white/90">
                           What was included
                         </p>
-                        <ul className="mt-3 space-y-2 text-sm leading-6 text-white/72">
+                        <ul className="mt-3 space-y-2 text-sm leading-6 text-white/74">
                           {item.stack.map((detail) => (
                             <li key={detail} className="flex gap-3">
                               <span className="mt-[9px] h-1.5 w-1.5 rounded-full bg-emerald-400/80" />

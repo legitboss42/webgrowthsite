@@ -55,15 +55,17 @@ export default function PricingSection({
             <article
               key={tier.name}
               className={[
-                "relative flex h-full flex-col overflow-hidden rounded-3xl border p-7 shadow-[0_18px_44px_rgba(0,0,0,0.22)]",
+                "relative flex h-full flex-col overflow-hidden rounded-3xl border p-7 shadow-[0_20px_50px_rgba(0,0,0,0.28)]",
                 index === 0
-                  ? "border-emerald-500/45 bg-[linear-gradient(180deg,rgba(16,185,129,0.24),rgba(16,185,129,0.08))]"
-                  : "border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.06),rgba(255,255,255,0.015))]",
+                  ? "border-emerald-500/45 bg-[radial-gradient(circle_at_16%_-10%,rgba(16,185,129,0.28),rgba(4,18,14,0.92)_46%,rgba(2,8,7,0.98)_100%)]"
+                  : "border-emerald-400/25 bg-[radial-gradient(circle_at_16%_-10%,rgba(16,185,129,0.2),rgba(3,14,11,0.94)_46%,rgba(2,8,7,0.98)_100%)]",
               ].join(" ")}
             >
-              <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-emerald-300/70 to-transparent" />
+              <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(110deg,rgba(16,185,129,0.1)_0%,transparent_45%,rgba(16,185,129,0.05)_100%)]" />
+              <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:26px_26px] opacity-20" />
+              <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-emerald-300/85 to-transparent" />
 
-              <div className="flex items-start justify-between gap-4">
+              <div className="relative z-10 flex items-start justify-between gap-4">
                 <div>
                   <h3 className="text-2xl font-semibold tracking-[-0.01em]">
                     {tier.name}
@@ -84,7 +86,7 @@ export default function PricingSection({
                 </span>
               </div>
 
-              <div className="mt-6 rounded-2xl border border-white/10 bg-black/25 p-5">
+              <div className="relative z-10 mt-6 rounded-2xl border border-emerald-400/25 bg-black/45 p-5 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.03)]">
                 <p className="text-xs uppercase tracking-[0.14em] text-white/55">
                   Package total
                 </p>
@@ -94,7 +96,7 @@ export default function PricingSection({
                 </div>
               </div>
 
-              <ul className="mt-6 space-y-3 text-sm text-white/76">
+              <ul className="relative z-10 mt-6 space-y-3 text-sm text-white/78">
                 {tier.details.map((detail) => (
                   <li key={detail} className="flex gap-3">
                     <span className="mt-1.5 inline-block h-2 w-2 rounded-full bg-emerald-400" />
@@ -107,7 +109,7 @@ export default function PricingSection({
                 href={tier.startNowHref}
                 target="_blank"
                 rel="noreferrer"
-                className="mt-auto inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-emerald-700 px-6 py-3 text-sm font-semibold text-white shadow-[0_12px_28px_rgba(5,150,105,0.22)] transition-colors hover:bg-emerald-600"
+                className="relative z-10 mt-auto inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-emerald-600 px-6 py-3 text-sm font-semibold text-white shadow-[0_14px_30px_rgba(5,150,105,0.3)] transition-colors hover:bg-emerald-500"
               >
                 Start Now
               </a>

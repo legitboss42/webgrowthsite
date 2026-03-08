@@ -1,4 +1,4 @@
-﻿import type { Metadata } from "next";
+﻿﻿import type { Metadata } from "next";
 import Script from "next/script";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -105,6 +105,31 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
 
       <body>
+        <Script id="scroll-top-on-refresh" strategy="beforeInteractive">
+          {`
+            (function () {
+              try {
+                var navEntries = performance.getEntriesByType && performance.getEntriesByType("navigation");
+                var navType = navEntries && navEntries[0] && navEntries[0].type;
+
+                if (!navType && performance.navigation) {
+                  navType = performance.navigation.type === 1 ? "reload" : "navigate";
+                }
+
+                if (navType === "reload") {
+                  var reset = function () {
+                    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+                  };
+
+                  reset();
+                  requestAnimationFrame(reset);
+                  setTimeout(reset, 0);
+                }
+              } catch (e) {}
+            })();
+          `}
+        </Script>
+
         <StructuredData data={websiteSchema} />
         <Analytics />
         <SpeedInsights />
