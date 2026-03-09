@@ -57,8 +57,8 @@ export default function WhatYouGetSection({
                 <p className="mt-3 flex-1 text-sm leading-7 text-white/80">{item.description}</p>
 
                 <div className="mt-5 border-t border-white/15 pt-3">
-                  <p className="text-[11px] uppercase tracking-[0.14em] text-emerald-200/85">
-                    Launch-ready
+                  <p className="text-xs font-medium text-emerald-200/85">
+                    Ready to launch
                   </p>
                 </div>
               </div>

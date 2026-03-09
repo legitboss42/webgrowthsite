@@ -145,7 +145,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         ) : null}
 
         <Header latestPost={latestPost ?? undefined} />
-        <main className={latestPost ? "pt-40" : "pt-28"}>{children}</main>
+        <main className={latestPost ? "pt-44 md:pt-40" : "pt-28"}>{children}</main>
         <Footer />
         <WebVitals />
 

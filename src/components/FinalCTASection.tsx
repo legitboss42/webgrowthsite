@@ -17,10 +17,7 @@ export default function FinalCTASection({
 
           <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
             <div>
-              <p className="text-xs uppercase tracking-[0.2em] text-emerald-200/90">
-                Final CTA
-              </p>
-              <h2 className="mt-4 text-balance text-3xl font-semibold leading-tight tracking-[-0.01em] md:text-5xl">
+              <h2 className="text-balance text-3xl font-semibold leading-tight tracking-[-0.01em] md:text-5xl">
                 {title}
               </h2>
               <p className="mt-4 max-w-2xl text-lg leading-7 text-white/78">

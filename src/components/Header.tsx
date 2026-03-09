@@ -140,12 +140,10 @@ export default function Header({ latestPost }: { latestPost?: LatestPostHeadline
                   <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-emerald-300/90 md:text-xs">
                     Latest Post
                   </span>
-                  <span className="text-xs font-medium text-white/90 md:text-sm">
+                  <span className="block min-w-0 max-w-[66vw] truncate text-xs font-medium text-white/90 md:max-w-none md:text-sm">
                     {latestPost.title}
                   </span>
-                  <span aria-hidden="true" className="text-white/45">
-                    •
-                  </span>
+                  <span aria-hidden="true" className="text-white/45">|</span>
                 </span>
               ))}
             </div>
@@ -321,3 +319,4 @@ export default function Header({ latestPost }: { latestPost?: LatestPostHeadline
     </header>
   );
 }
+

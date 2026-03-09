@@ -57,6 +57,24 @@ body {
   box-sizing: border-box;
 }
 
+@media (max-width: 767px) {
+  .latest-headline-track {
+    animation: none;
+    width: 100%;
+    min-width: 100%;
+  }
+
+  .latest-headline-item {
+    width: 100%;
+    overflow: hidden;
+    gap: 0.5rem;
+  }
+
+  .latest-headline-item + .latest-headline-item {
+    display: none;
+  }
+}
+
 .latest-headline-ticker:hover .latest-headline-track,
 .latest-headline-ticker:focus-within .latest-headline-track {
   animation-play-state: paused;
