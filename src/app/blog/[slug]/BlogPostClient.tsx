@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Script from "next/script";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
+import BlogEndCTA from "@/components/BlogEndCTA";
 import LeadMagnetCTA from "@/components/LeadMagnetCTA";
 import BlogInlineCTA from "@/components/BlogInlineCTA";
 
@@ -517,6 +518,7 @@ export default function BlogPostClient({ content }: { content: string }) {
         {blocks
           .slice(inlineCtaIndex)
           .map((b, idx) => renderBlockNode(b, idx + inlineCtaIndex))}
+        <BlogEndCTA />
       </div>
 
       {/* ===========================

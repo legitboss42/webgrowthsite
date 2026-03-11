@@ -5,7 +5,6 @@ import {
   DEFAULT_DESCRIPTION,
   DEFAULT_OG_IMAGE,
   PRIMARY_KEYWORD,
-  SERVICE_AREA,
   SITE_NAME,
   SITE_URL,
   WHATSAPP_BASE_URL,
@@ -68,17 +67,23 @@ export function buildProfessionalServiceSchema(path: string, description: string
     "@context": "https://schema.org",
     "@type": "ProfessionalService",
     "@id": `${absoluteUrl(path)}#professional-service`,
-    name: SITE_NAME,
+    name: "WebGrowth",
     url: absoluteUrl(path),
     image: absoluteUrl(DEFAULT_OG_IMAGE),
     description,
-    email: CONTACT_EMAIL.toLowerCase(),
+    email: CONTACT_EMAIL,
     telephone: "+2348066706336",
     priceRange: "$150-$250",
-    areaServed: SERVICE_AREA.map((area) => ({
-      "@type": "Place",
-      name: area,
-    })),
+    areaServed: [
+      {
+        "@type": "Country",
+        name: "Nigeria",
+      },
+      {
+        "@type": "Place",
+        name: "Worldwide",
+      },
+    ],
     address: {
       "@type": "PostalAddress",
       addressCountry: "NG",
@@ -93,9 +98,54 @@ export function buildProfessionalServiceSchema(path: string, description: string
         price: "150",
         availability: "https://schema.org/InStock",
         url: absoluteUrl("/launch"),
-        description: PRIMARY_KEYWORD,
+        description:
+          "Done-for-you website design in 48 hours for a mobile-first one-page business website launch.",
       },
     ],
+  };
+}
+
+export function buildArticleSchema({
+  url,
+  title,
+  description,
+  datePublished,
+  dateModified,
+  image,
+}: {
+  url: string;
+  title: string;
+  description: string;
+  datePublished: string;
+  dateModified?: string;
+  image: string;
+}) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: title,
+    description,
+    datePublished,
+    dateModified: dateModified || datePublished,
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": url,
+    },
+    author: {
+      "@type": "Organization",
+      name: SITE_NAME,
+      url: SITE_URL,
+    },
+    publisher: {
+      "@type": "Organization",
+      name: SITE_NAME,
+      url: SITE_URL,
+      logo: {
+        "@type": "ImageObject",
+        url: absoluteUrl("/images/brand/web-growth-logo.webp"),
+      },
+    },
+    image: [absoluteUrl(image)],
   };
 }
 
@@ -129,7 +179,7 @@ export const launchKeywordSet = [
 export const defaultSiteMetadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "Web Growth",
+    default: "Web Growth | Website Design in 48 Hours",
     template: "%s",
   },
   description: DEFAULT_DESCRIPTION,

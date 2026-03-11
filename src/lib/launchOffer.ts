@@ -52,7 +52,7 @@ export const whatYouGetItems = [
   {
     title: "1-page site structure",
     description:
-      "Your launch page includes a hero, services, social proof placeholder, FAQ, and contact section.",
+      "Your one-page business website includes a hero, services, social proof placeholder, FAQ, and contact section.",
   },
   {
     title: "Contact form + WhatsApp link",
@@ -62,7 +62,7 @@ export const whatYouGetItems = [
   {
     title: "Basic SEO setup",
     description:
-      "Titles, meta description, sitemap checks, and indexability checks are handled before launch.",
+      "Titles, meta description, sitemap checks, and indexability checks are handled before the 48-hour website launch.",
   },
 ] as const;
 
@@ -70,12 +70,12 @@ export const pricingTiers = [
   {
     name: "Launch",
     price: "$150",
-    summary: "1 page",
+    summary: "One-page business website",
     details: [
       "Hero, services, social proof placeholder, FAQ, and contact section",
-      "Mobile-first layout and clean conversion flow",
+      "Mobile-first business website layout and clean conversion flow",
       "Hosting and domain guidance",
-      "Basic SEO setup before launch",
+      "Basic SEO setup before the 48-hour website launch",
     ],
     startNowHref: "/contact?service=Launch%20($150)",
   },

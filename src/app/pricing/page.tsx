@@ -12,10 +12,10 @@ import {
 import { BOOKING_URL } from "@/lib/site";
 
 const pageDescription =
-  "Pricing for website design in 48 hours, with clear USD packages for businesses in Nigeria and international clients who need a professional website live fast.";
+  "Pricing for website design in 48 hours, with clear USD packages from $150 for businesses in Nigeria and international clients who need a professional website live fast.";
 
 export const metadata = buildPageMetadata({
-  title: "Pricing for Website Design in 48 Hours",
+  title: "48-Hour Website Launch Pricing | Business Website from $150",
   description: pageDescription,
   path: "/pricing",
   keywords: [
@@ -53,8 +53,10 @@ export default function PricingPage() {
                   Pricing for website design in 48 hours
                 </h1>
                 <p className="mt-5 max-w-2xl text-lg leading-7 text-white/72">
-                  Clear USD pricing, clean scope, and a focused launch for businesses
-                  in Nigeria, Lagos, or remote international markets.
+                  Clear USD pricing, clean scope, and a focused 48-hour website launch
+                  for businesses in Nigeria, Lagos, or remote international markets that
+                  need a one-page business website or a mobile-first business website with
+                  blog support.
                 </p>
 
                 <div className="mt-8 flex flex-col gap-3 sm:flex-row">
@@ -111,8 +113,8 @@ export default function PricingPage() {
 
         <PricingSection
           tiers={pricingTiers}
-          title="Two launch options. No bloated package table."
-          description="Start with the one-page launch or add a blog if SEO publishing matters from day one."
+          title="Two 48-hour website launch options. No bloated package table."
+          description="Start with the one-page business website launch or add a blog if SEO publishing matters from day one."
         />
         <WhatYouGetSection
           items={whatYouGetItems}

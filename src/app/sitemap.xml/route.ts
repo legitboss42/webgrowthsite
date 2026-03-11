@@ -69,8 +69,10 @@ function safeGetPosts() {
 }
 
 export function GET() {
+  const generatedAt = new Date().toISOString();
   const staticUrls: SitemapUrl[] = [...STATIC_ROUTES, ...SERVICE_ROUTES].map((path) => ({
     loc: `${BASE_URL}${path}`,
+    lastmod: generatedAt,
   }));
 
   const postUrls: SitemapUrl[] = safeGetPosts()

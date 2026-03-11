@@ -7,12 +7,11 @@ import BlogPostClient from "./BlogPostClient";
 import RelatedServiceCTA from "@/components/RelatedServiceCTA";
 import SocialShareDock from "@/components/SocialShareDock";
 import { getPost, getPosts, type Post } from "@/lib/posts";
-import { buildPageMetadata } from "@/lib/seo";
+import { buildArticleSchema, buildPageMetadata } from "@/lib/seo";
 import {
   BOOKING_URL,
   buildWhatsAppUrl,
   DEFAULT_OG_IMAGE,
-  SITE_NAME,
   SITE_URL,
 } from "@/lib/site";
 
@@ -47,8 +46,8 @@ export function generateMetadata({
   );
 
   return buildPageMetadata({
-    title: post.title,
-    description: post.excerpt,
+    title: `${post.title} | Web Growth Blog`,
+    description: `${post.excerpt} Learn the practical next steps and see how it connects to a fast, done-for-you website launch.`,
     path: `/blog/${post.slug}`,
     keywords: postKeywords,
     image: post.cover || DEFAULT_OG_IMAGE,
@@ -140,33 +139,14 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
   );
   const canonicalUrl = `${SITE_URL}/blog/${post.slug}`;
 
-  const schema = {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    headline: post.title,
+  const schema = buildArticleSchema({
+    url: canonicalUrl,
+    title: post.title,
     description: post.excerpt,
     datePublished: post.date,
     dateModified: post.date,
-    mainEntityOfPage: {
-      "@type": "WebPage",
-      "@id": canonicalUrl,
-    },
-    author: {
-      "@type": "Organization",
-      name: SITE_NAME,
-      url: SITE_URL,
-    },
-    publisher: {
-      "@type": "Organization",
-      name: SITE_NAME,
-      url: SITE_URL,
-      logo: {
-        "@type": "ImageObject",
-        url: `${SITE_URL}/images/brand/web-growth-logo.webp`,
-      },
-    },
-    image: [`${SITE_URL}${post.cover || DEFAULT_OG_IMAGE}`],
-  };
+    image: post.cover || DEFAULT_OG_IMAGE,
+  });
 
   return (
     <article className="bg-black text-white">
@@ -219,7 +199,7 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
                 href="/launch"
                 className="rounded-md bg-emerald-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-500"
               >
-                Launch in 48 Hours
+                Website Design in 48 Hours
               </Link>
             </div>
           </div>

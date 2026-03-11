@@ -3,9 +3,9 @@ import { getPosts } from "../../lib/posts";
 import { buildPageMetadata } from "@/lib/seo";
 
 export const metadata = buildPageMetadata({
-  title: "Web Design Blog",
+  title: "Web Growth Blog | Website Launch, SEO, and Conversion Guides",
   description:
-    "Practical articles on web design, SEO, launch strategy, and conversion for businesses in Nigeria and international markets that want more enquiries.",
+    "Practical articles on web design, SEO, launch strategy, and conversion for businesses in Nigeria and international markets, plus guidance that supports a fast 48-hour website launch.",
   path: "/blog",
   keywords: [
     "web design blog",

@@ -8,7 +8,7 @@ const pageDescription =
   "Frequently asked questions about Web Growth's 48-hour website launch service for businesses in Nigeria and remote international clients.";
 
 export const metadata = buildPageMetadata({
-  title: "Launch FAQ",
+  title: "48-Hour Website Launch FAQ | Pricing, Timing, and Ownership",
   description: pageDescription,
   path: "/faq",
   keywords: [
@@ -34,7 +34,7 @@ export default function FaqPage() {
             <div className="max-w-3xl">
               <p className="text-xs uppercase tracking-[0.2em] text-emerald-300/80">FAQ</p>
               <h1 className="mt-4 text-balance text-4xl font-semibold leading-tight tracking-[-0.02em] md:text-6xl">
-                Questions before you commit to a fast launch
+                48-hour website launch FAQ for business owners who want clear answers
               </h1>
               <p className="mt-4 max-w-2xl text-lg leading-7 text-white/72">
                 Clear answers about timing, ownership, revisions, and support for the 48-hour website launch service.

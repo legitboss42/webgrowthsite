@@ -180,11 +180,10 @@ export default function BlogClient({ posts }: Props) {
                 BLOG
               </div>
               <h1 data-hero-item className="mt-3 text-3xl md:text-5xl font-semibold leading-tight">
-                Structured insights for redesign, SEO, and conversion growth.
+                Website launch, SEO, and conversion guides for businesses that need traction fast.
               </h1>
               <p data-hero-item className="mt-4 text-white/70">
-                Same strategy content, now arranged like an editorial board: one lead story plus a
-                clean card grid.
+                Practical articles for Nigeria-based and international businesses, plus a direct path to the website design in 48 hours offer when you are ready to launch.
               </p>
             </div>
 
@@ -339,7 +338,7 @@ export default function BlogClient({ posts }: Props) {
                     href={`/blog/${featuredPost.slug}`}
                     className="rounded-lg border border-white/20 bg-black/35 px-3.5 py-2 text-xs font-semibold text-white/85 hover:bg-white/10 transition"
                   >
-                    Read article →
+                    Read article
                   </Link>
                 </div>
               </div>
@@ -388,7 +387,7 @@ export default function BlogClient({ posts }: Props) {
                       href={`/blog/${post.slug}`}
                       className="font-semibold text-white/85 hover:text-white transition"
                     >
-                      Read →
+                      Read more
                     </Link>
                   </div>
                 </div>

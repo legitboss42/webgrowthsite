@@ -31,7 +31,9 @@ export default function Footer() {
           <div>
             <div className="text-white font-semibold">Web Growth</div>
             <p className="mt-3 text-white/60 leading-relaxed">
-              We build fast, conversion-focused websites for businesses in Nigeria and international clients that need a credible launch without unnecessary complexity.
+              We build fast, conversion-focused websites for businesses in Nigeria and
+              international clients that need a credible launch without unnecessary
+              complexity.
             </p>
           </div>
 
@@ -40,7 +42,13 @@ export default function Footer() {
 
             <div className="mt-3 flex flex-col gap-2 text-white/60">
               <Link className="hover:text-white transition" href="/launch">
-                Launch
+                Website design in 48 hours
+              </Link>
+              <Link className="hover:text-white transition" href="/pricing">
+                48-hour launch pricing
+              </Link>
+              <Link className="hover:text-white transition" href="/faq">
+                Launch FAQ
               </Link>
               <Link className="hover:text-white transition" href="/services">
                 Services
@@ -53,12 +61,6 @@ export default function Footer() {
               </Link>
               <Link className="hover:text-white transition" href="/blog">
                 Blog
-              </Link>
-              <Link className="hover:text-white transition" href="/pricing">
-                Pricing
-              </Link>
-              <Link className="hover:text-white transition" href="/faq">
-                FAQ
               </Link>
               <Link className="hover:text-white transition" href="/contact">
                 Contact
@@ -97,7 +99,7 @@ export default function Footer() {
         </div>
 
         <div className="mt-10 flex flex-col gap-3 border-t border-white/10 pt-6 text-sm text-white/50 md:flex-row md:items-center md:justify-between">
-          <div>© {new Date().getFullYear()} Web Growth. All rights reserved.</div>
+          <div>(c) {new Date().getFullYear()} Web Growth. All rights reserved.</div>
 
           <div className="flex gap-4">
             <Link className="hover:text-white transition" href="/privacy">
