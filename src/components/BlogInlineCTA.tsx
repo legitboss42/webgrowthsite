@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { buildWhatsAppUrl } from "@/lib/site";
+import { BOOKING_URL, buildWhatsAppUrl } from "@/lib/site";
 
-const launchHref = "/launch";
+const launchHref = "/contact";
 const whatsappHref = buildWhatsAppUrl(
   "Hello, I want to ask about website design in 48 hours."
 );
@@ -32,15 +32,25 @@ export default function BlogInlineCTA({
           href={launchHref}
           className="inline-flex items-center justify-center rounded-xl bg-emerald-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-600"
         >
-          See website design in 48 hours
+          Contact Us
         </Link>
+        <a
+          href={BOOKING_URL}
+          target={BOOKING_URL.startsWith("http") ? "_blank" : undefined}
+          rel={BOOKING_URL.startsWith("http") ? "noreferrer" : undefined}
+          className="inline-flex items-center justify-center rounded-xl border border-white/15 bg-black/30 px-5 py-3 text-sm font-semibold text-white/90 transition hover:bg-black/50"
+        >
+          Book a Call
+        </a>
+      </div>
+      <div className="mt-3">
         <a
           href={whatsappHref}
           target="_blank"
           rel="noreferrer"
-          className="inline-flex items-center justify-center rounded-xl border border-white/15 bg-black/30 px-5 py-3 text-sm font-semibold text-white/90 transition hover:bg-black/50"
+          className="text-sm font-semibold text-emerald-200 transition hover:text-emerald-100"
         >
-          Ask on WhatsApp
+          Chat on WhatsApp
         </a>
       </div>
     </div>

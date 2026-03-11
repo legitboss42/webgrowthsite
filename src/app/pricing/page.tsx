@@ -9,7 +9,7 @@ import {
   buildProfessionalServiceSchema,
   launchKeywordSet,
 } from "@/lib/seo";
-import { buildWhatsAppUrl } from "@/lib/site";
+import { BOOKING_URL } from "@/lib/site";
 
 const pageDescription =
   "Pricing for website design in 48 hours, with clear USD packages for businesses in Nigeria and international clients who need a professional website live fast.";
@@ -59,20 +59,18 @@ export default function PricingPage() {
 
                 <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                   <a
-                    href={buildWhatsAppUrl(
-                      "Hello, I want to start the website design in 48 hours package."
-                    )}
-                    target="_blank"
-                    rel="noreferrer"
+                    href="/contact"
                     className="inline-flex min-h-12 items-center justify-center rounded-xl bg-emerald-700 px-8 py-3 text-base font-semibold text-white shadow-[0_14px_34px_rgba(5,150,105,0.25)] transition-colors hover:bg-emerald-600"
                   >
-                    Start Now
+                    Contact Us
                   </a>
                   <a
-                    href="/launch"
+                    href={BOOKING_URL}
+                    target={BOOKING_URL.startsWith("http") ? "_blank" : undefined}
+                    rel={BOOKING_URL.startsWith("http") ? "noreferrer" : undefined}
                     className="inline-flex min-h-12 items-center justify-center rounded-xl border border-white/25 bg-black/35 px-8 py-3 text-base font-semibold text-white transition-colors hover:border-white/40 hover:bg-black/50"
                   >
-                    View Launch Offer
+                    Book a Call
                   </a>
                 </div>
 

@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 type PricingTier = {
   name: string;
   price: string;
@@ -22,6 +24,8 @@ export default function PricingSection({
   title?: string;
   description?: string;
 }) {
+  const isExternal = (href: string) => /^https?:\/\//i.test(href);
+
   return (
     <section className="relative overflow-hidden border-b border-white/10 bg-[#050806] py-20">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(16,185,129,0.12),transparent_28%),radial-gradient(circle_at_bottom_left,rgba(16,185,129,0.08),transparent_26%)]" />
@@ -105,14 +109,23 @@ export default function PricingSection({
                 ))}
               </ul>
 
-              <a
-                href={tier.startNowHref}
-                target="_blank"
-                rel="noreferrer"
-                className="relative z-10 mt-auto inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-emerald-600 px-6 py-3 text-sm font-semibold text-white shadow-[0_14px_30px_rgba(5,150,105,0.3)] transition-colors hover:bg-emerald-500"
-              >
-                Start Now
-              </a>
+              {isExternal(tier.startNowHref) ? (
+                <a
+                  href={tier.startNowHref}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="relative z-10 mt-auto inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-emerald-600 px-6 py-3 text-sm font-semibold text-white shadow-[0_14px_30px_rgba(5,150,105,0.3)] transition-colors hover:bg-emerald-500"
+                >
+                  Start Your Website
+                </a>
+              ) : (
+                <Link
+                  href={tier.startNowHref}
+                  className="relative z-10 mt-auto inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-emerald-600 px-6 py-3 text-sm font-semibold text-white shadow-[0_14px_30px_rgba(5,150,105,0.3)] transition-colors hover:bg-emerald-500"
+                >
+                  Start Your Website
+                </Link>
+              )}
             </article>
           ))}
         </div>

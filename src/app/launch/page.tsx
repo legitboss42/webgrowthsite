@@ -16,7 +16,7 @@ import {
   buildProfessionalServiceSchema,
   launchKeywordSet,
 } from "@/lib/seo";
-import { buildWhatsAppUrl } from "@/lib/site";
+import { BOOKING_URL, GET_STARTED_PATH } from "@/lib/site";
 
 const pageDescription =
   "Website design in 48 hours for Nigeria-based businesses and international clients that need a professional site live fast with domain guidance, hosting, and a conversion-focused one-page build.";
@@ -43,12 +43,10 @@ export default function LaunchPage() {
           eyebrow="Launch Offer"
           title="Website design in 48 hours for Nigeria-based and international businesses"
           description="Domain + hosting + a high-converting one-page site - done for you."
-          primaryLabel="Start Now"
-          primaryHref={buildWhatsAppUrl(
-            "Hello, I want the website design in 48 hours launch offer."
-          )}
-          secondaryLabel="See What's Included"
-          secondaryHref="#inclusions"
+          primaryLabel="Start Your Website"
+          primaryHref={GET_STARTED_PATH}
+          secondaryLabel="Book a Call"
+          secondaryHref={BOOKING_URL}
           trustLine="Fast turnaround | Mobile-first | Simple pricing"
           locationNote="This offer works well for founders, service businesses, and lean teams in Nigeria or abroad that need to launch quickly without adding unnecessary complexity."
           asideTitle="Why this offer works"
@@ -70,7 +68,7 @@ export default function LaunchPage() {
           title="Questions about the 48-hour launch"
           description="These are the practical questions people ask before they commit to a fast website build."
         />
-        <FinalCTASection description="If the offer fits your stage, the fastest path is to start on WhatsApp and send the basics needed for the build." />
+        <FinalCTASection description="If the offer fits your stage, start your website request now and choose the next step that suits your process." />
       </main>
     </>
   );

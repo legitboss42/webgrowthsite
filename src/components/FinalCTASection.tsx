@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { finalCtaLinks } from "@/lib/launchOffer";
 
 export default function FinalCTASection({
@@ -38,22 +39,29 @@ export default function FinalCTASection({
             </div>
 
             <div className="flex flex-col gap-3">
-              <a
+              <Link
                 href={finalCtaLinks.primaryHref}
-                target="_blank"
-                rel="noreferrer"
                 className="inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-emerald-700 px-8 py-3 text-base font-semibold text-white shadow-[0_14px_34px_rgba(5,150,105,0.25)] transition-colors hover:bg-emerald-600"
               >
-                Start Now
+                Start Your Website
+              </Link>
+
+              <a
+                href={finalCtaLinks.bookingHref}
+                target={finalCtaLinks.bookingHref.startsWith("http") ? "_blank" : undefined}
+                rel={finalCtaLinks.bookingHref.startsWith("http") ? "noreferrer" : undefined}
+                className="inline-flex min-h-12 w-full items-center justify-center rounded-xl border border-white/25 bg-black/35 px-8 py-3 text-base font-semibold text-white transition-colors hover:border-white/40 hover:bg-black/50"
+              >
+                Book a Call
               </a>
 
               <a
                 href={finalCtaLinks.whatsappHref}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex min-h-12 w-full items-center justify-center rounded-xl border border-white/25 bg-black/35 px-8 py-3 text-base font-semibold text-white transition-colors hover:border-white/40 hover:bg-black/50"
+                className="inline-flex min-h-11 w-full items-center justify-center rounded-xl text-sm font-semibold text-emerald-200 transition hover:text-emerald-100"
               >
-                WhatsApp
+                Chat on WhatsApp
               </a>
             </div>
           </div>

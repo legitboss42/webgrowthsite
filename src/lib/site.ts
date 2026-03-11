@@ -8,6 +8,8 @@ export const CONTACT_EMAIL = "Admin@webgrowth.info";
 export const CONTACT_EMAIL_HREF = "mailto:admin@webgrowth.info";
 export const WHATSAPP_NUMBER = "2348066706336";
 export const WHATSAPP_BASE_URL = `https://wa.me/${WHATSAPP_NUMBER}`;
+export const BOOKING_URL = process.env.NEXT_PUBLIC_BOOKING_URL || "#";
+export const GET_STARTED_PATH = "/get-started";
 export const BUSINESS_PHONE_DISPLAY = "+234 806 670 6336";
 export const SERVICE_AREA = ["Nigeria", "Lagos", "Remote", "Worldwide"] as const;
 

@@ -3,8 +3,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 
-const FORM_ENDPOINT = "https://formspree.io/f/xgoanbnr";
-
 type Status = "idle" | "sending" | "success" | "error";
 
 function pushToDataLayer(eventName: string, payload: Record<string, unknown>) {
@@ -68,31 +66,27 @@ export default function ContactClient() {
     setStatusMsg("");
 
     try {
-      const res = await fetch(FORM_ENDPOINT, {
+      const res = await fetch("/api/forms/notify", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Accept: "application/json",
         },
         body: JSON.stringify({
-          name,
-          email,
-          service,
-          message,
-          _subject: `New Web Growth Launch Request - ${service}`,
+          formType: "contact",
+          subject: `New Web Growth Launch Request - ${service}`,
+          fields: {
+            name,
+            email,
+            service,
+            message,
+            page_path: typeof window !== "undefined" ? window.location.pathname : "",
+          },
         }),
       });
 
       if (!res.ok) {
-        let errorMessage = "Failed to send. Try again.";
-        try {
-          const data = await res.json();
-          if (data?.errors?.length) {
-            errorMessage = data.errors[0].message || errorMessage;
-          }
-        } catch {}
         setStatus("error");
-        setStatusMsg(errorMessage);
+        setStatusMsg("Failed to send. Try again.");
         return;
       }
 
@@ -104,7 +98,7 @@ export default function ContactClient() {
       };
 
       pushToDataLayer("wg_lead", leadPayload);
-      fireGtagEvent("generate_lead", { ...leadPayload, method: "formspree" });
+      fireGtagEvent("generate_lead", { ...leadPayload, method: "website_form" });
 
       setTimeout(() => {
         router.push("/contact/thanks");
@@ -116,7 +110,7 @@ export default function ContactClient() {
   }
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.045),rgba(255,255,255,0.015))] p-7 shadow-[0_18px_44px_rgba(0,0,0,0.22)]">
+    <div id="contact-form" className="rounded-2xl border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.045),rgba(255,255,255,0.015))] p-7 shadow-[0_18px_44px_rgba(0,0,0,0.22)]">
       <h2 className="text-2xl font-semibold tracking-[-0.01em] text-white">
         Start your launch request
       </h2>

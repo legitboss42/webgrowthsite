@@ -9,6 +9,7 @@ import SocialShareDock from "@/components/SocialShareDock";
 import { getPost, getPosts, type Post } from "@/lib/posts";
 import { buildPageMetadata } from "@/lib/seo";
 import {
+  BOOKING_URL,
   buildWhatsAppUrl,
   DEFAULT_OG_IMAGE,
   SITE_NAME,
@@ -135,7 +136,7 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
   const headings = extractHeadings(post.content);
   const relatedPosts = getRelatedPosts(post, 3);
   const whatsappUrl = buildWhatsAppUrl(
-    "Hello, I'd like to request a quote for a website."
+    "Hello, I would like to discuss my website project."
   );
   const canonicalUrl = `${SITE_URL}/blog/${post.slug}`;
 
@@ -290,10 +291,9 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
               )}
 
               <div className="mt-6 rounded-xl border border-emerald-400/20 bg-emerald-500/10 p-5">
-                <div className="text-sm font-semibold text-white">Request a Quote</div>
+                <div className="text-sm font-semibold text-white">Start your website</div>
                 <p className="mt-2 text-sm text-white/70">
-                  Want a fast website that generates enquiries? Tell us what you
-                  do and what you need. We will reply with the best plan.
+                  Use the short intake flow and we will send your next steps quickly.
                 </p>
 
                 <div className="mt-4 grid gap-3">
@@ -301,8 +301,17 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
                     href="/contact"
                     className="inline-flex w-full items-center justify-center rounded-md bg-emerald-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-emerald-500"
                   >
-                    Request a Quote
+                    Contact Us
                   </Link>
+
+                  <a
+                    href={BOOKING_URL}
+                    target={BOOKING_URL.startsWith("http") ? "_blank" : undefined}
+                    rel={BOOKING_URL.startsWith("http") ? "noreferrer" : undefined}
+                    className="inline-flex w-full items-center justify-center rounded-md border border-white/10 bg-black/30 px-4 py-3 text-sm font-semibold text-white/85 transition hover:bg-black/45"
+                  >
+                    Book a Call
+                  </a>
 
                   <a
                     href={whatsappUrl}

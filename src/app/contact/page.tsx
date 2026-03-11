@@ -6,6 +6,7 @@ import StructuredData from "@/components/StructuredData";
 import { pricingTiers } from "@/lib/launchOffer";
 import { buildPageMetadata, buildProfessionalServiceSchema } from "@/lib/seo";
 import {
+  BOOKING_URL,
   buildWhatsAppUrl,
   CONTACT_EMAIL,
   CONTACT_EMAIL_HREF,
@@ -45,20 +46,28 @@ export default function ContactPage() {
 
                 <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                   <a
+                    href="#contact-form"
+                    className="inline-flex min-h-12 items-center justify-center rounded-xl bg-emerald-700 px-8 py-3 text-base font-semibold text-white shadow-[0_14px_34px_rgba(5,150,105,0.25)] transition-colors hover:bg-emerald-600"
+                  >
+                    Get Started
+                  </a>
+                  <a
+                    href={BOOKING_URL}
+                    target={BOOKING_URL.startsWith("http") ? "_blank" : undefined}
+                    rel={BOOKING_URL.startsWith("http") ? "noreferrer" : undefined}
+                    className="inline-flex min-h-12 items-center justify-center rounded-xl border border-white/25 bg-black/35 px-8 py-3 text-base font-semibold text-white transition-colors hover:border-white/40 hover:bg-black/50"
+                  >
+                    Book a Call
+                  </a>
+                  <a
                     href={buildWhatsAppUrl(
-                      "Hello, I want to start website design in 48 hours."
+                      "Hello, I want to discuss my website project."
                     )}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex min-h-12 items-center justify-center rounded-xl bg-emerald-700 px-8 py-3 text-base font-semibold text-white shadow-[0_14px_34px_rgba(5,150,105,0.25)] transition-colors hover:bg-emerald-600"
-                  >
-                    Start Now
-                  </a>
-                  <a
-                    href={CONTACT_EMAIL_HREF}
                     className="inline-flex min-h-12 items-center justify-center rounded-xl border border-white/25 bg-black/35 px-8 py-3 text-base font-semibold text-white transition-colors hover:border-white/40 hover:bg-black/50"
                   >
-                    Email Us
+                    Chat on WhatsApp
                   </a>
                 </div>
 
@@ -102,7 +111,7 @@ export default function ContactPage() {
           title="Pick the package before you submit"
           description="This keeps the enquiry clear and speeds up the reply."
         />
-        <FinalCTASection title="Prefer a direct message instead of the form?" />
+        <FinalCTASection title="Need a faster path than email?" />
       </main>
     </>
   );

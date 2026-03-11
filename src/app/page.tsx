@@ -16,7 +16,7 @@ import {
   buildProfessionalServiceSchema,
   launchKeywordSet,
 } from "@/lib/seo";
-import { buildWhatsAppUrl } from "@/lib/site";
+import { GET_STARTED_PATH } from "@/lib/site";
 
 const pageDescription =
   "Website design in 48 hours for businesses in Nigeria and international clients who need a professional one-page website live fast with domain guidance, hosting, and basic SEO handled.";
@@ -46,12 +46,10 @@ export default function Page() {
           eyebrow="48-Hour Website Launch"
           title="Website Design in 48 Hours | Get a Professional Website Live Fast"
           description="Domain + hosting + a high-converting one-page site - done for you."
-          primaryLabel="Start Now"
-          primaryHref={buildWhatsAppUrl(
-            "Hello, I want to get started with website design in 48 hours."
-          )}
-          secondaryLabel="See What's Included"
-          secondaryHref="#inclusions"
+          primaryLabel="Get Started"
+          primaryHref={GET_STARTED_PATH}
+          secondaryLabel="See Pricing"
+          secondaryHref="/pricing"
           trustLine="Fast turnaround | Mobile-first | Simple pricing"
           locationNote="Built for businesses in Nigeria, Lagos, and international clients who want a remote launch partner without agency drag."
           asideTitle="Launch sequence"

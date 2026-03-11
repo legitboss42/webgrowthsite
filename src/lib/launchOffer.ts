@@ -1,4 +1,9 @@
-import { buildWhatsAppUrl, CONTACT_EMAIL_HREF, CONTACT_EMAIL } from "@/lib/site";
+import {
+  BOOKING_URL,
+  CONTACT_EMAIL_HREF,
+  CONTACT_EMAIL,
+  buildWhatsAppUrl,
+} from "@/lib/site";
 import { featuredPortfolioCases } from "@/lib/portfolioCases";
 
 export const launchFaqs = [
@@ -72,9 +77,7 @@ export const pricingTiers = [
       "Hosting and domain guidance",
       "Basic SEO setup before launch",
     ],
-    startNowHref: buildWhatsAppUrl(
-      "Hello, I want the Launch package for website design in 48 hours."
-    ),
+    startNowHref: "/contact?service=Launch%20($150)",
   },
   {
     name: "Launch + Blog",
@@ -86,20 +89,19 @@ export const pricingTiers = [
       "One existing post migrated and formatted",
       "Launch-ready setup for Nigeria-based or international clients",
     ],
-    startNowHref: buildWhatsAppUrl(
-      "Hello, I want the Launch + Blog package for website design in 48 hours."
-    ),
+    startNowHref: "/contact?service=Launch%20%2B%20Blog%20($250)",
   },
 ] as const;
 
 export const socialProofCards = featuredPortfolioCases;
 
 export const finalCtaLinks = {
-  primaryHref: buildWhatsAppUrl(
-    "Hello, I want to get started with website design in 48 hours."
-  ),
+  primaryHref: "/contact",
+  bookingHref: BOOKING_URL,
   emailHref: CONTACT_EMAIL_HREF,
   emailLabel: CONTACT_EMAIL,
-  whatsappHref: "https://wa.me/2348066706336",
-  whatsappLabel: "WhatsApp",
+  whatsappHref: buildWhatsAppUrl(
+    "Hello, I want to discuss my website project and next steps."
+  ),
+  whatsappLabel: "Chat on WhatsApp",
 };
