@@ -1,6 +1,15 @@
 import { NextResponse } from "next/server";
+import {
+  checkRateLimit,
+  escapeHtml,
+  getClientIp,
+  isAllowedOrigin,
+  isValidEmail,
+  sanitizeText,
+} from "@/lib/security";
 
 const ADMIN_EMAIL = "admin@webgrowth.info";
+export const runtime = "nodejs";
 
 type GetStartedBody = {
   projectNeed?: string;
@@ -18,17 +27,28 @@ function requiredString(value: unknown) {
 
 export async function POST(req: Request) {
   try {
+    if (!isAllowedOrigin(req)) {
+      return NextResponse.json({ error: "Forbidden origin." }, { status: 403 });
+    }
+
+    const ip = getClientIp(req);
+    const rate = checkRateLimit(`get-started:${ip}`, 8);
+    if (!rate.ok) {
+      return NextResponse.json(
+        { error: "Too many requests. Please try again shortly." },
+        { status: 429 }
+      );
+    }
+
     const body = (await req.json()) as GetStartedBody;
 
-    const {
-      projectNeed,
-      hasDomain,
-      fullName,
-      businessName,
-      email,
-      phoneOrWhatsApp,
-      selectedPackage,
-    } = body;
+    const projectNeed = sanitizeText(body.projectNeed, 80);
+    const hasDomain = sanitizeText(body.hasDomain, 10);
+    const fullName = sanitizeText(body.fullName, 120);
+    const businessName = sanitizeText(body.businessName, 160);
+    const email = sanitizeText(body.email, 254).toLowerCase();
+    const phoneOrWhatsApp = sanitizeText(body.phoneOrWhatsApp, 40);
+    const selectedPackage = sanitizeText(body.selectedPackage, 120);
 
     if (
       !requiredString(projectNeed) ||
@@ -42,6 +62,10 @@ export async function POST(req: Request) {
         { error: "Missing required fields." },
         { status: 400 }
       );
+    }
+
+    if (!isValidEmail(email)) {
+      return NextResponse.json({ error: "Invalid email address." }, { status: 400 });
     }
 
     const token = process.env.MAILERSEND_API_TOKEN;
@@ -72,7 +96,7 @@ export async function POST(req: Request) {
     ].filter(Boolean);
 
     const textBody = lines.join("\n");
-    const htmlBody = lines.map((line) => `<p>${line}</p>`).join("");
+    const htmlBody = lines.map((line) => `<p>${escapeHtml(line)}</p>`).join("");
 
     const msRes = await fetch("https://api.mailersend.com/v1/email", {
       method: "POST",
@@ -80,6 +104,7 @@ export async function POST(req: Request) {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
+      signal: AbortSignal.timeout(10000),
       body: JSON.stringify({
         from: {
           email: fromEmail,
@@ -97,11 +122,9 @@ export async function POST(req: Request) {
     });
 
     if (!msRes.ok) {
-      const errorPayload = await msRes.text();
       return NextResponse.json(
         {
-          error: "MailerSend rejected the request.",
-          details: errorPayload,
+          error: "Could not send your request right now.",
         },
         { status: 502 }
       );

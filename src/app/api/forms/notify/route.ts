@@ -1,6 +1,14 @@
 import { NextResponse } from "next/server";
+import {
+  checkRateLimit,
+  escapeHtml,
+  getClientIp,
+  isAllowedOrigin,
+  sanitizeText,
+} from "@/lib/security";
 
 const ADMIN_EMAIL = "admin@webgrowth.info";
+export const runtime = "nodejs";
 
 type NotifyBody = {
   formType?: string;
@@ -8,29 +16,29 @@ type NotifyBody = {
   fields?: Record<string, unknown>;
 };
 
-function toSafeString(value: unknown) {
-  if (value === null || value === undefined) return "";
-  return String(value).trim();
-}
-
-function escapeHtml(input: string) {
-  return input
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-}
-
 export async function POST(req: Request) {
   try {
+    if (!isAllowedOrigin(req)) {
+      return NextResponse.json({ error: "Forbidden origin." }, { status: 403 });
+    }
+
+    const ip = getClientIp(req);
+    const rate = checkRateLimit(`forms-notify:${ip}`, 8);
+    if (!rate.ok) {
+      return NextResponse.json(
+        { error: "Too many requests. Please try again shortly." },
+        { status: 429 }
+      );
+    }
+
     const body = (await req.json()) as NotifyBody;
 
-    const formType = toSafeString(body.formType) || "website_form";
+    const formType = sanitizeText(body.formType, 64) || "website_form";
     const subject =
-      toSafeString(body.subject) ||
+      sanitizeText(body.subject, 140) ||
       `New Website Form Submission - ${formType}`;
     const fields = body.fields && typeof body.fields === "object" ? body.fields : {};
+    const normalizedEntries = Object.entries(fields).slice(0, 20);
 
     const token = process.env.MAILERSEND_API_TOKEN;
     const fromEmail = process.env.MAILERSEND_FROM_EMAIL;
@@ -47,8 +55,8 @@ export async function POST(req: Request) {
       `Form type: ${formType}`,
       `Submitted at: ${new Date().toISOString()}`,
       "",
-      ...Object.entries(fields).map(
-        ([key, value]) => `${key}: ${toSafeString(value)}`
+      ...normalizedEntries.map(
+        ([key, value]) => `${sanitizeText(key, 80)}: ${sanitizeText(value, 1200)}`
       ),
     ];
 
@@ -63,6 +71,7 @@ export async function POST(req: Request) {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
+      signal: AbortSignal.timeout(10000),
       body: JSON.stringify({
         from: {
           email: fromEmail,
@@ -77,7 +86,7 @@ export async function POST(req: Request) {
 
     if (!msRes.ok) {
       return NextResponse.json(
-        { error: "Email provider rejected the request." },
+        { error: "Could not send your request right now." },
         { status: 502 }
       );
     }
@@ -87,4 +96,3 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Invalid request payload." }, { status: 400 });
   }
 }
-
