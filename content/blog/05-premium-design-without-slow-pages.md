@@ -30,6 +30,8 @@ If you missed the first four parts, start here:
 - [SEO Migration Without Losing Traffic (Part 3)](/blog/03-seo-migration-without-losing-traffic)
 - [Writing Service Pages That Convert (Part 4)](/blog/04-writing-service-pages-that-convert)
 
+For teams planning scope before UI decisions, this [website redesign checklist for small businesses](/blog/small-business-website-redesign-checklist) helps prioritize trust, speed, SEO, and conversion in the right order.
+
 Part 5 is where aesthetics and performance meet.
 
 ---

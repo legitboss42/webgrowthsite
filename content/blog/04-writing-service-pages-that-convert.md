@@ -34,6 +34,8 @@ Part 4 is about conversion mechanics.
 
 This is the exact service page SEO and conversion copywriting framework we used during the J Luxe rebuild to make pages rank better, read better, and convert better.
 
+If you are planning a broader rebuild, use this [small business website redesign checklist](/blog/small-business-website-redesign-checklist) first so page-level copy decisions match the full conversion strategy.
+
 ---
 
 ## Why most service pages do not convert

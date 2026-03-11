@@ -1,6 +1,6 @@
 ---
-title: Website Redesign Checklist for Small Businesses (What to Fix First for More Leads)
-excerpt: Use this website redesign checklist to fix trust, structure, speed, and SEO problems before you waste budget on a cosmetic rebuild.
+title: Small Business Website Redesign Checklist (What to Fix First for More Leads)
+excerpt: Use this small business website redesign checklist to fix trust, structure, speed, and SEO issues before you spend money on a cosmetic rebuild.
 date: 2026-02-19
 category: Strategy
 tags: ["Website Redesign", "Conversion", "UX", "SEO", "Small Business"]
@@ -8,7 +8,7 @@ readTime: 14 min read
 cover: /images/blog/redesign-checklist-cover-generated.webp
 ---
 
-# Website Redesign Checklist for Small Businesses
+# Small Business Website Redesign Checklist
 
 Most redesign projects fail for one reason:
 
@@ -22,12 +22,12 @@ Same weak message.
 Same confusing pages.
 Same poor conversion path.
 
-A website redesign without a clear conversion strategy is expensive rework.
+A small business website redesign without a clear conversion strategy is expensive rework.
 
 If your business website is underperforming, you do not need a prettier version of the same problem.
 You need a better system.
 
-This checklist gives you a practical order of operations so your redesign improves leads, trust, and revenue.
+This small business website redesign checklist gives you a practical order of operations so your redesign improves leads, trust, and revenue.
 
 If your current site is also slow, pair this with the [website speed guide](/blog/how-to-make-your-website-load-fast) before launch.
 
@@ -207,6 +207,26 @@ A practical split for most service businesses:
 - 15% QA, SEO, and launch preparation
 
 If most of your budget goes only to visuals, expect cosmetic results.
+
+## FAQ: small business website redesign checklist
+
+### How often should a small business redesign its website?
+Most small businesses should run a major redesign every 2-4 years, with smaller conversion and SEO updates every quarter.
+
+### What is the first step in a website redesign checklist?
+Start with a conversion audit. Confirm what action you want users to take, then map content, layout, and CTA flow to that single goal.
+
+### How much does a small business website redesign cost?
+Cost depends on scope, but many projects fail because budget is spent on visuals instead of messaging, UX structure, SEO migration, and speed.
+
+### Can a website redesign hurt SEO?
+Yes, if URL mapping, redirects, metadata, and internal links are ignored. Treat SEO migration as a core workstream, not a post-launch fix.
+
+### What pages should be prioritized first?
+Homepage, service pages, pricing/contact pages, and top organic landing pages should be redesigned first because they affect both rankings and conversions.
+
+### Is a full redesign always necessary?
+No. If structure is solid, targeted updates to messaging, trust signals, speed, and service-page copy can outperform a full redesign.
 
 ## First 90 days after launch
 
