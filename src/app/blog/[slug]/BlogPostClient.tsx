@@ -505,13 +505,6 @@ export default function BlogPostClient({ content }: { content: string }) {
 
   return (
     <>
-      <Script
-        id="adsense-blog"
-        strategy="lazyOnload"
-        src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4073948936216175"
-        crossOrigin="anonymous"
-      />
-
       <div className="mt-10 space-y-7 text-white/80 leading-relaxed">
         {blocks.slice(0, inlineCtaIndex).map((b, idx) => renderBlockNode(b, idx))}
         <BlogInlineCTA compact />

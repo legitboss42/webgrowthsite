@@ -4,6 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import BlogPostClient from "./BlogPostClient";
+import EditorialTrustNote from "@/components/EditorialTrustNote";
 import RelatedServiceCTA from "@/components/RelatedServiceCTA";
 import SocialShareDock from "@/components/SocialShareDock";
 import { getPost, getPosts, type Post } from "@/lib/posts";
@@ -169,6 +170,11 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
               <span className="text-emerald-200">{post.category}</span>
             </div>
 
+            <div className="mt-3 text-sm text-white/62">
+              Written and reviewed by <span className="text-white">Web Growth</span>
+              {" "}for website launch, SEO, and conversion-focused businesses.
+            </div>
+
             <h1 className="mt-4 text-4xl font-semibold leading-tight md:text-6xl">
               {post.title}
             </h1>
@@ -232,6 +238,10 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
           </div>
 
           <div className="max-w-3xl">
+            <div className="mb-8">
+              <EditorialTrustNote compact />
+            </div>
+
             <BlogPostClient content={post.content} />
 
             <div className="lg:hidden">

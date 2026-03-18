@@ -102,6 +102,10 @@ export default function Footer() {
           <div>(c) {new Date().getFullYear()} Web Growth. All rights reserved.</div>
 
           <div className="flex gap-4">
+            <Link className="hover:text-white transition" href="/editorial-policy">
+              Editorial Policy
+            </Link>
+
             <Link className="hover:text-white transition" href="/privacy">
               Privacy Policy
             </Link>

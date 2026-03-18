@@ -6,6 +6,7 @@ import Image from "next/image";
 import type { Post } from "../../lib/posts";
 import { gsap } from "gsap";
 import BlogInlineCTA from "@/components/BlogInlineCTA";
+import EditorialTrustNote from "@/components/EditorialTrustNote";
 
 type Props = {
   posts: Post[];
@@ -270,6 +271,10 @@ export default function BlogClient({ posts }: Props) {
       </section>
 
       <section className="mx-auto max-w-6xl px-6 py-12">
+        <div className="mb-8">
+          <EditorialTrustNote />
+        </div>
+
         <div className="mb-8">
           <BlogInlineCTA />
         </div>
