@@ -7,6 +7,7 @@ import type { Post } from "../../lib/posts";
 import { gsap } from "gsap";
 import BlogInlineCTA from "@/components/BlogInlineCTA";
 import EditorialTrustNote from "@/components/EditorialTrustNote";
+import HostingSupportBlock from "@/components/HostingSupportBlock";
 
 type Props = {
   posts: Post[];
@@ -277,6 +278,15 @@ export default function BlogClient({ posts }: Props) {
 
         <div className="mb-8">
           <BlogInlineCTA />
+        </div>
+
+        <div className="mb-8">
+          <HostingSupportBlock
+            compact
+            title="Need hosting before you launch your site?"
+            description="Compare the shared hosting offer, save 68%, and start your website on stronger footing."
+            ctaLabel="View Hosting Offer"
+          />
         </div>
 
         <div className="mb-6 flex items-end justify-between gap-4">

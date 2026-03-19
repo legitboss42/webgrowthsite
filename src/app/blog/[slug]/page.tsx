@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 
 import BlogPostClient from "./BlogPostClient";
 import EditorialTrustNote from "@/components/EditorialTrustNote";
+import HostingSupportBlock from "@/components/HostingSupportBlock";
 import RelatedServiceCTA from "@/components/RelatedServiceCTA";
 import SocialShareDock from "@/components/SocialShareDock";
 import { getPost, getPosts, type Post } from "@/lib/posts";
@@ -254,6 +255,15 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
 
             <div className="mt-14">
               <RelatedServiceCTA />
+            </div>
+
+            <div className="mt-10">
+              <HostingSupportBlock
+                compact
+                title="Need reliable hosting before you build?"
+                description="Use the hosting offer to start with a cleaner setup and a lower upfront cost."
+                ctaLabel="View Hosting Offer"
+              />
             </div>
           </div>
 

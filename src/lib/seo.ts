@@ -166,6 +166,48 @@ export function buildFaqSchema(
   };
 }
 
+export function buildHostingOfferSchema() {
+  const offerUrl = absoluteUrl("/hosting-offer");
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    "@id": `${offerUrl}#hosting-offer`,
+    name: "Shared Web Hosting Offer",
+    serviceType: "Web Hosting",
+    provider: {
+      "@type": "Organization",
+      name: SITE_NAME,
+      url: SITE_URL,
+    },
+    areaServed: [
+      {
+        "@type": "Country",
+        name: "Nigeria",
+      },
+      {
+        "@type": "Place",
+        name: "Worldwide",
+      },
+    ],
+    audience: {
+      "@type": "BusinessAudience",
+      audienceType: "Small businesses",
+    },
+    url: offerUrl,
+    description:
+      "Shared web hosting offer for small business websites that need reliable hosting, a stronger launch foundation, and a lower starting cost.",
+    offers: {
+      "@type": "Offer",
+      url: offerUrl,
+      category: "Shared web hosting",
+      availability: "https://schema.org/InStock",
+      description:
+        "Save 68% on shared web hosting for a business website launch.",
+    },
+  };
+}
+
 export const launchKeywordSet = [
   PRIMARY_KEYWORD,
   "48 hour website launch",
