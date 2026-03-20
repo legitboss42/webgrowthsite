@@ -1,5 +1,6 @@
 ﻿"use client";
 
+import Link from "next/link";
 import { useEffect } from "react";
 
 export default function ContactThanksPage() {
@@ -40,19 +41,19 @@ export default function ContactThanksPage() {
         </div>
 
         <div className="mt-10 flex flex-col gap-3 sm:flex-row">
-          <a
+          <Link
             href="/services"
             className="inline-flex items-center justify-center rounded-md bg-white/10 px-6 py-4 text-sm font-semibold text-white hover:bg-white/15 transition"
           >
             View Services
-          </a>
+          </Link>
 
-          <a
+          <Link
             href="/"
             className="inline-flex items-center justify-center rounded-md bg-emerald-600 px-6 py-4 text-sm font-semibold text-white hover:bg-emerald-500 transition"
           >
             Back Home
-          </a>
+          </Link>
         </div>
       </div>
     </div>
