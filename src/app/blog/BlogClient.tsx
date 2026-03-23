@@ -6,6 +6,7 @@ import Image from "next/image";
 import type { Post } from "../../lib/posts";
 import { gsap } from "gsap";
 import BlogInlineCTA from "@/components/BlogInlineCTA";
+import EntitySnapshotSection from "@/components/EntitySnapshotSection";
 import EditorialTrustNote from "@/components/EditorialTrustNote";
 import HostingSupportBlock from "@/components/HostingSupportBlock";
 
@@ -277,6 +278,41 @@ export default function BlogClient({ posts }: Props) {
         </div>
 
         <div className="mb-8">
+          <EntitySnapshotSection
+            eyebrow="What this blog covers"
+            title="Use the blog to understand the strategy before you buy the build"
+            description="These articles answer the questions businesses usually ask before they hire for web design, launch, SEO, speed, hosting, or conversion work."
+            items={[
+              {
+                title: "What the blog is for",
+                description:
+                  "It explains website launch, SEO, conversion, speed, hosting, and rebuild decisions in plain language instead of vague marketing talk.",
+              },
+              {
+                title: "Who it helps",
+                description:
+                  "It is most useful for business owners, founders, marketers, and lean teams trying to improve or launch a website without wasting time.",
+              },
+              {
+                title: "How it connects to services",
+                description:
+                  "The articles support the commercial pages by helping you understand when you need a fast launch, a hosting decision, an audit, or a larger rebuild.",
+              },
+              {
+                title: "Where to go after reading",
+                description:
+                  "Use the launch page if you are ready to move, pricing if you are comparing scope, and contact if you want help applying the ideas to your site.",
+              },
+            ]}
+            links={[
+              { href: "/launch", label: "Start with the main offer" },
+              { href: "/pricing", label: "Review pricing" },
+              { href: "/about", label: "See who Web Growth is" },
+            ]}
+          />
+        </div>
+
+        <div className="mb-8">
           <BlogInlineCTA />
         </div>
 
@@ -287,6 +323,51 @@ export default function BlogClient({ posts }: Props) {
             description="Compare the shared hosting offer, save 68%, and start your website on stronger footing."
             ctaLabel="View Hosting Offer"
           />
+        </div>
+
+        <div className="mb-8 grid gap-4 md:grid-cols-3">
+          {[
+            {
+              href: "/launch",
+              label: "Launch fast",
+              title: "Need a live website quickly?",
+              description:
+                "Go straight to the 48-hour website offer if you already know you need a site live soon.",
+            },
+            {
+              href: "/pricing",
+              label: "Compare",
+              title: "Need to compare packages first?",
+              description:
+                "Review pricing if you are still deciding which launch option fits your business stage and budget.",
+            },
+            {
+              href: "/hosting-offer",
+              label: "Foundation",
+              title: "Need hosting before the build?",
+              description:
+                "Use the hosting offer if the first thing you need is a cleaner setup and lower upfront hosting cost.",
+            },
+          ].map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="group relative overflow-hidden rounded-2xl border border-emerald-400/24 bg-[radial-gradient(circle_at_16%_-10%,rgba(16,185,129,0.18),rgba(3,14,11,0.94)_46%,rgba(2,8,7,0.98)_100%)] p-6 shadow-[0_16px_36px_rgba(0,0,0,0.22)] transition hover:-translate-y-0.5 hover:border-emerald-300/40"
+            >
+              <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(115deg,rgba(16,185,129,0.08)_0%,transparent_46%,rgba(16,185,129,0.04)_100%)]" />
+              <div className="relative z-10">
+                <p className="text-xs uppercase tracking-[0.18em] text-emerald-200/85">
+                  {item.label}
+                </p>
+                <h2 className="mt-3 text-xl font-semibold text-white transition group-hover:text-emerald-100">
+                  {item.title}
+                </h2>
+                <p className="mt-3 text-sm leading-6 text-white/72">
+                  {item.description}
+                </p>
+              </div>
+            </Link>
+          ))}
         </div>
 
         <div className="mb-6 flex items-end justify-between gap-4">

@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
+import AnswerHighlightsSection from "@/components/AnswerHighlightsSection";
+import CorePageLinks from "@/components/CorePageLinks";
 import SectionHeading from "@/components/SectionHeading";
 import CTASection from "@/components/CTASection";
 import FAQAccordion from "@/components/FAQAccordion";
@@ -35,6 +37,37 @@ const painDetails: Record<
     fixes: ["Mobile-first layout", "Tap-friendly UI", "Clear scroll structure"],
   },
 };
+
+const redesignAnswers = [
+  {
+    title: "How do I know it is time for a redesign?",
+    answer:
+      "If the site feels outdated, does not convert, loads poorly on mobile, or no longer reflects the quality of the business, redesign becomes a growth issue rather than a cosmetic one.",
+    href: "/services/website-audit",
+    hrefLabel: "Audit the current site first",
+  },
+  {
+    title: "What should a redesign improve first?",
+    answer:
+      "The biggest gains usually come from better messaging, stronger trust signals, clearer CTA flow, and a more stable mobile experience.",
+    href: "/blog/why-your-website-isnt-getting-leads",
+    hrefLabel: "See common conversion leaks",
+  },
+  {
+    title: "Will redesign hurt SEO?",
+    answer:
+      "Handled properly, no. A careful redesign can improve structure, speed, internal links, and page clarity without sacrificing the foundations that matter.",
+    href: "/services/search-engine-optimisation",
+    hrefLabel: "See SEO support",
+  },
+  {
+    title: "What if I need something faster first?",
+    answer:
+      "If you need a clean stopgap before a larger redesign, the 48-hour launch offer can get you a focused website live while the bigger rebuild waits.",
+    href: "/launch",
+    hrefLabel: "See the fast launch option",
+  },
+] as const;
 
 export default function WebsiteRedesignClient() {
   const pageRef = useRef<HTMLDivElement | null>(null);
@@ -136,6 +169,13 @@ export default function WebsiteRedesignClient() {
           </div>
         </div>
       </section>
+
+      <AnswerHighlightsSection
+        eyebrow="Quick answers"
+        title="The redesign questions buyers usually need answered fast"
+        description="These answers help prospects self-diagnose quickly, which makes the page easier to understand for both decision-makers and AI-driven discovery systems."
+        items={redesignAnswers}
+      />
 
       {/* COMMON PAINS (INTERACTIVE) */}
       <section data-reveal=".pain" className="py-24 bg-gray-950">
@@ -297,6 +337,37 @@ export default function WebsiteRedesignClient() {
       {/* CTA */}
       <section className="py-24 bg-gray-950">
         <div className="mx-auto max-w-6xl px-6">
+          <div className="mb-12">
+            <CorePageLinks
+              eyebrow="Useful next steps"
+              title="Move to the next page that fits your situation"
+              description="Redesign is not always the first move. These links help prospects choose between diagnosis, fast launch, and SEO support without leaving the site confused."
+              links={[
+                {
+                  href: "/services/website-audit",
+                  label: "Audit",
+                  title: "Need to diagnose the current site first?",
+                  description:
+                    "Use the audit service if you want clarity on what is actually broken before you invest in a redesign.",
+                },
+                {
+                  href: "/launch",
+                  label: "Fast launch",
+                  title: "Need something live sooner?",
+                  description:
+                    "Use the 48-hour launch page if you need a focused website live quickly while a bigger redesign waits.",
+                },
+                {
+                  href: "/blog/small-business-website-redesign-checklist",
+                  label: "Checklist",
+                  title: "Need to evaluate your current site?",
+                  description:
+                    "Read the redesign checklist if you want to spot the highest-impact problems before you request a quote.",
+                },
+              ]}
+            />
+          </div>
+
           <CTASection
             eyebrow="READY"
             title="Let’s rebuild your website the right way"

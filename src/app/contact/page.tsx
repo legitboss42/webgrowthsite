@@ -1,5 +1,7 @@
+import AnswerHighlightsSection from "@/components/AnswerHighlightsSection";
 import { Suspense } from "react";
 import ContactClient from "@/components/ContactClient";
+import CorePageLinks from "@/components/CorePageLinks";
 import PricingSection from "@/components/PricingSection";
 import FinalCTASection from "@/components/FinalCTASection";
 import StructuredData from "@/components/StructuredData";
@@ -14,6 +16,37 @@ import {
 
 const pageDescription =
   "Contact Web Growth to start a fast website launch for your business in Nigeria or remotely, with direct WhatsApp access, email, and a simple lead form.";
+
+const contactAnswers = [
+  {
+    title: "What happens after I submit?",
+    answer:
+      "You get a direct response with likely scope, what we need from you, and the clearest next step instead of a vague autoresponder.",
+    href: "/pricing",
+    hrefLabel: "Review packages first",
+  },
+  {
+    title: "What should I include in the message?",
+    answer:
+      "The business type, what page or website you need, whether you already have a domain, and the timeline you are working with.",
+    href: "/get-started",
+    hrefLabel: "Use the intake flow",
+  },
+  {
+    title: "What if I want the fastest path?",
+    answer:
+      "Use the form if you want us to review the project quickly, or use WhatsApp if you want a direct conversation before you submit the details.",
+    href: "/launch",
+    hrefLabel: "See the launch offer",
+  },
+  {
+    title: "What if I am still comparing options?",
+    answer:
+      "That is fine. Review pricing, the launch offer, and the FAQ first, then submit when you know which path feels right for your business.",
+    href: "/faq",
+    hrefLabel: "Read the FAQ",
+  },
+] as const;
 
 export const metadata = buildPageMetadata({
   title: "Contact Web Growth",
@@ -105,6 +138,42 @@ export default function ContactPage() {
             </div>
           </div>
         </section>
+
+        <AnswerHighlightsSection
+          eyebrow="Before you submit"
+          title="The quick answers that make the contact step easier"
+          description="These remove the common hesitation points so you can choose the fastest path and send a clearer request."
+          items={contactAnswers}
+        />
+
+        <CorePageLinks
+          eyebrow="Useful next steps"
+          title="Choose the path that fits how ready you are"
+          description="Some people want to submit now. Some want pricing, launch details, or a guided intake first. These links keep the next step obvious."
+          links={[
+            {
+              href: "/get-started",
+              label: "Intake",
+              title: "Want a guided project intake?",
+              description:
+                "Use the multi-step get-started flow if you want a cleaner way to send your project details.",
+            },
+            {
+              href: "/launch",
+              label: "Offer",
+              title: "Want the fastest service overview?",
+              description:
+                "Read the launch page if you want to confirm what the 48-hour website service includes before submitting.",
+            },
+            {
+              href: "/pricing",
+              label: "Pricing",
+              title: "Want to compare package options first?",
+              description:
+                "Review pricing before you contact us if you want to submit with clearer scope and budget context.",
+            },
+          ]}
+        />
 
         <PricingSection
           tiers={pricingTiers}

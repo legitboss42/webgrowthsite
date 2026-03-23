@@ -1,6 +1,8 @@
+import AnswerHighlightsSection from "@/components/AnswerHighlightsSection";
 import FAQSection from "@/components/FAQSection";
 import FinalCTASection from "@/components/FinalCTASection";
 import CorePageLinks from "@/components/CorePageLinks";
+import EntitySnapshotSection from "@/components/EntitySnapshotSection";
 import HeroSection from "@/components/HeroSection";
 import PricingSection from "@/components/PricingSection";
 import SocialProofSection from "@/components/SocialProofSection";
@@ -21,6 +23,60 @@ import { GET_STARTED_PATH } from "@/lib/site";
 
 const pageDescription =
   "Website design in 48 hours for businesses in Nigeria and international clients who need a professional one-page website live fast, with domain guidance, hosting, basic SEO, and pricing from $150.";
+
+const homeBuyerAnswers = [
+  {
+    title: "How fast can this go live?",
+    answer:
+      "If your core business details and approvals are ready, the website can be launched in 48 hours without dragging the project into weeks of back-and-forth.",
+    href: "/launch",
+    hrefLabel: "See the launch offer",
+  },
+  {
+    title: "What kind of business is this for?",
+    answer:
+      "It is best for service businesses, founders, and lean teams that need a clear online presence before outreach, ads, referrals, or local search starts sending traffic.",
+    href: "/faq",
+    hrefLabel: "Read the FAQ",
+  },
+  {
+    title: "What do you actually get?",
+    answer:
+      "You get a conversion-focused one-page website, domain and hosting guidance, mobile-first structure, and the essential launch SEO basics needed to go live confidently.",
+    href: "/pricing",
+    hrefLabel: "Review pricing",
+  },
+  {
+    title: "What should I do first?",
+    answer:
+      "Start with the launch page if you are ready to move, or use the pricing and FAQ pages if you need to compare the offer before you commit.",
+    href: "/contact",
+    hrefLabel: "Start your website",
+  },
+] as const;
+
+const entitySnapshotItems = [
+  {
+    title: "What Web Growth does",
+    description:
+      "Web Growth helps businesses launch clearer, faster, more conversion-focused websites instead of vague brochure sites that do not support growth.",
+  },
+  {
+    title: "Who it is for",
+    description:
+      "The site is built for service businesses, founders, and lean teams in Nigeria and international markets that need a credible online presence quickly.",
+  },
+  {
+    title: "What the main offer is",
+    description:
+      "The fastest entry point is website design in 48 hours, with domain guidance, hosting setup, and a focused one-page launch from $150.",
+  },
+  {
+    title: "What to read next",
+    description:
+      "Use the launch page for the service, pricing for scope and budget, FAQ for decision support, and the blog for supporting SEO and website strategy guidance.",
+  },
+] as const;
 
 export const metadata = buildPageMetadata({
   title: "Website Design in 48 Hours | Fast Business Website Launch",
@@ -62,6 +118,24 @@ export default function Page() {
           imageAlt="Website design in 48 hours hero image for Web Growth"
           showCodeRain
           showHomeAnimations
+        />
+
+        <AnswerHighlightsSection
+          eyebrow="Buyer questions"
+          title="The questions serious prospects usually ask first"
+          description="This gives you the fast version up front, so you can tell quickly whether the offer matches your business, timeline, and launch stage."
+          items={homeBuyerAnswers}
+        />
+
+        <EntitySnapshotSection
+          title="A clearer summary of what this website is here to help you do"
+          description="This makes the business easier to understand quickly, which helps both human visitors and AI-style answer systems interpret the site without guessing."
+          items={entitySnapshotItems}
+          links={[
+            { href: "/about", label: "About Web Growth" },
+            { href: "/launch", label: "See the main offer" },
+            { href: "/blog", label: "Browse practical guides" },
+          ]}
         />
 
         <CorePageLinks

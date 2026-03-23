@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
+import AnswerHighlightsSection from "@/components/AnswerHighlightsSection";
+import CorePageLinks from "@/components/CorePageLinks";
 import SectionHeading from "@/components/SectionHeading";
 import CTASection from "@/components/CTASection";
 import FAQAccordion from "@/components/FAQAccordion";
@@ -39,6 +41,37 @@ const goalCopy: Record<
     sub: "Ideal for new products, startups, and pre-launch campaigns.",
   },
 };
+
+const landingPageAnswers = [
+  {
+    title: "Who actually needs a landing page?",
+    answer:
+      "Businesses running ads, campaigns, outreach, or focused offers usually need a dedicated landing page instead of sending traffic to a generic homepage.",
+    href: "/blog/high-converting-landing-pages-guide",
+    hrefLabel: "Read the landing page guide",
+  },
+  {
+    title: "What usually hurts conversions first?",
+    answer:
+      "Weak message match, clutter, poor proof placement, and a CTA flow that asks visitors to think too hard before they act.",
+    href: "/blog/why-your-website-isnt-getting-leads",
+    hrefLabel: "See common conversion leaks",
+  },
+  {
+    title: "Do I need this or a full website?",
+    answer:
+      "Choose this when one campaign or offer needs a focused page. Choose a full site when the business needs broader trust, service coverage, and ongoing content support.",
+    href: "/services/business-website-design",
+    hrefLabel: "See full website design",
+  },
+  {
+    title: "What if I need it live quickly?",
+    answer:
+      "If speed matters more than a bigger build, the 48-hour launch offer can be the fast-start option before you move into more specialized pages.",
+    href: "/launch",
+    hrefLabel: "See the 48-hour launch",
+  },
+] as const;
 
 export default function LandingPageDesignClient() {
   const pageRef = useRef<HTMLDivElement | null>(null);
@@ -141,6 +174,13 @@ export default function LandingPageDesignClient() {
           </div>
         </div>
       </section>
+
+      <AnswerHighlightsSection
+        eyebrow="Quick answers"
+        title="What buyers usually want to understand before they request a landing page"
+        description="These answers help people self-qualify faster and make the page easier for AI systems to summarize accurately."
+        items={landingPageAnswers}
+      />
 
       {/* WHY LANDING PAGES FAIL */}
       <section data-reveal=".problem" className="py-24 bg-gray-950">
@@ -294,6 +334,37 @@ export default function LandingPageDesignClient() {
       {/* CTA */}
       <section className="py-24 bg-gray-950">
         <div className="mx-auto max-w-6xl px-6">
+          <div className="mb-12">
+            <CorePageLinks
+              eyebrow="Useful next steps"
+              title="Choose the page that best matches the rest of your funnel"
+              description="Some businesses need a landing page, some need a broader website, and some need the message diagnosed first. These links keep that choice clear."
+              links={[
+                {
+                  href: "/services/business-website-design",
+                  label: "Website",
+                  title: "Need more than a campaign page?",
+                  description:
+                    "Use the business website service if your company needs a broader online presence, not just one focused page.",
+                },
+                {
+                  href: "/services/website-audit",
+                  label: "Audit",
+                  title: "Need to find the weak point first?",
+                  description:
+                    "Start with an audit if the funnel is underperforming and you are not fully sure whether the problem is message, speed, trust, or UX.",
+                },
+                {
+                  href: "/launch",
+                  label: "Fast launch",
+                  title: "Need a focused page live quickly?",
+                  description:
+                    "Use the 48-hour launch offer if the priority is getting a cleaner page online fast before you build a wider funnel.",
+                },
+              ]}
+            />
+          </div>
+
           <CTASection
             eyebrow="READY"
             title="Stop wasting clicks, build a page that converts"

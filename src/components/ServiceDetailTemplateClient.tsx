@@ -5,6 +5,8 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Link from "next/link";
 
+import AnswerHighlightsSection from "@/components/AnswerHighlightsSection";
+import CorePageLinks from "@/components/CorePageLinks";
 import SectionHeading from "@/components/SectionHeading";
 import CTASection from "@/components/CTASection";
 import FAQAccordion from "@/components/FAQAccordion";
@@ -16,6 +18,12 @@ type Props = {
 
 export default function ServiceDetailTemplateClient({ service }: Props) {
   const pageRef = useRef<HTMLDivElement | null>(null);
+  const answerItems = service.faqs.slice(0, 4).map((item) => ({
+    title: item.question,
+    answer: item.answer,
+    href: `/contact?service=${encodeURIComponent(service.serviceParam)}`,
+    hrefLabel: "Request this service",
+  }));
 
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
@@ -111,6 +119,13 @@ export default function ServiceDetailTemplateClient({ service }: Props) {
         </div>
       </section>
 
+      <AnswerHighlightsSection
+        eyebrow="Quick answers"
+        title={`What people usually want to know about ${service.title.toLowerCase()}`}
+        description="Short practical answers make the service easier to understand quickly and help prospects move to the right next step without unnecessary friction."
+        items={answerItems}
+      />
+
       <section data-reveal=".deliverables-reveal" className="py-24 bg-gray-950">
         <div className="deliverables-reveal mx-auto max-w-6xl px-6">
           <SectionHeading
@@ -167,6 +182,37 @@ export default function ServiceDetailTemplateClient({ service }: Props) {
 
       <section className="py-24">
         <div className="mx-auto max-w-6xl px-6">
+          <div className="mb-12">
+            <CorePageLinks
+              eyebrow="Useful next steps"
+              title="Choose the next page that supports this service"
+              description="Use these supporting pages if you want a faster launch, pricing context, or a broader view of the other ways Web Growth can help."
+              links={[
+                {
+                  href: "/launch",
+                  label: "Launch",
+                  title: "Need a focused fast-start option?",
+                  description:
+                    "Use the 48-hour launch offer if your biggest priority is getting a website live quickly before expanding the scope later.",
+                },
+                {
+                  href: "/pricing",
+                  label: "Pricing",
+                  title: "Need pricing context first?",
+                  description:
+                    "Review pricing if you want to compare service paths before requesting implementation.",
+                },
+                {
+                  href: "/services",
+                  label: "Services",
+                  title: "Need a broader solution view?",
+                  description:
+                    "Explore the full service list if you are still deciding which path best fits your business goals.",
+                },
+              ]}
+            />
+          </div>
+
           <CTASection
             eyebrow="READY"
             title={service.ctaTitle}

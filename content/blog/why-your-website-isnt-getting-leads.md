@@ -1,4 +1,4 @@
-﻿---
+---
 title: Why Your Website Isn’t Getting Leads (And How to Fix It Step-by-Step)
 excerpt: Getting traffic but no enquiries? Your website has hidden conversion leaks. Learn exactly what kills leads and how to fix them using this practical system.
 date: 2026-02-03
@@ -41,6 +41,8 @@ Just mechanics.
 ---
 
 Start with the [homepage structure that converts](/blog/homepage-structure-that-converts-visitors-into-customers).
+
+If you already know your site needs a cleaner structure and a faster path to launch, the [website design in 48 hours service](/launch) is the direct done-for-you option.
 
 ## The uncomfortable truth
 
@@ -112,6 +114,8 @@ Always.
 ---
 
 If you need a focused offer page, read the [high-converting landing pages guide](/blog/high-converting-landing-pages-guide).
+
+If you are not sure whether the issue is messaging, UX, or SEO, start with a [website audit](/services/website-audit) before making random changes.
 
 ## Problem 2: You look like everyone else
 
@@ -243,6 +247,8 @@ Speed is money.
 ---
 
 Use the [Core Web Vitals speed checklist](/blog/how-to-make-your-website-load-fast) to fix performance leaks fast.
+
+And if the foundation is still weak, use the [hosting offer](/hosting-offer) to start with a more reliable setup.
 
 ## Problem 6: Too many distractions
 
@@ -391,7 +397,7 @@ If you want this handled for you, [request a quote](/contact).
 
 ## Related reads
 
-- [Why Your Website Isnâ€™t Getting Leads](/blog/why-your-website-isnt-getting-leads)
+- [Why Your Website Isn't Getting Leads](/blog/why-your-website-isnt-getting-leads)
 - [Speed Checklist That Improves Rankings](/blog/how-to-make-your-website-load-fast)
 - [Homepage Structure That Converts](/blog/homepage-structure-that-converts-visitors-into-customers)
 

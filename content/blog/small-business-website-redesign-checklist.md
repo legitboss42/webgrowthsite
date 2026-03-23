@@ -29,6 +29,8 @@ You need a better system.
 
 This small business website redesign checklist gives you a practical order of operations so your redesign improves leads, trust, and revenue.
 
+If you want the diagnosis before the rebuild, start with a [website audit](/services/website-audit) so you know what actually needs to change first.
+
 If your current site is also slow, pair this with the [website speed guide](/blog/how-to-make-your-website-load-fast) before launch.
 
 ![Website redesign checklist wireframe focused on clear messaging and conversion flow](/images/blog/redesign-checklist-cover-generated.webp)
@@ -52,6 +54,8 @@ You might only need targeted fixes if:
 - load speed is the main problem
 
 If you are not sure, start with a focused audit first.
+
+And if the business simply needs a clean site live quickly before a larger rebuild, use the [website design in 48 hours offer](/launch) as the faster first move.
 
 ## Step 2: Clarify the main outcome of the website
 

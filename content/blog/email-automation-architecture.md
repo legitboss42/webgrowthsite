@@ -39,6 +39,8 @@ This is not a "Newsletter." Newsletters are for entertainment. Automations are f
 
 When a lead enters my ecosystem (usually by downloading a [Technical Checklist](/blog/stop-using-cheap-hosting)), they are not just getting a file. They are entering a Decision Engine.
 
+If you need the opt-in and lead capture assets built first, use the [lead magnet strategy and build service](/services/lead-magnet-strategy-build).
+
 ---
 
 ## 2. The Infrastructure: Deliverability Engineering
@@ -55,6 +57,8 @@ You must own your domain and authenticate it.
 
 1. Buy a Professional Domain: Do not use your main website domain for heavy email marketing (protect your root IP). Buy a variation (e.g., get-webgrowth.com). I use Namecheap because they allow advanced DNS manipulation without the headache.
 [Get your dedicated email domain here](https://namecheap.pxf.io/c/6943664/672007/5618)
+
+If you want help with the setup side before the automations, use the [domain registration and hosting guidance service](/services/domain-registration-hosting-guidance).
 
 2. Authenticate the Records: You must add three specific TXT records to your Namecheap DNS:
 - SPF (Sender Policy Framework): "I approve this server to send email."
@@ -194,6 +198,8 @@ Build the system once. Get paid forever.
 Ready to build your Revenue Engine?
 
 [Apply for a Project Slot](/contact)
+
+If you want the simpler version first, read the [email marketing for small business guide](/blog/email-marketing-for-small-business).
 
 ---
 

@@ -1,4 +1,4 @@
-﻿---
+---
 title: Email Marketing for Small Businesses (Build a List That Generates Leads Automatically)
 excerpt: Stop depending only on Google and social media. Learn how to build an email list, automate follow-ups and turn subscribers into enquiries and clients on autopilot.
 date: 2026-02-02
@@ -44,7 +44,9 @@ Email fixes that.
 
 ---
 
-If your site isnâ€™t converting yet, read [Why Your Website Isnâ€™t Getting Leads](/blog/why-your-website-isnt-getting-leads).
+If your site isn't converting yet, read [Why Your Website Isn't Getting Leads](/blog/why-your-website-isnt-getting-leads).
+
+And if you need the website foundation cleaned up before email can perform well, start with the [business website design service](/services/business-website-design).
 
 ## Why email still beats everything
 
@@ -83,6 +85,8 @@ That’s powerful.
 ---
 
 If you need a focused offer page, read the [high-converting landing pages guide](/blog/high-converting-landing-pages-guide).
+
+If you want the email capture system built for you, the [lead magnet strategy and build service](/services/lead-magnet-strategy-build) is the direct next step.
 
 ## The money math nobody shows you
 
@@ -540,6 +544,8 @@ Predictable income.
 ---
 
 Still choosing your platform? Read the [best website builders guide](/blog/how-to-build-a-small-business-website-that-converts).
+
+And if you want automation beyond the list-building basics, continue with the [email automation architecture guide](/blog/email-automation-architecture).
 
 ## Lead magnet
 [LEAD|Download 5 High-Converting Email Templates (PDF)|/downloads/email-templates.pdf]

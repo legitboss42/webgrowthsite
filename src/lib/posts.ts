@@ -49,7 +49,12 @@ function getMarkdownFiles() {
   const entries = fs.readdirSync(postsDirectory, { withFileTypes: true });
 
   return entries
-    .filter((entry) => entry.isFile() && entry.name.endsWith(".md")) // ✅ only real markdown files
+    .filter(
+      (entry) =>
+        entry.isFile() &&
+        entry.name.endsWith(".md") &&
+        !entry.name.endsWith("-image-prompts.md")
+    )
     .map((entry) => entry.name);
 }
 

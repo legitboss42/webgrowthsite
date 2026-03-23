@@ -4,6 +4,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
+import AnswerHighlightsSection from "@/components/AnswerHighlightsSection";
+import CorePageLinks from "@/components/CorePageLinks";
 import SectionHeading from "@/components/SectionHeading";
 import CTASection from "@/components/CTASection";
 import FAQAccordion from "@/components/FAQAccordion";
@@ -59,6 +61,37 @@ const planMap: Record<Plan, PlanDetails> = {
     ],
   },
 };
+
+const maintenanceAnswers = [
+  {
+    title: "Who actually needs website maintenance?",
+    answer:
+      "Any business that depends on its website for trust, enquiries, content updates, or uptime usually needs some form of maintenance instead of waiting for issues to turn into emergencies.",
+    href: "/services/website-audit",
+    hrefLabel: "Start with an audit",
+  },
+  {
+    title: "What does maintenance prevent first?",
+    answer:
+      "It prevents security issues, broken updates, missing backups, performance decay, and the quiet site problems that often go unnoticed until something important stops working.",
+    href: "/services/performance-optimisation",
+    hrefLabel: "See performance support",
+  },
+  {
+    title: "Do I need maintenance if I did not build the site with you?",
+    answer:
+      "Yes. Existing sites can still go onto maintenance once we understand the current setup and the risk level of the stack.",
+    href: "/contact?service=Website Maintenance & Support",
+    hrefLabel: "Request support",
+  },
+  {
+    title: "What if the current site is already unstable?",
+    answer:
+      "If the site is already underperforming, an audit or redesign may need to happen before maintenance becomes the right long-term solution.",
+    href: "/services/website-redesign",
+    hrefLabel: "See redesign service",
+  },
+] as const;
 
 export default function WebsiteMaintenanceClient() {
   const pageRef = useRef<HTMLDivElement | null>(null);
@@ -186,6 +219,13 @@ export default function WebsiteMaintenanceClient() {
         </div>
       </section>
 
+      <AnswerHighlightsSection
+        eyebrow="Quick answers"
+        title="The maintenance questions buyers usually ask first"
+        description="These answers help people understand whether they need ongoing support, a bigger fix, or a different next step."
+        items={maintenanceAnswers}
+      />
+
       {/* WHY MAINTENANCE */}
       <section data-reveal=".why" className="py-24 bg-gray-950">
         <div className="why mx-auto max-w-4xl px-6">
@@ -300,6 +340,37 @@ export default function WebsiteMaintenanceClient() {
       {/* CTA */}
       <section className="py-24">
         <div className="mx-auto max-w-6xl px-6">
+          <div className="mb-12">
+            <CorePageLinks
+              eyebrow="Useful next steps"
+              title="Choose the right next move for your current website"
+              description="Maintenance is not always the first step. These links help people move toward the correct solution instead of paying for the wrong one."
+              links={[
+                {
+                  href: "/services/website-audit",
+                  label: "Audit",
+                  title: "Need to assess the current site first?",
+                  description:
+                    "Use the audit service if you are not fully sure what is broken, risky, or underperforming on the current website.",
+                },
+                {
+                  href: "/services/performance-optimisation",
+                  label: "Performance",
+                  title: "Need faster pages before ongoing support?",
+                  description:
+                    "Choose performance optimization if the biggest current issue is speed, mobile smoothness, or weak Core Web Vitals.",
+                },
+                {
+                  href: "/services/website-redesign",
+                  label: "Redesign",
+                  title: "Need more than maintenance?",
+                  description:
+                    "Choose redesign if the site is outdated, structurally weak, or no longer supports how the business actually sells.",
+                },
+              ]}
+            />
+          </div>
+
           <CTASection
             eyebrow="READY"
             title="Stop firefighting. Maintain your website properly."

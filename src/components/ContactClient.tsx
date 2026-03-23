@@ -117,6 +117,25 @@ export default function ContactClient() {
       <p className="mt-3 text-sm leading-6 text-white/70">
         Send the basics. You will get a clear response on scope, timing, and what is needed to launch.
       </p>
+      <div className="mt-5 rounded-xl border border-emerald-400/20 bg-emerald-500/10 p-4">
+        <p className="text-xs uppercase tracking-[0.16em] text-emerald-200/90">
+          Best results
+        </p>
+        <ul className="mt-3 space-y-2 text-sm leading-6 text-white/78">
+          <li className="flex gap-2">
+            <span className="mt-[9px] h-1.5 w-1.5 rounded-full bg-emerald-300" />
+            <span>Tell us what you need built and how quickly you want it live.</span>
+          </li>
+          <li className="flex gap-2">
+            <span className="mt-[9px] h-1.5 w-1.5 rounded-full bg-emerald-300" />
+            <span>Mention if you already have a domain, hosting, or existing website.</span>
+          </li>
+          <li className="flex gap-2">
+            <span className="mt-[9px] h-1.5 w-1.5 rounded-full bg-emerald-300" />
+            <span>The clearer the message, the faster we can point you to the right next step.</span>
+          </li>
+        </ul>
+      </div>
 
       {status !== "idle" ? (
         <div
@@ -199,6 +218,9 @@ export default function ContactClient() {
         >
           {status === "sending" ? "Sending..." : "Send Request"}
         </button>
+        <p className="text-xs leading-6 text-white/55">
+          Typical next step: a direct reply with scope guidance, package fit, and the fastest path to launch.
+        </p>
       </form>
     </div>
   );

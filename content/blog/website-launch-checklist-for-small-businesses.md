@@ -40,6 +40,8 @@ This guide gives you a practical launch checklist so your site goes live ready t
 
 If your homepage message is still weak, fix that first with the [homepage structure blueprint](/blog/homepage-structure-that-converts-visitors-into-customers).
 
+If you want the fastest done-for-you version of this process, the [website design in 48 hours offer](/launch) is built for businesses that need a clean launch path without dragging the project out.
+
 ## Launch principle: ship outcomes, not files
 
 A website launch is not "design complete".
@@ -81,6 +83,8 @@ Start here. Technical issues silently kill conversions.
 - unused plugins and scripts are removed
 
 For deeper speed fixes, use the [Core Web Vitals guide](/blog/how-to-make-your-website-load-fast).
+
+If you have not sorted hosting yet, compare the [shared hosting offer](/hosting-offer) before launch day so your website starts on stronger footing.
 
 ### URL and indexing hygiene
 
@@ -280,6 +284,8 @@ Track daily for two weeks:
 - ranking/indexing movement
 
 If traffic comes in but leads stay flat, use this fix guide: [Why your website is not getting leads](/blog/why-your-website-isnt-getting-leads).
+
+If you would rather not manage launch day alone, [start your website](/launch) and use the fast launch flow instead of piecing the process together manually.
 
 Small updates in week one often produce big gains by week four.
 

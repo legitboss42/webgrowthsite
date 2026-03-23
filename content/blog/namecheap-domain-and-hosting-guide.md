@@ -44,6 +44,8 @@ Just reliable, affordable infrastructure that works.
 
 If you want a domain and hosting that won’t punish your wallet or your sanity, this guide will save you time and money.
 
+If you want the direct offer page instead of the full review, go straight to the [hosting offer](/hosting-offer).
+
 
 ---
 
@@ -222,6 +224,8 @@ A domain alone doesn’t run a website.
 Hosting is the engine.
 
 If you want a full comparison, read the [best web hosting guide for small businesses](/blog/best-web-hosting-for-small-business-websites).
+
+If you want help connecting the domain, hosting, and website setup properly, use the [domain registration and hosting guidance service](/services/domain-registration-hosting-guidance).
 
 Think:
 
@@ -503,6 +507,8 @@ If you want something affordable, reliable and beginner-friendly, Namecheap is o
 Start small. Ship fast. Grow later.
 
 Need help launching? [Request a quote](/contact).
+
+If you want the website built after the setup is sorted, use the [website design in 48 hours offer](/launch).
 
 ---
 

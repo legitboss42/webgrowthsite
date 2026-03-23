@@ -1,4 +1,4 @@
-﻿---
+---
 title: Local SEO for Small Businesses (Rank on Google Maps and Get Clients Without Ads)
 excerpt: If customers search ‘near me’ and don’t find you, you don’t exist. Learn how to rank on Google Maps, dominate local searches and generate consistent enquiries without paying for ads.
 date: 2026-02-02
@@ -57,6 +57,8 @@ Let’s break it down.
 ---
 
 Start with the [small business SEO checklist](/blog/small-business-website-seo-checklist) to cover the basics.
+
+If you want this done for your business instead of piecing it together alone, see the [Google My Business setup and optimisation service](/services/google-my-business-setup-optimisation).
 
 ## Why local SEO is insanely powerful
 
@@ -120,6 +122,8 @@ If you ignore them, you vanish.
 ---
 
 Make sure your homepage converts that traffic with a [homepage structure that converts](/blog/homepage-structure-that-converts-visitors-into-customers).
+
+And if your local visitors still hit a weak website after they click, use the [website design in 48 hours offer](/launch) to fix the conversion path fast.
 
 ## Step 1: Create or fix your Google Business Profile
 
@@ -540,9 +544,11 @@ Always.
 
 ---
 
-If traffic isnâ€™t turning into enquiries, read [Why Your Website Isnâ€™t Getting Leads](/blog/why-your-website-isnt-getting-leads).
+If traffic isn't turning into enquiries, read [Why Your Website Isn't Getting Leads](/blog/why-your-website-isnt-getting-leads).
 
 And make sure the foundation is solid with the [best hosting guide](/blog/best-web-hosting-for-small-business-websites).
+
+If you want implementation support beyond the checklist, the [search engine optimisation service](/services/search-engine-optimisation) is the next step.
 
 ## Lead magnet
 [LEAD|Download the Google Maps Ranking Guide (PDF)|/downloads/local-seo-guide.pdf]

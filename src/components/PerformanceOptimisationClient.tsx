@@ -4,6 +4,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
+import AnswerHighlightsSection from "@/components/AnswerHighlightsSection";
+import CorePageLinks from "@/components/CorePageLinks";
 import SectionHeading from "@/components/SectionHeading";
 import CTASection from "@/components/CTASection";
 import FAQAccordion from "@/components/FAQAccordion";
@@ -43,6 +45,37 @@ const symptomDetails: Record<
     fixes: ["Speed pass + mobile fixes", "Clean section structure", "Reduce heavy assets", "Improve CTA flow"],
   },
 };
+
+const performanceAnswers = [
+  {
+    title: "When is performance optimization worth it?",
+    answer:
+      "It is worth it when slow pages, poor mobile experience, weak Core Web Vitals, or bounce behavior are directly affecting rankings, trust, or conversions.",
+    href: "/blog/how-to-make-your-website-load-fast",
+    hrefLabel: "Read the speed guide",
+  },
+  {
+    title: "What usually causes the slowdown?",
+    answer:
+      "The biggest culprits are heavy images, bloated scripts, weak hosting, page-builder overhead, and sections that were designed without mobile performance in mind.",
+    href: "/hosting-offer",
+    hrefLabel: "Compare hosting first",
+  },
+  {
+    title: "Do I need optimization or a redesign?",
+    answer:
+      "Choose optimization when the main issue is speed and stability. Choose redesign if the structure, messaging, and UX are also weak across the whole site.",
+    href: "/services/website-redesign",
+    hrefLabel: "See redesign service",
+  },
+  {
+    title: "What if I need a simpler fresh start?",
+    answer:
+      "Sometimes the fastest move is a focused fresh build instead of overworking a slow page. The 48-hour launch offer covers that simpler path.",
+    href: "/launch",
+    hrefLabel: "See the fast launch option",
+  },
+] as const;
 
 export default function PerformanceOptimisationClient() {
   const pageRef = useRef<HTMLDivElement | null>(null);
@@ -170,6 +203,13 @@ export default function PerformanceOptimisationClient() {
         </div>
       </section>
 
+      <AnswerHighlightsSection
+        eyebrow="Quick answers"
+        title="The speed and performance questions buyers usually ask first"
+        description="These answers help people understand whether optimization is the right fix and what to do next if it is not."
+        items={performanceAnswers}
+      />
+
       {/* SYMPTOMS (INTERACTIVE) */}
       <section data-reveal=".symptoms" className="py-24 bg-gray-950">
         <div className="symptoms mx-auto max-w-6xl px-6">
@@ -296,6 +336,37 @@ export default function PerformanceOptimisationClient() {
       {/* CTA */}
       <section className="py-24">
         <div className="mx-auto max-w-6xl px-6">
+          <div className="mb-12">
+            <CorePageLinks
+              eyebrow="Useful next steps"
+              title="Use the next page that fits the real problem"
+              description="Performance work is often connected to hosting, redesign, or a simpler relaunch. These links help prospects move toward the right fix."
+              links={[
+                {
+                  href: "/hosting-offer",
+                  label: "Hosting",
+                  title: "Need a stronger hosting foundation?",
+                  description:
+                    "Use the hosting offer if the site is being held back by weak infrastructure or you need a lower-cost way to improve the base setup.",
+                },
+                {
+                  href: "/services/website-redesign",
+                  label: "Redesign",
+                  title: "Need more than a speed pass?",
+                  description:
+                    "Choose redesign if poor structure, weak UX, and outdated presentation are hurting trust as much as speed is.",
+                },
+                {
+                  href: "/services/website-audit",
+                  label: "Audit",
+                  title: "Need a diagnosis before touching anything?",
+                  description:
+                    "Start with an audit if you know the site is underperforming but need clarity on whether speed is the main blocker.",
+                },
+              ]}
+            />
+          </div>
+
           <CTASection
             eyebrow="READY"
             title="Speed is profit. Let’s fix your website properly."

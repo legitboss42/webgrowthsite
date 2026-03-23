@@ -187,6 +187,16 @@ export default function GetStartedClient() {
             Quick 3-step intake so we can review your project and send the next
             steps.
           </p>
+          <div className="mt-5 rounded-2xl border border-emerald-400/20 bg-emerald-500/10 p-5">
+            <p className="text-xs uppercase tracking-[0.16em] text-emerald-200/90">
+              What this does
+            </p>
+            <div className="mt-3 grid gap-3 text-sm leading-6 text-white/78 sm:grid-cols-3">
+              <p>Helps us understand what you need without a long call first.</p>
+              <p>Keeps the reply focused on the right service and timeline.</p>
+              <p>Gives you a cleaner path into email, WhatsApp, or booking.</p>
+            </div>
+          </div>
 
           {selectedPackage ? (
             <div className="mt-5 inline-flex rounded-full border border-emerald-400/30 bg-emerald-500/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-emerald-200/95">
@@ -209,6 +219,9 @@ export default function GetStartedClient() {
           {step === 1 ? (
             <div className="mt-8">
               <h2 className="text-xl font-semibold text-white">What do you need?</h2>
+              <p className="mt-2 text-sm leading-6 text-white/68">
+                Pick the closest fit. This just helps us route the request faster.
+              </p>
               <div className="mt-4 grid gap-3 sm:grid-cols-2">
                 {PROJECT_NEEDS.map((option) => (
                   <button
@@ -249,6 +262,9 @@ export default function GetStartedClient() {
               <h2 className="text-xl font-semibold text-white">
                 Do you already have a domain?
               </h2>
+              <p className="mt-2 text-sm leading-6 text-white/68">
+                If not, that is fine. We can still point you to the right next step.
+              </p>
               <div className="mt-4 grid gap-3 sm:grid-cols-2">
                 {DOMAIN_OPTIONS.map((option) => (
                   <button
@@ -294,6 +310,9 @@ export default function GetStartedClient() {
           {step === 3 ? (
             <form className="mt-8 space-y-4" onSubmit={onSubmitDetails}>
               <h2 className="text-xl font-semibold text-white">Contact details</h2>
+              <p className="text-sm leading-6 text-white/68">
+                This is enough for us to respond clearly without making you fill a long form.
+              </p>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="sm:col-span-2">
                   <label className="mb-2 block text-sm text-white/70">Full name</label>
@@ -398,6 +417,10 @@ export default function GetStartedClient() {
                 >
                   Send this request by email
                 </a>
+              </div>
+
+              <div className="mt-5 rounded-xl border border-white/10 bg-black/25 p-4 text-sm leading-6 text-white/74">
+                Best next move: book a call if you want fast clarification, use WhatsApp if you want direct back-and-forth, or just wait for the reply if your request is already clear.
               </div>
 
               <div className="mt-5 border-t border-white/10 pt-4">

@@ -1,5 +1,7 @@
+import AnswerHighlightsSection from "@/components/AnswerHighlightsSection";
 import Link from "next/link";
 import FAQSection from "@/components/FAQSection";
+import CorePageLinks from "@/components/CorePageLinks";
 import HostingSupportBlock from "@/components/HostingSupportBlock";
 import StructuredData from "@/components/StructuredData";
 import {
@@ -118,6 +120,33 @@ const hostingFaqs = [
     question: "Why is web hosting important for business websites?",
     answer:
       "Web hosting affects uptime, speed, security, and how stable your website feels to customers. It is one of the foundations of a professional online presence.",
+  },
+] as const;
+
+const hostingDecisionAnswers = [
+  {
+    title: "Why not choose the cheapest host and move on?",
+    answer:
+      "Because weak hosting often creates avoidable speed, uptime, and setup issues that slow the website launch down and make the business look less reliable.",
+  },
+  {
+    title: "What does this deal help me do faster?",
+    answer:
+      "It helps you secure hosting quickly, lower the upfront cost, and move into domain setup and website launch with fewer basic infrastructure problems.",
+    href: "/launch",
+    hrefLabel: "Start your website next",
+  },
+  {
+    title: "Who is this page best for?",
+    answer:
+      "It is best for founders and small businesses that already know they need hosting and want a simple path into getting their business online properly.",
+  },
+  {
+    title: "What if I do not want to handle the setup myself?",
+    answer:
+      "You can use the hosting deal as the foundation, then move into the 48-hour website service if you want the website build and launch handled for you.",
+    href: "/services/domain-registration-hosting-guidance",
+    hrefLabel: "See setup guidance",
   },
 ] as const;
 
@@ -244,6 +273,13 @@ export default function HostingOfferRoute() {
           </div>
         </section>
 
+        <AnswerHighlightsSection
+          eyebrow="Quick answers"
+          title="What this hosting offer actually helps you solve"
+          description="This page is not just about a discount. It is about starting your business website with fewer setup mistakes and a cleaner path to launch."
+          items={hostingDecisionAnswers}
+        />
+
         <section className="relative overflow-hidden border-b border-white/10 bg-[#060907] py-16">
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.12),transparent_30%),radial-gradient(circle_at_85%_25%,rgba(16,185,129,0.07),transparent_24%)]" />
           <div className="mx-auto max-w-6xl px-6">
@@ -346,6 +382,35 @@ export default function HostingOfferRoute() {
             />
           </div>
         </section>
+
+        <CorePageLinks
+          eyebrow="After hosting"
+          title="Choose the next step that matches where you are"
+          description="Once hosting is sorted, use the page that fits your situation instead of guessing what should happen next."
+          links={[
+            {
+              href: "/launch",
+              label: "Launch",
+              title: "Need the website built fast?",
+              description:
+                "Move into the 48-hour website offer if you want a clean, professional site launched without handling the whole setup yourself.",
+            },
+            {
+              href: "/services/domain-registration-hosting-guidance",
+              label: "Guidance",
+              title: "Need help connecting everything?",
+              description:
+                "Use the setup guidance service if you want help with domain connection, hosting, and practical launch decisions.",
+            },
+            {
+              href: "/blog/best-web-hosting-for-small-business-websites",
+              label: "Guide",
+              title: "Still comparing hosting options?",
+              description:
+                "Read the hosting guide if you want more context before you commit to a plan.",
+            },
+          ]}
+        />
 
         <FAQSection items={hostingFaqs} title="Web hosting questions people usually ask first" description="Short answers to help you choose hosting for your business website without overcomplicating the basics." />
 

@@ -4,9 +4,42 @@ import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
+import AnswerHighlightsSection from "@/components/AnswerHighlightsSection";
+import CorePageLinks from "@/components/CorePageLinks";
 import SectionHeading from "@/components/SectionHeading";
 import CTASection from "@/components/CTASection";
 import FAQAccordion from "@/components/FAQAccordion";
+
+const ecommerceAnswers = [
+  {
+    title: "Who is this best for?",
+    answer:
+      "It is best for businesses that need an online store with stronger product discovery, better trust signals, and a cleaner path from browse to checkout.",
+    href: "/portfolio",
+    hrefLabel: "See recent work",
+  },
+  {
+    title: "What usually hurts ecommerce conversions first?",
+    answer:
+      "Weak product pages, poor mobile experience, slow load times, and checkout flows that make buyers hesitate before they finish the purchase.",
+    href: "/services/performance-optimisation",
+    hrefLabel: "See performance support",
+  },
+  {
+    title: "Do I need this or a simpler launch first?",
+    answer:
+      "Choose ecommerce design if you are ready to sell products. Choose the 48-hour launch if you need a fast business presence first before a fuller store build.",
+    href: "/launch",
+    hrefLabel: "See the fast launch option",
+  },
+  {
+    title: "What if I am not sure the current store needs a rebuild?",
+    answer:
+      "Start with an audit if the issue might be UX, messaging, or performance rather than the full ecommerce structure itself.",
+    href: "/services/website-audit",
+    hrefLabel: "Start with an audit",
+  },
+] as const;
 
 export default function EcommerceWebsiteDesignClient() {
   const pageRef = useRef<HTMLDivElement | null>(null);
@@ -94,6 +127,13 @@ export default function EcommerceWebsiteDesignClient() {
         </div>
       </section>
 
+      <AnswerHighlightsSection
+        eyebrow="Quick answers"
+        title="The ecommerce questions buyers usually need answered first"
+        description="These answers help prospects figure out whether they need a store build, a performance fix, or a smaller first step."
+        items={ecommerceAnswers}
+      />
+
       {/* WHY STORES FAIL */}
       <section data-reveal className="py-24 bg-gray-950">
         <div className="mx-auto max-w-4xl px-6">
@@ -180,6 +220,37 @@ export default function EcommerceWebsiteDesignClient() {
       {/* CTA */}
       <section className="py-24">
         <div className="mx-auto max-w-6xl px-6">
+          <div className="mb-12">
+            <CorePageLinks
+              eyebrow="Useful next steps"
+              title="Choose the page that supports the rest of your selling system"
+              description="Some stores need design, some need speed fixes, and some need a simpler launch path first. These links keep the decision clearer."
+              links={[
+                {
+                  href: "/services/performance-optimisation",
+                  label: "Performance",
+                  title: "Need a faster shopping experience?",
+                  description:
+                    "Choose performance optimization if slow load times and poor mobile experience are hurting product views and checkout confidence.",
+                },
+                {
+                  href: "/services/website-audit",
+                  label: "Audit",
+                  title: "Need to diagnose the current store first?",
+                  description:
+                    "Start with an audit if you are not fully sure whether the problem is product UX, trust, speed, or overall store structure.",
+                },
+                {
+                  href: "/launch",
+                  label: "Fast launch",
+                  title: "Need a simpler business website first?",
+                  description:
+                    "Use the 48-hour launch offer if you need a cleaner online presence now and want to build the full store later.",
+                },
+              ]}
+            />
+          </div>
+
           <CTASection
             eyebrow="READY"
             title="Build an online store customers trust"

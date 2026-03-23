@@ -1,4 +1,4 @@
-﻿---
+---
 title: How to Build a Small Business Website That Actually Converts Visitors Into Customers
 excerpt: Most small business websites look good but don’t sell. Learn the exact structure, psychology and layout that turns visitors into enquiries automatically.
 date: 2026-02-02
@@ -42,7 +42,9 @@ Today we fix that.
 
 ---
 
-If you havenâ€™t chosen infrastructure yet, start with the [best hosting guide](/blog/best-web-hosting-for-small-business-websites).
+If you haven't chosen infrastructure yet, start with the [best hosting guide](/blog/best-web-hosting-for-small-business-websites).
+
+If you want the fastest done-for-you path instead of planning every page yourself, see the [website design in 48 hours offer](/launch).
 
 ## First principle: your website is not art
 
@@ -389,7 +391,7 @@ Always test.
 
 ---
 
-If youâ€™re getting traffic but no enquiries, read [Why Your Website Isnâ€™t Getting Leads](/blog/why-your-website-isnt-getting-leads).
+If you're getting traffic but no enquiries, read [Why Your Website Isn't Getting Leads](/blog/why-your-website-isnt-getting-leads).
 
 ## The simple high-converting structure
 
@@ -412,6 +414,8 @@ That’s what works.
 ---
 
 To make sure it ranks, use the [small business SEO checklist](/blog/small-business-website-seo-checklist).
+
+If you want a business website built around this structure for you, the [business website design service](/services/business-website-design) is the direct next step.
 
 ## Lead magnet
 [LEAD|Download the Website Builder Decision Guide (PDF)|/downloads/builder-decision-checklist.pdf]
@@ -448,7 +452,7 @@ If you want this handled for you, [request a quote](/contact).
 
 ## Related reads
 
-- [Why Your Website Isnâ€™t Getting Leads](/blog/why-your-website-isnt-getting-leads)
+- [Why Your Website Isn't Getting Leads](/blog/why-your-website-isnt-getting-leads)
 - [Speed Checklist That Improves Rankings](/blog/how-to-make-your-website-load-fast)
 - [Homepage Structure That Converts](/blog/homepage-structure-that-converts-visitors-into-customers)
 

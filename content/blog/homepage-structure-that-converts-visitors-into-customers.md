@@ -44,6 +44,8 @@ Let’s fix it properly.
 
 If leads are the goal, start with [Why Your Website Isn’t Getting Leads](/blog/why-your-website-isnt-getting-leads).
 
+If you want this structure built for you instead of planning it section by section, start with the [business website design service](/services/business-website-design).
+
 ## Brutal truth first
 
 Visitors don’t read.
@@ -93,6 +95,8 @@ Delete it.
 ---
 
 If you need a focused offer page, read the [high-converting landing pages guide](/blog/high-converting-landing-pages-guide).
+
+And if you need a cleaner fast-start version first, the [website design in 48 hours offer](/launch) is the quickest done-for-you path.
 
 ## The perfect homepage blueprint
 
@@ -406,6 +410,8 @@ Always the headline first.
 Once it converts, build follow-up with [email marketing for small business](/blog/email-marketing-for-small-business).
 
 And make sure it loads fast with the [Core Web Vitals speed checklist](/blog/how-to-make-your-website-load-fast).
+
+If you want help improving the full page structure, conversion path, and trust flow, use the [website audit service](/services/website-audit).
 
 ## Lead magnet
 [LEAD|Download the Homepage Wireframe Template (PDF)|/downloads/homepage-wireframe.pdf]

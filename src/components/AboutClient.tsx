@@ -1,13 +1,15 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
-import SectionHeading from "@/components/SectionHeading";
-import CTASection from "@/components/CTASection";
-import FAQAccordion from "@/components/FAQAccordion";
 import BlogInlineCTA from "@/components/BlogInlineCTA";
+import CTASection from "@/components/CTASection";
+import EntitySnapshotSection from "@/components/EntitySnapshotSection";
+import FAQAccordion from "@/components/FAQAccordion";
+import SectionHeading from "@/components/SectionHeading";
 
 type ValueItem = {
   title: string;
@@ -18,7 +20,7 @@ type ValueItem = {
 const values: ValueItem[] = [
   {
     title: "Strategy first",
-    text: "We don’t start with colours. We start with outcomes. Your site is structured around what matters: enquiries, bookings, credibility, or sales, not vanity.",
+    text: "We don't start with colours. We start with outcomes. Your site is structured around what matters: enquiries, bookings, credibility, or sales, not vanity.",
     icon: "strategy",
   },
   {
@@ -28,37 +30,37 @@ const values: ValueItem[] = [
   },
   {
     title: "Performance that holds",
-    text: "Fast loads, mobile-first layouts, and a build that won’t collapse the moment you want to expand. A website should scale with your business.",
+    text: "Fast loads, mobile-first layouts, and a build that won't collapse the moment you want to expand. A website should scale with your business.",
     icon: "performance",
   },
 ];
 
 const faqs = [
   {
-    question: "What makes Web Growth different from a typical “web designer”?",
+    question: 'What makes Web Growth different from a typical "web designer"?',
     answer:
-      "Most designers focus on visuals alone. We focus on outcomes: structure, clarity, performance, and trust. A website can look nice and still fail, we build for results.",
+      "Most designers focus on visuals alone. We focus on outcomes: structure, clarity, performance, and trust. A website can look nice and still fail, so we build for results.",
   },
   {
     question: "Do you build with WordPress or custom code?",
     answer:
-      "We can do both. For speed and flexibility, WordPress works well for many businesses. For advanced interaction, performance, and a premium feel, a custom build (like this Next.js site) is ideal.",
+      "We can do both. For speed and flexibility, WordPress works well for many businesses. For advanced interaction, performance, and a premium feel, a custom build like this Next.js site can be the better fit.",
   },
   {
     question: "Can you redesign my existing website without starting from scratch?",
     answer:
-      "Yes. Redesign can mean improving structure, speed, messaging, and conversion flow while keeping what still works. We’ll assess what to keep, what to rebuild, and what to remove.",
+      "Yes. Redesign can mean improving structure, speed, messaging, and conversion flow while keeping what still works. We'll assess what to keep, what to rebuild, and what to remove.",
   },
   {
     question: "How long does a typical project take?",
     answer:
-      "It depends on scope. A focused landing page is faster than a full business site with multiple sections and assets. We’ll give clear milestones after discovery.",
+      "It depends on scope. A focused landing page is faster than a full business site with multiple sections and assets. We'll give clear milestones after discovery.",
   },
 ];
 
 function Icon({ kind }: { kind: ValueItem["icon"] }) {
   const common = "h-5 w-5 text-emerald-400";
-  if (kind === "strategy")
+  if (kind === "strategy") {
     return (
       <svg className={common} viewBox="0 0 24 24" fill="none">
         <path
@@ -70,7 +72,9 @@ function Icon({ kind }: { kind: ValueItem["icon"] }) {
         />
       </svg>
     );
-  if (kind === "design")
+  }
+
+  if (kind === "design") {
     return (
       <svg className={common} viewBox="0 0 24 24" fill="none">
         <path
@@ -87,6 +91,8 @@ function Icon({ kind }: { kind: ValueItem["icon"] }) {
         />
       </svg>
     );
+  }
+
   return (
     <svg className={common} viewBox="0 0 24 24" fill="none">
       <path
@@ -108,14 +114,13 @@ function Icon({ kind }: { kind: ValueItem["icon"] }) {
 
 export default function AboutClient() {
   const pageRef = useRef<HTMLDivElement | null>(null);
-
   const [activeStep, setActiveStep] = useState(0);
 
   const steps = useMemo(
     () => [
       {
         title: "Discovery",
-        text: "We get clear on your audience, your offer, and what success looks like. No guesswork. No “just vibes.”",
+        text: 'We get clear on your audience, your offer, and what success looks like. No guesswork. No "just vibes."',
         img: "/images/about/about-discovery.webp",
       },
       {
@@ -150,7 +155,6 @@ export default function AboutClient() {
     const root = pageRef.current;
     if (!root) return;
 
-    // Hero entrance
     gsap.fromTo(
       ".about-hero",
       { opacity: 0, y: 80, filter: "blur(8px)" },
@@ -182,7 +186,6 @@ export default function AboutClient() {
       if (sel) reveal(sel, el);
     });
 
-    // Subtle parallax for banner image blocks
     gsap.utils.toArray<HTMLElement>(".about-parallax").forEach((el) => {
       gsap.fromTo(
         el,
@@ -209,7 +212,6 @@ export default function AboutClient() {
 
   return (
     <div ref={pageRef} className="bg-black text-white">
-      {/* HERO */}
       <section className="about-hero relative overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(16,185,129,0.18),transparent_55%)]" />
         <div className="mx-auto max-w-6xl px-6 py-24 md:py-28">
@@ -218,37 +220,36 @@ export default function AboutClient() {
               <div className="text-sm tracking-[0.25em] text-white/50">
                 ABOUT WEB GROWTH
               </div>
-              <h1 className="mt-4 text-4xl md:text-5xl font-semibold leading-tight">
+              <h1 className="mt-4 text-4xl font-semibold leading-tight md:text-5xl">
                 We build websites that look premium and perform under pressure.
               </h1>
-              <p className="mt-6 text-white/70 leading-relaxed text-lg">
+              <p className="mt-6 text-lg leading-relaxed text-white/70">
                 Web Growth exists for businesses that are tired of websites that
-                “look fine” but don’t deliver. We combine structure, clean design,
+                appear fine but do not deliver. We combine structure, clean design,
                 and controlled interaction to help you attract customers, build trust,
                 and support real growth.
               </p>
 
-              <div className="mt-10 flex flex-col sm:flex-row gap-3">
-                <a
+              <div className="mt-10 flex flex-col gap-3 sm:flex-row">
+                <Link
                   href="/contact"
                   className="inline-flex items-center justify-center rounded-md bg-emerald-600 px-7 py-3.5 text-sm font-semibold text-white transition hover:bg-emerald-500"
                 >
                   Work with us
-                </a>
-                <a
+                </Link>
+                <Link
                   href="/portfolio"
                   className="inline-flex items-center justify-center rounded-md border border-white/15 bg-black/30 px-7 py-3.5 text-sm font-semibold text-white/90 transition hover:bg-black/50"
                 >
                   See our work
-                </a>
+                </Link>
               </div>
             </div>
 
-            {/* Image placeholder */}
             <div className="relative">
               <div className="about-parallax relative overflow-hidden rounded-2xl border border-white/10 bg-black/40">
                 <div
-                  className="h-[320px] md:h-[420px] bg-cover bg-center opacity-80"
+                  className="h-[320px] bg-cover bg-center opacity-80 md:h-[420px]"
                   style={{ backgroundImage: "url(/images/about/about-hero.webp)" }}
                 />
                 <div className="absolute inset-0 bg-black/35" />
@@ -269,11 +270,39 @@ export default function AboutClient() {
         </div>
       </section>
 
-      {/* WHY / VALUES */}
-      <section
-        className="py-24"
-        data-reveal=".values-reveal"
-      >
+      <EntitySnapshotSection
+        title="A factual summary of who Web Growth helps and what the business actually does"
+        description="This gives a cleaner entity-level picture of the business, which helps visitors and answer engines understand the site without relying on vague brand language."
+        items={[
+          {
+            title: "What Web Growth is",
+            description:
+              "Web Growth is a web design and website growth business focused on clarity, conversion, performance, and launch readiness.",
+          },
+          {
+            title: "Who it helps",
+            description:
+              "It helps service businesses, founders, and lean teams in Nigeria and international markets that need a stronger website presence.",
+          },
+          {
+            title: "What the main outcomes are",
+            description:
+              "The work is designed to improve first impressions, website speed, conversion flow, launch clarity, and overall business credibility online.",
+          },
+          {
+            title: "Where to start",
+            description:
+              "Start with the 48-hour launch offer if speed matters most, pricing if you are comparing options, or the blog if you need the strategy explained first.",
+          },
+        ]}
+        links={[
+          { href: "/launch", label: "See the launch offer" },
+          { href: "/pricing", label: "Compare pricing" },
+          { href: "/blog", label: "Read the strategy guides" },
+        ]}
+      />
+
+      <section className="py-24" data-reveal=".values-reveal">
         <div className="mx-auto max-w-6xl px-6 values-reveal">
           <SectionHeading
             eyebrow="WHY US"
@@ -285,7 +314,7 @@ export default function AboutClient() {
             {values.map((v) => (
               <div
                 key={v.title}
-                className="rounded-2xl border border-white/10 bg-black/40 backdrop-blur p-7 hover:border-white/20 transition"
+                className="rounded-2xl border border-white/10 bg-black/40 p-7 backdrop-blur transition hover:border-white/20"
               >
                 <div className="flex items-center gap-3">
                   <div className="rounded-lg border border-white/10 bg-black/50 p-2">
@@ -293,30 +322,26 @@ export default function AboutClient() {
                   </div>
                   <h3 className="text-xl font-semibold">{v.title}</h3>
                 </div>
-                <p className="mt-4 text-white/65 leading-relaxed">{v.text}</p>
+                <p className="mt-4 leading-relaxed text-white/65">{v.text}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* STORY + IMAGE */}
-      <section
-        className="py-24 bg-gray-950"
-        data-reveal=".story-reveal"
-      >
+      <section className="bg-gray-950 py-24" data-reveal=".story-reveal">
         <div className="mx-auto max-w-6xl px-6 story-reveal">
           <div className="grid gap-10 md:grid-cols-2 md:items-center">
             <div>
               <SectionHeading
                 eyebrow="OUR STORY"
-                title="From “nice websites” to websites that actually work"
-                description="Most businesses don’t need more pages. They need a clearer message, stronger trust signals, and a website that guides people to take action."
+                title='From "nice websites" to websites that actually work'
+                description="Most businesses do not need more pages. They need a clearer message, stronger trust signals, and a website that guides people to take action."
               />
-              <div className="mt-6 space-y-4 text-white/70 leading-relaxed">
+              <div className="mt-6 space-y-4 leading-relaxed text-white/70">
                 <p>
                   We noticed a pattern: lots of sites look modern, but visitors still
-                  don’t understand what the business does, why it matters, or what to do next.
+                  do not understand what the business does, why it matters, or what to do next.
                 </p>
                 <p>
                   Web Growth is built around fixing that. We focus on clarity first,
@@ -329,24 +354,18 @@ export default function AboutClient() {
               </div>
             </div>
 
-            {/* Image placeholder */}
             <div className="about-parallax relative overflow-hidden rounded-2xl border border-white/10 bg-black/40">
               <div
-                className="h-[360px] md:h-[460px] bg-cover bg-center opacity-80"
+                className="h-[360px] bg-cover bg-center opacity-80 md:h-[460px]"
                 style={{ backgroundImage: "url(/images/about/about-nice.webp)" }}
               />
               <div className="absolute inset-0 bg-black/35" />
-              
             </div>
           </div>
         </div>
       </section>
 
-      {/* PROCESS (INTERACTIVE) */}
-      <section
-        className="py-24"
-        data-reveal=".process-reveal"
-      >
+      <section className="py-24" data-reveal=".process-reveal">
         <div className="mx-auto max-w-6xl px-6 process-reveal">
           <SectionHeading
             eyebrow="PROCESS"
@@ -355,8 +374,7 @@ export default function AboutClient() {
           />
 
           <div className="mt-12 grid gap-8 md:grid-cols-2">
-            {/* Steps (interactive tabs) */}
-            <div className="rounded-2xl border border-white/10 bg-black/40 backdrop-blur p-6">
+            <div className="rounded-2xl border border-white/10 bg-black/40 p-6 backdrop-blur">
               <div className="flex flex-wrap gap-2">
                 {steps.map((s, idx) => {
                   const active = idx === activeStep;
@@ -368,7 +386,7 @@ export default function AboutClient() {
                         "rounded-full px-4 py-2 text-sm font-semibold transition",
                         active
                           ? "bg-emerald-600 text-white"
-                          : "bg-black/40 text-white/70 border border-white/10 hover:text-white hover:border-white/20",
+                          : "border border-white/10 bg-black/40 text-white/70 hover:border-white/20 hover:text-white",
                       ].join(" ")}
                       type="button"
                     >
@@ -380,16 +398,12 @@ export default function AboutClient() {
 
               <div className="mt-6">
                 <h3 className="text-xl font-semibold">{steps[activeStep].title}</h3>
-                <p className="mt-3 text-white/70 leading-relaxed">
+                <p className="mt-3 leading-relaxed text-white/70">
                   {steps[activeStep].text}
                 </p>
-
-                <div className="mt-6 rounded-xl border border-white/10 bg-black/30 p-4 text-sm text-white/60">
-                </div>
               </div>
             </div>
 
-            {/* Image panel */}
             <div className="about-parallax relative overflow-hidden rounded-2xl border border-white/10 bg-black/40">
               <div
                 className="h-[420px] bg-cover bg-center opacity-80"
@@ -397,19 +411,15 @@ export default function AboutClient() {
               />
               <div className="absolute inset-0 bg-black/35" />
               <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between rounded-xl border border-white/10 bg-black/55 p-4 text-sm text-white/70">
-                <span> {activeStep + 1}  </span>
-                <span className="text-emerald-400 font-semibold"></span>
+                <span>{activeStep + 1}</span>
+                <span className="font-semibold text-emerald-400">{steps[activeStep].title}</span>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* FAQ */}
-      <section
-        className="py-24 bg-gray-950"
-        data-reveal=".faq-reveal"
-      >
+      <section className="bg-gray-950 py-24" data-reveal=".faq-reveal">
         <div className="mx-auto max-w-6xl px-6 faq-reveal">
           <SectionHeading
             eyebrow="FAQ"
@@ -422,7 +432,6 @@ export default function AboutClient() {
         </div>
       </section>
 
-      {/* CTA */}
       <section className="py-24">
         <div className="mx-auto max-w-6xl px-6">
           <div className="mb-10">
@@ -430,8 +439,8 @@ export default function AboutClient() {
           </div>
           <CTASection
             eyebrow="READY"
-            title="Let’s build a website your customers take seriously"
-            description="If your current site feels outdated or doesn’t convert, we’ll rebuild it with clarity, performance, and a premium feel."
+            title="Let's build a website your customers take seriously"
+            description="If your current site feels outdated or does not convert, we'll rebuild it with clarity, performance, and a premium feel."
             primaryCtaText="Request a Quote"
             primaryHref="/contact"
             secondaryCtaText="See Pricing"

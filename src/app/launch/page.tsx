@@ -1,7 +1,9 @@
 import Link from "next/link";
+import AnswerHighlightsSection from "@/components/AnswerHighlightsSection";
 import FAQSection from "@/components/FAQSection";
 import FinalCTASection from "@/components/FinalCTASection";
 import CorePageLinks from "@/components/CorePageLinks";
+import EntitySnapshotSection from "@/components/EntitySnapshotSection";
 import PricingSection from "@/components/PricingSection";
 import SocialProofSection from "@/components/SocialProofSection";
 import StructuredData from "@/components/StructuredData";
@@ -66,6 +68,60 @@ const comparisonPoints = [
       "Your content is not ready enough to approve quickly",
       "You want a long discovery phase before launch work begins",
     ],
+  },
+] as const;
+
+const buyerQuestionAnswers = [
+  {
+    title: "What do you need from me?",
+    answer:
+      "A clear offer, basic business information, contact details, and quick approvals. This service works best when you want speed and can respond during the build window.",
+    href: "/blog/website-launch-checklist-for-small-businesses",
+    hrefLabel: "Use the launch checklist",
+  },
+  {
+    title: "Is this only for Nigeria-based businesses?",
+    answer:
+      "No. The service is built for Nigeria-based businesses and international clients who want a remote partner, simple communication, and a focused done-for-you launch.",
+    href: "/faq",
+    hrefLabel: "See launch questions",
+  },
+  {
+    title: "What happens after the page goes live?",
+    answer:
+      "You can start sending traffic immediately, then expand into more pages, blog content, or deeper SEO once the first launch is working and validated.",
+    href: "/pricing",
+    hrefLabel: "Compare next-step packages",
+  },
+  {
+    title: "Why choose this over a longer build?",
+    answer:
+      "Because many businesses need a clean, credible online presence now. This keeps the scope focused so speed, clarity, and conversion are not buried under unnecessary process.",
+    href: "/contact",
+    hrefLabel: "Start your website",
+  },
+] as const;
+
+const launchEntitySnapshot = [
+  {
+    title: "What this page is about",
+    description:
+      "This is the focused service page for the 48-hour website launch, not a general web design overview or a long custom-build process.",
+  },
+  {
+    title: "What Web Growth is offering here",
+    description:
+      "A done-for-you one-page business website with domain guidance, hosting setup, mobile-first structure, and clean launch basics handled in one flow.",
+  },
+  {
+    title: "Who should use it",
+    description:
+      "Businesses that need to get online fast, want a professional first impression, and do not want weeks of unnecessary project drag.",
+  },
+  {
+    title: "What comes after this",
+    description:
+      "After launch, the site can expand into pricing, blog support, deeper SEO, service pages, or broader website growth work as needed.",
   },
 ] as const;
 
@@ -272,6 +328,22 @@ export default function LaunchPage() {
       <main className="bg-[#050806] text-white">
         <LaunchHero />
         <LaunchFitSection />
+        <AnswerHighlightsSection
+          eyebrow="Decision support"
+          title="What buyers usually want clarified before they say yes"
+          description="These are the practical answers that help people decide whether the 48-hour offer is the right move now or whether they need a bigger scope first."
+          items={buyerQuestionAnswers}
+        />
+        <EntitySnapshotSection
+          title="The simple summary of what this launch offer does"
+          description="This section removes ambiguity. It gives a clean, factual summary of the offer, who it helps, and what the next step looks like."
+          items={launchEntitySnapshot}
+          links={[
+            { href: "/pricing", label: "Compare launch pricing" },
+            { href: "/faq", label: "Read launch FAQ" },
+            { href: "/contact", label: "Talk through your project" },
+          ]}
+        />
         <PricingSection
           tiers={pricingTiers}
           title="Choose the launch package that matches your timeline"
@@ -319,7 +391,10 @@ export default function LaunchPage() {
           title="Questions about the 48-hour launch"
           description="These are the practical questions people ask before they commit to a fast website build."
         />
-        <FinalCTASection description="If the offer fits your stage, start your website request now and choose the next step that suits your process." />
+        <FinalCTASection
+          title="Ready to stop researching and get your website live?"
+          description="If the offer fits your stage, use the fastest next step for your process and move toward a live website instead of keeping the project stuck in planning."
+        />
       </main>
     </>
   );

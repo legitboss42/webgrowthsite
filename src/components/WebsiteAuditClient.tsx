@@ -4,6 +4,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
+import AnswerHighlightsSection from "@/components/AnswerHighlightsSection";
+import CorePageLinks from "@/components/CorePageLinks";
 import SectionHeading from "@/components/SectionHeading";
 import CTASection from "@/components/CTASection";
 import FAQAccordion from "@/components/FAQAccordion";
@@ -45,6 +47,37 @@ const focusMap: Record<
     outputs: ["Performance fix plan", "Top bottlenecks list", "Quick wins + deeper fixes"],
   },
 };
+
+const auditAnswers = [
+  {
+    title: "When should I request an audit?",
+    answer:
+      "Request an audit when traffic is not turning into leads, rankings feel weak, the site feels slow, or you know the website is underperforming but cannot clearly see why.",
+    href: "/blog/why-your-website-isnt-getting-leads",
+    hrefLabel: "See common lead leaks",
+  },
+  {
+    title: "What do I get at the end?",
+    answer:
+      "You get a diagnosis, the priority order for fixes, and a practical path for what to handle first instead of vague feedback that goes nowhere.",
+    href: "/contact?service=Website Audit & Consultation",
+    hrefLabel: "Request an audit",
+  },
+  {
+    title: "Can this lead into implementation?",
+    answer:
+      "Yes. Many audits naturally turn into redesign, SEO, speed optimisation, or a simpler 48-hour launch depending on what the business actually needs.",
+    href: "/services/website-redesign",
+    hrefLabel: "See redesign service",
+  },
+  {
+    title: "Is this useful before paying for more traffic?",
+    answer:
+      "Absolutely. It is often smarter to fix clarity, trust, speed, and conversion flow before spending more on SEO or ads.",
+    href: "/services/search-engine-optimisation",
+    hrefLabel: "See SEO support",
+  },
+] as const;
 
 export default function WebsiteAuditClient() {
   const pageRef = useRef<HTMLDivElement | null>(null);
@@ -172,6 +205,13 @@ export default function WebsiteAuditClient() {
         </div>
       </section>
 
+      <AnswerHighlightsSection
+        eyebrow="Quick answers"
+        title="The questions people ask when they know something is off"
+        description="This helps prospects move from vague frustration to a clearer next step, which makes the service easier to understand and easier to act on."
+        items={auditAnswers}
+      />
+
       {/* INTERACTIVE FOCUS */}
       <section data-reveal=".focus" className="py-24 bg-gray-950">
         <div className="focus mx-auto max-w-6xl px-6">
@@ -296,6 +336,37 @@ export default function WebsiteAuditClient() {
       {/* CTA */}
       <section className="py-24">
         <div className="mx-auto max-w-6xl px-6">
+          <div className="mb-12">
+            <CorePageLinks
+              eyebrow="Next steps"
+              title="Use the right service after the diagnosis"
+              description="The audit is often the first move. These links help prospects continue into the right implementation path instead of starting over."
+              links={[
+                {
+                  href: "/services/website-redesign",
+                  label: "Redesign",
+                  title: "Need the site rebuilt properly?",
+                  description:
+                    "Choose redesign if the audit points to structure, trust, messaging, or UX problems across the whole site.",
+                },
+                {
+                  href: "/services/search-engine-optimisation",
+                  label: "SEO",
+                  title: "Need visibility improvements next?",
+                  description:
+                    "Move into SEO support if the audit shows crawlability, internal links, or ranking foundations are holding the site back.",
+                },
+                {
+                  href: "/launch",
+                  label: "Launch",
+                  title: "Need a cleaner fast-start option?",
+                  description:
+                    "Choose the 48-hour launch if the simplest answer is getting a focused site live first instead of overworking the current one.",
+                },
+              ]}
+            />
+          </div>
+
           <CTASection
             eyebrow="READY"
             title="Stop guessing. Get a real diagnosis."

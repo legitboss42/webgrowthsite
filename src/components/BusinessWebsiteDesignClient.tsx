@@ -4,9 +4,42 @@ import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
+import AnswerHighlightsSection from "@/components/AnswerHighlightsSection";
+import CorePageLinks from "@/components/CorePageLinks";
 import SectionHeading from "@/components/SectionHeading";
 import CTASection from "@/components/CTASection";
 import FAQAccordion from "@/components/FAQAccordion";
+
+const businessWebsiteAnswers = [
+  {
+    title: "Who is this best for?",
+    answer:
+      "It is best for businesses that need a stronger first impression, clearer trust signals, and a site that supports enquiries instead of acting like a static brochure.",
+    href: "/portfolio",
+    hrefLabel: "See recent work",
+  },
+  {
+    title: "What problem does this solve first?",
+    answer:
+      "It fixes weak positioning, generic structure, and unclear calls to action so visitors understand what the business offers and what to do next faster.",
+    href: "/services/website-audit",
+    hrefLabel: "Start with an audit",
+  },
+  {
+    title: "Should I choose this or the 48-hour launch?",
+    answer:
+      "Choose this if you need a fuller business website. Choose the 48-hour launch if you want a lean one-page site live quickly before expanding later.",
+    href: "/launch",
+    hrefLabel: "Compare the launch offer",
+  },
+  {
+    title: "What happens after launch?",
+    answer:
+      "Once the site is live, you can add more pages, SEO content, proof, and deeper lead-generation support without rebuilding from scratch.",
+    href: "/pricing",
+    hrefLabel: "Review pricing paths",
+  },
+] as const;
 
 export default function BusinessWebsiteDesignClient() {
   const pageRef = useRef<HTMLDivElement | null>(null);
@@ -101,6 +134,13 @@ export default function BusinessWebsiteDesignClient() {
           </div>
         </div>
       </section>
+
+      <AnswerHighlightsSection
+        eyebrow="Quick answers"
+        title="What serious buyers usually want clarified first"
+        description="This gives prospects the fast version so they can decide whether this service fits their business, timeline, and growth stage."
+        items={businessWebsiteAnswers}
+      />
 
       {/* PROBLEM */}
       <section data-reveal=".problem" className="py-24 bg-gray-950">
@@ -223,6 +263,37 @@ export default function BusinessWebsiteDesignClient() {
       {/* CTA */}
       <section className="py-24 bg-gray-950">
         <div className="mx-auto max-w-6xl px-6">
+          <div className="mb-12">
+            <CorePageLinks
+              eyebrow="Helpful next steps"
+              title="Choose the page that matches what you need next"
+              description="Some businesses need a fast launch, some need a full build, and some need diagnosis first. These links help people move to the right next step without guessing."
+              links={[
+                {
+                  href: "/launch",
+                  label: "Fast launch",
+                  title: "Need a site live quickly?",
+                  description:
+                    "Use the 48-hour launch offer if you want a focused one-page website live fast before expanding later.",
+                },
+                {
+                  href: "/services/website-audit",
+                  label: "Audit",
+                  title: "Need clarity before rebuilding?",
+                  description:
+                    "Start with a website audit if you are not fully sure what is blocking trust, enquiries, or SEO performance.",
+                },
+                {
+                  href: "/blog/how-to-build-a-small-business-website-that-converts",
+                  label: "Guide",
+                  title: "Need the strategy first?",
+                  description:
+                    "Read the conversion guide if you want to understand the structure behind a stronger business website before you request a quote.",
+                },
+              ]}
+            />
+          </div>
+
           <CTASection
             eyebrow="READY"
             title="Let’s build a website your business can rely on"
