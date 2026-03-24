@@ -3,13 +3,15 @@ import type { Metadata } from "next";
 import PerformanceOptimisationClient from "@/components/PerformanceOptimisationClient";
 
 export const metadata: Metadata = {
-  title: "Speed & Performance Optimisation",
+  title: "Website Speed Optimization Nigeria | Faster Pages, Better Conversions",
   description:
-    "Speed and performance optimisation for faster load times, better mobile experience, and improved conversions. Fix slow websites properly.",
+    "Website speed optimization in Nigeria for faster load times, better mobile experience, and stronger conversions. Fix slow websites properly.",
   keywords: [
     "web design",
     "web design services",
     "website speed optimisation",
+    "website speed optimization nigeria",
+    "website speed optimisation nigeria",
     "performance optimisation",
     "improve website speed",
     "page speed optimisation",
@@ -20,9 +22,9 @@ export const metadata: Metadata = {
     canonical: "https://webgrowth.info/services/performance-optimisation",
   },
   openGraph: {
-    title: "Speed & Performance Optimisation",
+    title: "Website Speed Optimization Nigeria | Faster Pages, Better Conversions",
     description:
-      "Make your website faster and smoother - reduce bounce and improve conversions.",
+      "Website speed optimization in Nigeria to reduce bounce, improve mobile experience, and support better conversions.",
     url: "https://webgrowth.info/services/performance-optimisation",
     siteName: "Web Growth",
     images: [
@@ -37,9 +39,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Speed & Performance Optimisation",
+    title: "Website Speed Optimization Nigeria | Faster Pages, Better Conversions",
     description:
-      "Speed-focused web design optimisation to improve Core Web Vitals and reduce bounce.",
+      "Website speed optimization in Nigeria to improve Core Web Vitals, mobile performance, and conversion quality.",
     images: ["https://webgrowth.info/images/hero/Hero-Image-1.webp"],
   },
   robots: { index: true, follow: true },

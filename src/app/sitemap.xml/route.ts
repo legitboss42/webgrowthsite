@@ -15,6 +15,7 @@ const STATIC_ROUTES = [
   "/pricing",
   "/faq",
   "/blog",
+  "/web-design-for-real-estate-lagos",
   "/services",
   "/contact",
   "/privacy",

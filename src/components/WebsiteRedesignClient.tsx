@@ -17,18 +17,18 @@ const painDetails: Record<
   { title: string; text: string; fixes: string[] }
 > = {
   "Outdated design": {
-    title: "Your site looks old, people don’t trust it",
-    text: "Design is a trust signal. If your site feels outdated, visitors assume your business is outdated too, even if you’re excellent.",
+    title: "Your site looks old, people do not trust it",
+    text: "Design is a trust signal. If your site feels outdated, visitors assume your business is outdated too, even if your work is excellent.",
     fixes: ["Modern layout + typography", "Better spacing and hierarchy", "Trust signals placed correctly"],
   },
   "Low enquiries": {
-    title: "People visit… and do nothing",
-    text: "This is usually a structure problem, not a traffic problem. If the message is unclear or the CTA path is weak, visitors won’t act.",
+    title: "People visit and do nothing",
+    text: "This is usually a structure problem, not a traffic problem. If the message is unclear or the CTA path is weak, visitors will not act.",
     fixes: ["Clear messaging flow", "Proof + credibility blocks", "Strong CTA placement"],
   },
   "Slow site": {
     title: "Your site is slow, visitors bounce",
-    text: "Speed affects conversions. If your site loads slowly on mobile, you’re bleeding potential customers without knowing it.",
+    text: "Speed affects conversions. If your site loads slowly on mobile, you are losing potential customers without noticing.",
     fixes: ["Image + asset optimisation", "Performance pass", "Cleaner page build"],
   },
   "Mobile issues": {
@@ -106,7 +106,6 @@ export default function WebsiteRedesignClient() {
       reveal(cls, el);
     });
 
-    // Small transition on interactive panel change
     gsap.fromTo(
       ".pain-panel",
       { opacity: 0, y: 16 },
@@ -124,22 +123,22 @@ export default function WebsiteRedesignClient() {
 
   return (
     <div ref={pageRef} className="bg-black text-white">
-      {/* HERO */}
       <section className="relative overflow-hidden py-24">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(16,185,129,0.18),transparent_55%)]" />
         <div className="relative mx-auto max-w-6xl px-6">
           <div className="grid gap-12 md:grid-cols-2 md:items-center">
             <div>
               <div className="text-sm tracking-[0.25em] text-white/50">
-                WEBSITE REDESIGN
+                WEBSITE REDESIGN LAGOS
               </div>
               <h1 className="mt-4 text-4xl md:text-5xl font-semibold leading-tight">
-                Upgrade your website into a modern, trust-building machine.
+                Website redesign in Lagos that improves trust, speed, and enquiries.
               </h1>
               <p className="mt-6 text-lg text-white/70 leading-relaxed">
-                If your site feels outdated, slow, or doesn’t convert, a redesign
-                isn’t “cosmetic”, it’s business. We redesign websites with better
-                structure, stronger trust, and cleaner conversion flow.
+                If you need website redesign in Lagos for a business site that
+                looks outdated, loads slowly, or fails to turn visitors into
+                enquiries, we redesign it around clarity, mobile performance,
+                and stronger conversion flow from the start.
               </p>
 
               <div className="mt-10 flex gap-3 flex-col sm:flex-row">
@@ -158,7 +157,6 @@ export default function WebsiteRedesignClient() {
               </div>
             </div>
 
-            {/* Image placeholder */}
             <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-black/40">
               <div
                 className="h-[360px] bg-cover bg-center opacity-80"
@@ -177,13 +175,12 @@ export default function WebsiteRedesignClient() {
         items={redesignAnswers}
       />
 
-      {/* COMMON PAINS (INTERACTIVE) */}
       <section data-reveal=".pain" className="py-24 bg-gray-950">
         <div className="pain mx-auto max-w-6xl px-6">
           <SectionHeading
             eyebrow="DIAGNOSIS"
-            title="What’s wrong with your current site?"
-            description="Pick the problem that feels most accurate. This is how we approach redesign, by fixing what’s actually broken."
+            title="When website redesign in Lagos becomes the right move"
+            description="Pick the problem that feels most accurate. This is how we approach website redesign in Lagos: by fixing what is actually hurting trust, speed, and lead generation."
           />
 
           <div className="mt-10 flex flex-wrap gap-2">
@@ -245,21 +242,20 @@ export default function WebsiteRedesignClient() {
         </div>
       </section>
 
-      {/* PROCESS */}
       <section data-reveal=".process" className="py-24">
         <div className="process mx-auto max-w-6xl px-6">
           <SectionHeading
             eyebrow="PROCESS"
-            title="How redesign works"
-            description="We don’t randomly “freshen it up.” We redesign with intent."
+            title="How the website redesign process works"
+            description="We do not randomly freshen up a homepage. We redesign around business goals, conversion flow, and the actions buyers should take next."
           />
 
           <div className="mt-12 grid gap-6 md:grid-cols-4">
             {[
-              ["Audit", "We review what’s broken: message, UX, speed, trust, structure."],
+              ["Audit", "We review what is broken first: message, UX, speed, trust, and conversion flow."],
               ["Plan", "We restructure sections and conversion flow around your goals."],
               ["Redesign", "We rebuild the UI with modern layout, hierarchy, and proof."],
-              ["Launch", "We polish, test, and launch with performance checks."],
+              ["Launch", "We polish, test, and launch with performance checks, usually within a focused 3-7 day redesign window depending on scope."],
             ].map(([t, d]) => (
               <div
                 key={t}
@@ -273,13 +269,12 @@ export default function WebsiteRedesignClient() {
         </div>
       </section>
 
-      {/* WHAT YOU GET */}
       <section data-reveal=".deliverables" className="py-24 bg-gray-950">
         <div className="deliverables mx-auto max-w-6xl px-6">
           <SectionHeading
             eyebrow="DELIVERABLES"
-            title="What’s included"
-            description="Redesign is more than looks. It’s structure and performance."
+            title="What is included in a website redesign project"
+            description="A strong website redesign should improve more than aesthetics. It should improve structure, trust, speed, and the quality of incoming enquiries."
           />
 
           <div className="mt-12 grid gap-6 md:grid-cols-3">
@@ -303,7 +298,6 @@ export default function WebsiteRedesignClient() {
         </div>
       </section>
 
-      {/* FAQ */}
       <section data-reveal=".faq" className="py-24">
         <div className="faq mx-auto max-w-4xl px-6">
           <SectionHeading
@@ -322,7 +316,7 @@ export default function WebsiteRedesignClient() {
               {
                 question: "Can you keep my existing content and brand?",
                 answer:
-                  "Yes. We can keep what still works and rebuild what doesn’t. Redesign is about improvement, not throwing everything away.",
+                  "Yes. We can keep what still works and rebuild what does not. Redesign is about improvement, not throwing everything away.",
               },
               {
                 question: "Will a redesign affect my SEO?",
@@ -334,35 +328,41 @@ export default function WebsiteRedesignClient() {
         </div>
       </section>
 
-      {/* CTA */}
       <section className="py-24 bg-gray-950">
         <div className="mx-auto max-w-6xl px-6">
           <div className="mb-12">
             <CorePageLinks
               eyebrow="Useful next steps"
               title="Move to the next page that fits your situation"
-              description="Redesign is not always the first move. These links help prospects choose between diagnosis, fast launch, and SEO support without leaving the site confused."
+              description="Redesign is not always the first move. These links help prospects choose between diagnosis, speed fixes, SEO support, and direct contact without leaving the site confused."
               links={[
                 {
                   href: "/services/website-audit",
                   label: "Audit",
-                  title: "Need to diagnose the current site first?",
+                  title: "Need to diagnose the current site before website redesign in Lagos?",
                   description:
                     "Use the audit service if you want clarity on what is actually broken before you invest in a redesign.",
                 },
                 {
-                  href: "/launch",
-                  label: "Fast launch",
-                  title: "Need something live sooner?",
+                  href: "/services/performance-optimisation",
+                  label: "Speed",
+                  title: "Need website speed optimization before a full redesign?",
                   description:
-                    "Use the 48-hour launch page if you need a focused website live quickly while a bigger redesign waits.",
+                    "Use the performance service if page speed and mobile lag are the biggest reasons buyers are dropping off right now.",
                 },
                 {
-                  href: "/blog/small-business-website-redesign-checklist",
-                  label: "Checklist",
-                  title: "Need to evaluate your current site?",
+                  href: "/services/search-engine-optimisation",
+                  label: "SEO",
+                  title: "Need website redesign in Lagos with SEO support in mind?",
                   description:
-                    "Read the redesign checklist if you want to spot the highest-impact problems before you request a quote.",
+                    "Use the SEO service if the redesign also needs stronger page clarity, internal linking, and search visibility support.",
+                },
+                {
+                  href: "/contact?service=Website Redesign",
+                  label: "Contact",
+                  title: "Ready to discuss your website redesign in Lagos?",
+                  description:
+                    "Go to contact if you already know the current website is costing you trust, enquiries, or mobile conversions.",
                 },
               ]}
             />
@@ -370,8 +370,8 @@ export default function WebsiteRedesignClient() {
 
           <CTASection
             eyebrow="READY"
-            title="Let’s rebuild your website the right way"
-            description="If your website looks old, loads slowly, or doesn’t convert, we’ll redesign it with clarity and performance."
+            title="Let us rebuild your website the right way"
+            description="If your website looks old, loads slowly, or does not convert, we will redesign it with clearer messaging, stronger trust signals, and better conversion flow."
             primaryCtaText="Request a Quote"
             primaryHref="/contact?service=Website Redesign"
             secondaryCtaText="View Services"

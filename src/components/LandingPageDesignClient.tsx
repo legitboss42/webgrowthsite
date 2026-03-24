@@ -111,7 +111,6 @@ export default function LandingPageDesignClient() {
       reveal(cls, el);
     });
 
-    // Small interactive transition for the goal panel
     gsap.fromTo(
       ".goal-panel",
       { opacity: 0, y: 18 },
@@ -129,22 +128,21 @@ export default function LandingPageDesignClient() {
 
   return (
     <div ref={pageRef} className="bg-black text-white">
-      {/* HERO */}
       <section className="relative overflow-hidden py-24">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(16,185,129,0.18),transparent_55%)]" />
         <div className="relative mx-auto max-w-6xl px-6">
           <div className="grid gap-12 md:grid-cols-2 md:items-center">
             <div>
               <div className="text-sm tracking-[0.25em] text-white/50">
-                LANDING PAGE DESIGN
+                LANDING PAGE DESIGN LAGOS
               </div>
               <h1 className="mt-4 text-4xl md:text-5xl font-semibold leading-tight">
-                Landing page design and funnel architecture built to convert.
+                Landing page design in Lagos that turns clicks into leads.
               </h1>
               <p className="mt-6 text-lg text-white/70 leading-relaxed">
-                Ads and campaigns waste money when the landing page is weak.
-                We design high-conversion pages and funnel flow that load fast,
-                communicate clearly, and guide visitors to take action.
+                If you need landing page design in Lagos for ads, offers, or
+                outreach campaigns, we build pages that load fast, match the
+                traffic intent, and guide visitors to one clear next step.
               </p>
 
               <div className="mt-10 flex gap-3 flex-col sm:flex-row">
@@ -163,7 +161,6 @@ export default function LandingPageDesignClient() {
               </div>
             </div>
 
-            {/* Image placeholder */}
             <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-black/40">
               <div
                 className="h-[360px] bg-cover bg-center opacity-80"
@@ -182,20 +179,19 @@ export default function LandingPageDesignClient() {
         items={landingPageAnswers}
       />
 
-      {/* WHY LANDING PAGES FAIL */}
       <section data-reveal=".problem" className="py-24 bg-gray-950">
         <div className="problem mx-auto max-w-4xl px-6">
           <SectionHeading
             eyebrow="WHY IT FAILS"
-            title="Most landing pages leak conversions"
-            description="It’s not always the ads. Often the page is the problem."
+            title="What a landing page design service should fix first"
+            description="It is not always the ads. Often the page is the real reason clicks fail to turn into leads, bookings, or sales."
           />
 
           <ul className="mt-10 space-y-4 text-white/70">
             {[
-              "The headline is vague and doesn’t match the ad message",
+              "The headline is vague and does not match the ad message",
               "Too many distractions (menus, multiple offers, clutter)",
-              "No proof, visitors don’t trust the offer",
+              "No proof, so visitors do not trust the offer",
               "Slow load speed on mobile",
               "Weak CTA placement and poor flow",
             ].map((item) => (
@@ -208,13 +204,12 @@ export default function LandingPageDesignClient() {
         </div>
       </section>
 
-      {/* INTERACTIVE: PICK YOUR GOAL */}
       <section data-reveal=".goal" className="py-24">
         <div className="goal mx-auto max-w-6xl px-6">
           <SectionHeading
             eyebrow="PICK A GOAL"
-            title="What should your landing page achieve?"
-            description="Different goals need different structure. Pick your goal to see how we design the flow."
+            title="Choose the outcome your landing page needs to produce"
+            description="Different goals need different structure. Pick your goal to see how a landing page design service in Lagos should shape the flow."
           />
 
           <div className="mt-10 flex flex-wrap gap-2">
@@ -263,30 +258,30 @@ export default function LandingPageDesignClient() {
               />
               <div className="absolute inset-0 bg-black/35" />
               <div className="absolute bottom-4 left-4 right-4 rounded-xl border border-white/10 bg-black/55 p-4 text-sm text-white/70">
-                Placeholder image: use a UI mockup of the landing page (hero + CTA + proof).
+                Use a UI mockup here showing the hero, proof block, and CTA flow
+                that the landing page will use.
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* WHAT YOU GET */}
       <section data-reveal=".deliverables" className="py-24 bg-gray-950">
         <div className="deliverables mx-auto max-w-6xl px-6">
           <SectionHeading
             eyebrow="DELIVERABLES"
-            title="What’s included"
-            description="Everything needed for a landing page that can actually convert."
+            title="What is included in the landing page design service"
+            description="Everything needed for a landing page that can actually convert campaign traffic into a measurable business action."
           />
 
           <div className="mt-12 grid gap-6 md:grid-cols-3">
             {[
-              ["Message match", "Headline and sections aligned with the ad/campaign"],
-              ["Conversion-focused structure", "One goal, one flow, fewer distractions"],
-              ["Speed optimisation", "Fast mobile load to reduce drop-offs"],
-              ["Proof + trust blocks", "Testimonials, logos, results, guarantees (if you have them)"],
-              ["Strong CTA placement", "Buttons placed where people are ready to act"],
-              ["Analytics-ready setup", "Built with measurement in mind (event hooks later)"],
+              ["Message match", "Headline and sections aligned with the ad or campaign promise."],
+              ["Conversion-focused structure", "One goal, one flow, fewer distractions."],
+              ["Speed optimisation", "Fast mobile load to reduce drop-offs."],
+              ["Proof + trust blocks", "Testimonials, logos, outcomes, or credibility signals placed correctly."],
+              ["Strong CTA placement", "Buttons placed where visitors are ready to act."],
+              ["Analytics-ready setup", "Built with measurement in mind so you can track what the page is doing."],
             ].map(([title, desc]) => (
               <div
                 key={title}
@@ -300,7 +295,6 @@ export default function LandingPageDesignClient() {
         </div>
       </section>
 
-      {/* FAQ */}
       <section data-reveal=".faq" className="py-24">
         <div className="faq mx-auto max-w-4xl px-6">
           <SectionHeading
@@ -314,7 +308,7 @@ export default function LandingPageDesignClient() {
               {
                 question: "Do you write the landing page copy?",
                 answer:
-                  "We help structure and refine your messaging. If you don’t have copy, we can craft conversion-focused sections based on your offer and audience.",
+                  "We help structure and refine your messaging. If you do not have copy, we can craft conversion-focused sections based on your offer and audience.",
               },
               {
                 question: "Can you connect the landing page to a form or WhatsApp?",
@@ -331,7 +325,6 @@ export default function LandingPageDesignClient() {
         </div>
       </section>
 
-      {/* CTA */}
       <section className="py-24 bg-gray-950">
         <div className="mx-auto max-w-6xl px-6">
           <div className="mb-12">
@@ -343,7 +336,7 @@ export default function LandingPageDesignClient() {
                 {
                   href: "/services/business-website-design",
                   label: "Website",
-                  title: "Need more than a campaign page?",
+                  title: "Need more than a landing page design service in Lagos?",
                   description:
                     "Use the business website service if your company needs a broader online presence, not just one focused page.",
                 },
@@ -357,9 +350,16 @@ export default function LandingPageDesignClient() {
                 {
                   href: "/launch",
                   label: "Fast launch",
-                  title: "Need a focused page live quickly?",
+                  title: "Need a focused page live quickly before a bigger funnel build?",
                   description:
                     "Use the 48-hour launch offer if the priority is getting a cleaner page online fast before you build a wider funnel.",
+                },
+                {
+                  href: "/contact?service=Landing Page Design",
+                  label: "Contact",
+                  title: "Ready to discuss landing page design in Lagos?",
+                  description:
+                    "Go to contact if you already know the campaign, offer, and next action the page needs to support.",
                 },
               ]}
             />
@@ -368,7 +368,7 @@ export default function LandingPageDesignClient() {
           <CTASection
             eyebrow="READY"
             title="Stop wasting clicks, build a page that converts"
-            description="If you’re paying for traffic (ads or attention), your landing page needs to do its job. We’ll build it properly."
+            description="If you are paying for traffic or chasing leads through outreach, your landing page needs to do its job. We will build it properly."
             primaryCtaText="Request a Quote"
             primaryHref="/contact?service=Landing Page Design"
             secondaryCtaText="View Services"

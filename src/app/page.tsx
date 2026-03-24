@@ -78,6 +78,44 @@ const entitySnapshotItems = [
   },
 ] as const;
 
+const priorityServiceLinks = [
+  {
+    href: "/services/website-redesign",
+    label: "Redesign",
+    title: "Website redesign in Lagos for outdated sites",
+    description:
+      "Explore the redesign service if your current website feels old, weak on mobile, or no longer converts well.",
+  },
+  {
+    href: "/services/landing-page-design",
+    label: "Landing page",
+    title: "Landing page design service for Lagos campaigns",
+    description:
+      "Use the landing page service if you need a focused page for ads, promotions, or lead generation campaigns.",
+  },
+  {
+    href: "/services/performance-optimisation",
+    label: "Speed",
+    title: "Website speed optimization in Nigeria for better conversions",
+    description:
+      "Use the speed optimization service if slow load times or weak mobile performance are costing you trust and enquiries.",
+  },
+  {
+    href: "/services/google-my-business-setup-optimisation",
+    label: "GBP",
+    title: "Google Business Profile optimization in Lagos",
+    description:
+      "Use the profile optimization service if local buyers need to find you more easily on Google Maps and local search.",
+  },
+  {
+    href: "/web-design-for-real-estate-lagos",
+    label: "Real estate",
+    title: "Web design for real estate in Lagos",
+    description:
+      "Explore the real-estate website page if you need a property-focused website that showcases listings and generates serious enquiries.",
+  },
+] as const;
+
 export const metadata = buildPageMetadata({
   title: "Website Design in 48 Hours | Fast Business Website Launch",
   description: pageDescription,
@@ -165,6 +203,13 @@ export default function Page() {
                 "Get quick answers on timing, ownership, revisions, support, and launch expectations.",
             },
           ]}
+        />
+
+        <CorePageLinks
+          eyebrow="Priority services"
+          title="Explore the service pages built for higher-intent website growth needs"
+          description="These internal links help search engines and buyers understand the next commercial pages to review when the need is redesign, landing page conversion, speed, or local visibility."
+          links={priorityServiceLinks}
         />
 
         <WhatYouGetSection items={whatYouGetItems} />

@@ -25,6 +25,12 @@ export type ServicePageConfig = {
   faqs: { question: string; answer: string }[];
   ctaTitle: string;
   ctaDescription: string;
+  relatedLinks?: {
+    href: string;
+    label: string;
+    title: string;
+    description: string;
+  }[];
 };
 
 export const NEW_SERVICE_PAGES: Record<string, ServicePageConfig> = {
@@ -167,14 +173,16 @@ export const NEW_SERVICE_PAGES: Record<string, ServicePageConfig> = {
   },
 
   "google-my-business-setup-optimisation": {
-    title: "Google My Business (GMB) Setup and Optimisation",
+    title: "Google Business Profile Optimization Lagos",
     slug: "google-my-business-setup-optimisation",
-    serviceParam: "Google My Business Setup and Optimisation",
+    serviceParam: "Google Business Profile Optimization Lagos",
     metaDescription:
-      "Google My Business setup and optimisation service to improve Google Maps visibility, local rankings, profile quality, and enquiry volume.",
+      "Google Business Profile optimization in Lagos to improve Google Maps visibility, local rankings, profile quality, and enquiry volume for service businesses.",
     keywords: [
       "google my business setup",
       "google business profile optimization",
+      "google business profile optimization lagos",
+      "google business profile optimisation lagos",
       "google maps seo",
       "local seo google my business",
       "google business profile setup",
@@ -183,56 +191,91 @@ export const NEW_SERVICE_PAGES: Record<string, ServicePageConfig> = {
       "local business listing optimization",
     ],
     heroTitle:
-      "Google My Business setup and optimisation to increase local visibility and enquiries",
+      "Google Business Profile optimization in Lagos for more local visibility and enquiries",
     heroDescription:
-      "We set up and optimize your Google Business Profile for stronger local ranking signals, profile trust, and better lead flow from Google Maps search.",
+      "If you need Google Business Profile optimization in Lagos, we improve your profile structure, service targeting, trust signals, and conversion setup so more local searches can turn into enquiries.",
     heroImage: "/images/services/services-business.webp",
     detailImage: "/images/services/services-business-2.webp",
     highlights: [
-      "Google Business Profile setup best practices",
-      "Local ranking signal optimisation",
-      "Profile trust and conversion improvement",
+      "Google Business Profile setup and optimization for Lagos service searches",
+      "Local ranking signal improvement for Maps visibility",
+      "Profile trust, service clarity, and conversion improvement",
     ],
     deliverables: [
-      "Profile setup or full optimisation audit",
-      "Category, services, and description refinement",
-      "Location, media, and Q&A optimisation",
-      "Review strategy and ongoing profile guidance",
+      "Profile setup or full optimization audit for your current listing",
+      "Category, services, and description refinement around local buyer intent",
+      "Location, media, service area, and Q&A optimization",
+      "Review strategy and ongoing profile guidance for stronger enquiry quality",
     ],
     process: [
       {
         title: "Profile audit",
-        text: "We assess profile completeness, category targeting, and local visibility gaps.",
+        text: "We assess profile completeness, category targeting, and the visibility gaps hurting local search performance in Lagos.",
       },
       {
-        title: "Optimisation implementation",
-        text: "We optimize business details, services, media, and conversion elements inside the profile.",
+        title: "Optimization implementation",
+        text: "We optimize business details, services, media, and conversion elements inside the profile so buyers understand what you offer faster.",
       },
       {
         title: "Growth guidance",
-        text: "We provide practical recommendations for reviews, updates, and sustained local ranking improvements.",
+        text: "We provide practical recommendations for reviews, updates, and sustained local ranking improvements after the setup work is complete.",
       },
     ],
     faqs: [
       {
         question: "Is this useful if I already have a profile?",
         answer:
-          "Yes. Most existing profiles are under-optimized and leave local ranking opportunities untapped.",
+          "Yes. Most existing profiles are under-optimized and leave local ranking opportunities untapped, especially when categories, services, and Q&A are too weak or too generic.",
       },
       {
-        question: "Will this improve Google Maps ranking?",
+        question: "Will this help my Google Maps visibility in Lagos?",
         answer:
-          "It improves the quality signals and relevance factors that support better Maps visibility over time.",
+          "It improves the quality signals and relevance factors that support better Maps visibility over time, especially for the services and areas you want to be found for.",
       },
       {
         question: "Do you help with review strategy?",
         answer:
           "Yes. We include practical review and profile activity guidance to support trust and ranking performance.",
       },
+      {
+        question: "Who is this best for?",
+        answer:
+          "This is best for Lagos-based service businesses that rely on local search, Maps visibility, calls, or direction requests to generate enquiries.",
+      },
     ],
     ctaTitle: "Want more qualified local enquiries from Google Maps?",
     ctaDescription:
-      "Get your Google Business Profile properly configured and optimized for local search performance.",
+      "Get your Google Business Profile properly configured and optimized for local search visibility, trust, and conversion quality.",
+    relatedLinks: [
+      {
+        href: "/services/search-engine-optimisation",
+        label: "SEO",
+        title: "Need broader local SEO support too?",
+        description:
+          "Use the SEO service if you want your website and Google Business Profile working together for stronger local rankings.",
+      },
+      {
+        href: "/services/website-audit",
+        label: "Audit",
+        title: "Need to fix the website before driving more local traffic?",
+        description:
+          "Start with an audit if your website is weak enough to waste the enquiries your profile should be sending.",
+      },
+      {
+        href: "/services/landing-page-design",
+        label: "Landing page",
+        title: "Need a better page for ad or Maps traffic?",
+        description:
+          "Use the landing page service if local search visibility is rising but your current page is not turning visitors into leads.",
+      },
+      {
+        href: "/contact?service=Google Business Profile Optimization Lagos",
+        label: "Contact",
+        title: "Ready to optimize your Google Business Profile in Lagos?",
+        description:
+          "Go to contact if you want to discuss the profile, service area, and the local enquiries you are trying to increase.",
+      },
+    ],
   },
 
   "booking-platform-setup-integration": {

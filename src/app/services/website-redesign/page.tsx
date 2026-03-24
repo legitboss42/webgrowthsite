@@ -2,13 +2,15 @@ import type { Metadata } from "next";
 import WebsiteRedesignClient from "@/components/WebsiteRedesignClient";
 
 export const metadata: Metadata = {
-  title: "Website Redesign",
+  title: "Website Redesign Lagos | Redesign Your Site for More Enquiries",
   description:
-    "Website redesign focused on clarity, trust, speed, and conversions. Upgrade an outdated site into a modern experience that performs.",
+    "Website redesign in Lagos for businesses that need a faster, more credible website with clearer messaging, better mobile UX, and stronger conversion flow.",
   keywords: [
     "web design",
     "web design services",
     "website redesign",
+    "website redesign lagos",
+    "website redesign nigeria",
     "website revamp",
     "modern website redesign",
     "professional website redesign",
@@ -18,9 +20,9 @@ export const metadata: Metadata = {
     canonical: "https://webgrowth.info/services/website-redesign",
   },
   openGraph: {
-    title: "Website Redesign",
+    title: "Website Redesign Lagos | Redesign Your Site for More Enquiries",
     description:
-      "Transform an outdated website into a modern, fast, trust-building experience.",
+      "Website redesign in Lagos for businesses that need a modern, faster, trust-building website that converts better.",
     url: "https://webgrowth.info/services/website-redesign",
     siteName: "Web Growth",
     images: [
@@ -35,9 +37,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Website Redesign",
+    title: "Website Redesign Lagos | Redesign Your Site for More Enquiries",
     description:
-      "Website redesign services to improve trust, user experience, speed, and conversions.",
+      "Website redesign in Lagos to improve trust, user experience, speed, and enquiries.",
     images: ["https://webgrowth.info/images/hero/Hero-Image-1.webp"],
   },
   robots: { index: true, follow: true },

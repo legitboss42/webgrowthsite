@@ -22,7 +22,7 @@ const symptomDetails: Record<
 > = {
   "Slow loading": {
     title: "Your site loads slowly, people leave",
-    text: "Speed is not a “nice to have.” Slow load time kills intent and trust, especially on mobile networks.",
+    text: "Speed is not optional. Slow load time kills intent and trust, especially on mobile networks in Nigeria.",
     causes: ["Huge images", "Too many scripts", "Heavy page builder output", "No caching"],
     fixes: ["Image compression + correct sizing", "Script cleanup", "Caching + CDN strategy", "Performance pass per page"],
   },
@@ -86,7 +86,7 @@ export default function PerformanceOptimisationClient() {
       {
         question: "Will optimisation change my website design?",
         answer:
-          "We aim to keep the look the same while making it faster. If specific sections are too heavy, we’ll recommend small design adjustments that improve speed without ruining the style.",
+          "We aim to keep the look the same while making it faster. If specific sections are too heavy, we will recommend small design adjustments that improve speed without ruining the style.",
       },
       {
         question: "How do you measure improvements?",
@@ -101,7 +101,7 @@ export default function PerformanceOptimisationClient() {
       {
         question: "Do you guarantee a specific Google score?",
         answer:
-          "No, that’s fake marketing. Scores vary by device, network, and page complexity. We focus on meaningful improvements that users feel.",
+          "No. Scores vary by device, network, and page complexity. We focus on meaningful improvements that users feel and that remove obvious conversion blockers.",
       },
     ],
     []
@@ -157,22 +157,22 @@ export default function PerformanceOptimisationClient() {
 
   return (
     <div ref={pageRef} className="bg-black text-white">
-      {/* HERO */}
       <section className="relative overflow-hidden py-24">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(16,185,129,0.18),transparent_55%)]" />
         <div className="relative mx-auto max-w-6xl px-6">
           <div className="grid gap-12 md:grid-cols-2 md:items-center">
             <div>
               <div className="text-sm tracking-[0.25em] text-white/50">
-                SPEED & PERFORMANCE OPTIMISATION
+                WEBSITE SPEED OPTIMIZATION NIGERIA
               </div>
               <h1 className="mt-4 text-4xl md:text-5xl font-semibold leading-tight">
-                Make your website faster, and stop losing customers.
+                Website speed optimization in Nigeria to reduce bounce and improve conversions.
               </h1>
               <p className="mt-6 text-lg text-white/70 leading-relaxed">
-                Slow sites lose money quietly. We optimise speed and performance
-                so your website loads fast, feels smooth, and converts better,
-                especially on mobile.
+                If you need website speed optimization in Nigeria because your
+                pages load slowly, feel heavy on mobile, or keep losing buyers
+                before they act, we fix the speed issues that hurt trust,
+                rankings, and conversion quality.
               </p>
 
               <div className="mt-10 flex gap-3 flex-col sm:flex-row">
@@ -191,7 +191,6 @@ export default function PerformanceOptimisationClient() {
               </div>
             </div>
 
-            {/* Image placeholder */}
             <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-black/40">
               <div
                 className="h-[360px] bg-cover bg-center opacity-80"
@@ -210,13 +209,12 @@ export default function PerformanceOptimisationClient() {
         items={performanceAnswers}
       />
 
-      {/* SYMPTOMS (INTERACTIVE) */}
       <section data-reveal=".symptoms" className="py-24 bg-gray-950">
         <div className="symptoms mx-auto max-w-6xl px-6">
           <SectionHeading
             eyebrow="DIAGNOSIS"
-            title="What symptom are you seeing?"
-            description="Pick what you’re dealing with. We’ll fix the cause, not just the surface."
+            title="Why website speed optimization matters for Nigerian businesses"
+            description="Pick the symptom that feels familiar. We fix the cause, not just the surface, so your pages load better for the people actually trying to use them."
           />
 
           <div className="mt-10 flex flex-wrap gap-2">
@@ -292,13 +290,12 @@ export default function PerformanceOptimisationClient() {
         </div>
       </section>
 
-      {/* WHAT YOU GET */}
       <section data-reveal=".deliverables" className="py-24">
         <div className="deliverables mx-auto max-w-6xl px-6">
           <SectionHeading
             eyebrow="DELIVERABLES"
-            title="What’s included"
-            description="Performance work should be practical and measurable."
+            title="What is included in the speed optimization service"
+            description="Performance work should be practical, measurable, and focused on the pages most likely to affect rankings and conversions."
           />
 
           <div className="mt-12 grid gap-6 md:grid-cols-3">
@@ -319,7 +316,6 @@ export default function PerformanceOptimisationClient() {
         </div>
       </section>
 
-      {/* FAQ */}
       <section data-reveal=".faq" className="py-24 bg-gray-950">
         <div className="faq mx-auto max-w-4xl px-6">
           <SectionHeading
@@ -333,7 +329,6 @@ export default function PerformanceOptimisationClient() {
         </div>
       </section>
 
-      {/* CTA */}
       <section className="py-24">
         <div className="mx-auto max-w-6xl px-6">
           <div className="mb-12">
@@ -345,7 +340,7 @@ export default function PerformanceOptimisationClient() {
                 {
                   href: "/hosting-offer",
                   label: "Hosting",
-                  title: "Need a stronger hosting foundation?",
+                  title: "Need a stronger hosting foundation before website speed optimization?",
                   description:
                     "Use the hosting offer if the site is being held back by weak infrastructure or you need a lower-cost way to improve the base setup.",
                 },
@@ -363,14 +358,21 @@ export default function PerformanceOptimisationClient() {
                   description:
                     "Start with an audit if you know the site is underperforming but need clarity on whether speed is the main blocker.",
                 },
+                {
+                  href: "/contact?service=Speed & Performance Optimisation",
+                  label: "Contact",
+                  title: "Ready to discuss website speed optimization in Nigeria?",
+                  description:
+                    "Go to contact if you already know slow pages, weak mobile performance, or poor Core Web Vitals are affecting your business.",
+                },
               ]}
             />
           </div>
 
           <CTASection
             eyebrow="READY"
-            title="Speed is profit. Let’s fix your website properly."
-            description="If your website feels slow, you’re losing customers. We’ll optimise it with real, measurable improvements."
+            title="Speed is profit. Let us fix your website properly."
+            description="If your website feels slow, you are losing customers. We will optimize it with real, measurable improvements that support both rankings and conversions."
             primaryCtaText="Request a Quote"
             primaryHref="/contact?service=Speed & Performance Optimisation"
             secondaryCtaText="View Services"

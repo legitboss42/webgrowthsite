@@ -24,6 +24,30 @@ export default function ServiceDetailTemplateClient({ service }: Props) {
     href: `/contact?service=${encodeURIComponent(service.serviceParam)}`,
     hrefLabel: "Request this service",
   }));
+  const supportingLinks =
+    service.relatedLinks ?? [
+      {
+        href: "/launch",
+        label: "Launch",
+        title: "Need a focused fast-start option?",
+        description:
+          "Use the 48-hour launch offer if your biggest priority is getting a website live quickly before expanding the scope later.",
+      },
+      {
+        href: "/pricing",
+        label: "Pricing",
+        title: "Need pricing context first?",
+        description:
+          "Review pricing if you want to compare service paths before requesting implementation.",
+      },
+      {
+        href: "/services",
+        label: "Services",
+        title: "Need a broader solution view?",
+        description:
+          "Explore the full service list if you are still deciding which path best fits your business goals.",
+      },
+    ];
 
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
@@ -187,29 +211,7 @@ export default function ServiceDetailTemplateClient({ service }: Props) {
               eyebrow="Useful next steps"
               title="Choose the next page that supports this service"
               description="Use these supporting pages if you want a faster launch, pricing context, or a broader view of the other ways Web Growth can help."
-              links={[
-                {
-                  href: "/launch",
-                  label: "Launch",
-                  title: "Need a focused fast-start option?",
-                  description:
-                    "Use the 48-hour launch offer if your biggest priority is getting a website live quickly before expanding the scope later.",
-                },
-                {
-                  href: "/pricing",
-                  label: "Pricing",
-                  title: "Need pricing context first?",
-                  description:
-                    "Review pricing if you want to compare service paths before requesting implementation.",
-                },
-                {
-                  href: "/services",
-                  label: "Services",
-                  title: "Need a broader solution view?",
-                  description:
-                    "Explore the full service list if you are still deciding which path best fits your business goals.",
-                },
-              ]}
+              links={supportingLinks}
             />
           </div>
 
