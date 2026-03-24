@@ -8,6 +8,8 @@ export default function HomeAnimations() {
   useEffect(() => {
     let disposed = false;
     let cleanup: (() => void) | undefined;
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+    let idleId: number | undefined;
 
     const setup = async () => {
       const reduceMotion =
@@ -174,10 +176,24 @@ export default function HomeAnimations() {
       };
     };
 
-    void setup();
+    const startSetup = () => {
+      void setup();
+    };
+
+    if ("requestIdleCallback" in window) {
+      idleId = window.requestIdleCallback(startSetup, { timeout: 2000 });
+    } else {
+      timeoutId = setTimeout(startSetup, 700);
+    }
 
     return () => {
       disposed = true;
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+      if (idleId && "cancelIdleCallback" in window) {
+        window.cancelIdleCallback(idleId);
+      }
       cleanup?.();
     };
   }, []);

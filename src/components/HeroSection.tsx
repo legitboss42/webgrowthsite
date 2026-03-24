@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import dynamic from "next/dynamic";
+import { useEffect, useState } from "react";
 
 const HomeAnimations = dynamic(() => import("@/components/HomeAnimations"), {
   ssr: false,
@@ -86,21 +87,76 @@ export default function HeroSection({
   showCodeRain = false,
   showHomeAnimations = false,
 }: HeroSectionProps) {
+  const [effectsReady, setEffectsReady] = useState(false);
+
+  useEffect(() => {
+    if (!showCodeRain && !showHomeAnimations) return;
+    if (typeof window === "undefined") return;
+
+    const reduceMotion =
+      window.matchMedia &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    if (reduceMotion) return;
+
+    let cancelled = false;
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
+    let idleId: number | null = null;
+
+    const enableEffects = () => {
+      if (!cancelled) {
+        setEffectsReady(true);
+      }
+    };
+
+    const schedule = () => {
+      if ("requestIdleCallback" in window) {
+        idleId = window.requestIdleCallback(enableEffects, { timeout: 1800 });
+        return;
+      }
+
+      timeoutId = setTimeout(enableEffects, 900);
+    };
+
+    if (document.readyState === "complete") {
+      schedule();
+    } else {
+      const onLoad = () => schedule();
+      window.addEventListener("load", onLoad, { once: true });
+      return () => {
+        cancelled = true;
+        window.removeEventListener("load", onLoad);
+        if (timeoutId) clearTimeout(timeoutId);
+        if (idleId && "cancelIdleCallback" in window) {
+          window.cancelIdleCallback(idleId);
+        }
+      };
+    }
+
+    return () => {
+      cancelled = true;
+      if (timeoutId) clearTimeout(timeoutId);
+      if (idleId && "cancelIdleCallback" in window) {
+        window.cancelIdleCallback(idleId);
+      }
+    };
+  }, [showCodeRain, showHomeAnimations]);
+
   return (
     <section className="relative overflow-hidden border-b border-white/10">
-      {showHomeAnimations ? <HomeAnimations /> : null}
+      {showHomeAnimations && effectsReady ? <HomeAnimations /> : null}
 
       <Image
         src={imageSrc}
         alt={imageAlt}
         fill
         priority
-        quality={68}
+        quality={60}
         sizes="100vw"
         className="absolute inset-0 object-cover object-center opacity-55"
       />
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_22%,rgba(16,185,129,0.18),transparent_42%),radial-gradient(circle_at_85%_0%,rgba(16,185,129,0.09),transparent_34%),linear-gradient(180deg,rgba(5,8,6,0.45)_0%,rgba(7,11,9,0.6)_56%,rgba(5,8,6,0.84)_100%)]" />
-      {showCodeRain ? (
+      {showCodeRain && effectsReady ? (
         <div className="pointer-events-none absolute inset-0 mix-blend-screen opacity-45">
           <CodeRain />
         </div>
@@ -110,26 +166,28 @@ export default function HeroSection({
       <div className="relative z-10 mx-auto max-w-6xl px-6 pb-20 pt-14 md:pt-20">
         <div className="grid gap-8 lg:grid-cols-[1.15fr_0.85fr] lg:items-start">
           <div className="text-center lg:text-left">
-            <span className="inline-flex rounded-full border border-emerald-400/35 bg-emerald-500/10 px-4 py-2 text-[11px] uppercase tracking-[0.18em] text-emerald-100">
+            <span className="hero-kicker inline-flex rounded-full border border-emerald-400/35 bg-emerald-500/10 px-4 py-2 text-[11px] uppercase tracking-[0.18em] text-emerald-100">
               {eyebrow}
             </span>
 
-            <h1 className="mt-6 max-w-4xl text-balance text-4xl font-semibold leading-[1.02] tracking-[-0.02em] sm:text-5xl md:text-6xl">
+            <h1 className="hero-title mt-6 max-w-4xl text-balance text-4xl font-semibold leading-[1.02] tracking-[-0.02em] sm:text-5xl md:text-6xl">
               {title}
             </h1>
 
-            <p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-white/75 lg:mx-0 lg:text-xl">
+            <p className="hero-copy mx-auto mt-5 max-w-2xl text-lg leading-8 text-white/75 lg:mx-0 lg:text-xl">
               {description}
             </p>
 
             <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row lg:justify-start">
-              <ActionLink href={primaryHref} label={primaryLabel} primary />
+              <div className="hero-cta w-full sm:w-auto">
+                <ActionLink href={primaryHref} label={primaryLabel} primary />
+              </div>
               <ActionLink href={secondaryHref} label={secondaryLabel} />
             </div>
 
-            <p className="mt-4 text-sm text-white/65">{trustLine}</p>
+            <p className="hero-meta mt-4 text-sm text-white/65">{trustLine}</p>
 
-            <div className="relative mt-8 max-w-2xl overflow-hidden rounded-2xl border border-emerald-400/30 bg-[radial-gradient(circle_at_14%_-20%,rgba(16,185,129,0.26),rgba(4,18,14,0.9)_45%,rgba(2,8,7,0.98)_100%)] p-5 text-left shadow-[0_18px_50px_rgba(0,0,0,0.25)]">
+            <div className="hero-stat relative mt-8 max-w-2xl overflow-hidden rounded-2xl border border-emerald-400/30 bg-[radial-gradient(circle_at_14%_-20%,rgba(16,185,129,0.26),rgba(4,18,14,0.9)_45%,rgba(2,8,7,0.98)_100%)] p-5 text-left shadow-[0_18px_50px_rgba(0,0,0,0.25)]">
               <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(115deg,rgba(16,185,129,0.08)_0%,transparent_46%,rgba(16,185,129,0.04)_100%)]" />
               <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:24px_24px] opacity-15" />
 
@@ -153,7 +211,7 @@ export default function HeroSection({
             </div>
           </div>
 
-          <aside className="relative overflow-hidden rounded-2xl border border-emerald-400/28 bg-[radial-gradient(circle_at_14%_-20%,rgba(16,185,129,0.24),rgba(4,16,13,0.9)_45%,rgba(2,8,7,0.98)_100%)] p-7 shadow-[0_18px_50px_rgba(0,0,0,0.25)]">
+          <aside className="hero-aside relative overflow-hidden rounded-2xl border border-emerald-400/28 bg-[radial-gradient(circle_at_14%_-20%,rgba(16,185,129,0.24),rgba(4,16,13,0.9)_45%,rgba(2,8,7,0.98)_100%)] p-7 shadow-[0_18px_50px_rgba(0,0,0,0.25)]">
             <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(115deg,rgba(16,185,129,0.08)_0%,transparent_46%,rgba(16,185,129,0.04)_100%)]" />
             <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:22px_22px] opacity-15" />
 
