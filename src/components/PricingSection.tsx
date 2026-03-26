@@ -1,4 +1,4 @@
-import Link from "next/link";
+import TrackedLink from "@/components/analytics/TrackedLink";
 
 type PricingTier = {
   name: string;
@@ -19,10 +19,12 @@ export default function PricingSection({
   tiers,
   title = "Launch package - starting at $150",
   description = "Clear pricing in USD for Nigeria-based and international clients who want a fast, focused launch.",
+  pageType = "pricing_section",
 }: {
   tiers: readonly PricingTier[];
   title?: string;
   description?: string;
+  pageType?: string;
 }) {
   const isExternal = (href: string) => /^https?:\/\//i.test(href);
 
@@ -110,21 +112,31 @@ export default function PricingSection({
               </ul>
 
               {isExternal(tier.startNowHref) ? (
-                <a
+                <TrackedLink
                   href={tier.startNowHref}
                   target="_blank"
                   rel="noreferrer"
                   className="relative z-10 mt-auto inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-emerald-600 px-6 py-3 text-sm font-semibold text-white shadow-[0_14px_30px_rgba(5,150,105,0.3)] transition-colors hover:bg-emerald-500"
+                  ctaName="start_your_website"
+                  ctaLocation={`${pageType}_${tier.name.toLowerCase().replace(/\s+/g, "_")}`}
+                  destination={tier.startNowHref}
+                  pageType={pageType}
+                  offerType={tier.name.toLowerCase().replace(/\s+/g, "_")}
                 >
                   Start Your Website
-                </a>
+                </TrackedLink>
               ) : (
-                <Link
+                <TrackedLink
                   href={tier.startNowHref}
                   className="relative z-10 mt-auto inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-emerald-600 px-6 py-3 text-sm font-semibold text-white shadow-[0_14px_30px_rgba(5,150,105,0.3)] transition-colors hover:bg-emerald-500"
+                  ctaName="start_your_website"
+                  ctaLocation={`${pageType}_${tier.name.toLowerCase().replace(/\s+/g, "_")}`}
+                  destination={tier.startNowHref}
+                  pageType={pageType}
+                  offerType={tier.name.toLowerCase().replace(/\s+/g, "_")}
                 >
                   Start Your Website
-                </Link>
+                </TrackedLink>
               )}
             </article>
           ))}

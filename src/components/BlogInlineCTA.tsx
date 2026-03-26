@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import TrackedLink from "@/components/analytics/TrackedLink";
 import { BOOKING_URL, buildWhatsAppUrl } from "@/lib/site";
 
 const launchHref = "/launch";
@@ -10,8 +11,20 @@ const whatsappHref = buildWhatsAppUrl(
 
 export default function BlogInlineCTA({
   compact = false,
+  pageType = "content_page",
+  ctaLocation = "content_inline",
+  contentGroup,
+  blogSlug,
+  blogTitle,
+  blogCategory,
 }: {
   compact?: boolean;
+  pageType?: string;
+  ctaLocation?: string;
+  contentGroup?: string;
+  blogSlug?: string;
+  blogTitle?: string;
+  blogCategory?: string;
 }) {
   return (
     <div
@@ -43,30 +56,57 @@ export default function BlogInlineCTA({
         {" "}details.
       </p>
       <div className="mt-5 flex flex-col gap-3 sm:flex-row">
-        <Link
+        <TrackedLink
           href={launchHref}
           className="inline-flex items-center justify-center rounded-xl bg-emerald-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-600"
+          ctaName="start_your_website"
+          ctaLocation={ctaLocation}
+          destination={launchHref}
+          pageType={pageType}
+          offerType="website_launch"
+          contentGroup={contentGroup}
+          blogSlug={blogSlug}
+          blogTitle={blogTitle}
+          blogCategory={blogCategory}
         >
           View Launch Offer
-        </Link>
-        <a
+        </TrackedLink>
+        <TrackedLink
           href={BOOKING_URL}
           target={BOOKING_URL.startsWith("http") ? "_blank" : undefined}
           rel={BOOKING_URL.startsWith("http") ? "noreferrer" : undefined}
           className="inline-flex items-center justify-center rounded-xl border border-white/15 bg-black/30 px-5 py-3 text-sm font-semibold text-white/90 transition hover:bg-black/50"
+          ctaName="booking"
+          ctaLocation={ctaLocation}
+          destination="booking"
+          pageType={pageType}
+          offerType="consultation"
+          contentGroup={contentGroup}
+          blogSlug={blogSlug}
+          blogTitle={blogTitle}
+          blogCategory={blogCategory}
         >
           Book a Call
-        </a>
+        </TrackedLink>
       </div>
       <div className="mt-3">
-        <a
+        <TrackedLink
           href={whatsappHref}
           target="_blank"
           rel="noreferrer"
           className="text-sm font-semibold text-emerald-200 transition hover:text-emerald-100"
+          ctaName="whatsapp"
+          ctaLocation={ctaLocation}
+          destination="whatsapp"
+          pageType={pageType}
+          offerType="consultation"
+          contentGroup={contentGroup}
+          blogSlug={blogSlug}
+          blogTitle={blogTitle}
+          blogCategory={blogCategory}
         >
           Chat on WhatsApp
-        </a>
+        </TrackedLink>
       </div>
     </div>
   );

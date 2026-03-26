@@ -35,3 +35,12 @@ The easiest way to deploy your Next.js app is to use the [Vercel Platform](https
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
 
+## Analytics Setup
+
+- Paste your GA4 measurement ID into `NEXT_PUBLIC_GA_ID` in `.env.local`.
+- Paste your Microsoft Clarity project ID into `NEXT_PUBLIC_CLARITY_ID` in `.env.local`.
+- Global analytics install lives in [src/app/layout.tsx](./src/app/layout.tsx).
+- Shared event helpers live in [src/lib/analytics.ts](./src/lib/analytics.ts).
+- CTA click tracking is wired through [src/components/analytics/TrackedLink.tsx](./src/components/analytics/TrackedLink.tsx).
+- Blog Clarity tagging is set in [src/app/blog/BlogClient.tsx](./src/app/blog/BlogClient.tsx) and [src/app/blog/[slug]/BlogPostClient.tsx](./src/app/blog/%5Bslug%5D/BlogPostClient.tsx).
+

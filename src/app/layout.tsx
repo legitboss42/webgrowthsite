@@ -1,5 +1,6 @@
 ﻿﻿import type { Metadata } from "next";
 import Script from "next/script";
+import { GoogleAnalytics } from "@next/third-parties/google";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import StructuredData from "@/components/StructuredData";
@@ -50,6 +51,8 @@ export const metadata: Metadata = {
 
 const GTM_ID = "GTM-TKSB7S75";
 const TIKTOK_PIXEL_ID = "D6NCMIRC77UDVRSELGE0";
+const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
+const CLARITY_ID = process.env.NEXT_PUBLIC_CLARITY_ID;
 const IS_PRODUCTION = process.env.NODE_ENV === "production";
 
 type LatestPostHeadline = {
@@ -116,6 +119,18 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           />
         ) : null}
 
+        {CLARITY_ID ? (
+          <Script id="microsoft-clarity" strategy="afterInteractive">
+            {`
+              (function(c,l,a,r,i,t,y){
+                c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+                t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+                y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+              })(window, document, "clarity", "script", "${CLARITY_ID}");
+            `}
+          </Script>
+        ) : null}
+
       </head>
 
       <body>
@@ -145,6 +160,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </Script>
 
         <StructuredData data={websiteSchema} />
+        {GA_ID ? <GoogleAnalytics gaId={GA_ID} /> : null}
         <Analytics />
         <SpeedInsights />
         {IS_PRODUCTION ? (

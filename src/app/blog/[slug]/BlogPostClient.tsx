@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Script from "next/script";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
+import ClarityPageTags from "@/components/analytics/ClarityPageTags";
 import BlogEndCTA from "@/components/BlogEndCTA";
 import LeadMagnetCTA from "@/components/LeadMagnetCTA";
 import BlogInlineCTA from "@/components/BlogInlineCTA";
@@ -353,7 +354,19 @@ function MailerLiteForm({ downloadHref }: { downloadHref: string }) {
   );
 }
 
-export default function BlogPostClient({ content }: { content: string }) {
+export default function BlogPostClient({
+  content,
+  blogSlug,
+  blogTitle,
+  blogCategory,
+  blogTags,
+}: {
+  content: string;
+  blogSlug: string;
+  blogTitle: string;
+  blogCategory: string;
+  blogTags: string[];
+}) {
   const blocks = useMemo(() => renderBlocks(content), [content]);
   const inlineCtaIndex = blocks.length > 5 ? 4 : 2;
 
@@ -505,13 +518,35 @@ export default function BlogPostClient({ content }: { content: string }) {
 
   return (
     <>
+      <ClarityPageTags
+        tags={{
+          page_type: "blog_post",
+          blog_slug: blogSlug,
+          blog_title: blogTitle,
+          blog_category: blogCategory,
+          blog_tags: blogTags,
+          content_group: "blog",
+        }}
+      />
       <div className="mt-10 space-y-7 text-white/80 leading-relaxed">
         {blocks.slice(0, inlineCtaIndex).map((b, idx) => renderBlockNode(b, idx))}
-        <BlogInlineCTA compact />
+        <BlogInlineCTA
+          compact
+          pageType="blog_post"
+          ctaLocation="blog_inline"
+          contentGroup="blog"
+          blogSlug={blogSlug}
+          blogTitle={blogTitle}
+          blogCategory={blogCategory}
+        />
         {blocks
           .slice(inlineCtaIndex)
           .map((b, idx) => renderBlockNode(b, idx + inlineCtaIndex))}
-        <BlogEndCTA />
+        <BlogEndCTA
+          blogSlug={blogSlug}
+          blogTitle={blogTitle}
+          blogCategory={blogCategory}
+        />
       </div>
 
       {/* ===========================

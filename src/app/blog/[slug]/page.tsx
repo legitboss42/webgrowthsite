@@ -4,6 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import BlogPostClient from "./BlogPostClient";
+import TrackedLink from "@/components/analytics/TrackedLink";
 import EditorialTrustNote from "@/components/EditorialTrustNote";
 import HostingSupportBlock from "@/components/HostingSupportBlock";
 import RelatedServiceCTA from "@/components/RelatedServiceCTA";
@@ -208,12 +209,21 @@ export default async function BlogPostPage({
               >
                 Back to Blog
               </Link>
-              <Link
+              <TrackedLink
                 href="/launch"
                 className="rounded-md bg-emerald-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-500"
+                ctaName="start_your_website"
+                ctaLocation="blog_hero"
+                destination="/launch"
+                pageType="blog_post"
+                offerType="website_launch"
+                contentGroup="blog"
+                blogSlug={post.slug}
+                blogTitle={post.title}
+                blogCategory={post.category}
               >
                 Website Design in 48 Hours
-              </Link>
+              </TrackedLink>
             </div>
           </div>
 
@@ -249,7 +259,13 @@ export default async function BlogPostPage({
               <EditorialTrustNote compact />
             </div>
 
-            <BlogPostClient content={post.content} />
+            <BlogPostClient
+              content={post.content}
+              blogSlug={post.slug}
+              blogTitle={post.title}
+              blogCategory={post.category}
+              blogTags={getSafeTags(post)}
+            />
 
             <div className="lg:hidden">
               <SocialShareDock
@@ -303,30 +319,57 @@ export default async function BlogPostPage({
                 </p>
 
                 <div className="mt-4 grid gap-3">
-                  <Link
+                  <TrackedLink
                     href="/contact"
                     className="inline-flex w-full items-center justify-center rounded-md bg-emerald-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-emerald-500"
+                    ctaName="contact"
+                    ctaLocation="blog_sidebar"
+                    destination="/contact"
+                    pageType="blog_post"
+                    offerType="website_launch"
+                    contentGroup="blog"
+                    blogSlug={post.slug}
+                    blogTitle={post.title}
+                    blogCategory={post.category}
                   >
                     Contact Us
-                  </Link>
+                  </TrackedLink>
 
-                  <a
+                  <TrackedLink
                     href={BOOKING_URL}
                     target={BOOKING_URL.startsWith("http") ? "_blank" : undefined}
                     rel={BOOKING_URL.startsWith("http") ? "noreferrer" : undefined}
                     className="inline-flex w-full items-center justify-center rounded-md border border-white/10 bg-black/30 px-4 py-3 text-sm font-semibold text-white/85 transition hover:bg-black/45"
+                    ctaName="booking"
+                    ctaLocation="blog_sidebar"
+                    destination="booking"
+                    pageType="blog_post"
+                    offerType="consultation"
+                    contentGroup="blog"
+                    blogSlug={post.slug}
+                    blogTitle={post.title}
+                    blogCategory={post.category}
                   >
                     Book a Call
-                  </a>
+                  </TrackedLink>
 
-                  <a
+                  <TrackedLink
                     href={whatsappUrl}
                     target="_blank"
                     rel="noreferrer"
                     className="inline-flex w-full items-center justify-center rounded-md border border-white/10 bg-black/30 px-4 py-3 text-sm font-semibold text-white/85 transition hover:bg-black/45"
+                    ctaName="whatsapp"
+                    ctaLocation="blog_sidebar"
+                    destination="whatsapp"
+                    pageType="blog_post"
+                    offerType="consultation"
+                    contentGroup="blog"
+                    blogSlug={post.slug}
+                    blogTitle={post.title}
+                    blogCategory={post.category}
                   >
                     Chat on WhatsApp
-                  </a>
+                  </TrackedLink>
                 </div>
 
                 <div className="mt-4 text-xs text-white/55">

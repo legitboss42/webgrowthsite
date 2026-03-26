@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import TrackedLink from "@/components/analytics/TrackedLink";
 
 const WHATSAPP_NUMBER = "2348066706336";
 const WHATSAPP_MESSAGE = "Hello, I'd like to request a quote for a website.";
@@ -8,17 +9,6 @@ const WHATSAPP_MESSAGE = "Hello, I'd like to request a quote for a website.";
 function buildWhatsAppUrl() {
   const text = encodeURIComponent(WHATSAPP_MESSAGE);
   return `https://wa.me/${WHATSAPP_NUMBER}?text=${text}`;
-}
-
-function trackWhatsApp(location: string) {
-  if (typeof window === "undefined") return;
-
-  (window as Window & { dataLayer?: Array<Record<string, unknown>> }).dataLayer =
-    (window as Window & { dataLayer?: Array<Record<string, unknown>> }).dataLayer || [];
-  (window as Window & { dataLayer?: Array<Record<string, unknown>> }).dataLayer?.push({
-    event: "whatsapp_click",
-    location,
-  });
 }
 
 export default function Footer() {
@@ -84,15 +74,18 @@ export default function Footer() {
 
               <div>
                 <span className="text-white/70">WhatsApp: </span>
-                <a
+                <TrackedLink
                   className="hover:text-white transition"
                   href={whatsappUrl}
                   target="_blank"
                   rel="noreferrer"
-                  onClick={() => trackWhatsApp("footer")}
+                  ctaName="whatsapp"
+                  ctaLocation="footer"
+                  destination="whatsapp"
+                  pageType="sitewide_footer"
                 >
                   Chat on WhatsApp
-                </a>
+                </TrackedLink>
               </div>
             </div>
           </div>

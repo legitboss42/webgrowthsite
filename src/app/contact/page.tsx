@@ -1,4 +1,5 @@
 import AnswerHighlightsSection from "@/components/AnswerHighlightsSection";
+import TrackedLink from "@/components/analytics/TrackedLink";
 import { Suspense } from "react";
 import ContactClient from "@/components/ContactClient";
 import CorePageLinks from "@/components/CorePageLinks";
@@ -78,30 +79,45 @@ export default function ContactPage() {
                 </p>
 
                 <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                  <a
+                  <TrackedLink
                     href="#contact-form"
                     className="inline-flex min-h-12 items-center justify-center rounded-xl bg-emerald-700 px-8 py-3 text-base font-semibold text-white shadow-[0_14px_34px_rgba(5,150,105,0.25)] transition-colors hover:bg-emerald-600"
+                    ctaName="get_started"
+                    ctaLocation="contact_hero_primary"
+                    destination="#contact-form"
+                    pageType="contact"
+                    offerType="website_launch"
                   >
                     Get Started
-                  </a>
-                  <a
+                  </TrackedLink>
+                  <TrackedLink
                     href={BOOKING_URL}
                     target={BOOKING_URL.startsWith("http") ? "_blank" : undefined}
                     rel={BOOKING_URL.startsWith("http") ? "noreferrer" : undefined}
                     className="inline-flex min-h-12 items-center justify-center rounded-xl border border-white/25 bg-black/35 px-8 py-3 text-base font-semibold text-white transition-colors hover:border-white/40 hover:bg-black/50"
+                    ctaName="booking"
+                    ctaLocation="contact_hero_booking"
+                    destination="booking"
+                    pageType="contact"
+                    offerType="consultation"
                   >
                     Book a Call
-                  </a>
-                  <a
+                  </TrackedLink>
+                  <TrackedLink
                     href={buildWhatsAppUrl(
                       "Hello, I want to discuss my website project."
                     )}
                     target="_blank"
                     rel="noreferrer"
                     className="inline-flex min-h-12 items-center justify-center rounded-xl border border-white/25 bg-black/35 px-8 py-3 text-base font-semibold text-white transition-colors hover:border-white/40 hover:bg-black/50"
+                    ctaName="whatsapp"
+                    ctaLocation="contact_hero_whatsapp"
+                    destination="whatsapp"
+                    pageType="contact"
+                    offerType="consultation"
                   >
                     Chat on WhatsApp
-                  </a>
+                  </TrackedLink>
                 </div>
 
                 <div className="mt-8 rounded-2xl border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.045),rgba(255,255,255,0.015))] p-6 shadow-[0_18px_44px_rgba(0,0,0,0.22)]">
@@ -179,8 +195,9 @@ export default function ContactPage() {
           tiers={pricingTiers}
           title="Pick the package before you submit"
           description="This keeps the enquiry clear and speeds up the reply."
+          pageType="contact_pricing"
         />
-        <FinalCTASection title="Need a faster path than email?" />
+        <FinalCTASection title="Need a faster path than email?" pageType="contact_final_cta" />
       </main>
     </>
   );

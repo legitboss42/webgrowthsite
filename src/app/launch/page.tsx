@@ -1,5 +1,6 @@
 import Link from "next/link";
 import AnswerHighlightsSection from "@/components/AnswerHighlightsSection";
+import TrackedLink from "@/components/analytics/TrackedLink";
 import FAQSection from "@/components/FAQSection";
 import FinalCTASection from "@/components/FinalCTASection";
 import CorePageLinks from "@/components/CorePageLinks";
@@ -158,20 +159,30 @@ function LaunchHero() {
           </p>
 
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <Link
+            <TrackedLink
               href={GET_STARTED_PATH}
               className="inline-flex min-h-12 items-center justify-center rounded-xl bg-emerald-700 px-8 py-3 text-base font-semibold text-white shadow-[0_14px_34px_rgba(5,150,105,0.25)] transition-colors hover:bg-emerald-600"
+              ctaName="start_your_website"
+              ctaLocation="launch_hero_primary"
+              destination={GET_STARTED_PATH}
+              pageType="launch"
+              offerType="website_launch"
             >
               Start Your Website
-            </Link>
-            <a
+            </TrackedLink>
+            <TrackedLink
               href={BOOKING_URL}
               target={BOOKING_URL.startsWith("http") ? "_blank" : undefined}
               rel={BOOKING_URL.startsWith("http") ? "noreferrer" : undefined}
               className="inline-flex min-h-12 items-center justify-center rounded-xl border border-white/25 bg-black/35 px-8 py-3 text-base font-semibold text-white transition-colors hover:border-white/40 hover:bg-black/50"
+              ctaName="booking"
+              ctaLocation="launch_hero_booking"
+              destination="booking"
+              pageType="launch"
+              offerType="consultation"
             >
               Book a Call
-            </a>
+            </TrackedLink>
           </div>
 
           <div className="mt-8 grid gap-4 sm:grid-cols-3">
@@ -348,6 +359,7 @@ export default function LaunchPage() {
           tiers={pricingTiers}
           title="Choose the launch package that matches your timeline"
           description="Straight USD pricing for a focused launch. Ideal when speed, clarity, and clean delivery matter more than bloated scope, and when you need a website design in 48 hours without sacrificing the basics."
+          pageType="launch_pricing"
         />
         <LaunchComparisonSection />
 
@@ -394,6 +406,7 @@ export default function LaunchPage() {
         <FinalCTASection
           title="Ready to stop researching and get your website live?"
           description="If the offer fits your stage, use the fastest next step for your process and move toward a live website instead of keeping the project stuck in planning."
+          pageType="launch_final_cta"
         />
       </main>
     </>

@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import type { Post } from "../../lib/posts";
 import { gsap } from "gsap";
+import ClarityPageTags from "@/components/analytics/ClarityPageTags";
 import BlogInlineCTA from "@/components/BlogInlineCTA";
 import EntitySnapshotSection from "@/components/EntitySnapshotSection";
 import EditorialTrustNote from "@/components/EditorialTrustNote";
@@ -165,6 +166,7 @@ export default function BlogClient({ posts }: Props) {
 
   return (
     <div ref={rootRef} className="min-h-screen bg-black text-white">
+      <ClarityPageTags tags={{ page_type: "blog_index", content_group: "blog" }} />
       <section
         ref={heroRef}
         onMouseMove={onHeroMouseMove}
@@ -313,7 +315,7 @@ export default function BlogClient({ posts }: Props) {
         </div>
 
         <div className="mb-8">
-          <BlogInlineCTA />
+          <BlogInlineCTA pageType="blog_index" ctaLocation="blog_index_inline" contentGroup="blog" />
         </div>
 
         <div className="mb-8">
@@ -322,6 +324,7 @@ export default function BlogClient({ posts }: Props) {
             title="Need hosting before you launch your site?"
             description="Compare the shared hosting offer, save 68%, and start your website on stronger footing."
             ctaLabel="View Hosting Offer"
+            pageType="blog_index_support"
           />
         </div>
 
@@ -500,7 +503,7 @@ export default function BlogClient({ posts }: Props) {
 
         {filtered.length > 0 ? (
           <div className="mt-10">
-            <BlogInlineCTA compact />
+            <BlogInlineCTA compact pageType="blog_index" ctaLocation="blog_index_end" contentGroup="blog" />
           </div>
         ) : null}
       </section>

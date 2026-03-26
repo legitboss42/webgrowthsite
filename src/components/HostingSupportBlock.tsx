@@ -1,15 +1,17 @@
-import Link from "next/link";
+import TrackedLink from "@/components/analytics/TrackedLink";
 
 export default function HostingSupportBlock({
   title = "Need reliable hosting before you launch?",
   description = "Compare the shared hosting offer, save 68%, and start your business website with a stronger foundation.",
   ctaLabel = "View Hosting Offer",
   compact = false,
+  pageType = "hosting_support_block",
 }: {
   title?: string;
   description?: string;
   ctaLabel?: string;
   compact?: boolean;
+  pageType?: string;
 }) {
   return (
     <section
@@ -31,18 +33,28 @@ export default function HostingSupportBlock({
         </p>
 
         <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-          <Link
+          <TrackedLink
             href="/hosting-offer"
             className="offer-button inline-flex min-h-12 items-center justify-center rounded-xl bg-emerald-700 px-8 py-3 text-base font-semibold text-white shadow-[0_14px_34px_rgba(5,150,105,0.25)] transition-colors hover:bg-emerald-600"
+            ctaName="hosting_offer"
+            ctaLocation={`${pageType}_primary`}
+            destination="/hosting-offer"
+            pageType={pageType}
+            offerType="hosting"
           >
             <span className="relative z-10">{ctaLabel}</span>
-          </Link>
-          <Link
+          </TrackedLink>
+          <TrackedLink
             href="/launch"
             className="offer-button-soft inline-flex min-h-12 items-center justify-center rounded-xl border border-white/25 bg-black/35 px-8 py-3 text-base font-semibold text-white transition-colors hover:border-white/40 hover:bg-black/50"
+            ctaName="start_your_website"
+            ctaLocation={`${pageType}_secondary`}
+            destination="/launch"
+            pageType={pageType}
+            offerType="website_launch"
           >
             Start Your Website
-          </Link>
+          </TrackedLink>
         </div>
       </div>
     </section>

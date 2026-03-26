@@ -156,6 +156,7 @@ export default function Page() {
           imageAlt="Website design in 48 hours hero image for Web Growth"
           showCodeRain
           showHomeAnimations
+          pageType="homepage"
         />
 
         <AnswerHighlightsSection
@@ -213,10 +214,10 @@ export default function Page() {
         />
 
         <WhatYouGetSection items={whatYouGetItems} />
-        <PricingSection tiers={pricingTiers} />
+        <PricingSection tiers={pricingTiers} pageType="homepage_pricing" />
         <SocialProofSection cards={socialProofCards} />
         <FAQSection items={launchFaqs} />
-        <FinalCTASection />
+        <FinalCTASection pageType="homepage_final_cta" />
       </main>
     </>
   );

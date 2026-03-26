@@ -1,9 +1,9 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
+import TrackedLink from "@/components/analytics/TrackedLink";
 
 const HomeAnimations = dynamic(() => import("@/components/HomeAnimations"), {
   ssr: false,
@@ -29,44 +29,45 @@ type HeroSectionProps = {
   imageAlt?: string;
   showCodeRain?: boolean;
   showHomeAnimations?: boolean;
+  pageType?: string;
 };
 
 function ActionLink({
   href,
   label,
   primary = false,
+  ctaName,
+  ctaLocation,
+  destination,
+  pageType,
+  offerType,
 }: {
   href: string;
   label: string;
   primary?: boolean;
+  ctaName: string;
+  ctaLocation: string;
+  destination: string;
+  pageType: string;
+  offerType?: string;
 }) {
   const className = primary
     ? "inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-emerald-700 px-8 py-3 text-base font-semibold text-white shadow-[0_14px_34px_rgba(5,150,105,0.25)] transition-colors hover:bg-emerald-600 sm:w-auto"
     : "inline-flex min-h-12 w-full items-center justify-center rounded-xl border border-white/25 bg-black/35 px-8 py-3 text-base font-semibold text-white transition-colors hover:border-white/40 hover:bg-black/50 sm:w-auto";
-  const isInternalRoute = href.startsWith("/");
-  const isInPageAnchor = href.startsWith("#") || /^\/[^?#]*#/.test(href);
-  const isDirectAction = href.startsWith("mailto:") || href.startsWith("tel:");
-
-  if (isInternalRoute && !isInPageAnchor) {
-    return (
-      <Link href={href} className={className}>
-        {label}
-      </Link>
-    );
-  }
-
-  if (isInPageAnchor || isDirectAction) {
-    return (
-      <a href={href} className={className}>
-        {label}
-      </a>
-    );
-  }
-
   return (
-    <a href={href} className={className} target="_blank" rel="noreferrer">
+    <TrackedLink
+      href={href}
+      className={className}
+      target={href.startsWith("http") ? "_blank" : undefined}
+      rel={href.startsWith("http") ? "noreferrer" : undefined}
+      ctaName={ctaName}
+      ctaLocation={ctaLocation}
+      destination={destination}
+      pageType={pageType}
+      offerType={offerType}
+    >
       {label}
-    </a>
+    </TrackedLink>
   );
 }
 
@@ -86,6 +87,7 @@ export default function HeroSection({
   imageAlt = "Modern business website launch workspace",
   showCodeRain = false,
   showHomeAnimations = false,
+  pageType = "homepage",
 }: HeroSectionProps) {
   const [effectsReady, setEffectsReady] = useState(false);
 
@@ -180,9 +182,26 @@ export default function HeroSection({
 
             <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row lg:justify-start">
               <div className="hero-cta w-full sm:w-auto">
-                <ActionLink href={primaryHref} label={primaryLabel} primary />
+                <ActionLink
+                  href={primaryHref}
+                  label={primaryLabel}
+                  primary
+                  ctaName="get_started"
+                  ctaLocation={`${pageType}_hero_primary`}
+                  destination={primaryHref}
+                  pageType={pageType}
+                  offerType="website_launch"
+                />
               </div>
-              <ActionLink href={secondaryHref} label={secondaryLabel} />
+              <ActionLink
+                href={secondaryHref}
+                label={secondaryLabel}
+                ctaName="launch_offer"
+                ctaLocation={`${pageType}_hero_secondary`}
+                destination={secondaryHref}
+                pageType={pageType}
+                offerType="website_launch"
+              />
             </div>
 
             <p className="hero-meta mt-4 text-sm text-white/65">{trustLine}</p>

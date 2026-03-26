@@ -1,12 +1,14 @@
-import Link from "next/link";
 import { finalCtaLinks } from "@/lib/launchOffer";
+import TrackedLink from "@/components/analytics/TrackedLink";
 
 export default function FinalCTASection({
   title = "Website Design in 48 Hours | Get a Professional Website Live Fast",
   description = "Ready to launch? Send your details and move from idea to live website without dragging the project out for weeks.",
+  pageType = "final_cta_section",
 }: {
   title?: string;
   description?: string;
+  pageType?: string;
 }) {
   return (
     <section className="relative overflow-hidden bg-[#050806] py-20">
@@ -39,30 +41,45 @@ export default function FinalCTASection({
             </div>
 
             <div className="flex flex-col gap-3">
-              <Link
+              <TrackedLink
                 href={finalCtaLinks.primaryHref}
                 className="inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-emerald-700 px-8 py-3 text-base font-semibold text-white shadow-[0_14px_34px_rgba(5,150,105,0.25)] transition-colors hover:bg-emerald-600"
+                ctaName="start_your_website"
+                ctaLocation={`${pageType}_primary`}
+                destination={finalCtaLinks.primaryHref}
+                pageType={pageType}
+                offerType="website_launch"
               >
                 Start Your Website
-              </Link>
+              </TrackedLink>
 
-              <a
+              <TrackedLink
                 href={finalCtaLinks.bookingHref}
                 target={finalCtaLinks.bookingHref.startsWith("http") ? "_blank" : undefined}
                 rel={finalCtaLinks.bookingHref.startsWith("http") ? "noreferrer" : undefined}
                 className="inline-flex min-h-12 w-full items-center justify-center rounded-xl border border-white/25 bg-black/35 px-8 py-3 text-base font-semibold text-white transition-colors hover:border-white/40 hover:bg-black/50"
+                ctaName="booking"
+                ctaLocation={`${pageType}_booking`}
+                destination="booking"
+                pageType={pageType}
+                offerType="consultation"
               >
                 Book a Call
-              </a>
+              </TrackedLink>
 
-              <a
+              <TrackedLink
                 href={finalCtaLinks.whatsappHref}
                 target="_blank"
                 rel="noreferrer"
                 className="inline-flex min-h-11 w-full items-center justify-center rounded-xl text-sm font-semibold text-emerald-200 transition hover:text-emerald-100"
+                ctaName="whatsapp"
+                ctaLocation={`${pageType}_whatsapp`}
+                destination="whatsapp"
+                pageType={pageType}
+                offerType="consultation"
               >
                 Chat on WhatsApp
-              </a>
+              </TrackedLink>
             </div>
           </div>
 

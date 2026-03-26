@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { FormEvent, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import TrackedLink from "@/components/analytics/TrackedLink";
 import {
   BOOKING_URL,
   CONTACT_EMAIL_HREF,
@@ -392,22 +393,32 @@ export default function GetStartedClient() {
               ) : null}
 
               <div className="mt-6 grid gap-3 sm:grid-cols-2">
-                <a
+                <TrackedLink
                   href={BOOKING_URL}
                   target={isExternalUrl(BOOKING_URL) ? "_blank" : undefined}
                   rel={isExternalUrl(BOOKING_URL) ? "noreferrer" : undefined}
                   className="inline-flex min-h-12 items-center justify-center rounded-xl bg-emerald-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-600"
+                  ctaName="booking"
+                  ctaLocation="get_started_success"
+                  destination="booking"
+                  pageType="get_started"
+                  offerType="consultation"
                 >
                   Book a Call
-                </a>
-                <a
+                </TrackedLink>
+                <TrackedLink
                   href={whatsappHref}
                   target="_blank"
                   rel="noreferrer"
                   className="inline-flex min-h-12 items-center justify-center rounded-xl border border-white/20 bg-black/35 px-5 py-3 text-sm font-semibold text-white/90 transition hover:bg-black/50"
+                  ctaName="whatsapp"
+                  ctaLocation="get_started_success"
+                  destination="whatsapp"
+                  pageType="get_started"
+                  offerType="consultation"
                 >
                   Chat on WhatsApp
-                </a>
+                </TrackedLink>
               </div>
 
               <div className="mt-4">

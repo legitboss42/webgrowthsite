@@ -1,5 +1,5 @@
 import AnswerHighlightsSection from "@/components/AnswerHighlightsSection";
-import Link from "next/link";
+import TrackedLink from "@/components/analytics/TrackedLink";
 import FAQSection from "@/components/FAQSection";
 import CorePageLinks from "@/components/CorePageLinks";
 import HostingSupportBlock from "@/components/HostingSupportBlock";
@@ -166,16 +166,27 @@ export const metadata = buildPageMetadata({
   ],
 });
 
-function PrimaryHostingButton({ label }: { label: string }) {
+function PrimaryHostingButton({
+  label,
+  location,
+}: {
+  label: string;
+  location: string;
+}) {
   return (
-    <a
+    <TrackedLink
       href={HOSTING_LINK}
       target="_blank"
       rel="noreferrer sponsored"
       className="offer-button inline-flex min-h-12 items-center justify-center rounded-xl bg-emerald-700 px-8 py-3 text-base font-semibold text-white shadow-[0_14px_34px_rgba(5,150,105,0.25)] transition-colors hover:bg-emerald-600"
+      ctaName="hosting_offer"
+      ctaLocation={location}
+      destination="namecheap_hosting_offer"
+      pageType="hosting_offer"
+      offerType="hosting"
     >
       <span className="relative z-10">{label}</span>
-    </a>
+    </TrackedLink>
   );
 }
 
@@ -211,7 +222,7 @@ export default function HostingOfferRoute() {
                 </p>
 
                 <div className="hero-fall-in hero-fall-delay-4 mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
-                  <PrimaryHostingButton label="Get Hosting Now" />
+                  <PrimaryHostingButton label="Get Hosting Now" location="hosting_offer_hero" />
                 </div>
 
                 <p className="hero-fall-in hero-fall-delay-5 mt-4 text-sm text-white/62">
@@ -352,7 +363,7 @@ export default function HostingOfferRoute() {
               <p className="text-xs uppercase tracking-[0.18em] text-emerald-200/85">Main action</p>
               <h2 className="mt-4 text-balance text-3xl font-semibold leading-tight md:text-5xl">Compare hosting and choose a setup you can rely on</h2>
               <p className="mx-auto mt-4 max-w-2xl text-lg leading-7 text-white/72">Get your website started with reliable hosting, lower your upfront cost, and avoid fixing basic setup mistakes later.</p>
-              <div className="mt-8"><PrimaryHostingButton label="Claim This Hosting Deal" /></div>
+              <div className="mt-8"><PrimaryHostingButton label="Claim This Hosting Deal" location="hosting_offer_main_cta" /></div>
             </div>
           </div>
         </section>
@@ -364,9 +375,17 @@ export default function HostingOfferRoute() {
               <h2 className="mt-4 text-balance text-3xl font-semibold leading-tight md:text-4xl">Don&apos;t want to set it up yourself?</h2>
               <p className="mt-4 max-w-2xl text-lg leading-7 text-white/72">I can help you get online with a clean, professional website in 48 hours.</p>
               <div className="mt-8">
-                <Link href="/launch" className="offer-button-soft inline-flex min-h-12 items-center justify-center rounded-xl border border-white/25 bg-black/35 px-8 py-3 text-base font-semibold text-white transition-colors hover:border-white/40 hover:bg-black/50">
+                <TrackedLink
+                  href="/launch"
+                  className="offer-button-soft inline-flex min-h-12 items-center justify-center rounded-xl border border-white/25 bg-black/35 px-8 py-3 text-base font-semibold text-white transition-colors hover:border-white/40 hover:bg-black/50"
+                  ctaName="start_your_website"
+                  ctaLocation="hosting_offer_upsell"
+                  destination="/launch"
+                  pageType="hosting_offer"
+                  offerType="website_launch"
+                >
                   Start Your Website
-                </Link>
+                </TrackedLink>
               </div>
             </div>
           </div>
@@ -379,6 +398,7 @@ export default function HostingOfferRoute() {
               title="Want hosting sorted before the website build starts?"
               description="Use the hosting offer first if you want a clean starting point, then move into the website setup when you are ready."
               ctaLabel="Launch with Reliable Hosting"
+              pageType="hosting_offer_support"
             />
           </div>
         </section>
@@ -419,7 +439,7 @@ export default function HostingOfferRoute() {
             <p className="text-xs uppercase tracking-[0.2em] text-emerald-300/80">Final step</p>
             <h2 className="mt-4 text-balance text-3xl font-semibold leading-tight md:text-5xl">Launch with Reliable Hosting</h2>
             <p className="mx-auto mt-4 max-w-2xl text-lg leading-7 text-white/72">Claim the discount, start with stronger hosting, and give your business website a cleaner path online.</p>
-            <div className="mt-8"><PrimaryHostingButton label="Get Hosting Now" /></div>
+            <div className="mt-8"><PrimaryHostingButton label="Get Hosting Now" location="hosting_offer_final_cta" /></div>
           </div>
         </section>
       </main>
