@@ -3,6 +3,7 @@ import Script from "next/script";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import NavigationLoader from "@/components/NavigationLoader";
 import StructuredData from "@/components/StructuredData";
 import { getPosts } from "@/lib/posts";
 import { SpeedInsights } from "@vercel/speed-insights/next";
@@ -175,6 +176,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         ) : null}
 
         <Header latestPost={latestPost ?? undefined} />
+        <NavigationLoader />
         <main className={latestPost ? "pt-44 md:pt-40" : "pt-28"}>{children}</main>
         <Footer />
         <WebVitals />
