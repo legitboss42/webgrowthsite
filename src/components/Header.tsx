@@ -94,19 +94,35 @@ export default function Header({ latestPost }: { latestPost?: LatestPostHeadline
     href,
     label,
     section,
+    matchPaths,
     onClick,
   }: {
     href: string;
     label: string;
     section?: NavKey;
+    matchPaths?: string[];
     onClick?: () => void;
   }) => {
-    const active = isActive(href, section);
+    const normalizedHref = href.replace(/\/+$/, "") || "/";
+    const active =
+      isActive(href, section) ||
+      (matchPaths ?? []).some((path) => {
+        const normalizedPath = path.replace(/\/+$/, "") || "/";
+        if (normalizedPath === "/") return activeRoute === "/";
+        return (
+          activeRoute === normalizedPath ||
+          activeRoute.startsWith(`${normalizedPath}/`)
+        );
+      }) ||
+      (normalizedHref !== "/" &&
+        (activeRoute === normalizedHref ||
+          activeRoute.startsWith(`${normalizedHref}/`)));
 
     return (
       <Link
         href={href}
         onClick={onClick}
+        aria-current={active ? "page" : undefined}
         className={[
           "transition",
           "text-sm",
@@ -192,13 +208,17 @@ export default function Header({ latestPost }: { latestPost?: LatestPostHeadline
 
           {/* Desktop Nav */}
           <nav className="hidden md:flex items-center gap-8">
-            <NavLink href="/launch" label="Launch" />
+            <NavLink href="/launch" label="Launch" matchPaths={["/get-started"]} />
             <NavLink href="/services" label="Services" />
             <NavLink href="/about" label="About" />
             <NavLink href="/portfolio" label="Portfolio" />
             <NavLink href="/blog" label="Blog" />
             <NavLink href="/pricing" label="Pricing" />
-            <NavLink href="/contact" label="Contact" />
+            <NavLink
+              href="/contact"
+              label="Contact"
+              matchPaths={["/contact/thanks", "/thank-you"]}
+            />
           </nav>
 
           {/* Right: CTA + Hamburger */}
@@ -265,6 +285,7 @@ export default function Header({ latestPost }: { latestPost?: LatestPostHeadline
                   <NavLink
                     href="/launch"
                     label="Launch"
+                    matchPaths={["/get-started"]}
                     onClick={() => setMenuOpen(false)}
                   />
                   <NavLink
@@ -300,6 +321,7 @@ export default function Header({ latestPost }: { latestPost?: LatestPostHeadline
                   <NavLink
                     href="/contact"
                     label="Contact"
+                    matchPaths={["/contact/thanks", "/thank-you"]}
                     onClick={() => setMenuOpen(false)}
                   />
 
