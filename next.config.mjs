@@ -41,6 +41,16 @@ const nextConfig = {
   async redirects() {
     return [
       {
+        source: "/home",
+        destination: "/",
+        permanent: true,
+      },
+      {
+        source: "/blog/07-launch-week-checklist-and-first-7-days-image-prompts",
+        destination: "/blog/07-launch-week-checklist-and-first-7-days",
+        permanent: true,
+      },
+      {
         source: "/services/website-maintenance-and-support",
         destination: "https://webgrowth.info/services/website-maintenance",
         permanent: true,
