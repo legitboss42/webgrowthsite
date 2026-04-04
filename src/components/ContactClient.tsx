@@ -32,10 +32,10 @@ export default function ContactClient() {
       "Launch ($150)",
       "Launch + Blog ($250)",
       "Business Website Design",
-      "Landing Page Design",
       "Website Redesign",
-      "Search Engine Optimisation (SEO)",
-      "Lead Magnet Strategy and Build",
+      "Landing Page Design",
+      "Speed & Mobile Optimisation",
+      "Lead Capture & Booking Setup",
     ],
     []
   );
@@ -88,7 +88,7 @@ export default function ContactClient() {
         },
         body: JSON.stringify({
           formType: "contact",
-          subject: `New Web Growth Launch Request - ${service}`,
+          subject: `New Web Growth Project Enquiry - ${service}`,
           turnstileToken,
           fields: {
             name,
@@ -131,19 +131,19 @@ export default function ContactClient() {
   return (
     <div id="contact-form" className="rounded-2xl border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.045),rgba(255,255,255,0.015))] p-7 shadow-[0_18px_44px_rgba(0,0,0,0.22)]">
       <h2 className="text-2xl font-semibold tracking-[-0.01em] text-white">
-        Start your launch request
+        Send your project details
       </h2>
       <p className="mt-3 text-sm leading-6 text-white/70">
-        Send the basics. You will get a clear response on scope, timing, and what is needed to launch.
+        You are contacting Victor Chinukwue directly. Send the basics and I will reply with what makes sense and what to do next.
       </p>
       <div className="mt-5 rounded-xl border border-emerald-400/20 bg-emerald-500/10 p-4">
         <p className="text-xs uppercase tracking-[0.16em] text-emerald-200/90">
-          Best results
+          To get the fastest reply
         </p>
         <ul className="mt-3 space-y-2 text-sm leading-6 text-white/78">
           <li className="flex gap-2">
             <span className="mt-[9px] h-1.5 w-1.5 rounded-full bg-emerald-300" />
-            <span>Tell us what you need built and how quickly you want it live.</span>
+            <span>Say what you need built and how quickly you want it live.</span>
           </li>
           <li className="flex gap-2">
             <span className="mt-[9px] h-1.5 w-1.5 rounded-full bg-emerald-300" />
@@ -151,7 +151,7 @@ export default function ContactClient() {
           </li>
           <li className="flex gap-2">
             <span className="mt-[9px] h-1.5 w-1.5 rounded-full bg-emerald-300" />
-            <span>The clearer the message, the faster we can point you to the right next step.</span>
+            <span>The clearer the message, the easier it is for me to give you a useful answer quickly.</span>
           </li>
         </ul>
       </div>
@@ -177,8 +177,11 @@ export default function ContactClient() {
 
       <form onSubmit={handleSubmit} className="mt-8 space-y-5">
         <div>
-          <label className="mb-2 block text-sm text-white/70">Your name</label>
+          <label htmlFor="contact-name" className="mb-2 block text-sm text-white/70">
+            Your name
+          </label>
           <input
+            id="contact-name"
             type="text"
             required
             value={name}
@@ -188,8 +191,11 @@ export default function ContactClient() {
         </div>
 
         <div>
-          <label className="mb-2 block text-sm text-white/70">Email address</label>
+          <label htmlFor="contact-email" className="mb-2 block text-sm text-white/70">
+            Email address
+          </label>
           <input
+            id="contact-email"
             type="email"
             required
             value={email}
@@ -199,8 +205,11 @@ export default function ContactClient() {
         </div>
 
         <div>
-          <label className="mb-2 block text-sm text-white/70">Service</label>
+          <label htmlFor="contact-service" className="mb-2 block text-sm text-white/70">
+            Service
+          </label>
           <select
+            id="contact-service"
             required
             value={service}
             onChange={(e) => setService(e.target.value)}
@@ -215,8 +224,11 @@ export default function ContactClient() {
         </div>
 
         <div>
-          <label className="mb-2 block text-sm text-white/70">Project details</label>
+          <label htmlFor="contact-message" className="mb-2 block text-sm text-white/70">
+            Project details
+          </label>
           <textarea
+            id="contact-message"
             rows={5}
             required
             value={message}
@@ -250,10 +262,10 @@ export default function ContactClient() {
               : "bg-emerald-700 hover:bg-emerald-600",
           ].join(" ")}
         >
-          {status === "sending" ? "Sending..." : "Send Request"}
+          {status === "sending" ? "Sending..." : "Send Project Details"}
         </button>
         <p className="text-xs leading-6 text-white/55">
-          Typical next step: a direct reply with scope guidance, package fit, and the fastest path to launch.
+          Typical next step: a direct reply from Victor with what fits, what it will take, and what to do next.
         </p>
       </form>
     </div>

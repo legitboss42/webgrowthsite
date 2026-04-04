@@ -52,17 +52,17 @@ export const whatYouGetItems = [
   {
     title: "1-page site structure",
     description:
-      "Your one-page business website includes a hero, services, social proof placeholder, FAQ, and contact section.",
+      "Your one-page website includes the main sections most businesses need: a strong opening, services, trust elements, FAQs, and a contact section.",
   },
   {
     title: "Contact form + WhatsApp link",
     description:
-      "Visitors can contact you through a direct form or WhatsApp, which keeps the path to enquiry simple.",
+      "People can reach you through a contact form or WhatsApp without having to hunt around the page.",
   },
   {
     title: "Basic SEO setup",
     description:
-      "Titles, meta description, sitemap checks, and indexability checks are handled before the 48-hour website launch.",
+      "The important basics are handled before launch, including page titles, meta description, sitemap checks, and indexability checks.",
   },
 ] as const;
 
@@ -72,10 +72,10 @@ export const pricingTiers = [
     price: "$150",
     summary: "One-page business website",
     details: [
-      "Hero, services, social proof placeholder, FAQ, and contact section",
-      "Mobile-first business website layout and clean conversion flow",
+      "Main sections included: hero, services, trust section, FAQ, and contact section",
+      "A layout that works well on mobile and makes it easy for people to contact you",
       "Hosting and domain guidance",
-      "Basic SEO setup before the 48-hour website launch",
+      "Basic SEO setup before the site goes live",
     ],
     startNowHref: "/contact?service=Launch%20($150)",
   },
@@ -85,9 +85,9 @@ export const pricingTiers = [
     summary: "1 page + blog setup + 1 post migrated",
     details: [
       "Everything in Launch",
-      "Blog structure configured for future SEO publishing",
+      "Blog structure set up so you can start publishing later",
       "One existing post migrated and formatted",
-      "Launch-ready setup for Nigeria-based or international clients",
+      "Set up for Nigeria-based or international clients",
     ],
     startNowHref: "/contact?service=Launch%20%2B%20Blog%20($250)",
   },

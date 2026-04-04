@@ -55,7 +55,7 @@ export async function generateMetadata({
 
   return buildPageMetadata({
     title: `${post.title} | Web Growth Blog`,
-    description: `${post.excerpt} Learn the practical next steps and see how it connects to a fast, done-for-you website launch.`,
+    description: post.excerpt,
     path: `/blog/${post.slug}`,
     keywords: postKeywords,
     image: post.cover || DEFAULT_OG_IMAGE,

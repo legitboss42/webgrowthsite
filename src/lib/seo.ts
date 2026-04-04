@@ -68,7 +68,7 @@ export function buildProfessionalServiceSchema(path: string, description: string
     "@context": "https://schema.org",
     "@type": "ProfessionalService",
     "@id": `${absoluteUrl(path)}#professional-service`,
-    name: "WebGrowth",
+    name: "Web Growth",
     url: absoluteUrl(path),
     image: absoluteUrl(DEFAULT_OG_IMAGE),
     description,
@@ -83,14 +83,6 @@ export function buildProfessionalServiceSchema(path: string, description: string
       {
         "@type": "Country",
         name: "Nigeria",
-      },
-      {
-        "@type": "Country",
-        name: "United Kingdom",
-      },
-      {
-        "@type": "Place",
-        name: "Worldwide",
       },
     ],
     address: {
@@ -188,14 +180,6 @@ export function buildOrganizationSchema() {
         "@type": "Country",
         name: "Nigeria",
       },
-      {
-        "@type": "Country",
-        name: "United Kingdom",
-      },
-      {
-        "@type": "Place",
-        name: "Worldwide",
-      },
     ],
     contactPoint: [
       {
@@ -203,7 +187,7 @@ export function buildOrganizationSchema() {
         contactType: "sales",
         email: CONTACT_EMAIL,
         telephone: BUSINESS_PHONE_DISPLAY,
-        areaServed: ["Lagos", "NG", "GB", "Worldwide"],
+        areaServed: ["Lagos", "NG"],
         availableLanguage: ["en"],
       },
     ],
@@ -315,14 +299,6 @@ export function buildHostingOfferSchema() {
         "@type": "Country",
         name: "Nigeria",
       },
-      {
-        "@type": "Country",
-        name: "United Kingdom",
-      },
-      {
-        "@type": "Place",
-        name: "Worldwide",
-      },
     ],
     audience: {
       "@type": "BusinessAudience",
@@ -344,18 +320,19 @@ export function buildHostingOfferSchema() {
 
 export const launchKeywordSet = [
   PRIMARY_KEYWORD,
+  "website design in lagos",
   "48 hour website launch",
   "fast website design",
   "website launch service",
   "small business website design nigeria",
   "lagos web designer",
-  "remote website designer",
+  "website launch lagos",
 ];
 
 export const defaultSiteMetadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "Web Growth | Website Design in 48 Hours",
+    default: "Web Growth | Web Design for Lagos Service Businesses",
     template: "%s",
   },
   description: DEFAULT_DESCRIPTION,

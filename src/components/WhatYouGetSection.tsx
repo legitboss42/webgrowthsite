@@ -31,7 +31,7 @@ export default function WhatYouGetSection({
           <p className="mt-4 max-w-2xl text-lg leading-7 text-white/72">{description}</p>
         </div>
 
-        <div className="mt-10 grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+        <div className="mt-10 grid gap-4 sm:auto-rows-fr sm:grid-cols-2 xl:grid-cols-5">
           {items.map((item, index) => (
             <article
               key={item.title}

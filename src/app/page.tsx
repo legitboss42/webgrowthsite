@@ -1,9 +1,8 @@
 import AnswerHighlightsSection from "@/components/AnswerHighlightsSection";
 import FAQSection from "@/components/FAQSection";
 import FinalCTASection from "@/components/FinalCTASection";
-import CorePageLinks from "@/components/CorePageLinks";
-import EntitySnapshotSection from "@/components/EntitySnapshotSection";
 import HeroSection from "@/components/HeroSection";
+import HomeTrustSection from "@/components/HomeTrustSection";
 import PricingSection from "@/components/PricingSection";
 import SocialProofSection from "@/components/SocialProofSection";
 import StructuredData from "@/components/StructuredData";
@@ -19,115 +18,44 @@ import {
   buildProfessionalServiceSchema,
   launchKeywordSet,
 } from "@/lib/seo";
-import { GET_STARTED_PATH } from "@/lib/site";
 
 const pageDescription =
-  "Website design in 48 hours for businesses in Lagos, Nigeria, the United Kingdom, and remote markets that need a professional one-page website live fast, with domain guidance, hosting, basic SEO, and pricing from $150.";
+  "Web Growth builds websites for Lagos service businesses that want to look more credible, work better on mobile, and get more enquiries.";
 
 const homeBuyerAnswers = [
   {
-    title: "How fast can this go live?",
+    title: "Who this is for",
     answer:
-      "If your core business details and approvals are ready, the website can be launched in 48 hours without dragging the project into weeks of back-and-forth.",
-    href: "/launch",
-    hrefLabel: "See the launch offer",
-  },
-  {
-    title: "What kind of business is this for?",
-    answer:
-      "It is best for service businesses, founders, and lean teams that need a clear online presence before outreach, ads, referrals, or local search starts sending traffic.",
-    href: "/faq",
-    hrefLabel: "Read the FAQ",
-  },
-  {
-    title: "What do you actually get?",
-    answer:
-      "You get a conversion-focused one-page website, domain and hosting guidance, mobile-first structure, and the essential launch SEO basics needed to go live confidently.",
+      "Best for Lagos service businesses that already get some attention but still lose people because the website feels weak, confusing, or old.",
     href: "/pricing",
-    hrefLabel: "Review pricing",
+    hrefLabel: "See pricing",
   },
   {
-    title: "What should I do first?",
+    title: "What you actually get",
     answer:
-      "Start with the launch page if you are ready to move, or use the pricing and FAQ pages if you need to compare the offer before you commit.",
+      "A website that explains what you do more clearly, feels better on mobile, and makes it easier for people to contact you.",
+    href: "/launch",
+    hrefLabel: "See the offer",
+  },
+  {
+    title: "What happens after you enquire",
+    answer:
+      "You get a direct reply from Victor with what makes sense, what it will take, and what the next step should be.",
     href: "/contact",
-    hrefLabel: "Start your website",
-  },
-] as const;
-
-const entitySnapshotItems = [
-  {
-    title: "What Web Growth does",
-    description:
-      "Web Growth helps businesses launch clearer, faster, more conversion-focused websites instead of vague brochure sites that do not support growth.",
-  },
-  {
-    title: "Who it is for",
-    description:
-      "The site is built for service businesses, founders, and lean teams in Nigeria and international markets that need a credible online presence quickly.",
-  },
-  {
-    title: "What the main offer is",
-    description:
-      "The fastest entry point is website design in 48 hours, with domain guidance, hosting setup, and a focused one-page launch from $150.",
-  },
-  {
-    title: "What to read next",
-    description:
-      "Use the launch page for the service, pricing for scope and budget, FAQ for decision support, and the blog for supporting SEO and website strategy guidance.",
-  },
-] as const;
-
-const priorityServiceLinks = [
-  {
-    href: "/services/website-redesign",
-    label: "Redesign",
-    title: "Website redesign in Lagos for outdated sites",
-    description:
-      "Explore the redesign service if your current website feels old, weak on mobile, or no longer converts well.",
-  },
-  {
-    href: "/services/landing-page-design",
-    label: "Landing page",
-    title: "Landing page design service for Lagos campaigns",
-    description:
-      "Use the landing page service if you need a focused page for ads, promotions, or lead generation campaigns.",
-  },
-  {
-    href: "/services/performance-optimisation",
-    label: "Speed",
-    title: "Website speed optimization in Nigeria for better conversions",
-    description:
-      "Use the speed optimization service if slow load times or weak mobile performance are costing you trust and enquiries.",
-  },
-  {
-    href: "/services/google-my-business-setup-optimisation",
-    label: "GBP",
-    title: "Google Business Profile optimization in Lagos",
-    description:
-      "Use the profile optimization service if local buyers need to find you more easily on Google Maps and local search.",
-  },
-  {
-    href: "/web-design-for-real-estate-lagos",
-    label: "Real estate",
-    title: "Web design for real estate in Lagos",
-    description:
-      "Explore the real-estate website page if you need a property-focused website that showcases listings and generates serious enquiries.",
+    hrefLabel: "Send project details",
   },
 ] as const;
 
 export const metadata = buildPageMetadata({
-  title: "Website Design in 48 Hours | Fast Business Website Launch",
+  title: "Web Design for Lagos Service Businesses | Web Growth",
   description: pageDescription,
   path: "/",
   keywords: [
     ...launchKeywordSet,
-    "website design nigeria",
     "website design lagos",
-    "website design united kingdom",
-    "web designer uk",
-    "professional website launch",
-    "one-page website service",
+    "lagos service business website",
+    "conversion focused web design",
+    "small business website design lagos",
   ],
   image: "/images/hero/Hero-Image-1.webp",
 });
@@ -141,20 +69,21 @@ export default function Page() {
         <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.028)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.018)_1px,transparent_1px)] bg-[size:42px_42px] opacity-25" />
 
         <HeroSection
-          eyebrow="48-Hour Website Launch"
-          title="Website design in 48 hours for businesses that need a professional website live fast"
-          description="Website design in 48 hours with domain guidance, hosting setup, and a high-converting one-page business website done for you."
-          primaryLabel="Get Started"
-          primaryHref={GET_STARTED_PATH}
-          secondaryLabel="See the Launch Offer"
-          secondaryHref="/launch"
-          trustLine="Fast turnaround | Mobile-first | Simple pricing"
-          locationNote="Built for businesses in Lagos, Nigeria, the United Kingdom, and remote markets that want a fast launch partner without agency drag."
-          asideTitle="Launch sequence"
+          eyebrow="Web Design for Service Businesses"
+          title="Websites that help service businesses look more credible and get more enquiries"
+          description="I build websites for businesses that are tired of looking average online and want something clearer, faster, and easier for people to act on."
+          primaryLabel="Get My Website Quote"
+          primaryHref="/contact"
+          secondaryLabel="See Pricing"
+          secondaryHref="/pricing"
+          trustLine="Work directly with Victor | Built mobile-first | You keep control of your domain and hosting"
+          locationNote="Best for Lagos service businesses that need a stronger website before putting more money into ads, outreach, or referrals."
+          fitTags={["Lagos", "Service businesses", "Fast launch"]}
+          asideTitle="What you get"
           asideItems={[
-            "Offer, structure, and conversion path locked in quickly.",
-            "Domain, hosting, page build, and SEO basics handled in one flow.",
-            "Launch-ready delivery so you can start sending traffic immediately.",
+            "A clearer site that tells people what you do without making them work for it.",
+            "A mobile-first layout that feels more trustworthy from the first visit.",
+            "A simple next step so people know how to contact you or book.",
           ]}
           imageAlt="Website design in 48 hours hero image for Web Growth"
           showCodeRain
@@ -162,87 +91,13 @@ export default function Page() {
           pageType="homepage"
         />
 
+        <HomeTrustSection />
+
         <AnswerHighlightsSection
           eyebrow="Buyer questions"
-          title="The questions serious prospects usually ask first"
-          description="This gives you the fast version up front, so you can tell quickly whether the offer matches your business, timeline, and launch stage."
+          title="The questions people usually ask before they reach out"
+          description="These are the quick answers most people want before they decide whether to start the conversation."
           items={homeBuyerAnswers}
-        />
-
-        <EntitySnapshotSection
-          title="A clearer summary of what this website is here to help you do"
-          description="This makes the business easier to understand quickly, which helps both human visitors and AI-style answer systems interpret the site without guessing."
-          items={entitySnapshotItems}
-          links={[
-            { href: "/about", label: "About Web Growth" },
-            { href: "/launch", label: "See the main offer" },
-            { href: "/blog", label: "Browse practical guides" },
-          ]}
-        />
-
-        <CorePageLinks
-          eyebrow="Core pages"
-          title="See how the 48-hour website launch works before you commit"
-          description="These crawlable text links make it easy to review the offer, compare pricing, and check launch questions without losing your place."
-          links={[
-            {
-              href: "/launch",
-              label: "Offer",
-              title: "Explore the 48-hour launch service",
-              description:
-                "See exactly what is included in the done-for-you website design in 48 hours offer.",
-            },
-            {
-              href: "/pricing",
-              label: "Pricing",
-              title: "Review 48-hour launch pricing",
-              description:
-                "Compare the one-page business website package and the blog-ready option starting at $150.",
-            },
-            {
-              href: "/faq",
-              label: "FAQ",
-              title: "Read the launch FAQ",
-              description:
-                "Get quick answers on timing, ownership, revisions, support, and launch expectations.",
-            },
-          ]}
-        />
-
-        <CorePageLinks
-          eyebrow="Location pages"
-          title="Use the location page that matches the market you want to target"
-          description="These pages support Lagos and United Kingdom commercial intent without forcing location keywords onto pages where they do not belong."
-          links={[
-            {
-              href: "/website-design-lagos",
-              label: "Lagos",
-              title: "Website design in Lagos for service businesses",
-              description:
-                "Use the Lagos page if you want a commercial overview built around local trust, mobile UX, and enquiry flow.",
-            },
-            {
-              href: "/website-design-united-kingdom",
-              label: "United Kingdom",
-              title: "Website design for UK service businesses",
-              description:
-                "Use the UK page if you want a stronger website for a United Kingdom market without forcing a local office claim.",
-            },
-            {
-              href: "/web-design-for-real-estate-lagos",
-              label: "Real estate",
-              title: "Web design for real estate in Lagos",
-              description:
-                "Use the real-estate page if you want a Lagos property-focused commercial page instead of a general service overview.",
-            },
-          ]}
-        />
-
-        <CorePageLinks
-          eyebrow="Priority services"
-          title="Explore the service pages built for higher-intent website growth needs"
-          description="These internal links help search engines and buyers understand the next commercial pages to review when the need is redesign, landing page conversion, speed, or local visibility."
-          links={priorityServiceLinks}
         />
 
         <WhatYouGetSection items={whatYouGetItems} />

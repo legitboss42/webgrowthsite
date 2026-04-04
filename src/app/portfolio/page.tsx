@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import PortfolioClient from "@/components/PortfolioClient";
 
 export const metadata: Metadata = {
-  title: "Web Design Portfolio - Case Studies & Results",
+  title: "Portfolio | Real Website Projects by Web Growth",
   description:
-    "Explore Web Growth web design portfolio case studies: modern websites, landing pages, and redesigns built for clarity, trust, and real business results.",
+    "Browse a small selection of real websites launched by Web Growth for interiors, aesthetics, fitness, and ecommerce brands.",
   keywords: [
     "web design",
     "web design services",
@@ -19,26 +19,26 @@ export const metadata: Metadata = {
     canonical: "https://webgrowth.info/portfolio",
   },
   openGraph: {
-    title: "Web Design Portfolio",
+    title: "Portfolio | Real Website Projects by Web Growth",
     description:
-      "Case studies and examples of premium websites built for performance and conversions.",
+      "A curated selection of real websites launched by Web Growth.",
     url: "https://webgrowth.info/portfolio",
     siteName: "Web Growth",
     images: [
       {
-        url: "https://webgrowth.info/images/hero/Hero-Image-1.webp",
+        url: "https://webgrowth.info/images/portfolio/tlc-interiors-desktop.jpg",
         width: 1200,
         height: 630,
-        alt: "Web Growth Portfolio",
+        alt: "Web Growth portfolio preview",
       },
     ],
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Web Design Portfolio",
-    description: "Case studies and results from our web design work.",
-    images: ["https://webgrowth.info/images/hero/Hero-Image-1.webp"],
+    title: "Portfolio | Real Website Projects by Web Growth",
+    description: "A curated selection of real websites launched by Web Growth.",
+    images: ["https://webgrowth.info/images/portfolio/tlc-interiors-desktop.jpg"],
   },
   robots: { index: true, follow: true },
 };

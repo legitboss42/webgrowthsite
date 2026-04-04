@@ -6,17 +6,12 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 
 type NavKey = "services" | "about" | "portfolio" | "contact";
-type LatestPostHeadline = {
-  slug: string;
-  title: string;
-};
 
 const HOME_SECTIONS: NavKey[] = ["services", "about", "portfolio", "contact"];
 
-export default function Header({ latestPost }: { latestPost?: LatestPostHeadline }) {
+export default function Header() {
   const pathname = usePathname();
   const isHome = pathname === "/";
-  const tickerRepeats = 2;
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState<NavKey | null>(null);
@@ -139,34 +134,8 @@ export default function Header({ latestPost }: { latestPost?: LatestPostHeadline
       </Link>
     );
   };
-  const mobileMenuTop = latestPost ? "top-[126px]" : "top-[88px]";
-
   return (
     <header className="fixed top-0 left-0 right-0 z-50">
-      {latestPost && (
-        <Link
-          href={`/blog/${latestPost.slug}`}
-          className="block w-full border-b border-emerald-400/25 bg-black/95 py-2 transition hover:bg-black"
-          title={latestPost.title}
-        >
-          <div className="latest-headline-ticker">
-            <div className="latest-headline-track">
-              {Array.from({ length: tickerRepeats }).map((_, idx) => (
-                <span key={idx} className="latest-headline-item">
-                  <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-emerald-300/90 md:text-xs">
-                    Latest Post
-                  </span>
-                  <span className="block min-w-0 max-w-[66vw] truncate text-xs font-medium text-white/90 md:max-w-none md:text-sm">
-                    {latestPost.title}
-                  </span>
-                  <span aria-hidden="true" className="text-white/45">|</span>
-                </span>
-              ))}
-            </div>
-          </div>
-        </Link>
-      )}
-
       {/* Soft hero melt only at top */}
       <div
         className={[
@@ -278,7 +247,7 @@ export default function Header({ latestPost }: { latestPost?: LatestPostHeadline
             className="fixed inset-0 z-40 bg-black/60 md:hidden"
           />
 
-          <div className={["fixed left-0 right-0 z-50 md:hidden", mobileMenuTop].join(" ")}>
+          <div className="fixed left-0 right-0 top-[88px] z-50 md:hidden">
             <div className="mx-auto max-w-6xl px-6">
               <div className="rounded-xl border border-white/10 bg-black/80 backdrop-blur p-5">
                 <div className="flex flex-col gap-4">

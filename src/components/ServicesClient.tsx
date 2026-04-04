@@ -7,7 +7,6 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 import SectionHeading from "@/components/SectionHeading";
 import CTASection from "@/components/CTASection";
-import { NEW_SERVICES_LIST } from "@/lib/newServiceConfigs";
 
 export type Service = {
   title: string;
@@ -25,7 +24,6 @@ type Props = {
 export default function ServicesClient({ services: servicesProp }: Props) {
   const pageRef = useRef<HTMLDivElement | null>(null);
 
-  // Fallback (your current static list)
   const fallbackServices = useMemo<Service[]>(
     () => [
       {
@@ -55,57 +53,14 @@ export default function ServicesClient({ services: servicesProp }: Props) {
         bullets: ["Better structure", "Improved trust", "Cleaner conversion path"],
         image: "/images/services/services-redesign.webp",
       },
-      {
-        title: "E-commerce Website Design",
-        short:
-          "Online stores built to earn trust and make buying simple + product pages + checkout done right.",
-        slug: "/services/ecommerce-website-design",
-        serviceParam: "E-commerce Website Design",
-        bullets: ["Product UX", "Trust signals", "Checkout clarity"],
-        image: "/images/services/services-ecommerce.webp",
-      },
-      {
-        title: "Website Maintenance & Support",
-        short:
-          "Monthly care to keep your website secure, updated, fast, and reliable, no surprises.",
-        slug: "/services/website-maintenance",
-        serviceParam: "Website Maintenance & Support",
-        bullets: ["Updates + backups", "Security checks", "Ongoing fixes"],
-        image: "/images/services/services-maintenance.webp",
-      },
-      {
-        title: "Speed & Performance Optimisation",
-        short:
-          "Fix slow websites properly: faster load times, better mobile experience, improved Core Web Vitals.",
-        slug: "/services/performance-optimisation",
-        serviceParam: "Speed & Performance Optimisation",
-        bullets: ["Speed audit", "Asset cleanup", "Core Web Vitals improvements"],
-        image: "/images/services/services-speed.webp",
-      },
-      {
-        title: "Website Audit & Consultation",
-        short:
-          "A clear diagnosis of what is blocking results, plus a practical plan to fix it.",
-        slug: "/services/website-audit",
-        serviceParam: "Website Audit & Consultation",
-        bullets: ["Clarity + trust", "Conversion flow", "SEO + performance basics"],
-        image: "/images/services/services-audit.webp",
-      },
     ],
     []
   );
 
-  const services = useMemo<Service[]>(() => {
-    const base = servicesProp?.length ? servicesProp : fallbackServices;
-    const merged = [...base, ...NEW_SERVICES_LIST];
-    const bySlug = new Map<string, Service>();
-
-    merged.forEach((service) => {
-      bySlug.set(service.slug, service);
-    });
-
-    return Array.from(bySlug.values());
-  }, [fallbackServices, servicesProp]);
+  const services = useMemo<Service[]>(
+    () => (servicesProp?.length ? servicesProp : fallbackServices),
+    [fallbackServices, servicesProp]
+  );
 
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
@@ -177,12 +132,12 @@ export default function ServicesClient({ services: servicesProp }: Props) {
                 SERVICES
               </div>
               <h1 className="mt-4 text-4xl md:text-5xl font-semibold leading-tight">
-                Web design services built for real business outcomes.
+                Website services built to help local businesses get more enquiries.
               </h1>
               <p className="mt-6 text-lg text-white/70 leading-relaxed">
-                We do not sell pretty websites. We build clear, trustworthy,
-                performance-aware web experiences that help businesses attract
-                customers and grow.
+                The public offer should stay simple. Start with a new business
+                website, a landing page, or a redesign if your current site is
+                already costing you leads.
               </p>
 
               <div className="mt-10 flex flex-col sm:flex-row gap-3">
@@ -190,13 +145,13 @@ export default function ServicesClient({ services: servicesProp }: Props) {
                   href="/contact"
                   className="rounded-md bg-emerald-600 px-7 py-3.5 text-sm font-semibold text-white text-center hover:bg-emerald-500 transition"
                 >
-                  Request a Quote
+                  Get a Quote
                 </Link>
                 <Link
-                  href="/portfolio"
+                  href="/pricing"
                   className="rounded-md border border-white/15 bg-black/30 px-7 py-3.5 text-sm font-semibold text-white/90 text-center hover:bg-black/50 transition"
                 >
-                  View Portfolio
+                  See Pricing
                 </Link>
               </div>
             </div>
@@ -220,8 +175,8 @@ export default function ServicesClient({ services: servicesProp }: Props) {
           <div data-reveal-item>
             <SectionHeading
               eyebrow="WHAT WE DO"
-              title="Choose a service"
-              description="Each service has its own page with deeper details. Every service also has a dedicated quote request path."
+              title="Start with the service that fixes the biggest leak"
+              description="Each page is built around a specific buyer need, a clear scope, and a direct quote request."
             />
           </div>
 
@@ -290,12 +245,12 @@ export default function ServicesClient({ services: servicesProp }: Props) {
         <div className="mx-auto max-w-6xl px-6">
           <CTASection
             eyebrow="READY"
-            title="Not sure what you need?"
-            description="We can quickly recommend the best option based on your goal, budget, and timeline."
-            primaryCtaText="Request a Quote"
+            title="Not sure whether you need a new site or a redesign?"
+            description="Start with a quote request. We will tell you the fastest path to a better website without wasting your budget."
+            primaryCtaText="Get a Quote"
             primaryHref="/contact"
-            secondaryCtaText="Website Audit"
-            secondaryHref="/services/website-audit"
+            secondaryCtaText="Contact Us"
+            secondaryHref="/contact"
             imageUrl="/images/services/services-cta.webp"
           />
         </div>

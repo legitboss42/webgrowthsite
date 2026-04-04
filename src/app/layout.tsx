@@ -4,7 +4,6 @@ import { GoogleAnalytics } from "@next/third-parties/google";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import StructuredData from "@/components/StructuredData";
-import { getPosts } from "@/lib/posts";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/react";
 import {
@@ -59,23 +58,7 @@ const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
 const CLARITY_ID = process.env.NEXT_PUBLIC_CLARITY_ID;
 const IS_PRODUCTION = process.env.NODE_ENV === "production";
 
-type LatestPostHeadline = {
-  slug: string;
-  title: string;
-} | null;
-
-function getLatestPostHeadline(): LatestPostHeadline {
-  try {
-    const latest = getPosts()[0];
-    if (!latest?.slug || !latest?.title) return null;
-    return { slug: latest.slug, title: latest.title };
-  } catch {
-    return null;
-  }
-}
-
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  const latestPost = getLatestPostHeadline();
   const siteSchemas = [buildWebsiteSchema(), buildOrganizationSchema()];
 
   return (
@@ -169,43 +152,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </noscript>
         ) : null}
 
-        <Header latestPost={latestPost ?? undefined} />
-        <main className={latestPost ? "pt-44 md:pt-40" : "pt-28"}>{children}</main>
+        <Header />
+        <main className="pt-28">{children}</main>
         <Footer />
         <WebVitals />
-
-        <Script id="analytics-spy" strategy="lazyOnload">
-          {`
-            (function() {
-              const run = function() {
-                const payload = JSON.stringify({
-                  page_url: window.location.href,
-                  referrer: document.referrer || "Direct",
-                });
-                const endpoint = 'https://analytics-dashboard-fqnf.vercel.app/api/track';
-
-                if (navigator.sendBeacon) {
-                  navigator.sendBeacon(endpoint, new Blob([payload], { type: 'application/json' }));
-                  return;
-                }
-
-                fetch(endpoint, {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: payload,
-                  keepalive: true,
-                }).catch(function() {});
-              };
-
-              if ('requestIdleCallback' in window) {
-                requestIdleCallback(run, { timeout: 2000 });
-                return;
-              }
-
-              setTimeout(run, 1200);
-            })();
-          `}
-        </Script>
       </body>
     </html>
   );

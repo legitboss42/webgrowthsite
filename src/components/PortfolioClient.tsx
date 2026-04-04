@@ -7,9 +7,9 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import SectionHeading from "@/components/SectionHeading";
 import CaseStudyCard from "@/components/CaseStudyCard";
 import CTASection from "@/components/CTASection";
-import { portfolioCases } from "@/lib/portfolioCases";
+import { portfolioCases, type PortfolioCase } from "@/lib/portfolioCases";
 
-type Filter = "All" | "Business Sites" | "Landing Pages" | "Redesign" | "E-commerce";
+type Filter = "All" | PortfolioCase["type"];
 
 export default function PortfolioClient() {
   const pageRef = useRef<HTMLDivElement | null>(null);
@@ -19,7 +19,10 @@ export default function PortfolioClient() {
 
   const [filter, setFilter] = useState<Filter>("All");
 
-  const filters: Filter[] = ["All", "Business Sites", "Landing Pages", "Redesign", "E-commerce"];
+  const filters = useMemo(
+    () => ["All", ...new Set(portfolioCases.map((item) => item.type))] as Filter[],
+    []
+  );
 
   const filtered = useMemo(() => {
     if (filter === "All") return portfolioCases;
@@ -92,35 +95,49 @@ export default function PortfolioClient() {
             <div>
               <div className="text-sm tracking-[0.25em] text-white/50">PORTFOLIO</div>
               <h1 className="mt-4 text-4xl md:text-5xl font-semibold leading-tight">
-                Work that looks premium and performs with purpose.
+                Real website work, plus one proposal worth showing.
               </h1>
               <p className="mt-6 text-white/70 leading-relaxed text-lg">
-                These case studies show the type of outcomes we build for: clarity,
-                trust, conversion flow, and speed. Replace placeholders with real
-                projects as you complete them.
+                This is a small, curated selection of shipped client work plus one
+                clearly labeled proposal. The goal is not to fake volume. The goal
+                is to show the level of clarity, trust, and conversion structure you
+                can expect when the work is done properly.
               </p>
+
+              <div className="mt-6 flex flex-wrap gap-3 text-sm text-white/70">
+                <span className="rounded-full border border-white/10 bg-black/35 px-4 py-2">
+                  3 live projects
+                </span>
+                <span className="rounded-full border border-white/10 bg-black/35 px-4 py-2">
+                  1 clearly labeled proposal
+                </span>
+                <span className="rounded-full border border-white/10 bg-black/35 px-4 py-2">
+                  Built for trust and enquiries
+                </span>
+              </div>
 
               <div className="mt-10 flex flex-col sm:flex-row gap-3">
                 <a
                   href="/contact"
                   className="inline-flex items-center justify-center rounded-md bg-emerald-600 px-7 py-3.5 text-sm font-semibold text-white transition hover:bg-emerald-500"
                 >
-                  Request a Quote
+                  Get My Website Quote
                 </a>
                 <a
-                  href="/services"
+                  href="/pricing"
                   className="inline-flex items-center justify-center rounded-md border border-white/15 bg-black/30 px-7 py-3.5 text-sm font-semibold text-white/90 transition hover:bg-black/50"
                 >
-                  View Services
+                  See Pricing
                 </a>
               </div>
             </div>
 
-            {/* Image placeholder */}
             <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-black/40">
               <div
                 className="h-[320px] md:h-[420px] bg-cover bg-center opacity-80"
-                style={{ backgroundImage: "url(/images/portfolio/portfolio-hero.webp)" }}
+                style={{
+                  backgroundImage: "url(/images/portfolio/tlc-interiors-desktop.jpg)",
+                }}
               />
               <div className="absolute inset-0 bg-black/35" />
             </div>
@@ -133,13 +150,12 @@ export default function PortfolioClient() {
         <div className="mx-auto max-w-6xl px-6">
           <div className="portfolio-head max-w-2xl">
             <SectionHeading
-              eyebrow="CASE STUDIES"
-              title="Browse by project type"
-              description="Filter to see the kind of build you need. Each card is a placeholder until you replace it with real projects."
+              eyebrow="REAL PROJECTS"
+              title="Browse shipped work and the iFitness proposal by project type"
+              description="Use the filters to review the kind of build you need. Live projects are marked as live, and the iFitness concept is marked clearly as a proposal."
             />
           </div>
 
-          {/* Filters (interactive) */}
           <div className="portfolio-head mt-10 flex flex-wrap gap-2">
             {filters.map((f) => {
               const active = f === filter;
@@ -161,21 +177,27 @@ export default function PortfolioClient() {
             })}
           </div>
 
-          {/* Cards */}
-          <div className="mt-12 grid gap-7 md:grid-cols-3">
+          <div className="mt-12 grid gap-7 md:auto-rows-fr md:grid-cols-3">
             {filtered.map((c) => (
-              <div key={c.title} className="portfolio-card">
+              <div key={c.title} className="portfolio-card flex h-full min-h-0 flex-col">
                 <CaseStudyCard
                   title={c.title}
                   client={c.client}
+                  status={c.status}
                   summary={c.summary}
                   results={c.results}
                   imageUrl={c.imageUrl}
-                  href="/contact"
+                  imageAlt={c.imageAlt}
+                  href={c.liveUrl}
+                  className="shrink-0"
                 />
 
-                {/* Extra details block for credibility */}
-                <div className="mt-4 rounded-xl border border-white/10 bg-black/30 backdrop-blur px-5 py-4">
+                <div className="mt-4 flex min-h-0 flex-1 flex-col rounded-xl border border-white/10 bg-black/30 px-5 py-4 backdrop-blur">
+                  {c.status === "Proposal" ? (
+                    <div className="mb-4 rounded-xl border border-amber-300/25 bg-amber-500/10 px-4 py-3 text-sm leading-6 text-amber-100">
+                      This is a proposal concept, not shipped client work. It is shown here because the conversion structure and page direction are worth reviewing.
+                    </div>
+                  ) : null}
                   <div className="text-sm font-semibold text-white/85">What was included</div>
                   <ul className="mt-3 space-y-2 text-sm text-white/65">
                     {c.stack.map((s) => (
@@ -186,21 +208,31 @@ export default function PortfolioClient() {
                     ))}
                   </ul>
 
-                  <a
-                    href="/contact"
-                    className="mt-4 inline-flex w-full items-center justify-center rounded-md bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-500"
-                  >
-                    Request a Quote
-                  </a>
+                  <div className="mt-4 grid gap-3 sm:mt-auto sm:grid-cols-2">
+                    <a
+                      href={c.liveUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex w-full items-center justify-center rounded-md bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-500"
+                    >
+                      {c.status === "Proposal" ? "View Proposal Preview" : "View Live Site"}
+                    </a>
+                    <a
+                      href={`/contact?project=${encodeURIComponent(c.client)}`}
+                      className="inline-flex w-full items-center justify-center rounded-md border border-white/15 bg-black/35 px-4 py-2.5 text-sm font-semibold text-white/90 transition hover:bg-black/50"
+                    >
+                      Request Similar Build
+                    </a>
+                  </div>
                 </div>
               </div>
             ))}
           </div>
 
-          {/* Empty state */}
           {filtered.length === 0 && (
             <div className="mt-16 rounded-2xl border border-white/10 bg-black/40 backdrop-blur p-10 text-white/70">
-              No projects in this category yet. Add a case study here when ready.
+              No live projects match this filter yet. Clear the filter to see the
+              current launches.
             </div>
           )}
         </div>
@@ -212,16 +244,16 @@ export default function PortfolioClient() {
           <div className="proof-block grid gap-6 md:grid-cols-3">
             {[
               {
-                title: "Clarity",
-                text: "Visitors should understand what you do in seconds - that’s where conversions start.",
+                title: "Clear positioning",
+                text: "The strongest projects make the offer understandable fast instead of forcing buyers to decode the page.",
               },
               {
-                title: "Trust",
-                text: "Proof, structure, and good UX make people comfortable enough to reach out or buy.",
+                title: "Mobile trust",
+                text: "A polished desktop layout is not enough. These builds are structured to feel credible on phones where most visitors first judge the business.",
               },
               {
-                title: "Performance",
-                text: "Slow sites lose money. We build fast experiences that don’t frustrate users.",
+                title: "Stronger action",
+                text: "The layout, hierarchy, and CTA flow are there to move the right visitor toward an enquiry, booking, or purchase.",
               },
             ].map((p) => (
               <div
@@ -237,11 +269,11 @@ export default function PortfolioClient() {
           <div className="proof-block mt-14">
             <CTASection
               eyebrow="NEXT STEP"
-              title="Want results like this? Let’s scope your project."
-              description="Tell us what you do and what you need. We’ll recommend the best approach and send a clear proposal."
-              primaryCtaText="Request a Quote"
+              title="Want a website that feels this clear before you start sending traffic?"
+              description="If your current site still looks generic, slow, or vague, start with a quote request and we will map the fastest fix."
+              primaryCtaText="Get My Website Quote"
               primaryHref="/contact"
-              secondaryCtaText="View Pricing"
+              secondaryCtaText="See Pricing"
               secondaryHref="/pricing"
               imageUrl="/images/portfolio/portfolio-cta-2.webp"
             />

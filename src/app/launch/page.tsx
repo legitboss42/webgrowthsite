@@ -23,26 +23,26 @@ import {
 import { BOOKING_URL, GET_STARTED_PATH } from "@/lib/site";
 
 const pageDescription =
-  "Website design in 48 hours for businesses in Lagos, Nigeria, the United Kingdom, and remote markets that need a professional site live fast, with domain guidance, hosting, a conversion-focused one-page build, and pricing from $150.";
+  "A fast website launch for businesses that need a clean one-page site live quickly, with setup help and pricing from $150.";
 
 const launchSteps = [
   {
     label: "Day 1",
     title: "Direction locked",
     description:
-      "We confirm the offer, headline, CTA path, brand assets, and the exact scope before the build starts.",
+      "We confirm the offer, the main message, the call to action, and what is being built before anything starts.",
   },
   {
     label: "Build",
     title: "Page assembled fast",
     description:
-      "The one-page business website is built with mobile-first structure, launch-ready copy blocks, and clean SEO basics.",
+      "The one-page site is built with a clear structure, mobile-friendly layout, and the basics needed to go live.",
   },
   {
     label: "Go live",
     title: "Launch and handoff",
     description:
-      "Domain connection, hosting setup, final checks, and a simple handoff so you can start sending traffic immediately.",
+      "I connect the domain, finish the checks, and hand it over so you can start using it right away.",
   },
 ] as const;
 
@@ -50,7 +50,7 @@ const fitPoints = [
   "Founders who need a professional website before outreach starts",
   "Service businesses that want a focused one-page business website first",
   "Lagos and Nigeria-based brands that need a remote partner and a fast delivery window",
-  "United Kingdom and international clients who want a done-for-you website launch without agency drag",
+  "Remote clients who want a simple website process without weeks of back-and-forth",
 ] as const;
 
 const comparisonPoints = [
@@ -76,28 +76,28 @@ const buyerQuestionAnswers = [
   {
     title: "What do you need from me?",
     answer:
-      "A clear offer, basic business information, contact details, and quick approvals. This service works best when you want speed and can respond during the build window.",
+      "A clear offer, your business details, contact information, and quick approvals. This works best when you want speed and can reply during the build.",
     href: "/blog/website-launch-checklist-for-small-businesses",
     hrefLabel: "Use the launch checklist",
   },
   {
     title: "Is this only for Nigeria-based businesses?",
     answer:
-      "No. The service is built for Nigeria-based businesses and international clients who want a remote partner, simple communication, and a focused done-for-you launch.",
+      "No. It works for Nigeria-based businesses and remote clients who want a straightforward process and a site live quickly.",
     href: "/faq",
     hrefLabel: "See launch questions",
   },
   {
     title: "What happens after the page goes live?",
     answer:
-      "You can start sending traffic immediately, then expand into more pages, blog content, or deeper SEO once the first launch is working and validated.",
+      "You can start using the site right away, then add more pages, blog content, or extra SEO later if you need it.",
     href: "/pricing",
     hrefLabel: "Compare next-step packages",
   },
   {
     title: "Why choose this over a longer build?",
     answer:
-      "Because many businesses need a clean, credible online presence now. This keeps the scope focused so speed, clarity, and conversion are not buried under unnecessary process.",
+      "Because a lot of businesses do not need a long build. They just need a clean, solid site live now so they can stop waiting.",
     href: "/contact",
     hrefLabel: "Start your website",
   },
@@ -107,36 +107,34 @@ const launchEntitySnapshot = [
   {
     title: "What this page is about",
     description:
-      "This is the focused service page for the 48-hour website launch, not a general web design overview or a long custom-build process.",
+      "This page is for the 48-hour launch offer, not a full custom-build process.",
   },
   {
     title: "What Web Growth is offering here",
     description:
-      "A done-for-you one-page business website with domain guidance, hosting setup, mobile-first structure, and clean launch basics handled in one flow.",
+      "A one-page business website with domain guidance, hosting setup, and the main launch basics handled in one go.",
   },
   {
     title: "Who should use it",
     description:
-      "Businesses that need to get online fast, want a professional first impression, and do not want weeks of unnecessary project drag.",
+      "Businesses that need to get online quickly and do not want the project to drag on for weeks.",
   },
   {
     title: "What comes after this",
     description:
-      "After launch, the site can expand into pricing, blog support, deeper SEO, service pages, or broader website growth work as needed.",
+      "After launch, you can add more pages, blog content, SEO work, or a bigger redesign if the business needs it.",
   },
 ] as const;
 
 export const metadata = buildPageMetadata({
-  title: "Website Design in 48 Hours | Launch Your Business Website Fast",
+  title: "48-Hour Website Launch for Lagos Service Businesses | Web Growth",
   description: pageDescription,
   path: "/launch",
   keywords: [
     ...launchKeywordSet,
-    "website design lagos",
     "website launch in nigeria",
-    "website design united kingdom",
-    "web designer uk",
     "remote website launch service",
+    "one page website launch",
   ],
   image: "/images/hero/Hero-Image-1.webp",
 });
@@ -153,12 +151,12 @@ function LaunchHero() {
             Launch Offer
           </p>
           <h1 className="mt-5 text-balance text-4xl font-semibold leading-[1.02] tracking-[-0.02em] md:text-6xl">
-            Website design in 48 hours for businesses that need to go live without delay
+            A website launch for businesses that need to go live fast
           </h1>
           <p className="mt-6 max-w-2xl text-lg leading-8 text-white/75">
-            Website design in 48 hours with domain guidance, hosting setup, and a
-            conversion-focused one-page business website delivered in a fast,
-            done-for-you flow for Lagos, Nigeria, United Kingdom, and remote clients.
+            If you need a clean one-page website without dragging the project
+            out for weeks, this is the fastest option. I handle the setup, the
+            build, and the basics needed to get it live.
           </p>
 
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
@@ -249,8 +247,7 @@ function LaunchHero() {
             <div className="mt-6 rounded-2xl border border-white/10 bg-black/35 p-5">
               <p className="text-sm font-semibold text-white">Supporting sentence</p>
               <p className="mt-2 text-sm leading-7 text-white/74">
-                This website design in 48 hours offer stays focused so you can launch
-                quickly now and expand into services, blog content, or deeper SEO later.
+                The point is to get the first version live quickly, then build on it later if the business needs more.
               </p>
             </div>
           </div>
@@ -269,12 +266,11 @@ function LaunchFitSection() {
             Best fit
           </p>
           <h2 className="mt-4 text-balance text-3xl font-semibold leading-tight tracking-[-0.01em] md:text-5xl">
-            Who this 48-hour launch is actually for
+            Who this fast launch is really for
           </h2>
           <p className="mt-4 text-lg leading-7 text-white/72">
-            The homepage introduces the offer. This page is where we get specific
-            about the type of business, timeline, and launch constraints the service
-            is designed to solve.
+            This offer works best for businesses that want a solid one-page site
+            first and do not need a huge build straight away.
           </p>
         </div>
 
@@ -302,12 +298,11 @@ function LaunchComparisonSection() {
             Quick filter
           </p>
           <h2 className="mt-4 text-balance text-3xl font-semibold leading-tight tracking-[-0.01em] md:text-5xl">
-            A simple way to tell if this launch offer matches your situation
+            A quick way to tell if this offer fits
           </h2>
           <p className="mt-4 text-lg leading-7 text-white/72">
-            This keeps the service page practical. You should be able to decide
-            quickly whether the 48-hour website launch is the right next step or
-            whether your project needs a bigger scope first.
+            You should be able to tell pretty quickly whether this is enough for
+            your business or whether you need a bigger project.
           </p>
         </div>
 
@@ -344,13 +339,13 @@ export default function LaunchPage() {
         <LaunchFitSection />
         <AnswerHighlightsSection
           eyebrow="Decision support"
-          title="What buyers usually want clarified before they say yes"
-          description="These are the practical answers that help people decide whether the 48-hour offer is the right move now or whether they need a bigger scope first."
+          title="The questions people usually ask before they commit"
+          description="These answers help you tell whether the fast launch is enough for now or whether you need something bigger."
           items={buyerQuestionAnswers}
         />
         <EntitySnapshotSection
-          title="The simple summary of what this launch offer does"
-          description="This section removes ambiguity. It gives a clean, factual summary of the offer, who it helps, and what the next step looks like."
+          title="What this offer includes in plain English"
+          description="If you want the short version, this is it."
           items={launchEntitySnapshot}
           links={[
             { href: "/pricing", label: "Compare launch pricing" },
@@ -360,16 +355,16 @@ export default function LaunchPage() {
         />
         <PricingSection
           tiers={pricingTiers}
-          title="Choose the launch package that matches your timeline"
-          description="Straight USD pricing for a focused launch. Ideal when speed, clarity, and clean delivery matter more than bloated scope, and when you need a website design in 48 hours without sacrificing the basics."
+          title="Pick the package that fits"
+          description="Simple USD pricing for getting a one-page site live without overcomplicating the job."
           pageType="launch_pricing"
         />
         <LaunchComparisonSection />
 
         <CorePageLinks
           eyebrow="Next steps"
-          title="Review pricing, launch questions, and supporting resources"
-          description="If the offer fits your timeline, use these internal links to compare package options, check FAQs, and read launch-focused articles before you start."
+          title="A few useful next steps"
+          description="If this looks like the right fit, these pages will help you decide a little faster."
           links={[
             {
               href: "/pricing",
@@ -397,18 +392,18 @@ export default function LaunchPage() {
 
         <WhatYouGetSection
           items={whatYouGetItems}
-          title="What your website design in 48 hours package includes"
-          description="This section goes deeper into the actual launch deliverables, so the service page feels more operational and less like a broad homepage overview."
+          title="What is included in the package"
+          description="These are the main pieces that come with the launch."
         />
         <SocialProofSection cards={socialProofCards} />
         <FAQSection
           items={launchFaqs}
           title="Questions about the 48-hour launch"
-          description="These are the practical questions people ask before they commit to a fast website build."
+          description="These are the questions people usually ask before saying yes."
         />
         <FinalCTASection
           title="Ready to stop researching and get your website live?"
-          description="If the offer fits your stage, use the fastest next step for your process and move toward a live website instead of keeping the project stuck in planning."
+          description="If this looks right for your business, send the details and let’s get the site moving."
           pageType="launch_final_cta"
         />
       </main>

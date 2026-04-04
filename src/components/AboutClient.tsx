@@ -1,146 +1,79 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
-import BlogInlineCTA from "@/components/BlogInlineCTA";
 import CTASection from "@/components/CTASection";
-import EntitySnapshotSection from "@/components/EntitySnapshotSection";
 import FAQAccordion from "@/components/FAQAccordion";
 import SectionHeading from "@/components/SectionHeading";
 
-type ValueItem = {
-  title: string;
-  text: string;
-  icon: "strategy" | "design" | "performance";
-};
+const trustPoints = [
+  {
+    title: "Built to get a response",
+    text: "I do not treat the website like decoration. It needs to help people trust the business and make it easier for them to reach out.",
+  },
+  {
+    title: "You deal with one person",
+    text: "You work with me directly from start to finish, so nothing gets lost between strategy, design, and build.",
+  },
+  {
+    title: "Mobile matters first",
+    text: "A lot of people will judge the site on their phone before they ever see it on a laptop, so that experience has to feel solid.",
+  },
+  {
+    title: "No drawn-out process",
+    text: "I keep the work focused on what actually helps: clearer pages, better structure, and an easier way for people to contact you.",
+  },
+];
 
-const values: ValueItem[] = [
-  {
-    title: "Strategy first",
-    text: "We don't start with colours. We start with outcomes. Your site is structured around what matters: enquiries, bookings, credibility, or sales, not vanity.",
-    icon: "strategy",
-  },
-  {
-    title: "Design that converts",
-    text: "Clean hierarchy, persuasive sections, and intentional interaction. Visitors should understand you fast and feel confident taking the next step.",
-    icon: "design",
-  },
-  {
-    title: "Performance that holds",
-    text: "Fast loads, mobile-first layouts, and a build that won't collapse the moment you want to expand. A website should scale with your business.",
-    icon: "performance",
-  },
+const fitItems = [
+  "Aesthetic clinics that need a site that feels more polished and trustworthy",
+  "Service businesses losing enquiries because the current site feels weak or unclear",
+  "Consultants who need a clearer site and a better way to capture leads",
+  "Premium local brands that need a better website before running ads or outreach",
+];
+
+const serviceItems = [
+  "Website redesigns",
+  "Conversion-focused landing pages",
+  "Business websites",
+  "Speed and mobile optimisation",
+  "Lead capture and booking-focused improvements",
+];
+
+const proofItems = [
+  "Built and improved J Luxe Medical Aesthetics, a London clinic website that needed clearer treatment pages and a more trustworthy first impression.",
+  "Run Web Growth as a direct, founder-led service instead of dressing it up like a big agency.",
+  "Worked on real client sites that needed better structure, faster mobile performance, and a stronger first impression.",
 ];
 
 const faqs = [
   {
-    question: 'What makes Web Growth different from a typical "web designer"?',
+    question: "Who do I work with on the project?",
     answer:
-      "Most designers focus on visuals alone. We focus on outcomes: structure, clarity, performance, and trust. A website can look nice and still fail, so we build for results.",
+      "You work directly with Victor Chinukwue. I handle the strategy, design, and development myself.",
   },
   {
-    question: "Do you build with WordPress or custom code?",
+    question: "What kind of businesses are the best fit?",
     answer:
-      "We can do both. For speed and flexibility, WordPress works well for many businesses. For advanced interaction, performance, and a premium feel, a custom build like this Next.js site can be the better fit.",
+      "Usually service businesses, aesthetic clinics, consultants, and premium local brands that know the website is holding them back.",
   },
   {
-    question: "Can you redesign my existing website without starting from scratch?",
+    question: "Do you only work with Lagos businesses?",
     answer:
-      "Yes. Redesign can mean improving structure, speed, messaging, and conversion flow while keeping what still works. We'll assess what to keep, what to rebuild, and what to remove.",
+      "Lagos and Nigeria are the main focus. I also take on some UK projects when the fit is right.",
   },
   {
-    question: "How long does a typical project take?",
+    question: "What matters most in your process?",
     answer:
-      "It depends on scope. A focused landing page is faster than a full business site with multiple sections and assets. We'll give clear milestones after discovery.",
+      "Clarity and usefulness. The site needs to explain the business properly, feel trustworthy on mobile, and make the next step obvious.",
   },
 ];
 
-function Icon({ kind }: { kind: ValueItem["icon"] }) {
-  const common = "h-5 w-5 text-emerald-400";
-  if (kind === "strategy") {
-    return (
-      <svg className={common} viewBox="0 0 24 24" fill="none">
-        <path
-          d="M4 19V5m0 0h10l-2 3 2 3H4Zm12 0h4M16 7h4M16 11h4M16 15h4"
-          stroke="currentColor"
-          strokeWidth="1.8"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
-    );
-  }
-
-  if (kind === "design") {
-    return (
-      <svg className={common} viewBox="0 0 24 24" fill="none">
-        <path
-          d="M4 7h16M4 12h10M4 17h16"
-          stroke="currentColor"
-          strokeWidth="1.8"
-          strokeLinecap="round"
-        />
-        <path
-          d="M18 10l2 2-6 6H12v-2l6-6Z"
-          stroke="currentColor"
-          strokeWidth="1.8"
-          strokeLinejoin="round"
-        />
-      </svg>
-    );
-  }
-
-  return (
-    <svg className={common} viewBox="0 0 24 24" fill="none">
-      <path
-        d="M4 17l5-6 4 3 7-9"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M4 19h16"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-}
-
 export default function AboutClient() {
   const pageRef = useRef<HTMLDivElement | null>(null);
-  const [activeStep, setActiveStep] = useState(0);
-
-  const steps = useMemo(
-    () => [
-      {
-        title: "Discovery",
-        text: 'We get clear on your audience, your offer, and what success looks like. No guesswork. No "just vibes."',
-        img: "/images/about/about-discovery.webp",
-      },
-      {
-        title: "Structure",
-        text: "We plan the sections, messaging hierarchy, and conversion flow so the site actually guides visitors.",
-        img: "/images/about/about-structure.webp",
-      },
-      {
-        title: "Design + Build",
-        text: "We design and build with performance and clarity in mind, then add controlled interaction where it adds value.",
-        img: "/images/about/about-design.webp",
-      },
-      {
-        title: "Launch + Refine",
-        text: "We polish, test, and launch. Then we refine based on feedback and reality, not assumptions.",
-        img: "/images/about/about-launch.webp",
-      },
-    ],
-    []
-  );
 
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
@@ -157,47 +90,27 @@ export default function AboutClient() {
 
     gsap.fromTo(
       ".about-hero",
-      { opacity: 0, y: 80, filter: "blur(8px)" },
-      { opacity: 1, y: 0, filter: "blur(0px)", duration: 1.1, ease: "power3.out" }
+      { opacity: 0, y: 70, filter: "blur(8px)" },
+      { opacity: 1, y: 0, filter: "blur(0px)", duration: 1, ease: "power3.out" }
     );
 
-    const reveal = (selector: string, trigger: Element) => {
+    const sections = root.querySelectorAll("[data-reveal]");
+    sections.forEach((section) => {
+      const selector = (section as HTMLElement).dataset.reveal;
+      if (!selector) return;
+
       gsap.fromTo(
         selector,
-        { opacity: 0, y: 90, scale: 0.98, filter: "blur(6px)" },
+        { opacity: 0, y: 80, filter: "blur(6px)" },
         {
           opacity: 1,
           y: 0,
-          scale: 1,
           filter: "blur(0px)",
-          duration: 1,
+          duration: 0.95,
           ease: "power3.out",
           scrollTrigger: {
-            trigger,
-            start: "top 75%",
-          },
-        }
-      );
-    };
-
-    const sectionEls = root.querySelectorAll("[data-reveal]");
-    sectionEls.forEach((el) => {
-      const sel = (el as HTMLElement).dataset.reveal;
-      if (sel) reveal(sel, el);
-    });
-
-    gsap.utils.toArray<HTMLElement>(".about-parallax").forEach((el) => {
-      gsap.fromTo(
-        el,
-        { y: -20 },
-        {
-          y: 20,
-          ease: "none",
-          scrollTrigger: {
-            trigger: el,
-            start: "top bottom",
-            end: "bottom top",
-            scrub: true,
+            trigger: section,
+            start: "top 76%",
           },
         }
       );
@@ -206,213 +119,204 @@ export default function AboutClient() {
     ScrollTrigger.refresh();
 
     return () => {
-      ScrollTrigger.getAll().forEach((t) => t.kill());
+      ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
     };
   }, []);
 
   return (
     <div ref={pageRef} className="bg-black text-white">
-      <section className="about-hero relative overflow-hidden">
+      <section className="about-hero relative overflow-hidden border-b border-white/10">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(16,185,129,0.18),transparent_55%)]" />
         <div className="mx-auto max-w-6xl px-6 py-24 md:py-28">
           <div className="grid gap-12 md:grid-cols-2 md:items-center">
             <div>
-              <div className="text-sm tracking-[0.25em] text-white/50">
-                ABOUT WEB GROWTH
-              </div>
-              <h1 className="mt-4 text-4xl font-semibold leading-tight md:text-5xl">
-                We build websites that look premium and perform under pressure.
-              </h1>
-              <p className="mt-6 text-lg leading-relaxed text-white/70">
-                Web Growth exists for businesses that are tired of websites that
-                appear fine but do not deliver. We combine structure, clean design,
-                and controlled interaction to help you attract customers, build trust,
-                and support real growth.
+              <p className="text-sm uppercase tracking-[0.25em] text-white/50">
+                About Victor Chinukwue
               </p>
+              <h1 className="mt-4 text-4xl font-semibold leading-tight md:text-5xl">
+                Websites for service businesses that need more than something that just looks nice
+              </h1>
+              <p className="mt-6 max-w-2xl text-lg leading-relaxed text-white/72">
+                I&apos;m Victor Chinukwue, founder of Web Growth. I design and build
+                websites for service businesses that want to look more credible,
+                work better on mobile, and make it easier for people to get in touch.
+              </p>
+
+              <div className="mt-8 flex flex-wrap gap-3 text-sm text-white/72">
+                <span className="rounded-full border border-white/10 bg-black/35 px-4 py-2">
+                  Lagos based
+                </span>
+                <span className="rounded-full border border-white/10 bg-black/35 px-4 py-2">
+                  Solo operator
+                </span>
+                <span className="rounded-full border border-white/10 bg-black/35 px-4 py-2">
+                  Same-day response in most cases
+                </span>
+              </div>
 
               <div className="mt-10 flex flex-col gap-3 sm:flex-row">
                 <Link
                   href="/contact"
                   className="inline-flex items-center justify-center rounded-md bg-emerald-600 px-7 py-3.5 text-sm font-semibold text-white transition hover:bg-emerald-500"
                 >
-                  Work with us
+                  Request a Quote
                 </Link>
                 <Link
                   href="/portfolio"
                   className="inline-flex items-center justify-center rounded-md border border-white/15 bg-black/30 px-7 py-3.5 text-sm font-semibold text-white/90 transition hover:bg-black/50"
                 >
-                  See our work
+                  See Real Projects
                 </Link>
               </div>
             </div>
 
-            <div className="relative">
-              <div className="about-parallax relative overflow-hidden rounded-2xl border border-white/10 bg-black/40">
-                <div
-                  className="h-[320px] bg-cover bg-center opacity-80 md:h-[420px]"
-                  style={{ backgroundImage: "url(/images/about/about-hero.webp)" }}
-                />
-                <div className="absolute inset-0 bg-black/35" />
-              </div>
-
-              <div className="mt-4 grid grid-cols-3 gap-3">
-                {["Strategy", "Design", "Performance"].map((t) => (
-                  <div
-                    key={t}
-                    className="rounded-xl border border-white/10 bg-black/40 px-4 py-3 text-center text-sm text-white/70"
-                  >
-                    {t}
-                  </div>
-                ))}
+            <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-black/40">
+              <div
+                className="h-[320px] bg-cover bg-center opacity-80 md:h-[420px]"
+                style={{ backgroundImage: "url(/images/about/about-hero.webp)" }}
+              />
+              <div className="absolute inset-0 bg-black/40" />
+              <div className="absolute bottom-4 left-4 right-4 rounded-2xl border border-white/10 bg-black/60 p-5 backdrop-blur">
+                <p className="text-xs uppercase tracking-[0.16em] text-emerald-200/90">
+                  Founder-led studio
+                </p>
+                <p className="mt-3 text-sm leading-6 text-white/76">
+                  You work with me directly on strategy, design, and development.
+                  It stays simple, moves faster, and avoids the usual agency back-and-forth.
+                </p>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      <EntitySnapshotSection
-        title="A factual summary of who Web Growth helps and what the business actually does"
-        description="This gives a cleaner entity-level picture of the business, which helps visitors and answer engines understand the site without relying on vague brand language."
-        items={[
-          {
-            title: "What Web Growth is",
-            description:
-              "Web Growth is a web design and website growth business focused on clarity, conversion, performance, and launch readiness.",
-          },
-          {
-            title: "Who it helps",
-            description:
-              "It helps service businesses, founders, and lean teams in Nigeria and international markets that need a stronger website presence.",
-          },
-          {
-            title: "What the main outcomes are",
-            description:
-              "The work is designed to improve first impressions, website speed, conversion flow, launch clarity, and overall business credibility online.",
-          },
-          {
-            title: "Where to start",
-            description:
-              "Start with the 48-hour launch offer if speed matters most, pricing if you are comparing options, or the blog if you need the strategy explained first.",
-          },
-        ]}
-        links={[
-          { href: "/launch", label: "See the launch offer" },
-          { href: "/pricing", label: "Compare pricing" },
-          { href: "/blog", label: "Read the strategy guides" },
-        ]}
-      />
+      <section className="py-24" data-reveal=".story-reveal">
+        <div className="mx-auto max-w-6xl px-6 story-reveal">
+          <div className="grid gap-10 md:grid-cols-[1.05fr_0.95fr] md:items-center">
+            <div>
+              <SectionHeading
+                eyebrow="Founder Story"
+                title="Why Web Growth exists"
+                description="The shift was simple: stop building sites that only look acceptable and start building sites that help businesses get customers."
+                
+              />
+              <div className="mt-8 space-y-4 text-base leading-7 text-white/72">
+                <p>
+                  I started as a web developer focused on building clean, fast
+                  websites. Over time, I noticed the same problem again and
+                  again: many businesses had websites that looked decent on the
+                  surface but still failed to generate leads or customers.
+                </p>
+                <p>
+                  That pushed me toward website work that is more practical. The
+                  point is to help people understand the business, trust it
+                  faster, and know what to do next.
+                </p>
+                <p>
+                  I mainly work with service businesses, consultants, premium
+                  local brands, and aesthetic clinics in Lagos, Nigeria, and
+                  some UK projects as well.
+                </p>
+              </div>
+            </div>
 
-      <section className="py-24" data-reveal=".values-reveal">
-        <div className="mx-auto max-w-6xl px-6 values-reveal">
+            <div className="rounded-2xl border border-white/10 bg-[#08110d] p-7 shadow-[0_18px_44px_rgba(0,0,0,0.22)]">
+              <p className="text-xs uppercase tracking-[0.18em] text-emerald-200/90">
+                What clients get
+              </p>
+              <ul className="mt-5 space-y-3 text-sm leading-6 text-white/78">
+                {proofItems.map((item) => (
+                  <li key={item} className="flex gap-3">
+                    <span className="mt-[9px] h-1.5 w-1.5 rounded-full bg-emerald-300" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+
+              <div className="mt-6 border-t border-white/10 pt-6">
+                <p className="text-sm font-semibold text-white/90">
+                  Work style
+                </p>
+                <p className="mt-3 text-sm leading-6 text-white/72">
+                  Direct communication, fast turnaround, and one person handling
+                  the work from start to finish. No middlemen and no unnecessary process.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="bg-gray-950 py-24" data-reveal=".trust-reveal">
+        <div className="mx-auto max-w-6xl px-6 trust-reveal">
           <SectionHeading
-            eyebrow="WHY US"
-            title="Design is not the goal. Results are."
-            description="A beautiful website that loads slowly, confuses visitors, or lacks a clear path to action is just decoration. We build websites with structure and intent."
+            eyebrow="Why Work With Web Growth"
+            title="Why people hire me instead of a random freelancer"
+            description="The difference is not buzzwords. It is how the work is handled and how the final site feels to the people visiting it."
           />
 
-          <div className="mt-12 grid gap-6 md:grid-cols-3">
-            {values.map((v) => (
+          <div className="mt-12 grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+            {trustPoints.map((item) => (
               <div
-                key={v.title}
-                className="rounded-2xl border border-white/10 bg-black/40 p-7 backdrop-blur transition hover:border-white/20"
+                key={item.title}
+                className="rounded-2xl border border-white/10 bg-black/40 p-7 backdrop-blur"
               >
-                <div className="flex items-center gap-3">
-                  <div className="rounded-lg border border-white/10 bg-black/50 p-2">
-                    <Icon kind={v.icon} />
-                  </div>
-                  <h3 className="text-xl font-semibold">{v.title}</h3>
-                </div>
-                <p className="mt-4 leading-relaxed text-white/65">{v.text}</p>
+                <h2 className="text-xl font-semibold">{item.title}</h2>
+                <p className="mt-3 text-sm leading-6 text-white/68">{item.text}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="bg-gray-950 py-24" data-reveal=".story-reveal">
-        <div className="mx-auto max-w-6xl px-6 story-reveal">
-          <div className="grid gap-10 md:grid-cols-2 md:items-center">
-            <div>
-              <SectionHeading
-                eyebrow="OUR STORY"
-                title='From "nice websites" to websites that actually work'
-                description="Most businesses do not need more pages. They need a clearer message, stronger trust signals, and a website that guides people to take action."
-              />
-              <div className="mt-6 space-y-4 leading-relaxed text-white/70">
-                <p>
-                  We noticed a pattern: lots of sites look modern, but visitors still
-                  do not understand what the business does, why it matters, or what to do next.
-                </p>
-                <p>
-                  Web Growth is built around fixing that. We focus on clarity first,
-                  then design, then performance, and then we add interaction where it supports the message.
-                </p>
-                <p>
-                  The result is a site that feels premium, loads fast, and makes your business
-                  look serious to the people you want to attract.
-                </p>
-              </div>
+      <section className="py-24" data-reveal=".fit-reveal">
+        <div className="mx-auto max-w-6xl px-6 fit-reveal">
+          <div className="grid gap-8 lg:grid-cols-2">
+            <div className="rounded-2xl border border-white/10 bg-black/40 p-8">
+              <p className="text-xs uppercase tracking-[0.18em] text-emerald-200/90">
+                Best fit
+              </p>
+              <h2 className="mt-4 text-3xl font-semibold tracking-[-0.02em]">
+                The kind of businesses I usually help best
+              </h2>
+              <ul className="mt-6 space-y-3 text-sm leading-6 text-white/74">
+                {fitItems.map((item) => (
+                  <li key={item} className="flex gap-3">
+                    <span className="mt-[9px] h-1.5 w-1.5 rounded-full bg-emerald-300" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
 
-            <div className="about-parallax relative overflow-hidden rounded-2xl border border-white/10 bg-black/40">
-              <div
-                className="h-[360px] bg-cover bg-center opacity-80 md:h-[460px]"
-                style={{ backgroundImage: "url(/images/about/about-nice.webp)" }}
-              />
-              <div className="absolute inset-0 bg-black/35" />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="py-24" data-reveal=".process-reveal">
-        <div className="mx-auto max-w-6xl px-6 process-reveal">
-          <SectionHeading
-            eyebrow="PROCESS"
-            title="How we take you from idea to launch"
-            description="A clear process reduces mistakes, speeds up delivery, and keeps the final product focused on outcomes."
-          />
-
-          <div className="mt-12 grid gap-8 md:grid-cols-2">
-            <div className="rounded-2xl border border-white/10 bg-black/40 p-6 backdrop-blur">
-              <div className="flex flex-wrap gap-2">
-                {steps.map((s, idx) => {
-                  const active = idx === activeStep;
-                  return (
-                    <button
-                      key={s.title}
-                      onClick={() => setActiveStep(idx)}
-                      className={[
-                        "rounded-full px-4 py-2 text-sm font-semibold transition",
-                        active
-                          ? "bg-emerald-600 text-white"
-                          : "border border-white/10 bg-black/40 text-white/70 hover:border-white/20 hover:text-white",
-                      ].join(" ")}
-                      type="button"
-                    >
-                      {idx + 1}. {s.title}
-                    </button>
-                  );
-                })}
-              </div>
-
-              <div className="mt-6">
-                <h3 className="text-xl font-semibold">{steps[activeStep].title}</h3>
-                <p className="mt-3 leading-relaxed text-white/70">
-                  {steps[activeStep].text}
-                </p>
-              </div>
-            </div>
-
-            <div className="about-parallax relative overflow-hidden rounded-2xl border border-white/10 bg-black/40">
-              <div
-                className="h-[420px] bg-cover bg-center opacity-80"
-                style={{ backgroundImage: `url(${steps[activeStep].img})` }}
-              />
-              <div className="absolute inset-0 bg-black/35" />
-              <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between rounded-xl border border-white/10 bg-black/55 p-4 text-sm text-white/70">
-                <span>{activeStep + 1}</span>
-                <span className="font-semibold text-emerald-400">{steps[activeStep].title}</span>
+            <div className="rounded-2xl border border-white/10 bg-[#08110d] p-8">
+              <p className="text-xs uppercase tracking-[0.18em] text-emerald-200/90">
+                Core services
+              </p>
+              <h2 className="mt-4 text-3xl font-semibold tracking-[-0.02em]">
+                What I actually sell
+              </h2>
+              <ul className="mt-6 space-y-3 text-sm leading-6 text-white/74">
+                {serviceItems.map((item) => (
+                  <li key={item} className="flex gap-3">
+                    <span className="mt-[9px] h-1.5 w-1.5 rounded-full bg-emerald-300" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+              <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+                <Link
+                  href="/services"
+                  className="inline-flex items-center justify-center rounded-xl border border-white/15 bg-black/35 px-5 py-3 text-sm font-semibold text-white/90 transition hover:bg-black/50"
+                >
+                  View Services
+                </Link>
+                <Link
+                  href="/contact"
+                  className="inline-flex items-center justify-center rounded-xl bg-emerald-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-600"
+                >
+                  Start a Project
+                </Link>
               </div>
             </div>
           </div>
@@ -423,8 +327,8 @@ export default function AboutClient() {
         <div className="mx-auto max-w-6xl px-6 faq-reveal">
           <SectionHeading
             eyebrow="FAQ"
-            title="Questions people ask before they hire"
-            description="Clear answers, no marketing fluff."
+            title="The questions that matter before you enquire"
+            description="Simple answers so you know who you are hiring and how the work usually goes."
           />
           <div className="mt-10">
             <FAQAccordion items={faqs} />
@@ -434,13 +338,10 @@ export default function AboutClient() {
 
       <section className="py-24">
         <div className="mx-auto max-w-6xl px-6">
-          <div className="mb-10">
-            <BlogInlineCTA />
-          </div>
           <CTASection
-            eyebrow="READY"
-            title="Let's build a website your customers take seriously"
-            description="If your current site feels outdated or does not convert, we'll rebuild it with clarity, performance, and a premium feel."
+            eyebrow="Ready"
+            title="If your current website is letting the business down, we can fix that"
+            description="Send the basics and I will tell you what makes sense, what it will take, and where to start."
             primaryCtaText="Request a Quote"
             primaryHref="/contact"
             secondaryCtaText="See Pricing"

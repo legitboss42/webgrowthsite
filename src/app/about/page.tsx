@@ -2,16 +2,16 @@ import AboutClient from "@/components/AboutClient";
 import { buildPageMetadata } from "@/lib/seo";
 
 export const metadata = buildPageMetadata({
-  title: "About Web Growth",
+  title: "About Victor Chinukwue | Web Growth",
   description:
-    "Learn how Web Growth helps businesses in Lagos, Nigeria, the United Kingdom, and remote markets launch clearer, faster, more conversion-focused websites.",
+    "Meet Victor Chinukwue, founder of Web Growth, and see how he builds conversion-focused websites for Lagos businesses and selective UK projects.",
   path: "/about",
   keywords: [
     "about web growth",
+    "victor chinukwue",
     "web designer nigeria",
     "web designer lagos",
-    "web designer uk",
-    "remote web design studio",
+    "founder web growth",
     "conversion-focused web design",
   ],
 });

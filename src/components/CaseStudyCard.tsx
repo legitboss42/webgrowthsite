@@ -3,9 +3,11 @@ import Image from "next/image";
 interface CaseStudyCardProps {
   title: string;
   client?: string;
+  status?: "Live" | "Proposal";
   summary: string;
   results?: string[];
   imageUrl?: string;
+  imageAlt?: string;
   href?: string;
   className?: string;
   headingLevel?: "h2" | "h3" | "h4";
@@ -14,26 +16,35 @@ interface CaseStudyCardProps {
 const CaseStudyCard: React.FC<CaseStudyCardProps> = ({
   title,
   client,
+  status = "Live",
   summary,
   results,
   imageUrl = "/images/hero/Hero-Image-1.webp",
+  imageAlt,
   href,
   className,
   headingLevel = "h3",
 }) => {
   const CardComponent = href ? "a" : "div";
   const HeadingTag = headingLevel;
+  const isExternal = Boolean(href && /^https?:\/\//.test(href));
 
   return (
     <CardComponent
-      className={`group relative flex h-full flex-col overflow-hidden rounded-2xl border border-white/10 bg-black/40 transition-transform duration-300 hover:-translate-y-2 ${className || ""}`}
-      {...(href ? { href } : {})}
+      className={`group relative flex min-h-0 flex-col overflow-hidden rounded-2xl border border-white/10 bg-black/40 transition-transform duration-300 hover:-translate-y-2 ${className || ""}`}
+      {...(href
+        ? {
+            href,
+            target: isExternal ? "_blank" : undefined,
+            rel: isExternal ? "noreferrer" : undefined,
+          }
+        : {})}
     >
       {/* Image header */}
       <div className="relative aspect-video overflow-hidden">
         <Image
           src={imageUrl}
-          alt=""
+          alt={imageAlt || `${title} project preview`}
           fill
           loading="lazy"
           quality={60}
@@ -41,6 +52,18 @@ const CaseStudyCard: React.FC<CaseStudyCardProps> = ({
           className="absolute inset-0 scale-110 object-cover object-center transition-transform duration-700 group-hover:scale-125"
         />
         <div className="absolute inset-0 bg-black/50" />
+        <div className="absolute left-4 top-4 z-10">
+          <span
+            className={[
+              "inline-flex rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em]",
+              status === "Proposal"
+                ? "border-amber-300/40 bg-amber-500/15 text-amber-100"
+                : "border-emerald-300/35 bg-emerald-500/15 text-emerald-100",
+            ].join(" ")}
+          >
+            {status}
+          </span>
+        </div>
         {/* Glow effect */}
         <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-emerald-500/20 blur-sm" />
       </div>

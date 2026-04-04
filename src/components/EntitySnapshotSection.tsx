@@ -36,14 +36,14 @@ export default function EntitySnapshotSection({
           <p className="mt-4 text-lg leading-7 text-white/72">{description}</p>
         </div>
 
-        <div className="mt-10 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+        <div className="mt-10 grid gap-5 md:auto-rows-fr md:grid-cols-2 xl:grid-cols-4">
           {items.map((item) => (
             <article
               key={item.title}
-              className="relative overflow-hidden rounded-2xl border border-emerald-400/24 bg-[radial-gradient(circle_at_16%_-10%,rgba(16,185,129,0.18),rgba(3,14,11,0.94)_46%,rgba(2,8,7,0.98)_100%)] p-6 shadow-[0_16px_36px_rgba(0,0,0,0.22)]"
+              className="relative flex h-full min-h-0 flex-col overflow-hidden rounded-2xl border border-emerald-400/24 bg-[radial-gradient(circle_at_16%_-10%,rgba(16,185,129,0.18),rgba(3,14,11,0.94)_46%,rgba(2,8,7,0.98)_100%)] p-6 shadow-[0_16px_36px_rgba(0,0,0,0.22)]"
             >
               <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(115deg,rgba(16,185,129,0.08)_0%,transparent_46%,rgba(16,185,129,0.04)_100%)]" />
-              <div className="relative z-10">
+              <div className="relative z-10 flex h-full flex-1 flex-col">
                 <h3 className="text-xl font-semibold text-white">{item.title}</h3>
                 <p className="mt-3 text-sm leading-6 text-white/74">
                   {item.description}

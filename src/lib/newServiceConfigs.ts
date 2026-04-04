@@ -108,7 +108,7 @@ export const NEW_SERVICE_PAGES: Record<string, ServicePageConfig> = {
     slug: "search-engine-optimisation",
     serviceParam: "Search Engine Optimisation (SEO)",
     metaDescription:
-      "Search engine optimisation services for small businesses: technical SEO, on-page SEO, local SEO, and content optimisation to grow qualified organic traffic.",
+      "SEO for service businesses that already have a real offer and need stronger local visibility, cleaner service pages, and better-qualified enquiries.",
     keywords: [
       "search engine optimisation",
       "seo services",
@@ -120,34 +120,34 @@ export const NEW_SERVICE_PAGES: Record<string, ServicePageConfig> = {
       "seo consultant",
     ],
     heroTitle:
-      "Search engine optimisation services designed to increase qualified organic leads",
+      "SEO for service businesses that need better local visibility and better leads",
     heroDescription:
-      "We improve search visibility using a structured SEO system: technical SEO fixes, intent-based content optimization, internal linking, and local SEO improvements.",
+      "This is not generic SEO busywork. We fix the pages, structure, metadata, and local signals that stop service businesses from turning search traffic into enquiries.",
     heroImage: "/images/services/services-audit.webp",
     detailImage: "/images/services/services-speed-2.webp",
     highlights: [
-      "Commercial-intent keyword targeting",
-      "Technical SEO and crawl health optimisation",
-      "Local SEO structure for service businesses",
+      "Local SEO for real service-area searches",
+      "Service-page SEO tied to enquiry intent",
+      "Technical cleanup that supports crawlability and trust",
     ],
     deliverables: [
-      "SEO audit with prioritised action plan",
-      "On-page SEO updates across key service pages",
-      "Internal linking and metadata optimisation",
-      "Performance tracking and reporting guidance",
+      "SEO audit focused on pages that should generate enquiries",
+      "Title, meta, heading, and internal-link updates on key service pages",
+      "Local SEO cleanup for location relevance and trust signals",
+      "Priority action plan for rankings, conversions, and content gaps",
     ],
     process: [
       {
-        title: "SEO diagnosis",
-        text: "We identify ranking blockers across technical SEO, on-page quality, and content intent.",
+        title: "Audit",
+        text: "We find the pages, keywords, and trust gaps blocking qualified search traffic.",
       },
       {
-        title: "SEO implementation",
-        text: "We execute high-impact fixes first: metadata, structure, internal links, and local relevance signals.",
+        title: "Fix",
+        text: "We tighten page targeting, internal links, metadata, and local relevance signals.",
       },
       {
-        title: "Monitoring + iteration",
-        text: "We monitor indexation, keyword movement, and landing page performance for continuous improvement.",
+        title: "Measure",
+        text: "We track whether search visibility is improving on pages that should produce leads, not vanity traffic.",
       },
     ],
     faqs: [
@@ -167,9 +167,9 @@ export const NEW_SERVICE_PAGES: Record<string, ServicePageConfig> = {
           "Yes. We work with existing sites and provide practical fixes without forcing a full rebuild unless necessary.",
       },
     ],
-    ctaTitle: "Want stronger rankings and higher-intent traffic?",
+    ctaTitle: "Need SEO that supports real enquiries, not just traffic charts?",
     ctaDescription:
-      "Get a structured SEO implementation plan built around measurable search and conversion outcomes.",
+      "Get a focused SEO plan built around service pages, local visibility, and lead quality.",
   },
 
   "google-my-business-setup-optimisation": {
@@ -557,13 +557,11 @@ export const NEW_SERVICE_PAGES: Record<string, ServicePageConfig> = {
   },
 
   "domain-registration-hosting-guidance": {
-    title:
-      "Guidance on Domain Registration and Hosting Platform Selection",
+    title: "Website Hosting and Launch Setup Guidance",
     slug: "domain-registration-hosting-guidance",
-    serviceParam:
-      "Guidance on Domain Registration and Hosting Platform Selection",
+    serviceParam: "Website Hosting and Launch Setup Guidance",
     metaDescription:
-      "Domain registration and hosting guidance service for small businesses: choose the right domain strategy, hosting platform, SSL setup, and launch-ready technical foundation.",
+      "Launch setup guidance for small businesses that need the right domain, hosting, SSL, and DNS decisions before building or moving a website.",
     keywords: [
       "domain registration help",
       "hosting platform selection",
@@ -575,34 +573,34 @@ export const NEW_SERVICE_PAGES: Record<string, ServicePageConfig> = {
       "small business website hosting",
     ],
     heroTitle:
-      "Domain registration and hosting guidance to avoid expensive setup mistakes",
+      "Website hosting and launch setup guidance before you waste money on the wrong stack",
     heroDescription:
-      "We help you choose the right domain and hosting setup based on performance, reliability, and business growth needs before you commit.",
+      "If you are about to buy hosting, move a website, or launch a new one, this service helps you choose the right setup before technical mistakes slow you down.",
     heroImage: "/images/services/services-hero.webp",
     detailImage: "/images/services/services-business.webp",
     highlights: [
-      "Domain selection and structure guidance",
-      "Hosting platform comparison for your use case",
-      "Launch-ready technical setup recommendations",
+      "Hosting choice based on your real site type",
+      "Domain, DNS, and SSL guidance before launch",
+      "Cleaner setup decisions before redesign or migration",
     ],
     deliverables: [
-      "Domain strategy and purchase guidance",
-      "Hosting platform recommendation matrix",
-      "SSL, DNS, and core setup checklist",
-      "Migration and launch risk considerations",
+      "Recommended hosting stack based on site type and budget",
+      "Domain, DNS, SSL, and email setup checklist",
+      "Risk notes before migration or rebuild",
+      "Clear next-step guidance for launch",
     ],
     process: [
       {
-        title: "Needs assessment",
-        text: "We assess traffic expectations, site type, and performance requirements.",
+        title: "Assess",
+        text: "We look at the kind of site you are running, the support you need, and where setup mistakes would hurt you most.",
       },
       {
-        title: "Platform recommendation",
-        text: "We recommend domain and hosting options aligned to budget, speed, and reliability.",
+        title: "Recommend",
+        text: "We recommend domain, hosting, DNS, and SSL decisions that match your actual budget and build path.",
       },
       {
-        title: "Setup guidance",
-        text: "We guide implementation decisions so your technical foundation supports long-term growth.",
+        title: "Prepare",
+        text: "You leave with a clean setup checklist and the next technical steps before launch work starts.",
       },
     ],
     faqs: [
@@ -622,9 +620,9 @@ export const NEW_SERVICE_PAGES: Record<string, ServicePageConfig> = {
           "Yes. Choosing the right setup early reduces platform lock-in and avoidable migration issues later.",
       },
     ],
-    ctaTitle: "Need help choosing the right domain and hosting stack?",
+    ctaTitle: "Need a clean launch setup before the website build starts?",
     ctaDescription:
-      "Get practical guidance before you spend budget on a setup that limits growth.",
+      "Get practical guidance on hosting, DNS, and launch setup so you do not build on a weak foundation.",
   },
 
   "lead-magnet-strategy-build": {

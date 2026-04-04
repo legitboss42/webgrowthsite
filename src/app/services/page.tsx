@@ -2,34 +2,25 @@ import type { Metadata } from "next";
 import ServicesClient from "@/components/ServicesClient";
 
 export const metadata: Metadata = {
-  title: "Web Design Services",
+  title: "Website Services for Small Businesses",
   description:
-    "Explore Web Growth services for website design, landing page and funnel architecture, SEO, Google Business Profile optimisation, email marketing setup, CRM and automation implementation, analytics tracking, and lead generation.",
+    "Explore the core website services Web Growth uses to help small businesses launch faster, redesign weak sites, and turn more visitors into enquiries.",
   keywords: [
     "web design",
     "web design services",
     "website design services",
-    "website design company",
     "small business website design",
     "business website design",
     "landing page design",
-    "sales funnel design",
     "website redesign services",
-    "ecommerce website design",
-    "seo services",
-    "search engine optimisation",
-    "google business profile optimization",
-    "email marketing services",
-    "crm setup service",
-    "marketing automation services",
-    "google analytics setup",
-    "lead magnet strategy",
+    "service business web design",
+    "conversion focused website",
   ],
   alternates: { canonical: "https://webgrowth.info/services" },
   openGraph: {
-    title: "Web Design Services",
+    title: "Website Services for Small Businesses",
     description:
-      "High-intent web growth services: websites, SEO, funnel architecture, automation, and tracking setup built to increase leads and sales.",
+      "Core website services built to improve clarity, mobile trust, and enquiries.",
     url: "https://webgrowth.info/services",
     siteName: "Web Growth",
     images: [
@@ -44,9 +35,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Web Design Services",
+    title: "Website Services for Small Businesses",
     description:
-      "Website design, landing page funnels, SEO, CRM automation, and tracking setup for business growth.",
+      "New websites, landing pages, and redesigns built for clearer offers and more enquiries.",
     images: ["https://webgrowth.info/images/hero/Hero-Image-1.webp"],
   },
   robots: { index: true, follow: true },

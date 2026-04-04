@@ -56,7 +56,7 @@ export default function PricingSection({
           ))}
         </div>
 
-        <div className="mt-10 grid gap-6 md:grid-cols-2">
+        <div className="mt-10 grid gap-6 md:auto-rows-fr md:grid-cols-2">
           {tiers.map((tier, index) => (
             <article
               key={tier.name}

@@ -12,25 +12,24 @@ import {
 import { BOOKING_URL } from "@/lib/site";
 
 const pageDescription =
-  "Pricing for website design in 48 hours, with clear USD packages from $150 for businesses in Lagos, Nigeria, the United Kingdom, and remote markets that need a professional website live fast.";
+  "Pricing for Web Growth website packages, starting at $150 for businesses that need a site live quickly without a drawn-out build.";
 
 export const metadata = buildPageMetadata({
-  title: "Website Design Pricing Lagos, UK & Nigeria | Launch from $150",
+  title: "Website Pricing for Lagos Service Businesses | Launch from $150",
   description: pageDescription,
   path: "/pricing",
   keywords: [
-    ...launchKeywordSet,
     "website design pricing nigeria",
     "website design pricing lagos",
-    "website design pricing uk",
     "one page website cost",
+    "website launch pricing",
   ],
 });
 
 const pricingHighlights = [
   { label: "Starting at", value: "$150", note: "Launch package" },
   { label: "Delivery", value: "48 hours", note: "When content is ready" },
-  { label: "Best fit", value: "Service brands", note: "Lagos, UK + remote clients" },
+  { label: "Best fit", value: "Service brands", note: "Lagos + remote clients" },
   { label: "Scope", value: "1 page or 1 page + blog", note: "Built to expand later" },
 ];
 
@@ -52,13 +51,12 @@ export default function PricingPage() {
                   Pricing
                 </p>
                 <h1 className="mt-4 text-balance text-4xl font-semibold leading-tight tracking-[-0.02em] md:text-6xl">
-                  Pricing for website design in 48 hours
+                  Website pricing
                 </h1>
                 <p className="mt-5 max-w-2xl text-lg leading-7 text-white/72">
-                  Clear USD pricing, clean scope, and a focused 48-hour website launch
-                  for businesses in Lagos, Nigeria, the United Kingdom, or remote markets that
-                  need a one-page business website or a mobile-first business website with
-                  blog support.
+                  Straightforward pricing for a one-page site or a one-page site
+                  with blog setup. If you want to get online without dragging
+                  the project out for weeks, start here.
                 </p>
 
                 <div className="mt-8 flex flex-col gap-3 sm:flex-row">
@@ -83,10 +81,10 @@ export default function PricingPage() {
                     USD pricing
                   </span>
                   <span className="rounded-full border border-white/10 bg-black/25 px-4 py-2">
-                    Built for direct outreach
+                    Clear scope
                   </span>
                   <span className="rounded-full border border-white/10 bg-black/25 px-4 py-2">
-                    Expand later without rebuilding
+                    Easy to expand later
                   </span>
                 </div>
               </div>
@@ -115,17 +113,17 @@ export default function PricingPage() {
 
         <PricingSection
           tiers={pricingTiers}
-          title="Two 48-hour website launch options. No bloated package table."
-          description="Start with the one-page business website launch or add a blog if SEO publishing matters from day one."
+          title="Two simple options"
+          description="Start with the one-page site, or add the blog setup if you know you will need content later."
         />
         <WhatYouGetSection
           items={whatYouGetItems}
-          title="What these packages already cover"
-          description="The core launch stack is already included, so you are not piecing the essentials together separately."
+          title="What is already included"
+          description="These packages already cover the basics, so you are not chasing separate fixes before the site can go live."
         />
         <FAQSection
           items={launchFaqs}
-          title="Pricing questions people ask first"
+          title="Questions people usually ask about pricing"
           description="Short answers on ownership, revisions, support, and what happens after launch."
         />
         <FinalCTASection title="Ready to lock in your launch package?" />

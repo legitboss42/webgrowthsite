@@ -23,6 +23,7 @@ type HeroSectionProps = {
   secondaryHref: string;
   trustLine: string;
   locationNote: string;
+  fitTags?: string[];
   asideTitle: string;
   asideItems: string[];
   imageSrc?: string;
@@ -81,6 +82,7 @@ export default function HeroSection({
   secondaryHref,
   trustLine,
   locationNote,
+  fitTags = ["Nigeria", "Remote", "International"],
   asideTitle,
   asideItems,
   imageSrc = "/images/hero/Hero-Image-1.webp",
@@ -216,15 +218,14 @@ export default function HeroSection({
                 </p>
                 <p className="mt-2 text-sm leading-7 text-white/82">{locationNote}</p>
                 <div className="mt-4 flex flex-wrap gap-2">
-                  <span className="rounded-full border border-white/25 bg-black/45 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.12em] text-white/80">
-                    Nigeria
-                  </span>
-                  <span className="rounded-full border border-white/25 bg-black/45 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.12em] text-white/80">
-                    Remote
-                  </span>
-                  <span className="rounded-full border border-white/25 bg-black/45 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.12em] text-white/80">
-                    International
-                  </span>
+                  {fitTags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="rounded-full border border-white/25 bg-black/45 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.12em] text-white/80"
+                    >
+                      {tag}
+                    </span>
+                  ))}
                 </div>
               </div>
             </div>

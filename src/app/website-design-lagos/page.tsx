@@ -67,15 +67,15 @@ const faqs = [
 ] as const;
 
 export const metadata = buildPageMetadata({
-  title: "Website Design Lagos | Fast, Conversion-Focused Business Websites",
+  title: "Website Design in Lagos for Service Businesses | Web Growth",
   description: pageDescription,
   path: "/website-design-lagos",
   keywords: [
     "website design lagos",
     "web designer lagos",
-    "website designer lagos",
     "business website design lagos",
     "lagos web design",
+    "small business website lagos",
   ],
   image: "/images/services/services-business.webp",
 });
