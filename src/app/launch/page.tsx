@@ -23,7 +23,7 @@ import {
 import { BOOKING_URL, GET_STARTED_PATH } from "@/lib/site";
 
 const pageDescription =
-  "Website design in 48 hours for Nigeria-based businesses and international clients that need a professional site live fast, with domain guidance, hosting, a conversion-focused one-page build, and pricing from $150.";
+  "Website design in 48 hours for businesses in Lagos, Nigeria, the United Kingdom, and remote markets that need a professional site live fast, with domain guidance, hosting, a conversion-focused one-page build, and pricing from $150.";
 
 const launchSteps = [
   {
@@ -49,8 +49,8 @@ const launchSteps = [
 const fitPoints = [
   "Founders who need a professional website before outreach starts",
   "Service businesses that want a focused one-page business website first",
-  "Nigeria-based brands that need a remote partner and a fast delivery window",
-  "International clients who want a done-for-you website launch without agency drag",
+  "Lagos and Nigeria-based brands that need a remote partner and a fast delivery window",
+  "United Kingdom and international clients who want a done-for-you website launch without agency drag",
 ] as const;
 
 const comparisonPoints = [
@@ -132,7 +132,10 @@ export const metadata = buildPageMetadata({
   path: "/launch",
   keywords: [
     ...launchKeywordSet,
+    "website design lagos",
     "website launch in nigeria",
+    "website design united kingdom",
+    "web designer uk",
     "remote website launch service",
   ],
   image: "/images/hero/Hero-Image-1.webp",
@@ -155,7 +158,7 @@ function LaunchHero() {
           <p className="mt-6 max-w-2xl text-lg leading-8 text-white/75">
             Website design in 48 hours with domain guidance, hosting setup, and a
             conversion-focused one-page business website delivered in a fast,
-            done-for-you flow for Nigeria-based and international clients.
+            done-for-you flow for Lagos, Nigeria, United Kingdom, and remote clients.
           </p>
 
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
@@ -210,7 +213,7 @@ function LaunchHero() {
               </p>
               <p className="mt-3 text-2xl font-semibold text-white">Nigeria + Remote</p>
               <p className="mt-2 text-sm leading-6 text-white/68">
-                Built for local and international service businesses
+                Lagos, UK, and remote service businesses
               </p>
             </div>
           </div>

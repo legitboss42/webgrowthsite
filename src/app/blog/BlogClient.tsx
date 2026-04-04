@@ -100,6 +100,50 @@ export default function BlogClient({ posts }: Props) {
 
   const featuredPost = filtered[0];
   const listPosts = filtered.slice(1);
+  const priorityGuides = [
+    {
+      href: "/blog/small-business-website-redesign-checklist",
+      label: "Redesign checklist",
+      title: "Small business website redesign checklist",
+      description:
+        "Start here if your current site feels outdated, weak on mobile, or unclear on conversion.",
+    },
+    {
+      href: "/blog/small-business-website-seo-checklist",
+      label: "SEO checklist",
+      title: "Small business website SEO checklist",
+      description:
+        "Use this when the problem is rankings, crawlability, metadata, and basic search visibility.",
+    },
+    {
+      href: "/blog/why-your-website-isnt-getting-leads",
+      label: "Lead fix",
+      title: "Why your website is not getting leads",
+      description:
+        "Read this if traffic exists but enquiries are weak, inconsistent, or dead.",
+    },
+    {
+      href: "/blog/email-marketing-for-small-business",
+      label: "Email marketing",
+      title: "Email marketing for small business",
+      description:
+        "Use this when you want leads to compound after the first website visit instead of disappearing.",
+    },
+    {
+      href: "/blog/how-to-make-your-website-load-fast",
+      label: "Speed",
+      title: "How to make your website load fast",
+      description:
+        "Read this when performance, Core Web Vitals, or slow mobile load time is hurting trust.",
+    },
+    {
+      href: "/blog/high-converting-landing-pages-guide",
+      label: "Landing pages",
+      title: "High-converting landing pages guide",
+      description:
+        "Use this when paid traffic or promotions need a page built to capture leads cleanly.",
+    },
+  ];
 
   useEffect(() => {
     const reduceMotion =
@@ -316,6 +360,22 @@ export default function BlogClient({ posts }: Props) {
 
         <div className="mb-8">
           <BlogInlineCTA pageType="blog_index" ctaLocation="blog_index_inline" contentGroup="blog" />
+        </div>
+
+        <div className="mb-8 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {priorityGuides.map((guide) => (
+            <Link
+              key={guide.href}
+              href={guide.href}
+              className="rounded-2xl border border-white/12 bg-black/35 p-5 transition hover:border-emerald-400/30 hover:bg-black/45"
+            >
+              <p className="text-xs uppercase tracking-[0.18em] text-emerald-200/80">
+                {guide.label}
+              </p>
+              <h2 className="mt-3 text-lg font-semibold text-white">{guide.title}</h2>
+              <p className="mt-3 text-sm leading-6 text-white/72">{guide.description}</p>
+            </Link>
+          ))}
         </div>
 
         <div className="mb-8">

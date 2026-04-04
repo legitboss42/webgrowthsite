@@ -4,6 +4,7 @@ import Link from "next/link";
 import { FormEvent, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import TrackedLink from "@/components/analytics/TrackedLink";
+import TurnstileWidget from "@/components/TurnstileWidget";
 import {
   BOOKING_URL,
   CONTACT_EMAIL_HREF,
@@ -56,6 +57,13 @@ export default function GetStartedClient() {
   const [phoneOrWhatsApp, setPhoneOrWhatsApp] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
+  const [turnstileToken, setTurnstileToken] = useState("");
+  const [turnstileResetKey, setTurnstileResetKey] = useState(0);
+
+  const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "";
+  const isProduction = process.env.NODE_ENV === "production";
+  const isTurnstileEnabled = Boolean(turnstileSiteKey);
+  const canSubmit = isTurnstileEnabled || !isProduction;
 
   const whatsappHref = useMemo(() => {
     const intro = "Hello, I just completed the Get Started form.";
@@ -136,6 +144,12 @@ export default function GetStartedClient() {
     e.preventDefault();
     if (!projectNeed || !hasDomain) return;
     if (!fullName.trim() || !businessName.trim() || !email.trim() || !phoneOrWhatsApp.trim()) return;
+
+    if (isTurnstileEnabled && !turnstileToken) {
+      setSubmitError("Complete the spam check before submitting your request.");
+      return;
+    }
+
     setIsSubmitting(true);
     setSubmitError("");
 
@@ -158,19 +172,28 @@ export default function GetStartedClient() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({
+          ...payload,
+          turnstileToken,
+        }),
       });
 
       if (!res.ok) {
+        const data = (await res.json().catch(() => null)) as { error?: string } | null;
         setSubmitError(
-          "We could not send this automatically right now. Use email, call booking, or WhatsApp below."
+          data?.error ||
+            "We could not send this automatically right now. Use email, call booking, or WhatsApp below."
         );
+        setTurnstileResetKey((current) => current + 1);
+        return;
       }
+
+      setStep(4);
     } catch {
       setSubmitError("Network error. Use email, call booking, or WhatsApp below.");
+      setTurnstileResetKey((current) => current + 1);
     } finally {
       setIsSubmitting(false);
-      setStep(4);
     }
   }
 
@@ -368,12 +391,26 @@ export default function GetStartedClient() {
                 </button>
                 <button
                   type="submit"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || !canSubmit}
                   className="inline-flex min-h-11 items-center justify-center rounded-xl bg-emerald-700 px-6 text-sm font-semibold text-white transition hover:bg-emerald-600"
                 >
                   {isSubmitting ? "Submitting..." : "Submit request"}
                 </button>
               </div>
+              {isTurnstileEnabled ? (
+                <div className="space-y-2">
+                  <p className="text-sm text-white/70">Spam check</p>
+                  <TurnstileWidget
+                    action="get_started"
+                    onTokenChange={setTurnstileToken}
+                    resetKey={turnstileResetKey}
+                  />
+                </div>
+              ) : (
+                <p className="rounded-xl border border-amber-400/35 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
+                  Form protection is not configured yet. Add the Turnstile site key before using this form in production.
+                </p>
+              )}
             </form>
           ) : null}
 

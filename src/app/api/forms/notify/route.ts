@@ -6,6 +6,7 @@ import {
   isAllowedOrigin,
   sanitizeText,
 } from "@/lib/security";
+import { verifyTurnstileToken } from "@/lib/turnstile";
 
 const ADMIN_EMAIL = "admin@webgrowth.info";
 export const runtime = "nodejs";
@@ -14,6 +15,7 @@ type NotifyBody = {
   formType?: string;
   subject?: string;
   fields?: Record<string, unknown>;
+  turnstileToken?: string;
 };
 
 export async function POST(req: Request) {
@@ -37,8 +39,26 @@ export async function POST(req: Request) {
     const subject =
       sanitizeText(body.subject, 140) ||
       `New Website Form Submission - ${formType}`;
+    const turnstileToken = sanitizeText(body.turnstileToken, 2048);
     const fields = body.fields && typeof body.fields === "object" ? body.fields : {};
     const normalizedEntries = Object.entries(fields).slice(0, 20);
+
+    if (!turnstileToken) {
+      return NextResponse.json(
+        { error: "Please complete the spam check." },
+        { status: 400 }
+      );
+    }
+
+    const turnstile = await verifyTurnstileToken({
+      token: turnstileToken,
+      ip,
+      expectedAction: formType,
+    });
+
+    if (!turnstile.ok) {
+      return NextResponse.json({ error: turnstile.error }, { status: 400 });
+    }
 
     const token = process.env.MAILERSEND_API_TOKEN;
     const fromEmail = process.env.MAILERSEND_FROM_EMAIL;

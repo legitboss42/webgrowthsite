@@ -22,7 +22,7 @@ import {
 import { GET_STARTED_PATH } from "@/lib/site";
 
 const pageDescription =
-  "Website design in 48 hours for businesses in Nigeria and international clients who need a professional one-page website live fast, with domain guidance, hosting, basic SEO, and pricing from $150.";
+  "Website design in 48 hours for businesses in Lagos, Nigeria, the United Kingdom, and remote markets that need a professional one-page website live fast, with domain guidance, hosting, basic SEO, and pricing from $150.";
 
 const homeBuyerAnswers = [
   {
@@ -123,6 +123,9 @@ export const metadata = buildPageMetadata({
   keywords: [
     ...launchKeywordSet,
     "website design nigeria",
+    "website design lagos",
+    "website design united kingdom",
+    "web designer uk",
     "professional website launch",
     "one-page website service",
   ],
@@ -146,7 +149,7 @@ export default function Page() {
           secondaryLabel="See the Launch Offer"
           secondaryHref="/launch"
           trustLine="Fast turnaround | Mobile-first | Simple pricing"
-          locationNote="Built for businesses in Nigeria, Lagos, and international clients who want a remote launch partner without agency drag."
+          locationNote="Built for businesses in Lagos, Nigeria, the United Kingdom, and remote markets that want a fast launch partner without agency drag."
           asideTitle="Launch sequence"
           asideItems={[
             "Offer, structure, and conversion path locked in quickly.",
@@ -202,6 +205,35 @@ export default function Page() {
               title: "Read the launch FAQ",
               description:
                 "Get quick answers on timing, ownership, revisions, support, and launch expectations.",
+            },
+          ]}
+        />
+
+        <CorePageLinks
+          eyebrow="Location pages"
+          title="Use the location page that matches the market you want to target"
+          description="These pages support Lagos and United Kingdom commercial intent without forcing location keywords onto pages where they do not belong."
+          links={[
+            {
+              href: "/website-design-lagos",
+              label: "Lagos",
+              title: "Website design in Lagos for service businesses",
+              description:
+                "Use the Lagos page if you want a commercial overview built around local trust, mobile UX, and enquiry flow.",
+            },
+            {
+              href: "/website-design-united-kingdom",
+              label: "United Kingdom",
+              title: "Website design for UK service businesses",
+              description:
+                "Use the UK page if you want a stronger website for a United Kingdom market without forcing a local office claim.",
+            },
+            {
+              href: "/web-design-for-real-estate-lagos",
+              label: "Real estate",
+              title: "Web design for real estate in Lagos",
+              description:
+                "Use the real-estate page if you want a Lagos property-focused commercial page instead of a general service overview.",
             },
           ]}
         />

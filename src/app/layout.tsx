@@ -8,7 +8,11 @@ import StructuredData from "@/components/StructuredData";
 import { getPosts } from "@/lib/posts";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/react";
-import { defaultSiteMetadata } from "@/lib/seo";
+import {
+  buildOrganizationSchema,
+  buildWebsiteSchema,
+  defaultSiteMetadata,
+} from "@/lib/seo";
 import { DEFAULT_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site";
 import { WebVitals } from "./components/WebVitals";
 import "./globals.css";
@@ -73,16 +77,7 @@ function getLatestPostHeadline(): LatestPostHeadline {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const latestPost = getLatestPostHeadline();
-  const websiteSchema = {
-    "@context": "https://schema.org",
-    "@type": "WebSite",
-    name: SITE_NAME,
-    url: SITE_URL,
-    potentialAction: {
-      "@type": "ContactAction",
-      target: `${SITE_URL}/contact`,
-    },
-  };
+  const siteSchemas = [buildWebsiteSchema(), buildOrganizationSchema()];
 
   return (
     <html lang="en">
@@ -160,7 +155,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           `}
         </Script>
 
-        <StructuredData data={websiteSchema} />
+        <StructuredData data={siteSchemas} />
         {GA_ID ? <GoogleAnalytics gaId={GA_ID} /> : null}
         <Analytics />
         <SpeedInsights />

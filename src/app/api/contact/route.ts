@@ -6,6 +6,7 @@ import {
   isValidEmail,
   sanitizeText,
 } from "@/lib/security";
+import { verifyTurnstileToken } from "@/lib/turnstile";
 
 export const runtime = "nodejs";
 
@@ -28,8 +29,9 @@ export async function POST(req: Request) {
     const name = sanitizeText(body?.name, 120);
     const email = sanitizeText(body?.email, 254).toLowerCase();
     const message = sanitizeText(body?.message, 2000);
+    const turnstileToken = sanitizeText(body?.turnstileToken, 2048);
 
-    if (!name || !email || !message) {
+    if (!name || !email || !message || !turnstileToken) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }
@@ -41,6 +43,16 @@ export async function POST(req: Request) {
         { error: "Invalid email address" },
         { status: 400 }
       );
+    }
+
+    const turnstile = await verifyTurnstileToken({
+      token: turnstileToken,
+      ip,
+      expectedAction: "contact",
+    });
+
+    if (!turnstile.ok) {
+      return NextResponse.json({ error: turnstile.error }, { status: 400 });
     }
 
     return NextResponse.json(

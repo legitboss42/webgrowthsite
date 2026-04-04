@@ -7,6 +7,7 @@ import {
   isValidEmail,
   sanitizeText,
 } from "@/lib/security";
+import { verifyTurnstileToken } from "@/lib/turnstile";
 
 const ADMIN_EMAIL = "admin@webgrowth.info";
 export const runtime = "nodejs";
@@ -19,6 +20,7 @@ type GetStartedBody = {
   email?: string;
   phoneOrWhatsApp?: string;
   selectedPackage?: string;
+  turnstileToken?: string;
 };
 
 function requiredString(value: unknown) {
@@ -49,6 +51,7 @@ export async function POST(req: Request) {
     const email = sanitizeText(body.email, 254).toLowerCase();
     const phoneOrWhatsApp = sanitizeText(body.phoneOrWhatsApp, 40);
     const selectedPackage = sanitizeText(body.selectedPackage, 120);
+    const turnstileToken = sanitizeText(body.turnstileToken, 2048);
 
     if (
       !requiredString(projectNeed) ||
@@ -56,7 +59,8 @@ export async function POST(req: Request) {
       !requiredString(fullName) ||
       !requiredString(businessName) ||
       !requiredString(email) ||
-      !requiredString(phoneOrWhatsApp)
+      !requiredString(phoneOrWhatsApp) ||
+      !requiredString(turnstileToken)
     ) {
       return NextResponse.json(
         { error: "Missing required fields." },
@@ -66,6 +70,16 @@ export async function POST(req: Request) {
 
     if (!isValidEmail(email)) {
       return NextResponse.json({ error: "Invalid email address." }, { status: 400 });
+    }
+
+    const turnstile = await verifyTurnstileToken({
+      token: turnstileToken,
+      ip,
+      expectedAction: "get_started",
+    });
+
+    if (!turnstile.ok) {
+      return NextResponse.json({ error: turnstile.error }, { status: 400 });
     }
 
     const token = process.env.MAILERSEND_API_TOKEN;

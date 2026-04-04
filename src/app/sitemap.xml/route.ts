@@ -8,9 +8,12 @@ const BASE_URL = "https://webgrowth.info";
 const STATIC_ROUTES = [
   "/",
   "/about",
+  "/editorial-policy",
   "/launch",
   "/hosting-offer",
   "/get-started",
+  "/website-design-lagos",
+  "/website-design-united-kingdom",
   "/portfolio",
   "/pricing",
   "/faq",

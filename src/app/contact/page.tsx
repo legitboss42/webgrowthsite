@@ -16,7 +16,7 @@ import {
 } from "@/lib/site";
 
 const pageDescription =
-  "Contact Web Growth to start a fast website launch for your business in Nigeria or remotely, with direct WhatsApp access, email, and a simple lead form.";
+  "Contact Web Growth to start a fast website launch for your business in Lagos, the United Kingdom, or remotely, with direct WhatsApp access, email, and a simple lead form.";
 
 const contactAnswers = [
   {
@@ -55,6 +55,8 @@ export const metadata = buildPageMetadata({
   path: "/contact",
   keywords: [
     "contact web designer nigeria",
+    "contact web designer lagos",
+    "contact web designer uk",
     "request website launch quote",
     "contact web growth",
   ],
@@ -75,7 +77,7 @@ export default function ContactPage() {
                   Start your fast website launch
                 </h1>
                 <p className="mt-4 max-w-2xl text-lg leading-7 text-white/72">
-                  If you want a professional site live fast for Nigeria-based or international customers, send the basics and get a direct response.
+                  If you want a professional site live fast for Lagos, United Kingdom, or remote customers, send the basics and get a direct response.
                 </p>
 
                 <div className="mt-8 flex flex-col gap-3 sm:flex-row">

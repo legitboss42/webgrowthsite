@@ -21,8 +21,8 @@ export default function Footer() {
           <div>
             <div className="text-white font-semibold">Web Growth</div>
             <p className="mt-3 text-white/60 leading-relaxed">
-              We build fast, conversion-focused websites for businesses in Nigeria and
-              international clients that need a credible launch without unnecessary
+              We build fast, conversion-focused websites for businesses in Lagos,
+              Nigeria, the United Kingdom, and remote markets that need a credible launch without unnecessary
               complexity.
             </p>
           </div>
@@ -42,6 +42,12 @@ export default function Footer() {
               </Link>
               <Link className="hover:text-white transition" href="/services">
                 Services
+              </Link>
+              <Link className="hover:text-white transition" href="/website-design-lagos">
+                Website Design Lagos
+              </Link>
+              <Link className="hover:text-white transition" href="/website-design-united-kingdom">
+                Website Design United Kingdom
               </Link>
               <Link className="hover:text-white transition" href="/about">
                 About

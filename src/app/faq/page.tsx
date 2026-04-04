@@ -5,7 +5,7 @@ import { launchFaqs } from "@/lib/launchOffer";
 import { buildFaqSchema, buildPageMetadata, buildProfessionalServiceSchema } from "@/lib/seo";
 
 const pageDescription =
-  "Frequently asked questions about Web Growth's 48-hour website launch service for businesses in Nigeria and remote international clients.";
+  "Frequently asked questions about Web Growth's 48-hour website launch service for businesses in Lagos, Nigeria, the United Kingdom, and remote international markets.";
 
 export const metadata = buildPageMetadata({
   title: "48-Hour Website Launch FAQ | Pricing, Timing, and Ownership",
@@ -15,6 +15,8 @@ export const metadata = buildPageMetadata({
     "website launch faq",
     "48 hour website faq",
     "website design nigeria faq",
+    "website design lagos faq",
+    "website design uk faq",
   ],
 });
 
@@ -37,7 +39,7 @@ export default function FaqPage() {
                 48-hour website launch FAQ for business owners who want clear answers
               </h1>
               <p className="mt-4 max-w-2xl text-lg leading-7 text-white/72">
-                Clear answers about timing, ownership, revisions, and support for the 48-hour website launch service.
+                Clear answers about timing, ownership, revisions, and support for the 48-hour website launch service for Lagos, UK, and remote businesses.
               </p>
             </div>
           </div>

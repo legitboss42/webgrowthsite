@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import {
   absoluteUrl,
+  BUSINESS_PHONE_DISPLAY,
   CONTACT_EMAIL,
   DEFAULT_DESCRIPTION,
   DEFAULT_OG_IMAGE,
@@ -76,8 +77,16 @@ export function buildProfessionalServiceSchema(path: string, description: string
     priceRange: "$150-$250",
     areaServed: [
       {
+        "@type": "Place",
+        name: "Lagos",
+      },
+      {
         "@type": "Country",
         name: "Nigeria",
+      },
+      {
+        "@type": "Country",
+        name: "United Kingdom",
       },
       {
         "@type": "Place",
@@ -112,6 +121,9 @@ export function buildArticleSchema({
   datePublished,
   dateModified,
   image,
+  category,
+  tags = [],
+  wordCount,
 }: {
   url: string;
   title: string;
@@ -119,10 +131,13 @@ export function buildArticleSchema({
   datePublished: string;
   dateModified?: string;
   image: string;
+  category?: string;
+  tags?: string[];
+  wordCount?: number;
 }) {
   return {
     "@context": "https://schema.org",
-    "@type": "Article",
+    "@type": "BlogPosting",
     headline: title,
     description,
     datePublished,
@@ -146,6 +161,117 @@ export function buildArticleSchema({
       },
     },
     image: [absoluteUrl(image)],
+    articleSection: category,
+    keywords: tags.join(", "),
+    wordCount,
+  };
+}
+
+export function buildOrganizationSchema() {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "@id": `${SITE_URL}#organization`,
+    name: SITE_NAME,
+    alternateName: "WebGrowth",
+    url: SITE_URL,
+    logo: absoluteUrl("/images/brand/web-growth-logo.webp"),
+    email: CONTACT_EMAIL,
+    telephone: BUSINESS_PHONE_DISPLAY,
+    sameAs: [WHATSAPP_BASE_URL],
+    areaServed: [
+      {
+        "@type": "Place",
+        name: "Lagos",
+      },
+      {
+        "@type": "Country",
+        name: "Nigeria",
+      },
+      {
+        "@type": "Country",
+        name: "United Kingdom",
+      },
+      {
+        "@type": "Place",
+        name: "Worldwide",
+      },
+    ],
+    contactPoint: [
+      {
+        "@type": "ContactPoint",
+        contactType: "sales",
+        email: CONTACT_EMAIL,
+        telephone: BUSINESS_PHONE_DISPLAY,
+        areaServed: ["Lagos", "NG", "GB", "Worldwide"],
+        availableLanguage: ["en"],
+      },
+    ],
+  };
+}
+
+export function buildWebsiteSchema() {
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "@id": `${SITE_URL}#website`,
+    name: SITE_NAME,
+    url: SITE_URL,
+    publisher: {
+      "@id": `${SITE_URL}#organization`,
+    },
+    potentialAction: {
+      "@type": "ContactAction",
+      target: `${SITE_URL}/contact`,
+    },
+  };
+}
+
+export function buildBreadcrumbSchema(
+  items: Array<{ name: string; path: string }>
+) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: items.map((item, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      name: item.name,
+      item: absoluteUrl(item.path),
+    })),
+  };
+}
+
+export function buildBlogCollectionSchema(
+  posts: Array<{
+    slug: string;
+    title: string;
+    excerpt: string;
+    date: string;
+    cover?: string;
+  }>
+) {
+  const blogUrl = absoluteUrl("/blog");
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "Blog",
+    "@id": `${blogUrl}#blog`,
+    url: blogUrl,
+    name: `${SITE_NAME} Blog`,
+    description:
+      "Website launch, SEO, conversion, and growth guides for small businesses.",
+    publisher: {
+      "@id": `${SITE_URL}#organization`,
+    },
+    blogPost: posts.slice(0, 8).map((post) => ({
+      "@type": "BlogPosting",
+      headline: post.title,
+      description: post.excerpt,
+      url: absoluteUrl(`/blog/${post.slug}`),
+      datePublished: post.date,
+      image: absoluteUrl(post.cover || DEFAULT_OG_IMAGE),
+    })),
   };
 }
 
@@ -182,8 +308,16 @@ export function buildHostingOfferSchema() {
     },
     areaServed: [
       {
+        "@type": "Place",
+        name: "Lagos",
+      },
+      {
         "@type": "Country",
         name: "Nigeria",
+      },
+      {
+        "@type": "Country",
+        name: "United Kingdom",
       },
       {
         "@type": "Place",

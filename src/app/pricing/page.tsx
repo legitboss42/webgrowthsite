@@ -12,15 +12,17 @@ import {
 import { BOOKING_URL } from "@/lib/site";
 
 const pageDescription =
-  "Pricing for website design in 48 hours, with clear USD packages from $150 for businesses in Nigeria and international clients who need a professional website live fast.";
+  "Pricing for website design in 48 hours, with clear USD packages from $150 for businesses in Lagos, Nigeria, the United Kingdom, and remote markets that need a professional website live fast.";
 
 export const metadata = buildPageMetadata({
-  title: "48-Hour Website Launch Pricing | Business Website from $150",
+  title: "Website Design Pricing Lagos, UK & Nigeria | Launch from $150",
   description: pageDescription,
   path: "/pricing",
   keywords: [
     ...launchKeywordSet,
     "website design pricing nigeria",
+    "website design pricing lagos",
+    "website design pricing uk",
     "one page website cost",
   ],
 });
@@ -28,7 +30,7 @@ export const metadata = buildPageMetadata({
 const pricingHighlights = [
   { label: "Starting at", value: "$150", note: "Launch package" },
   { label: "Delivery", value: "48 hours", note: "When content is ready" },
-  { label: "Best fit", value: "Service brands", note: "Nigeria + remote clients" },
+  { label: "Best fit", value: "Service brands", note: "Lagos, UK + remote clients" },
   { label: "Scope", value: "1 page or 1 page + blog", note: "Built to expand later" },
 ];
 
@@ -54,7 +56,7 @@ export default function PricingPage() {
                 </h1>
                 <p className="mt-5 max-w-2xl text-lg leading-7 text-white/72">
                   Clear USD pricing, clean scope, and a focused 48-hour website launch
-                  for businesses in Nigeria, Lagos, or remote international markets that
+                  for businesses in Lagos, Nigeria, the United Kingdom, or remote markets that
                   need a one-page business website or a mobile-first business website with
                   blog support.
                 </p>

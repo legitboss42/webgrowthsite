@@ -10,7 +10,11 @@ import HostingSupportBlock from "@/components/HostingSupportBlock";
 import RelatedServiceCTA from "@/components/RelatedServiceCTA";
 import SocialShareDock from "@/components/SocialShareDock";
 import { getPost, getPosts, type Post } from "@/lib/posts";
-import { buildArticleSchema, buildPageMetadata } from "@/lib/seo";
+import {
+  buildArticleSchema,
+  buildBreadcrumbSchema,
+  buildPageMetadata,
+} from "@/lib/seo";
 import {
   BOOKING_URL,
   buildWhatsAppUrl,
@@ -93,6 +97,13 @@ function extractHeadings(content: string) {
   return headings;
 }
 
+function estimateWordCount(content: string) {
+  return content
+    .replace(/[#_*>\-\[\]\(\)`]/g, " ")
+    .split(/\s+/)
+    .filter(Boolean).length;
+}
+
 function getRelatedPosts(current: Post, limit = 3): Post[] {
   const all = getPosts().filter((post) => post.slug !== current.slug);
   const currentTags = new Set(getSafeTags(current));
@@ -147,15 +158,24 @@ export default async function BlogPostPage({
     "Hello, I would like to discuss my website project."
   );
   const canonicalUrl = `${SITE_URL}/blog/${post.slug}`;
-
-  const schema = buildArticleSchema({
-    url: canonicalUrl,
-    title: post.title,
-    description: post.excerpt,
-    datePublished: post.date,
-    dateModified: post.date,
-    image: post.cover || DEFAULT_OG_IMAGE,
-  });
+  const schema = [
+    buildArticleSchema({
+      url: canonicalUrl,
+      title: post.title,
+      description: post.excerpt,
+      datePublished: post.date,
+      dateModified: post.date,
+      image: post.cover || DEFAULT_OG_IMAGE,
+      category: post.category,
+      tags: getSafeTags(post),
+      wordCount: estimateWordCount(post.content),
+    }),
+    buildBreadcrumbSchema([
+      { name: "Home", path: "/" },
+      { name: "Blog", path: "/blog" },
+      { name: post.title, path: `/blog/${post.slug}` },
+    ]),
+  ];
 
   return (
     <article className="bg-black text-white">
@@ -173,6 +193,24 @@ export default async function BlogPostPage({
 
         <div className="relative mx-auto max-w-6xl px-6 py-16">
           <div className="max-w-3xl">
+            <nav aria-label="Breadcrumb" className="mb-5 text-sm text-white/55">
+              <ol className="flex flex-wrap items-center gap-2">
+                <li>
+                  <Link href="/" className="transition hover:text-white">
+                    Home
+                  </Link>
+                </li>
+                <li aria-hidden="true">/</li>
+                <li>
+                  <Link href="/blog" className="transition hover:text-white">
+                    Blog
+                  </Link>
+                </li>
+                <li aria-hidden="true">/</li>
+                <li className="text-white/82">{post.title}</li>
+              </ol>
+            </nav>
+
             <div className="text-sm text-white/55">
               {new Date(post.date).toLocaleDateString()} | {post.readTime} |{" "}
               <span className="text-emerald-200">{post.category}</span>

@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
+import TurnstileWidget from "@/components/TurnstileWidget";
 
 type Status = "idle" | "sending" | "success" | "error";
 
@@ -47,6 +48,13 @@ export default function ContactClient() {
   );
   const [status, setStatus] = useState<Status>("idle");
   const [statusMsg, setStatusMsg] = useState("");
+  const [turnstileToken, setTurnstileToken] = useState("");
+  const [turnstileResetKey, setTurnstileResetKey] = useState(0);
+
+  const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "";
+  const isProduction = process.env.NODE_ENV === "production";
+  const isTurnstileEnabled = Boolean(turnstileSiteKey);
+  const canSubmit = isTurnstileEnabled || !isProduction;
 
   useEffect(() => {
     const selected = searchParams.get("service");
@@ -62,6 +70,13 @@ export default function ContactClient() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+
+    if (isTurnstileEnabled && !turnstileToken) {
+      setStatus("error");
+      setStatusMsg("Complete the spam check, then send your request again.");
+      return;
+    }
+
     setStatus("sending");
     setStatusMsg("");
 
@@ -74,6 +89,7 @@ export default function ContactClient() {
         body: JSON.stringify({
           formType: "contact",
           subject: `New Web Growth Launch Request - ${service}`,
+          turnstileToken,
           fields: {
             name,
             email,
@@ -85,8 +101,10 @@ export default function ContactClient() {
       });
 
       if (!res.ok) {
+        const data = (await res.json().catch(() => null)) as { error?: string } | null;
         setStatus("error");
-        setStatusMsg("Failed to send. Try again.");
+        setStatusMsg(data?.error || "Failed to send. Try again.");
+        setTurnstileResetKey((current) => current + 1);
         return;
       }
 
@@ -106,6 +124,7 @@ export default function ContactClient() {
     } catch {
       setStatus("error");
       setStatusMsg("Network error. Please try again.");
+      setTurnstileResetKey((current) => current + 1);
     }
   }
 
@@ -206,12 +225,27 @@ export default function ContactClient() {
           />
         </div>
 
+        {isTurnstileEnabled ? (
+          <div className="space-y-2">
+            <p className="text-sm text-white/70">Spam check</p>
+            <TurnstileWidget
+              action="contact"
+              onTokenChange={setTurnstileToken}
+              resetKey={turnstileResetKey}
+            />
+          </div>
+        ) : (
+          <p className="rounded-xl border border-amber-400/35 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
+            Form protection is not configured yet. Add the Turnstile site key before using this form in production.
+          </p>
+        )}
+
         <button
           type="submit"
-          disabled={status === "sending"}
+          disabled={status === "sending" || !canSubmit}
           className={[
             "w-full rounded-xl px-6 py-4 text-sm font-semibold text-white transition",
-            status === "sending"
+            status === "sending" || !canSubmit
               ? "cursor-not-allowed bg-emerald-600/60"
               : "bg-emerald-700 hover:bg-emerald-600",
           ].join(" ")}
