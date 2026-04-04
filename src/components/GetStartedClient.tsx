@@ -64,6 +64,7 @@ export default function GetStartedClient() {
   const isProduction = process.env.NODE_ENV === "production";
   const isTurnstileEnabled = Boolean(turnstileSiteKey);
   const canSubmit = isTurnstileEnabled || !isProduction;
+  const isWaitingForSpamCheck = isTurnstileEnabled && !turnstileToken;
 
   const whatsappHref = useMemo(() => {
     const intro = "Hello, I just completed the Get Started form.";
@@ -194,6 +195,14 @@ export default function GetStartedClient() {
       setTurnstileResetKey((current) => current + 1);
     } finally {
       setIsSubmitting(false);
+    }
+  }
+
+  function handleTurnstileTokenChange(token: string) {
+    setTurnstileToken(token);
+
+    if (token) {
+      setSubmitError("");
     }
   }
 
@@ -381,6 +390,30 @@ export default function GetStartedClient() {
                   />
                 </div>
               </div>
+              {isTurnstileEnabled ? (
+                <div className="space-y-2">
+                  <p className="text-sm text-white/70">Spam check</p>
+                  <TurnstileWidget
+                    action="get_started"
+                    onTokenChange={handleTurnstileTokenChange}
+                    resetKey={turnstileResetKey}
+                  />
+                </div>
+              ) : (
+                <p className="rounded-xl border border-amber-400/35 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
+                  Form protection is not configured yet. Add the Turnstile site key before using this form in production.
+                </p>
+              )}
+              {submitError ? (
+                <p className="rounded-xl border border-amber-400/35 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
+                  {submitError}
+                </p>
+              ) : null}
+              {isTurnstileEnabled && isWaitingForSpamCheck ? (
+                <p className="text-sm text-white/60">
+                  Complete the spam check to enable submit.
+                </p>
+              ) : null}
               <div className="flex justify-between pt-2">
                 <button
                   type="button"
@@ -391,26 +424,17 @@ export default function GetStartedClient() {
                 </button>
                 <button
                   type="submit"
-                  disabled={isSubmitting || !canSubmit}
-                  className="inline-flex min-h-11 items-center justify-center rounded-xl bg-emerald-700 px-6 text-sm font-semibold text-white transition hover:bg-emerald-600"
+                  disabled={isSubmitting || !canSubmit || isWaitingForSpamCheck}
+                  className={[
+                    "inline-flex min-h-11 items-center justify-center rounded-xl px-6 text-sm font-semibold text-white transition",
+                    isSubmitting || !canSubmit || isWaitingForSpamCheck
+                      ? "cursor-not-allowed bg-emerald-700/45"
+                      : "bg-emerald-700 hover:bg-emerald-600",
+                  ].join(" ")}
                 >
                   {isSubmitting ? "Submitting..." : "Submit request"}
                 </button>
               </div>
-              {isTurnstileEnabled ? (
-                <div className="space-y-2">
-                  <p className="text-sm text-white/70">Spam check</p>
-                  <TurnstileWidget
-                    action="get_started"
-                    onTokenChange={setTurnstileToken}
-                    resetKey={turnstileResetKey}
-                  />
-                </div>
-              ) : (
-                <p className="rounded-xl border border-amber-400/35 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
-                  Form protection is not configured yet. Add the Turnstile site key before using this form in production.
-                </p>
-              )}
             </form>
           ) : null}
 
