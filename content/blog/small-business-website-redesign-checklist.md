@@ -1,6 +1,6 @@
 ---
-title: Small Business Website Redesign Checklist: What to Fix Before You Rebuild
-excerpt: Use this small business website redesign checklist to fix messaging, structure, trust, speed, SEO, and launch readiness before spending money on a cosmetic rebuild.
+title: "Small Business Website Redesign Checklist: What to Fix Before You Rebuild"
+excerpt: "Use this small business website redesign checklist to fix messaging, structure, trust, speed, SEO, and launch readiness before spending money on a cosmetic rebuild."
 date: 2026-02-19
 category: Strategy
 tags: ["Website Redesign", "Conversion", "UX", "SEO", "Small Business"]

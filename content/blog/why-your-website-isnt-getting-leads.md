@@ -1,6 +1,6 @@
 ---
-title: Website Not Generating Leads? 9 Fixes for Small Business Websites
-excerpt: If your website is not generating leads, the problem is usually weak messaging, weak trust, weak structure, or weak follow-up. Use these 9 fixes to turn more traffic into enquiries.
+title: "Website Not Generating Leads? 9 Fixes for Small Business Websites"
+excerpt: "If your website is not generating leads, the problem is usually weak messaging, weak trust, weak structure, or weak follow-up. Use these 9 fixes to turn more traffic into enquiries."
 date: 2026-02-03
 category: Conversion
 tags: ["Conversion", "Leads", "Sales", "Website Strategy", "Small Business"]

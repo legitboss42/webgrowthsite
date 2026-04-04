@@ -1,6 +1,6 @@
 ---
-title: Small Business SEO Checklist: 12 Fixes That Improve Rankings and Leads
-excerpt: Use this small business SEO checklist to fix crawlability, speed, page targeting, metadata, internal links, and local signals so your website can rank higher and turn search traffic into enquiries.
+title: "Small Business SEO Checklist: 12 Fixes That Improve Rankings and Leads"
+excerpt: "Use this small business SEO checklist to fix crawlability, speed, page targeting, metadata, internal links, and local signals so your website can rank higher and turn search traffic into enquiries."
 date: 2026-02-03
 category: SEO
 tags: ["SEO", "Google", "Traffic", "Small Business", "Local SEO"]
