@@ -106,6 +106,35 @@ export function buildProfessionalServiceSchema(path: string, description: string
   };
 }
 
+export function buildLocalBusinessServiceSchema() {
+  const serviceUrl = absoluteUrl("/local-business");
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    "@id": `${serviceUrl}#service`,
+    name: "Local SEO Web Design & Lead Generation",
+    description:
+      "Custom, high-speed website development engineered to generate local leads and phone calls for service businesses and high-ticket clinics.",
+    url: serviceUrl,
+    serviceType: "Local SEO web design and lead generation",
+    category: "Web Design Service",
+    areaServed: [
+      {
+        "@type": "Place",
+        name: "Lagos",
+      },
+      {
+        "@type": "Country",
+        name: "Nigeria",
+      },
+    ],
+    provider: {
+      "@id": `${SITE_URL}#professional-service`,
+    },
+  };
+}
+
 export function buildArticleSchema({
   url,
   title,
@@ -130,47 +159,59 @@ export function buildArticleSchema({
   return {
     "@context": "https://schema.org",
     "@type": "BlogPosting",
+    "@id": `${url}#article`,
     headline: title,
+    url,
     description,
     datePublished,
-    dateModified: dateModified || datePublished,
     mainEntityOfPage: {
       "@type": "WebPage",
       "@id": url,
     },
     author: {
       "@type": "Organization",
-      name: SITE_NAME,
+      name: "Web Growth",
       url: SITE_URL,
     },
     publisher: {
-      "@type": "Organization",
-      name: SITE_NAME,
-      url: SITE_URL,
-      logo: {
-        "@type": "ImageObject",
-        url: absoluteUrl("/images/brand/web-growth-logo.webp"),
-      },
+      "@id": `${SITE_URL}#professional-service`,
     },
-    image: [absoluteUrl(image)],
-    articleSection: category,
-    keywords: tags.join(", "),
-    wordCount,
+    image: absoluteUrl(image),
+    ...(dateModified ? { dateModified } : {}),
+    ...(category ? { articleSection: category } : {}),
+    ...(tags.length ? { keywords: tags.join(", ") } : {}),
+    ...(wordCount ? { wordCount } : {}),
   };
 }
 
 export function buildOrganizationSchema() {
   return {
     "@context": "https://schema.org",
-    "@type": "Organization",
-    "@id": `${SITE_URL}#organization`,
-    name: SITE_NAME,
+    "@type": "ProfessionalService",
+    "@id": `${SITE_URL}#professional-service`,
+    name: "Web Growth",
     alternateName: "WebGrowth",
     url: SITE_URL,
-    logo: absoluteUrl("/images/brand/web-growth-logo.webp"),
+    description:
+      "A premium web design agency specializing in high-performance, custom Next.js websites.",
+    logo: {
+      "@type": "ImageObject",
+      url: absoluteUrl("/images/brand/web-growth-logo.webp"),
+    },
+    image: absoluteUrl(DEFAULT_OG_IMAGE),
     email: CONTACT_EMAIL,
     telephone: BUSINESS_PHONE_DISPLAY,
-    sameAs: [WHATSAPP_BASE_URL],
+    serviceType: [
+      "High-performance web design",
+      "Custom Next.js website development",
+      "Technical SEO-ready website builds",
+    ],
+    sameAs: [
+      "https://www.instagram.com/webgrowthinfo",
+      "https://www.linkedin.com/company/webgrowthinfo",
+      "https://x.com/webgrowthinfo",
+      "https://www.facebook.com/webgrowthinfo",
+    ],
     areaServed: [
       {
         "@type": "Place",
@@ -187,6 +228,7 @@ export function buildOrganizationSchema() {
         contactType: "sales",
         email: CONTACT_EMAIL,
         telephone: BUSINESS_PHONE_DISPLAY,
+        url: absoluteUrl("/contact"),
         areaServed: ["Lagos", "NG"],
         availableLanguage: ["en"],
       },
@@ -202,7 +244,7 @@ export function buildWebsiteSchema() {
     name: SITE_NAME,
     url: SITE_URL,
     publisher: {
-      "@id": `${SITE_URL}#organization`,
+      "@id": `${SITE_URL}#professional-service`,
     },
     potentialAction: {
       "@type": "ContactAction",
@@ -246,7 +288,7 @@ export function buildBlogCollectionSchema(
     description:
       "Website launch, SEO, conversion, and growth guides for small businesses.",
     publisher: {
-      "@id": `${SITE_URL}#organization`,
+      "@id": `${SITE_URL}#professional-service`,
     },
     blogPost: posts.slice(0, 8).map((post) => ({
       "@type": "BlogPosting",

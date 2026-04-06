@@ -1,112 +1,100 @@
-"use client";
-
 import Link from "next/link";
 import TrackedLink from "@/components/analytics/TrackedLink";
+import { CONTACT_EMAIL, CONTACT_EMAIL_HREF, buildWhatsAppUrl } from "@/lib/site";
 
-const WHATSAPP_NUMBER = "2348066706336";
-const WHATSAPP_MESSAGE = "Hello, I'd like to request a quote for a website.";
-
-function buildWhatsAppUrl() {
-  const text = encodeURIComponent(WHATSAPP_MESSAGE);
-  return `https://wa.me/${WHATSAPP_NUMBER}?text=${text}`;
-}
+const footerLinks = [
+  { href: "/launch", label: "Launch" },
+  { href: "/services", label: "Services" },
+  { href: "/about", label: "About" },
+  { href: "/portfolio", label: "Portfolio" },
+  { href: "/blog", label: "Blog" },
+  { href: "/pricing", label: "Pricing" },
+  { href: "/contact", label: "Contact" },
+];
 
 export default function Footer() {
-  const whatsappUrl = buildWhatsAppUrl();
+  const whatsappHref = buildWhatsAppUrl("Hello, I'd like to ask about a website project.");
 
   return (
     <footer className="border-t border-white/10 bg-black">
       <div className="mx-auto max-w-6xl px-6 py-14">
         <div className="grid gap-10 md:grid-cols-3">
           <div>
-            <div className="text-white font-semibold">Web Growth</div>
-            <p className="mt-3 text-white/60 leading-relaxed">
-              Web Growth is run by Victor Chinukwue. I build websites for service
-              businesses that want to look better online and make it easier for
-              people to get in touch.
+            <p className="text-sm uppercase tracking-[0.18em] text-emerald-300/80">
+              Web Growth
+            </p>
+            <h2 className="mt-4 text-2xl font-semibold tracking-[-0.02em] text-white">
+              Founder-led websites built to help businesses get more enquiries
+            </h2>
+            <p className="mt-4 max-w-sm text-sm leading-7 text-white/62">
+              Web Growth is run by Victor Chinukwue. The work is direct, mobile-first,
+              and built for service businesses that want a site that feels sharper and
+              easier to trust.
             </p>
           </div>
 
           <div className="md:justify-self-center">
-            <div className="text-white font-semibold">Links</div>
-
-            <div className="mt-3 flex flex-col gap-2 text-white/60">
-              <Link className="hover:text-white transition" href="/launch">
-                Website design in 48 hours
-              </Link>
-              <Link className="hover:text-white transition" href="/pricing">
-                48-hour launch pricing
-              </Link>
-              <Link className="hover:text-white transition" href="/faq">
-                Launch FAQ
-              </Link>
-              <Link className="hover:text-white transition" href="/services">
-                Services
-              </Link>
-              <Link className="hover:text-white transition" href="/website-design-lagos">
-                Website Design Lagos
-              </Link>
-              <Link className="hover:text-white transition" href="/about">
-                About
-              </Link>
-              <Link className="hover:text-white transition" href="/portfolio">
-                Portfolio
-              </Link>
-              <Link className="hover:text-white transition" href="/blog">
-                Blog
-              </Link>
-              <Link className="hover:text-white transition" href="/contact">
-                Contact
-              </Link>
+            <p className="text-sm uppercase tracking-[0.18em] text-emerald-300/80">
+              Links
+            </p>
+            <div className="mt-4 grid gap-2 text-sm text-white/64">
+              {footerLinks.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="transition hover:text-white"
+                >
+                  {item.label}
+                </Link>
+              ))}
             </div>
           </div>
 
           <div className="md:justify-self-end">
-            <div className="text-white font-semibold">Contact</div>
-
-            <div className="mt-3 space-y-2 text-white/60">
-              <div>
-                <span className="text-white/70">Email: </span>
-                <a
-                  className="hover:text-white transition"
-                  href="mailto:admin@webgrowth.info"
-                >
-                  admin@webgrowth.info
+            <p className="text-sm uppercase tracking-[0.18em] text-emerald-300/80">
+              Contact
+            </p>
+            <div className="mt-4 space-y-3 text-sm text-white/64">
+              <p>
+                <span className="text-white/78">Email:</span>{" "}
+                <a href={CONTACT_EMAIL_HREF} className="transition hover:text-white">
+                  {CONTACT_EMAIL}
                 </a>
-              </div>
-
-              <div>
-                <span className="text-white/70">WhatsApp: </span>
+              </p>
+              <p>
+                <span className="text-white/78">WhatsApp:</span>{" "}
                 <TrackedLink
-                  className="hover:text-white transition"
-                  href={whatsappUrl}
+                  href={whatsappHref}
                   target="_blank"
                   rel="noreferrer"
                   ctaName="whatsapp"
                   ctaLocation="footer"
                   destination="whatsapp"
                   pageType="sitewide_footer"
+                  className="transition hover:text-white"
                 >
                   Chat on WhatsApp
                 </TrackedLink>
-              </div>
+              </p>
+              <p className="max-w-xs text-xs leading-6 text-white/48">
+                Same-day replies in most cases. Best fit for service businesses,
+                consultants, clinics, and premium local brands.
+              </p>
             </div>
           </div>
         </div>
 
-        <div className="mt-10 flex flex-col gap-3 border-t border-white/10 pt-6 text-sm text-white/50 md:flex-row md:items-center md:justify-between">
-          <div>(c) {new Date().getFullYear()} Web Growth. All rights reserved.</div>
+        <div className="mt-10 flex flex-col gap-3 border-t border-white/10 pt-6 text-sm text-white/48 md:flex-row md:items-center md:justify-between">
+          <p>(c) {new Date().getFullYear()} Web Growth. All rights reserved.</p>
 
-          <div className="flex gap-4">
-            <Link className="hover:text-white transition" href="/editorial-policy">
+          <div className="flex flex-wrap gap-4">
+            <Link href="/editorial-policy" className="transition hover:text-white">
               Editorial Policy
             </Link>
-
-            <Link className="hover:text-white transition" href="/privacy">
+            <Link href="/privacy" className="transition hover:text-white">
               Privacy Policy
             </Link>
-
-            <Link className="hover:text-white transition" href="/terms">
+            <Link href="/terms" className="transition hover:text-white">
               Terms of Service
             </Link>
           </div>

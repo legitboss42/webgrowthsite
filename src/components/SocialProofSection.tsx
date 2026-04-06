@@ -2,14 +2,26 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-
 import CaseStudyCard from "@/components/CaseStudyCard";
 import type { PortfolioCase } from "@/lib/portfolioCases";
 
+const typeLabels: Record<PortfolioCase["type"], string> = {
+  "Business Sites": "Service Website",
+  "Landing Pages": "Landing Page",
+  Redesign: "Rebuild",
+  "E-commerce": "E-commerce",
+};
+
 export default function SocialProofSection({
   cards,
+  eyebrow = "Recent work",
+  title = "Proof of build quality in live projects",
+  description = "These projects are here to show real execution, not filler. They are selected to demonstrate the standard of work behind Web Growth.",
 }: {
   cards: readonly PortfolioCase[];
+  eyebrow?: string;
+  title?: string;
+  description?: string;
 }) {
   const initialState = useMemo(
     () =>
@@ -22,10 +34,10 @@ export default function SocialProofSection({
 
   const [openCards, setOpenCards] = useState<Record<string, boolean>>(initialState);
 
-  const toggleCard = (title: string) => {
+  const toggleCard = (titleKey: string) => {
     setOpenCards((current) => ({
       ...current,
-      [title]: !current[title],
+      [titleKey]: !current[titleKey],
     }));
   };
 
@@ -34,14 +46,13 @@ export default function SocialProofSection({
       <div className="mx-auto max-w-6xl px-6">
         <div className="max-w-3xl">
           <p className="text-xs uppercase tracking-[0.2em] text-emerald-300/80">
-            Recent work
+            {eyebrow}
           </p>
           <h2 className="mt-4 text-balance text-3xl font-semibold leading-tight tracking-[-0.01em] md:text-5xl">
-            A few projects so you can see the kind of work I do
+            {title}
           </h2>
           <p className="mt-4 max-w-2xl text-lg leading-7 text-white/72">
-            These are here so you can get a feel for the work. They are not filler,
-            and they are not made-up case studies.
+            {description}
           </p>
         </div>
 
@@ -50,7 +61,7 @@ export default function SocialProofSection({
             const isOpen = openCards[item.title];
 
             return (
-              <div key={item.title} className="flex min-h-0 h-full flex-col gap-4">
+              <div key={item.title} className="flex h-full min-h-0 flex-col gap-4">
                 <CaseStudyCard
                   title={item.title}
                   client={item.client}
@@ -74,7 +85,7 @@ export default function SocialProofSection({
                     aria-expanded={isOpen}
                   >
                     <span className="inline-flex rounded-full border border-white/10 bg-black/55 px-3 py-1 text-xs uppercase tracking-[0.12em] text-emerald-200/90">
-                      {item.type}
+                      {typeLabels[item.type]}
                     </span>
                     <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-emerald-300/90 transition hover:text-emerald-200">
                       {isOpen ? "Hide Details" : "Show Details"}

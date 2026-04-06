@@ -164,7 +164,6 @@ export default async function BlogPostPage({
       title: post.title,
       description: post.excerpt,
       datePublished: post.date,
-      dateModified: post.date,
       image: post.cover || DEFAULT_OG_IMAGE,
       category: post.category,
       tags: getSafeTags(post),

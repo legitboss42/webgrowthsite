@@ -6,7 +6,7 @@ interface FAQItem {
 }
 
 interface FAQAccordionProps {
-  items: FAQItem[];
+  items: readonly FAQItem[];
   className?: string;
 }
 

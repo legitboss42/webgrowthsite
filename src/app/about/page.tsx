@@ -1,21 +1,30 @@
 import AboutClient from "@/components/AboutClient";
-import { buildPageMetadata } from "@/lib/seo";
+import StructuredData from "@/components/StructuredData";
+import { buildPageMetadata, buildProfessionalServiceSchema } from "@/lib/seo";
+
+const pageDescription =
+  "Web Growth is a premium Next.js agency building custom websites for clinics, service brands, and e-commerce businesses that need speed and conversion.";
 
 export const metadata = buildPageMetadata({
-  title: "About Victor Chinukwue | Web Growth",
-  description:
-    "Meet Victor Chinukwue, founder of Web Growth, and see how he builds conversion-focused websites for Lagos businesses and selective UK projects.",
+  title: "About Web Growth | Premium Next.js Agency",
+  description: pageDescription,
   path: "/about",
   keywords: [
     "about web growth",
     "victor chinukwue",
-    "web designer nigeria",
-    "web designer lagos",
-    "founder web growth",
-    "conversion-focused web design",
+    "premium next.js agency",
+    "next.js web design agency",
+    "custom website development agency",
+    "premium website development partner",
   ],
+  image: "/images/about/about-hero.webp",
 });
 
 export default function AboutPage() {
-  return <AboutClient />;
+  return (
+    <>
+      <StructuredData data={buildProfessionalServiceSchema("/about", pageDescription)} />
+      <AboutClient />
+    </>
+  );
 }

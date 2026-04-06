@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import TurnstileWidget from "@/components/TurnstileWidget";
 
 type Status = "idle" | "sending" | "success" | "error";
@@ -24,28 +24,26 @@ function fireGtagEvent(eventName: string, params: Record<string, unknown>) {
 }
 
 export default function ContactClient() {
-  const searchParams = useSearchParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const serviceOptions = useMemo(
     () => [
-      "Launch ($150)",
-      "Launch + Blog ($250)",
       "Business Website Design",
       "Website Redesign",
       "Landing Page Design",
       "Speed & Mobile Optimisation",
       "Lead Capture & Booking Setup",
+      "Launch ($150)",
+      "Launch + Blog ($250)",
     ],
     []
   );
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [service, setService] = useState("Launch ($150)");
-  const [message, setMessage] = useState(
-    "I want a professional website live fast. Here are the basics of my business:"
-  );
+  const [service, setService] = useState("Business Website Design");
+  const [message, setMessage] = useState("Here is the project I need help with:");
   const [status, setStatus] = useState<Status>("idle");
   const [statusMsg, setStatusMsg] = useState("");
   const [turnstileToken, setTurnstileToken] = useState("");
@@ -68,8 +66,8 @@ export default function ContactClient() {
     setService(match ?? decoded);
   }, [searchParams, serviceOptions]);
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  async function handleSubmit(event: React.FormEvent) {
+    event.preventDefault();
 
     if (isTurnstileEnabled && !turnstileToken) {
       setStatus("error");
@@ -81,7 +79,7 @@ export default function ContactClient() {
     setStatusMsg("");
 
     try {
-      const res = await fetch("/api/forms/notify", {
+      const response = await fetch("/api/forms/notify", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -100,8 +98,8 @@ export default function ContactClient() {
         }),
       });
 
-      if (!res.ok) {
-        const data = (await res.json().catch(() => null)) as { error?: string } | null;
+      if (!response.ok) {
+        const data = (await response.json().catch(() => null)) as { error?: string } | null;
         setStatus("error");
         setStatusMsg(data?.error || "Failed to send. Try again.");
         setTurnstileResetKey((current) => current + 1);
@@ -109,16 +107,17 @@ export default function ContactClient() {
       }
 
       setStatus("success");
-      const leadPayload = {
-        form_name: "launch_contact",
+
+      const payload = {
+        form_name: "contact_form",
         service,
         page_path: typeof window !== "undefined" ? window.location.pathname : "",
       };
 
-      pushToDataLayer("wg_lead", leadPayload);
-      fireGtagEvent("generate_lead", { ...leadPayload, method: "website_form" });
+      pushToDataLayer("wg_lead", payload);
+      fireGtagEvent("generate_lead", { ...payload, method: "website_form" });
 
-      setTimeout(() => {
+      window.setTimeout(() => {
         router.push("/contact/thanks");
       }, 800);
     } catch {
@@ -129,29 +128,34 @@ export default function ContactClient() {
   }
 
   return (
-    <div id="contact-form" className="rounded-2xl border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.045),rgba(255,255,255,0.015))] p-7 shadow-[0_18px_44px_rgba(0,0,0,0.22)]">
-      <h2 className="text-2xl font-semibold tracking-[-0.01em] text-white">
-        Send your project details
+    <div
+      id="contact-form"
+      className="rounded-3xl border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.012))] p-7 shadow-[0_20px_50px_rgba(0,0,0,0.28)] backdrop-blur-xl"
+    >
+      <h2 className="text-2xl font-semibold tracking-[-0.02em] text-white">
+        Tell me what needs to be built
       </h2>
-      <p className="mt-3 text-sm leading-6 text-white/70">
-        You are contacting Victor Chinukwue directly. Send the basics and I will reply with what makes sense and what to do next.
+      <p className="mt-3 text-sm leading-7 text-white/70">
+        Send the brief and get a direct reply on fit, likely scope, timing, and
+        the strongest next step for the project.
       </p>
-      <div className="mt-5 rounded-xl border border-emerald-400/20 bg-emerald-500/10 p-4">
+
+      <div className="mt-5 rounded-2xl border border-emerald-400/20 bg-emerald-500/10 p-4">
         <p className="text-xs uppercase tracking-[0.16em] text-emerald-200/90">
-          To get the fastest reply
+          To get the most useful reply
         </p>
         <ul className="mt-3 space-y-2 text-sm leading-6 text-white/78">
           <li className="flex gap-2">
             <span className="mt-[9px] h-1.5 w-1.5 rounded-full bg-emerald-300" />
-            <span>Say what you need built and how quickly you want it live.</span>
+            <span>Say what the business does and what the website needs to improve.</span>
           </li>
           <li className="flex gap-2">
             <span className="mt-[9px] h-1.5 w-1.5 rounded-full bg-emerald-300" />
-            <span>Mention if you already have a domain, hosting, or existing website.</span>
+            <span>Mention whether this is a new build, redesign, launch package, or landing page.</span>
           </li>
           <li className="flex gap-2">
             <span className="mt-[9px] h-1.5 w-1.5 rounded-full bg-emerald-300" />
-            <span>The clearer the message, the easier it is for me to give you a useful answer quickly.</span>
+            <span>You do not need a polished brief. A clear summary is enough to start properly.</span>
           </li>
         </ul>
       </div>
@@ -159,7 +163,7 @@ export default function ContactClient() {
       {status !== "idle" ? (
         <div
           className={[
-            "mt-6 rounded-xl border p-4 text-sm",
+            "mt-6 rounded-2xl border p-4 text-sm",
             status === "success"
               ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-200"
               : status === "error"
@@ -185,8 +189,8 @@ export default function ContactClient() {
             type="text"
             required
             value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="w-full rounded-xl border border-white/10 bg-black/40 px-4 py-3 text-white outline-none"
+            onChange={(event) => setName(event.target.value)}
+            className="w-full rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-white outline-none transition focus:border-emerald-400/50"
           />
         </div>
 
@@ -199,21 +203,21 @@ export default function ContactClient() {
             type="email"
             required
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded-xl border border-white/10 bg-black/40 px-4 py-3 text-white outline-none"
+            onChange={(event) => setEmail(event.target.value)}
+            className="w-full rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-white outline-none transition focus:border-emerald-400/50"
           />
         </div>
 
         <div>
           <label htmlFor="contact-service" className="mb-2 block text-sm text-white/70">
-            Service
+            What do you need?
           </label>
           <select
             id="contact-service"
             required
             value={service}
-            onChange={(e) => setService(e.target.value)}
-            className="w-full rounded-xl border border-white/10 bg-black/40 px-4 py-3 text-white outline-none"
+            onChange={(event) => setService(event.target.value)}
+            className="w-full rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-white outline-none transition focus:border-emerald-400/50"
           >
             {serviceOptions.map((option) => (
               <option key={option} value={option} className="bg-black">
@@ -229,11 +233,11 @@ export default function ContactClient() {
           </label>
           <textarea
             id="contact-message"
-            rows={5}
+            rows={6}
             required
             value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            className="w-full rounded-xl border border-white/10 bg-black/40 px-4 py-3 text-white outline-none"
+            onChange={(event) => setMessage(event.target.value)}
+            className="w-full rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-white outline-none transition focus:border-emerald-400/50"
           />
         </div>
 
@@ -247,7 +251,7 @@ export default function ContactClient() {
             />
           </div>
         ) : (
-          <p className="rounded-xl border border-amber-400/35 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
+          <p className="rounded-2xl border border-amber-400/35 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
             Form protection is not configured yet. Add the Turnstile site key before using this form in production.
           </p>
         )}
@@ -256,16 +260,18 @@ export default function ContactClient() {
           type="submit"
           disabled={status === "sending" || !canSubmit}
           className={[
-            "w-full rounded-xl px-6 py-4 text-sm font-semibold text-white transition",
+            "w-full rounded-2xl px-6 py-4 text-sm font-semibold text-white transition",
             status === "sending" || !canSubmit
               ? "cursor-not-allowed bg-emerald-600/60"
               : "bg-emerald-700 hover:bg-emerald-600",
           ].join(" ")}
         >
-          {status === "sending" ? "Sending..." : "Send Project Details"}
+          {status === "sending" ? "Sending..." : "Request a Premium Website Quote"}
         </button>
+
         <p className="text-xs leading-6 text-white/55">
-          Typical next step: a direct reply from Victor with what fits, what it will take, and what to do next.
+          Typical next step: a direct reply with fit, likely scope, timing, and the
+          strongest way to approach the build.
         </p>
       </form>
     </div>

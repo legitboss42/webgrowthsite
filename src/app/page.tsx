@@ -7,85 +7,127 @@ import PricingSection from "@/components/PricingSection";
 import SocialProofSection from "@/components/SocialProofSection";
 import StructuredData from "@/components/StructuredData";
 import WhatYouGetSection from "@/components/WhatYouGetSection";
+import { launchFaqs, pricingTiers } from "@/lib/launchOffer";
+import { portfolioCases } from "@/lib/portfolioCases";
 import {
-  launchFaqs,
-  pricingTiers,
-  socialProofCards,
-  whatYouGetItems,
-} from "@/lib/launchOffer";
-import {
+  buildFaqSchema,
   buildPageMetadata,
   buildProfessionalServiceSchema,
   launchKeywordSet,
 } from "@/lib/seo";
 
 const pageDescription =
-  "Web Growth builds websites for Lagos service businesses that want to look more credible, work better on mobile, and get more enquiries.";
+  "High-performance web design services built in Next.js for serious brands that need speed, stronger SEO foundations, and better conversion.";
 
-const homeBuyerAnswers = [
+const buyerAnswers = [
   {
-    title: "Who this is for",
+    title: "Why does a slow website cost real money?",
     answer:
-      "Best for Lagos service businesses that already get some attention but still lose people because the website feels weak, confusing, or old.",
-    href: "/pricing",
-    hrefLabel: "See pricing",
-  },
-  {
-    title: "What you actually get",
-    answer:
-      "A website that explains what you do more clearly, feels better on mobile, and makes it easier for people to contact you.",
+      "Because paid traffic, referrals, and organic clicks land on a page that feels heavy, generic, or hard to trust before the buyer ever considers enquiring.",
     href: "/launch",
-    hrefLabel: "See the offer",
+    hrefLabel: "See the premium package",
   },
   {
-    title: "What happens after you enquire",
+    title: "What does builder bloat do to conversion?",
     answer:
-      "You get a direct reply from Victor with what makes sense, what it will take, and what the next step should be.",
+      "It slows load times, weakens the mobile experience, and forces buyers through clumsy layouts that make strong businesses look less established than they are.",
+    href: "/about",
+    hrefLabel: "See why custom code wins",
+  },
+  {
+    title: "Why can good traffic still underperform?",
+    answer:
+      "Traffic does not convert on intent alone. If the page structure is unclear, the trust signals are weak, or the offer feels flat, valuable visits still leak away.",
+    href: "/portfolio",
+    hrefLabel: "Review the proof",
+  },
+  {
+    title: "What changes when the architecture is right?",
+    answer:
+      "You get faster pages, cleaner SEO foundations, stronger UX, and a conversion path that makes it easier for serious buyers to trust the brand and take action.",
     href: "/contact",
-    hrefLabel: "Send project details",
+    hrefLabel: "Request a website quote",
+  },
+] as const;
+
+const homepageWhatYouGet = [
+  {
+    title: "Performance architecture",
+    description:
+      "Custom-coded Next.js builds engineered to load fast, feel smooth on mobile, and protect the traffic you already paid to earn.",
+  },
+  {
+    title: "SEO foundations",
+    description:
+      "Clean page structure, metadata, crawlability basics, and technical decisions that give search visibility something solid to build on.",
+  },
+  {
+    title: "Premium UX design",
+    description:
+      "A sharper interface, stronger hierarchy, and a more trustworthy first impression for buyers comparing serious options.",
+  },
+  {
+    title: "Conversion-focused flow",
+    description:
+      "Clear messaging, stronger calls to action, and a tighter enquiry path so visitors do not have to work to understand what to do next.",
+  },
+  {
+    title: "Scalable codebase",
+    description:
+      "A flexible technical foundation that can expand into new pages, SEO content, integrations, and future growth without becoming messy.",
   },
 ] as const;
 
 export const metadata = buildPageMetadata({
-  title: "Web Design for Lagos Service Businesses | Web Growth",
+  title: "High-Performance Web Design Services | Web Growth",
   description: pageDescription,
   path: "/",
   keywords: [
+    "high-performance web design",
+    "high-performance web design services",
+    "next.js web design agency",
+    "premium web design agency",
+    "custom next.js website development",
     ...launchKeywordSet,
-    "website design lagos",
-    "lagos service business website",
-    "conversion focused web design",
-    "small business website design lagos",
   ],
   image: "/images/hero/Hero-Image-1.webp",
 });
 
 export default function Page() {
+  const featuredCases = portfolioCases
+    .filter((item) => item.status !== "Proposal")
+    .slice(0, 3);
+
   return (
     <>
-      <StructuredData data={buildProfessionalServiceSchema("/", pageDescription)} />
+      <StructuredData
+        data={[
+          buildProfessionalServiceSchema("/", pageDescription),
+          buildFaqSchema(launchFaqs),
+        ]}
+      />
 
       <main className="relative overflow-x-clip bg-[#050806] text-white">
-        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.028)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.018)_1px,transparent_1px)] bg-[size:42px_42px] opacity-25" />
+        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.028)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.018)_1px,transparent_1px)] bg-[size:42px_42px] opacity-20" />
 
         <HeroSection
-          eyebrow="Web Design for Service Businesses"
-          title="Websites that help service businesses look more credible and get more enquiries"
-          description="I build websites for businesses that are tired of looking average online and want something clearer, faster, and easier for people to act on."
-          primaryLabel="Get My Website Quote"
+          eyebrow="High-Performance Next.js Web Design"
+          title="Premium Next.js websites engineered to convert high-value traffic"
+          description="Web Growth delivers high-performance web design services with custom-coded Next.js architecture, stronger SEO foundations, and premium UX built to turn serious traffic into enquiries and revenue."
+          primaryLabel="Request a Premium Website Quote"
           primaryHref="/contact"
-          secondaryLabel="See Pricing"
-          secondaryHref="/pricing"
-          trustLine="Work directly with Victor | Built mobile-first | You keep control of your domain and hosting"
-          locationNote="Best for Lagos service businesses that need a stronger website before putting more money into ads, outreach, or referrals."
-          fitTags={["Lagos", "Service businesses", "Fast launch"]}
-          asideTitle="What you get"
+          secondaryLabel="View the Website Package"
+          secondaryHref="/launch"
+          trustLine="Custom-coded in Next.js | Fast-loading by design | Built for SEO and conversion"
+          locationNote="Best for serious service businesses, premium clinics, and ambitious e-commerce brands that want stronger performance before they spend more on traffic."
+          fitTags={["Next.js", "Performance", "Premium brands"]}
+          asideTitle="Engineered for"
           asideItems={[
-            "A clearer site that tells people what you do without making them work for it.",
-            "A mobile-first layout that feels more trustworthy from the first visit.",
-            "A simple next step so people know how to contact you or book.",
+            "Fast-loading architecture that protects ad spend, organic traffic, and first impressions.",
+            "Premium UX that makes the brand feel more established the moment the page opens.",
+            "Conversion architecture that guides serious buyers toward an enquiry instead of losing them in clutter.",
           ]}
-          imageAlt="Website design in 48 hours hero image for Web Growth"
+          imageAlt="High-performance Next.js website design hero for Web Growth"
           showCodeRain
           showHomeAnimations
           pageType="homepage"
@@ -94,17 +136,43 @@ export default function Page() {
         <HomeTrustSection />
 
         <AnswerHighlightsSection
-          eyebrow="Buyer questions"
-          title="The questions people usually ask before they reach out"
-          description="These are the quick answers most people want before they decide whether to start the conversation."
-          items={homeBuyerAnswers}
+          eyebrow="The cost of slow websites"
+          title="What weak architecture does to trust, leads, and revenue"
+          description="A slow, bloated, generic website is not just a design issue. It is a conversion problem that makes every traffic source work harder for less return."
+          items={buyerAnswers}
         />
 
-        <WhatYouGetSection items={whatYouGetItems} />
-        <PricingSection tiers={pricingTiers} pageType="homepage_pricing" />
-        <SocialProofSection cards={socialProofCards} />
-        <FAQSection items={launchFaqs} />
-        <FinalCTASection pageType="homepage_final_cta" />
+        <WhatYouGetSection
+          items={homepageWhatYouGet}
+          title="What serious brands should expect from a modern website"
+          description="Performance, SEO, design, and conversion support are treated as revenue infrastructure, not decorative extras."
+        />
+
+        <PricingSection
+          tiers={pricingTiers}
+          title="Premium website packages built to launch with commercial intent"
+          description="Straightforward USD pricing for businesses that want a serious website foundation without paying for unnecessary complexity."
+          pageType="homepage_pricing"
+        />
+
+        <SocialProofSection
+          cards={featuredCases}
+          eyebrow="Engineered proof"
+          title="Proof of premium build quality in live projects"
+          description="These projects show how Web Growth handles premium UX, clearer conversion flow, and business-ready frontend execution across live brands."
+        />
+
+        <FAQSection
+          items={launchFaqs}
+          title="Questions before you move"
+          description="The practical answers most buyers want before they send the first message."
+        />
+
+        <FinalCTASection
+          title="If the website is underperforming, fix the build before you buy more traffic"
+          description="Send the brief and get a direct recommendation on the right architecture, the likely scope, and the fastest route to a premium website that earns its keep."
+          pageType="homepage_final_cta"
+        />
       </main>
     </>
   );

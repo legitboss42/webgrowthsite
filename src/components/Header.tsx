@@ -1,165 +1,82 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import Link from "next/link";
 import Image from "next/image";
+import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
 import { usePathname } from "next/navigation";
 
-type NavKey = "services" | "about" | "portfolio" | "contact";
+type NavItem = {
+  href: string;
+  label: string;
+  matchPaths?: string[];
+};
 
-const HOME_SECTIONS: NavKey[] = ["services", "about", "portfolio", "contact"];
+const NAV_ITEMS: NavItem[] = [
+  { href: "/launch", label: "Launch", matchPaths: ["/get-started"] },
+  { href: "/services", label: "Services" },
+  { href: "/local-business", label: "Local Business" },
+  { href: "/ecommerce", label: "Ecommerce" },
+  { href: "/portfolio", label: "Portfolio" },
+  { href: "/blog", label: "Blog" },
+  { href: "/pricing", label: "Pricing" },
+];
+
+function normalize(path: string) {
+  const trimmed = path.replace(/\/+$/, "");
+  return trimmed.length ? trimmed : "/";
+}
 
 export default function Header() {
   const pathname = usePathname();
-  const isHome = pathname === "/";
-
   const [menuOpen, setMenuOpen] = useState(false);
-  const [activeSection, setActiveSection] = useState<NavKey | null>(null);
   const [scrolled, setScrolled] = useState(false);
 
-  // Close menu on route change
+  const activeRoute = useMemo(() => normalize(pathname || "/"), [pathname]);
+
   useEffect(() => {
     setMenuOpen(false);
   }, [pathname]);
 
-  // Scroll lock when mobile menu open
   useEffect(() => {
-    if (!menuOpen) {
-      document.body.style.overflow = "";
-      return;
-    }
-    document.body.style.overflow = "hidden";
+    document.body.style.overflow = menuOpen ? "hidden" : "";
     return () => {
       document.body.style.overflow = "";
     };
   }, [menuOpen]);
 
-  // Header blend + shrink: transparent at top, solid + tighter after scroll
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 30);
+    const onScroll = () => setScrolled(window.scrollY > 24);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Active section highlight on HOME only
-  useEffect(() => {
-    if (!isHome) return;
+  const isActive = (item: NavItem) => {
+    const href = normalize(item.href);
 
-    const els = HOME_SECTIONS.map((id) => document.getElementById(id)).filter(
-      Boolean
-    ) as HTMLElement[];
+    if (activeRoute === href) return true;
+    if (item.matchPaths?.some((path) => normalize(path) === activeRoute)) return true;
+    if (href !== "/" && activeRoute.startsWith(`${href}/`)) return true;
 
-    if (!els.length) return;
-
-    const io = new IntersectionObserver(
-      (entries) => {
-        const visible = entries
-          .filter((e) => e.isIntersecting)
-          .sort(
-            (a, b) => (b.intersectionRatio ?? 0) - (a.intersectionRatio ?? 0)
-          )[0];
-
-        if (!visible?.target?.id) return;
-        setActiveSection(visible.target.id as NavKey);
-      },
-      {
-        root: null,
-        rootMargin: "-25% 0px -60% 0px",
-        threshold: [0.1, 0.2, 0.35, 0.5, 0.65],
-      }
-    );
-
-    els.forEach((el) => io.observe(el));
-    return () => io.disconnect();
-  }, [isHome]);
-
-  const activeRoute = useMemo(() => {
-    const p = (pathname || "/").replace(/\/+$/, "") || "/";
-    return p;
-  }, [pathname]);
-
-  const isActive = (href: string, section?: NavKey) => {
-    if (isHome && section) return activeSection === section;
-    const h = href.replace(/\/+$/, "") || "/";
-    return activeRoute === h;
+    return false;
   };
 
-  const NavLink = ({
-    href,
-    label,
-    section,
-    matchPaths,
-    onClick,
-  }: {
-    href: string;
-    label: string;
-    section?: NavKey;
-    matchPaths?: string[];
-    onClick?: () => void;
-  }) => {
-    const normalizedHref = href.replace(/\/+$/, "") || "/";
-    const active =
-      isActive(href, section) ||
-      (matchPaths ?? []).some((path) => {
-        const normalizedPath = path.replace(/\/+$/, "") || "/";
-        if (normalizedPath === "/") return activeRoute === "/";
-        return (
-          activeRoute === normalizedPath ||
-          activeRoute.startsWith(`${normalizedPath}/`)
-        );
-      }) ||
-      (normalizedHref !== "/" &&
-        (activeRoute === normalizedHref ||
-          activeRoute.startsWith(`${normalizedHref}/`)));
+  const shellClass = scrolled
+    ? "mt-2 border border-white/10 bg-black/78 px-5 py-3 shadow-[0_20px_50px_rgba(0,0,0,0.38)] backdrop-blur-xl"
+    : "mt-4 border border-emerald-300/10 bg-black/38 px-5 py-4 shadow-[0_18px_52px_rgba(16,185,129,0.08)] backdrop-blur-xl";
 
-    return (
-      <Link
-        href={href}
-        onClick={onClick}
-        aria-current={active ? "page" : undefined}
-        className={[
-          "transition",
-          "text-sm",
-          active ? "text-white" : "text-white/70 hover:text-white",
-          active ? "relative" : "",
-        ].join(" ")}
-      >
-        <span className="relative">
-          {label}
-          {active && (
-            <span className="absolute -bottom-2 left-0 right-0 h-[2px] rounded-full bg-emerald-400/80" />
-          )}
-        </span>
-      </Link>
-    );
-  };
   return (
-    <header className="fixed top-0 left-0 right-0 z-50">
-      {/* Soft hero melt only at top */}
-      <div
-        className={[
-          "pointer-events-none absolute inset-x-0 top-0 h-24 transition-opacity duration-300",
-          scrolled ? "opacity-0" : "opacity-100",
-        ].join(" ")}
-      >
-        <div className="h-full bg-gradient-to-b from-emerald-500/10 via-black/30 to-transparent" />
-      </div>
+    <header className="fixed inset-x-0 top-0 z-50">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-emerald-400/10 via-black/20 to-transparent" />
 
       <div className="mx-auto max-w-6xl px-6">
-        {/* SHRINK happens here: mt + padding changes */}
         <div
           className={[
-            "flex items-center justify-between rounded-xl backdrop-blur",
-            "transition-all duration-300",
-            scrolled ? "mt-2 px-5 py-3" : "mt-4 px-5 py-4",
-            scrolled
-              ? "border border-white/10 bg-black/75 shadow-[0_18px_60px_rgba(0,0,0,0.35)]"
-              : "border border-white/5 bg-black/25 shadow-[0_18px_60px_rgba(16,185,129,0.08)]",
+            "flex items-center justify-between rounded-2xl transition-all duration-300",
+            shellClass,
           ].join(" ")}
         >
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-3">
+          <Link href="/" className="flex items-center gap-3" aria-label="Web Growth home">
             <Image
               src="/images/brand/web-growth-logo.webp"
               alt="Web Growth"
@@ -167,51 +84,53 @@ export default function Header() {
               height={48}
               sizes="(max-width: 768px) 160px, 220px"
               quality={60}
-              className={["w-auto transition-all duration-300", scrolled ? "h-7 md:h-8" : "h-8 md:h-9"].join(" ")}
-              style={{
-                filter: "saturate(1.15) contrast(1.05) brightness(1.05)",
-                opacity: 0.95,
-              }}
+              className={[
+                "w-auto transition-all duration-300",
+                scrolled ? "h-7 md:h-8" : "h-8 md:h-9",
+              ].join(" ")}
             />
           </Link>
 
-          {/* Desktop Nav */}
-          <nav className="hidden md:flex items-center gap-8">
-            <NavLink href="/launch" label="Launch" matchPaths={["/get-started"]} />
-            <NavLink href="/services" label="Services" />
-            <NavLink href="/about" label="About" />
-            <NavLink href="/portfolio" label="Portfolio" />
-            <NavLink href="/blog" label="Blog" />
-            <NavLink href="/pricing" label="Pricing" />
-            <NavLink
-              href="/contact"
-              label="Contact"
-              matchPaths={["/contact/thanks", "/thank-you"]}
-            />
+          <nav className="hidden items-center gap-7 md:flex">
+            {NAV_ITEMS.map((item) => {
+              const active = isActive(item);
+
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  aria-current={active ? "page" : undefined}
+                  className={[
+                    "relative text-sm transition-colors",
+                    active ? "text-white" : "text-white/68 hover:text-white",
+                  ].join(" ")}
+                >
+                  {item.label}
+                  <span
+                    className={[
+                      "absolute -bottom-2 left-0 h-[2px] rounded-full bg-emerald-400 transition-all duration-300",
+                      active ? "w-full opacity-100" : "w-0 opacity-0",
+                    ].join(" ")}
+                  />
+                </Link>
+              );
+            })}
           </nav>
 
-          {/* Right: CTA + Hamburger */}
           <div className="flex items-center gap-3">
             <Link
               href="/contact"
-              className={[
-                "hidden md:inline-flex items-center justify-center rounded-md px-4 text-sm font-semibold text-white transition",
-                scrolled ? "py-2 bg-emerald-700 hover:bg-emerald-600" : "py-2.5 bg-emerald-700/95 hover:bg-emerald-600",
-              ].join(" ")}
+              className="hidden min-h-11 items-center justify-center rounded-xl bg-emerald-700 px-4 text-sm font-semibold text-white transition hover:bg-emerald-600 md:inline-flex"
             >
               Request a Quote
             </Link>
 
-            {/* Hamburger */}
             <button
               type="button"
-              aria-label="Open menu"
+              aria-label={menuOpen ? "Close menu" : "Open menu"}
               aria-expanded={menuOpen}
-              onClick={() => setMenuOpen((v) => !v)}
-              className={[
-                "md:hidden inline-flex items-center justify-center rounded-lg border text-white/80 hover:text-white transition",
-                scrolled ? "h-9 w-9 border-white/10 bg-black/55" : "h-10 w-10 border-white/10 bg-black/30",
-              ].join(" ")}
+              onClick={() => setMenuOpen((current) => !current)}
+              className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-white/10 bg-black/35 text-white/82 transition hover:border-white/20 hover:text-white md:hidden"
             >
               <span className="relative block h-4 w-5">
                 <span
@@ -238,76 +157,50 @@ export default function Header() {
         </div>
       </div>
 
-      {/* Mobile Menu */}
-      {menuOpen && (
+      {menuOpen ? (
         <>
           <button
-            aria-label="Close menu"
+            type="button"
+            aria-label="Close mobile menu overlay"
             onClick={() => setMenuOpen(false)}
-            className="fixed inset-0 z-40 bg-black/60 md:hidden"
+            className="fixed inset-0 z-40 bg-black/70 md:hidden"
           />
+          <div className="fixed inset-x-0 top-[86px] z-50 px-6 md:hidden">
+            <div className="mx-auto max-w-6xl rounded-2xl border border-white/10 bg-[#060907]/95 p-5 shadow-[0_18px_60px_rgba(0,0,0,0.5)] backdrop-blur-2xl">
+              <div className="flex flex-col gap-4">
+                {NAV_ITEMS.map((item) => {
+                  const active = isActive(item);
 
-          <div className="fixed left-0 right-0 top-[88px] z-50 md:hidden">
-            <div className="mx-auto max-w-6xl px-6">
-              <div className="rounded-xl border border-white/10 bg-black/80 backdrop-blur p-5">
-                <div className="flex flex-col gap-4">
-                  <NavLink
-                    href="/launch"
-                    label="Launch"
-                    matchPaths={["/get-started"]}
-                    onClick={() => setMenuOpen(false)}
-                  />
-                  <NavLink
-                    href="/services"
-                    label="Services"
-                    onClick={() => setMenuOpen(false)}
-                  />
-                  <NavLink
-                    href="/about"
-                    label="About"
-                    onClick={() => setMenuOpen(false)}
-                  />
-                  <NavLink
-                    href="/portfolio"
-                    label="Portfolio"
-                    onClick={() => setMenuOpen(false)}
-                  />
-                  <NavLink
-                    href="/blog"
-                    label="Blog"
-                    onClick={() => setMenuOpen(false)}
-                  />
-                  <NavLink
-                    href="/pricing"
-                    label="Pricing"
-                    onClick={() => setMenuOpen(false)}
-                  />
-                  <NavLink
-                    href="/faq"
-                    label="FAQ"
-                    onClick={() => setMenuOpen(false)}
-                  />
-                  <NavLink
-                    href="/contact"
-                    label="Contact"
-                    matchPaths={["/contact/thanks", "/thank-you"]}
-                    onClick={() => setMenuOpen(false)}
-                  />
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => setMenuOpen(false)}
+                      aria-current={active ? "page" : undefined}
+                      className={[
+                        "rounded-xl border px-4 py-3 text-sm font-medium transition",
+                        active
+                          ? "border-emerald-400/30 bg-emerald-500/10 text-white"
+                          : "border-white/8 bg-black/25 text-white/78 hover:border-white/16 hover:text-white",
+                      ].join(" ")}
+                    >
+                      {item.label}
+                    </Link>
+                  );
+                })}
 
-                  <Link
-                    href="/contact"
-                    onClick={() => setMenuOpen(false)}
-                    className="mt-2 inline-flex items-center justify-center rounded-md bg-emerald-700 px-4 py-3 text-sm font-semibold text-white transition hover:bg-emerald-600"
-                  >
-                    Request a Quote
-                  </Link>
-                </div>
+                <Link
+                  href="/contact"
+                  onClick={() => setMenuOpen(false)}
+                  className="mt-2 inline-flex min-h-12 items-center justify-center rounded-xl bg-emerald-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-600"
+                >
+                  Request a Quote
+                </Link>
               </div>
             </div>
           </div>
         </>
-      )}
+      ) : null}
     </header>
   );
 }
-
