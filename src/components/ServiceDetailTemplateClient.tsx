@@ -10,6 +10,7 @@ import CorePageLinks from "@/components/CorePageLinks";
 import SectionHeading from "@/components/SectionHeading";
 import CTASection from "@/components/CTASection";
 import FAQAccordion from "@/components/FAQAccordion";
+import GeneratedSectionBackground from "@/components/GeneratedSectionBackground";
 import type { ServicePageConfig } from "@/lib/newServiceConfigs";
 
 type Props = {
@@ -93,6 +94,7 @@ export default function ServiceDetailTemplateClient({ service }: Props) {
   return (
     <div ref={pageRef} className="bg-black text-white">
       <section className="relative overflow-hidden py-24">
+        <GeneratedSectionBackground variant="service" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(16,185,129,0.18),transparent_55%)]" />
         <div className="relative mx-auto max-w-6xl px-6">
           <div className="grid gap-12 md:grid-cols-2 md:items-center">
@@ -150,8 +152,9 @@ export default function ServiceDetailTemplateClient({ service }: Props) {
         items={answerItems}
       />
 
-      <section data-reveal=".deliverables-reveal" className="py-24 bg-gray-950">
-        <div className="deliverables-reveal mx-auto max-w-6xl px-6">
+      <section data-reveal=".deliverables-reveal" className="relative overflow-hidden py-24 bg-gray-950">
+        <GeneratedSectionBackground variant="service" />
+        <div className="deliverables-reveal relative mx-auto max-w-6xl px-6">
           <SectionHeading
             eyebrow="DELIVERABLES"
             title="What is included"
@@ -168,8 +171,9 @@ export default function ServiceDetailTemplateClient({ service }: Props) {
         </div>
       </section>
 
-      <section data-reveal=".process-reveal" className="py-24">
-        <div className="process-reveal mx-auto max-w-6xl px-6">
+      <section data-reveal=".process-reveal" className="relative overflow-hidden py-24">
+        <GeneratedSectionBackground variant="service" />
+        <div className="process-reveal relative mx-auto max-w-6xl px-6">
           <SectionHeading
             eyebrow="PROCESS"
             title="How implementation works"
@@ -190,8 +194,9 @@ export default function ServiceDetailTemplateClient({ service }: Props) {
         </div>
       </section>
 
-      <section data-reveal=".faq-reveal" className="py-24 bg-gray-950">
-        <div className="faq-reveal mx-auto max-w-4xl px-6">
+      <section data-reveal=".faq-reveal" className="relative overflow-hidden py-24 bg-gray-950">
+        <GeneratedSectionBackground variant="faq" />
+        <div className="faq-reveal relative mx-auto max-w-4xl px-6">
           <SectionHeading
             eyebrow="FAQ"
             title="Common questions"

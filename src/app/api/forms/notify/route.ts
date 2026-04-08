@@ -42,22 +42,27 @@ export async function POST(req: Request) {
     const turnstileToken = sanitizeText(body.turnstileToken, 2048);
     const fields = body.fields && typeof body.fields === "object" ? body.fields : {};
     const normalizedEntries = Object.entries(fields).slice(0, 20);
+    const isProduction = process.env.NODE_ENV === "production";
+    const hasTurnstileSecret = Boolean(process.env.TURNSTILE_SECRET_KEY);
+    const shouldRequireTurnstile = isProduction || hasTurnstileSecret;
 
-    if (!turnstileToken) {
+    if (shouldRequireTurnstile && !turnstileToken) {
       return NextResponse.json(
         { error: "Please complete the spam check." },
         { status: 400 }
       );
     }
 
-    const turnstile = await verifyTurnstileToken({
-      token: turnstileToken,
-      ip,
-      expectedAction: formType,
-    });
+    if (turnstileToken) {
+      const turnstile = await verifyTurnstileToken({
+        token: turnstileToken,
+        ip,
+        expectedAction: formType,
+      });
 
-    if (!turnstile.ok) {
-      return NextResponse.json({ error: turnstile.error }, { status: 400 });
+      if (!turnstile.ok) {
+        return NextResponse.json({ error: turnstile.error }, { status: 400 });
+      }
     }
 
     const token = process.env.MAILERSEND_API_TOKEN;

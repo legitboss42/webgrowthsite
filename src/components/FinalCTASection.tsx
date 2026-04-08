@@ -1,5 +1,6 @@
 import { finalCtaLinks } from "@/lib/launchOffer";
 import TrackedLink from "@/components/analytics/TrackedLink";
+import GeneratedSectionBackground from "@/components/GeneratedSectionBackground";
 
 export default function FinalCTASection({
   title = "Website Design in 48 Hours | Get a Professional Website Live Fast",
@@ -12,9 +13,10 @@ export default function FinalCTASection({
 }) {
   return (
     <section className="relative overflow-hidden bg-[#050806] py-20">
+      <GeneratedSectionBackground variant="cta" />
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.16),transparent_35%),radial-gradient(circle_at_bottom_right,rgba(16,185,129,0.1),transparent_32%)]" />
 
-      <div className="mx-auto max-w-6xl px-6">
+      <div className="relative mx-auto max-w-6xl px-6">
         <article className="relative overflow-hidden rounded-3xl border border-emerald-500/35 bg-[linear-gradient(135deg,rgba(16,185,129,0.18),rgba(8,12,10,0.96)_55%,rgba(0,0,0,0.9))] p-8 shadow-[0_20px_50px_rgba(0,0,0,0.25)]">
           <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-emerald-300/70 to-transparent" />
 

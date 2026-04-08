@@ -1,4 +1,5 @@
 import TrackedLink from "@/components/analytics/TrackedLink";
+import GeneratedSectionBackground from "@/components/GeneratedSectionBackground";
 
 type PricingTier = {
   name: string;
@@ -30,6 +31,7 @@ export default function PricingSection({
 
   return (
     <section className="relative overflow-hidden border-b border-white/10 bg-[#050806] py-20">
+      <GeneratedSectionBackground variant="pricing" />
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(16,185,129,0.12),transparent_28%),radial-gradient(circle_at_bottom_left,rgba(16,185,129,0.08),transparent_26%)]" />
 
       <div className="relative mx-auto max-w-6xl px-6">

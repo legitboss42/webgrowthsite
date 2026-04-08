@@ -3,6 +3,8 @@ type FAQItem = {
   answer: string;
 };
 
+import GeneratedSectionBackground from "@/components/GeneratedSectionBackground";
+
 export default function FAQSection({
   items,
   title = "Questions before you launch",
@@ -13,8 +15,9 @@ export default function FAQSection({
   description?: string;
 }) {
   return (
-    <section className="border-b border-white/10 bg-[#050806] py-20">
-      <div className="mx-auto max-w-6xl px-6">
+    <section className="relative overflow-hidden border-b border-white/10 bg-[#050806] py-20">
+      <GeneratedSectionBackground variant="faq" />
+      <div className="relative mx-auto max-w-6xl px-6">
         <div className="max-w-3xl">
           <p className="text-xs uppercase tracking-[0.2em] text-emerald-300/80">FAQ</p>
           <h2 className="mt-4 text-balance text-3xl font-semibold leading-tight tracking-[-0.01em] md:text-5xl">

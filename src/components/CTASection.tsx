@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import GeneratedSectionBackground from "@/components/GeneratedSectionBackground";
 
 interface CTASectionProps {
   eyebrow?: string;
@@ -54,8 +55,9 @@ export default function CTASection({
 }: CTASectionProps) {
   return (
     <section className={`relative overflow-hidden py-16 sm:py-20 ${className || ""}`}>
+      <GeneratedSectionBackground variant="cta" />
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_16%_18%,rgba(16,185,129,0.16),transparent_32%),radial-gradient(circle_at_82%_82%,rgba(16,185,129,0.1),transparent_28%)]" />
-      <div className="mx-auto max-w-6xl px-6">
+      <div className="relative mx-auto max-w-6xl px-6">
         <div className="relative overflow-hidden rounded-3xl border border-emerald-500/25 bg-[linear-gradient(135deg,rgba(16,185,129,0.12),rgba(8,12,10,0.96)_55%,rgba(0,0,0,0.92))] p-6 shadow-[0_20px_50px_rgba(0,0,0,0.24)] sm:p-8">
           <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(115deg,rgba(16,185,129,0.08)_0%,transparent_46%,rgba(16,185,129,0.04)_100%)]" />
           <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-emerald-300/70 to-transparent" />

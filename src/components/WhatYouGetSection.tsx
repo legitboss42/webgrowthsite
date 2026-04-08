@@ -3,6 +3,8 @@ type Item = {
   description: string;
 };
 
+import GeneratedSectionBackground from "@/components/GeneratedSectionBackground";
+
 export default function WhatYouGetSection({
   items,
   title = "Everything required for a fast, credible launch",
@@ -17,6 +19,7 @@ export default function WhatYouGetSection({
       id="inclusions"
       className="relative overflow-hidden border-b border-white/10 bg-[#060907] py-20"
     >
+      <GeneratedSectionBackground variant="inclusions" />
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_35%,rgba(16,185,129,0.13),transparent_45%),radial-gradient(circle_at_85%_85%,rgba(16,185,129,0.08),transparent_45%)]" />
       <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.18),rgba(0,0,0,0.48))]" />
 

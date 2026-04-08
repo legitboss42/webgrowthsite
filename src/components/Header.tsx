@@ -12,7 +12,7 @@ type NavItem = {
 };
 
 const NAV_ITEMS: NavItem[] = [
-  { href: "/launch", label: "Launch", matchPaths: ["/get-started"] },
+  { href: "/website-build", label: "Website Build" },
   { href: "/services", label: "Services" },
   { href: "/local-business", label: "Local Business" },
   { href: "/ecommerce", label: "Ecommerce" },

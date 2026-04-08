@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import GeneratedSectionBackground from "@/components/GeneratedSectionBackground";
 
 const trustCards = [
   {
@@ -27,8 +28,9 @@ const trustCards = [
 
 export default function HomeTrustSection() {
   return (
-    <section className="border-b border-white/10 bg-[#060907] py-16">
-      <div className="mx-auto max-w-6xl px-6">
+    <section className="relative overflow-hidden border-b border-white/10 bg-[#060907] py-16">
+      <GeneratedSectionBackground variant="trust" />
+      <div className="relative mx-auto max-w-6xl px-6">
         <div className="grid gap-6 lg:grid-cols-[0.92fr_1.08fr] lg:items-start">
           <div className="rounded-2xl border border-emerald-400/24 bg-[radial-gradient(circle_at_16%_-10%,rgba(16,185,129,0.18),rgba(3,14,11,0.94)_46%,rgba(2,8,7,0.98)_100%)] p-7 shadow-[0_16px_36px_rgba(0,0,0,0.22)]">
             <p className="text-xs uppercase tracking-[0.2em] text-emerald-300/80">

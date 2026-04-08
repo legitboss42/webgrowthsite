@@ -10,6 +10,7 @@ const STATIC_ROUTES = [
   "/about",
   "/editorial-policy",
   "/launch",
+  "/website-build",
   "/hosting-offer",
   "/get-started",
   "/website-design-lagos",

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import CaseStudyCard from "@/components/CaseStudyCard";
+import GeneratedSectionBackground from "@/components/GeneratedSectionBackground";
 import type { PortfolioCase } from "@/lib/portfolioCases";
 
 const typeLabels: Record<PortfolioCase["type"], string> = {
@@ -42,8 +43,9 @@ export default function SocialProofSection({
   };
 
   return (
-    <section className="border-b border-white/10 bg-[#060907] py-20">
-      <div className="mx-auto max-w-6xl px-6">
+    <section className="relative overflow-hidden border-b border-white/10 bg-[#060907] py-20">
+      <GeneratedSectionBackground variant="proof" />
+      <div className="relative mx-auto max-w-6xl px-6">
         <div className="max-w-3xl">
           <p className="text-xs uppercase tracking-[0.2em] text-emerald-300/80">
             {eyebrow}
