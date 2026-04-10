@@ -15,7 +15,7 @@ const pageDescription =
   "Pricing for Web Growth website packages, starting at $150 for businesses that need a site live quickly without a drawn-out build.";
 
 export const metadata = buildPageMetadata({
-  title: "Website Pricing for Lagos Service Businesses | Launch from $150",
+  title: "Website Pricing for Service Businesses | Web Growth",
   description: pageDescription,
   path: "/pricing",
   keywords: [

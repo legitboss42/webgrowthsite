@@ -88,18 +88,18 @@ export default function EcommerceWebsiteDesignClient() {
       <section className="relative py-24 overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(16,185,129,0.18),transparent_55%)]" />
         <div className="relative mx-auto max-w-6xl px-6 grid gap-12 md:grid-cols-2 md:items-center">
-          <div>
-            <div className="text-sm tracking-[0.25em] text-white/50">
-              E-COMMERCE WEBSITE DESIGN
-            </div>
-            <h1 className="mt-4 text-4xl md:text-5xl font-semibold leading-tight">
-              Online stores built to earn trust and drive sales.
-            </h1>
-            <p className="mt-6 text-lg text-white/70">
-              A good-looking store is not enough. We design e-commerce websites
-              with clear product structure, trust signals, and checkout flows
-              that reduce hesitation and increase conversions.
-            </p>
+            <div>
+              <div className="text-sm tracking-[0.25em] text-white/50">
+                ECOMMERCE WEBSITE DESIGN SERVICE
+              </div>
+              <h1 className="mt-4 text-4xl md:text-5xl font-semibold leading-tight">
+                Ecommerce websites built to increase conversion and completed purchases.
+              </h1>
+              <p className="mt-6 text-lg text-white/70">
+                A good-looking store is not enough. We design ecommerce websites
+                with clean product hierarchy, premium trust cues, and checkout
+                paths that reduce hesitation and lift conversion quality.
+              </p>
 
             <div className="mt-10 flex gap-3 flex-col sm:flex-row">
               <a
@@ -253,7 +253,7 @@ export default function EcommerceWebsiteDesignClient() {
 
           <CTASection
             eyebrow="READY"
-            title="Build an online store customers trust"
+            title="Ready for an ecommerce store that converts better?"
             description="If you’re serious about selling online, your store needs to feel credible and simple to use."
             primaryCtaText="Request a Quote"
             primaryHref="/contact?service=E-commerce Website Design"

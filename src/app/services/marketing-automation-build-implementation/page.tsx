@@ -1,7 +1,7 @@
 import ServiceDetailTemplateClient from "@/components/ServiceDetailTemplateClient";
-import { NEW_SERVICE_PAGES, buildServiceMetadata } from "@/lib/newServiceConfigs";
+import { ALL_SERVICE_PAGES, buildServiceMetadata } from "@/lib/newServiceConfigs";
 
-const service = NEW_SERVICE_PAGES["marketing-automation-build-implementation"];
+const service = ALL_SERVICE_PAGES["marketing-automation-build-implementation"];
 
 export const metadata = buildServiceMetadata(
   service,

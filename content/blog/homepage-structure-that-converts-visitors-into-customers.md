@@ -1,11 +1,63 @@
 ---
-title: "Homepage Structure for Service Businesses: The 7 Sections That Turn Visits Into Enquiries"
-excerpt: "A homepage should not try to say everything. It should make the offer clear, reduce risk fast, and move the right visitor to one next step."
-date: 2026-02-03
+title: >-
+  Homepage Structure for Service Businesses: The 7 Sections That Turn Visits
+  Into Enquiries
+excerpt: >-
+  A homepage should not try to say everything. It should make the offer clear,
+  reduce risk fast, and move the right visitor to one next step.
+date: 2026-02-06T00:00:00.000Z
 category: UX
-tags: ["Conversion", "Homepage", "UX", "Sales Psychology"]
+tags:
+  - Conversion
+  - Homepage
+  - UX
+  - Sales Psychology
 readTime: 13 min read
 cover: /images/blog/homepage.webp
+updatedAt: '2026-02-06'
+lastReviewedAt: '2026-02-06'
+topic: Website Strategy
+difficulty: Beginner
+isCornerstone: false
+checklistAvailable: false
+author: victor-chinukwue
+reviewedBy: web-growth-editorial
+keyTakeaways:
+  - Priority one is what the homepage has to answer in 5 seconds.
+  - 'Sustained results depend on section 1: hero with a clear promise.'
+  - >-
+    Execution quality improves when you address section 2: trust block with
+    proof, not slogans.
+whatYouNeed:
+  - Current website URL and business objective.
+  - Primary audience and offer clarity notes.
+  - 'Baseline performance data (traffic, leads, or sales).'
+commonMistakes:
+  - Starting execution before strategic clarity.
+  - Relying on aesthetics without conversion structure.
+  - Skipping QA before launch or campaign traffic.
+steps:
+  - 'Apply: What the homepage has to answer in 5 seconds.'
+  - 'Apply: Section 1: Hero with a clear promise.'
+  - 'Apply: Section 2: Trust block with proof, not slogans.'
+  - 'Apply: Section 3: What you do and who it is for.'
+relatedGuideSlugs:
+  - how-to-plan-website-copy-before-hiring-developer
+  - website-platform-comparison-small-business
+faq:
+  - question: What is the first step before making major website changes?
+    answer: >-
+      Define the commercial outcome and baseline metrics, then prioritize the
+      highest-impact fixes first.
+  - question: How do I avoid wasting budget on website updates?
+    answer: >-
+      Use clear scope, measurable goals, and structured QA before and after
+      launch.
+ctaVariant: consultation
+evidenceNote: Updated using observed implementation patterns and recurring project outcomes.
+methodologyNote: >-
+  Recommendations follow practical implementation-first workflows with
+  measurable QA checkpoints.
 ---
 
 # Homepage Structure for Service Businesses: The 7 Sections That Turn Visits Into Enquiries
@@ -156,6 +208,35 @@ Cut these first:
 
 Every extra section competes with the next step.
 
+## Homepage self-audit scorecard (10-minute check)
+
+Open your homepage on mobile and score each item from 0 to 2:
+
+- headline clarity
+- offer clarity
+- trust proof visibility
+- CTA visibility above the fold
+- page speed feel on 4G
+- contact path simplicity
+
+Scoring:
+
+- 0-5: weak conversion foundation
+- 6-8: workable but leaky
+- 9-12: strong baseline
+
+If your score is below 9, fix copy clarity and CTA flow before paying for more traffic.
+
+## What to improve first when time is limited
+
+If you can only ship three upgrades this week, do these:
+
+1. Rewrite hero headline + subheadline for one audience and one offer.
+2. Add one clear trust block above the fold.
+3. Reduce CTA choices to one primary action.
+
+These three fixes usually improve response faster than redesigning every visual detail.
+
 ## Final takeaway
 
 Your homepage is not a storage room for everything your business wants to say.
@@ -172,3 +253,10 @@ Focus on:
 - one CTA
 
 If your homepage still tries to act like a full brochure, cut it down and make the next step obvious.
+
+## Related guides and next step
+
+- [How To Plan Website Copy Before Hiring Developer](/blog/how-to-plan-website-copy-before-hiring-developer)
+- [Website Platform Comparison Small Business](/blog/website-platform-comparison-small-business)
+- [Small Business Website Redesign Checklist](/blog/small-business-website-redesign-checklist)
+- [Why Your Website Isnt Getting Leads](/blog/why-your-website-isnt-getting-leads)

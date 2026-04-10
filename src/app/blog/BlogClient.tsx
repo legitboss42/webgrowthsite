@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useRef, useState, type MouseEvent } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import type { Post } from "../../lib/posts";
 import { gsap } from "gsap";
 import ClarityPageTags from "@/components/analytics/ClarityPageTags";
 import BlogInlineCTA from "@/components/BlogInlineCTA";
@@ -12,10 +11,20 @@ import EditorialTrustNote from "@/components/EditorialTrustNote";
 import HostingSupportBlock from "@/components/HostingSupportBlock";
 
 type Props = {
-  posts: Post[];
+  posts: BlogPostPreview[];
 };
 
 type FilterMode = "All" | "Category" | "Tag";
+type BlogPostPreview = {
+  slug: string;
+  title: string;
+  excerpt: string;
+  date: string;
+  category: string;
+  tags: string[];
+  readTime: string;
+  cover?: string;
+};
 
 const CATEGORY_ORDER = [
   "Series",
@@ -27,6 +36,8 @@ const CATEGORY_ORDER = [
   "UX",
   "Automation",
 ] as const;
+
+const FALLBACK_COVER = "/images/hero/Hero-Image-1.webp";
 
 function formatPostDate(value: string) {
   const date = new Date(value);
@@ -51,7 +62,7 @@ export default function BlogClient({ posts }: Props) {
 
   const categories = useMemo(() => {
     const set = new Set<string>();
-    posts.forEach((p: Post) => {
+    posts.forEach((p) => {
       if (p.category) set.add(p.category);
     });
 
@@ -66,7 +77,7 @@ export default function BlogClient({ posts }: Props) {
   const tags = useMemo(() => {
     const set = new Set<string>();
 
-    posts.forEach((p: Post) => (p.tags ?? []).forEach((t: string) => set.add(t)));
+    posts.forEach((p) => (p.tags ?? []).forEach((t: string) => set.add(t)));
 
     return ["All", ...Array.from(set).sort((a, b) => a.localeCompare(b))];
   }, [posts]);
@@ -74,7 +85,7 @@ export default function BlogClient({ posts }: Props) {
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
 
-    return posts.filter((p: Post) => {
+    return posts.filter((p) => {
       const safeTags = p.tags ?? [];
 
       const matchesQuery =
@@ -157,23 +168,20 @@ export default function BlogClient({ posts }: Props) {
     if (!root) return;
 
     const ctx = gsap.context(() => {
-      gsap.fromTo(
+      gsap.from(
         "[data-hero-item]",
-        { opacity: 0, y: 20, filter: "blur(8px)" },
-        { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.8, stagger: 0.07, ease: "power3.out" }
+        { y: 16, duration: 0.62, stagger: 0.06, ease: "power3.out", clearProps: "transform" }
       );
 
-      gsap.fromTo(
+      gsap.from(
         "[data-card]",
-        { opacity: 0, y: 18, filter: "blur(6px)" },
         {
-          opacity: 1,
-          y: 0,
-          filter: "blur(0px)",
-          duration: 0.62,
+          y: 14,
+          duration: 0.55,
           stagger: 0.05,
           ease: "power3.out",
           delay: 0.12,
+          clearProps: "transform",
         }
       );
     }, root);
@@ -190,10 +198,15 @@ export default function BlogClient({ posts }: Props) {
     if (reduceMotion) return;
 
     gsap.killTweensOf("[data-card]");
-    gsap.fromTo(
+    gsap.from(
       "[data-card]",
-      { opacity: 0, y: 14, filter: "blur(6px)" },
-      { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.5, stagger: 0.035, ease: "power3.out" }
+      {
+        y: 10,
+        duration: 0.42,
+        stagger: 0.03,
+        ease: "power3.out",
+        clearProps: "transform",
+      }
     );
   }, [query, filterMode, activeCategory, activeTag, filtered.length]);
 
@@ -209,7 +222,7 @@ export default function BlogClient({ posts }: Props) {
   }
 
   return (
-    <div ref={rootRef} className="min-h-screen bg-black text-white">
+    <div ref={rootRef} className="bg-black text-white">
       <ClarityPageTags tags={{ page_type: "blog_index", content_group: "blog" }} />
       <section
         ref={heroRef}
@@ -351,9 +364,9 @@ export default function BlogClient({ posts }: Props) {
               },
             ]}
             links={[
-              { href: "/launch", label: "Start with the main offer" },
+              { href: "/website-build", label: "See website build service" },
               { href: "/pricing", label: "Review pricing" },
-              { href: "/about", label: "See who Web Growth is" },
+              { href: "/local-business", label: "Explore local-business pages" },
             ]}
           />
         </div>
@@ -391,11 +404,11 @@ export default function BlogClient({ posts }: Props) {
         <div className="mb-8 grid gap-4 md:grid-cols-3">
           {[
             {
-              href: "/launch",
-              label: "Launch fast",
-              title: "Need a live website quickly?",
+              href: "/website-build",
+              label: "Core service",
+              title: "Need a high-converting website build?",
               description:
-                "Go straight to the 48-hour website offer if you already know you need a site live soon.",
+                "Start with the main website build page if you need a faster, cleaner path to leads or sales.",
             },
             {
               href: "/pricing",
@@ -435,8 +448,8 @@ export default function BlogClient({ posts }: Props) {
 
         <div className="mb-6 flex items-end justify-between gap-4">
           <div>
-            <div className="text-xs tracking-[0.2em] text-white/45">LATEST</div>
-            <h2 className="mt-2 text-2xl font-semibold">Articles</h2>
+            <div className="text-xs tracking-[0.2em] text-white/45">ARTICLES</div>
+            <h2 className="mt-2 text-2xl font-semibold">By Publish Date</h2>
           </div>
           <div className="text-sm text-white/55">
             Showing <span className="text-white">{filtered.length}</span> of{" "}
@@ -451,18 +464,14 @@ export default function BlogClient({ posts }: Props) {
           >
             <div className="grid lg:grid-cols-[1.25fr_1fr]">
               <Link href={`/blog/${featuredPost.slug}`} className="relative block min-h-[250px] lg:min-h-[370px]">
-                {featuredPost.cover ? (
-                  <Image
-                    src={featuredPost.cover}
-                    alt={featuredPost.title}
-                    fill
-                    className="object-cover opacity-95 group-hover:opacity-100 transition"
-                    sizes="(max-width: 1024px) 100vw, 60vw"
-                    priority={false}
-                  />
-                ) : (
-                  <div className="absolute inset-0 bg-white/5" />
-                )}
+                <Image
+                  src={featuredPost.cover || FALLBACK_COVER}
+                  alt={featuredPost.title}
+                  fill
+                  className="object-cover opacity-95 group-hover:opacity-100 transition"
+                  sizes="(max-width: 1024px) 100vw, 60vw"
+                  priority={false}
+                />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/15 to-transparent" />
               </Link>
 
@@ -515,16 +524,14 @@ export default function BlogClient({ posts }: Props) {
               >
                 <Link href={`/blog/${post.slug}`} className="block">
                   <div className="relative aspect-[16/10] overflow-hidden border-b border-white/10 bg-white/5">
-                    {post.cover ? (
-                      <Image
-                        src={post.cover}
-                        alt={post.title}
-                        fill
-                        className="object-cover opacity-95 group-hover:opacity-100 transition"
-                        sizes="(max-width: 1024px) 100vw, 33vw"
-                        priority={false}
-                      />
-                    ) : null}
+                    <Image
+                      src={post.cover || FALLBACK_COVER}
+                      alt={post.title}
+                      fill
+                      className="object-cover opacity-95 group-hover:opacity-100 transition"
+                      sizes="(max-width: 1024px) 100vw, 33vw"
+                      priority={false}
+                    />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/10 to-transparent" />
                   </div>
                 </Link>

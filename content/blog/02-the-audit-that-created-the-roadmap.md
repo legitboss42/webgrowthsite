@@ -1,11 +1,66 @@
 ---
-title: "The Audit That Created the Roadmap: Website Audit Strategy for SEO and Conversion"
-excerpt: "Part 2 of the J Luxe rebuild series: how a structured website audit, technical SEO audit, and conversion audit created a clear rebuild roadmap without wasted redesign work."
-date: 2026-02-26
+title: >-
+  The Audit That Created the Roadmap: Website Audit Strategy for SEO and
+  Conversion
+excerpt: >-
+  Part 2 of the J Luxe rebuild series: how a structured website audit, technical
+  SEO audit, and conversion audit created a clear rebuild roadmap without wasted
+  redesign work.
+date: 2026-02-19T00:00:00.000Z
 category: Series
-tags: ["Series", "Website Audit", "Technical SEO Audit", "Website Strategy", "Local SEO", "Conversion Rate Optimization"]
+tags:
+  - Series
+  - Website Audit
+  - Technical SEO Audit
+  - Website Strategy
+  - Local SEO
+  - Conversion Rate Optimization
 readTime: 16 min read
 cover: /images/blog/jluxe-series-audit-roadmap.webp
+updatedAt: '2026-02-19'
+lastReviewedAt: '2026-02-19'
+topic: Case Study Series
+difficulty: Intermediate
+isCornerstone: false
+checklistAvailable: false
+author: victor-chinukwue
+reviewedBy: web-growth-editorial
+keyTakeaways:
+  - Priority one is why a website audit matters more than mockups.
+  - Sustained results depend on the four-layer audit framework we used.
+  - >-
+    Execution quality improves when you address the audit scorecard that forced
+    prioritization.
+whatYouNeed:
+  - Current website URL and business objective.
+  - Primary audience and offer clarity notes.
+  - 'Baseline performance data (traffic, leads, or sales).'
+commonMistakes:
+  - Starting execution before strategic clarity.
+  - Relying on aesthetics without conversion structure.
+  - Skipping QA before launch or campaign traffic.
+steps:
+  - 'Apply: Why a website audit matters more than mockups.'
+  - 'Apply: The four-layer audit framework we used.'
+  - 'Apply: The audit scorecard that forced prioritization.'
+  - 'Apply: What the roadmap looked like after the audit.'
+relatedGuideSlugs:
+  - jluxe-medical-aesthetics-case-study
+  - website-redesign-cost-breakdown-nigeria
+faq:
+  - question: What is the first step before making major website changes?
+    answer: >-
+      Define the commercial outcome and baseline metrics, then prioritize the
+      highest-impact fixes first.
+  - question: How do I avoid wasting budget on website updates?
+    answer: >-
+      Use clear scope, measurable goals, and structured QA before and after
+      launch.
+ctaVariant: none
+evidenceNote: Updated using observed implementation patterns and recurring project outcomes.
+methodologyNote: >-
+  Recommendations follow practical implementation-first workflows with
+  measurable QA checkpoints.
 ---
 
 # The Audit That Created the Roadmap (Part 2)

@@ -158,6 +158,13 @@ export default function LocalBusinessPage() {
                   Local SEO support
                 </span>
               </div>
+              <p className="mt-4 text-sm text-white/64">
+                Need a broader mixed-audience build? See{" "}
+                <Link href="/website-build" className="text-emerald-200 hover:text-emerald-100">
+                  website design and redesign services
+                </Link>
+                .
+              </p>
             </div>
 
             <div className="rounded-3xl border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.015))] p-7 shadow-[0_18px_48px_rgba(0,0,0,0.24)] backdrop-blur-xl">
@@ -335,10 +342,10 @@ export default function LocalBusinessPage() {
                     Get My Website Quote
                   </TrackedLink>
                   <Link
-                    href="/portfolio"
+                    href="/website-build"
                     className="inline-flex min-h-12 w-full items-center justify-center rounded-xl border border-white/25 bg-black/35 px-8 py-3 text-base font-semibold text-white transition hover:border-white/40 hover:bg-black/50"
                   >
-                    See Portfolio
+                    See Full Website Build Service
                   </Link>
                 </div>
               </div>

@@ -1,11 +1,62 @@
 ---
-title: "J Luxe Website Rebuild Series: 8 Parts on SEO and Conversion"
-excerpt: "An 8-part series on rebuilding jluxemedicalaesthetics.com, covering SEO migration, service page conversion, launch strategy, and Next.js architecture decisions."
-date: 2026-02-22
+title: 'J Luxe Website Rebuild Series: 8 Parts on SEO and Conversion'
+excerpt: >-
+  An 8-part series on rebuilding jluxemedicalaesthetics.com, covering SEO
+  migration, service page conversion, launch strategy, and Next.js architecture
+  decisions.
+date: 2026-02-17T00:00:00.000Z
 category: Series
-tags: ["Series", "Website Redesign", "SEO Migration", "Next.js", "Local SEO", "Conversion"]
+tags:
+  - Series
+  - Website Redesign
+  - SEO Migration
+  - Next.js
+  - Local SEO
+  - Conversion
 readTime: 12 min read
 cover: /images/blog/jluxe-series-cover.webp
+updatedAt: '2026-02-17'
+lastReviewedAt: '2026-02-17'
+topic: Case Study Series
+difficulty: Intermediate
+isCornerstone: false
+checklistAvailable: false
+author: victor-chinukwue
+reviewedBy: web-growth-editorial
+keyTakeaways:
+  - Priority one is why this series matters for website redesign in 2026.
+  - Sustained results depend on who should follow this 8-part rebuild series.
+  - Execution quality improves when you address the 8-part roadmap.
+whatYouNeed:
+  - Current website URL and business objective.
+  - Primary audience and offer clarity notes.
+  - 'Baseline performance data (traffic, leads, or sales).'
+commonMistakes:
+  - Starting execution before strategic clarity.
+  - Relying on aesthetics without conversion structure.
+  - Skipping QA before launch or campaign traffic.
+steps:
+  - 'Apply: Why this series matters for website redesign in 2026.'
+  - 'Apply: Who should follow this 8-part rebuild series.'
+  - 'Apply: The 8-part roadmap.'
+  - 'Apply: What you will get from every post in the series.'
+relatedGuideSlugs:
+  - jluxe-medical-aesthetics-case-study
+  - website-redesign-cost-breakdown-nigeria
+faq:
+  - question: What is the first step before making major website changes?
+    answer: >-
+      Define the commercial outcome and baseline metrics, then prioritize the
+      highest-impact fixes first.
+  - question: How do I avoid wasting budget on website updates?
+    answer: >-
+      Use clear scope, measurable goals, and structured QA before and after
+      launch.
+ctaVariant: none
+evidenceNote: Updated using observed implementation patterns and recurring project outcomes.
+methodologyNote: >-
+  Recommendations follow practical implementation-first workflows with
+  measurable QA checkpoints.
 ---
 
 # J Luxe Website Rebuild Series: 8-Part Announcement

@@ -129,16 +129,15 @@ export default function WebsiteRedesignClient() {
           <div className="grid gap-12 md:grid-cols-2 md:items-center">
             <div>
               <div className="text-sm tracking-[0.25em] text-white/50">
-                WEBSITE REDESIGN LAGOS
+                WEBSITE REDESIGN SERVICE
               </div>
               <h1 className="mt-4 text-4xl md:text-5xl font-semibold leading-tight">
-                Website redesign in Lagos that improves trust, speed, and enquiries.
+                Website redesign that improves trust, speed, and conversion.
               </h1>
               <p className="mt-6 text-lg text-white/70 leading-relaxed">
-                If you need website redesign in Lagos for a business site that
-                looks outdated, loads slowly, or fails to turn visitors into
-                enquiries, we redesign it around clarity, mobile performance,
-                and stronger conversion flow from the start.
+                If your current site looks outdated, loads slowly, or leaks
+                enquiries, we redesign it around clearer positioning, mobile-first
+                UX, and stronger conversion flow.
               </p>
 
               <div className="mt-10 flex gap-3 flex-col sm:flex-row">
@@ -370,8 +369,8 @@ export default function WebsiteRedesignClient() {
 
           <CTASection
             eyebrow="READY"
-            title="Let us rebuild your website the right way"
-            description="If your website looks old, loads slowly, or does not convert, we will redesign it with clearer messaging, stronger trust signals, and better conversion flow."
+            title="Ready to rebuild a website that is costing you leads?"
+            description="We redesign underperforming websites into premium assets that earn trust faster and convert more of your existing traffic."
             primaryCtaText="Request a Quote"
             primaryHref="/contact?service=Website Redesign"
             secondaryCtaText="View Services"

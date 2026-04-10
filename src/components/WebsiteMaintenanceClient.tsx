@@ -183,12 +183,12 @@ export default function WebsiteMaintenanceClient() {
                 WEBSITE MAINTENANCE & SUPPORT
               </div>
               <h1 className="mt-4 text-4xl md:text-5xl font-semibold leading-tight">
-                Keep your website secure, updated, and reliable.
+                Website maintenance that protects uptime, trust, and lead flow.
               </h1>
               <p className="mt-6 text-lg text-white/70 leading-relaxed">
-                Websites break quietly, until it becomes a disaster. Maintenance
-                prevents downtime, security issues, and performance decay. We keep
-                your site stable and improve it over time.
+                Maintenance prevents downtime, security issues, and performance
+                decay before they impact revenue. We keep your website stable and
+                commercially reliable over time.
               </p>
 
               <div className="mt-10 flex gap-3 flex-col sm:flex-row">
@@ -373,7 +373,7 @@ export default function WebsiteMaintenanceClient() {
 
           <CTASection
             eyebrow="READY"
-            title="Stop firefighting. Maintain your website properly."
+            title="Stop firefighting and maintain your website properly"
             description="Maintenance is cheaper than emergencies. We’ll keep your site stable, secure, and fast."
             primaryCtaText="Request a Quote"
             primaryHref="/contact?service=Website Maintenance & Support"

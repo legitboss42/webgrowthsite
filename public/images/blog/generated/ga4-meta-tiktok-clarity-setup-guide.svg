@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1600" y2="900" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#041510" />
+      <stop offset="0.55" stop-color="#05221A" />
+      <stop offset="1" stop-color="#081A2E" />
+    </linearGradient>
+    <radialGradient id="glow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(1320 120) rotate(146.91) scale(780 560)">
+      <stop stop-color="#34D399" stop-opacity="0.42" />
+      <stop offset="1" stop-color="#34D399" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+  <rect width="1600" height="900" fill="url(#bg)" />
+  <rect width="1600" height="900" fill="url(#glow)" />
+  <g opacity="0.2" stroke="#A7F3D0">
+    <path d="M0 220H1600" />
+    <path d="M0 380H1600" />
+    <path d="M0 540H1600" />
+    <path d="M0 700H1600" />
+    <path d="M260 0V900" />
+    <path d="M560 0V900" />
+    <path d="M860 0V900" />
+    <path d="M1160 0V900" />
+  </g>
+  <rect x="120" y="130" width="1360" height="640" rx="28" fill="#020617" fill-opacity="0.35" stroke="#10B981" stroke-opacity="0.42" />
+  <text x="180" y="230" fill="#A7F3D0" font-family="Inter, Arial, sans-serif" font-size="32" letter-spacing="6">ANALYTICS STACK GUIDE</text>
+  <text x="180" y="330" fill="white" font-family="Inter, Arial, sans-serif" font-size="68" font-weight="700">GA4 + Meta + TikTok + Clarity</text>
+  <text x="180" y="410" fill="#D1FAE5" font-family="Inter, Arial, sans-serif" font-size="46" font-weight="600">Implementation Blueprint</text>
+  <g transform="translate(180 505)">
+    <rect width="640" height="190" rx="18" fill="#064E3B" fill-opacity="0.45" stroke="#34D399" stroke-opacity="0.55" />
+    <text x="34" y="62" fill="#A7F3D0" font-family="Inter, Arial, sans-serif" font-size="28">Track clean events</text>
+    <text x="34" y="112" fill="#A7F3D0" font-family="Inter, Arial, sans-serif" font-size="28">Validate before launch</text>
+    <text x="34" y="162" fill="#A7F3D0" font-family="Inter, Arial, sans-serif" font-size="28">Stop data blind spots</text>
+  </g>
+  <text x="180" y="760" fill="#E2E8F0" font-family="Inter, Arial, sans-serif" font-size="30">webgrowth.info/blog</text>
+</svg>

@@ -1,11 +1,63 @@
 ---
-title: "SEO Migration Without Losing Traffic: 301 Redirect Checklist"
-excerpt: "Part 3 of the J Luxe series: use this SEO migration checklist to protect organic traffic with 301 redirects, canonical tags, and launch QA."
-date: 2026-03-02
+title: 'SEO Migration Without Losing Traffic: 301 Redirect Checklist'
+excerpt: >-
+  Part 3 of the J Luxe series: use this SEO migration checklist to protect
+  organic traffic with 301 redirects, canonical tags, and launch QA.
+date: 2026-02-20T00:00:00.000Z
 category: Series
-tags: ["Series", "SEO Migration", "Website Migration", "Technical SEO", "301 Redirects", "Organic Traffic"]
+tags:
+  - Series
+  - SEO Migration
+  - Website Migration
+  - Technical SEO
+  - 301 Redirects
+  - Organic Traffic
 readTime: 17 min read
 cover: /images/blog/jluxe-series-seo-migration.webp
+updatedAt: '2026-02-20'
+lastReviewedAt: '2026-02-20'
+topic: Case Study Series
+difficulty: Intermediate
+isCornerstone: false
+checklistAvailable: true
+author: victor-chinukwue
+reviewedBy: web-growth-editorial
+keyTakeaways:
+  - Priority one is why seo migration fails during website redesign projects.
+  - Sustained results depend on the seo migration principle we followed.
+  - >-
+    Execution quality improves when you address phase 1: freeze url policy
+    before copy and design revisions.
+whatYouNeed:
+  - Current website URL and business objective.
+  - Primary audience and offer clarity notes.
+  - 'Baseline performance data (traffic, leads, or sales).'
+commonMistakes:
+  - Starting execution before strategic clarity.
+  - Relying on aesthetics without conversion structure.
+  - Skipping QA before launch or campaign traffic.
+steps:
+  - 'Apply: Why SEO migration fails during website redesign projects.'
+  - 'Apply: The SEO migration principle we followed.'
+  - 'Apply: Phase 1: Freeze URL policy before copy and design revisions.'
+  - 'Apply: Phase 2: Build a complete 301 redirect map.'
+relatedGuideSlugs:
+  - jluxe-medical-aesthetics-case-study
+  - website-redesign-cost-breakdown-nigeria
+faq:
+  - question: What is the first step before making major website changes?
+    answer: >-
+      Define the commercial outcome and baseline metrics, then prioritize the
+      highest-impact fixes first.
+  - question: How do I avoid wasting budget on website updates?
+    answer: >-
+      Use clear scope, measurable goals, and structured QA before and after
+      launch.
+ctaVariant: none
+evidenceNote: Updated using observed implementation patterns and recurring project outcomes.
+methodologyNote: >-
+  Recommendations follow practical implementation-first workflows with
+  measurable QA checkpoints.
 ---
 
 # SEO Migration Without Losing Traffic (Part 3)

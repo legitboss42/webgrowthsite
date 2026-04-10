@@ -1,11 +1,66 @@
 ---
-title: "Next.js Architecture and Build Decisions: Technical SEO and Website Maintainability"
-excerpt: "Part 6 of the J Luxe rebuild series: the Next.js architecture decisions that improved performance, crawlability, publishing speed, and long-term maintenance during the rebuild."
-date: 2026-03-12
+title: >-
+  Next.js Architecture and Build Decisions: Technical SEO and Website
+  Maintainability
+excerpt: >-
+  Part 6 of the J Luxe rebuild series: the Next.js architecture decisions that
+  improved performance, crawlability, publishing speed, and long-term
+  maintenance during the rebuild.
+date: 2026-02-23T00:00:00.000Z
 category: Series
-tags: ["Series", "Next.js", "Website Architecture", "Technical SEO", "Website Performance", "Maintainability"]
+tags:
+  - Series
+  - Next.js
+  - Website Architecture
+  - Technical SEO
+  - Website Performance
+  - Maintainability
 readTime: 16 min read
 cover: /images/blog/jluxe-series-nextjs-architecture-cover.webp
+updatedAt: '2026-02-23'
+lastReviewedAt: '2026-02-23'
+topic: Case Study Series
+difficulty: Intermediate
+isCornerstone: false
+checklistAvailable: false
+author: victor-chinukwue
+reviewedBy: web-growth-editorial
+keyTakeaways:
+  - Priority one is why architecture decisions affect seo and conversion.
+  - Sustained results depend on the architecture principle we used.
+  - >-
+    Execution quality improves when you address why we used next.js for this
+    rebuild.
+whatYouNeed:
+  - Current website URL and business objective.
+  - Primary audience and offer clarity notes.
+  - 'Baseline performance data (traffic, leads, or sales).'
+commonMistakes:
+  - Starting execution before strategic clarity.
+  - Relying on aesthetics without conversion structure.
+  - Skipping QA before launch or campaign traffic.
+steps:
+  - 'Apply: Why architecture decisions affect SEO and conversion.'
+  - 'Apply: The architecture principle we used.'
+  - 'Apply: Why we used Next.js for this rebuild.'
+  - 'Apply: The App Router decision and why it mattered.'
+relatedGuideSlugs:
+  - jluxe-medical-aesthetics-case-study
+  - website-redesign-cost-breakdown-nigeria
+faq:
+  - question: What is the first step before making major website changes?
+    answer: >-
+      Define the commercial outcome and baseline metrics, then prioritize the
+      highest-impact fixes first.
+  - question: How do I avoid wasting budget on website updates?
+    answer: >-
+      Use clear scope, measurable goals, and structured QA before and after
+      launch.
+ctaVariant: none
+evidenceNote: Updated using observed implementation patterns and recurring project outcomes.
+methodologyNote: >-
+  Recommendations follow practical implementation-first workflows with
+  measurable QA checkpoints.
 ---
 
 # Next.js Architecture and Build Decisions (Part 6)

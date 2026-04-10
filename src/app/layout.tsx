@@ -7,10 +7,12 @@ import StructuredData from "@/components/StructuredData";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/react";
 import {
+  buildPersonSchema,
   buildOrganizationSchema,
   buildWebsiteSchema,
   defaultSiteMetadata,
 } from "@/lib/seo";
+import { getAuthorProfile } from "@/lib/authors";
 import { DEFAULT_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site";
 import { WebVitals } from "./components/WebVitals";
 import "./globals.css";
@@ -59,7 +61,12 @@ const CLARITY_ID = process.env.NEXT_PUBLIC_CLARITY_ID;
 const IS_PRODUCTION = process.env.NODE_ENV === "production";
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  const siteSchemas = [buildWebsiteSchema(), buildOrganizationSchema()];
+  const founder = getAuthorProfile("victor-chinukwue");
+  const siteSchemas = [
+    buildWebsiteSchema(),
+    buildOrganizationSchema(),
+    buildPersonSchema(founder),
+  ];
 
   return (
     <html lang="en">

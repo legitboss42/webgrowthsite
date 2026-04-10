@@ -10,7 +10,7 @@ import {
 } from "@/lib/seo";
 
 const pageDescription =
-  "Web design for real estate in Lagos for realtors, agencies, and property brands that need a faster, more credible website built to showcase listings and generate enquiries.";
+  "Web design for real estate businesses in Lagos that need faster, credible property websites to showcase listings and generate qualified enquiries.";
 
 const buyerAnswers = [
   {
@@ -67,7 +67,7 @@ const faqs = [
 ] as const;
 
 export const metadata = buildPageMetadata({
-  title: "Web Design for Real Estate Lagos | Property Websites That Generate Enquiries",
+  title: "Real Estate Web Design in Lagos | Web Growth",
   description: pageDescription,
   path: "/web-design-for-real-estate-lagos",
   keywords: [

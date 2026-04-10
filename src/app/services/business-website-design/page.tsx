@@ -1,49 +1,13 @@
-import type { Metadata } from "next";
-import BusinessWebsiteDesignClient from "@/components/BusinessWebsiteDesignClient";
+import ServiceDetailTemplateClient from "@/components/ServiceDetailTemplateClient";
+import { ALL_SERVICE_PAGES, buildServiceMetadata } from "@/lib/newServiceConfigs";
 
-export const metadata: Metadata = {
-  title: "Business Website Design",
-  description:
-    "Professional business website design focused on clarity, trust, speed, and real results. Built to attract customers and support growth.",
-  keywords: [
-    "web design",
-    "web design services",
-    "business website design",
-    "professional website design",
-    "company website design",
-    "web design agency",
-    "conversion focused websites",
-    "modern business websites",
-  ],
-  alternates: {
-    canonical: "https://webgrowth.info/services/business-website-design",
-  },
-  openGraph: {
-    title: "Business Website Design",
-    description:
-      "Websites designed to position your business professionally and convert visitors into enquiries.",
-    url: "https://webgrowth.info/services/business-website-design",
-    siteName: "Web Growth",
-    images: [
-      {
-        url: "https://webgrowth.info/images/hero/Hero-Image-1.webp",
-        width: 1200,
-        height: 630,
-        alt: "Business Website Design",
-      },
-    ],
-    type: "website",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Business Website Design",
-    description:
-      "Professional web design services for businesses that want more enquiries and stronger trust.",
-    images: ["https://webgrowth.info/images/hero/Hero-Image-1.webp"],
-  },
-  robots: { index: true, follow: true },
-};
+const service = ALL_SERVICE_PAGES["business-website-design"];
+
+export const metadata = buildServiceMetadata(
+  service,
+  "https://webgrowth.info/services/business-website-design"
+);
 
 export default function Page() {
-  return <BusinessWebsiteDesignClient />;
+  return <ServiceDetailTemplateClient service={service} />;
 }

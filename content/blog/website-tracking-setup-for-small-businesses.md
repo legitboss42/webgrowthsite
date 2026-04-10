@@ -1,11 +1,66 @@
 ---
-title: "Website Tracking Setup for Small Businesses (GA4, Meta Pixel, TikTok Pixel, and Clarity)"
-excerpt: "Most small business websites collect visits but not answers. This guide shows how to track the pages, buttons, campaigns, and actions that actually generate enquiries."
-date: 2026-03-29
+title: >-
+  Website Tracking Setup for Small Businesses (GA4, Meta Pixel, TikTok Pixel,
+  and Clarity)
+excerpt: >-
+  Most small business websites collect visits but not answers. This guide shows
+  how to track the pages, buttons, campaigns, and actions that actually generate
+  enquiries.
+date: 2026-02-26T00:00:00.000Z
 category: Strategy
-tags: ["Analytics Tracking", "GA4", "Meta Pixel", "TikTok Pixel", "Microsoft Clarity", "Conversion Tracking"]
+tags:
+  - Analytics Tracking
+  - GA4
+  - Meta Pixel
+  - TikTok Pixel
+  - Microsoft Clarity
+  - Conversion Tracking
 readTime: 14 min read
 cover: /images/blog/analytics-tracking-hero-generated.jpg
+updatedAt: '2026-02-26'
+lastReviewedAt: '2026-02-26'
+topic: Website Strategy
+difficulty: Beginner
+isCornerstone: false
+checklistAvailable: false
+author: victor-chinukwue
+reviewedBy: web-growth-editorial
+keyTakeaways:
+  - Priority one is what website tracking setup should a small business have?.
+  - Sustained results depend on why most website tracking setups fail.
+  - >-
+    Execution quality improves when you address the 5 conversions every service
+    business should track.
+whatYouNeed:
+  - Current website URL and business objective.
+  - Primary audience and offer clarity notes.
+  - 'Baseline performance data (traffic, leads, or sales).'
+commonMistakes:
+  - Starting execution before strategic clarity.
+  - Relying on aesthetics without conversion structure.
+  - Skipping QA before launch or campaign traffic.
+steps:
+  - 'Apply: What website tracking setup should a small business have?.'
+  - 'Apply: Why most website tracking setups fail.'
+  - 'Apply: The 5 conversions every service business should track.'
+  - 'Apply: GA4 vs Meta Pixel vs TikTok Pixel vs Clarity.'
+relatedGuideSlugs:
+  - how-to-plan-website-copy-before-hiring-developer
+  - website-platform-comparison-small-business
+faq:
+  - question: What is the first step before making major website changes?
+    answer: >-
+      Define the commercial outcome and baseline metrics, then prioritize the
+      highest-impact fixes first.
+  - question: How do I avoid wasting budget on website updates?
+    answer: >-
+      Use clear scope, measurable goals, and structured QA before and after
+      launch.
+ctaVariant: consultation
+evidenceNote: Updated using observed implementation patterns and recurring project outcomes.
+methodologyNote: >-
+  Recommendations follow practical implementation-first workflows with
+  measurable QA checkpoints.
 ---
 
 # Website Tracking Setup for Small Businesses

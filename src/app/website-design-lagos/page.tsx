@@ -10,7 +10,7 @@ import {
 } from "@/lib/seo";
 
 const pageDescription =
-  "Website design in Lagos for service businesses that need a fast, credible, conversion-focused website with clearer messaging, better mobile UX, and a cleaner path to enquiries.";
+  "Website design in Lagos for service businesses that need fast, credible websites with clearer messaging, stronger mobile UX, and easier enquiries.";
 
 const buyerAnswers = [
   {

@@ -1,11 +1,66 @@
 ---
-title: "Writing Service Pages That Convert: Service Page SEO and Conversion Copy Framework"
-excerpt: "Part 4 of the J Luxe rebuild series: how to write service pages that rank in local SEO and convert visitors into qualified enquiries using a practical, repeatable framework."
-date: 2026-03-04
+title: >-
+  Writing Service Pages That Convert: Service Page SEO and Conversion Copy
+  Framework
+excerpt: >-
+  Part 4 of the J Luxe rebuild series: how to write service pages that rank in
+  local SEO and convert visitors into qualified enquiries using a practical,
+  repeatable framework.
+date: 2026-02-21T00:00:00.000Z
 category: Series
-tags: ["Series", "Service Page SEO", "Local SEO", "Conversion Rate Optimization", "Website Copywriting", "Small Business Website"]
+tags:
+  - Series
+  - Service Page SEO
+  - Local SEO
+  - Conversion Rate Optimization
+  - Website Copywriting
+  - Small Business Website
 readTime: 16 min read
 cover: /images/blog/jluxe-series-service-pages-cover.webp
+updatedAt: '2026-02-21'
+lastReviewedAt: '2026-02-21'
+topic: Case Study Series
+difficulty: Intermediate
+isCornerstone: false
+checklistAvailable: false
+author: victor-chinukwue
+reviewedBy: web-growth-editorial
+keyTakeaways:
+  - Priority one is why most service pages do not convert.
+  - Sustained results depend on the real objective of a service page.
+  - >-
+    Execution quality improves when you address the keyword strategy we used for
+    service pages.
+whatYouNeed:
+  - Current website URL and business objective.
+  - Primary audience and offer clarity notes.
+  - 'Baseline performance data (traffic, leads, or sales).'
+commonMistakes:
+  - Starting execution before strategic clarity.
+  - Relying on aesthetics without conversion structure.
+  - Skipping QA before launch or campaign traffic.
+steps:
+  - 'Apply: Why most service pages do not convert.'
+  - 'Apply: The real objective of a service page.'
+  - 'Apply: The keyword strategy we used for service pages.'
+  - 'Apply: The service page structure that converts.'
+relatedGuideSlugs:
+  - jluxe-medical-aesthetics-case-study
+  - website-redesign-cost-breakdown-nigeria
+faq:
+  - question: What is the first step before making major website changes?
+    answer: >-
+      Define the commercial outcome and baseline metrics, then prioritize the
+      highest-impact fixes first.
+  - question: How do I avoid wasting budget on website updates?
+    answer: >-
+      Use clear scope, measurable goals, and structured QA before and after
+      launch.
+ctaVariant: none
+evidenceNote: Updated using observed implementation patterns and recurring project outcomes.
+methodologyNote: >-
+  Recommendations follow practical implementation-first workflows with
+  measurable QA checkpoints.
 ---
 
 # Writing Service Pages That Convert (Part 4)

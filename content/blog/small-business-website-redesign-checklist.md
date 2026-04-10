@@ -1,11 +1,65 @@
 ---
-title: "Small Business Website Redesign Checklist: What to Fix Before You Rebuild"
-excerpt: "Use this small business website redesign checklist to fix messaging, structure, trust, speed, SEO, and launch readiness before spending money on a cosmetic rebuild."
-date: 2026-02-19
+title: 'Small Business Website Redesign Checklist: What to Fix Before You Rebuild'
+excerpt: >-
+  Use this small business website redesign checklist to fix messaging,
+  structure, trust, speed, SEO, and launch readiness before spending money on a
+  cosmetic rebuild.
+date: 2026-02-16T00:00:00.000Z
 category: Strategy
-tags: ["Website Redesign", "Conversion", "UX", "SEO", "Small Business"]
+tags:
+  - Website Redesign
+  - Conversion
+  - UX
+  - SEO
+  - Small Business
 readTime: 15 min read
 cover: /images/blog/redesign-checklist-cover-generated.webp
+updatedAt: '2026-02-16'
+lastReviewedAt: '2026-02-16'
+topic: Website Strategy
+difficulty: Beginner
+isCornerstone: false
+checklistAvailable: true
+author: victor-chinukwue
+reviewedBy: web-growth-editorial
+keyTakeaways:
+  - >-
+    Priority one is step 1: decide whether you need a full redesign or focused
+    fixes.
+  - 'Sustained results depend on step 2: lock the main business goal first.'
+  - >-
+    Execution quality improves when you address step 3: rewrite the homepage for
+    clarity before style.
+whatYouNeed:
+  - Current website URL and business objective.
+  - Primary audience and offer clarity notes.
+  - 'Baseline performance data (traffic, leads, or sales).'
+commonMistakes:
+  - Starting execution before strategic clarity.
+  - Relying on aesthetics without conversion structure.
+  - Skipping QA before launch or campaign traffic.
+steps:
+  - 'Apply: Step 1: Decide whether you need a full redesign or focused fixes.'
+  - 'Apply: Step 2: Lock the main business goal first.'
+  - 'Apply: Step 3: Rewrite the homepage for clarity before style.'
+  - 'Apply: Step 4: Rebuild service pages around buyer intent.'
+relatedGuideSlugs:
+  - how-to-plan-website-copy-before-hiring-developer
+  - website-platform-comparison-small-business
+faq:
+  - question: What is the first step before making major website changes?
+    answer: >-
+      Define the commercial outcome and baseline metrics, then prioritize the
+      highest-impact fixes first.
+  - question: How do I avoid wasting budget on website updates?
+    answer: >-
+      Use clear scope, measurable goals, and structured QA before and after
+      launch.
+ctaVariant: consultation
+evidenceNote: Updated using observed implementation patterns and recurring project outcomes.
+methodologyNote: >-
+  Recommendations follow practical implementation-first workflows with
+  measurable QA checkpoints.
 ---
 
 # Small Business Website Redesign Checklist: What to Fix Before You Rebuild

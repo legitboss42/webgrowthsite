@@ -1,11 +1,65 @@
 ---
-title: How to Build a Small Business Website That Actually Converts Visitors Into Customers
-excerpt: Most small business websites look good but don’t sell. Learn the exact structure, psychology and layout that turns visitors into enquiries automatically.
-date: 2026-02-02
+title: >-
+  How to Build a Small Business Website That Actually Converts Visitors Into
+  Customers
+excerpt: >-
+  Most small business websites look good but don’t sell. Learn the exact
+  structure, psychology and layout that turns visitors into enquiries
+  automatically.
+date: 2026-02-08T00:00:00.000Z
 category: Conversion
-tags: ["Conversion", "UX", "Sales", "Website Strategy", "Small Business"]
+tags:
+  - Conversion
+  - UX
+  - Sales
+  - Website Strategy
+  - Small Business
 readTime: 18 min read
 cover: /images/blog/converting-website.webp
+updatedAt: '2026-02-08'
+lastReviewedAt: '2026-02-08'
+topic: Conversion Optimization
+difficulty: Beginner
+isCornerstone: true
+checklistAvailable: false
+author: victor-chinukwue
+reviewedBy: web-growth-editorial
+keyTakeaways:
+  - 'Priority one is first principle: your website is not art.'
+  - Sustained results depend on the 5-second rule.
+  - >-
+    Execution quality improves when you address section 1: the headline (this
+    matters more than everything else).
+whatYouNeed:
+  - Current page URL and main conversion action.
+  - Primary audience and key objections list.
+  - Existing proof assets such as reviews or results.
+commonMistakes:
+  - Using generic copy that lacks trust signals.
+  - Adding multiple conflicting CTA paths.
+  - Ignoring mobile readability and button hierarchy.
+steps:
+  - 'Apply: First principle: your website is not art.'
+  - 'Apply: The 5-second rule.'
+  - 'Apply: Section 1: The headline (this matters more than everything else).'
+  - 'Apply: Section 2: Proof immediately after.'
+relatedGuideSlugs:
+  - why-your-website-isnt-getting-leads
+  - homepage-structure-that-converts-visitors-into-customers
+faq:
+  - question: Do I need a full redesign to improve conversion?
+    answer: >-
+      Not always. Many high-impact gains come from messaging, trust, and CTA
+      structure fixes.
+  - question: What should I test first?
+    answer: >-
+      Start with hero clarity, CTA hierarchy, trust sections, and mobile form
+      friction.
+ctaVariant: service
+evidenceNote: Updated using observed implementation patterns and recurring project outcomes.
+methodologyNote: >-
+  Recommendations follow practical implementation-first workflows with
+  measurable QA checkpoints.
 ---
 
 # How to Build a Small Business Website That Actually Converts Visitors Into Customers

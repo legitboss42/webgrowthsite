@@ -1,11 +1,64 @@
 ---
-title: Website Launch Checklist for Small Businesses (Avoid Expensive Mistakes on Day One)
-excerpt: Launch day should not be chaos. Use this practical checklist to ship a fast, credible, conversion-ready website that actually generates enquiries.
-date: 2026-02-15
+title: >-
+  Website Launch Checklist for Small Businesses (Avoid Expensive Mistakes on Day
+  One)
+excerpt: >-
+  Launch day should not be chaos. Use this practical checklist to ship a fast,
+  credible, conversion-ready website that actually generates enquiries.
+date: 2026-02-15T00:00:00.000Z
 category: Strategy
-tags: ["Strategy", "Website Launch", "Conversion", "SEO", "Small Business"]
+tags:
+  - Strategy
+  - Website Launch
+  - Conversion
+  - SEO
+  - Small Business
 readTime: 16 min read
 cover: /images/blog/growth-process.webp
+updatedAt: '2026-02-15'
+lastReviewedAt: '2026-02-15'
+topic: Website Launch
+difficulty: Beginner
+isCornerstone: true
+checklistAvailable: true
+author: victor-chinukwue
+reviewedBy: web-growth-editorial
+keyTakeaways:
+  - 'Priority one is launch principle: ship outcomes, not files.'
+  - Sustained results depend on 1) technical readiness checklist.
+  - >-
+    Execution quality improves when you address 2) conversion readiness
+    checklist.
+whatYouNeed:
+  - Current website URL and business objective.
+  - Primary audience and offer clarity notes.
+  - 'Baseline performance data (traffic, leads, or sales).'
+commonMistakes:
+  - Starting execution before strategic clarity.
+  - Relying on aesthetics without conversion structure.
+  - Skipping QA before launch or campaign traffic.
+steps:
+  - 'Apply: Launch principle: ship outcomes, not files.'
+  - 'Apply: 1) Technical readiness checklist.'
+  - 'Apply: 2) Conversion readiness checklist.'
+  - 'Apply: 3) SEO readiness checklist.'
+relatedGuideSlugs:
+  - how-to-plan-website-copy-before-hiring-developer
+  - website-platform-comparison-small-business
+faq:
+  - question: What is the first step before making major website changes?
+    answer: >-
+      Define the commercial outcome and baseline metrics, then prioritize the
+      highest-impact fixes first.
+  - question: How do I avoid wasting budget on website updates?
+    answer: >-
+      Use clear scope, measurable goals, and structured QA before and after
+      launch.
+ctaVariant: consultation
+evidenceNote: Updated using observed implementation patterns and recurring project outcomes.
+methodologyNote: >-
+  Recommendations follow practical implementation-first workflows with
+  measurable QA checkpoints.
 ---
 
 # Website Launch Checklist for Small Businesses (Avoid Expensive Mistakes on Day One)

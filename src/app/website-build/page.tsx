@@ -1,3 +1,4 @@
+import Link from "next/link";
 import StructuredData from "@/components/StructuredData";
 import CodeRain from "@/components/CodeRain";
 import WebsiteBuildAnimations from "@/components/WebsiteBuildAnimations";
@@ -6,13 +7,61 @@ import WebsiteBuildInquiryForm from "@/components/WebsiteBuildInquiryForm";
 import WebsiteBuildSectionBackground from "@/components/WebsiteBuildSectionBackground";
 import TrackedLink from "@/components/analytics/TrackedLink";
 import {
+  buildBreadcrumbSchema,
   buildFaqSchema,
   buildPageMetadata,
   buildProfessionalServiceSchema,
 } from "@/lib/seo";
+import { absoluteUrl, SITE_URL } from "@/lib/site";
 
 const pageDescription =
-  "High-converting website design for local businesses and ecommerce brands. Web Growth builds premium pages engineered to turn cold traffic into calls, bookings, and sales.";
+  "High-converting website design and redesign for service and ecommerce brands. Web Growth builds fast premium pages engineered for leads, bookings, and sales.";
+
+const websiteBuildUrl = absoluteUrl("/website-build");
+
+const websiteBuildServiceSchema = {
+  "@context": "https://schema.org",
+  "@type": "Service",
+  "@id": `${websiteBuildUrl}#service`,
+  name: "High-Converting Website Design and Redesign",
+  description: pageDescription,
+  url: websiteBuildUrl,
+  serviceType: "Website design and redesign agency",
+  category: "Website Design Service",
+  provider: {
+    "@id": `${SITE_URL}#professional-service`,
+  },
+  areaServed: [
+    {
+      "@type": "Place",
+      name: "Lagos",
+    },
+    {
+      "@type": "Country",
+      name: "Nigeria",
+    },
+  ],
+};
+
+const websiteBuildPageSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": `${websiteBuildUrl}#webpage`,
+  url: websiteBuildUrl,
+  name: "High-Converting Website Design Agency | Web Growth",
+  description: pageDescription,
+  isPartOf: {
+    "@id": `${SITE_URL}#website`,
+  },
+  about: {
+    "@id": `${websiteBuildUrl}#service`,
+  },
+};
+
+const websiteBuildBreadcrumbSchema = buildBreadcrumbSchema([
+  { name: "Home", path: "/" },
+  { name: "Website Build", path: "/website-build" },
+]);
 
 const problemCards = [
   {
@@ -85,16 +134,19 @@ const faqItems = [
 ] as const;
 
 export const metadata = buildPageMetadata({
-  title: "Website Design for Local & Ecommerce Brands | Web Growth",
+  title: "High-Converting Website Design Agency | Web Growth",
   description: pageDescription,
   path: "/website-build",
   keywords: [
-    "website design for local businesses",
-    "e-commerce website redesign",
-    "high-converting websites",
+    "high-converting website design agency",
     "website redesign agency",
-    "website build for local businesses",
-    "website conversion optimization",
+    "high-performance web design",
+    "custom next.js website development",
+    "conversion-focused web design",
+    "premium web design agency",
+    "website design for service businesses",
+    "ecommerce website redesign agency",
+    "fast-loading website development",
   ],
   image: "/images/hero/Hero-Image-1.webp",
 });
@@ -106,6 +158,9 @@ export default function WebsiteBuildPage() {
       <StructuredData
         data={[
           buildProfessionalServiceSchema("/website-build", pageDescription),
+          websiteBuildServiceSchema,
+          websiteBuildPageSchema,
+          websiteBuildBreadcrumbSchema,
           buildFaqSchema(faqItems),
         ]}
       />
@@ -129,18 +184,18 @@ export default function WebsiteBuildPage() {
                   data-wb-hero-kicker
                   className="text-xs uppercase tracking-[0.22em] text-emerald-300/85"
                 >
-                  Cold Traffic Landing Page
+                  High-Converting Website Design Agency
                 </p>
                 <h1
                   data-wb-hero-title
                   className="mt-4 text-balance text-4xl font-semibold leading-[1.02] tracking-[-0.03em] md:text-6xl"
                 >
-                  Your Website Is Wasting Cold Traffic Before It Can Convert
+                  Your Website Should Convert Traffic, Not Waste It
                 </h1>
                 <p data-wb-hero-copy className="mt-5 max-w-2xl text-lg leading-8 text-white/74">
-                  If your traffic is coming from TikTok, Instagram, WhatsApp, or DMs,
-                  the page has to win on first visit. We build premium, conversion-focused
-                  pages that turn cold clicks into calls, bookings, and sales.
+                  We engineer fast, premium websites for service businesses and ecommerce
+                  brands. Custom Next.js builds, conversion architecture, and stronger SEO
+                  foundations that turn traffic into leads, bookings, and sales.
                 </p>
 
                 <div
@@ -171,11 +226,20 @@ export default function WebsiteBuildPage() {
                   </TrackedLink>
                 </div>
 
-                <p className="mt-4 text-sm text-white/68">
-                  Best for growth-focused local businesses and ecommerce brands.
-                </p>
+                <p className="mt-4 text-sm text-white/68">Built for serious businesses investing in growth.</p>
                 <p data-wb-hero-meta className="mt-2 text-sm text-white/62">
                   First impression speed | Mobile-first UX | Conversion architecture
+                </p>
+                <p className="mt-3 text-sm text-white/66">
+                  Need a specialised track? Explore{" "}
+                  <Link href="/local-business" className="text-emerald-200 hover:text-emerald-100">
+                    local business website design
+                  </Link>{" "}
+                  and{" "}
+                  <Link href="/ecommerce" className="text-emerald-200 hover:text-emerald-100">
+                    ecommerce website redesign
+                  </Link>{" "}
+                  services.
                 </p>
               </div>
 
@@ -387,7 +451,7 @@ export default function WebsiteBuildPage() {
           <WebsiteBuildSectionBackground variant="faq" />
           <div className="relative mx-auto max-w-4xl px-6">
             <h2 className="text-balance text-3xl font-semibold tracking-[-0.02em] md:text-5xl">
-              Questions Business Owners Usually Ask
+              Questions Before Hiring a Website Redesign Agency
             </h2>
 
             <div data-wb-card-group className="mt-10 space-y-4">
@@ -413,7 +477,7 @@ export default function WebsiteBuildPage() {
               className="rounded-3xl border border-emerald-500/30 bg-[linear-gradient(135deg,rgba(16,185,129,0.18),rgba(8,12,10,0.95)_55%,rgba(0,0,0,0.9))] p-6 shadow-[0_22px_56px_rgba(0,0,0,0.3)] md:p-8"
             >
               <h2 className="text-balance text-3xl font-semibold leading-tight tracking-[-0.02em] md:text-5xl">
-                Stop Paying for Clicks That Never Become Leads
+                Ready for a Website That Converts More of Your Traffic?
               </h2>
               <p className="mt-4 max-w-3xl text-lg leading-8 text-white/78">
                 Let&apos;s build a premium page that earns trust in seconds and guides

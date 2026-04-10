@@ -1,7 +1,7 @@
 import ServiceDetailTemplateClient from "@/components/ServiceDetailTemplateClient";
-import { NEW_SERVICE_PAGES, buildServiceMetadata } from "@/lib/newServiceConfigs";
+import { ALL_SERVICE_PAGES, buildServiceMetadata } from "@/lib/newServiceConfigs";
 
-const service = NEW_SERVICE_PAGES["google-my-business-setup-optimisation"];
+const service = ALL_SERVICE_PAGES["google-my-business-setup-optimisation"];
 
 export const metadata = buildServiceMetadata(
   service,

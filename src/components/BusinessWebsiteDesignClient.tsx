@@ -99,12 +99,11 @@ export default function BusinessWebsiteDesignClient() {
                 BUSINESS WEBSITE DESIGN
               </div>
               <h1 className="mt-4 text-4xl md:text-5xl font-semibold leading-tight">
-                A professional website that makes your business look serious.
+                Business website design built to convert serious buyers.
               </h1>
               <p className="mt-6 text-lg text-white/70 leading-relaxed">
-                Your website is often the first impression of your business.
-                We design business websites that clearly explain what you do,
-                build trust quickly, and guide visitors toward contacting you.
+                We build custom business websites that position your offer clearly,
+                build trust fast, and guide visitors toward high-intent enquiries.
               </p>
 
               <div className="mt-10 flex gap-3 flex-col sm:flex-row">
@@ -296,8 +295,8 @@ export default function BusinessWebsiteDesignClient() {
 
           <CTASection
             eyebrow="READY"
-            title="Let’s build a website your business can rely on"
-            description="If you need a professional website that supports real growth, we’ll build it properly."
+            title="Ready to replace a weak website with a revenue-ready one?"
+            description="If your current website is costing trust or leads, we will rebuild it with premium execution and conversion intent."
             primaryCtaText="Request a Quote"
             primaryHref="/contact?service=Business Website Design"
             secondaryCtaText="View Services"

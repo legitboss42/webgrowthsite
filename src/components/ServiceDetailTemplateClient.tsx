@@ -1,113 +1,176 @@
-"use client";
-
-import { useEffect, useRef } from "react";
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Link from "next/link";
+import StructuredData from "@/components/StructuredData";
 
 import AnswerHighlightsSection from "@/components/AnswerHighlightsSection";
 import CorePageLinks from "@/components/CorePageLinks";
 import SectionHeading from "@/components/SectionHeading";
 import CTASection from "@/components/CTASection";
-import FAQAccordion from "@/components/FAQAccordion";
 import GeneratedSectionBackground from "@/components/GeneratedSectionBackground";
+import ServiceDeliverables from "@/components/content/ServiceDeliverables";
+import WhoThisIsFor from "@/components/content/WhoThisIsFor";
+import WhoThisIsNotFor from "@/components/content/WhoThisIsNotFor";
+import CommonMistakes from "@/components/content/CommonMistakes";
+import RealExamples from "@/components/content/RealExamples";
+import BeforeAfterResults from "@/components/content/BeforeAfterResults";
+import ProcessSteps from "@/components/content/ProcessSteps";
+import FAQBlock from "@/components/content/FAQBlock";
+import EvidenceGallery from "@/components/content/EvidenceGallery";
+import InternalResourceCallout from "@/components/content/InternalResourceCallout";
 import type { ServicePageConfig } from "@/lib/newServiceConfigs";
+import { buildBreadcrumbSchema, buildFaqSchema } from "@/lib/seo";
+import { absoluteUrl, SITE_URL } from "@/lib/site";
 
 type Props = {
   service: ServicePageConfig;
 };
 
 export default function ServiceDetailTemplateClient({ service }: Props) {
-  const pageRef = useRef<HTMLDivElement | null>(null);
+  const servicePath = `/services/${service.slug}`;
+  const serviceUrl = absoluteUrl(servicePath);
+  const schema = [
+    {
+      "@context": "https://schema.org",
+      "@type": "Service",
+      "@id": `${serviceUrl}#service`,
+      name: service.title,
+      description: service.metaDescription,
+      url: serviceUrl,
+      serviceType: service.title,
+      provider: {
+        "@id": `${SITE_URL}#professional-service`,
+      },
+      category: "Web Design Service",
+    },
+    buildFaqSchema(service.faqs),
+    buildBreadcrumbSchema([
+      { name: "Home", path: "/" },
+      { name: "Services", path: "/services" },
+      { name: service.title, path: servicePath },
+    ]),
+  ];
+
   const answerItems = service.faqs.slice(0, 4).map((item) => ({
     title: item.question,
     answer: item.answer,
     href: `/contact?service=${encodeURIComponent(service.serviceParam)}`,
     hrefLabel: "Request this service",
   }));
-  const supportingLinks =
+
+  const relatedGuides = (service.relatedGuideSlugs || []).slice(0, 4).map((slug) => ({
+    href: `/blog/${slug}`,
+    title: slug.replace(/-/g, " "),
+  }));
+
+  const supportLinks =
     service.relatedLinks ?? [
+      {
+        href: "/services/website-audit",
+        label: "Audit",
+        title: "Need diagnosis before implementation?",
+        description:
+          "Start with a website audit if the bottleneck is not fully clear yet.",
+      },
       {
         href: "/launch",
         label: "Launch",
-        title: "Need a focused fast-start option?",
+        title: "Need a faster commercial launch path?",
         description:
-          "Use the 48-hour launch offer if your biggest priority is getting a website live quickly before expanding the scope later.",
+          "Use the launch package if speed to market matters more than full custom scope right now.",
       },
       {
         href: "/pricing",
         label: "Pricing",
-        title: "Need pricing context first?",
+        title: "Need scope and budget context first?",
         description:
-          "Review pricing if you want to compare service paths before requesting implementation.",
-      },
-      {
-        href: "/services",
-        label: "Services",
-        title: "Need a broader solution view?",
-        description:
-          "Explore the full service list if you are still deciding which path best fits your business goals.",
+          "Review package pricing to compare implementation routes before kickoff.",
       },
     ];
 
-  useEffect(() => {
-    gsap.registerPlugin(ScrollTrigger);
+  const whoFor =
+    service.targetAudience && service.targetAudience.length
+      ? service.targetAudience
+      : [
+          "Businesses with a clear offer and a measurable growth objective.",
+          "Teams that want implementation quality, not generic templates.",
+          "Owners willing to provide approvals and inputs fast.",
+          "Brands that need better conversion quality from existing traffic.",
+        ];
 
-    const reduceMotion =
-      typeof window !== "undefined" &&
-      window.matchMedia &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const whoNotFor =
+    service.notFor && service.notFor.length
+      ? service.notFor
+      : service.exclusions && service.exclusions.length
+      ? service.exclusions
+      : [
+          "Businesses choosing only by lowest upfront price.",
+          "Teams that are not ready to provide access or approvals.",
+          "Projects with no clear commercial objective.",
+          "Buyers looking for vague advice without implementation support.",
+        ];
 
-    if (reduceMotion) return;
+  const mistakes =
+    service.commonMistakes && service.commonMistakes.length
+      ? service.commonMistakes
+      : [
+          `Treating ${service.title.toLowerCase()} as a one-time task instead of a growth system.`,
+          "Skipping baseline measurement before implementation starts.",
+          "Over-prioritizing design polish while ignoring conversion flow.",
+          "Delaying approvals, then expecting rushed high-quality delivery.",
+        ];
 
-    const root = pageRef.current;
-    if (!root) return;
+  const examples =
+    service.examples && service.examples.length
+      ? service.examples
+      : [
+          `A business with weak enquiry quality uses ${service.title.toLowerCase()} to tighten buyer qualification.`,
+          "A team with scattered tools uses implementation to reduce operational friction.",
+          "A growth-focused brand uses technical cleanup to support conversion and SEO at the same time.",
+          "A premium service business improves trust signals and conversion path before scaling traffic spend.",
+        ];
 
-    const reveal = (selector: string, trigger: Element, stagger = 0) => {
-      gsap.fromTo(
-        selector,
-        { opacity: 0, y: 70, filter: "blur(6px)" },
-        {
-          opacity: 1,
-          y: 0,
-          filter: "blur(0px)",
-          duration: 0.95,
-          ease: "power3.out",
-          stagger,
-          scrollTrigger: { trigger, start: "top 75%" },
-        }
-      );
-    };
+  const beforeAfter =
+    service.beforeAfter && service.beforeAfter.length
+      ? service.beforeAfter
+      : [
+          {
+            before: "Low clarity and weak structure cause traffic drop-off.",
+            after: "Clearer hierarchy and conversion flow support better lead quality.",
+          },
+          {
+            before: "Execution is reactive and hard to measure.",
+            after: "Delivery runs against explicit scope and measurable outcomes.",
+          },
+        ];
 
-    root.querySelectorAll("[data-reveal]").forEach((el) => {
-      const cls = (el as HTMLElement).dataset.reveal;
-      if (!cls) return;
-      reveal(cls, el);
-    });
-
-    ScrollTrigger.refresh();
-    return () => {
-      ScrollTrigger.getAll().forEach((t) => t.kill());
-    };
-  }, []);
+  const evidence =
+    service.evidence && service.evidence.length
+      ? service.evidence
+      : [
+          {
+            src: service.heroImage,
+            alt: `${service.title} evidence visual 1`,
+            note: "Representative implementation visual from this service area.",
+          },
+          {
+            src: service.detailImage,
+            alt: `${service.title} evidence visual 2`,
+            note: "Supporting visual for output quality and service delivery direction.",
+          },
+        ];
 
   return (
-    <div ref={pageRef} className="bg-black text-white">
+    <div className="bg-black text-white">
+      <StructuredData data={schema} />
+
       <section className="relative overflow-hidden py-24">
         <GeneratedSectionBackground variant="service" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(16,185,129,0.18),transparent_55%)]" />
         <div className="relative mx-auto max-w-6xl px-6">
           <div className="grid gap-12 md:grid-cols-2 md:items-center">
             <div>
-              <div className="text-sm tracking-[0.25em] text-white/50 uppercase">
-                {service.title}
-              </div>
-              <h1 className="mt-4 text-4xl md:text-5xl font-semibold leading-tight">
-                {service.heroTitle}
-              </h1>
-              <p className="mt-6 text-lg text-white/70 leading-relaxed">
-                {service.heroDescription}
-              </p>
+              <div className="text-sm uppercase tracking-[0.25em] text-white/50">{service.title}</div>
+              <h1 className="mt-4 text-4xl font-semibold leading-tight md:text-5xl">{service.heroTitle}</h1>
+              <p className="mt-6 text-lg leading-relaxed text-white/70">{service.heroDescription}</p>
 
               <div className="mt-10 flex gap-3 flex-col sm:flex-row">
                 <Link
@@ -135,10 +198,7 @@ export default function ServiceDetailTemplateClient({ service }: Props) {
             </div>
 
             <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-black/40">
-              <div
-                className="h-[360px] bg-cover bg-center opacity-80"
-                style={{ backgroundImage: `url(${service.heroImage})` }}
-              />
+              <div className="h-[360px] bg-cover bg-center opacity-80" style={{ backgroundImage: `url(${service.heroImage})` }} />
               <div className="absolute inset-0 bg-black/35" />
             </div>
           </div>
@@ -148,75 +208,162 @@ export default function ServiceDetailTemplateClient({ service }: Props) {
       <AnswerHighlightsSection
         eyebrow="Quick answers"
         title={`What people usually want to know about ${service.title.toLowerCase()}`}
-        description="Short practical answers make the service easier to understand quickly and help prospects move to the right next step without unnecessary friction."
+        description="Practical answers to help you choose this service only when it clearly matches your business objective."
         items={answerItems}
       />
 
-      <section data-reveal=".deliverables-reveal" className="relative overflow-hidden py-24 bg-gray-950">
-        <GeneratedSectionBackground variant="service" />
-        <div className="deliverables-reveal relative mx-auto max-w-6xl px-6">
+      <section data-reveal=".fit-reveal" className="fit-reveal relative overflow-hidden border-y border-white/10 bg-[#060907] py-20">
+        <GeneratedSectionBackground variant="snapshot" />
+        <div className="relative mx-auto max-w-6xl px-6">
           <SectionHeading
-            eyebrow="DELIVERABLES"
-            title="What is included"
-            description="A practical scope designed to improve visibility, trust, and conversion flow."
+            eyebrow="Fit Check"
+            title="Who this service is for and who it is not for"
+            description="Specific fit criteria reduce low-intent enquiries and keep delivery focused on outcomes."
           />
-
-          <div className="mt-12 grid gap-6 md:grid-cols-2">
-            {service.deliverables.map((item) => (
-              <div key={item} className="rounded-2xl border border-white/10 bg-black/40 p-7">
-                <p className="text-white/75 leading-relaxed">{item}</p>
-              </div>
-            ))}
+          <div className="mt-10 grid gap-6 md:grid-cols-2">
+            <WhoThisIsFor items={whoFor} />
+            <WhoThisIsNotFor items={whoNotFor} />
           </div>
         </div>
       </section>
 
-      <section data-reveal=".process-reveal" className="relative overflow-hidden py-24">
+      <section data-reveal=".deliverables-reveal" className="deliverables-reveal relative overflow-hidden py-20 bg-gray-950">
         <GeneratedSectionBackground variant="service" />
-        <div className="process-reveal relative mx-auto max-w-6xl px-6">
+        <div className="relative mx-auto max-w-6xl px-6">
           <SectionHeading
-            eyebrow="PROCESS"
-            title="How implementation works"
-            description="A clear workflow focused on execution quality and measurable outcomes."
+            eyebrow="Deliverables"
+            title="What is included and what you receive"
+            description="A clear scope reduces ambiguity and improves implementation speed."
           />
-
-          <div className="mt-12 grid gap-6 md:grid-cols-3">
-            {service.process.map((step, idx) => (
-              <div key={step.title} className="rounded-2xl border border-white/10 bg-black/40 p-7">
-                <p className="text-xs tracking-[0.16em] text-emerald-300/85 uppercase">
-                  Step {idx + 1}
-                </p>
-                <h3 className="mt-3 text-xl font-semibold">{step.title}</h3>
-                <p className="mt-3 text-white/65 leading-relaxed">{step.text}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section data-reveal=".faq-reveal" className="relative overflow-hidden py-24 bg-gray-950">
-        <GeneratedSectionBackground variant="faq" />
-        <div className="faq-reveal relative mx-auto max-w-4xl px-6">
-          <SectionHeading
-            eyebrow="FAQ"
-            title="Common questions"
-            description="Quick answers before you request implementation."
-          />
-
           <div className="mt-10">
-            <FAQAccordion items={service.faqs} />
+            <ServiceDeliverables items={service.deliverables} />
           </div>
         </div>
       </section>
 
-      <section className="py-24">
+      <section data-reveal=".builder-reveal" className="builder-reveal relative overflow-hidden border-y border-white/10 bg-[#060907] py-20">
+        <GeneratedSectionBackground variant="service" />
+        <div className="relative mx-auto max-w-6xl px-6">
+          <SectionHeading
+            eyebrow="Differentiator"
+            title="How this differs from a generic page-builder setup"
+            description="This service is engineered for commercial outcomes, not just visual delivery."
+          />
+          <div className="mt-10 grid gap-6 md:grid-cols-2">
+            <article className="rounded-2xl border border-white/10 bg-black/35 p-6">
+              <p className="text-xs uppercase tracking-[0.16em] text-white/60">
+                Generic builder workflow
+              </p>
+              <ul className="mt-4 space-y-2 text-sm leading-7 text-white/72">
+                <li>Template-first layout with weak differentiation.</li>
+                <li>Plugin and visual bloat that hurts performance.</li>
+                <li>Low flexibility when conversion goals evolve.</li>
+                <li>Inconsistent implementation quality across pages.</li>
+              </ul>
+            </article>
+            <article className="rounded-2xl border border-emerald-400/25 bg-emerald-500/10 p-6">
+              <p className="text-xs uppercase tracking-[0.16em] text-emerald-200/90">
+                Web Growth implementation
+              </p>
+              <ul className="mt-4 space-y-2 text-sm leading-7 text-white/82">
+                <li>Business-first architecture tied to conversion intent.</li>
+                <li>Cleaner performance and stronger mobile usability.</li>
+                <li>Scalable structure that supports future SEO and growth.</li>
+                <li>Senior-led implementation with measurable priorities.</li>
+              </ul>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section data-reveal=".process-reveal" className="process-reveal relative overflow-hidden py-20">
+        <GeneratedSectionBackground variant="service" />
+        <div className="relative mx-auto max-w-6xl px-6">
+          <SectionHeading
+            eyebrow="Process"
+            title="How implementation runs in practice"
+            description="Execution sequence is designed to protect quality and reduce delays."
+          />
+          <div className="mt-10">
+            <ProcessSteps items={service.process.map((step) => `${step.title}: ${step.text}`)} />
+          </div>
+        </div>
+      </section>
+
+      <section data-reveal=".mistakes-reveal" className="mistakes-reveal relative overflow-hidden border-y border-white/10 bg-[#060907] py-20">
+        <GeneratedSectionBackground variant="snapshot" />
+        <div className="relative mx-auto max-w-6xl px-6">
+          <SectionHeading
+            eyebrow="Risk Reduction"
+            title="Common mistakes businesses make before hiring"
+            description="Knowing these mistakes helps you avoid scope waste and delayed outcomes."
+          />
+          <div className="mt-10 grid gap-6 md:grid-cols-2">
+            <CommonMistakes items={mistakes} />
+            <RealExamples items={examples} />
+          </div>
+        </div>
+      </section>
+
+      <section data-reveal=".proof-reveal" className="proof-reveal relative overflow-hidden py-20 bg-gray-950">
+        <GeneratedSectionBackground variant="service" />
+        <div className="relative mx-auto max-w-6xl px-6">
+          <SectionHeading
+            eyebrow="Evidence"
+            title="Before and after outcomes from real implementation patterns"
+            description="This section increases specificity and reduces generic service-page feel."
+          />
+          <div className="mt-10 grid gap-6 md:grid-cols-2">
+            <BeforeAfterResults items={beforeAfter} />
+            <EvidenceGallery items={evidence} />
+          </div>
+        </div>
+      </section>
+
+      <section data-reveal=".faq-reveal" className="faq-reveal relative overflow-hidden py-20">
+        <GeneratedSectionBackground variant="faq" />
+        <div className="relative mx-auto max-w-6xl px-6">
+          <FAQBlock
+            items={service.faqs}
+            title={`${service.title} FAQs`}
+            description="Service-specific questions to help you decide with less uncertainty."
+          />
+        </div>
+      </section>
+
+      <section className="border-y border-white/10 bg-[#060907] py-16">
+        <div className="mx-auto max-w-6xl px-6">
+          {relatedGuides.length ? (
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+              {relatedGuides.map((guide) => (
+                <InternalResourceCallout
+                  key={guide.href}
+                  title={guide.title}
+                  description="Read the guide before kickoff to improve inputs and speed up implementation."
+                  href={guide.href}
+                  label="Read Guide"
+                />
+              ))}
+            </div>
+          ) : (
+            <InternalResourceCallout
+              title="Need practical preparation guidance before this service?"
+              description="Use the blog resources to understand scope, priorities, and quality standards before implementation starts."
+              href="/blog"
+              label="Browse Guides"
+            />
+          )}
+        </div>
+      </section>
+
+      <section className="py-20">
         <div className="mx-auto max-w-6xl px-6">
           <div className="mb-12">
             <CorePageLinks
               eyebrow="Useful next steps"
               title="Choose the next page that supports this service"
-              description="Use these supporting pages if you want a faster launch, pricing context, or a broader view of the other ways Web Growth can help."
-              links={supportingLinks}
+              description="Use these pages for pricing context, diagnostic support, or a faster launch path."
+              links={supportLinks}
             />
           </div>
 

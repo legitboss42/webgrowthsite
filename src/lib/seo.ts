@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import type { AuthorProfile } from "@/lib/authors";
 import {
   absoluteUrl,
   BUSINESS_PHONE_DISPLAY,
@@ -145,6 +146,9 @@ export function buildArticleSchema({
   category,
   tags = [],
   wordCount,
+  authorName = "Web Growth",
+  authorUrl = SITE_URL,
+  reviewedByName,
 }: {
   url: string;
   title: string;
@@ -155,6 +159,9 @@ export function buildArticleSchema({
   category?: string;
   tags?: string[];
   wordCount?: number;
+  authorName?: string;
+  authorUrl?: string;
+  reviewedByName?: string;
 }) {
   return {
     "@context": "https://schema.org",
@@ -169,10 +176,19 @@ export function buildArticleSchema({
       "@id": url,
     },
     author: {
-      "@type": "Organization",
-      name: "Web Growth",
-      url: SITE_URL,
+      "@type": "Person",
+      name: authorName,
+      url: authorUrl,
     },
+    ...(reviewedByName
+      ? {
+          reviewedBy: {
+            "@type": "Person",
+            name: reviewedByName,
+            url: `${SITE_URL}/editorial-policy`,
+          },
+        }
+      : {}),
     publisher: {
       "@id": `${SITE_URL}#professional-service`,
     },
@@ -181,6 +197,24 @@ export function buildArticleSchema({
     ...(category ? { articleSection: category } : {}),
     ...(tags.length ? { keywords: tags.join(", ") } : {}),
     ...(wordCount ? { wordCount } : {}),
+  };
+}
+
+export function buildPersonSchema(author: AuthorProfile) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    "@id": `${SITE_URL}#${author.id}`,
+    name: author.name,
+    jobTitle: author.role,
+    description: author.bio,
+    url: author.profileUrl || `${SITE_URL}/about`,
+    knowsAbout: author.expertise,
+    image: author.image ? absoluteUrl(author.image) : absoluteUrl(DEFAULT_OG_IMAGE),
+    worksFor: {
+      "@id": `${SITE_URL}#professional-service`,
+    },
+    ...(author.sameAs?.length ? { sameAs: author.sameAs } : {}),
   };
 }
 

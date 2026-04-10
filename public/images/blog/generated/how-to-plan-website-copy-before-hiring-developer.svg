@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1600" y2="900" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#06110E" />
+      <stop offset="0.58" stop-color="#0B241C" />
+      <stop offset="1" stop-color="#1B2438" />
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="900" fill="url(#bg)" />
+  <rect x="90" y="90" width="1420" height="720" rx="30" fill="#020617" fill-opacity="0.34" stroke="#34D399" stroke-opacity="0.45" />
+  <text x="162" y="202" fill="#A7F3D0" font-family="Inter, Arial, sans-serif" font-size="30" letter-spacing="5">COPY PLANNING GUIDE</text>
+  <text x="162" y="300" fill="white" font-family="Inter, Arial, sans-serif" font-size="62" font-weight="700">Plan Website Copy</text>
+  <text x="162" y="368" fill="#D1FAE5" font-family="Inter, Arial, sans-serif" font-size="42" font-weight="600">Before Hiring a Developer</text>
+  <g transform="translate(162 446)">
+    <rect width="1248" height="284" rx="22" fill="#05261E" fill-opacity="0.62" stroke="#34D399" stroke-opacity="0.4" />
+    <rect x="54" y="48" width="1140" height="52" rx="12" fill="#10B981" fill-opacity="0.17" />
+    <text x="78" y="82" fill="#A7F3D0" font-family="Inter, Arial, sans-serif" font-size="30">Offer clarity  |  audience pains  |  objections  |  proof  |  CTA</text>
+    <text x="78" y="156" fill="#A7F3D0" font-family="Inter, Arial, sans-serif" font-size="28">Reduce revision loops and launch delays.</text>
+    <text x="78" y="212" fill="#A7F3D0" font-family="Inter, Arial, sans-serif" font-size="28">Give your developer copy with conversion intent.</text>
+  </g>
+</svg>

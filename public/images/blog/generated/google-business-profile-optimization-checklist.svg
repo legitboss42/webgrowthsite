@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1600" y2="900" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#06130F" />
+      <stop offset="0.56" stop-color="#0A261D" />
+      <stop offset="1" stop-color="#1A2438" />
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="900" fill="url(#bg)" />
+  <rect x="88" y="88" width="1424" height="724" rx="30" fill="#020617" fill-opacity="0.34" stroke="#34D399" stroke-opacity="0.45" />
+  <text x="164" y="200" fill="#A7F3D0" font-family="Inter, Arial, sans-serif" font-size="30" letter-spacing="5">LOCAL SEO CHECKLIST</text>
+  <text x="164" y="300" fill="white" font-family="Inter, Arial, sans-serif" font-size="64" font-weight="700">Google Business Profile</text>
+  <text x="164" y="370" fill="#D1FAE5" font-family="Inter, Arial, sans-serif" font-size="44" font-weight="600">Optimization Checklist</text>
+  <g transform="translate(164 450)">
+    <rect width="1248" height="276" rx="22" fill="#05261E" fill-opacity="0.62" stroke="#34D399" stroke-opacity="0.4" />
+    <path d="M70 82L96 108L142 58" stroke="#34D399" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M70 156L96 182L142 132" stroke="#34D399" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M70 230L96 256L142 206" stroke="#34D399" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" />
+    <text x="180" y="92" fill="#A7F3D0" font-family="Inter, Arial, sans-serif" font-size="30">Category alignment and service relevance</text>
+    <text x="180" y="166" fill="#A7F3D0" font-family="Inter, Arial, sans-serif" font-size="30">Photos, reviews, and trust cues that convert</text>
+    <text x="180" y="240" fill="#A7F3D0" font-family="Inter, Arial, sans-serif" font-size="30">Ongoing profile activity and local consistency</text>
+  </g>
+</svg>

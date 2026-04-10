@@ -1,12 +1,63 @@
 ---
-slug: "jluxe-medical-aesthetics-case-study"
-title: "Case Study: Rebuilding J Luxe Medical Aesthetics for Trust, Clarity, and a Stronger London Presence"
-excerpt: "A practical case study on rebuilding the J Luxe Medical Aesthetics website for a London clinic that needed a more premium first impression, clearer treatment pages, and a better path to enquiry."
-date: "2026-02-07"
-category: "Case Study"
-tags: ["Case Study", "Client Work", "Website Redesign", "Local SEO"]
-readTime: "10 min read"
-cover: "/images/portfolio/jluxe-mockup.webp"
+slug: jluxe-medical-aesthetics-case-study
+title: >-
+  Case Study: Rebuilding J Luxe Medical Aesthetics for Trust, Clarity, and a
+  Stronger London Presence
+excerpt: >-
+  A practical case study on rebuilding the J Luxe Medical Aesthetics website for
+  a London clinic that needed a more premium first impression, clearer treatment
+  pages, and a better path to enquiry.
+date: 2026-02-13T00:00:00.000Z
+category: Case Study
+tags:
+  - Case Study
+  - Client Work
+  - Website Redesign
+  - Local SEO
+readTime: 10 min read
+cover: /images/portfolio/jluxe-mockup.webp
+updatedAt: '2026-02-13'
+lastReviewedAt: '2026-02-13'
+topic: Case Study
+difficulty: Beginner
+isCornerstone: false
+checklistAvailable: false
+author: victor-chinukwue
+reviewedBy: web-growth-editorial
+keyTakeaways:
+  - Priority one is project summary.
+  - Sustained results depend on what needed fixing.
+  - Execution quality improves when you address what changed in the rebuild.
+whatYouNeed:
+  - Current website URL and business objective.
+  - Primary audience and offer clarity notes.
+  - 'Baseline performance data (traffic, leads, or sales).'
+commonMistakes:
+  - Starting execution before strategic clarity.
+  - Relying on aesthetics without conversion structure.
+  - Skipping QA before launch or campaign traffic.
+steps:
+  - 'Apply: Project summary.'
+  - 'Apply: What needed fixing.'
+  - 'Apply: What changed in the rebuild.'
+  - 'Apply: What the finished site does better.'
+relatedGuideSlugs:
+  - website-redesign-cost-breakdown-nigeria
+  - conversion-audit-checklist-service-homepage
+faq:
+  - question: What is the first step before making major website changes?
+    answer: >-
+      Define the commercial outcome and baseline metrics, then prioritize the
+      highest-impact fixes first.
+  - question: How do I avoid wasting budget on website updates?
+    answer: >-
+      Use clear scope, measurable goals, and structured QA before and after
+      launch.
+ctaVariant: consultation
+evidenceNote: Updated using observed implementation patterns and recurring project outcomes.
+methodologyNote: >-
+  Recommendations follow practical implementation-first workflows with
+  measurable QA checkpoints.
 ---
 
 # Case Study: Rebuilding J Luxe Medical Aesthetics for Trust, Clarity, and a Stronger London Presence
@@ -136,6 +187,32 @@ This kind of rebuild is a strong fit for:
 
 It is especially useful when the current site looks acceptable on the surface but still feels too generic to support serious enquiries.
 
+## Constraints we planned around
+
+Every rebuild has constraints, and documenting them improves decision quality.
+
+For this project, the constraints were:
+
+- premium visual expectation from a high-consideration audience
+- need for clear treatment information without visual clutter
+- mobile-first trust requirements
+- need for stronger local relevance without turning pages into keyword blocks
+
+These constraints shaped layout, messaging order, and section priority.
+
+## What other clinics can borrow from this case
+
+You do not need to copy the exact design to use the same logic.
+
+Borrow this sequence:
+
+1. Improve first-screen clarity for your core treatment audience.
+2. Move trust signals higher on key pages.
+3. Tighten service page structure before adding traffic.
+4. Review mobile readability and form flow every release.
+
+If you are planning a similar upgrade, use [Small Business Website Redesign Checklist](/blog/small-business-website-redesign-checklist) and [Homepage Structure for Service Businesses](/blog/homepage-structure-that-converts-visitors-into-customers) before final design sign-off.
+
 ## Final takeaway
 
 The J Luxe rebuild is a good example of what happens when a service-business website is treated like a commercial asset instead of a brochure.
@@ -152,4 +229,8 @@ They were about getting the right fundamentals right:
 
 If your website already gets attention but still feels too weak to support real enquiries, this is the kind of problem a rebuild should solve.
 
-If you want a website rebuilt around trust, clarity, and conversion instead of filler, start here: [Request a Quote](/contact)
+## Related guides and next step
+
+- [Website Redesign Cost Breakdown Nigeria](/blog/website-redesign-cost-breakdown-nigeria)
+- [Conversion Audit Checklist Service Homepage](/blog/conversion-audit-checklist-service-homepage)
+- [Small Business Website Redesign Checklist](/blog/small-business-website-redesign-checklist)

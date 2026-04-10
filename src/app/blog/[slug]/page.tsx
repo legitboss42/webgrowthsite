@@ -2,29 +2,79 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-
 import BlogPostClient from "./BlogPostClient";
-import TrackedLink from "@/components/analytics/TrackedLink";
-import EditorialTrustNote from "@/components/EditorialTrustNote";
-import HostingSupportBlock from "@/components/HostingSupportBlock";
-import RelatedServiceCTA from "@/components/RelatedServiceCTA";
-import SocialShareDock from "@/components/SocialShareDock";
-import { getPost, getPosts, type Post } from "@/lib/posts";
-import {
-  buildArticleSchema,
-  buildBreadcrumbSchema,
-  buildPageMetadata,
-} from "@/lib/seo";
-import {
-  BOOKING_URL,
-  buildWhatsAppUrl,
-  DEFAULT_OG_IMAGE,
-  SITE_URL,
-} from "@/lib/site";
+import AuthorBio from "@/components/content/AuthorBio";
+import CommonMistakes from "@/components/content/CommonMistakes";
+import ContentLastUpdated from "@/components/content/ContentLastUpdated";
+import DownloadableChecklistCard from "@/components/content/DownloadableChecklistCard";
+import EditorialNote from "@/components/content/EditorialNote";
+import FAQBlock from "@/components/content/FAQBlock";
+import InternalResourceCallout from "@/components/content/InternalResourceCallout";
+import KeyTakeaways from "@/components/content/KeyTakeaways";
+import ProcessSteps from "@/components/content/ProcessSteps";
+import RelatedGuides from "@/components/content/RelatedGuides";
+import ReviewedByBlock from "@/components/content/ReviewedByBlock";
+import TableOfContents from "@/components/content/TableOfContents";
+import WhatYouNeed from "@/components/content/WhatYouNeed";
+import { getAuthorProfile } from "@/lib/authors";
+import { getPost, getPosts, getRelatedGuidesForPost, type Post } from "@/lib/posts";
+import { buildArticleSchema, buildBreadcrumbSchema, buildPageMetadata } from "@/lib/seo";
+import { DEFAULT_OG_IMAGE, SITE_URL } from "@/lib/site";
+
+export const revalidate = 3600;
+export const dynamicParams = true;
+
+const ENHANCED_POST_SLUGS = new Set([
+  "ga4-meta-tiktok-clarity-setup-guide",
+  "landing-page-wireframe-local-service-business",
+  "website-redesign-cost-breakdown-nigeria",
+  "how-to-audit-slow-wordpress-site",
+  "google-business-profile-optimization-checklist",
+  "conversion-audit-checklist-service-homepage",
+  "small-business-website-launch-qa-checklist",
+  "how-to-plan-website-copy-before-hiring-developer",
+  "local-seo-basics-service-business-lagos",
+  "website-platform-comparison-small-business",
+]);
+
+function slugifyHeading(text: string) {
+  return text
+    .toLowerCase()
+    .replace(/['"]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+}
+
+function extractHeadings(content: string) {
+  return content
+    .split("\n")
+    .map((line) => line.trim())
+    .filter((line) => line.startsWith("## "))
+    .map((line) => line.replace(/^##\s+/, "").trim())
+    .filter((text) => text.toLowerCase() !== "lead magnet")
+    .map((text) => ({ text, id: slugifyHeading(text) }));
+}
+
+function estimateWordCount(content: string) {
+  return content
+    .replace(/[#_*>\-\[\]\(\)`]/g, " ")
+    .split(/\s+/)
+    .filter(Boolean).length;
+}
+
+function getSafeTags(post: Pick<Post, "tags">): string[] {
+  return Array.isArray(post.tags)
+    ? post.tags.filter((tag): tag is string => typeof tag === "string")
+    : [];
+}
 
 export function generateStaticParams() {
   const posts = getPosts();
-  return posts.map((post) => ({ slug: post.slug }));
+  const cornerstone = posts.filter((post) => post.isCornerstone);
+  const newest = posts.slice(0, 12);
+  const selected = [...cornerstone, ...newest];
+  const unique = Array.from(new Set(selected.map((post) => post.slug)));
+  return unique.map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({
@@ -42,13 +92,12 @@ export async function generateMetadata({
     };
   }
 
-  const postKeywords = Array.from(
+  const keywords = Array.from(
     new Set([
-      "web design",
-      "web design services",
-      "website design",
-      "small business website",
+      "web design blog",
+      "website growth guide",
       post.category.toLowerCase(),
+      ...(post.topic ? [post.topic.toLowerCase()] : []),
       ...getSafeTags(post).map((tag) => tag.toLowerCase()),
     ])
   );
@@ -57,90 +106,10 @@ export async function generateMetadata({
     title: `${post.title} | Web Growth Blog`,
     description: post.excerpt,
     path: `/blog/${post.slug}`,
-    keywords: postKeywords,
+    keywords,
     image: post.cover || DEFAULT_OG_IMAGE,
     type: "article",
   });
-}
-
-function slugifyHeading(text: string) {
-  return text
-    .toLowerCase()
-    .replace(/['"]/g, "")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
-}
-
-function isLeadMagnetHeading(text: string) {
-  return text.trim().toLowerCase() === "lead magnet";
-}
-
-function getSafeTags(post: Pick<Post, "tags">): string[] {
-  return Array.isArray(post.tags)
-    ? post.tags.filter((tag): tag is string => typeof tag === "string")
-    : [];
-}
-
-function extractHeadings(content: string) {
-  const lines = content.split("\n").map((line) => line.trim());
-  const headings: Array<{ text: string; id: string }> = [];
-
-  for (const line of lines) {
-    if (!line.startsWith("## ")) continue;
-
-    const text = line.replace(/^##\s+/, "").trim();
-    if (isLeadMagnetHeading(text)) continue;
-
-    headings.push({ text, id: slugifyHeading(text) });
-  }
-
-  return headings;
-}
-
-function estimateWordCount(content: string) {
-  return content
-    .replace(/[#_*>\-\[\]\(\)`]/g, " ")
-    .split(/\s+/)
-    .filter(Boolean).length;
-}
-
-function getRelatedPosts(current: Post, limit = 3): Post[] {
-  const all = getPosts().filter((post) => post.slug !== current.slug);
-  const currentTags = new Set(getSafeTags(current));
-
-  const overlap = (post: Post) =>
-    getSafeTags(post).reduce(
-      (count, tag) => count + (currentTags.has(tag) ? 1 : 0),
-      0
-    );
-
-  const toTime = (value?: string) => {
-    if (!value) return 0;
-    const time = new Date(value).getTime();
-    return Number.isNaN(time) ? 0 : time;
-  };
-
-  const byCategory = all
-    .filter((post) => post.category === current.category)
-    .sort((a, b) => overlap(b) - overlap(a) || toTime(b.date) - toTime(a.date));
-
-  const byTags = all
-    .filter((post) => post.category !== current.category && overlap(post) > 0)
-    .sort((a, b) => overlap(b) - overlap(a) || toTime(b.date) - toTime(a.date));
-
-  const related: Post[] = [];
-  const seen = new Set<string>();
-
-  for (const post of [...byCategory, ...byTags]) {
-    if (seen.has(post.slug)) continue;
-
-    related.push(post);
-    seen.add(post.slug);
-
-    if (related.length >= limit) break;
-  }
-
-  return related;
 }
 
 export default async function BlogPostPage({
@@ -152,35 +121,63 @@ export default async function BlogPostPage({
   const post = getPost(slug);
   if (!post) return notFound();
 
+  const author = getAuthorProfile(post.author);
+  const reviewer = post.reviewedBy ? getAuthorProfile(post.reviewedBy) : undefined;
   const headings = extractHeadings(post.content);
-  const relatedPosts = getRelatedPosts(post, 3);
-  const whatsappUrl = buildWhatsAppUrl(
-    "Hello, I would like to discuss my website project."
-  );
+  const tags = getSafeTags(post);
   const canonicalUrl = `${SITE_URL}/blog/${post.slug}`;
-  const schema = [
-    buildArticleSchema({
-      url: canonicalUrl,
-      title: post.title,
-      description: post.excerpt,
-      datePublished: post.date,
-      image: post.cover || DEFAULT_OG_IMAGE,
-      category: post.category,
-      tags: getSafeTags(post),
-      wordCount: estimateWordCount(post.content),
-    }),
-    buildBreadcrumbSchema([
-      { name: "Home", path: "/" },
-      { name: "Blog", path: "/blog" },
-      { name: post.title, path: `/blog/${post.slug}` },
-    ]),
-  ];
+  const relatedGuides = getRelatedGuidesForPost(post).map((guide) => ({
+    slug: guide.slug,
+    title: guide.title,
+    excerpt: guide.excerpt,
+    topic: guide.topic,
+    readTime: guide.readTime,
+  }));
+
+  const articleSchema = buildArticleSchema({
+    url: canonicalUrl,
+    title: post.title,
+    description: post.excerpt,
+    datePublished: post.date,
+    dateModified: post.updatedAt || post.lastReviewedAt || post.date,
+    image: post.cover || DEFAULT_OG_IMAGE,
+    category: post.category,
+    tags,
+    wordCount: estimateWordCount(post.content),
+    authorName: author.name,
+    authorUrl: author.profileUrl || `${SITE_URL}/about`,
+    reviewedByName:
+      reviewer && reviewer.name !== author.name ? reviewer.name : undefined,
+  });
+
+  const breadcrumbSchema = buildBreadcrumbSchema([
+    { name: "Home", path: "/" },
+    { name: "Blog", path: "/blog" },
+    { name: post.title, path: `/blog/${post.slug}` },
+  ]);
+
+  const hasEnhancedBlocks =
+    ENHANCED_POST_SLUGS.has(post.slug) ||
+    Boolean(post.topic) ||
+    Boolean(post.difficulty) ||
+    Boolean(post.updatedAt) ||
+    Boolean(post.lastReviewedAt) ||
+    Boolean(post.evidenceNote) ||
+    Boolean(post.methodologyNote) ||
+    Boolean(post.checklistAvailable) ||
+    post.keyTakeaways.length > 0 ||
+    post.whatYouNeed.length > 0 ||
+    post.commonMistakes.length > 0 ||
+    post.steps.length > 0 ||
+    post.faq.length > 0;
 
   return (
     <article className="bg-black text-white">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify([articleSchema, breadcrumbSchema]),
+        }}
       />
 
       <section className="relative overflow-hidden border-b border-white/10">
@@ -191,45 +188,51 @@ export default async function BlogPostPage({
         </div>
 
         <div className="relative mx-auto max-w-6xl px-6 py-16">
-          <div className="max-w-3xl">
-            <nav aria-label="Breadcrumb" className="mb-5 text-sm text-white/55">
-              <ol className="flex flex-wrap items-center gap-2">
-                <li>
-                  <Link href="/" className="transition hover:text-white">
-                    Home
-                  </Link>
-                </li>
-                <li aria-hidden="true">/</li>
-                <li>
-                  <Link href="/blog" className="transition hover:text-white">
-                    Blog
-                  </Link>
-                </li>
-                <li aria-hidden="true">/</li>
-                <li className="text-white/82">{post.title}</li>
-              </ol>
-            </nav>
+          <nav aria-label="Breadcrumb" className="mb-5 text-sm text-white/55">
+            <ol className="flex flex-wrap items-center gap-2">
+              <li>
+                <Link href="/" className="transition hover:text-white">
+                  Home
+                </Link>
+              </li>
+              <li aria-hidden="true">/</li>
+              <li>
+                <Link href="/blog" className="transition hover:text-white">
+                  Blog
+                </Link>
+              </li>
+              <li aria-hidden="true">/</li>
+              <li className="text-white/82">{post.title}</li>
+            </ol>
+          </nav>
 
-            <div className="text-sm text-white/55">
-              {new Date(post.date).toLocaleDateString()} | {post.readTime} |{" "}
-              <span className="text-emerald-200">{post.category}</span>
-            </div>
+          <div className="flex flex-wrap gap-2 text-xs text-white/65">
+            <span className="rounded-full border border-white/20 bg-black/35 px-3 py-1 text-white">
+              {post.category}
+            </span>
+            {post.topic ? (
+              <span className="rounded-full border border-white/20 bg-black/35 px-3 py-1">
+                {post.topic}
+              </span>
+            ) : null}
+            {post.difficulty ? (
+              <span className="rounded-full border border-white/20 bg-black/35 px-3 py-1">
+                {post.difficulty}
+              </span>
+            ) : null}
+            <span className="rounded-full border border-white/20 bg-black/35 px-3 py-1">
+              {post.readTime}
+            </span>
+          </div>
 
-            <div className="mt-3 text-sm text-white/62">
-              Written and reviewed by <span className="text-white">Web Growth</span>
-              {" "}for website launch, SEO, and conversion-focused businesses.
-            </div>
+          <h1 className="mt-5 max-w-4xl text-balance text-4xl font-semibold leading-tight md:text-6xl">
+            {post.title}
+          </h1>
+          <p className="mt-5 max-w-3xl text-lg leading-8 text-white/72">{post.excerpt}</p>
 
-            <h1 className="mt-4 text-4xl font-semibold leading-tight md:text-6xl">
-              {post.title}
-            </h1>
-
-            <p className="mt-6 text-lg leading-relaxed text-white/70">
-              {post.excerpt}
-            </p>
-
-            <div className="mt-8 flex flex-wrap gap-2">
-              {getSafeTags(post).map((tag) => (
+          {tags.length ? (
+            <div className="mt-6 flex flex-wrap gap-2">
+              {tags.map((tag) => (
                 <span
                   key={tag}
                   className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/70"
@@ -238,41 +241,17 @@ export default async function BlogPostPage({
                 </span>
               ))}
             </div>
-
-            <div className="mt-10 flex gap-3">
-              <Link
-                href="/blog"
-                className="rounded-md border border-white/10 bg-black/30 px-5 py-3 text-sm font-semibold text-white/85 transition hover:bg-black/45"
-              >
-                Back to Blog
-              </Link>
-              <TrackedLink
-                href="/launch"
-                className="rounded-md bg-emerald-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-500"
-                ctaName="start_your_website"
-                ctaLocation="blog_hero"
-                destination="/launch"
-                pageType="blog_post"
-                offerType="website_launch"
-                contentGroup="blog"
-                blogSlug={post.slug}
-                blogTitle={post.title}
-                blogCategory={post.category}
-              >
-                Website Design in 48 Hours
-              </TrackedLink>
-            </div>
-          </div>
+          ) : null}
 
           {post.cover ? (
-            <div className="mt-12 max-w-3xl overflow-hidden rounded-2xl border border-white/10">
+            <div className="mt-10 max-w-4xl overflow-hidden rounded-2xl border border-white/10">
               <div className="relative aspect-[16/9]">
                 <Image
                   src={post.cover}
                   alt={post.title}
                   fill
                   className="object-cover"
-                  sizes="(max-width: 768px) 100vw, 768px"
+                  sizes="(max-width: 768px) 100vw, 960px"
                   priority
                 />
               </div>
@@ -281,174 +260,83 @@ export default async function BlogPostPage({
         </div>
       </section>
 
-      <section className="mx-auto max-w-6xl px-6 py-16">
-        <div className="grid gap-10 lg:grid-cols-[72px_1fr_340px]">
-          <div className="hidden lg:block">
-            <SocialShareDock
-              title={post.title}
-              excerpt={post.excerpt}
-              slug={post.slug}
-            />
-          </div>
-
-          <div className="max-w-3xl">
-            <div className="mb-8">
-              <EditorialTrustNote compact />
-            </div>
+      <section className="mx-auto max-w-6xl px-6 py-14">
+        <div className="grid gap-10 lg:grid-cols-[1fr_320px]">
+          <div className="space-y-8">
+            {hasEnhancedBlocks ? (
+              <>
+                <ContentLastUpdated
+                  publishedAt={post.date}
+                  updatedAt={post.updatedAt}
+                  lastReviewedAt={post.lastReviewedAt}
+                />
+                <AuthorBio author={author} />
+                {reviewer && reviewer.name !== author.name ? (
+                  <ReviewedByBlock reviewerName={reviewer.name} reviewerRole={reviewer.role} />
+                ) : null}
+                <EditorialNote
+                  note={
+                    post.evidenceNote ||
+                    "This guide is written to be useful even if you never hire Web Growth. It focuses on practical decisions, implementation risks, and measurable outcomes."
+                  }
+                  methodology={post.methodologyNote}
+                />
+                <KeyTakeaways items={post.keyTakeaways} />
+                <WhatYouNeed items={post.whatYouNeed} />
+                <CommonMistakes items={post.commonMistakes} />
+                <ProcessSteps items={post.steps} />
+              </>
+            ) : null}
 
             <BlogPostClient
               content={post.content}
               blogSlug={post.slug}
               blogTitle={post.title}
               blogCategory={post.category}
-              blogTags={getSafeTags(post)}
+              blogTags={tags}
             />
 
-            <div className="lg:hidden">
-              <SocialShareDock
-                title={post.title}
-                excerpt={post.excerpt}
-                slug={post.slug}
+            {hasEnhancedBlocks ? (
+              <FAQBlock
+                items={post.faq}
+                title={`${post.title} FAQ`}
+                description="Short answers to common planning and implementation questions."
               />
-            </div>
+            ) : null}
 
-            <div className="mt-14">
-              <RelatedServiceCTA />
-            </div>
-
-            <div className="mt-10">
-              <HostingSupportBlock
-                compact
-                title="Need reliable hosting before you build?"
-                description="Use the hosting offer to start with a cleaner setup and a lower upfront cost."
-                ctaLabel="View Hosting Offer"
+            {hasEnhancedBlocks && post.checklistAvailable ? (
+              <DownloadableChecklistCard
+                title={`${post.title} checklist`}
+                description="Use this checklist while implementing the guide to avoid missed steps."
+                href={`/resources/checklists/${post.slug}.txt`}
               />
-            </div>
+            ) : null}
+
+            {hasEnhancedBlocks ? <RelatedGuides guides={relatedGuides} /> : null}
+
+            {hasEnhancedBlocks ? (
+              <InternalResourceCallout
+                title="Need implementation support for this guide?"
+                description="If you want this executed with senior-level speed and quality control, request a scoped recommendation."
+                href="/contact"
+                label="Request Implementation Scope"
+              />
+            ) : null}
           </div>
 
-          <aside className="h-fit lg:sticky lg:top-32">
-            <div className="rounded-2xl border border-white/10 bg-black/40 p-6">
-              <div className="text-sm font-semibold text-white">On this page</div>
-
-              {headings.length ? (
-                <div className="mt-4 space-y-2">
-                  {headings.map((heading) => (
-                    <a
-                      key={heading.id}
-                      href={`#${heading.id}`}
-                      className="block text-sm text-white/65 transition hover:text-white"
-                    >
-                      {heading.text}
-                    </a>
-                  ))}
-                </div>
-              ) : (
-                <div className="mt-4 text-sm text-white/60">
-                  No sections found. Add headings using{" "}
-                  <span className="text-white">##</span>.
-                </div>
-              )}
-
-              <div className="mt-6 rounded-xl border border-emerald-400/20 bg-emerald-500/10 p-5">
-                <div className="text-sm font-semibold text-white">Start your website</div>
-                <p className="mt-2 text-sm text-white/70">
-                  Use the short intake flow and we will send your next steps quickly.
-                </p>
-
-                <div className="mt-4 grid gap-3">
-                  <TrackedLink
-                    href="/contact"
-                    className="inline-flex w-full items-center justify-center rounded-md bg-emerald-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-emerald-500"
-                    ctaName="contact"
-                    ctaLocation="blog_sidebar"
-                    destination="/contact"
-                    pageType="blog_post"
-                    offerType="website_launch"
-                    contentGroup="blog"
-                    blogSlug={post.slug}
-                    blogTitle={post.title}
-                    blogCategory={post.category}
-                  >
-                    Contact Us
-                  </TrackedLink>
-
-                  <TrackedLink
-                    href={BOOKING_URL}
-                    target={BOOKING_URL.startsWith("http") ? "_blank" : undefined}
-                    rel={BOOKING_URL.startsWith("http") ? "noreferrer" : undefined}
-                    className="inline-flex w-full items-center justify-center rounded-md border border-white/10 bg-black/30 px-4 py-3 text-sm font-semibold text-white/85 transition hover:bg-black/45"
-                    ctaName="booking"
-                    ctaLocation="blog_sidebar"
-                    destination="booking"
-                    pageType="blog_post"
-                    offerType="consultation"
-                    contentGroup="blog"
-                    blogSlug={post.slug}
-                    blogTitle={post.title}
-                    blogCategory={post.category}
-                  >
-                    Book a Call
-                  </TrackedLink>
-
-                  <TrackedLink
-                    href={whatsappUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex w-full items-center justify-center rounded-md border border-white/10 bg-black/30 px-4 py-3 text-sm font-semibold text-white/85 transition hover:bg-black/45"
-                    ctaName="whatsapp"
-                    ctaLocation="blog_sidebar"
-                    destination="whatsapp"
-                    pageType="blog_post"
-                    offerType="consultation"
-                    contentGroup="blog"
-                    blogSlug={post.slug}
-                    blogTitle={post.title}
-                    blogCategory={post.category}
-                  >
-                    Chat on WhatsApp
-                  </TrackedLink>
-                </div>
-
-                <div className="mt-4 text-xs text-white/55">
-                  Typical reply time: <span className="text-white/80">same day</span>.
-                </div>
-              </div>
-            </div>
+          <aside className="space-y-6 lg:sticky lg:top-32 lg:h-fit">
+            <TableOfContents items={headings} />
+            {hasEnhancedBlocks ? (
+              <InternalResourceCallout
+                title="Start Here"
+                description="Browse resource-first guides by topic before choosing a service."
+                href="/blog"
+                label="Open Resource Hub"
+              />
+            ) : null}
           </aside>
         </div>
       </section>
-
-      {relatedPosts.length ? (
-        <section className="mx-auto max-w-6xl px-6 pb-20">
-          <div className="rounded-2xl border border-white/10 bg-black/40 p-7">
-            <h2 className="text-2xl font-semibold text-white">Related posts</h2>
-            <p className="mt-2 text-white/65">
-              More articles to help you get better rankings and more leads.
-            </p>
-
-            <div className="mt-6 grid gap-6 md:grid-cols-3">
-              {relatedPosts.map((relatedPost) => (
-                <Link
-                  key={relatedPost.slug}
-                  href={`/blog/${relatedPost.slug}`}
-                  className="group rounded-2xl border border-white/10 bg-white/5 p-6 transition hover:border-emerald-500/25"
-                >
-                  <div className="text-xs text-white/55">
-                    {relatedPost.category} |{" "}
-                    {new Date(relatedPost.date).toLocaleDateString()}
-                  </div>
-                  <div className="mt-2 text-lg font-semibold text-white transition group-hover:text-emerald-200">
-                    {relatedPost.title}
-                  </div>
-                  <p className="mt-2 text-sm leading-relaxed text-white/70">
-                    {relatedPost.excerpt}
-                  </p>
-                </Link>
-              ))}
-            </div>
-          </div>
-        </section>
-      ) : null}
     </article>
   );
 }

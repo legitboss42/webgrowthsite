@@ -1,51 +1,13 @@
-import type { Metadata } from "next";
-import WebsiteMaintenanceClient from "@/components/WebsiteMaintenanceClient";
+import ServiceDetailTemplateClient from "@/components/ServiceDetailTemplateClient";
+import { ALL_SERVICE_PAGES, buildServiceMetadata } from "@/lib/newServiceConfigs";
 
-export const metadata: Metadata = {
-  title: "Website Maintenance & Support",
-  description:
-    "Website maintenance and support to keep your site secure, updated, fast, and reliable - with monthly care that prevents surprises.",
-  keywords: [
-    "web design",
-    "web design services",
-    "website maintenance",
-    "website support",
-    "wordpress maintenance",
-    "site updates",
-    "website security",
-    "website backups",
-  ],
-  alternates: {
-    canonical: "https://webgrowth.info/services/website-maintenance",
-  },
-  openGraph: {
-    title: "Website Maintenance & Support",
-    description:
-      "Monthly website care: updates, backups, security, and small fixes - so your site stays reliable.",
-    url: "https://webgrowth.info/services/website-maintenance",
-    siteName: "Web Growth",
-    images: [
-      {
-        url: "https://webgrowth.info/images/hero/Hero-Image-1.webp",
-        width: 1200,
-        height: 630,
-        alt: "Website Maintenance & Support",
-      },
-    ],
-    type: "website",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Website Maintenance & Support",
-    description:
-      "Ongoing website support to keep your web design secure, updated, and fast.",
-    images: ["https://webgrowth.info/images/hero/Hero-Image-1.webp"],
-  },
-  robots: { index: true, follow: true },
-};
+const service = ALL_SERVICE_PAGES["website-maintenance"];
+
+export const metadata = buildServiceMetadata(
+  service,
+  "https://webgrowth.info/services/website-maintenance"
+);
 
 export default function Page() {
-  return <WebsiteMaintenanceClient />;
+  return <ServiceDetailTemplateClient service={service} />;
 }
-
-

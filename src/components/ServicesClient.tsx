@@ -29,7 +29,7 @@ export default function ServicesClient({ services: servicesProp }: Props) {
       {
         title: "Business Website Design",
         short:
-          "Professional business websites designed for clarity, trust, and real results.",
+          "Custom business websites built for speed, trust, and higher-quality enquiries.",
         slug: "/services/business-website-design",
         serviceParam: "Business Website Design",
         bullets: ["Modern structure", "Mobile-first", "SEO-ready foundation"],
@@ -38,7 +38,7 @@ export default function ServicesClient({ services: servicesProp }: Props) {
       {
         title: "Landing Page Design",
         short:
-          "Conversion-focused landing page design and funnel architecture for campaigns, ads, and offers.",
+          "High-converting landing pages for campaigns, ads, and focused lead generation offers.",
         slug: "/services/landing-page-design",
         serviceParam: "Landing Page Design",
         bullets: ["Message match", "Funnel architecture", "Fast mobile load"],
@@ -47,11 +47,47 @@ export default function ServicesClient({ services: servicesProp }: Props) {
       {
         title: "Website Redesign",
         short:
-          "Upgrade outdated sites into modern, trust-building experiences that perform better.",
+          "Redesign outdated websites into premium, conversion-focused experiences that perform better.",
         slug: "/services/website-redesign",
         serviceParam: "Website Redesign",
         bullets: ["Better structure", "Improved trust", "Cleaner conversion path"],
         image: "/images/services/services-redesign.webp",
+      },
+      {
+        title: "E-commerce Website Design",
+        short:
+          "Premium ecommerce storefronts built for cleaner product discovery and stronger checkout trust.",
+        slug: "/services/ecommerce-website-design",
+        serviceParam: "E-commerce Website Design",
+        bullets: ["Product-page UX", "Checkout trust", "Mobile commerce flow"],
+        image: "/images/services/services-ecommerce-2.webp",
+      },
+      {
+        title: "Website Audit & Consultation",
+        short:
+          "A clear diagnosis of what is hurting SEO, UX, speed, and conversion, with a practical fix plan.",
+        slug: "/services/website-audit",
+        serviceParam: "Website Audit & Consultation",
+        bullets: ["Diagnosis", "Priority fixes", "Implementation roadmap"],
+        image: "/images/services/services-audit.webp",
+      },
+      {
+        title: "Website Maintenance & Support",
+        short:
+          "Ongoing support to keep your website secure, updated, reliable, and commercially usable.",
+        slug: "/services/website-maintenance",
+        serviceParam: "Website Maintenance & Support",
+        bullets: ["Updates", "Backups", "Priority support"],
+        image: "/images/services/services-maintenance.webp",
+      },
+      {
+        title: "Performance Optimisation",
+        short:
+          "Website speed optimization to improve mobile experience, Core Web Vitals, and conversion quality.",
+        slug: "/services/performance-optimisation",
+        serviceParam: "Speed & Performance Optimisation",
+        bullets: ["Speed pass", "Core Web Vitals", "Mobile smoothness"],
+        image: "/images/services/services-speed.webp",
       },
     ],
     []
@@ -132,12 +168,11 @@ export default function ServicesClient({ services: servicesProp }: Props) {
                 SERVICES
               </div>
               <h1 className="mt-4 text-4xl md:text-5xl font-semibold leading-tight">
-                Website services built to help local businesses get more enquiries.
+                Website services built to increase enquiries, bookings, and sales.
               </h1>
               <p className="mt-6 text-lg text-white/70 leading-relaxed">
-                The public offer should stay simple. Start with a new business
-                website, a landing page, or a redesign if your current site is
-                already costing you leads.
+                Start with the service that fixes your biggest growth bottleneck:
+                weak trust, low conversion, slow performance, or outdated UX.
               </p>
 
               <div className="mt-10 flex flex-col sm:flex-row gap-3">
@@ -165,6 +200,38 @@ export default function ServicesClient({ services: servicesProp }: Props) {
               />
               <div className="absolute inset-0 bg-black/35" />
             </div>
+          </div>
+        </div>
+      </section>
+
+      <section data-reveal className="border-y border-white/10 bg-[#050806] py-16">
+        <div className="mx-auto max-w-6xl px-6">
+          <div data-reveal-item>
+            <SectionHeading
+              eyebrow="Service Selection"
+              title="How to choose the right service first"
+              description="Pick the service based on the bottleneck that is costing you revenue now, not the one that sounds the most advanced."
+            />
+          </div>
+          <div className="mt-8 grid gap-4 md:grid-cols-3">
+            <article data-reveal-item className="rounded-2xl border border-white/10 bg-black/35 p-6">
+              <h3 className="text-lg font-semibold text-white">If leads are weak</h3>
+              <p className="mt-3 text-sm leading-7 text-white/72">
+                Start with <Link href="/services/website-audit" className="text-emerald-300 hover:text-emerald-200">website audit</Link>, <Link href="/services/website-redesign" className="text-emerald-300 hover:text-emerald-200">website redesign</Link>, or <Link href="/services/landing-page-design" className="text-emerald-300 hover:text-emerald-200">landing page design</Link>.
+              </p>
+            </article>
+            <article data-reveal-item className="rounded-2xl border border-white/10 bg-black/35 p-6">
+              <h3 className="text-lg font-semibold text-white">If traffic is weak</h3>
+              <p className="mt-3 text-sm leading-7 text-white/72">
+                Start with <Link href="/services/search-engine-optimisation" className="text-emerald-300 hover:text-emerald-200">search engine optimisation</Link> and <Link href="/services/google-my-business-setup-optimisation" className="text-emerald-300 hover:text-emerald-200">Google Business Profile optimisation</Link>.
+              </p>
+            </article>
+            <article data-reveal-item className="rounded-2xl border border-white/10 bg-black/35 p-6">
+              <h3 className="text-lg font-semibold text-white">If operations are messy</h3>
+              <p className="mt-3 text-sm leading-7 text-white/72">
+                Start with <Link href="/services/crm-system-setup-configuration" className="text-emerald-300 hover:text-emerald-200">CRM setup</Link>, <Link href="/services/booking-platform-setup-integration" className="text-emerald-300 hover:text-emerald-200">booking integration</Link>, and <Link href="/services/analytics-tracking-setup" className="text-emerald-300 hover:text-emerald-200">analytics tracking</Link>.
+              </p>
+            </article>
           </div>
         </div>
       </section>

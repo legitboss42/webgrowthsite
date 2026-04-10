@@ -163,15 +163,14 @@ export default function PerformanceOptimisationClient() {
           <div className="grid gap-12 md:grid-cols-2 md:items-center">
             <div>
               <div className="text-sm tracking-[0.25em] text-white/50">
-                WEBSITE SPEED OPTIMIZATION NIGERIA
+                WEBSITE SPEED OPTIMIZATION SERVICE
               </div>
               <h1 className="mt-4 text-4xl md:text-5xl font-semibold leading-tight">
-                Website speed optimization in Nigeria to reduce bounce and improve conversions.
+                Website speed optimization to reduce bounce and improve conversion.
               </h1>
               <p className="mt-6 text-lg text-white/70 leading-relaxed">
-                If you need website speed optimization in Nigeria because your
-                pages load slowly, feel heavy on mobile, or keep losing buyers
-                before they act, we fix the speed issues that hurt trust,
+                If your pages load slowly, feel heavy on mobile, or leak buyers
+                before they act, we fix the speed bottlenecks that hurt trust,
                 rankings, and conversion quality.
               </p>
 
@@ -371,7 +370,7 @@ export default function PerformanceOptimisationClient() {
 
           <CTASection
             eyebrow="READY"
-            title="Speed is profit. Let us fix your website properly."
+            title="Speed is revenue. Fix your website performance properly."
             description="If your website feels slow, you are losing customers. We will optimize it with real, measurable improvements that support both rankings and conversions."
             primaryCtaText="Request a Quote"
             primaryHref="/contact?service=Speed & Performance Optimisation"

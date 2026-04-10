@@ -27,6 +27,7 @@ const securityHeaders = [
 
 const nextConfig = {
   reactStrictMode: true,
+  distDir: ".next-webgrowth",
   images: {
     qualities: [60, 65, 68, 75],
   },

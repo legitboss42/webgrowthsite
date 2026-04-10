@@ -13,6 +13,7 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ["/api/", "/contact/thanks", "/thank-you/", "/mockup"],
       },
     ],
-    sitemap: `${BASE_URL}/sitemap-index.xml`,
+    host: BASE_URL,
+    sitemap: [`${BASE_URL}/sitemap.xml`, `${BASE_URL}/sitemap-index.xml`],
   };
 }

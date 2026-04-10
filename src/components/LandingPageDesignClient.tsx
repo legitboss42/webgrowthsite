@@ -134,15 +134,15 @@ export default function LandingPageDesignClient() {
           <div className="grid gap-12 md:grid-cols-2 md:items-center">
             <div>
               <div className="text-sm tracking-[0.25em] text-white/50">
-                LANDING PAGE DESIGN LAGOS
+                LANDING PAGE DESIGN SERVICE
               </div>
               <h1 className="mt-4 text-4xl md:text-5xl font-semibold leading-tight">
-                Landing page design in Lagos that turns clicks into leads.
+                Landing page design that turns paid and social traffic into enquiries.
               </h1>
               <p className="mt-6 text-lg text-white/70 leading-relaxed">
-                If you need landing page design in Lagos for ads, offers, or
-                outreach campaigns, we build pages that load fast, match the
-                traffic intent, and guide visitors to one clear next step.
+                We build conversion-focused landing pages for ads, launches, and
+                outreach campaigns with fast load speed, clear message match, and
+                one high-intent call to action.
               </p>
 
               <div className="mt-10 flex gap-3 flex-col sm:flex-row">
@@ -258,8 +258,8 @@ export default function LandingPageDesignClient() {
               />
               <div className="absolute inset-0 bg-black/35" />
               <div className="absolute bottom-4 left-4 right-4 rounded-xl border border-white/10 bg-black/55 p-4 text-sm text-white/70">
-                Use a UI mockup here showing the hero, proof block, and CTA flow
-                that the landing page will use.
+                Focused conversion structure: offer headline, proof, objection handling,
+                and one friction-free CTA path.
               </div>
             </div>
           </div>
@@ -367,8 +367,8 @@ export default function LandingPageDesignClient() {
 
           <CTASection
             eyebrow="READY"
-            title="Stop wasting clicks, build a page that converts"
-            description="If you are paying for traffic or chasing leads through outreach, your landing page needs to do its job. We will build it properly."
+            title="Stop paying for clicks that never convert"
+            description="If your campaigns are active, your landing page should be your strongest conversion asset. We will engineer it that way."
             primaryCtaText="Request a Quote"
             primaryHref="/contact?service=Landing Page Design"
             secondaryCtaText="View Services"

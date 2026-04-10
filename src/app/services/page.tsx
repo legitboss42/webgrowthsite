@@ -1,26 +1,29 @@
 import type { Metadata } from "next";
 import ServicesClient from "@/components/ServicesClient";
+import { NEW_SERVICES_LIST } from "@/lib/newServiceConfigs";
 
 export const metadata: Metadata = {
-  title: "Website Services for Small Businesses",
+  title: "Web Design Services Agency | Web Growth",
   description:
-    "Explore the core website services Web Growth uses to help small businesses launch faster, redesign weak sites, and turn more visitors into enquiries.",
+    "Web design services for businesses that need faster websites, stronger SEO foundations, and higher conversion.",
   keywords: [
-    "web design",
     "web design services",
+    "web design services agency",
+    "business website design service",
+    "website redesign service",
+    "landing page design service",
+    "ecommerce website design service",
+    "website speed optimization service",
+    "website audit service",
     "website design services",
     "small business website design",
-    "business website design",
-    "landing page design",
-    "website redesign services",
-    "service business web design",
-    "conversion focused website",
+    "conversion-focused web design",
   ],
   alternates: { canonical: "https://webgrowth.info/services" },
   openGraph: {
-    title: "Website Services for Small Businesses",
+    title: "Web Design Services Agency | Web Growth",
     description:
-      "Core website services built to improve clarity, mobile trust, and enquiries.",
+      "Conversion-focused website services for businesses that need measurable performance.",
     url: "https://webgrowth.info/services",
     siteName: "Web Growth",
     images: [
@@ -35,14 +38,14 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Website Services for Small Businesses",
+    title: "Web Design Services Agency | Web Growth",
     description:
-      "New websites, landing pages, and redesigns built for clearer offers and more enquiries.",
+      "Website services for businesses that need stronger conversion and faster growth execution.",
     images: ["https://webgrowth.info/images/hero/Hero-Image-1.webp"],
   },
   robots: { index: true, follow: true },
 };
 
 export default function Page() {
-  return <ServicesClient />;
+  return <ServicesClient services={NEW_SERVICES_LIST} />;
 }

@@ -11,7 +11,7 @@ import {
 import { BOOKING_URL } from "@/lib/site";
 
 const pageDescription =
-  "Premium ecommerce websites and storefronts built for speed, stronger conversion, cleaner shopping journeys, and more trustworthy checkout experiences.";
+  "Ecommerce website redesign built for speed, stronger conversion, cleaner shopping journeys, and more trustworthy checkout experiences.";
 
 const valueProps = [
   {
@@ -79,11 +79,13 @@ const faqs = [
 ] as const;
 
 export const metadata = buildPageMetadata({
-  title: "Ecommerce Website Design | Web Growth",
+  title: "Ecommerce Website Redesign Agency | Web Growth",
   description: pageDescription,
   path: "/ecommerce",
   keywords: [
     "ecommerce website design",
+    "ecommerce website redesign",
+    "ecommerce redesign agency",
     "online store web design",
     "premium storefront design",
     "ecommerce conversion website",
@@ -162,6 +164,13 @@ export default function EcommercePage() {
                   Conversion-focused UX
                 </span>
               </div>
+              <p className="mt-4 text-sm text-white/64">
+                Running both service and ecommerce funnels? See{" "}
+                <Link href="/website-build" className="text-emerald-200 hover:text-emerald-100">
+                  website design and redesign services
+                </Link>
+                .
+              </p>
             </div>
 
             <div className="rounded-3xl border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.015))] p-7 shadow-[0_18px_48px_rgba(0,0,0,0.24)] backdrop-blur-xl">
@@ -325,10 +334,10 @@ export default function EcommercePage() {
                     Get My Ecommerce Quote
                   </TrackedLink>
                   <Link
-                    href="/portfolio"
+                    href="/website-build"
                     className="inline-flex min-h-12 w-full items-center justify-center rounded-xl border border-white/25 bg-black/35 px-8 py-3 text-base font-semibold text-white transition hover:border-white/40 hover:bg-black/50"
                   >
-                    See Portfolio
+                    See Full Website Build Service
                   </Link>
                 </div>
               </div>

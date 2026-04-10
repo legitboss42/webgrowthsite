@@ -169,12 +169,12 @@ export default function WebsiteAuditClient() {
                 WEBSITE AUDIT & CONSULTATION
               </div>
               <h1 className="mt-4 text-4xl md:text-5xl font-semibold leading-tight">
-                Get a clear diagnosis - and a plan that actually fixes things.
+                Get a clear website diagnosis and a fix plan you can execute.
               </h1>
               <p className="mt-6 text-lg text-white/70 leading-relaxed">
-                If your website isn’t getting enquiries, isn’t ranking, or feels slow,
-                you don’t need guesses - you need a diagnosis. We audit your website
-                and give you a practical plan to improve results.
+                If your site is underperforming, you do not need guesses. We audit
+                SEO, UX, trust, speed, and conversion flow, then map the highest-impact
+                fixes in priority order.
               </p>
 
               <div className="mt-10 flex gap-3 flex-col sm:flex-row">
@@ -369,7 +369,7 @@ export default function WebsiteAuditClient() {
 
           <CTASection
             eyebrow="READY"
-            title="Stop guessing. Get a real diagnosis."
+            title="Stop guessing and fix the real bottlenecks"
             description="If your website isn’t performing, we’ll show you exactly what’s wrong - and what to fix first."
             primaryCtaText="Request an Audit"
             primaryHref="/contact?service=Website Audit & Consultation"

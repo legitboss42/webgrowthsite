@@ -1,12 +1,65 @@
 ---
-slug: "email-automation-architecture"
-title: "The Invisible Sales Rep: How to Close Leads Without a Single Phone Call"
-excerpt: "Most agencies chase leads. Growth Engineers build systems that nurture them automatically. Here is the full technical architecture for a 24/7 revenue machine."
-date: "2026-02-08"
-category: "Automation"
-tags: ["Email Marketing", "Next.js", "System", "Revenue"]
-readTime: "16 min read"
-cover: "/images/blog/automation-flow.webp"
+slug: email-automation-architecture
+title: 'The Invisible Sales Rep: How to Close Leads Without a Single Phone Call'
+excerpt: >-
+  Most agencies chase leads. Growth Engineers build systems that nurture them
+  automatically. Here is the full technical architecture for a 24/7 revenue
+  machine.
+date: 2026-02-14T00:00:00.000Z
+category: Automation
+tags:
+  - Email Marketing
+  - Next.js
+  - System
+  - Revenue
+readTime: 16 min read
+cover: /images/blog/automation-flow.webp
+updatedAt: '2026-02-14'
+lastReviewedAt: '2026-02-14'
+topic: Website Strategy
+difficulty: Beginner
+isCornerstone: false
+checklistAvailable: false
+author: victor-chinukwue
+reviewedBy: web-growth-editorial
+keyTakeaways:
+  - Priority one is 1. the "ghosting" problem.
+  - >-
+    Sustained results depend on 2. the infrastructure: deliverability
+    engineering.
+  - >-
+    Execution quality improves when you address 3. the stack selection: why i
+    chose mailerlite.
+whatYouNeed:
+  - Current website URL and business objective.
+  - Primary audience and offer clarity notes.
+  - 'Baseline performance data (traffic, leads, or sales).'
+commonMistakes:
+  - Starting execution before strategic clarity.
+  - Relying on aesthetics without conversion structure.
+  - Skipping QA before launch or campaign traffic.
+steps:
+  - 'Apply: 1. The "Ghosting" Problem.'
+  - 'Apply: 2. The Infrastructure: Deliverability Engineering.'
+  - 'Apply: 3. The Stack Selection: Why I Chose MailerLite.'
+  - 'Apply: 4. The Technical Implementation (Next.js API).'
+relatedGuideSlugs:
+  - how-to-plan-website-copy-before-hiring-developer
+  - website-platform-comparison-small-business
+faq:
+  - question: What is the first step before making major website changes?
+    answer: >-
+      Define the commercial outcome and baseline metrics, then prioritize the
+      highest-impact fixes first.
+  - question: How do I avoid wasting budget on website updates?
+    answer: >-
+      Use clear scope, measurable goals, and structured QA before and after
+      launch.
+ctaVariant: consultation
+evidenceNote: Updated using observed implementation patterns and recurring project outcomes.
+methodologyNote: >-
+  Recommendations follow practical implementation-first workflows with
+  measurable QA checkpoints.
 ---
 
 There is a lie in the agency world that says: "To make more money, you need to hustle more."

@@ -1,0 +1,13 @@
+How to Audit a Slow WordPress Site Checklist
+
+1. Run baseline tests (Lighthouse + PageSpeed) on key pages.
+2. Record LCP, CLS, INP, and request counts.
+3. Export current plugin list and identify duplicates.
+4. Check image optimization and lazy-loading setup.
+5. Verify caching plugin configuration and cache behavior.
+6. Review theme/page-builder overhead.
+7. Identify third-party script bloat.
+8. Prioritize quick wins vs architecture-level fixes.
+9. Re-test after each batch of changes.
+10. Document before/after results for developer handoff.
+

@@ -1,0 +1,13 @@
+Service Homepage Conversion Audit Checklist
+
+1. Check hero clarity (offer, audience, next step).
+2. Check CTA visibility and consistency.
+3. Check trust proof placement before form asks.
+4. Check section sequence for conversion logic.
+5. Check objection handling coverage (price, timeline, fit).
+6. Check form friction and field count.
+7. Check mobile readability and button tap comfort.
+8. Check page speed on mobile network.
+9. Check tracking events for lead actions.
+10. Log prioritized fixes by impact.
+

@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1600" y2="900" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#04120E" />
+      <stop offset="0.56" stop-color="#09251D" />
+      <stop offset="1" stop-color="#19263A" />
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="900" fill="url(#bg)" />
+  <rect x="92" y="92" width="1416" height="716" rx="30" fill="#020617" fill-opacity="0.34" stroke="#34D399" stroke-opacity="0.45" />
+  <text x="164" y="204" fill="#A7F3D0" font-family="Inter, Arial, sans-serif" font-size="30" letter-spacing="5">LAGOS LOCAL SEO</text>
+  <text x="164" y="302" fill="white" font-family="Inter, Arial, sans-serif" font-size="64" font-weight="700">Local SEO Basics</text>
+  <text x="164" y="370" fill="#D1FAE5" font-family="Inter, Arial, sans-serif" font-size="42" font-weight="600">for Service Businesses in Lagos</text>
+  <g transform="translate(164 448)">
+    <rect width="1244" height="282" rx="22" fill="#04261E" fill-opacity="0.62" stroke="#34D399" stroke-opacity="0.4" />
+    <path d="M100 214C100 150 154 98 218 98C282 98 336 150 336 214C336 278 218 352 218 352C218 352 100 278 100 214Z" transform="translate(0 -38)" fill="#10B981" fill-opacity="0.22" stroke="#34D399" stroke-opacity="0.6" />
+    <circle cx="218" cy="176" r="46" fill="#A7F3D0" fill-opacity="0.35" />
+    <text x="420" y="114" fill="#A7F3D0" font-family="Inter, Arial, sans-serif" font-size="30">Map visibility starts with page + profile alignment.</text>
+    <text x="420" y="176" fill="#A7F3D0" font-family="Inter, Arial, sans-serif" font-size="30">Build local trust signals and service-area clarity.</text>
+    <text x="420" y="238" fill="#A7F3D0" font-family="Inter, Arial, sans-serif" font-size="30">Track calls, forms, and qualified enquiries.</text>
+  </g>
+</svg>

@@ -1,8 +1,8 @@
 import ServiceDetailTemplateClient from "@/components/ServiceDetailTemplateClient";
 import HostingSupportBlock from "@/components/HostingSupportBlock";
-import { NEW_SERVICE_PAGES, buildServiceMetadata } from "@/lib/newServiceConfigs";
+import { ALL_SERVICE_PAGES, buildServiceMetadata } from "@/lib/newServiceConfigs";
 
-const service = NEW_SERVICE_PAGES["domain-registration-hosting-guidance"];
+const service = ALL_SERVICE_PAGES["domain-registration-hosting-guidance"];
 
 export const metadata = buildServiceMetadata(
   service,

@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { warnOnServiceQuality } from "@/lib/contentQuality";
+import { CORE_SERVICE_PAGES } from "@/lib/coreServiceConfigs";
 
 export type ServiceListItem = {
   title: string;
@@ -14,6 +16,8 @@ export type ServicePageConfig = {
   slug: string;
   serviceParam: string;
   metaDescription: string;
+  seoTitle?: string;
+  seoDescription?: string;
   keywords: string[];
   heroTitle: string;
   heroDescription: string;
@@ -25,6 +29,14 @@ export type ServicePageConfig = {
   faqs: { question: string; answer: string }[];
   ctaTitle: string;
   ctaDescription: string;
+  targetAudience?: string[];
+  notFor?: string[];
+  commonMistakes?: string[];
+  examples?: string[];
+  beforeAfter?: { before: string; after: string }[];
+  evidence?: { src: string; alt: string; note?: string }[];
+  relatedGuideSlugs?: string[];
+  exclusions?: string[];
   relatedLinks?: {
     href: string;
     label: string;
@@ -101,6 +113,27 @@ export const NEW_SERVICE_PAGES: Record<string, ServicePageConfig> = {
     ctaTitle: "Need email marketing that drives real business outcomes?",
     ctaDescription:
       "Get a clean strategy and implementation plan that improves consistency, engagement, and conversion.",
+    targetAudience: [
+      "Service businesses with an active lead flow that needs better nurture.",
+      "Founders who want repeatable email conversion, not one-off broadcasts.",
+      "Teams ready to align email messaging with sales and offer positioning.",
+    ],
+    notFor: [
+      "Businesses with no clear offer or no lead source yet.",
+      "Teams expecting results without content inputs or approvals.",
+      "Buyers looking for bulk email blasts with no strategy.",
+    ],
+    commonMistakes: [
+      "Sending campaigns without segmentation or intent mapping.",
+      "Running automations with unclear trigger logic.",
+      "Treating open rate as the only performance metric.",
+      "Ignoring lifecycle follow-up after first enquiry.",
+    ],
+    examples: [
+      "A clinic replaced generic newsletters with segmented nurture flows by treatment interest.",
+      "A service brand mapped enquiry forms to tailored onboarding email sequences.",
+      "A founder team improved reply quality by rewriting automation copy around buyer objections.",
+    ],
   },
 
   "search-engine-optimisation": {
@@ -170,6 +203,27 @@ export const NEW_SERVICE_PAGES: Record<string, ServicePageConfig> = {
     ctaTitle: "Need SEO that supports real enquiries, not just traffic charts?",
     ctaDescription:
       "Get a focused SEO plan built around service pages, local visibility, and lead quality.",
+    targetAudience: [
+      "Service businesses with existing websites that underperform in search.",
+      "Teams that need local visibility tied to real enquiries.",
+      "Brands preparing to scale traffic and needing technical cleanup first.",
+    ],
+    notFor: [
+      "Projects expecting overnight ranking jumps.",
+      "Businesses without service clarity or conversion-ready pages.",
+      "Teams unwilling to improve content quality beyond metadata edits.",
+    ],
+    commonMistakes: [
+      "Publishing location-heavy pages without useful differentiation.",
+      "Targeting high-volume terms with weak service-page intent.",
+      "Ignoring internal linking between guides and money pages.",
+      "Scaling content before fixing crawl and structure basics.",
+    ],
+    examples: [
+      "A local service brand improved rankings by tightening page intent and internal links.",
+      "A founder-led business removed duplicated targeting and improved enquiry quality.",
+      "A team restructured service clusters to support local search and conversion together.",
+    ],
   },
 
   "google-my-business-setup-optimisation": {
@@ -246,6 +300,27 @@ export const NEW_SERVICE_PAGES: Record<string, ServicePageConfig> = {
     ctaTitle: "Want more qualified local enquiries from Google Maps?",
     ctaDescription:
       "Get your Google Business Profile properly configured and optimized for local search visibility, trust, and conversion quality.",
+    targetAudience: [
+      "Lagos service businesses relying on Maps calls and direction requests.",
+      "Teams with existing profiles that still have weak local visibility.",
+      "Businesses launching new service areas and needing cleaner local relevance.",
+    ],
+    notFor: [
+      "Businesses without a verified profile or real local service footprint.",
+      "Teams expecting profile optimisation to replace website quality.",
+      "Businesses targeting unrelated locations with no service coverage.",
+    ],
+    commonMistakes: [
+      "Using broad categories that do not match actual services.",
+      "Leaving profile media, Q&A, and service details outdated.",
+      "Ignoring review velocity and response quality.",
+      "Sending Maps traffic to weak pages with no conversion path.",
+    ],
+    examples: [
+      "A home-service business improved Maps lead quality by refining categories and services.",
+      "A clinic increased call actions after profile trust signals were tightened.",
+      "A local brand aligned GBP and website intent to improve local enquiry consistency.",
+    ],
     relatedLinks: [
       {
         href: "/services/search-engine-optimisation",
@@ -282,6 +357,9 @@ export const NEW_SERVICE_PAGES: Record<string, ServicePageConfig> = {
     title: "Booking Platform Setup and Integration",
     slug: "booking-platform-setup-integration",
     serviceParam: "Booking Platform Setup and Integration",
+    seoTitle: "Booking Platform Setup and Integration | Web Growth",
+    seoDescription:
+      "Booking platform setup and website integration for appointment-based businesses with clear flows, calendar sync, and conversion-focused booking journeys.",
     metaDescription:
       "Booking platform setup and website integration service for appointment-based businesses using clear flows, calendar sync, and conversion-focused booking journeys.",
     keywords: [
@@ -345,6 +423,27 @@ export const NEW_SERVICE_PAGES: Record<string, ServicePageConfig> = {
     ctaTitle: "Need a smoother booking journey on your website?",
     ctaDescription:
       "Get booking setup and integration that improves completion rates and user confidence.",
+    targetAudience: [
+      "Appointment-based businesses with high drop-off before booking completion.",
+      "Teams moving from manual booking to structured online flow.",
+      "Businesses needing cleaner booking UX on mobile.",
+    ],
+    notFor: [
+      "Businesses with no scheduling process or unclear availability rules.",
+      "Teams that cannot provide booking tool access.",
+      "Projects expecting custom software in a lightweight integration scope.",
+    ],
+    commonMistakes: [
+      "Routing traffic to booking forms before explaining service value.",
+      "Using too many required fields in first-step booking screens.",
+      "Failing to test reminder and confirmation delivery across scenarios.",
+      "Ignoring timezone and availability edge cases.",
+    ],
+    examples: [
+      "A salon improved completed bookings by simplifying first-step form fields.",
+      "A clinic reduced no-shows with confirmation and reminder automation.",
+      "A consultancy connected website CTAs to a cleaner calendar handoff flow.",
+    ],
   },
 
   "crm-system-setup-configuration": {
@@ -414,6 +513,27 @@ export const NEW_SERVICE_PAGES: Record<string, ServicePageConfig> = {
     ctaTitle: "Need a CRM that your team can actually use?",
     ctaDescription:
       "Get a clean CRM setup built around your process, not a generic template.",
+    targetAudience: [
+      "Service teams managing leads across multiple channels with no central pipeline.",
+      "Founders moving from spreadsheets to structured sales tracking.",
+      "Businesses needing clearer ownership and follow-up accountability.",
+    ],
+    notFor: [
+      "Teams unwilling to adopt process changes after setup.",
+      "Businesses without a defined sales workflow.",
+      "Projects expecting full enterprise CRM customisation in starter scope.",
+    ],
+    commonMistakes: [
+      "Importing data without field standards or naming rules.",
+      "Adding too many pipeline stages that teams never use.",
+      "Skipping automation safety checks before go-live.",
+      "Measuring activity volume instead of stage progression quality.",
+    ],
+    examples: [
+      "A service firm moved from scattered lead notes to a usable stage-based pipeline.",
+      "A founder team reduced missed follow-ups with assignment automations.",
+      "A growing agency improved reporting clarity by standardising CRM properties.",
+    ],
   },
 
   "marketing-automation-build-implementation": {
@@ -483,6 +603,27 @@ export const NEW_SERVICE_PAGES: Record<string, ServicePageConfig> = {
     ctaTitle: "Need automated follow-up that actually converts?",
     ctaDescription:
       "Get conversion-focused automation workflows that save time and improve lead progression.",
+    targetAudience: [
+      "Teams with recurring enquiries and delayed manual follow-up.",
+      "Businesses combining website forms, CRM, and email channels.",
+      "Founders needing consistent nurture across longer sales cycles.",
+    ],
+    notFor: [
+      "Businesses with no baseline conversion process to automate.",
+      "Teams unwilling to maintain message quality after launch.",
+      "Projects expecting automation to fix unclear offers.",
+    ],
+    commonMistakes: [
+      "Automating before mapping lifecycle stages and intent.",
+      "Using one generic sequence for all lead types.",
+      "Failing to include exit logic for converted leads.",
+      "Launching workflows without event-level measurement.",
+    ],
+    examples: [
+      "A local brand automated missed-call follow-up into booked consultations.",
+      "A service business split nurture logic by enquiry type and improved response quality.",
+      "A founder team reduced lead decay with timed follow-up triggers.",
+    ],
   },
 
   "analytics-tracking-setup": {
@@ -491,6 +632,9 @@ export const NEW_SERVICE_PAGES: Record<string, ServicePageConfig> = {
     slug: "analytics-tracking-setup",
     serviceParam:
       "Analytics and Tracking Setup (Google Analytics, Meta Pixel, TikTok Pixel)",
+    seoTitle: "Analytics and Tracking Setup | Web Growth",
+    seoDescription:
+      "Analytics setup for GA4, Meta Pixel, and TikTok Pixel with event tracking, conversion tracking, and ongoing monitoring for cleaner performance data.",
     metaDescription:
       "Analytics and tracking setup service: Google Analytics 4, Meta Pixel, TikTok Pixel, event tracking, conversion tracking, and ongoing monitoring for marketing performance.",
     keywords: [
@@ -554,6 +698,27 @@ export const NEW_SERVICE_PAGES: Record<string, ServicePageConfig> = {
     ctaTitle: "Need reliable tracking before scaling marketing spend?",
     ctaDescription:
       "Get clean analytics implementation and ongoing monitoring so your decisions are data-backed.",
+    targetAudience: [
+      "Businesses spending on ads without reliable conversion attribution.",
+      "Teams launching new pages and needing event-level measurement from day one.",
+      "Founders who need cleaner reporting across web and paid channels.",
+    ],
+    notFor: [
+      "Projects with no meaningful conversion events defined.",
+      "Teams expecting perfect tracking with no access to required accounts.",
+      "Businesses unwilling to maintain tags after major site changes.",
+    ],
+    commonMistakes: [
+      "Counting only page views while ignoring key conversion actions.",
+      "Duplicating event firing across multiple tag paths.",
+      "Failing to validate tracking after releases.",
+      "Optimising campaigns on incomplete attribution data.",
+    ],
+    examples: [
+      "A campaign team fixed duplicate event firing and restored reporting accuracy.",
+      "A service brand implemented CTA and form event tracking for cleaner optimisation.",
+      "An ecommerce funnel aligned pixel events with checkout milestones.",
+    ],
   },
 
   "domain-registration-hosting-guidance": {
@@ -623,12 +788,36 @@ export const NEW_SERVICE_PAGES: Record<string, ServicePageConfig> = {
     ctaTitle: "Need a clean launch setup before the website build starts?",
     ctaDescription:
       "Get practical guidance on hosting, DNS, and launch setup so you do not build on a weak foundation.",
+    targetAudience: [
+      "Founders preparing a first serious website launch.",
+      "Businesses planning migrations and wanting lower technical risk.",
+      "Teams unsure which hosting stack matches their growth stage.",
+    ],
+    notFor: [
+      "Projects needing fully managed infrastructure operations only.",
+      "Teams unwilling to follow launch checklist recommendations.",
+      "Businesses expecting one-click fixes for legacy architecture debt.",
+    ],
+    commonMistakes: [
+      "Choosing hosting from discounts without workload fit.",
+      "Skipping DNS and SSL planning until launch week.",
+      "Migrating without rollback and backup strategy.",
+      "Ignoring email deliverability dependencies during DNS changes.",
+    ],
+    examples: [
+      "A local business avoided downtime by planning DNS cutover with rollback steps.",
+      "A founder team moved from shared hosting to a setup matched to real usage.",
+      "A service brand reduced launch delays by pre-validating SSL and mailbox records.",
+    ],
   },
 
   "lead-magnet-strategy-build": {
     title: "Lead Magnet Strategy and Build (eBooks, Quizzes, Checklists, Offers)",
     slug: "lead-magnet-strategy-build",
     serviceParam: "Lead Magnet Strategy and Build",
+    seoTitle: "Lead Magnet Strategy and Build | Web Growth",
+    seoDescription:
+      "Lead magnet strategy and build service for eBooks, quizzes, checklists, and offers with landing pages and lead capture flow setup.",
     metaDescription:
       "Lead magnet strategy and build service: create high-converting lead magnets like eBooks, quizzes, checklists, and offers with landing page and capture flow setup.",
     keywords: [
@@ -692,11 +881,39 @@ export const NEW_SERVICE_PAGES: Record<string, ServicePageConfig> = {
     ctaTitle: "Need a lead magnet that attracts qualified prospects?",
     ctaDescription:
       "Get strategy and build support for lead magnets that convert attention into pipeline.",
+    targetAudience: [
+      "Service businesses needing higher-quality lead capture before sales calls.",
+      "Brands running traffic to offers with weak opt-in conversion.",
+      "Teams building nurture funnels around specific buyer pain points.",
+    ],
+    notFor: [
+      "Businesses without a clear follow-up or fulfilment process.",
+      "Teams seeking vanity downloads instead of qualified leads.",
+      "Projects with no channel to promote the lead asset.",
+    ],
+    commonMistakes: [
+      "Creating lead magnets with broad topics and weak intent match.",
+      "Sending opt-ins to generic thank-you pages with no next step.",
+      "Ignoring qualification prompts in capture forms.",
+      "Treating checklist downloads as final conversion goals.",
+    ],
+    examples: [
+      "A clinic used a treatment readiness checklist to improve lead quality.",
+      "A service brand replaced a generic PDF with a segmented quiz funnel.",
+      "A founder team tied opt-in assets to nurture sequences and consultation CTAs.",
+    ],
   },
 };
 
+export const ALL_SERVICE_PAGES: Record<string, ServicePageConfig> = {
+  ...CORE_SERVICE_PAGES,
+  ...NEW_SERVICE_PAGES,
+};
+
+warnOnServiceQuality(Object.values(ALL_SERVICE_PAGES));
+
 export const NEW_SERVICES_LIST: ServiceListItem[] = Object.values(
-  NEW_SERVICE_PAGES
+  ALL_SERVICE_PAGES
 ).map((service) => {
   const imageBySlug: Record<string, string> = {
     "email-marketing-setup-strategy": "/images/services/services-support.webp",
@@ -772,9 +989,12 @@ export function buildServiceMetadata(
   service: ServicePageConfig,
   canonicalUrl: string
 ): Metadata {
+  const title = service.seoTitle ?? service.title;
+  const description = service.seoDescription ?? service.metaDescription;
+
   return {
-    title: `${service.title}`,
-    description: service.metaDescription,
+    title,
+    description,
     keywords: [
       "web design",
       "web design services",
@@ -784,8 +1004,8 @@ export function buildServiceMetadata(
       canonical: canonicalUrl,
     },
     openGraph: {
-      title: `${service.title}`,
-      description: service.metaDescription,
+      title,
+      description,
       url: canonicalUrl,
       siteName: "Web Growth",
       images: [
@@ -793,15 +1013,15 @@ export function buildServiceMetadata(
           url: "https://webgrowth.info/images/hero/Hero-Image-1.webp",
           width: 1200,
           height: 630,
-          alt: service.title,
+          alt: title,
         },
       ],
       type: "website",
     },
     twitter: {
       card: "summary_large_image",
-      title: `${service.title}`,
-      description: service.metaDescription,
+      title,
+      description,
       images: ["https://webgrowth.info/images/hero/Hero-Image-1.webp"],
     },
     robots: { index: true, follow: true },

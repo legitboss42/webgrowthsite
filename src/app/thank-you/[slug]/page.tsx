@@ -2,22 +2,18 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { useSearchParams, useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 
 function safeFilePath(file: string | null) {
   if (!file) return null;
-  // Only allow files from /downloads to prevent abuse
   if (!file.startsWith("/downloads/")) return null;
-  // No directory traversal
   if (file.includes("..")) return null;
   return file;
 }
 
-// Minimal GA4 event helper (works if gtag is installed)
-function track(eventName: string, params: Record<string, any> = {}) {
+function track(eventName: string, params: Record<string, unknown> = {}) {
   if (typeof window === "undefined") return;
-  // @ts-ignore
-  const gtag = window.gtag as undefined | ((...args: any[]) => void);
+  const gtag = (window as { gtag?: (...args: unknown[]) => void }).gtag;
   if (!gtag) return;
   gtag("event", eventName, params);
 }
@@ -30,28 +26,25 @@ export default function ThankYouPage() {
   const slug = params?.slug || "download";
   const file = useMemo(() => safeFilePath(search.get("file")), [search]);
 
-  // Auto-download once
   useEffect(() => {
     if (!file || started) return;
 
-    // Track: download started
     track("lead_download", { slug, file });
 
-    // Trigger browser download/open
-    const a = document.createElement("a");
-    a.href = file;
-    a.download = ""; // hint to download; browser may still open PDF
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
+    const anchor = document.createElement("a");
+    anchor.href = file;
+    anchor.download = "";
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
 
     setStarted(true);
   }, [file, slug, started]);
 
   if (!file) {
     return (
-      <main className="min-h-screen bg-black text-white flex items-center justify-center px-6">
-        <div className="max-w-xl w-full rounded-2xl border border-white/10 bg-white/5 p-7">
+      <main className="flex min-h-screen items-center justify-center bg-black px-6 text-white">
+        <div className="w-full max-w-xl rounded-2xl border border-white/10 bg-white/5 p-7">
           <h1 className="text-2xl font-semibold">Download link is missing</h1>
           <p className="mt-3 text-white/70">
             This page needs a valid file path like{" "}
@@ -60,13 +53,13 @@ export default function ThankYouPage() {
           <div className="mt-6 flex gap-3">
             <Link
               href="/blog"
-              className="rounded-md border border-white/10 bg-black/30 px-5 py-3 text-sm font-semibold text-white/85 hover:bg-black/45 transition"
+              className="rounded-md border border-white/10 bg-black/30 px-5 py-3 text-sm font-semibold text-white/85 transition hover:bg-black/45"
             >
               Back to Blog
             </Link>
             <Link
               href="/contact"
-              className="rounded-md bg-emerald-600 px-5 py-3 text-sm font-semibold text-white hover:bg-emerald-500 transition"
+              className="rounded-md bg-emerald-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-500"
             >
               Contact
             </Link>
@@ -77,15 +70,13 @@ export default function ThankYouPage() {
   }
 
   return (
-    <main className="min-h-screen bg-black text-white flex items-center justify-center px-6">
-      <div className="max-w-2xl w-full rounded-2xl border border-white/10 bg-white/5 p-7">
+    <main className="flex min-h-screen items-center justify-center bg-black px-6 text-white">
+      <div className="w-full max-w-2xl rounded-2xl border border-white/10 bg-white/5 p-7">
         <div className="text-sm text-white/55">THANK YOU</div>
-        <h1 className="mt-2 text-3xl font-semibold">
-          Your download should start automatically
-        </h1>
+        <h1 className="mt-2 text-3xl font-semibold">Your download should start automatically</h1>
 
-        <p className="mt-3 text-white/70 leading-relaxed">
-          If it didn’t start, use the manual button below.
+        <p className="mt-3 leading-relaxed text-white/70">
+          If it did not start, use the manual button below.
         </p>
 
         <div className="mt-6 flex flex-col gap-3 sm:flex-row">
@@ -93,7 +84,7 @@ export default function ThankYouPage() {
             href={file}
             download
             onClick={() => track("lead_download_manual", { slug, file })}
-            className="inline-flex items-center justify-center rounded-md bg-emerald-600 px-6 py-3 text-sm font-semibold text-white hover:bg-emerald-500 transition"
+            className="inline-flex items-center justify-center rounded-md bg-emerald-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-emerald-500"
           >
             Download again
           </a>
@@ -101,7 +92,7 @@ export default function ThankYouPage() {
           <Link
             href="/contact"
             onClick={() => track("cta_click", { slug, source: "thank_you" })}
-            className="inline-flex items-center justify-center rounded-md border border-white/10 bg-black/30 px-6 py-3 text-sm font-semibold text-white/85 hover:bg-black/45 transition"
+            className="inline-flex items-center justify-center rounded-md border border-white/10 bg-black/30 px-6 py-3 text-sm font-semibold text-white/85 transition hover:bg-black/45"
           >
             Request a Quote
           </Link>

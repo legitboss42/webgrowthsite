@@ -1,11 +1,63 @@
 ---
-title: "Small Business SEO Checklist: 12 Fixes That Improve Rankings and Leads"
-excerpt: "Use this small business SEO checklist to fix crawlability, speed, page targeting, metadata, internal links, and local signals so your website can rank higher and turn search traffic into enquiries."
-date: 2026-02-03
+title: 'Small Business SEO Checklist: 12 Fixes That Improve Rankings and Leads'
+excerpt: >-
+  Use this small business SEO checklist to fix crawlability, speed, page
+  targeting, metadata, internal links, and local signals so your website can
+  rank higher and turn search traffic into enquiries.
+date: 2026-02-04T00:00:00.000Z
 category: SEO
-tags: ["SEO", "Google", "Traffic", "Small Business", "Local SEO"]
+tags:
+  - SEO
+  - Google
+  - Traffic
+  - Small Business
+  - Local SEO
 readTime: 19 min read
 cover: /images/blog/seo.webp
+updatedAt: '2026-02-04'
+lastReviewedAt: '2026-02-04'
+topic: SEO Strategy
+difficulty: Intermediate
+isCornerstone: true
+checklistAvailable: true
+author: victor-chinukwue
+reviewedBy: web-growth-editorial
+keyTakeaways:
+  - Priority one is what small business seo is really trying to do.
+  - 'Sustained results depend on step 1: make sure the site is indexable.'
+  - >-
+    Execution quality improves when you address step 2: fix page speed and
+    mobile experience.
+whatYouNeed:
+  - Current website URL and Search Console access.
+  - Primary target service and location intent list.
+  - Baseline traffic and enquiry quality snapshot.
+commonMistakes:
+  - Targeting too many intents on one page.
+  - Publishing thin pages without practical depth.
+  - Ignoring internal linking between related guides.
+steps:
+  - 'Apply: What small business SEO is really trying to do.'
+  - 'Apply: Step 1: Make sure the site is indexable.'
+  - 'Apply: Step 2: Fix page speed and mobile experience.'
+  - 'Apply: Step 3: Give each page one clear keyword intent.'
+relatedGuideSlugs:
+  - local-seo-for-small-business-google-maps-ranking-guide
+  - google-business-profile-optimization-checklist
+faq:
+  - question: How long do SEO improvements usually take to show results?
+    answer: >-
+      Initial signals can appear in weeks, but stable ranking and lead-quality
+      gains usually need sustained updates over months.
+  - question: Can I rank with only one service page?
+    answer: >-
+      Sometimes for narrow intent, but most businesses need multiple
+      high-quality pages mapped to real search demand.
+ctaVariant: service
+evidenceNote: Updated using observed implementation patterns and recurring project outcomes.
+methodologyNote: >-
+  Recommendations follow practical implementation-first workflows with
+  measurable QA checkpoints.
 ---
 
 # Small Business SEO Checklist: 12 Fixes That Improve Rankings and Leads

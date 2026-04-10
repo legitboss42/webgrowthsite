@@ -150,8 +150,16 @@ const hostingDecisionAnswers = [
   },
 ] as const;
 
+const evaluationCriteria = [
+  "Uptime and reliability track record",
+  "Server response speed under normal traffic",
+  "SSL, backups, and security tooling quality",
+  "Ease of DNS, email, and domain management",
+  "Upgrade path if your website traffic grows",
+] as const;
+
 export const metadata = buildPageMetadata({
-  title: "Save 68% on Shared Web Hosting | Best Hosting for Business Websites",
+  title: "Shared Web Hosting Offer for Business Websites | Web Growth",
   description: pageDescription,
   path: "/hosting-offer",
   keywords: [
@@ -259,6 +267,33 @@ export default function HostingOfferRoute() {
                   </div>
                 </div>
               </aside>
+            </div>
+          </div>
+        </section>
+
+        <section className="border-b border-white/10 bg-[#050806] py-14">
+          <div className="mx-auto max-w-6xl px-6">
+            <div className="rounded-3xl border border-white/10 bg-black/35 p-7 shadow-[0_16px_36px_rgba(0,0,0,0.22)]">
+              <p className="text-xs uppercase tracking-[0.18em] text-emerald-300/80">Editorial disclosure</p>
+              <h2 className="mt-3 text-2xl font-semibold text-white">How this recommendation is evaluated</h2>
+              <p className="mt-3 max-w-3xl text-sm leading-7 text-white/74">
+                This page contains an affiliate link. The recommendation is based on practical hosting criteria used for small-business launches, not random promotions. You should still compare against your own requirements before purchase.
+              </p>
+              <ul className="mt-5 grid gap-3 md:grid-cols-2">
+                {evaluationCriteria.map((item) => (
+                  <li key={item} className="flex gap-3 rounded-2xl border border-white/10 bg-black/30 p-4 text-sm leading-7 text-white/76">
+                    <span className="mt-[11px] h-2 w-2 rounded-full bg-emerald-400/80" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-4 text-sm text-white/68">
+                See our content standards on the{" "}
+                <a href="/editorial-policy" className="text-emerald-300 hover:text-emerald-200">
+                  editorial policy
+                </a>{" "}
+                page.
+              </p>
             </div>
           </div>
         </section>

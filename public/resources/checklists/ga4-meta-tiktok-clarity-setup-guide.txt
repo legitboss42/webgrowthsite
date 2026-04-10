@@ -1,0 +1,13 @@
+GA4 + Meta + TikTok + Clarity Setup Checklist
+
+1. Confirm account access for GA4, Meta, TikTok, and Clarity.
+2. Define high-intent conversion events (lead, booking, purchase).
+3. Implement GA4 base tag and custom events.
+4. Validate GA4 events in DebugView.
+5. Implement Meta Pixel with matching conversion events.
+6. Validate Meta events in Events Manager test mode.
+7. Implement TikTok Pixel with matching conversion events.
+8. Validate TikTok events in test events.
+9. Install Microsoft Clarity and confirm recording.
+10. Run end-to-end test submission and verify all event endpoints.
+

@@ -1,12 +1,64 @@
 ---
-slug: "high-converting-service-page"
-title: "Service Page Structure That Gets Enquiries: A Practical Framework for Small Business Websites"
-excerpt: "A service page should answer five buyer questions fast: what you do, who it is for, why it is credible, what is included, and what happens next."
-date: 2026-02-06
-category: "Conversion"
-tags: ["UX", "Sales", "Strategy", "Service Pages"]
-readTime: "11 min read"
-cover: "/images/blog/service-blueprint.webp"
+slug: high-converting-service-page
+title: >-
+  Service Page Structure That Gets Enquiries: A Practical Framework for Small
+  Business Websites
+excerpt: >-
+  A service page should answer five buyer questions fast: what you do, who it is
+  for, why it is credible, what is included, and what happens next.
+date: 2026-02-11T00:00:00.000Z
+category: Conversion
+tags:
+  - UX
+  - Sales
+  - Strategy
+  - Service Pages
+readTime: 11 min read
+cover: /images/blog/service-blueprint.webp
+updatedAt: '2026-02-11'
+lastReviewedAt: '2026-02-11'
+topic: Conversion Optimization
+difficulty: Beginner
+isCornerstone: false
+checklistAvailable: false
+author: victor-chinukwue
+reviewedBy: web-growth-editorial
+keyTakeaways:
+  - Priority one is what a service page must do in the first screen.
+  - Sustained results depend on the trust block that should sit under the hero.
+  - >-
+    Execution quality improves when you address how to explain the service
+    without sounding padded.
+whatYouNeed:
+  - Current page URL and main conversion action.
+  - Primary audience and key objections list.
+  - Existing proof assets such as reviews or results.
+commonMistakes:
+  - Using generic copy that lacks trust signals.
+  - Adding multiple conflicting CTA paths.
+  - Ignoring mobile readability and button hierarchy.
+steps:
+  - 'Apply: What a service page must do in the first screen.'
+  - 'Apply: The trust block that should sit under the hero.'
+  - 'Apply: How to explain the service without sounding padded.'
+  - 'Apply: What to include so pricing does not feel risky.'
+relatedGuideSlugs:
+  - why-your-website-isnt-getting-leads
+  - homepage-structure-that-converts-visitors-into-customers
+faq:
+  - question: Do I need a full redesign to improve conversion?
+    answer: >-
+      Not always. Many high-impact gains come from messaging, trust, and CTA
+      structure fixes.
+  - question: What should I test first?
+    answer: >-
+      Start with hero clarity, CTA hierarchy, trust sections, and mobile form
+      friction.
+ctaVariant: service
+evidenceNote: Updated using observed implementation patterns and recurring project outcomes.
+methodologyNote: >-
+  Recommendations follow practical implementation-first workflows with
+  measurable QA checkpoints.
 ---
 
 # Service Page Structure That Gets Enquiries: A Practical Framework for Small Business Websites
@@ -169,3 +221,11 @@ Focus on:
 - one CTA
 
 If your service pages still read like brochures, fix the page before you chase more traffic.
+
+## Related guides and next step
+
+- [Why Your Website Isnt Getting Leads](/blog/why-your-website-isnt-getting-leads)
+- [Homepage Structure That Converts Visitors Into Customers](/blog/homepage-structure-that-converts-visitors-into-customers)
+- [High Converting Landing Pages Guide](/blog/high-converting-landing-pages-guide)
+
+If you want implementation support, review [this related service](/services/landing-page-design).

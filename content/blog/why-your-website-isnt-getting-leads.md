@@ -1,11 +1,64 @@
 ---
-title: "Why Your Website Is Not Getting Leads: 7 Real Problems to Fix First"
-excerpt: "Most low-converting websites fail for the same reasons: unclear positioning, weak proof, poor mobile trust, and weak calls to action. Fix these first."
-date: 2026-02-03
+title: 'Why Your Website Is Not Getting Leads: 7 Real Problems to Fix First'
+excerpt: >-
+  Most low-converting websites fail for the same reasons: unclear positioning,
+  weak proof, poor mobile trust, and weak calls to action. Fix these first.
+date: 2026-02-05T00:00:00.000Z
 category: Conversion
-tags: ["Conversion", "Leads", "Sales", "Website Strategy", "Small Business"]
+tags:
+  - Conversion
+  - Leads
+  - Sales
+  - Website Strategy
+  - Small Business
 readTime: 12 min read
 cover: /images/blog/leads.webp
+updatedAt: '2026-02-05'
+lastReviewedAt: '2026-02-05'
+topic: Conversion Optimization
+difficulty: Beginner
+isCornerstone: false
+checklistAvailable: false
+author: victor-chinukwue
+reviewedBy: web-growth-editorial
+keyTakeaways:
+  - 'Priority one is problem 1: your headline does not tell buyers what you do.'
+  - >-
+    Sustained results depend on problem 2: the site looks acceptable but not
+    trustworthy.
+  - >-
+    Execution quality improves when you address problem 3: there is no proof
+    near the decision point.
+whatYouNeed:
+  - Current page URL and main conversion action.
+  - Primary audience and key objections list.
+  - Existing proof assets such as reviews or results.
+commonMistakes:
+  - Using generic copy that lacks trust signals.
+  - Adding multiple conflicting CTA paths.
+  - Ignoring mobile readability and button hierarchy.
+steps:
+  - 'Apply: Problem 1: Your headline does not tell buyers what you do.'
+  - 'Apply: Problem 2: The site looks acceptable but not trustworthy.'
+  - 'Apply: Problem 3: There is no proof near the decision point.'
+  - 'Apply: Problem 4: The call to action feels weak or risky.'
+relatedGuideSlugs:
+  - homepage-structure-that-converts-visitors-into-customers
+  - high-converting-landing-pages-guide
+faq:
+  - question: Do I need a full redesign to improve conversion?
+    answer: >-
+      Not always. Many high-impact gains come from messaging, trust, and CTA
+      structure fixes.
+  - question: What should I test first?
+    answer: >-
+      Start with hero clarity, CTA hierarchy, trust sections, and mobile form
+      friction.
+ctaVariant: service
+evidenceNote: Updated using observed implementation patterns and recurring project outcomes.
+methodologyNote: >-
+  Recommendations follow practical implementation-first workflows with
+  measurable QA checkpoints.
 ---
 
 # Why Your Website Is Not Getting Leads: 7 Real Problems to Fix First

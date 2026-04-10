@@ -1,11 +1,67 @@
 ---
-title: "Why We Rebuilt, Not Redesigned: Website Strategy for More Leads and Sales"
-excerpt: "Part 1 of the J Luxe rebuild series: why a full website rebuild beats a surface redesign when you want better SEO, higher conversion rates, and more sales."
-date: 2026-02-23
+title: 'Why We Rebuilt, Not Redesigned: Website Strategy for More Leads and Sales'
+excerpt: >-
+  Part 1 of the J Luxe rebuild series: why a full website rebuild beats a
+  surface redesign when you want better SEO, higher conversion rates, and more
+  sales.
+date: 2026-02-18T00:00:00.000Z
 category: Series
-tags: ["Series", "Website Redesign", "Small Business Website", "SEO", "Conversion"]
+tags:
+  - Series
+  - Website Redesign
+  - Small Business Website
+  - SEO
+  - Conversion
 readTime: 15 min read
 cover: /images/blog/jluxe-series-why-rebuild.webp
+updatedAt: '2026-02-18'
+lastReviewedAt: '2026-02-18'
+topic: Case Study Series
+difficulty: Intermediate
+isCornerstone: false
+checklistAvailable: false
+author: victor-chinukwue
+reviewedBy: web-growth-editorial
+keyTakeaways:
+  - >-
+    Priority one is the expensive confusion: website redesign vs website
+    rebuild.
+  - >-
+    Sustained results depend on the decision framework we used before touching
+    design.
+  - >-
+    Execution quality improves when you address what we found in the old website
+    (and why it mattered).
+whatYouNeed:
+  - Current website URL and business objective.
+  - Primary audience and offer clarity notes.
+  - 'Baseline performance data (traffic, leads, or sales).'
+commonMistakes:
+  - Starting execution before strategic clarity.
+  - Relying on aesthetics without conversion structure.
+  - Skipping QA before launch or campaign traffic.
+steps:
+  - 'Apply: The expensive confusion: website redesign vs website rebuild.'
+  - 'Apply: The decision framework we used before touching design.'
+  - 'Apply: What we found in the old website (and why it mattered).'
+  - 'Apply: Why a surface redesign would have failed.'
+relatedGuideSlugs:
+  - jluxe-medical-aesthetics-case-study
+  - website-redesign-cost-breakdown-nigeria
+faq:
+  - question: What is the first step before making major website changes?
+    answer: >-
+      Define the commercial outcome and baseline metrics, then prioritize the
+      highest-impact fixes first.
+  - question: How do I avoid wasting budget on website updates?
+    answer: >-
+      Use clear scope, measurable goals, and structured QA before and after
+      launch.
+ctaVariant: none
+evidenceNote: Updated using observed implementation patterns and recurring project outcomes.
+methodologyNote: >-
+  Recommendations follow practical implementation-first workflows with
+  measurable QA checkpoints.
 ---
 
 # Why We Rebuilt, Not Redesigned (Part 1)

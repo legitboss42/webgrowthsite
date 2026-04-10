@@ -1,0 +1,13 @@
+Small Business Website Launch QA Checklist
+
+1. Verify form submissions reach inbox.
+2. Verify confirmation and autoresponder behavior.
+3. Test all CTA buttons and contact links.
+4. Validate mobile layout on key pages.
+5. Validate title/meta/canonical on launch pages.
+6. Confirm no accidental noindex on target pages.
+7. Validate GA4 and pixel lead events.
+8. Validate redirects for changed URLs.
+9. Confirm legal and trust pages are accessible.
+10. Monitor first 72 hours for regressions.
+

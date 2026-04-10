@@ -27,6 +27,68 @@ const customCodeWins = [
   },
 ] as const;
 
+const whatWeDo = [
+  "Custom-coded Next.js website builds and redesigns for service and ecommerce brands.",
+  "Conversion-focused structure, copy hierarchy, and UX flow decisions.",
+  "Performance, technical SEO foundations, and launch readiness implementation.",
+  "Founder-led delivery with direct strategy-to-build continuity.",
+] as const;
+
+const whatWeDoNot = [
+  "Mass template deployments across unrelated niches.",
+  "Cheap, rushed builds optimized only for low upfront cost.",
+  "Vanity redesigns with no business objective or conversion focus.",
+  "Long retainers without clear scope and measurable output.",
+] as const;
+
+const methodology = [
+  {
+    title: "Clarity",
+    text: "We define the exact offer and page hierarchy so serious buyers understand your business fast.",
+  },
+  {
+    title: "Conversion path",
+    text: "We map intentional next steps so visitors move from interest to enquiry or purchase with less friction.",
+  },
+  {
+    title: "Performance",
+    text: "We treat speed and mobile experience as commercial factors, not optional polish.",
+  },
+  {
+    title: "Launch readiness",
+    text: "We QA the build before go-live so technical issues do not sabotage first impressions.",
+  },
+  {
+    title: "Scalable codebase",
+    text: "We structure the build to support future SEO, service expansion, and integrations cleanly.",
+  },
+] as const;
+
+const reviewStandards = [
+  "Every page is reviewed for message clarity before visual polishing.",
+  "CTA paths are checked for friction across desktop and mobile states.",
+  "Performance, metadata, and technical hygiene are reviewed before launch.",
+  "Content quality follows an editorial standard: practical, specific, and commercially useful.",
+] as const;
+
+const proofLinks = [
+  {
+    href: "/portfolio",
+    title: "Portfolio",
+    text: "See executed client work and build quality.",
+  },
+  {
+    href: "/blog/jluxe-medical-aesthetics-case-study",
+    title: "Case Study",
+    text: "Review a practical project breakdown and outcomes.",
+  },
+  {
+    href: "/services",
+    title: "Service System",
+    text: "Understand scope depth, deliverables, and process logic.",
+  },
+] as const;
+
 const bestFitClients = [
   {
     title: "High-ticket clinics",
@@ -213,6 +275,60 @@ export default function AboutClient() {
         </div>
       </section>
 
+      <section data-reveal className="border-b border-white/10 bg-black py-20">
+        <div className="mx-auto max-w-6xl px-6">
+          <p className="text-xs uppercase tracking-[0.2em] text-emerald-300/80">
+            Scope clarity
+          </p>
+          <h2 className="mt-4 text-3xl font-semibold leading-tight tracking-[-0.02em] md:text-5xl">
+            What Web Growth does and does not do
+          </h2>
+          <div className="mt-10 grid gap-6 md:grid-cols-2">
+            <article className="rounded-2xl border border-emerald-400/24 bg-emerald-500/10 p-6">
+              <h3 className="text-xl font-semibold text-white">What we do</h3>
+              <ul className="mt-4 space-y-2 text-sm leading-7 text-white/78">
+                {whatWeDo.map((item) => (
+                  <li key={item} className="flex gap-2">
+                    <span className="mt-[10px] h-2 w-2 rounded-full bg-emerald-300/90" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </article>
+            <article className="rounded-2xl border border-white/10 bg-black/35 p-6">
+              <h3 className="text-xl font-semibold text-white">What we do not do</h3>
+              <ul className="mt-4 space-y-2 text-sm leading-7 text-white/74">
+                {whatWeDoNot.map((item) => (
+                  <li key={item} className="flex gap-2">
+                    <span className="mt-[10px] h-2 w-2 rounded-full bg-white/65" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section data-reveal className="border-b border-white/10 bg-[#060907] py-20">
+        <div className="mx-auto max-w-6xl px-6">
+          <p className="text-xs uppercase tracking-[0.2em] text-emerald-300/80">
+            Methodology
+          </p>
+          <h2 className="mt-4 text-3xl font-semibold leading-tight tracking-[-0.02em] md:text-5xl">
+            How delivery is reviewed before launch
+          </h2>
+          <div className="mt-10 grid gap-6 md:grid-cols-5">
+            {methodology.map((item) => (
+              <article key={item.title} className="rounded-2xl border border-white/10 bg-black/35 p-5">
+                <h3 className="text-base font-semibold text-white">{item.title}</h3>
+                <p className="mt-3 text-sm leading-7 text-white/72">{item.text}</p>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
       <section data-reveal className="border-b border-white/10 bg-[#060907] py-24">
         <div className="mx-auto grid max-w-6xl gap-10 px-6 md:grid-cols-[1.05fr_0.95fr] md:items-start">
           <div>
@@ -256,6 +372,43 @@ export default function AboutClient() {
         </div>
       </section>
 
+      <section data-reveal className="border-b border-white/10 bg-black py-20">
+        <div className="mx-auto max-w-6xl px-6">
+          <p className="text-xs uppercase tracking-[0.2em] text-emerald-300/80">
+            Review standard
+          </p>
+          <h2 className="mt-4 text-3xl font-semibold leading-tight tracking-[-0.02em] md:text-5xl">
+            How work is reviewed before delivery
+          </h2>
+          <div className="mt-8 rounded-2xl border border-white/10 bg-black/35 p-6">
+            <ul className="space-y-2 text-sm leading-7 text-white/74">
+              {reviewStandards.map((item) => (
+                <li key={item} className="flex gap-2">
+                  <span className="mt-[10px] h-2 w-2 rounded-full bg-emerald-400/80" />
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <p className="mt-10 text-xs uppercase tracking-[0.2em] text-emerald-300/80">
+            Proof of work
+          </p>
+          <div className="mt-4 grid gap-4 md:grid-cols-3">
+            {proofLinks.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="rounded-2xl border border-white/10 bg-black/35 p-5 transition hover:border-emerald-400/28"
+              >
+                <h3 className="text-lg font-semibold text-white">{item.title}</h3>
+                <p className="mt-2 text-sm leading-7 text-white/70">{item.text}</p>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
       <section data-reveal className="border-b border-white/10 bg-black py-24">
         <div className="mx-auto max-w-6xl px-6">
           <div className="max-w-3xl">
@@ -281,6 +434,37 @@ export default function AboutClient() {
                 <p className="mt-3 text-sm leading-7 text-white/68">{item.text}</p>
               </article>
             ))}
+          </div>
+        </div>
+      </section>
+
+      <section data-reveal className="border-b border-white/10 bg-[#060907] py-20">
+        <div className="mx-auto max-w-6xl px-6">
+          <p className="text-xs uppercase tracking-[0.2em] text-emerald-300/80">
+            Fit check
+          </p>
+          <h2 className="mt-4 text-3xl font-semibold leading-tight tracking-[-0.02em] md:text-5xl">
+            Who this is for and who it is not for
+          </h2>
+          <div className="mt-10 grid gap-6 md:grid-cols-2">
+            <article className="rounded-2xl border border-emerald-400/24 bg-emerald-500/10 p-6">
+              <h3 className="text-xl font-semibold text-white">Best fit</h3>
+              <ul className="mt-4 space-y-2 text-sm leading-7 text-white/80">
+                <li>Founder-led or lean teams with clear growth intent.</li>
+                <li>Businesses where website quality affects sales conversations.</li>
+                <li>Teams willing to provide fast approvals and implementation inputs.</li>
+                <li>Brands prioritizing quality, speed, and conversion outcomes.</li>
+              </ul>
+            </article>
+            <article className="rounded-2xl border border-white/10 bg-black/35 p-6">
+              <h3 className="text-xl font-semibold text-white">Not a fit</h3>
+              <ul className="mt-4 space-y-2 text-sm leading-7 text-white/74">
+                <li>Projects choosing providers only by lowest price.</li>
+                <li>Businesses expecting premium outcomes without collaboration.</li>
+                <li>Teams wanting generic templates with no strategic depth.</li>
+                <li>Buyers looking for vague advice instead of implementation progress.</li>
+              </ul>
+            </article>
           </div>
         </div>
       </section>
