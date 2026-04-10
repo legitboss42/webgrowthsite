@@ -27,7 +27,14 @@ const securityHeaders = [
 
 const nextConfig = {
   reactStrictMode: true,
-  distDir: ".next-webgrowth",
+  // Keep Vercel builds on the default `.next` output so deployment manifests resolve.
+  // Optional local override: WEBGROWTH_ALT_DISTDIR=1
+  distDir:
+    process.env.VERCEL === "1"
+      ? ".next"
+      : process.env.WEBGROWTH_ALT_DISTDIR === "1"
+        ? ".next-webgrowth"
+        : ".next",
   images: {
     qualities: [60, 65, 68, 75],
   },
