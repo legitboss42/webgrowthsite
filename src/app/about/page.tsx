@@ -3,19 +3,19 @@ import StructuredData from "@/components/StructuredData";
 import { buildPageMetadata, buildProfessionalServiceSchema } from "@/lib/seo";
 
 const pageDescription =
-  "Web Growth is a premium Next.js agency building custom websites for clinics, service brands, and e-commerce businesses that need speed and conversion.";
+  "Web Growth is a web design agency building high-performance custom Next.js websites for Lagos service businesses and premium ecommerce brands.";
 
 export const metadata = buildPageMetadata({
-  title: "About Web Growth | Premium Next.js Agency",
+  title: "About Web Growth | Web Design Agency in Lagos",
   description: pageDescription,
   path: "/about",
   keywords: [
     "about web growth",
     "victor chinukwue",
-    "premium next.js agency",
+    "web design agency in lagos",
     "next.js web design agency",
     "custom website development agency",
-    "premium website development partner",
+    "website redesign agency lagos",
   ],
   image: "/images/about/about-hero.webp",
 });
