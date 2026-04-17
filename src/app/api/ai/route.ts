@@ -1,16 +1,29 @@
 import { NextResponse } from "next/server";
-import {
-  checkRateLimit,
-  getClientIp,
-  getUserAgent,
-  hasJsonContentType,
-  isAllowedOrigin,
-  isLikelyAutomationRequest,
-} from "@/lib/security";
-
 export const runtime = "edge";
+const AI_ENDPOINT_ENABLED = process.env.ENABLE_AI_WIDGET_API === "1";
 
 export async function POST(req: Request) {
+  if (!AI_ENDPOINT_ENABLED) {
+    return NextResponse.json(
+      { error: "Temporarily disabled." },
+      {
+        status: 410,
+        headers: {
+          "Cache-Control": "public, max-age=300, s-maxage=300",
+        },
+      }
+    );
+  }
+
+  const {
+    checkRateLimit,
+    getClientIp,
+    getUserAgent,
+    hasJsonContentType,
+    isAllowedOrigin,
+    isLikelyAutomationRequest,
+  } = await import("@/lib/security");
+
   if (!isAllowedOrigin(req, { allowMissingOrigin: false })) {
     return NextResponse.json({ error: "Forbidden origin." }, { status: 403 });
   }
