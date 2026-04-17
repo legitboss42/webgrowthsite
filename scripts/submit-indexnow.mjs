@@ -43,7 +43,13 @@ function getBlogUrls() {
 
   return fs
     .readdirSync(postsDirectory, { withFileTypes: true })
-    .filter((entry) => entry.isFile() && entry.name.endsWith(".md"))
+    .filter(
+      (entry) =>
+        entry.isFile() &&
+        entry.name.endsWith(".md") &&
+        !entry.name.endsWith("-image-prompts.md") &&
+        !entry.name.startsWith("_")
+    )
     .map((entry) => entry.name.replace(/\.md$/, ""))
     .filter(Boolean)
     .map((slug) => `/blog/${slug}`);

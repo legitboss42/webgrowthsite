@@ -1,6 +1,38 @@
-﻿import { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
+import {
+  checkRateLimit,
+  getClientIp,
+  getUserAgent,
+  hasJsonContentType,
+  isAllowedOrigin,
+  isLikelyAutomationRequest,
+} from "@/lib/security";
+
+export const runtime = "edge";
 
 export async function POST(req: Request) {
+  if (!isAllowedOrigin(req, { allowMissingOrigin: false })) {
+    return NextResponse.json({ error: "Forbidden origin." }, { status: 403 });
+  }
+
+  if (!hasJsonContentType(req)) {
+    return NextResponse.json({ error: "Unsupported content type." }, { status: 415 });
+  }
+
+  if (isLikelyAutomationRequest(req)) {
+    return NextResponse.json({ error: "Automated traffic is not allowed." }, { status: 403 });
+  }
+
+  const ip = getClientIp(req);
+  const ua = getUserAgent(req).slice(0, 80).toLowerCase();
+  const rate = checkRateLimit(`ai:${ip}:${ua}`, 20);
+  if (!rate.ok) {
+    return NextResponse.json(
+      { error: "Too many requests. Please try again shortly." },
+      { status: 429 }
+    );
+  }
+
   const body = await req.json().catch(() => ({}));
   const { answers } = body as { answers?: Record<string, string> };
 
@@ -28,9 +60,7 @@ export async function POST(req: Request) {
     tips: [
       "Your homepage must answer: what you do, who it’s for, why trust you, what to do next.",
       "Add WhatsApp + a short form. Don’t make people think.",
-      "Use 3–6 proof items (results, testimonials, before/after, logos).",
+      "Use 3-6 proof items (results, testimonials, before/after, logos).",
     ],
   });
 }
-
-

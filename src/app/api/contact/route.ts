@@ -2,7 +2,10 @@ import { NextResponse } from "next/server";
 import {
   checkRateLimit,
   getClientIp,
+  getUserAgent,
+  hasJsonContentType,
   isAllowedOrigin,
+  isLikelyAutomationRequest,
   isValidEmail,
   sanitizeText,
 } from "@/lib/security";
@@ -12,12 +15,21 @@ export const runtime = "nodejs";
 
 export async function POST(req: Request) {
   try {
-    if (!isAllowedOrigin(req)) {
+    if (!isAllowedOrigin(req, { allowMissingOrigin: false })) {
       return NextResponse.json({ error: "Forbidden origin." }, { status: 403 });
     }
 
+    if (!hasJsonContentType(req)) {
+      return NextResponse.json({ error: "Unsupported content type." }, { status: 415 });
+    }
+
+    if (isLikelyAutomationRequest(req)) {
+      return NextResponse.json({ error: "Automated traffic is not allowed." }, { status: 403 });
+    }
+
     const ip = getClientIp(req);
-    const rate = checkRateLimit(`contact:${ip}`, 8);
+    const ua = getUserAgent(req).slice(0, 80).toLowerCase();
+    const rate = checkRateLimit(`contact:${ip}:${ua}`, 6);
     if (!rate.ok) {
       return NextResponse.json(
         { error: "Too many requests. Please try again shortly." },

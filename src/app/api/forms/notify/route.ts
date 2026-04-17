@@ -3,7 +3,10 @@ import {
   checkRateLimit,
   escapeHtml,
   getClientIp,
+  getUserAgent,
+  hasJsonContentType,
   isAllowedOrigin,
+  isLikelyAutomationRequest,
   sanitizeText,
 } from "@/lib/security";
 import { verifyTurnstileToken } from "@/lib/turnstile";
@@ -20,12 +23,21 @@ type NotifyBody = {
 
 export async function POST(req: Request) {
   try {
-    if (!isAllowedOrigin(req)) {
+    if (!isAllowedOrigin(req, { allowMissingOrigin: false })) {
       return NextResponse.json({ error: "Forbidden origin." }, { status: 403 });
     }
 
+    if (!hasJsonContentType(req)) {
+      return NextResponse.json({ error: "Unsupported content type." }, { status: 415 });
+    }
+
+    if (isLikelyAutomationRequest(req)) {
+      return NextResponse.json({ error: "Automated traffic is not allowed." }, { status: 403 });
+    }
+
     const ip = getClientIp(req);
-    const rate = checkRateLimit(`forms-notify:${ip}`, 8);
+    const ua = getUserAgent(req).slice(0, 80).toLowerCase();
+    const rate = checkRateLimit(`forms-notify:${ip}:${ua}`, 6);
     if (!rate.ok) {
       return NextResponse.json(
         { error: "Too many requests. Please try again shortly." },

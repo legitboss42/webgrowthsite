@@ -1,5 +1,7 @@
 const RATE_WINDOW_MS = 10 * 60 * 1000;
 const RATE_LIMIT_MAX = 10;
+const AUTOMATION_UA_PATTERN =
+  /(bot|crawler|spider|curl|wget|python|scrapy|httpclient|axios|go-http-client|node-fetch|phantom|selenium|playwright|headless)/i;
 
 type RateState = {
   count: number;
@@ -7,6 +9,7 @@ type RateState = {
 };
 
 const rateStore = new Map<string, RateState>();
+let cleanupCounter = 0;
 
 function nowMs() {
   return Date.now();
@@ -20,13 +23,55 @@ export function getClientIp(req: Request) {
   return "unknown";
 }
 
-export function isAllowedOrigin(req: Request) {
+function isAllowedHost(hostname: string) {
+  const normalized = hostname.toLowerCase();
+  if (normalized === "webgrowth.info" || normalized === "www.webgrowth.info") return true;
+  if (process.env.NODE_ENV !== "production" && normalized.startsWith("localhost")) return true;
+  return false;
+}
+
+function hostFromHeaderOrUrl(value: string) {
+  try {
+    return new URL(value).host.toLowerCase();
+  } catch {
+    return value.toLowerCase();
+  }
+}
+
+export function getUserAgent(req: Request) {
+  return (req.headers.get("user-agent") || "").trim();
+}
+
+export function isLikelyAutomationRequest(req: Request) {
+  const userAgent = getUserAgent(req);
+  if (!userAgent) return process.env.NODE_ENV === "production";
+  return AUTOMATION_UA_PATTERN.test(userAgent);
+}
+
+export function hasJsonContentType(req: Request) {
+  const contentType = (req.headers.get("content-type") || "").toLowerCase();
+  return contentType.includes("application/json");
+}
+
+export function isAllowedOrigin(req: Request, options?: { allowMissingOrigin?: boolean }) {
   const origin = req.headers.get("origin");
+  const referer = req.headers.get("referer");
   const host = req.headers.get("host");
+  const allowMissingOrigin =
+    options?.allowMissingOrigin ?? process.env.NODE_ENV !== "production";
 
   if (!origin) {
-    // Server-to-server or non-browser clients may omit origin.
-    return true;
+    if (allowMissingOrigin) {
+      // Server-to-server or non-browser clients may omit origin.
+      return true;
+    }
+
+    if (!referer) return false;
+
+    const refererHost = hostFromHeaderOrUrl(referer);
+    const currentHost = (host || "").toLowerCase();
+    if (refererHost === currentHost) return true;
+    return isAllowedHost(refererHost);
   }
 
   try {
@@ -35,12 +80,7 @@ export function isAllowedOrigin(req: Request) {
     const currentHost = (host || "").toLowerCase();
 
     if (originHost === currentHost) return true;
-    if (originHost === "webgrowth.info" || originHost === "www.webgrowth.info") {
-      return true;
-    }
-    if (process.env.NODE_ENV !== "production" && originHost.startsWith("localhost")) {
-      return true;
-    }
+    if (isAllowedHost(originHost)) return true;
   } catch {
     return false;
   }
@@ -49,6 +89,16 @@ export function isAllowedOrigin(req: Request) {
 }
 
 export function checkRateLimit(key: string, max = RATE_LIMIT_MAX) {
+  cleanupCounter += 1;
+  if (cleanupCounter % 200 === 0) {
+    const currentNow = nowMs();
+    for (const [entryKey, entryValue] of rateStore.entries()) {
+      if (currentNow >= entryValue.resetAt) {
+        rateStore.delete(entryKey);
+      }
+    }
+  }
+
   const current = rateStore.get(key);
   const currentNow = nowMs();
 
@@ -85,4 +135,3 @@ export function escapeHtml(input: string) {
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#039;");
 }
-
