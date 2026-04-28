@@ -2,6 +2,12 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
 export function middleware(request: NextRequest) {
+  if (request.nextUrl.pathname === "/sitemap.xml") {
+    const url = request.nextUrl.clone();
+    url.pathname = "/sitemap-index.xml";
+    return NextResponse.redirect(url, 308);
+  }
+
   const host = request.headers.get("host");
 
   if (host === "www.webgrowth.info") {
