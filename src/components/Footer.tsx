@@ -12,6 +12,15 @@ const footerLinks = [
   { href: "/contact", label: "Contact" },
 ];
 
+const coreServiceLinks = [
+  { href: "/services/business-website-design/", label: "Business Website Design" },
+  { href: "/services/website-redesign/", label: "Website Redesign" },
+  { href: "/services/landing-page-design/", label: "Landing Page Design" },
+  { href: "/services/ecommerce-website-design/", label: "Ecommerce Website Design" },
+  { href: "/services/website-audit/", label: "Website Audit" },
+  { href: "/contact/", label: "Contact" },
+];
+
 export default function Footer() {
   const whatsappHref = buildWhatsAppUrl("Hello, I'd like to ask about a website project.");
 
@@ -39,6 +48,21 @@ export default function Footer() {
             </p>
             <div className="mt-4 grid gap-2 text-sm text-white/64">
               {footerLinks.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="transition hover:text-white"
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </div>
+
+            <p className="mt-8 text-sm uppercase tracking-[0.18em] text-emerald-300/80">
+              Core services
+            </p>
+            <div className="mt-4 grid gap-2 text-sm text-white/64">
+              {coreServiceLinks.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}

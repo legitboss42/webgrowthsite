@@ -27,6 +27,7 @@ const securityHeaders = [
 
 const nextConfig = {
   reactStrictMode: true,
+  trailingSlash: true,
   // Keep Vercel builds on the default `.next` output so deployment manifests resolve.
   // Optional local override: WEBGROWTH_ALT_DISTDIR=1
   distDir:
