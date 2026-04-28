@@ -37,6 +37,139 @@ const ENHANCED_POST_SLUGS = new Set([
   "website-platform-comparison-small-business",
 ]);
 
+const PRIORITY_POST_SERVICE_LINKS: Record<
+  string,
+  Array<{
+    title: string;
+    description: string;
+    href: string;
+    label: string;
+  }>
+> = {
+  "homepage-structure-that-converts-visitors-into-customers": [
+    {
+      title: "Need the homepage and service hierarchy implemented?",
+      description:
+        "Use the business website design service if you need a cleaner homepage, stronger trust flow, and better enquiry structure.",
+      href: "/services/business-website-design/",
+      label: "Review Business Website Design",
+    },
+    {
+      title: "Serving local buyers first?",
+      description:
+        "Use the local business page if the website needs to support local trust, call intent, and clearer service-area conversion.",
+      href: "/local-business/",
+      label: "Open Local Business Service",
+    },
+  ],
+  "why-your-website-isnt-getting-leads": [
+    {
+      title: "Need a direct diagnosis before changing the site?",
+      description:
+        "Start with a website audit if the lead problem needs a clear fix order before redesign or traffic scale.",
+      href: "/services/website-audit/",
+      label: "Open Website Audit",
+    },
+  ],
+  "high-converting-landing-pages-guide": [
+    {
+      title: "Need a focused landing page instead of a generic page?",
+      description:
+        "Use the landing page design service when paid traffic, campaigns, or outreach need one clear conversion path.",
+      href: "/services/landing-page-design/",
+      label: "Review Landing Page Design",
+    },
+  ],
+  "how-to-build-a-small-business-website-that-converts": [
+    {
+      title: "Need the small-business build handled for you?",
+      description:
+        "Use the business website design service for structure, trust, and conversion flow built around small-business buyer intent.",
+      href: "/services/business-website-design/",
+      label: "Review Business Website Design",
+    },
+    {
+      title: "Need a service-business-first path?",
+      description:
+        "Open the local business page if the main goal is stronger local trust, clearer service pages, and more enquiries.",
+      href: "/local-business/",
+      label: "Open Local Business Service",
+    },
+  ],
+  "high-converting-service-page": [
+    {
+      title: "Need service pages rebuilt around conversion?",
+      description:
+        "Use the website redesign service if the current site structure is weak and the top service pages need a stronger decision flow.",
+      href: "/services/website-redesign/",
+      label: "Review Website Redesign",
+    },
+  ],
+  "website-redesign-cost-breakdown-nigeria": [
+    {
+      title: "Need redesign scope before you commit budget?",
+      description:
+        "Use the website redesign service to review the likely scope, tradeoffs, and conversion priorities before implementation starts.",
+      href: "/services/website-redesign/",
+      label: "Review Website Redesign",
+    },
+  ],
+  "how-to-audit-slow-wordpress-site": [
+    {
+      title: "Need the diagnosis mapped in priority order?",
+      description:
+        "Start with a website audit if the site is slow, unclear, or underperforming and you need the highest-impact fixes first.",
+      href: "/services/website-audit/",
+      label: "Open Website Audit",
+    },
+  ],
+  "conversion-audit-checklist-service-homepage": [
+    {
+      title: "Need this checklist translated into a practical fix plan?",
+      description:
+        "Use the website audit service if you want the homepage issues diagnosed and prioritized before more traffic is sent in.",
+      href: "/services/website-audit/",
+      label: "Open Website Audit",
+    },
+  ],
+  "small-business-website-redesign-checklist": [
+    {
+      title: "Need redesign implementation instead of another planning round?",
+      description:
+        "Use the website redesign service when the structure, trust flow, and service hierarchy need to be rebuilt properly.",
+      href: "/services/website-redesign/",
+      label: "Review Website Redesign",
+    },
+  ],
+  "04-writing-service-pages-that-convert": [
+    {
+      title: "Need service pages that support real enquiries?",
+      description:
+        "Use the business website design service if the core service pages need better structure, stronger proof, and clearer CTA flow.",
+      href: "/services/business-website-design/",
+      label: "Review Business Website Design",
+    },
+  ],
+  "05-premium-design-without-slow-pages": [
+    {
+      title: "Need premium presentation without performance drag?",
+      description:
+        "Use the performance optimisation service when the site looks acceptable but still feels too heavy on mobile or under load.",
+      href: "/services/performance-optimisation/",
+      label: "Review Performance Optimisation",
+    },
+  ],
+  "03-seo-migration-without-losing-traffic": [
+    {
+      title: "Need a safer implementation path before migration work starts?",
+      description:
+        "Use the website audit service if redirects, canonical cleanup, or page quality need a controlled rollout before launch.",
+      href: "/services/website-audit/",
+      label: "Open Website Audit",
+    },
+  ],
+};
+
 function slugifyHeading(text: string) {
   return text
     .toLowerCase()
@@ -133,6 +266,7 @@ export default async function BlogPostPage({
     topic: guide.topic,
     readTime: guide.readTime,
   }));
+  const priorityServiceLinks = PRIORITY_POST_SERVICE_LINKS[post.slug] || [];
 
   const articleSchema = buildArticleSchema({
     url: canonicalUrl,
@@ -295,6 +429,16 @@ export default async function BlogPostPage({
               blogCategory={post.category}
               blogTags={tags}
             />
+
+            {priorityServiceLinks.map((link) => (
+              <InternalResourceCallout
+                key={link.href}
+                title={link.title}
+                description={link.description}
+                href={link.href}
+                label={link.label}
+              />
+            ))}
 
             {hasEnhancedBlocks ? (
               <FAQBlock

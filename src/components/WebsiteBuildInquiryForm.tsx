@@ -78,6 +78,10 @@ export default function WebsiteBuildInquiryForm() {
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
+    if (status === "sending") {
+      return;
+    }
+
     const name = values.name.trim();
     const businessName = values.businessName.trim();
     const email = values.email.trim();
@@ -144,6 +148,7 @@ export default function WebsiteBuildInquiryForm() {
       setStatus("success");
       setStatusMessage("Inquiry received. We will send your next steps within one business day.");
       setValues(INITIAL_VALUES);
+      setTurnstileToken("");
       setTurnstileResetKey((current) => current + 1);
 
       pushLeadEvent({

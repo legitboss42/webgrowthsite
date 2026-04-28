@@ -27,6 +27,7 @@ const securityHeaders = [
 
 const nextConfig = {
   reactStrictMode: true,
+  trailingSlash: true,
   // Keep Vercel builds on the default `.next` output so deployment manifests resolve.
   // Optional local override: WEBGROWTH_ALT_DISTDIR=1
   distDir:
@@ -51,6 +52,26 @@ const nextConfig = {
       {
         source: "/home",
         destination: "/",
+        permanent: true,
+      },
+      {
+        source: "/home/",
+        destination: "/",
+        permanent: true,
+      },
+      {
+        source: "/sitemap-index.xml/",
+        destination: "/sitemap-index.xml",
+        permanent: true,
+      },
+      {
+        source: "/sitemap-pages.xml/",
+        destination: "/sitemap-pages.xml",
+        permanent: true,
+      },
+      {
+        source: "/sitemap-blog.xml/",
+        destination: "/sitemap-blog.xml",
         permanent: true,
       },
       {

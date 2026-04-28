@@ -1,49 +1,8 @@
 import { NextResponse } from "next/server";
+import sitemapConfig from "@/lib/sitemap-config.json";
+import { absoluteUrl } from "@/lib/site";
 
 export const dynamic = "force-static";
-
-const BASE_URL = "https://webgrowth.info";
-
-const STATIC_ROUTES = [
-  "/",
-  "/about",
-  "/editorial-policy",
-  "/launch",
-  "/website-build",
-  "/local-business",
-  "/ecommerce",
-  "/hosting-offer",
-  "/get-started",
-  "/website-design-lagos",
-  "/website-design-united-kingdom",
-  "/portfolio",
-  "/pricing",
-  "/faq",
-  "/web-design-for-real-estate-lagos",
-  "/services",
-  "/contact",
-  "/privacy",
-  "/terms",
-];
-
-const SERVICE_ROUTES = [
-  "/services/business-website-design",
-  "/services/landing-page-design",
-  "/services/website-redesign",
-  "/services/ecommerce-website-design",
-  "/services/website-maintenance",
-  "/services/performance-optimisation",
-  "/services/website-audit",
-  "/services/email-marketing-setup-strategy",
-  "/services/search-engine-optimisation",
-  "/services/google-my-business-setup-optimisation",
-  "/services/booking-platform-setup-integration",
-  "/services/crm-system-setup-configuration",
-  "/services/marketing-automation-build-implementation",
-  "/services/analytics-tracking-setup",
-  "/services/domain-registration-hosting-guidance",
-  "/services/lead-magnet-strategy-build",
-];
 
 type SitemapUrl = {
   loc: string;
@@ -61,8 +20,8 @@ function escapeXml(value: string) {
 
 export function GET() {
   const generatedAt = new Date().toISOString();
-  const urls: SitemapUrl[] = [...STATIC_ROUTES, ...SERVICE_ROUTES].map((path) => ({
-    loc: `${BASE_URL}${path}`,
+  const urls: SitemapUrl[] = sitemapConfig.pagePaths.map((path) => ({
+    loc: absoluteUrl(path),
     lastmod: generatedAt,
   }));
 

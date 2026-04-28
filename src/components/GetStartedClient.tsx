@@ -143,6 +143,7 @@ export default function GetStartedClient() {
 
   async function onSubmitDetails(e: FormEvent) {
     e.preventDefault();
+    if (isSubmitting) return;
     if (!projectNeed || !hasDomain) return;
     if (!fullName.trim() || !businessName.trim() || !email.trim() || !phoneOrWhatsApp.trim()) return;
 
@@ -190,6 +191,8 @@ export default function GetStartedClient() {
       }
 
       setStep(4);
+      setTurnstileToken("");
+      setTurnstileResetKey((current) => current + 1);
     } catch {
       setSubmitError("Network error. Use email, call booking, or WhatsApp below.");
       setTurnstileResetKey((current) => current + 1);

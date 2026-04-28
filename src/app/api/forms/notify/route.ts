@@ -7,12 +7,14 @@ import {
   hasJsonContentType,
   isAllowedOrigin,
   isLikelyAutomationRequest,
+  isValidEmail,
   sanitizeText,
 } from "@/lib/security";
 import { verifyTurnstileToken } from "@/lib/turnstile";
 
 const ADMIN_EMAIL = "admin@webgrowth.info";
 export const runtime = "nodejs";
+const MAX_CONTENT_LENGTH_BYTES = 25_000;
 
 type NotifyBody = {
   formType?: string;
@@ -20,6 +22,13 @@ type NotifyBody = {
   fields?: Record<string, unknown>;
   turnstileToken?: string;
 };
+
+function getContentLength(req: Request) {
+  const raw = req.headers.get("content-length");
+  if (!raw) return null;
+  const parsed = Number(raw);
+  return Number.isFinite(parsed) && parsed >= 0 ? parsed : null;
+}
 
 export async function POST(req: Request) {
   try {
@@ -29,6 +38,11 @@ export async function POST(req: Request) {
 
     if (!hasJsonContentType(req)) {
       return NextResponse.json({ error: "Unsupported content type." }, { status: 415 });
+    }
+
+    const contentLength = getContentLength(req);
+    if (contentLength !== null && contentLength > MAX_CONTENT_LENGTH_BYTES) {
+      return NextResponse.json({ error: "Request payload is too large." }, { status: 413 });
     }
 
     if (isLikelyAutomationRequest(req)) {
@@ -54,9 +68,27 @@ export async function POST(req: Request) {
     const turnstileToken = sanitizeText(body.turnstileToken, 2048);
     const fields = body.fields && typeof body.fields === "object" ? body.fields : {};
     const normalizedEntries = Object.entries(fields).slice(0, 20);
+    const email = sanitizeText(fields.email, 254).toLowerCase();
+    const nonEmptyFieldCount = normalizedEntries.filter(([, value]) =>
+      Boolean(sanitizeText(value, 1200))
+    ).length;
     const isProduction = process.env.NODE_ENV === "production";
     const hasTurnstileSecret = Boolean(process.env.TURNSTILE_SECRET_KEY);
     const shouldRequireTurnstile = isProduction || hasTurnstileSecret;
+
+    if (nonEmptyFieldCount === 0) {
+      return NextResponse.json(
+        { error: "Missing required fields." },
+        { status: 400 }
+      );
+    }
+
+    if (!email || !isValidEmail(email)) {
+      return NextResponse.json(
+        { error: "Please enter a valid email address." },
+        { status: 400 }
+      );
+    }
 
     if (shouldRequireTurnstile && !turnstileToken) {
       return NextResponse.json(

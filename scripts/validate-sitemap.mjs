@@ -2,72 +2,72 @@ import fs from "fs";
 import path from "path";
 
 const root = process.cwd();
-const metadataSitemapPath = path.join(root, "src", "app", "sitemap.ts");
-const routeSitemapPath = path.join(root, "src", "app", "sitemap.xml", "route.ts");
-const servicesDir = path.join(root, "src", "app", "services");
+const configPath = path.join(root, "src", "lib", "sitemap-config.json");
 const publicRobots = path.join(root, "public", "robots.txt");
 const publicSitemap = path.join(root, "public", "sitemap.xml");
-
-const sitemapPath = fs.existsSync(routeSitemapPath)
-  ? routeSitemapPath
-  : metadataSitemapPath;
+const requiredRoutes = [
+  path.join(root, "src", "app", "sitemap-index.xml", "route.ts"),
+  path.join(root, "src", "app", "sitemap-pages.xml", "route.ts"),
+  path.join(root, "src", "app", "sitemap-blog.xml", "route.ts"),
+  path.join(root, "src", "app", "robots.ts"),
+];
 
 function fail(message) {
   console.error(`SITEMAP CHECK FAILED: ${message}`);
   process.exit(1);
 }
 
-if (!fs.existsSync(sitemapPath)) {
-  fail("Missing sitemap source (expected src/app/sitemap.ts or src/app/sitemap.xml/route.ts)");
+if (!fs.existsSync(configPath)) {
+  fail("Missing src/lib/sitemap-config.json");
 }
 
-// Guard against stale static files
 if (fs.existsSync(publicRobots)) {
   fail("public/robots.txt exists. Remove it to use the dynamic robots.ts");
 }
+
 if (fs.existsSync(publicSitemap)) {
-  fail("public/sitemap.xml exists. Remove it to use the dynamic sitemap.ts");
+  fail("public/sitemap.xml exists. Remove it to use the dynamic sitemap route");
 }
 
-// Extract service slugs from sitemap.ts
-const sitemapSource = fs.readFileSync(sitemapPath, "utf8");
-const serviceSlugMatches = [...sitemapSource.matchAll(/\/services\/([a-z0-9-]+)/g)];
-const serviceSlugsFromSitemap = new Set(
-  serviceSlugMatches.map((m) => m[1]).filter(Boolean)
-);
-
-// Extract service directory slugs from filesystem
-if (!fs.existsSync(servicesDir)) {
-  fail("Missing src/app/services directory");
+for (const routePath of requiredRoutes) {
+  if (!fs.existsSync(routePath)) {
+    fail(`Missing route file: ${path.relative(root, routePath)}`);
+  }
 }
 
-const serviceSlugsFromFs = new Set(
-  fs
-    .readdirSync(servicesDir, { withFileTypes: true })
-    .filter((entry) => entry.isDirectory())
-    .map((entry) => entry.name)
-);
+const config = JSON.parse(fs.readFileSync(configPath, "utf8"));
+const pagePaths = Array.isArray(config.pagePaths) ? config.pagePaths : [];
+const blogSlugs = Array.isArray(config.blogSlugs) ? config.blogSlugs : [];
 
-const missingInSitemap = [...serviceSlugsFromFs].filter(
-  (slug) => !serviceSlugsFromSitemap.has(slug)
-);
-const missingOnDisk = [...serviceSlugsFromSitemap].filter(
-  (slug) => !serviceSlugsFromFs.has(slug)
-);
+if (!pagePaths.length) {
+  fail("sitemap-config.json pagePaths is empty");
+}
 
-if (missingInSitemap.length || missingOnDisk.length) {
-  const details = [
-    missingInSitemap.length
-      ? `Missing in sitemap source: ${missingInSitemap.join(", ")}`
-      : null,
-    missingOnDisk.length
-      ? `Missing on disk: ${missingOnDisk.join(", ")}`
-      : null,
-  ]
-    .filter(Boolean)
-    .join(" | ");
+if (!blogSlugs.length) {
+  fail("sitemap-config.json blogSlugs is empty");
+}
 
-  fail(details || "Service slug mismatch");
+const duplicatePagePaths = pagePaths.filter((path, index) => pagePaths.indexOf(path) !== index);
+const duplicateBlogSlugs = blogSlugs.filter((slug, index) => blogSlugs.indexOf(slug) !== index);
+
+if (duplicatePagePaths.length) {
+  fail(`Duplicate page paths found: ${duplicatePagePaths.join(", ")}`);
+}
+
+if (duplicateBlogSlugs.length) {
+  fail(`Duplicate blog slugs found: ${duplicateBlogSlugs.join(", ")}`);
+}
+
+if (pagePaths.some((entry) => /\/home\/?$/i.test(entry))) {
+  fail("pagePaths contains /home or /home/");
+}
+
+if (
+  pagePaths.some((entry) =>
+    ["/sitemap-index.xml", "/sitemap-pages.xml", "/sitemap-blog.xml", "/sitemap.xml"].includes(entry)
+  )
+) {
+  fail("pagePaths contains sitemap XML URLs");
 }
 
 console.log("Sitemap validation passed.");

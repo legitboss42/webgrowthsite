@@ -3,10 +3,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef } from "react";
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import CTASection from "@/components/CTASection";
 import FAQAccordion from "@/components/FAQAccordion";
+import { loadGsap } from "@/lib/loadGsap";
 
 const customCodeWins = [
   {
@@ -158,8 +157,6 @@ export default function AboutClient() {
   const pageRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    gsap.registerPlugin(ScrollTrigger);
-
     const root = pageRef.current;
     if (!root) return;
 
@@ -169,34 +166,47 @@ export default function AboutClient() {
 
     if (reduceMotion) return;
 
-    const ctx = gsap.context(() => {
-      gsap.fromTo(
-        "[data-about-hero]",
-        { opacity: 0, y: 36, filter: "blur(10px)" },
-        { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.9, ease: "power3.out" }
-      );
+    let active = true;
+    let cleanup: (() => void) | undefined;
 
-      gsap.utils.toArray<HTMLElement>("[data-reveal]").forEach((section) => {
+    void (async () => {
+      const { gsap, ScrollTrigger } = await loadGsap();
+      if (!active) return;
+
+      const ctx = gsap.context(() => {
         gsap.fromTo(
-          section,
-          { opacity: 0, y: 54, filter: "blur(8px)" },
-          {
-            opacity: 1,
-            y: 0,
-            filter: "blur(0px)",
-            duration: 0.85,
-            ease: "power3.out",
-            scrollTrigger: {
-              trigger: section,
-              start: "top 76%",
-            },
-          }
+          "[data-about-hero]",
+          { opacity: 0, y: 36, filter: "blur(10px)" },
+          { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.9, ease: "power3.out" }
         );
-      });
-    }, root);
 
-    ScrollTrigger.refresh();
-    return () => ctx.revert();
+        gsap.utils.toArray<HTMLElement>("[data-reveal]").forEach((section) => {
+          gsap.fromTo(
+            section,
+            { opacity: 0, y: 54, filter: "blur(8px)" },
+            {
+              opacity: 1,
+              y: 0,
+              filter: "blur(0px)",
+              duration: 0.85,
+              ease: "power3.out",
+              scrollTrigger: {
+                trigger: section,
+                start: "top 76%",
+              },
+            }
+          );
+        });
+      }, root);
+
+      ScrollTrigger.refresh();
+      cleanup = () => ctx.revert();
+    })();
+
+    return () => {
+      active = false;
+      cleanup?.();
+    };
   }, []);
 
   return (

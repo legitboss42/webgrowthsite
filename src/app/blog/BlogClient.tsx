@@ -3,12 +3,12 @@
 import { useEffect, useMemo, useRef, useState, type MouseEvent } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { gsap } from "gsap";
 import ClarityPageTags from "@/components/analytics/ClarityPageTags";
 import BlogInlineCTA from "@/components/BlogInlineCTA";
 import EntitySnapshotSection from "@/components/EntitySnapshotSection";
 import EditorialTrustNote from "@/components/EditorialTrustNote";
 import HostingSupportBlock from "@/components/HostingSupportBlock";
+import { loadGsap } from "@/lib/loadGsap";
 
 type Props = {
   posts: BlogPostPreview[];
@@ -167,26 +167,39 @@ export default function BlogClient({ posts }: Props) {
     const root = rootRef.current;
     if (!root) return;
 
-    const ctx = gsap.context(() => {
-      gsap.from(
-        "[data-hero-item]",
-        { y: 16, duration: 0.62, stagger: 0.06, ease: "power3.out", clearProps: "transform" }
-      );
+    let active = true;
+    let cleanup: (() => void) | undefined;
 
-      gsap.from(
-        "[data-card]",
-        {
-          y: 14,
-          duration: 0.55,
-          stagger: 0.05,
-          ease: "power3.out",
-          delay: 0.12,
-          clearProps: "transform",
-        }
-      );
-    }, root);
+    void (async () => {
+      const { gsap } = await loadGsap();
+      if (!active) return;
 
-    return () => ctx.revert();
+      const ctx = gsap.context(() => {
+        gsap.from(
+          "[data-hero-item]",
+          { y: 16, duration: 0.62, stagger: 0.06, ease: "power3.out", clearProps: "transform" }
+        );
+
+        gsap.from(
+          "[data-card]",
+          {
+            y: 14,
+            duration: 0.55,
+            stagger: 0.05,
+            ease: "power3.out",
+            delay: 0.12,
+            clearProps: "transform",
+          }
+        );
+      }, root);
+
+      cleanup = () => ctx.revert();
+    })();
+
+    return () => {
+      active = false;
+      cleanup?.();
+    };
   }, [posts]);
 
   useEffect(() => {
@@ -197,17 +210,28 @@ export default function BlogClient({ posts }: Props) {
 
     if (reduceMotion) return;
 
-    gsap.killTweensOf("[data-card]");
-    gsap.from(
-      "[data-card]",
-      {
-        y: 10,
-        duration: 0.42,
-        stagger: 0.03,
-        ease: "power3.out",
-        clearProps: "transform",
-      }
-    );
+    let active = true;
+
+    void (async () => {
+      const { gsap } = await loadGsap();
+      if (!active) return;
+
+      gsap.killTweensOf("[data-card]");
+      gsap.from(
+        "[data-card]",
+        {
+          y: 10,
+          duration: 0.42,
+          stagger: 0.03,
+          ease: "power3.out",
+          clearProps: "transform",
+        }
+      );
+    })();
+
+    return () => {
+      active = false;
+    };
   }, [query, filterMode, activeCategory, activeTag, filtered.length]);
 
   function onHeroMouseMove(e: MouseEvent<HTMLElement>) {

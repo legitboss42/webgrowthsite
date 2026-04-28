@@ -69,6 +69,10 @@ export default function ContactClient() {
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
 
+    if (status === "sending") {
+      return;
+    }
+
     if (isTurnstileEnabled && !turnstileToken) {
       setStatus("error");
       setStatusMsg("Complete the spam check, then send your request again.");
@@ -107,6 +111,8 @@ export default function ContactClient() {
       }
 
       setStatus("success");
+      setTurnstileToken("");
+      setTurnstileResetKey((current) => current + 1);
 
       const payload = {
         form_name: "contact_form",

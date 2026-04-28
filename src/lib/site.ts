@@ -14,8 +14,17 @@ export const BUSINESS_PHONE_DISPLAY = "+234 806 670 6336";
 export const SERVICE_AREA = ["Lagos", "Nigeria"] as const;
 
 export function absoluteUrl(path = "/") {
-  if (/^https?:\/\//i.test(path)) return path;
-  return new URL(path, SITE_URL).toString();
+  const url = /^https?:\/\//i.test(path) ? new URL(path) : new URL(path, SITE_URL);
+
+  if (
+    url.origin === SITE_URL &&
+    !url.pathname.endsWith("/") &&
+    !/\.[a-z0-9]+$/i.test(url.pathname)
+  ) {
+    url.pathname = `${url.pathname}/`;
+  }
+
+  return url.toString();
 }
 
 export function buildWhatsAppUrl(message: string) {

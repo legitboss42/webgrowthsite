@@ -3,13 +3,21 @@ import TrackedLink from "@/components/analytics/TrackedLink";
 import { CONTACT_EMAIL, CONTACT_EMAIL_HREF, buildWhatsAppUrl } from "@/lib/site";
 
 const footerLinks = [
-  { href: "/launch", label: "Launch" },
-  { href: "/services", label: "Services" },
-  { href: "/about", label: "About" },
-  { href: "/portfolio", label: "Portfolio" },
-  { href: "/blog", label: "Blog" },
-  { href: "/pricing", label: "Pricing" },
-  { href: "/contact", label: "Contact" },
+  { href: "/services/", label: "Services" },
+  { href: "/services/business-website-design/", label: "Business Website Design" },
+  { href: "/services/website-redesign/", label: "Website Redesign" },
+  { href: "/services/landing-page-design/", label: "Landing Page Design" },
+  { href: "/services/ecommerce-website-design/", label: "Ecommerce Website Design" },
+  { href: "/services/website-audit/", label: "Website Audit" },
+  { href: "/contact/", label: "Contact" },
+];
+
+const secondaryFooterLinks = [
+  { href: "/about/", label: "About" },
+  { href: "/portfolio/", label: "Portfolio" },
+  { href: "/blog/", label: "Blog" },
+  { href: "/pricing/", label: "Pricing" },
+  { href: "/faq/", label: "FAQ" },
 ];
 
 export default function Footer() {
@@ -35,10 +43,21 @@ export default function Footer() {
 
           <div className="md:justify-self-center">
             <p className="text-sm uppercase tracking-[0.18em] text-emerald-300/80">
-              Links
+              Core Links
             </p>
             <div className="mt-4 grid gap-2 text-sm text-white/64">
               {footerLinks.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="transition hover:text-white"
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </div>
+            <div className="mt-6 grid gap-2 text-sm text-white/52">
+              {secondaryFooterLinks.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}

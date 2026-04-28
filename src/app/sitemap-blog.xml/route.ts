@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
-import { getPosts } from "@/lib/posts";
+import { getPosts, type Post } from "@/lib/posts";
+import sitemapConfig from "@/lib/sitemap-config.json";
+import { absoluteUrl } from "@/lib/site";
 
 export const dynamic = "force-static";
-
-const BASE_URL = "https://webgrowth.info";
 
 type SitemapUrl = {
   loc: string;
@@ -35,20 +35,17 @@ function safeGetPosts() {
 }
 
 export function GET() {
-  const generatedAt = new Date().toISOString();
+  const postMap = new Map(
+    safeGetPosts().map((post) => [post.slug, post] as const)
+  );
 
-  const blogUrls: SitemapUrl[] = [
-    {
-      loc: `${BASE_URL}/blog`,
-      lastmod: generatedAt,
-    },
-    ...safeGetPosts()
-      .filter((post) => typeof post?.slug === "string" && post.slug.length > 0)
-      .map((post) => ({
-        loc: `${BASE_URL}/blog/${post.slug}`,
-        lastmod: toValidDate(post.date),
-      })),
-  ];
+  const blogUrls: SitemapUrl[] = sitemapConfig.blogSlugs
+    .map((slug) => postMap.get(slug))
+    .filter((post): post is Post => Boolean(post && typeof post.slug === "string"))
+    .map((post) => ({
+      loc: absoluteUrl(`/blog/${post.slug}`),
+      lastmod: toValidDate(post.updatedAt || post.lastReviewedAt || post.date),
+    }));
 
   const body = [
     '<?xml version="1.0" encoding="UTF-8"?>',

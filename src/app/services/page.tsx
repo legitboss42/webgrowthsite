@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import ServicesClient from "@/components/ServicesClient";
 import { NEW_SERVICES_LIST } from "@/lib/newServiceConfigs";
+import { absoluteUrl } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Web Design Services Agency | Web Growth",
@@ -19,12 +20,12 @@ export const metadata: Metadata = {
     "small business website design",
     "conversion-focused web design",
   ],
-  alternates: { canonical: "https://webgrowth.info/services" },
+  alternates: { canonical: absoluteUrl("/services") },
   openGraph: {
     title: "Web Design Services Agency | Web Growth",
     description:
       "Conversion-focused website services for businesses that need measurable performance.",
-    url: "https://webgrowth.info/services",
+    url: absoluteUrl("/services"),
     siteName: "Web Growth",
     images: [
       {

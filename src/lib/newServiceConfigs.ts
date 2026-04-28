@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { warnOnServiceQuality } from "@/lib/contentQuality";
 import { CORE_SERVICE_PAGES } from "@/lib/coreServiceConfigs";
+import { absoluteUrl } from "@/lib/site";
 
 export type ServiceListItem = {
   title: string;
@@ -914,7 +915,25 @@ warnOnServiceQuality(Object.values(ALL_SERVICE_PAGES));
 
 export const NEW_SERVICES_LIST: ServiceListItem[] = Object.values(
   ALL_SERVICE_PAGES
-).map((service) => {
+)
+  .sort((a, b) => {
+    const serviceOrder = [
+      "business-website-design",
+      "website-redesign",
+      "landing-page-design",
+      "ecommerce-website-design",
+      "website-audit",
+      "performance-optimisation",
+    ];
+    const aIndex = serviceOrder.indexOf(a.slug);
+    const bIndex = serviceOrder.indexOf(b.slug);
+
+    if (aIndex !== -1 && bIndex !== -1) return aIndex - bIndex;
+    if (aIndex !== -1) return -1;
+    if (bIndex !== -1) return 1;
+    return a.title.localeCompare(b.title);
+  })
+  .map((service) => {
   const imageBySlug: Record<string, string> = {
     "email-marketing-setup-strategy": "/images/services/services-support.webp",
     "search-engine-optimisation": "/images/services/services-audit.webp",
@@ -978,7 +997,7 @@ export const NEW_SERVICES_LIST: ServiceListItem[] = Object.values(
   return {
     title: service.title,
     short: service.metaDescription,
-    slug: `/services/${service.slug}`,
+    slug: `/services/${service.slug}/`,
     serviceParam: service.serviceParam,
     bullets: bulletsBySlug[service.slug] ?? ["Strategy", "Implementation", "Optimization"],
     image: imageBySlug[service.slug] ?? "/images/services/services-cta.webp",
@@ -991,6 +1010,7 @@ export function buildServiceMetadata(
 ): Metadata {
   const title = service.seoTitle ?? service.title;
   const description = service.seoDescription ?? service.metaDescription;
+  const normalizedCanonicalUrl = absoluteUrl(canonicalUrl);
 
   return {
     title,
@@ -1001,12 +1021,12 @@ export function buildServiceMetadata(
       ...service.keywords,
     ],
     alternates: {
-      canonical: canonicalUrl,
+      canonical: normalizedCanonicalUrl,
     },
     openGraph: {
       title,
       description,
-      url: canonicalUrl,
+      url: normalizedCanonicalUrl,
       siteName: "Web Growth",
       images: [
         {

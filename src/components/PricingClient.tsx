@@ -3,8 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { loadGsap } from "@/lib/loadGsap";
 
 type Package = {
   name: string;
@@ -194,8 +193,6 @@ export default function PricingClient() {
   );
 
   useEffect(() => {
-    gsap.registerPlugin(ScrollTrigger);
-
     const reduceMotion =
       typeof window !== "undefined" &&
       window.matchMedia &&
@@ -203,69 +200,82 @@ export default function PricingClient() {
 
     if (reduceMotion) return;
 
-    if (topRef.current) {
-      gsap.fromTo(
-        ".pricing-hero",
-        { opacity: 0, y: 26, filter: "blur(6px)" },
-        {
-          opacity: 1,
-          y: 0,
-          filter: "blur(0px)",
-          duration: 0.9,
-          ease: "power3.out",
-        }
-      );
-    }
+    let active = true;
+    let cleanup: (() => void) | undefined;
 
-    if (gridRef.current) {
-      gsap.fromTo(
-        ".pricing-card",
-        { opacity: 0, y: 60, scale: 0.98, filter: "blur(6px)" },
-        {
-          opacity: 1,
-          y: 0,
-          scale: 1,
-          filter: "blur(0px)",
-          duration: 1,
-          ease: "power3.out",
-          stagger: 0.12,
-          scrollTrigger: { trigger: gridRef.current, start: "top 75%" },
-        }
-      );
-    }
+    void (async () => {
+      const { gsap, ScrollTrigger } = await loadGsap();
+      if (!active) return;
 
-    if (notesRef.current) {
-      gsap.fromTo(
-        ".pricing-note",
-        { opacity: 0, y: 50, filter: "blur(6px)" },
-        {
-          opacity: 1,
-          y: 0,
-          filter: "blur(0px)",
-          duration: 1,
-          ease: "power3.out",
-          scrollTrigger: { trigger: notesRef.current, start: "top 80%" },
-        }
-      );
-    }
+      if (topRef.current) {
+        gsap.fromTo(
+          ".pricing-hero",
+          { opacity: 0, y: 26, filter: "blur(6px)" },
+          {
+            opacity: 1,
+            y: 0,
+            filter: "blur(0px)",
+            duration: 0.9,
+            ease: "power3.out",
+          }
+        );
+      }
 
-    if (faqRef.current) {
-      gsap.fromTo(
-        ".pricing-faq",
-        { opacity: 0, y: 50, filter: "blur(6px)" },
-        {
-          opacity: 1,
-          y: 0,
-          filter: "blur(0px)",
-          duration: 1,
-          ease: "power3.out",
-          scrollTrigger: { trigger: faqRef.current, start: "top 80%" },
-        }
-      );
-    }
+      if (gridRef.current) {
+        gsap.fromTo(
+          ".pricing-card",
+          { opacity: 0, y: 60, scale: 0.98, filter: "blur(6px)" },
+          {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            filter: "blur(0px)",
+            duration: 1,
+            ease: "power3.out",
+            stagger: 0.12,
+            scrollTrigger: { trigger: gridRef.current, start: "top 75%" },
+          }
+        );
+      }
 
-    ScrollTrigger.refresh();
-    return () => ScrollTrigger.getAll().forEach((t) => t.kill());
+      if (notesRef.current) {
+        gsap.fromTo(
+          ".pricing-note",
+          { opacity: 0, y: 50, filter: "blur(6px)" },
+          {
+            opacity: 1,
+            y: 0,
+            filter: "blur(0px)",
+            duration: 1,
+            ease: "power3.out",
+            scrollTrigger: { trigger: notesRef.current, start: "top 80%" },
+          }
+        );
+      }
+
+      if (faqRef.current) {
+        gsap.fromTo(
+          ".pricing-faq",
+          { opacity: 0, y: 50, filter: "blur(6px)" },
+          {
+            opacity: 1,
+            y: 0,
+            filter: "blur(0px)",
+            duration: 1,
+            ease: "power3.out",
+            scrollTrigger: { trigger: faqRef.current, start: "top 80%" },
+          }
+        );
+      }
+
+      ScrollTrigger.refresh();
+      cleanup = () => ScrollTrigger.getAll().forEach((t) => t.kill());
+    })();
+
+    return () => {
+      active = false;
+      cleanup?.();
+    };
   }, []);
 
   return (

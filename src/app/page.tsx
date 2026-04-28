@@ -1,4 +1,5 @@
 import AnswerHighlightsSection from "@/components/AnswerHighlightsSection";
+import CorePageLinks from "@/components/CorePageLinks";
 import FAQSection from "@/components/FAQSection";
 import FinalCTASection from "@/components/FinalCTASection";
 import HeroSection from "@/components/HeroSection";
@@ -78,6 +79,79 @@ const homepageWhatYouGet = [
   },
 ] as const;
 
+const homepagePriorityLinks = [
+  {
+    href: "/services/business-website-design/",
+    label: "Core service",
+    title: "Business Website Design",
+    description:
+      "For service brands that need clearer positioning, better trust, and stronger enquiry quality.",
+  },
+  {
+    href: "/services/website-redesign/",
+    label: "Core service",
+    title: "Website Redesign",
+    description:
+      "For outdated websites that need a sharper structure, better conversion flow, and stronger trust.",
+  },
+  {
+    href: "/services/landing-page-design/",
+    label: "Core service",
+    title: "Landing Page Design",
+    description:
+      "For ad, outreach, or campaign traffic that needs one focused path to conversion.",
+  },
+  {
+    href: "/services/ecommerce-website-design/",
+    label: "Core service",
+    title: "Ecommerce Website Design",
+    description:
+      "For storefronts that need better product clarity, mobile trust, and stronger purchase intent.",
+  },
+  {
+    href: "/services/performance-optimisation/",
+    label: "Core service",
+    title: "Performance Optimisation",
+    description:
+      "For websites that feel heavy on mobile and are leaking trust before buyers engage.",
+  },
+  {
+    href: "/services/website-audit/",
+    label: "Core service",
+    title: "Website Audit",
+    description:
+      "For businesses that need a direct diagnosis before investing in a redesign or traffic scale.",
+  },
+  {
+    href: "/local-business/",
+    label: "Market focus",
+    title: "Local Business Websites",
+    description:
+      "For service businesses that need stronger local trust, phone-call intent, and booking flow.",
+  },
+  {
+    href: "/ecommerce/",
+    label: "Market focus",
+    title: "Ecommerce Websites",
+    description:
+      "For premium ecommerce brands that need faster pages and a cleaner buying journey.",
+  },
+  {
+    href: "/website-design-lagos/",
+    label: "Location",
+    title: "Website Design Lagos",
+    description:
+      "For Lagos-focused buyers comparing website design options and local service fit.",
+  },
+  {
+    href: "/contact/",
+    label: "Next step",
+    title: "Request a Quote",
+    description:
+      "Use the contact page when you already know the problem and want the fastest route to a scoped recommendation.",
+  },
+] as const;
+
 export const metadata = buildPageMetadata({
   title: "High-Performance Web Design Services | Web Growth",
   description: pageDescription,
@@ -146,6 +220,13 @@ export default function Page() {
           items={homepageWhatYouGet}
           title="What serious brands should expect from a modern website"
           description="Performance, SEO, design, and conversion support are treated as revenue infrastructure, not decorative extras."
+        />
+
+        <CorePageLinks
+          eyebrow="Priority paths"
+          title="Start with the page that matches the problem costing you revenue"
+          description="These are the main crawl paths and service routes Web Growth wants serious buyers to use first."
+          links={homepagePriorityLinks}
         />
 
         <PricingSection

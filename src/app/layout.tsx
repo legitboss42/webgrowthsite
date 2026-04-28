@@ -13,14 +13,14 @@ import {
   defaultSiteMetadata,
 } from "@/lib/seo";
 import { getAuthorProfile } from "@/lib/authors";
-import { DEFAULT_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site";
+import { absoluteUrl, DEFAULT_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site";
 import { WebVitals } from "./components/WebVitals";
 import "./globals.css";
 
 export const metadata: Metadata = {
   ...defaultSiteMetadata,
   alternates: {
-    canonical: SITE_URL,
+    canonical: absoluteUrl("/"),
   },
   keywords: [
     "web design",
@@ -33,7 +33,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: SITE_NAME,
     description: DEFAULT_DESCRIPTION,
-    url: SITE_URL,
+    url: absoluteUrl("/"),
     siteName: SITE_NAME,
     images: [
       {
@@ -146,8 +146,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
         <StructuredData data={siteSchemas} />
         {GA_ID ? <GoogleAnalytics gaId={GA_ID} /> : null}
-        <Analytics />
-        <SpeedInsights />
+        {IS_PRODUCTION ? <Analytics /> : null}
+        {IS_PRODUCTION ? <SpeedInsights /> : null}
         {IS_PRODUCTION ? (
           <noscript>
             <iframe
@@ -162,7 +162,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Header />
         <main className="pt-28">{children}</main>
         <Footer />
-        <WebVitals />
+        {IS_PRODUCTION ? <WebVitals /> : null}
       </body>
     </html>
   );

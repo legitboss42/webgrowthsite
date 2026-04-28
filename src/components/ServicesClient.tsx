@@ -2,11 +2,10 @@
 
 import { useEffect, useMemo, useRef } from "react";
 import Link from "next/link";
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 import SectionHeading from "@/components/SectionHeading";
 import CTASection from "@/components/CTASection";
+import { loadGsap } from "@/lib/loadGsap";
 
 export type Service = {
   title: string;
@@ -99,8 +98,6 @@ export default function ServicesClient({ services: servicesProp }: Props) {
   );
 
   useEffect(() => {
-    gsap.registerPlugin(ScrollTrigger);
-
     const reduceMotion =
       typeof window !== "undefined" &&
       window.matchMedia &&
@@ -111,43 +108,53 @@ export default function ServicesClient({ services: servicesProp }: Props) {
     const root = pageRef.current;
     if (!root) return;
 
-    // Section reveals
-    root.querySelectorAll("[data-reveal]").forEach((section) => {
-      const targets = section.querySelectorAll("[data-reveal-item]");
-      gsap.fromTo(
-        targets,
-        { opacity: 0, y: 70, filter: "blur(6px)" },
-        {
-          opacity: 1,
-          y: 0,
-          filter: "blur(0px)",
-          duration: 1,
-          ease: "power3.out",
-          stagger: 0.08,
-          scrollTrigger: {
-            trigger: section,
-            start: "top 75%",
-          },
-        }
-      );
-    });
+    let active = true;
+    let cleanup: (() => void) | undefined;
 
-    // Subtle parallax background dots
-    gsap.to(".services-parallax", {
-      yPercent: -10,
-      ease: "none",
-      scrollTrigger: {
-        trigger: root,
-        start: "top top",
-        end: "bottom bottom",
-        scrub: 0.6,
-      },
-    });
+    void (async () => {
+      const { gsap, ScrollTrigger } = await loadGsap();
+      if (!active) return;
 
-    ScrollTrigger.refresh();
+      root.querySelectorAll("[data-reveal]").forEach((section) => {
+        const targets = section.querySelectorAll("[data-reveal-item]");
+        gsap.fromTo(
+          targets,
+          { opacity: 0, y: 70, filter: "blur(6px)" },
+          {
+            opacity: 1,
+            y: 0,
+            filter: "blur(0px)",
+            duration: 1,
+            ease: "power3.out",
+            stagger: 0.08,
+            scrollTrigger: {
+              trigger: section,
+              start: "top 75%",
+            },
+          }
+        );
+      });
+
+      gsap.to(".services-parallax", {
+        yPercent: -10,
+        ease: "none",
+        scrollTrigger: {
+          trigger: root,
+          start: "top top",
+          end: "bottom bottom",
+          scrub: 0.6,
+        },
+      });
+
+      ScrollTrigger.refresh();
+      cleanup = () => {
+        ScrollTrigger.getAll().forEach((t) => t.kill());
+      };
+    })();
 
     return () => {
-      ScrollTrigger.getAll().forEach((t) => t.kill());
+      active = false;
+      cleanup?.();
     };
   }, []);
 

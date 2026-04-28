@@ -3,11 +3,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import CTASection from "@/components/CTASection";
 import CaseStudyCard from "@/components/CaseStudyCard";
 import SectionHeading from "@/components/SectionHeading";
+import { loadGsap } from "@/lib/loadGsap";
 import { portfolioCases, type PortfolioCase } from "@/lib/portfolioCases";
 
 type Filter = "All" | PortfolioCase["type"];
@@ -50,8 +49,6 @@ export default function PortfolioClient() {
   }, [filter]);
 
   useEffect(() => {
-    gsap.registerPlugin(ScrollTrigger);
-
     const root = pageRef.current;
     if (!root) return;
 
@@ -61,35 +58,48 @@ export default function PortfolioClient() {
 
     if (reduceMotion) return;
 
-    const ctx = gsap.context(() => {
-      gsap.fromTo(
-        "[data-portfolio-hero]",
-        { opacity: 0, y: 40, filter: "blur(10px)" },
-        { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.95, ease: "power3.out" }
-      );
+    let active = true;
+    let cleanup: (() => void) | undefined;
 
-      gsap.utils.toArray<HTMLElement>("[data-portfolio-reveal]").forEach((element) => {
+    void (async () => {
+      const { gsap, ScrollTrigger } = await loadGsap();
+      if (!active) return;
+
+      const ctx = gsap.context(() => {
         gsap.fromTo(
-          element,
-          { opacity: 0, y: 56, scale: 0.985, filter: "blur(8px)" },
-          {
-            opacity: 1,
-            y: 0,
-            scale: 1,
-            filter: "blur(0px)",
-            duration: 0.9,
-            ease: "power3.out",
-            scrollTrigger: {
-              trigger: element,
-              start: "top 78%",
-            },
-          }
+          "[data-portfolio-hero]",
+          { opacity: 0, y: 40, filter: "blur(10px)" },
+          { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.95, ease: "power3.out" }
         );
-      });
-    }, root);
 
-    ScrollTrigger.refresh();
-    return () => ctx.revert();
+        gsap.utils.toArray<HTMLElement>("[data-portfolio-reveal]").forEach((element) => {
+          gsap.fromTo(
+            element,
+            { opacity: 0, y: 56, scale: 0.985, filter: "blur(8px)" },
+            {
+              opacity: 1,
+              y: 0,
+              scale: 1,
+              filter: "blur(0px)",
+              duration: 0.9,
+              ease: "power3.out",
+              scrollTrigger: {
+                trigger: element,
+                start: "top 78%",
+              },
+            }
+          );
+        });
+      }, root);
+
+      ScrollTrigger.refresh();
+      cleanup = () => ctx.revert();
+    })();
+
+    return () => {
+      active = false;
+      cleanup?.();
+    };
   }, [filter]);
 
   return (

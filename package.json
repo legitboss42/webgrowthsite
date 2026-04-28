@@ -8,6 +8,7 @@
     "build": "node scripts/validate-sitemap.mjs && next build",
     "start": "next start",
     "lint": "eslint .",
+    "seo:validate-sitemap": "node scripts/seo-validate-sitemap.mjs",
     "indexnow:submit": "node scripts/submit-indexnow.mjs",
     "magnets:build": "node scripts/build-magnets.mjs",
     "magnets:watch": "node scripts/watch-magnets.mjs"
