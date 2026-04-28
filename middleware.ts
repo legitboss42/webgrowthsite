@@ -22,5 +22,8 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
+  // Emergency low-CPU mode: keep only the legacy sitemap redirect in middleware.
+  // Move www/apex redirects to Vercel's Domains settings to avoid middleware
+  // running on normal page traffic.
+  matcher: ["/sitemap.xml"],
 };

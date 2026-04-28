@@ -1,8 +1,14 @@
 import { NextResponse } from "next/server";
+import { buildLowCpuJsonResponse, LOW_CPU_EMERGENCY_MODE } from "@/lib/emergency";
 export const runtime = "edge";
 const AI_ENDPOINT_ENABLED = process.env.ENABLE_AI_WIDGET_API === "1";
 
 export async function POST(req: Request) {
+  if (LOW_CPU_EMERGENCY_MODE) {
+    const response = buildLowCpuJsonResponse();
+    return NextResponse.json(response.body, response.init);
+  }
+
   if (!AI_ENDPOINT_ENABLED) {
     return NextResponse.json(
       { error: "Temporarily disabled." },

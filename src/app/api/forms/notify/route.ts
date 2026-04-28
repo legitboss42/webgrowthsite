@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { buildLowCpuJsonResponse, LOW_CPU_EMERGENCY_MODE } from "@/lib/emergency";
 import {
   checkRateLimit,
   escapeHtml,
@@ -22,6 +23,11 @@ type NotifyBody = {
 };
 
 export async function POST(req: Request) {
+  if (LOW_CPU_EMERGENCY_MODE) {
+    const response = buildLowCpuJsonResponse();
+    return NextResponse.json(response.body, response.init);
+  }
+
   try {
     if (!isAllowedOrigin(req, { allowMissingOrigin: false })) {
       return NextResponse.json({ error: "Forbidden origin." }, { status: 403 });
