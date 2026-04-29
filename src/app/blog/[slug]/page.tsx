@@ -111,7 +111,7 @@ export async function generateMetadata({
   );
 
   return buildPageMetadata({
-    title: `${post.title} | Web Growth Blog`,
+    title: post.seoTitle || `${post.title} | Web Growth Blog`,
     description: post.excerpt,
     path: `/blog/${post.slug}`,
     keywords,

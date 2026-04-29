@@ -27,6 +27,7 @@ export type PostFaqItem = {
 export type Post = {
   slug: string;
   title: string;
+  seoTitle?: string;
   excerpt: string;
   date: string;
   updatedAt?: string;
@@ -192,6 +193,7 @@ export function getPosts(): Post[] {
     return {
       slug,
       title: toSafeString(data.title, slug.replace(/-/g, " ")),
+      seoTitle: toSafeString(data.seoTitle) || undefined,
       excerpt: toSafeString(data.excerpt, "Practical guide from Web Growth."),
       date: toDateString(data.date ?? data.publishedAt),
       updatedAt: data.updatedAt ? toDateString(data.updatedAt) : undefined,
