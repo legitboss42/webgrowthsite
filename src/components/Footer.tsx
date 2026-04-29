@@ -9,7 +9,7 @@ const footerLinks = [
   { href: "/portfolio", label: "Portfolio" },
   { href: "/blog", label: "Blog" },
   { href: "/pricing", label: "Pricing" },
-  { href: "/contact", label: "Contact" },
+  { href: "/contact", label: "Request a Website Review" },
 ];
 
 const coreServiceLinks = [
@@ -18,7 +18,7 @@ const coreServiceLinks = [
   { href: "/services/landing-page-design/", label: "Landing Page Design" },
   { href: "/services/ecommerce-website-design/", label: "Ecommerce Website Design" },
   { href: "/services/website-audit/", label: "Website Audit" },
-  { href: "/contact/", label: "Contact" },
+  { href: "/contact/", label: "Request a Website Review" },
 ];
 
 export default function Footer() {

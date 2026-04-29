@@ -66,6 +66,7 @@ const REMOVED_BLOG_URLS = [
   "https://webgrowth.info/blog/",
   "https://webgrowth.info/blog/how-to-launch-a-website-in-7-days/",
   "https://webgrowth.info/blog/medical-website-booking-experience/",
+  "https://webgrowth.info/thank-you/",
 ];
 
 const priorityPages = [
@@ -315,6 +316,9 @@ async function main() {
   const robotsSource = await read("src/app/robots.ts");
   const sitemapIndexSource = await read("src/app/sitemap-index.xml/route.ts");
   const footerSource = await read("src/components/Footer.tsx");
+  const contactPageSource = await read("src/app/contact/page.tsx");
+  const contactClientSource = await read("src/components/ContactClient.tsx");
+  const thankYouPageSource = await read("src/app/thank-you/page.tsx");
 
   if (sitemapConfig.pagePaths.length !== 16) {
     fail(`sitemap-config pagePaths count mismatch: expected 16, received ${sitemapConfig.pagePaths.length}`);
@@ -346,6 +350,14 @@ async function main() {
 
   for (const url of REMOVED_BLOG_URLS) {
     if (blogUrls.includes(url)) fail(`removed blog sitemap URL found: ${url}`);
+  }
+
+  if (pageUrls.includes("https://webgrowth.info/thank-you/")) {
+    fail("thank-you page must not be included in sitemap page URLs");
+  }
+
+  if (blogUrls.includes("https://webgrowth.info/blog/thank-you/")) {
+    fail("thank-you page must not be included in sitemap blog URLs");
   }
 
   for (const url of allUrls) {
@@ -387,6 +399,28 @@ async function main() {
   for (const href of footerRequiredLinks) {
     ensureIncludes(footerSource, href, "footer links");
   }
+
+  ensureIncludes(contactPageSource, "Contact Web Growth | Request a Website Review", "contact page title");
+  ensureIncludes(contactPageSource, "Request a website review from Web Growth. Send your website link or business details and get guidance on clarity, trust, speed, mobile experience, and enquiry flow.", "contact page meta description");
+  ensureIncludes(contactPageSource, "Request a Website Review", "contact page H1");
+  ensureIncludes(contactPageSource, 'path: "/contact/"', "contact page canonical path");
+  ensureExcludes(contactPageSource, "noIndex: true", "contact page noindex");
+  ensureIncludes(contactClientSource, "Name", "contact form field");
+  ensureIncludes(contactClientSource, "Email", "contact form field");
+  ensureIncludes(contactClientSource, "WhatsApp number", "contact form field");
+  ensureIncludes(contactClientSource, "Business name", "contact form field");
+  ensureIncludes(contactClientSource, "Website URL", "contact form field");
+  ensureIncludes(contactClientSource, "What do you need help with?", "contact form field");
+  ensureIncludes(contactClientSource, "Main issue", "contact form field");
+  ensureIncludes(contactClientSource, "Budget range", "contact form field");
+  ensureIncludes(contactClientSource, "Timeline", "contact form field");
+  ensureIncludes(contactClientSource, "Message", "contact form field");
+  ensureIncludes(contactPageSource, "https://wa.me/2348066706336", "contact WhatsApp link");
+  ensureIncludes(thankYouPageSource, "Thank You | Web Growth", "thank-you title");
+  ensureIncludes(thankYouPageSource, "Your request has been received by Web Growth.", "thank-you meta description");
+  ensureIncludes(thankYouPageSource, "index: false", "thank-you noindex");
+  ensureIncludes(thankYouPageSource, "follow: true", "thank-you robots follow");
+  ensureIncludes(thankYouPageSource, 'absoluteUrl("/thank-you/")', "thank-you canonical");
 
   for (const page of priorityPages) {
     const source = await read(page.file);

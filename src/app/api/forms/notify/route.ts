@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { buildLowCpuJsonResponse, LOW_CPU_EMERGENCY_MODE } from "@/lib/emergency";
 import {
   checkRateLimit,
   escapeHtml,
@@ -8,6 +7,7 @@ import {
   hasJsonContentType,
   isAllowedOrigin,
   isLikelyAutomationRequest,
+  isValidEmail,
   sanitizeText,
 } from "@/lib/security";
 import { verifyTurnstileToken } from "@/lib/turnstile";
@@ -23,11 +23,6 @@ type NotifyBody = {
 };
 
 export async function POST(req: Request) {
-  if (LOW_CPU_EMERGENCY_MODE) {
-    const response = buildLowCpuJsonResponse();
-    return NextResponse.json(response.body, response.init);
-  }
-
   try {
     if (!isAllowedOrigin(req, { allowMissingOrigin: false })) {
       return NextResponse.json({ error: "Forbidden origin." }, { status: 403 });
@@ -60,9 +55,37 @@ export async function POST(req: Request) {
     const turnstileToken = sanitizeText(body.turnstileToken, 2048);
     const fields = body.fields && typeof body.fields === "object" ? body.fields : {};
     const normalizedEntries = Object.entries(fields).slice(0, 20);
-    const isProduction = process.env.NODE_ENV === "production";
     const hasTurnstileSecret = Boolean(process.env.TURNSTILE_SECRET_KEY);
-    const shouldRequireTurnstile = isProduction || hasTurnstileSecret;
+    const shouldRequireTurnstile = hasTurnstileSecret;
+    const fieldMap = Object.fromEntries(
+      normalizedEntries.map(([key, value]) => [
+        sanitizeText(key, 80),
+        sanitizeText(value, 1200),
+      ])
+    );
+    const email = sanitizeText(fieldMap.email, 254).toLowerCase();
+
+    if (email && !isValidEmail(email)) {
+      return NextResponse.json(
+        { error: "Please enter a valid email address." },
+        { status: 400 }
+      );
+    }
+
+    if (formType === "website_review_request") {
+      const requiredFields = [
+        ["name", "Name"],
+        ["email", "Email"],
+        ["help_needed", "What do you need help with?"],
+        ["main_issue", "Main issue"],
+      ] as const;
+
+      for (const [key, label] of requiredFields) {
+        if (!fieldMap[key]) {
+          return NextResponse.json({ error: `${label} is required.` }, { status: 400 });
+        }
+      }
+    }
 
     if (shouldRequireTurnstile && !turnstileToken) {
       return NextResponse.json(
@@ -71,7 +94,7 @@ export async function POST(req: Request) {
       );
     }
 
-    if (turnstileToken) {
+    if (turnstileToken && hasTurnstileSecret) {
       const turnstile = await verifyTurnstileToken({
         token: turnstileToken,
         ip,
@@ -88,19 +111,18 @@ export async function POST(req: Request) {
     const fromName = process.env.MAILERSEND_FROM_NAME || "Web Growth";
 
     if (!token || !fromEmail) {
-      return NextResponse.json(
-        { error: "Email delivery is temporarily unavailable." },
-        { status: 500 }
-      );
+      if (process.env.NODE_ENV !== "production") {
+        console.info("[forms-notify][fallback]", { formType, subject, fields: fieldMap });
+      }
+
+      return NextResponse.json({ ok: true, delivery: "setup_required" }, { status: 202 });
     }
 
     const lines = [
       `Form type: ${formType}`,
       `Submitted at: ${new Date().toISOString()}`,
       "",
-      ...normalizedEntries.map(
-        ([key, value]) => `${sanitizeText(key, 80)}: ${sanitizeText(value, 1200)}`
-      ),
+      ...Object.entries(fieldMap).map(([key, value]) => `${key}: ${value}`),
     ];
 
     const textBody = lines.join("\n");
@@ -134,7 +156,7 @@ export async function POST(req: Request) {
       );
     }
 
-    return NextResponse.json({ ok: true });
+    return NextResponse.json({ ok: true, delivery: "email" });
   } catch {
     return NextResponse.json({ error: "Invalid request payload." }, { status: 400 });
   }
