@@ -3,21 +3,21 @@ import StructuredData from "@/components/StructuredData";
 import { buildPageMetadata, buildProfessionalServiceSchema } from "@/lib/seo";
 
 const pageDescription =
-  "Explore a Next.js web design portfolio featuring premium service, redesign, and e-commerce builds engineered for conversion.";
+  "Explore selected Web Growth website projects featuring real responsive screenshots, redesign work, ecommerce builds, landing pages, and product-focused interfaces.";
 
 export const metadata = buildPageMetadata({
   title: "Next.js Web Design Portfolio | Web Growth",
   description: pageDescription,
   path: "/portfolio",
   keywords: [
-    "next.js portfolio",
-    "next.js web design portfolio",
     "web design portfolio",
+    "website project portfolio",
+    "selected website projects",
     "ecommerce website portfolio",
-    "custom website portfolio",
-    "premium web design portfolio",
+    "website redesign portfolio",
+    "responsive website portfolio",
   ],
-  image: "/images/portfolio/tlc-interiors-desktop.jpg",
+  image: "/images/portfolio/jluxe-cover.webp",
 });
 
 export default function PortfolioPage() {

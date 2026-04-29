@@ -273,7 +273,7 @@ export const metadata = buildPageMetadata({
     "ecommerce website for product sellers",
     "online selling website for small business",
   ],
-  image: "/images/portfolio/treats-by-ann-desktop.jpg",
+  image: "/images/portfolio/treats-by-ann-cover.webp",
 });
 
 export default function EcommercePage() {

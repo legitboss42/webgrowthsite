@@ -1,30 +1,15 @@
 import Image from "next/image";
 import Link from "next/link";
 import GeneratedSectionBackground from "@/components/GeneratedSectionBackground";
+import { featuredPortfolioCases } from "@/lib/portfolioCases";
 
-const trustCards = [
-  {
-    eyebrow: "TLC Interiors",
-    title: "A site built to feel more premium",
-    body: "This project was about making the business look more established and making it easier for the right client to enquire.",
-    imageUrl: "/images/portfolio/tlc-interiors-desktop.jpg",
-    imageAlt: "TLC Interiors Limited project preview",
-  },
-  {
-    eyebrow: "J Luxe",
-    title: "A London clinic site built around trust",
-    body: "The focus here was a calmer first impression, clearer treatment pages, and a site that feels more credible when someone lands on it cold.",
-    imageUrl: "/images/portfolio/jluxe-mockup.webp",
-    imageAlt: "J Luxe Medical Aesthetics project preview",
-  },
-  {
-    eyebrow: "iFitness proposal",
-    title: "A proposal I still think is worth showing",
-    body: "It was not a shipped project, so I say that plainly. I keep it here because the landing page direction is strong and the idea still holds up.",
-    imageUrl: "/images/portfolio/ifitness-desktop.jpg",
-    imageAlt: "iFitness proposal preview",
-  },
-] as const;
+const trustCards = featuredPortfolioCases.map((item) => ({
+  eyebrow: item.industry,
+  title: item.title,
+  body: item.whatToNotice,
+  imageUrl: item.imageUrl,
+  imageAlt: item.imageAlt,
+}));
 
 export default function HomeTrustSection() {
   return (
@@ -37,12 +22,12 @@ export default function HomeTrustSection() {
               Work directly with me
             </p>
             <h2 className="mt-4 text-3xl font-semibold leading-tight tracking-[-0.02em] md:text-4xl">
-              I design and build the work myself, so you are not dealing with layers
+              Real projects, direct communication, and proof you can inspect
             </h2>
             <p className="mt-4 text-base leading-7 text-white/72">
-              I&apos;m Victor Chinukwue, founder of Web Growth. I work with service
-              businesses that need a site that looks more credible, works better
-              on mobile, and gives people a clearer reason to reach out.
+              I&apos;m Victor Chinukwue, founder of Web Growth. The selected work
+              shown here is grounded in real websites, real responsive layouts, and
+              a straightforward process from first review to final handoff.
             </p>
 
             <div className="mt-6 grid gap-3 sm:grid-cols-2">
@@ -52,17 +37,16 @@ export default function HomeTrustSection() {
                 </p>
                 <p className="mt-2 text-sm leading-6 text-white/72">
                   You speak to me directly from the first message to the final
-                  handoff. No middlemen, no account managers, and no dragged-out
-                  process.
+                  handoff. No middle layers and no padded process.
                 </p>
               </div>
               <div className="rounded-xl border border-white/10 bg-black/30 px-4 py-4">
                 <p className="text-xs uppercase tracking-[0.14em] text-emerald-200/85">
-                  What happens when you reach out
+                  Why the proof matters
                 </p>
                 <p className="mt-2 text-sm leading-6 text-white/72">
-                  In most cases, I reply the same day with a clear sense of fit,
-                  scope, and the fastest way to improve the site.
+                  The portfolio uses live-site screenshots so you can judge the work
+                  more clearly across desktop, tablet, and mobile.
                 </p>
               </div>
             </div>
@@ -72,10 +56,10 @@ export default function HomeTrustSection() {
                 Founder-led
               </span>
               <span className="rounded-full border border-white/10 bg-black/35 px-4 py-2">
-                3 live projects
+                3 featured projects
               </span>
               <span className="rounded-full border border-white/10 bg-black/35 px-4 py-2">
-                Lagos + selective UK
+                Real responsive proof
               </span>
             </div>
 
@@ -107,7 +91,7 @@ export default function HomeTrustSection() {
                     alt={card.imageAlt}
                     fill
                     sizes="(max-width: 768px) 100vw, 33vw"
-                    className="object-cover object-center"
+                    className="object-cover object-top"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-black/10" />
                   <span className="absolute left-4 top-4 rounded-full border border-white/15 bg-black/55 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-emerald-100">

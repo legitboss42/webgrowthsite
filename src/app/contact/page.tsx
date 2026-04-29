@@ -257,6 +257,23 @@ export default function ContactPage() {
                 </Link>
               ))}
             </div>
+
+            <div className="mt-8 rounded-3xl border border-white/10 bg-black/30 p-6">
+              <p className="text-xs uppercase tracking-[0.16em] text-emerald-300/80">
+                Selected work
+              </p>
+              <p className="mt-3 max-w-3xl text-sm leading-7 text-white/70">
+                You can also explore selected website projects before sending your
+                request. The portfolio now shows real desktop, tablet, and mobile
+                views from live websites so you can inspect the quality more clearly.
+              </p>
+              <Link
+                href="/portfolio/"
+                className="mt-5 inline-flex min-h-11 items-center justify-center rounded-xl border border-white/15 bg-black/35 px-5 py-3 text-sm font-semibold text-white/90 transition hover:bg-black/50"
+              >
+                Explore selected website projects
+              </Link>
+            </div>
           </div>
         </section>
 

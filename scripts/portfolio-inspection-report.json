@@ -1,0 +1,222 @@
+[
+  {
+    "slug": "base-yield",
+    "url": "https://base-yield-eight.vercel.app/",
+    "inspectedUrl": "https://base-yield-eight.vercel.app/",
+    "finalUrl": "https://base-yield-eight.vercel.app/",
+    "title": "BaseYield",
+    "metaDescription": "Retail-friendly USDC yield vault on Base",
+    "h1": [
+      "1-click USDC yield on Base"
+    ],
+    "nav": [
+      "Overview",
+      "Dashboard"
+    ],
+    "headings": [
+      "Low risk profile",
+      "How it works",
+      "Why Base",
+      "Usage signals"
+    ],
+    "paragraphs": [
+      "BaseYield is a retail-friendly ERC-4626 vault: deposit USDC, vault funds are supplied to Aave V3, and you can withdraw any time.",
+      "Strategy scope is intentionally narrow for the MVP:",
+      "Deposit USDC into the vault and receive shares. The vault supplies USDC to Aave V3 and holds aUSDC.",
+      "Fast finality, low fees, familiar wallet UX, and strong distribution for consumer DeFi use cases.",
+      "Built-in activity metrics, referral links, and offchain points leaderboard to track early traction."
+    ],
+    "rawScreenshots": [
+      "/images/portfolio/raw/base-yield-desktop.png",
+      "/images/portfolio/raw/base-yield-tablet.png",
+      "/images/portfolio/raw/base-yield-mobile.png"
+    ],
+    "coverImage": "/images/portfolio/base-yield-cover.webp"
+  },
+  {
+    "slug": "treats-by-ann",
+    "url": "https://treats-by-ann.vercel.app/",
+    "inspectedUrl": "https://treats-by-ann.vercel.app/",
+    "finalUrl": "https://treats-by-ann.vercel.app/",
+    "title": "Treats by Ann | Cakes, Snacks, Desserts & Treats",
+    "metaDescription": "Treats by Ann offers celebration cakes, pastries, snack platters, dessert cups, and premium treats with easy WhatsApp ordering.",
+    "h1": [
+      "Delicious Treats Made to Satisfy Every Craving"
+    ],
+    "nav": [
+      "About",
+      "Featured",
+      "Products",
+      "Price List",
+      "Contact"
+    ],
+    "headings": [
+      "Jump straight to the kind of order you want",
+      "Made with care, quality, and beautiful presentation",
+      "Browse the menu",
+      "Tap any item",
+      "Confirm details",
+      "A few standout favorites from the menu",
+      "Pink Rosette Cake",
+      "Pastry and Buns Combo Box",
+      "Fruit Yoghurt Parfait Cups",
+      "Celebration Food Tray",
+      "Explore cakes, snacks, desserts, platters, and more",
+      "Celebration Cakes",
+      "Pink pearl birthday cake",
+      "Pink butterfly birthday cake"
+    ],
+    "paragraphs": [
+      "From celebration cakes to snack favorites and dessert cups, Treats by Ann delivers fresh, high-quality treats you'll love.",
+      "Treats by Ann creates delicious, high-quality baked treats and snack favorites made to satisfy every craving.",
+      "Whether you're celebrating a special occasion or simply craving something sweet, we offer a wide variety of cakes, pastries, snack platters, and dessert cups, all made with care, quality ingredients, and attention to detail.",
+      "Every order is prepared to deliver both great taste and a beautiful presentation.",
+      "Explore cakes, snacks, dessert cups, platters, and treats in one place.",
+      "Every featured card and product links directly to WhatsApp with a prefilled order message."
+    ],
+    "rawScreenshots": [
+      "/images/portfolio/raw/treats-by-ann-desktop.png",
+      "/images/portfolio/raw/treats-by-ann-tablet.png",
+      "/images/portfolio/raw/treats-by-ann-mobile.png"
+    ],
+    "coverImage": "/images/portfolio/treats-by-ann-cover.webp"
+  },
+  {
+    "slug": "i-fitness",
+    "url": "https://i-fitness-preview.vercel.app/",
+    "inspectedUrl": "https://i-fitness-preview.vercel.app/",
+    "finalUrl": "https://i-fitness-preview.vercel.app/",
+    "title": "Join Premium Gyms Across Nigeria | i-Fitness",
+    "metaDescription": "Find your nearest i-Fitness centre, compare memberships, explore classes, and join online with a fast, high-trust registration flow.",
+    "h1": [
+      "Premium fitness clubs built for people who actually want to keep showing up."
+    ],
+    "nav": [
+      "About",
+      "Membership",
+      "Classes",
+      "Branches",
+      "Corporate",
+      "Contact"
+    ],
+    "headings": [
+      "Start with the city you actually train in.",
+      "Choose the branch that fits your route.",
+      "The strongest homepage answers the payment questions before the click.",
+      "Join with confidence",
+      "Train beyond the basics",
+      "Choose the right centre",
+      "Everything members need to believe before they commit is visible up front.",
+      "Pricing that feels trustworthy before registration starts.",
+      "Proof that reduces hesitation before payment.",
+      "Wellness programs for companies that want healthier, more engaged teams.",
+      "Answer the last questions before the click.",
+      "Can I complete my membership entirely on this website?",
+      "Are classes included in membership?",
+      "Can I choose my preferred branch before I pay?"
+    ],
+    "paragraphs": [
+      "Choose the nearest centre, understand the real price before checkout, and complete registration and payment inside the website. No off-site handoff. No hidden next step.",
+      "Clear plan pricing before payment starts.",
+      "Across Lagos, Abuja, Port Harcourt, and Ibadan.",
+      "Registration and payment stay inside the site.",
+      "Branch-first signup, clear pricing, and local checkout in one cleaner journey.",
+      "The highest-converting route is practical, not exhaustive. Choose the city first, then pick the branch you are most likely to use every week."
+    ],
+    "rawScreenshots": [
+      "/images/portfolio/raw/i-fitness-desktop.png",
+      "/images/portfolio/raw/i-fitness-tablet.png",
+      "/images/portfolio/raw/i-fitness-mobile.png"
+    ],
+    "coverImage": "/images/portfolio/i-fitness-cover.webp"
+  },
+  {
+    "slug": "tlc-interiors",
+    "url": "https://tlc-interiors-limited.vercel.app/",
+    "inspectedUrl": "https://tlc-interiors-limited.vercel.app/",
+    "finalUrl": "https://tlc-interiors-limited.vercel.app/",
+    "title": "TLC Interiors Limited | Premium Carpentry & Interior Design",
+    "metaDescription": "TLC Interiors Limited creates custom furniture, interior design solutions, lighting features, and hospitality fit-outs for homes, offices, and premium spaces.",
+    "h1": [
+      "Furniture that makes a room feel already considered."
+    ],
+    "nav": [
+      "About",
+      "Services",
+      "Work",
+      "Contact"
+    ],
+    "headings": [
+      "Layered bedroom styling with soft upholstery and tailored finishes.",
+      "Built pieces, styled spaces, and finishing details that sell the quality at a glance.",
+      "Tailored sofa silhouettes",
+      "Statement accents",
+      "Reception-ready corners",
+      "Functional cabinetry",
+      "We make furniture and interiors feel calm, finished, and worth keeping.",
+      "End-to-end furniture and interior support",
+      "Custom Furniture Manufacturing",
+      "Interior Design",
+      "Furniture Refurbishing",
+      "Office & Home Furniture Supply",
+      "Lighting Solutions",
+      "Hospitality Projects"
+    ],
+    "paragraphs": [
+      "TLC Interiors Limited crafts custom furniture, elevated interiors, refurbishing, lighting, and supply solutions for homes, offices, and hospitality spaces that want warmth with polish.",
+      "TLC Interiors Limited is a woman-led carpentry and interior business with a focus on modern comfort, refined detailing, and practical elegance. Every project is approached with the eye of a studio and the discipline of a workshop.",
+      "Our work spans custom furniture manufacturing, interior design, furniture refurbishing, office and home furniture supply, lighting, hospitality solutions, and furniture trade support including buying, selling, import, and export.",
+      "Built-to-fit sofas, beds, wardrobes, seating, and storage designed around your space.",
+      "Room concepts, styling direction, finishes, and atmosphere tailored to modern living.",
+      "Refreshing existing pieces with better fabric, comfort, structure, and visual appeal."
+    ],
+    "rawScreenshots": [
+      "/images/portfolio/raw/tlc-interiors-desktop.png",
+      "/images/portfolio/raw/tlc-interiors-tablet.png",
+      "/images/portfolio/raw/tlc-interiors-mobile.png"
+    ],
+    "coverImage": "/images/portfolio/tlc-interiors-cover.webp"
+  },
+  {
+    "slug": "jluxe",
+    "url": "https://www.jluxemedicalaesthetics.com/",
+    "inspectedUrl": "https://www.jluxemedicalaesthetics.com/",
+    "finalUrl": "https://www.jluxemedicalaesthetics.com/",
+    "title": "J Luxe Medical Aesthetics | Premier Clinic in London",
+    "metaDescription": "J Luxe Medical Aesthetics is a medical aesthetics clinic in Hackney London offering dermal fillers, anti-wrinkle injections, facials, and body sculpting.",
+    "h1": [
+      "LONDON MEDICALAESTHETICS CLINIC"
+    ],
+    "nav": [],
+    "headings": [
+      "Dermal Fillers, Anti-Wrinkle and Skin Treatments",
+      "Book Consultation",
+      "Ask On WhatsApp",
+      "Call The Clinic",
+      "Non-Surgical Facial and Body Treatments in London",
+      "Clear process, premium experience",
+      "Popular Non-Surgical Aesthetic Treatments",
+      "Searching by area? Start with our nearby booking pages.",
+      "Advanced Facials",
+      "Body Sculpting",
+      "Anti-Wrinkle Injections",
+      "Why Clients Choose Our Hackney Aesthetics Clinic",
+      "Our Promise as a Leading London Aesthetics Clinic",
+      "Expert Care"
+    ],
+    "paragraphs": [
+      "Nurse-Led Aesthetic Clinic in Hackney, London",
+      "Discover expert non-surgical aesthetic treatments in East London, including dermal fillers, anti-wrinkle injections, skin boosters, and body sculpting, tailored for natural-looking results.",
+      "Book a consultation with our Hackney team and receive a personalized plan designed around your facial and body goals.",
+      "Best if you already know the treatment you want or want to compare live pricing first.",
+      "Best if you are unsure which treatment fits your concern and want a quick response first.",
+      "Best if you want to talk through timing, suitability, pricing, and availability in one step."
+    ],
+    "rawScreenshots": [
+      "/images/portfolio/raw/jluxe-desktop.png",
+      "/images/portfolio/raw/jluxe-tablet.png",
+      "/images/portfolio/raw/jluxe-mobile.png"
+    ],
+    "coverImage": "/images/portfolio/jluxe-cover.webp"
+  }
+]

@@ -6,7 +6,7 @@ import SocialProofSection from "@/components/SocialProofSection";
 import StructuredData from "@/components/StructuredData";
 import WhatYouGetSection from "@/components/WhatYouGetSection";
 import GeneratedSectionBackground from "@/components/GeneratedSectionBackground";
-import { portfolioCases } from "@/lib/portfolioCases";
+import { featuredPortfolioCases } from "@/lib/portfolioCases";
 import { buildBreadcrumbSchema, buildFaqSchema, buildPageMetadata } from "@/lib/seo";
 import { SITE_URL } from "@/lib/site";
 
@@ -240,9 +240,7 @@ export const metadata = buildPageMetadata({
 });
 
 export default function Page() {
-  const featuredCases = portfolioCases
-    .filter((item) => item.status !== "Proposal")
-    .slice(0, 3);
+  const featuredCases = featuredPortfolioCases;
 
   const schema = [
     {
@@ -456,7 +454,7 @@ export default function Page() {
           cards={featuredCases}
           eyebrow="Selected work"
           title="Selected Website Work"
-          description="Explore selected Web Growth website builds, redesign concepts, and conversion-focused layouts without relying on invented results or exaggerated claims."
+          description="Explore selected Web Growth website builds, redesign work, and conversion-focused layouts without relying on invented results or exaggerated claims."
         />
 
         <section className="relative overflow-hidden border-b border-white/10 bg-[#050806] py-20">

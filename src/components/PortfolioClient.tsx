@@ -18,6 +18,7 @@ const filterLabels: Record<Filter, string> = {
   "Landing Pages": "Landing Pages",
   Redesign: "Rebuilds",
   "E-commerce": "E-commerce",
+  "Product Sites": "Product Websites",
 };
 
 const proofCards = [
@@ -30,8 +31,8 @@ const proofCards = [
     text: "Lighter frontend decisions, stronger mobile presentation, and cleaner page structure that help the site feel faster and more trustworthy.",
   },
   {
-    title: "Premium build quality",
-    text: "Sharper visual systems, better UX control, and a more scalable technical foundation than patched builder setups usually provide.",
+    title: "Proof you can actually inspect",
+    text: "Each cover image is built from real desktop, tablet, and mobile screenshots so the portfolio shows the sites as they actually appear across devices.",
   },
 ] as const;
 
@@ -102,12 +103,12 @@ export default function PortfolioClient() {
               Portfolio
             </p>
             <h1 className="mt-4 text-4xl font-semibold leading-tight tracking-[-0.03em] md:text-6xl">
-              Proof of premium Next.js websites built to convert and scale
+              Selected website projects presented with real responsive proof
             </h1>
             <p className="mt-6 max-w-2xl text-lg leading-8 text-white/72">
-              This page is not a gallery for filler work. It is technical and
-              commercial proof showing how Web Growth handles premium UX, cleaner
-              conversion flow, and stronger frontend execution across live brands.
+              Explore selected website builds, redesign work, ecommerce presentation,
+              landing-page thinking, and product-focused interfaces using real
+              screenshot composites taken from the live websites themselves.
             </p>
 
             <div className="mt-7 flex flex-wrap gap-3 text-sm text-white/70">
@@ -115,10 +116,10 @@ export default function PortfolioClient() {
                 Live projects
               </span>
               <span className="rounded-full border border-white/10 bg-black/35 px-4 py-2">
-                One labeled proposal
+                Desktop, tablet, and mobile views
               </span>
               <span className="rounded-full border border-white/10 bg-black/35 px-4 py-2">
-                Conversion-led execution
+                Cross-industry website proof
               </span>
             </div>
 
@@ -127,7 +128,7 @@ export default function PortfolioClient() {
                 href="/contact"
                 className="inline-flex min-h-12 items-center justify-center rounded-xl bg-emerald-700 px-7 py-3 text-sm font-semibold text-white transition hover:bg-emerald-600"
               >
-                Request a Similar Build
+                Request a Website Review
               </Link>
               <Link
                 href="/launch"
@@ -142,8 +143,8 @@ export default function PortfolioClient() {
             <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-black/40 shadow-[0_18px_48px_rgba(0,0,0,0.24)]">
               <div className="relative aspect-[4/3]">
                 <Image
-                  src="/images/portfolio/tlc-interiors-desktop.jpg"
-                  alt="TLC Interiors Limited project preview"
+                  src="/images/portfolio/jluxe-cover.webp"
+                  alt="J Luxe Medical Aesthetics responsive project preview"
                   fill
                   priority
                   sizes="(max-width: 768px) 100vw, 40vw"
@@ -162,7 +163,7 @@ export default function PortfolioClient() {
             <SectionHeading
               eyebrow="Filter the proof"
               title="Browse by business model and build type"
-              description="Sort the work by the kind of build you care about. Live projects are marked clearly, and the concept piece is labeled as a proposal."
+              description="Sort the work by the kind of website you care about. Each card now shows a real screenshot-based cover and a clearer summary of what the site is built to do."
               level="h2"
               align="left"
             />
@@ -196,6 +197,7 @@ export default function PortfolioClient() {
                 <CaseStudyCard
                   title={item.title}
                   client={item.client}
+                  eyebrow={item.industry}
                   status={item.status}
                   summary={item.summary}
                   results={item.results}
@@ -206,14 +208,17 @@ export default function PortfolioClient() {
                 />
 
                 <div className="mt-4 flex min-h-0 flex-1 flex-col rounded-2xl border border-white/10 bg-black/30 p-5 backdrop-blur">
-                  {item.status === "Proposal" ? (
-                    <div className="mb-4 rounded-2xl border border-amber-300/25 bg-amber-500/10 px-4 py-3 text-sm leading-6 text-amber-100">
-                      This is a proposal concept, not shipped client work. It is shown
-                      here because the page direction is strong and still worth reviewing.
-                    </div>
-                  ) : null}
+                  <div className="rounded-2xl border border-white/10 bg-black/25 px-4 py-4">
+                    <p className="text-xs uppercase tracking-[0.14em] text-emerald-200/90">
+                      What the site is for
+                    </p>
+                    <p className="mt-2 text-sm leading-6 text-white/72">{item.purpose}</p>
+                  </div>
 
-                  <p className="text-sm font-semibold text-white/86">Technical focus</p>
+                  <p className="mt-4 text-sm font-semibold text-white/86">What to notice</p>
+                  <p className="mt-2 text-sm leading-6 text-white/68">{item.whatToNotice}</p>
+
+                  <p className="mt-4 text-sm font-semibold text-white/86">Build focus</p>
                   <ul className="mt-3 space-y-2 text-sm leading-6 text-white/68">
                     {item.stack.map((detail) => (
                       <li key={detail} className="flex gap-3">
@@ -223,6 +228,17 @@ export default function PortfolioClient() {
                     ))}
                   </ul>
 
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    {item.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="rounded-full border border-white/10 bg-black/35 px-3 py-1 text-[11px] uppercase tracking-[0.12em] text-white/72"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+
                   <div className="mt-5 grid gap-3 sm:mt-auto sm:grid-cols-2">
                     <a
                       href={item.liveUrl}
@@ -230,7 +246,7 @@ export default function PortfolioClient() {
                       rel="noreferrer"
                       className="inline-flex w-full items-center justify-center rounded-xl bg-emerald-700 px-4 py-3 text-sm font-semibold text-white transition hover:bg-emerald-600"
                     >
-                      {item.status === "Proposal" ? "View Proposal Preview" : "View Live Site"}
+                      View Live Site
                     </a>
                     <Link
                       href={`/contact?project=${encodeURIComponent(item.client)}`}
@@ -270,12 +286,12 @@ export default function PortfolioClient() {
             <CTASection
               eyebrow="Next step"
               title="Need this level of execution on your own website?"
-              description="If the current site still feels generic, slow, or underpowered, request a quote and get a direct answer on the build that would move the business forward."
-              primaryCtaText="Request a Premium Website Quote"
+              description="If the current site still feels generic, slow, or underpowered, request a website review and get a direct answer on the next step that would move the business forward."
+              primaryCtaText="Request a Website Review"
               primaryHref="/contact"
               secondaryCtaText="See Package Options"
               secondaryHref="/pricing"
-              imageUrl="/images/portfolio/treats-by-ann-desktop.jpg"
+              imageUrl="/images/portfolio/treats-by-ann-cover.webp"
             />
           </div>
         </div>

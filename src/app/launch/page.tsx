@@ -9,7 +9,7 @@ import StructuredData from "@/components/StructuredData";
 import TrackedLink from "@/components/analytics/TrackedLink";
 import WhatYouGetSection from "@/components/WhatYouGetSection";
 import { launchFaqs, pricingTiers, whatYouGetItems } from "@/lib/launchOffer";
-import { portfolioCases } from "@/lib/portfolioCases";
+import { featuredPortfolioCases } from "@/lib/portfolioCases";
 import {
   buildFaqSchema,
   buildPageMetadata,
@@ -158,9 +158,7 @@ export const metadata = buildPageMetadata({
 });
 
 export default function LaunchPage() {
-  const proofCards = portfolioCases
-    .filter((item) => item.status !== "Proposal")
-    .slice(0, 3);
+  const proofCards = featuredPortfolioCases;
 
   return (
     <>

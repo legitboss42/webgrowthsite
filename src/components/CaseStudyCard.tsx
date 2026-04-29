@@ -3,7 +3,8 @@ import Image from "next/image";
 interface CaseStudyCardProps {
   title: string;
   client?: string;
-  status?: "Live" | "Proposal";
+  eyebrow?: string;
+  status?: "Live";
   summary: string;
   results?: string[];
   imageUrl?: string;
@@ -16,6 +17,7 @@ interface CaseStudyCardProps {
 const CaseStudyCard: React.FC<CaseStudyCardProps> = ({
   title,
   client,
+  eyebrow,
   status = "Live",
   summary,
   results,
@@ -40,37 +42,31 @@ const CaseStudyCard: React.FC<CaseStudyCardProps> = ({
           }
         : {})}
     >
-      {/* Image header */}
-      <div className="relative aspect-video overflow-hidden">
+      <div className="relative aspect-[4/3] overflow-hidden">
         <Image
           src={imageUrl}
           alt={imageAlt || `${title} project preview`}
           fill
           loading="lazy"
-          quality={60}
+          quality={82}
           sizes="(max-width: 768px) 100vw, 33vw"
-          className="absolute inset-0 scale-110 object-cover object-center transition-transform duration-700 group-hover:scale-125"
+          className="absolute inset-0 scale-[1.03] object-cover object-top transition-transform duration-700 group-hover:scale-[1.08]"
         />
-        <div className="absolute inset-0 bg-black/50" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/42 to-black/12" />
         <div className="absolute left-4 top-4 z-10">
-          <span
-            className={[
-              "inline-flex rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em]",
-              status === "Proposal"
-                ? "border-amber-300/40 bg-amber-500/15 text-amber-100"
-                : "border-emerald-300/35 bg-emerald-500/15 text-emerald-100",
-            ].join(" ")}
-          >
-            {status}
-          </span>
+          {status ? (
+            <span className="inline-flex rounded-full border border-emerald-300/35 bg-emerald-500/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-emerald-100">
+              {status}
+            </span>
+          ) : null}
         </div>
-        {/* Glow effect */}
         <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-emerald-500/20 blur-sm" />
       </div>
 
-      {/* Body */}
       <div className="flex flex-1 flex-col p-6">
-        {client && <p className="text-sm text-emerald-400 mb-2">{client}</p>}
+        {(eyebrow || client) && (
+          <p className="mb-2 text-sm text-emerald-400">{eyebrow || client}</p>
+        )}
         <HeadingTag className="text-xl font-semibold mb-3">{title}</HeadingTag>
         <p className="text-white/70 leading-relaxed mb-4">{summary}</p>
         {results && results.length > 0 && (

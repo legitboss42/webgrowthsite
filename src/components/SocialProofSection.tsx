@@ -11,13 +11,14 @@ const typeLabels: Record<PortfolioCase["type"], string> = {
   "Landing Pages": "Landing Page",
   Redesign: "Rebuild",
   "E-commerce": "E-commerce",
+  "Product Sites": "Product Website",
 };
 
 export default function SocialProofSection({
   cards,
   eyebrow = "Recent work",
-  title = "Proof of build quality in live projects",
-  description = "These projects are here to show real execution, not filler. They are selected to demonstrate the standard of work behind Web Growth.",
+  title = "Selected website projects built for trust and action",
+  description = "These are real website builds and live project previews used as honest proof of how Web Growth handles structure, responsive presentation, and conversion-minded design.",
 }: {
   cards: readonly PortfolioCase[];
   eyebrow?: string;
@@ -67,6 +68,7 @@ export default function SocialProofSection({
                 <CaseStudyCard
                   title={item.title}
                   client={item.client}
+                  eyebrow={item.industry}
                   status={item.status}
                   summary={item.summary}
                   results={item.results}
@@ -103,7 +105,25 @@ export default function SocialProofSection({
                   >
                     <div className="overflow-hidden">
                       <div className="relative z-10 flex h-full flex-col border-t border-white/15 px-5 pb-5 pt-4">
-                        <p className="text-sm font-semibold text-white/90">
+                        <div className="rounded-2xl border border-white/10 bg-black/25 px-4 py-4">
+                          <p className="text-xs uppercase tracking-[0.14em] text-emerald-200/90">
+                            What the site is for
+                          </p>
+                          <p className="mt-2 text-sm leading-6 text-white/72">
+                            {item.purpose}
+                          </p>
+                        </div>
+
+                        <div className="mt-4">
+                          <p className="text-sm font-semibold text-white/90">
+                            What to notice
+                          </p>
+                          <p className="mt-2 text-sm leading-6 text-white/72">
+                            {item.whatToNotice}
+                          </p>
+                        </div>
+
+                        <p className="mt-4 text-sm font-semibold text-white/90">
                           What was included
                         </p>
                         <ul className="mt-3 space-y-2 text-sm leading-6 text-white/74">
@@ -114,6 +134,17 @@ export default function SocialProofSection({
                             </li>
                           ))}
                         </ul>
+
+                        <div className="mt-4 flex flex-wrap gap-2">
+                          {item.tags.map((tag) => (
+                            <span
+                              key={tag}
+                              className="rounded-full border border-white/10 bg-black/30 px-3 py-1 text-[11px] uppercase tracking-[0.12em] text-white/72"
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
 
                         <div className="mt-5 flex flex-col gap-3 sm:mt-auto sm:flex-row">
                           <Link

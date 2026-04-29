@@ -9,6 +9,7 @@
     "start": "next start",
     "lint": "eslint .",
     "seo:validate": "node scripts/validate-seo.mjs",
+    "portfolio:generate": "node scripts/generate-portfolio-assets.mjs",
     "indexnow:submit": "node scripts/submit-indexnow.mjs",
     "magnets:build": "node scripts/build-magnets.mjs",
     "magnets:watch": "node scripts/watch-magnets.mjs"
@@ -31,6 +32,8 @@
     "eslint": "^9.39.4",
     "eslint-config-next": "^15.5.14",
     "md-to-pdf": "^5.2.5",
+    "playwright": "^1.59.1",
+    "sharp": "^0.34.5",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

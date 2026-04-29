@@ -103,8 +103,7 @@ export default function ContactClient({ directDeliveryConfigured }: ContactClien
   const budgetOptions = useMemo(
     () => [
       "Not sure yet",
-      "Below ₦100,000",
-      "₦100,000 – ₦250,000",
+      "₦200,000 – ₦250,000",
       "₦250,000 – ₦500,000",
       "₦500,000+",
       "I need an audit first",

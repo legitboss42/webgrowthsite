@@ -5,7 +5,7 @@ import HeroSection from "@/components/HeroSection";
 import SocialProofSection from "@/components/SocialProofSection";
 import StructuredData from "@/components/StructuredData";
 import WhatYouGetSection from "@/components/WhatYouGetSection";
-import { portfolioCases } from "@/lib/portfolioCases";
+import { featuredPortfolioCases } from "@/lib/portfolioCases";
 import {
   buildFaqSchema,
   buildOrganizationSchema,
@@ -205,9 +205,7 @@ export const metadata = buildPageMetadata({
 });
 
 export default function Page() {
-  const featuredCases = portfolioCases
-    .filter((item) => item.status !== "Proposal")
-    .slice(0, 3);
+  const featuredCases = featuredPortfolioCases;
 
   const localBusinessSchema = {
     "@context": "https://schema.org",
@@ -455,8 +453,8 @@ export default function Page() {
         <SocialProofSection
           cards={featuredCases}
           eyebrow="Selected work"
-          title="Selected Website Builds and Redesign Concepts"
-          description="Explore selected Web Growth website projects and design work to see how we approach business websites, redesign direction, and ecommerce presentation without relying on inflated claims."
+          title="Selected Website Projects and Redesign Work"
+          description="Explore selected Web Growth website projects and responsive proof to see how we approach business websites, redesign work, and ecommerce presentation without relying on inflated claims."
         />
 
         <FAQSection
