@@ -3,6 +3,8 @@ import path from "path";
 import matter from "gray-matter";
 import { DEFAULT_AUTHOR_ID, DEFAULT_REVIEWER_ID } from "@/lib/authors";
 import { warnOnPostQuality } from "@/lib/contentQuality";
+import { LOW_CPU_EMERGENCY_MODE } from "@/lib/emergency";
+import sitemapConfig from "@/lib/sitemap-config.json";
 
 export const CATEGORY_ORDER = [
   "Series",
@@ -76,6 +78,7 @@ const SERIES_SLUGS = new Set([
   "07-launch-week-checklist-and-first-7-days",
   "08-results-mistakes-and-reusable-playbook",
 ]);
+const APPROVED_BLOG_SLUGS = new Set(sitemapConfig.blogSlugs);
 
 function resolveCategory(slug: string, category: unknown): Category {
   if (SERIES_SLUGS.has(slug)) return "Series";
@@ -161,6 +164,11 @@ function toTime(value?: string) {
   return Number.isNaN(time) ? 0 : time;
 }
 
+export function isPublicBlogSlug(slug: string) {
+  if (!LOW_CPU_EMERGENCY_MODE) return true;
+  return APPROVED_BLOG_SLUGS.has(slug);
+}
+
 export function getPosts(): Post[] {
   if (postsCache) return postsCache;
 
@@ -230,6 +238,10 @@ export function getPost(slug: string): Post | undefined {
   return postsBySlugCache?.get(slug);
 }
 
+export function getPublicPosts(posts = getPosts()): Post[] {
+  return posts.filter((post) => isPublicBlogSlug(post.slug));
+}
+
 export function getCornerstonePosts(posts = getPosts()): Post[] {
   return posts.filter((post) => post.isCornerstone);
 }
@@ -239,7 +251,9 @@ export function getRelatedGuidesForPost(
   posts = getPosts(),
   limit = 4
 ): Post[] {
-  const relatedBySlug = posts
+  const publicPosts = posts.filter((candidate) => isPublicBlogSlug(candidate.slug));
+
+  const relatedBySlug = publicPosts
     .filter((candidate) => post.relatedGuideSlugs.includes(candidate.slug))
     .slice(0, limit);
 
@@ -251,7 +265,7 @@ export function getRelatedGuidesForPost(
   const topic = (post.topic || "").toLowerCase();
   const tagSet = new Set(post.tags.map((tag) => tag.toLowerCase()));
 
-  const scored = posts
+  const scored = publicPosts
     .filter((candidate) => !existingSlugs.has(candidate.slug))
     .map((candidate) => {
       let score = 0;

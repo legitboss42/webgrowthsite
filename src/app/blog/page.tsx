@@ -1,6 +1,6 @@
 import StructuredData from "@/components/StructuredData";
 import BlogClient from "./BlogClient";
-import { getPosts } from "../../lib/posts";
+import { getPublicPosts } from "../../lib/posts";
 import {
   buildBlogCollectionSchema,
   buildBreadcrumbSchema,
@@ -25,7 +25,7 @@ export const metadata = buildPageMetadata({
 });
 
 export default function BlogPage() {
-  const posts = getPosts();
+  const posts = getPublicPosts();
   return (
     <>
       <StructuredData

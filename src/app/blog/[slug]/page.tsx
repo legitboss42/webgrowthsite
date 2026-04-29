@@ -17,12 +17,14 @@ import ReviewedByBlock from "@/components/content/ReviewedByBlock";
 import TableOfContents from "@/components/content/TableOfContents";
 import WhatYouNeed from "@/components/content/WhatYouNeed";
 import { getAuthorProfile } from "@/lib/authors";
-import { getPost, getPosts, getRelatedGuidesForPost, type Post } from "@/lib/posts";
+import { LOW_CPU_EMERGENCY_MODE } from "@/lib/emergency";
+import { getPost, getPosts, getRelatedGuidesForPost, isPublicBlogSlug, type Post } from "@/lib/posts";
+import sitemapConfig from "@/lib/sitemap-config.json";
 import { buildArticleSchema, buildBreadcrumbSchema, buildPageMetadata } from "@/lib/seo";
 import { DEFAULT_OG_IMAGE, SITE_URL } from "@/lib/site";
 
-export const revalidate = 3600;
-export const dynamicParams = true;
+export const dynamic = "force-static";
+export const dynamicParams = false;
 
 const ENHANCED_POST_SLUGS = new Set([
   "ga4-meta-tiktok-clarity-setup-guide",
@@ -69,12 +71,11 @@ function getSafeTags(post: Pick<Post, "tags">): string[] {
 }
 
 export function generateStaticParams() {
-  const posts = getPosts();
-  const cornerstone = posts.filter((post) => post.isCornerstone);
-  const newest = posts.slice(0, 12);
-  const selected = [...cornerstone, ...newest];
-  const unique = Array.from(new Set(selected.map((post) => post.slug)));
-  return unique.map((slug) => ({ slug }));
+  if (LOW_CPU_EMERGENCY_MODE) {
+    return sitemapConfig.blogSlugs.map((slug) => ({ slug }));
+  }
+
+  return getPosts().map((post) => ({ slug: post.slug }));
 }
 
 export async function generateMetadata({
@@ -83,6 +84,13 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
+  if (!isPublicBlogSlug(slug)) {
+    return {
+      title: "Post not found",
+      robots: { index: false, follow: false },
+    };
+  }
+
   const post = getPost(slug);
 
   if (!post) {
@@ -118,6 +126,10 @@ export default async function BlogPostPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
+  if (process.env.NODE_ENV === "production" && !LOW_CPU_EMERGENCY_MODE) {
+    console.log(`[build][blog] rendering ${slug}`);
+  }
+  if (!isPublicBlogSlug(slug)) return notFound();
   const post = getPost(slug);
   if (!post) return notFound();
 
