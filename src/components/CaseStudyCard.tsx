@@ -48,7 +48,7 @@ const CaseStudyCard: React.FC<CaseStudyCardProps> = ({
           alt={imageAlt || `${title} project preview`}
           fill
           loading="lazy"
-          quality={82}
+          quality={75}
           sizes="(max-width: 768px) 100vw, 33vw"
           className="absolute inset-0 scale-[1.03] object-cover object-top transition-transform duration-700 group-hover:scale-[1.08]"
         />
