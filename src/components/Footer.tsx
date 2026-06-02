@@ -3,13 +3,13 @@ import TrackedLink from "@/components/analytics/TrackedLink";
 import { CONTACT_EMAIL, CONTACT_EMAIL_HREF, buildWhatsAppUrl } from "@/lib/site";
 
 const footerLinks = [
-  { href: "/launch", label: "Launch" },
-  { href: "/services", label: "Services" },
-  { href: "/about", label: "About" },
-  { href: "/portfolio", label: "Portfolio" },
-  { href: "/blog", label: "Blog" },
-  { href: "/pricing", label: "Pricing" },
-  { href: "/contact", label: "Request a Website Review" },
+  { href: "/launch/", label: "Launch" },
+  { href: "/services/", label: "Services" },
+  { href: "/about/", label: "About" },
+  { href: "/portfolio/", label: "Portfolio" },
+  { href: "/blog/", label: "Blog" },
+  { href: "/pricing/", label: "Pricing" },
+  { href: "/contact/", label: "Request a Website Review" },
 ];
 
 const coreServiceLinks = [
@@ -112,13 +112,13 @@ export default function Footer() {
           <p>(c) {new Date().getFullYear()} Web Growth. All rights reserved.</p>
 
           <div className="flex flex-wrap gap-4">
-            <Link href="/editorial-policy" className="transition hover:text-white">
+            <Link href="/editorial-policy/" className="transition hover:text-white">
               Editorial Policy
             </Link>
-            <Link href="/privacy" className="transition hover:text-white">
+            <Link href="/privacy/" className="transition hover:text-white">
               Privacy Policy
             </Link>
-            <Link href="/terms" className="transition hover:text-white">
+            <Link href="/terms/" className="transition hover:text-white">
               Terms of Service
             </Link>
           </div>

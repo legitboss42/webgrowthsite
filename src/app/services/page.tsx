@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     "small business website design",
     "conversion-focused web design",
   ],
-  alternates: { canonical: "https://webgrowth.info/services" },
+  alternates: { canonical: "https://webgrowth.info/services/" },
   openGraph: {
     title: "Web Design Services Agency | Web Growth",
     description:

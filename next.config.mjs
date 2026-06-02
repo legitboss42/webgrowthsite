@@ -61,22 +61,42 @@ const nextConfig = {
       },
       {
         source: "/blog/07-launch-week-checklist-and-first-7-days-image-prompts",
-        destination: "/blog/07-launch-week-checklist-and-first-7-days",
+        destination: "/blog/03-seo-migration-without-losing-traffic/",
+        permanent: true,
+      },
+      {
+        source: "/blog/01-why-we-rebuilt-not-redesigned",
+        destination: "/blog/03-seo-migration-without-losing-traffic/",
+        permanent: true,
+      },
+      {
+        source: "/blog/02-the-audit-that-created-the-roadmap",
+        destination: "/services/website-audit/",
+        permanent: true,
+      },
+      {
+        source: "/blog/06-nextjs-architecture-and-build-decisions",
+        destination: "/blog/05-premium-design-without-slow-pages/",
+        permanent: true,
+      },
+      {
+        source: "/blog/jluxe-website-redesign-series-announcement",
+        destination: "/blog/03-seo-migration-without-losing-traffic/",
         permanent: true,
       },
       {
         source: "/services/website-maintenance-and-support",
-        destination: "https://webgrowth.info/services/website-maintenance",
+        destination: "https://webgrowth.info/services/website-maintenance/",
         permanent: true,
       },
       {
         source: "/services/speed-and-performance-optimization",
-        destination: "https://webgrowth.info/services/performance-optimisation",
+        destination: "https://webgrowth.info/services/performance-optimisation/",
         permanent: true,
       },
       {
         source: "/services/website-audit-and-consultation",
-        destination: "https://webgrowth.info/services/website-audit",
+        destination: "https://webgrowth.info/services/website-audit/",
         permanent: true,
       },
       {

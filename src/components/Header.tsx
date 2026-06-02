@@ -12,13 +12,13 @@ type NavItem = {
 };
 
 const NAV_ITEMS: NavItem[] = [
-  { href: "/website-build", label: "Website Build" },
-  { href: "/services", label: "Services" },
-  { href: "/local-business", label: "Local Business" },
-  { href: "/ecommerce", label: "Ecommerce" },
-  { href: "/portfolio", label: "Portfolio" },
-  { href: "/blog", label: "Blog" },
-  { href: "/pricing", label: "Pricing" },
+  { href: "/website-build/", label: "Website Build" },
+  { href: "/services/", label: "Services" },
+  { href: "/local-business/", label: "Local Business" },
+  { href: "/ecommerce/", label: "Ecommerce" },
+  { href: "/portfolio/", label: "Portfolio" },
+  { href: "/blog/", label: "Blog" },
+  { href: "/pricing/", label: "Pricing" },
 ];
 
 function normalize(path: string) {
@@ -119,7 +119,7 @@ export default function Header() {
 
           <div className="flex items-center gap-3">
             <Link
-              href="/contact"
+              href="/contact/"
               className="hidden min-h-11 items-center justify-center rounded-xl bg-emerald-700 px-4 text-sm font-semibold text-white transition hover:bg-emerald-600 md:inline-flex"
             >
               Request a Quote
@@ -190,7 +190,7 @@ export default function Header() {
                 })}
 
                 <Link
-                  href="/contact"
+                  href="/contact/"
                   onClick={() => setMenuOpen(false)}
                   className="mt-2 inline-flex min-h-12 items-center justify-center rounded-xl bg-emerald-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-600"
                 >

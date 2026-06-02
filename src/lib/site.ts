@@ -13,9 +13,21 @@ export const GET_STARTED_PATH = "/get-started";
 export const BUSINESS_PHONE_DISPLAY = "+234 806 670 6336";
 export const SERVICE_AREA = ["Lagos", "Nigeria"] as const;
 
+function shouldUseTrailingSlash(url: URL) {
+  return (
+    url.origin === SITE_URL &&
+    url.pathname !== "/" &&
+    !url.pathname.endsWith("/") &&
+    !/\.[^/]+$/.test(url.pathname)
+  );
+}
+
 export function absoluteUrl(path = "/") {
-  if (/^https?:\/\//i.test(path)) return path;
-  return new URL(path, SITE_URL).toString();
+  const url = /^https?:\/\//i.test(path) ? new URL(path) : new URL(path, SITE_URL);
+  if (shouldUseTrailingSlash(url)) {
+    url.pathname = `${url.pathname}/`;
+  }
+  return url.toString();
 }
 
 export function buildWhatsAppUrl(message: string) {

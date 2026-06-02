@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     "web design services",
     "data privacy",
   ],
-  alternates: { canonical: "https://webgrowth.info/privacy" },
+  alternates: { canonical: "https://webgrowth.info/privacy/" },
   robots: { index: true, follow: true },
   openGraph: {
     title: "Privacy Policy",

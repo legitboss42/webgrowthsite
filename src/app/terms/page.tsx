@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     "web design services",
     "website development terms",
   ],
-  alternates: { canonical: "https://webgrowth.info/terms" },
+  alternates: { canonical: "https://webgrowth.info/terms/" },
   robots: { index: true, follow: true },
   openGraph: {
     title: "Terms of Service",
