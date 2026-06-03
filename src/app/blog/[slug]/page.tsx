@@ -21,7 +21,7 @@ import { LOW_CPU_EMERGENCY_MODE } from "@/lib/emergency";
 import { getPost, getPosts, getRelatedGuidesForPost, isPublicBlogSlug, type Post } from "@/lib/posts";
 import sitemapConfig from "@/lib/sitemap-config.json";
 import { buildArticleSchema, buildBreadcrumbSchema, buildPageMetadata } from "@/lib/seo";
-import { absoluteUrl, DEFAULT_OG_IMAGE } from "@/lib/site";
+import { DEFAULT_OG_IMAGE, SITE_URL } from "@/lib/site";
 
 export const dynamic = "force-static";
 export const dynamicParams = false;
@@ -113,7 +113,7 @@ export async function generateMetadata({
   return buildPageMetadata({
     title: post.seoTitle || `${post.title} | Web Growth Blog`,
     description: post.excerpt,
-    path: `/blog/${post.slug}/`,
+    path: `/blog/${post.slug}`,
     keywords,
     image: post.cover || DEFAULT_OG_IMAGE,
     type: "article",
@@ -137,7 +137,7 @@ export default async function BlogPostPage({
   const reviewer = post.reviewedBy ? getAuthorProfile(post.reviewedBy) : undefined;
   const headings = extractHeadings(post.content);
   const tags = getSafeTags(post);
-  const canonicalUrl = absoluteUrl(`/blog/${post.slug}/`);
+  const canonicalUrl = `${SITE_URL}/blog/${post.slug}`;
   const relatedGuides = getRelatedGuidesForPost(post).map((guide) => ({
     slug: guide.slug,
     title: guide.title,
@@ -157,15 +157,15 @@ export default async function BlogPostPage({
     tags,
     wordCount: estimateWordCount(post.content),
     authorName: author.name,
-    authorUrl: author.profileUrl || absoluteUrl("/about/"),
+    authorUrl: author.profileUrl || `${SITE_URL}/about`,
     reviewedByName:
       reviewer && reviewer.name !== author.name ? reviewer.name : undefined,
   });
 
   const breadcrumbSchema = buildBreadcrumbSchema([
     { name: "Home", path: "/" },
-    { name: "Blog", path: "/blog/" },
-    { name: post.title, path: `/blog/${post.slug}/` },
+    { name: "Blog", path: "/blog" },
+    { name: post.title, path: `/blog/${post.slug}` },
   ]);
 
   const hasEnhancedBlocks =
