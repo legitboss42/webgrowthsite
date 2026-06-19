@@ -15,7 +15,7 @@ export default function EvidenceGallery({ items }: EvidenceGalleryProps) {
 
   return (
     <section className="rounded-2xl border border-white/10 bg-black/35 p-6">
-      <p className="text-xs uppercase tracking-[0.18em] text-emerald-300/85">Evidence Gallery</p>
+      <p className="text-xs uppercase tracking-[0.18em] text-emerald-300/85">Representative Visuals</p>
       <div className="mt-4 grid gap-4 md:grid-cols-2">
         {items.map((item) => (
           <figure key={`${item.src}-${item.alt}`} className="overflow-hidden rounded-xl border border-white/10 bg-black/30">

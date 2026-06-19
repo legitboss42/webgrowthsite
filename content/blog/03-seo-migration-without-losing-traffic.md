@@ -1,6 +1,9 @@
 ---
 title: 'SEO Migration Without Losing Traffic During a Website Redesign'
 seoTitle: 'SEO Migration Without Losing Traffic | Web Growth'
+primaryKeyword: "SEO migration without losing traffic"
+searchIntent: "Informational - first-hand case study and implementation lessons"
+coverAlt: "SEO Migration Without Losing Traffic During a Website Redesign - practical Web Growth guide visual"
 excerpt: >-
   Learn how to handle SEO migration during a website redesign by protecting
   URLs, redirects, canonicals, metadata, internal links, and sitemap

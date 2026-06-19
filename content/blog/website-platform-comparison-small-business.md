@@ -1,5 +1,9 @@
 ---
 title: "Website Platform Comparison for Small Businesses"
+seoTitle: "Website Platform Comparison for Small Businesses | Web Growth"
+primaryKeyword: "website platform comparison for small business"
+searchIntent: "Commercial investigation - compare options before making a purchase decision"
+coverAlt: "Website Platform Comparison for Small Businesses - practical Web Growth guide visual"
 excerpt: "A practical comparison of common website platform options so small businesses can choose based on growth stage and technical needs."
 date: 2026-04-08
 updatedAt: 2026-04-08
@@ -9,7 +13,7 @@ topic: Platform Selection
 difficulty: Beginner
 tags: ["Platform Comparison", "WordPress", "Next.js", "Shopify", "Small Business"]
 readTime: 13 min read
-cover: /images/blog/generated/website-platform-comparison-small-business.svg
+cover: "/images/blog/builders-compare.webp"
 author: victor-chinukwue
 reviewedBy: web-growth-editorial
 isCornerstone: true

@@ -5,7 +5,6 @@ import CorePageLinks from "@/components/CorePageLinks";
 import HostingSupportBlock from "@/components/HostingSupportBlock";
 import StructuredData from "@/components/StructuredData";
 import {
-  buildFaqSchema,
   buildHostingOfferSchema,
   buildPageMetadata,
 } from "@/lib/seo";
@@ -162,6 +161,7 @@ export const metadata = buildPageMetadata({
   title: "Shared Web Hosting Offer for Business Websites | Web Growth",
   description: pageDescription,
   path: "/hosting-offer",
+  noIndex: true,
   keywords: [
     "shared web hosting offer",
     "best web hosting",
@@ -201,9 +201,7 @@ function PrimaryHostingButton({
 export default function HostingOfferRoute() {
   return (
     <>
-      <StructuredData
-        data={[buildFaqSchema(hostingFaqs), buildHostingOfferSchema()]}
-      />
+      <StructuredData data={buildHostingOfferSchema()} />
 
       <main className="relative overflow-x-clip bg-[#050806] text-white">
         <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.014)_1px,transparent_1px)] bg-[size:42px_42px] opacity-20" />

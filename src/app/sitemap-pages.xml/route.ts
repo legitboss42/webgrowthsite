@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import sitemapConfig from "@/lib/sitemap-config.json";
+import routeGovernance from "@/lib/route-governance.json";
 import { absoluteUrl } from "@/lib/site";
 
 export const dynamic = "force-static";
@@ -20,10 +20,12 @@ function escapeXml(value: string) {
 
 export function GET() {
   const generatedAt = new Date().toISOString();
-  const urls: SitemapUrl[] = sitemapConfig.pagePaths.map((path) => ({
-    loc: absoluteUrl(path),
-    lastmod: generatedAt,
-  }));
+  const urls: SitemapUrl[] = routeGovernance.routes
+    .filter((route) => route.status === "INDEX" && route.sitemap)
+    .map((route) => ({
+      loc: absoluteUrl(route.path),
+      lastmod: generatedAt,
+    }));
 
   const body = [
     '<?xml version="1.0" encoding="UTF-8"?>',

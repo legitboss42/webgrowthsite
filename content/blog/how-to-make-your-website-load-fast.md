@@ -1,5 +1,9 @@
 ---
 title: "How to Make a Fast-Loading Business Website: 10 Practical Speed Fixes"
+seoTitle: "How to Make a Fast-Loading Business Website | Web Growth"
+primaryKeyword: "make a website load fast"
+searchIntent: "Informational - diagnose and improve website performance"
+coverAlt: "How to Make a Fast-Loading Business Website: 10 Practical Speed Fixes - practical Web Growth guide visual"
 excerpt: "Use this fast-loading business website guide to improve Core Web Vitals, reduce bounce rate, and increase conversion with practical performance fixes."
 date: 2026-02-03T00:00:00.000Z
 category: Performance

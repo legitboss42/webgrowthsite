@@ -3,22 +3,9 @@ import AnswerHighlightsSection from "@/components/AnswerHighlightsSection";
 import FAQSection from "@/components/FAQSection";
 import HeroSection from "@/components/HeroSection";
 import SocialProofSection from "@/components/SocialProofSection";
-import StructuredData from "@/components/StructuredData";
 import WhatYouGetSection from "@/components/WhatYouGetSection";
 import { featuredPortfolioCases } from "@/lib/portfolioCases";
-import {
-  buildFaqSchema,
-  buildOrganizationSchema,
-  buildPageMetadata,
-  buildWebsiteSchema,
-} from "@/lib/seo";
-import {
-  absoluteUrl,
-  BUSINESS_PHONE_DISPLAY,
-  CONTACT_EMAIL,
-  DEFAULT_OG_IMAGE,
-  SITE_URL,
-} from "@/lib/site";
+import { buildPageMetadata } from "@/lib/seo";
 
 const pageDescription =
   "Web Growth is a web design agency in Nigeria building fast, conversion-focused websites for businesses that need more trust, enquiries, and online sales.";
@@ -207,44 +194,8 @@ export const metadata = buildPageMetadata({
 export default function Page() {
   const featuredCases = featuredPortfolioCases;
 
-  const localBusinessSchema = {
-    "@context": "https://schema.org",
-    "@type": "LocalBusiness",
-    "@id": `${SITE_URL}#localbusiness`,
-    name: "Web Growth",
-    url: absoluteUrl("/"),
-    image: absoluteUrl(DEFAULT_OG_IMAGE),
-    description: pageDescription,
-    email: CONTACT_EMAIL,
-    telephone: BUSINESS_PHONE_DISPLAY,
-    address: {
-      "@type": "PostalAddress",
-      addressLocality: "Lagos",
-      addressCountry: "NG",
-    },
-    areaServed: [
-      {
-        "@type": "Place",
-        name: "Lagos",
-      },
-      {
-        "@type": "Country",
-        name: "Nigeria",
-      },
-    ],
-  };
-
   return (
     <>
-      <StructuredData
-        data={[
-          buildOrganizationSchema(),
-          localBusinessSchema,
-          buildWebsiteSchema(),
-          buildFaqSchema(homepageFaqs),
-        ]}
-      />
-
       <main className="relative overflow-x-clip bg-[#050806] text-white">
         <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.028)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.018)_1px,transparent_1px)] bg-[size:42px_42px] opacity-20" />
 

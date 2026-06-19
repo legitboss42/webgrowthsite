@@ -1,5 +1,4 @@
-export const LOW_CPU_EMERGENCY_MODE =
-  process.env.LOW_CPU_EMERGENCY_MODE !== "0";
+export const LOW_CPU_EMERGENCY_MODE = true;
 
 export function buildLowCpuJsonResponse() {
   return {

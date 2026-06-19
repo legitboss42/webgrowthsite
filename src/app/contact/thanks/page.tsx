@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import ContactThanksTracking from "@/components/ContactThanksTracking";
+import { absoluteUrl } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Request Received",
   description: "Confirmation page for submitted website project enquiries.",
+  alternates: { canonical: absoluteUrl("/contact/thanks/") },
   robots: { index: false, follow: false },
 };
 
@@ -47,4 +49,3 @@ export default function ContactThanksPage() {
     </div>
   );
 }
-

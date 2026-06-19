@@ -1,6 +1,9 @@
 ---
 title: "Conversion Audit Checklist for Homepages and Service Pages"
 seoTitle: "Conversion Audit Checklist | Web Growth"
+primaryKeyword: "conversion audit checklist"
+searchIntent: "Informational - improve website conversion and lead quality"
+coverAlt: "Conversion Audit Checklist for Homepages and Service Pages - practical Web Growth guide visual"
 excerpt: "Use this conversion audit checklist to review your homepage or service page for clarity, trust, CTA strength, mobile experience, speed, and enquiry flow."
 date: 2026-04-05
 updatedAt: 2026-04-29
@@ -10,7 +13,7 @@ topic: Homepage Conversion
 difficulty: Beginner
 tags: ["Conversion Audit", "Homepage", "Service Pages", "Lead Generation"]
 readTime: 14 min read
-cover: /images/blog/generated/conversion-audit-checklist-service-homepage.svg
+cover: "/images/blog/conversion-hero.webp"
 author: victor-chinukwue
 reviewedBy: web-growth-editorial
 isCornerstone: false

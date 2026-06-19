@@ -1,6 +1,10 @@
 ---
 slug: email-automation-architecture
 title: 'The Invisible Sales Rep: How to Close Leads Without a Single Phone Call'
+seoTitle: "The Invisible Sales Rep | Web Growth"
+primaryKeyword: "email automation architecture"
+searchIntent: "Informational - design a practical automation workflow"
+coverAlt: "The Invisible Sales Rep: How to Close Leads Without a Single Phone Call - practical Web Growth guide visual"
 excerpt: >-
   Most agencies chase leads. Growth Engineers build systems that nurture them
   automatically. Here is the full technical architecture for a 24/7 revenue

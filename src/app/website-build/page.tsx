@@ -8,7 +8,6 @@ import WebsiteBuildSectionBackground from "@/components/WebsiteBuildSectionBackg
 import TrackedLink from "@/components/analytics/TrackedLink";
 import {
   buildBreadcrumbSchema,
-  buildFaqSchema,
   buildPageMetadata,
   buildProfessionalServiceSchema,
 } from "@/lib/seo";
@@ -137,6 +136,7 @@ export const metadata = buildPageMetadata({
   title: "High-Converting Website Design Agency | Web Growth",
   description: pageDescription,
   path: "/website-build",
+  noIndex: true,
   keywords: [
     "high-converting website design agency",
     "website redesign agency",
@@ -161,7 +161,6 @@ export default function WebsiteBuildPage() {
           websiteBuildServiceSchema,
           websiteBuildPageSchema,
           websiteBuildBreadcrumbSchema,
-          buildFaqSchema(faqItems),
         ]}
       />
 

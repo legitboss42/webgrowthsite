@@ -2,6 +2,10 @@
 title: >-
   Local SEO for Small Businesses (Rank on Google Maps and Get Clients Without
   Ads)
+seoTitle: "Local SEO for Small Businesses | Web Growth"
+primaryKeyword: "local SEO for small business"
+searchIntent: "Informational - improve search visibility with practical steps"
+coverAlt: "Local SEO for Small Businesses (Rank on Google Maps and Get Clients Without Ads) - practical Web Growth guide visual"
 excerpt: >-
   If customers search ‘near me’ and don’t find you, you don’t exist. Learn how
   to rank on Google Maps, dominate local searches and generate consistent

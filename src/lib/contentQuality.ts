@@ -6,19 +6,27 @@ type PostQualityInput = {
   lastReviewedAt?: string;
   keyTakeaways: string[];
   relatedGuideSlugs: string[];
+  primaryKeyword: string;
+  searchIntent: string;
+  coverAlt: string;
+  cover?: string;
   content: string;
 };
 
 type ServiceQualityInput = {
   slug: string;
   title: string;
-  targetAudience?: string[];
-  notFor?: string[];
+  searchIntent: string;
+  targetAudience: string[];
+  notFor: string[];
   deliverables: string[];
   process: { title: string; text: string }[];
   faqs: { question: string; answer: string }[];
-  commonMistakes?: string[];
-  examples?: string[];
+  commonMistakes: string[];
+  examples: string[];
+  useCases: string[];
+  evidence: { src: string; alt: string; note?: string }[];
+  relatedGuideSlugs: string[];
 };
 
 let didWarnPostQuality = false;
@@ -59,6 +67,11 @@ export function warnOnPostQuality(posts: PostQualityInput[]) {
       issues.push(`[blog/${post.slug}] keyTakeaways should have at least 3 items`);
     if (post.relatedGuideSlugs.length < 2)
       issues.push(`[blog/${post.slug}] relatedGuideSlugs should have at least 2 items`);
+    if (!post.primaryKeyword) issues.push(`[blog/${post.slug}] missing primaryKeyword`);
+    if (!post.searchIntent) issues.push(`[blog/${post.slug}] missing searchIntent`);
+    if (!post.coverAlt) issues.push(`[blog/${post.slug}] missing coverAlt`);
+    if (!post.cover || post.cover.toLowerCase().endsWith(".svg"))
+      issues.push(`[blog/${post.slug}] requires a non-SVG cover image`);
     if (sectionCount < 4)
       issues.push(`[blog/${post.slug}] appears thin: only ${sectionCount} H2 sections`);
   }
@@ -93,6 +106,18 @@ export function warnOnServiceQuality(services: ServiceQualityInput[]) {
     }
     if (!service.examples?.length) {
       issues.push(`[services/${service.slug}] missing examples`);
+    }
+    if (!service.searchIntent) {
+      issues.push(`[services/${service.slug}] missing searchIntent`);
+    }
+    if (service.useCases.length < 2) {
+      issues.push(`[services/${service.slug}] useCases should have at least 2 items`);
+    }
+    if (service.evidence.length < 1 || service.evidence.some((item) => !item.alt)) {
+      issues.push(`[services/${service.slug}] evidence requires descriptive alt text`);
+    }
+    if (service.relatedGuideSlugs.length < 3) {
+      issues.push(`[services/${service.slug}] relatedGuideSlugs should have at least 3 items`);
     }
   }
 

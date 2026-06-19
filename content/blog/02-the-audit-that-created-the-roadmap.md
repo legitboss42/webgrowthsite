@@ -2,6 +2,10 @@
 title: >-
   The Audit That Created the Roadmap: Website Audit Strategy for SEO and
   Conversion
+seoTitle: "The Audit That Created the Roadmap | Web Growth"
+primaryKeyword: "website audit strategy"
+searchIntent: "Informational - first-hand case study and implementation lessons"
+coverAlt: "The Audit That Created the Roadmap: Website Audit Strategy for SEO and Conversion - practical Web Growth guide visual"
 excerpt: >-
   Part 2 of the J Luxe rebuild series: how a structured website audit, technical
   SEO audit, and conversion audit created a clear rebuild roadmap without wasted
@@ -485,6 +489,8 @@ A successful rebuild is not driven by trends.
 It is driven by a clear website audit, a practical SEO strategy, and ruthless prioritization.
 
 That is how you build a site that ranks, converts, and scales.
+
+When the bottleneck is still unclear, a structured [website audit service](/services/website-audit/) is the correct starting point.
 
 ---
 

@@ -1,6 +1,6 @@
-import type { ServicePageConfig } from "@/lib/newServiceConfigs";
+import type { ServicePageInput } from "@/lib/newServiceConfigs";
 
-export const CORE_SERVICE_PAGES: Record<string, ServicePageConfig> = {
+export const CORE_SERVICE_PAGES: Record<string, ServicePageInput> = {
   "business-website-design": {
     title: "Business Website Design",
     slug: "business-website-design",
@@ -503,7 +503,7 @@ export const CORE_SERVICE_PAGES: Record<string, ServicePageConfig> = {
       },
     ],
     relatedGuideSlugs: [
-      "small-business-website-launch-qa-checklist",
+      "website-launch-checklist-for-small-businesses",
       "website-launch-checklist-for-small-businesses",
       "how-to-audit-slow-wordpress-site",
     ],
@@ -605,7 +605,7 @@ export const CORE_SERVICE_PAGES: Record<string, ServicePageConfig> = {
     relatedGuideSlugs: [
       "how-to-make-your-website-load-fast",
       "how-to-audit-slow-wordpress-site",
-      "small-business-website-launch-qa-checklist",
+      "website-launch-checklist-for-small-businesses",
     ],
   },
   "website-audit": {

@@ -67,43 +67,18 @@ export function buildPageMetadata({
 export function buildProfessionalServiceSchema(path: string, description: string) {
   return {
     "@context": "https://schema.org",
-    "@type": "ProfessionalService",
-    "@id": `${absoluteUrl(path)}#professional-service`,
-    name: "Web Growth",
+    "@type": "WebPage",
+    "@id": absoluteUrl(path),
+    name: SITE_NAME,
     url: absoluteUrl(path),
-    image: absoluteUrl(DEFAULT_OG_IMAGE),
     description,
-    email: CONTACT_EMAIL,
-    telephone: "+2348066706336",
-    priceRange: "$150-$250",
-    areaServed: [
-      {
-        "@type": "Place",
-        name: "Lagos",
-      },
-      {
-        "@type": "Country",
-        name: "Nigeria",
-      },
-    ],
-    address: {
-      "@type": "PostalAddress",
-      addressCountry: "NG",
-      addressLocality: "Lagos",
+    isPartOf: {
+      "@id": `${SITE_URL}#website`,
     },
-    availableLanguage: ["en"],
-    sameAs: [WHATSAPP_BASE_URL, SITE_URL],
-    offers: [
-      {
-        "@type": "Offer",
-        priceCurrency: "USD",
-        price: "150",
-        availability: "https://schema.org/InStock",
-        url: absoluteUrl("/launch"),
-        description:
-          "Done-for-you website design in 48 hours for a mobile-first one-page business website launch.",
-      },
-    ],
+    primaryImageOfPage: {
+      "@type": "ImageObject",
+      url: absoluteUrl(DEFAULT_OG_IMAGE),
+    },
   };
 }
 
@@ -240,12 +215,6 @@ export function buildOrganizationSchema() {
       "Custom Next.js website development",
       "Technical SEO-ready website builds",
     ],
-    sameAs: [
-      "https://www.instagram.com/webgrowthinfo",
-      "https://www.linkedin.com/company/webgrowthinfo",
-      "https://x.com/webgrowthinfo",
-      "https://www.facebook.com/webgrowthinfo",
-    ],
     areaServed: [
       {
         "@type": "Place",
@@ -335,23 +304,6 @@ export function buildBlogCollectionSchema(
   };
 }
 
-export function buildFaqSchema(
-  questions: ReadonlyArray<{ question: string; answer: string }>
-) {
-  return {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    mainEntity: questions.map((item) => ({
-      "@type": "Question",
-      name: item.question,
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: item.answer,
-      },
-    })),
-  };
-}
-
 export function buildHostingOfferSchema() {
   const offerUrl = absoluteUrl("/hosting-offer");
 
@@ -383,14 +335,6 @@ export function buildHostingOfferSchema() {
     url: offerUrl,
     description:
       "Shared web hosting offer for small business websites that need reliable hosting, a stronger launch foundation, and a lower starting cost.",
-    offers: {
-      "@type": "Offer",
-      url: offerUrl,
-      category: "Shared web hosting",
-      availability: "https://schema.org/InStock",
-      description:
-        "Save 68% on shared web hosting for a business website launch.",
-    },
   };
 }
 

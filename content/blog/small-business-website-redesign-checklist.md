@@ -1,6 +1,9 @@
 ---
 title: "Small Business Website Redesign Checklist: What to Fix Before You Rebuild"
 seoTitle: "Small Business Website Redesign Checklist | Web Growth"
+primaryKeyword: "small business website redesign checklist"
+searchIntent: "Informational - plan and improve a small-business website"
+coverAlt: "Small Business Website Redesign Checklist: What to Fix Before You Rebuild - practical Web Growth guide visual"
 excerpt: "Use this small business website redesign checklist to review clarity, trust, mobile experience, speed, CTAs, service pages, and enquiry flow."
 date: 2026-02-16T00:00:00.000Z
 category: Strategy

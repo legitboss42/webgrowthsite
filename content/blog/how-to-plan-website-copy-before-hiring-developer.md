@@ -1,5 +1,9 @@
 ---
 title: "How to Plan Website Copy Before Hiring a Developer"
+seoTitle: "Plan Website Copy Before Hiring a Developer | Web Growth"
+primaryKeyword: "plan website copy before hiring a developer"
+searchIntent: "Informational - plan and improve a small-business website"
+coverAlt: "How to Plan Website Copy Before Hiring a Developer - practical Web Growth guide visual"
 excerpt: "A practical planning framework for writing or organizing website copy before development starts."
 date: 2026-04-07
 updatedAt: 2026-04-07
@@ -9,7 +13,7 @@ topic: Copy Planning
 difficulty: Beginner
 tags: ["Website Copy", "Planning", "Small Business", "Conversion"]
 readTime: 11 min read
-cover: /images/blog/generated/how-to-plan-website-copy-before-hiring-developer.svg
+cover: "/images/blog/service-blueprint.webp"
 author: victor-chinukwue
 reviewedBy: web-growth-editorial
 isCornerstone: false

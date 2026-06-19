@@ -1,6 +1,9 @@
 ---
 title: "Homepage Structure That Converts Visitors Into Customers"
 seoTitle: "Homepage Structure That Converts | Web Growth"
+primaryKeyword: "homepage structure that converts"
+searchIntent: "Informational - plan and improve a small-business website"
+coverAlt: "Homepage Structure That Converts Visitors Into Customers - practical Web Growth guide visual"
 excerpt: "Learn the homepage structure that helps visitors understand your offer, trust your business, and move toward enquiries, bookings, or sales."
 date: 2026-02-06T00:00:00.000Z
 category: UX

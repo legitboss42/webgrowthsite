@@ -9,8 +9,7 @@ import BlogInlineCTA from "@/components/BlogInlineCTA";
 import EntitySnapshotSection from "@/components/EntitySnapshotSection";
 import EditorialTrustNote from "@/components/EditorialTrustNote";
 import HostingSupportBlock from "@/components/HostingSupportBlock";
-import { LOW_CPU_EMERGENCY_MODE } from "@/lib/emergency";
-import sitemapConfig from "@/lib/sitemap-config.json";
+import routeGovernance from "@/lib/route-governance.json";
 
 type Props = {
   posts: BlogPostPreview[];
@@ -40,7 +39,11 @@ const CATEGORY_ORDER = [
 ] as const;
 
 const FALLBACK_COVER = "/images/hero/Hero-Image-1.webp";
-const APPROVED_BLOG_PATHS = new Set(sitemapConfig.blogSlugs.map((slug) => `/blog/${slug}`));
+const APPROVED_BLOG_PATHS = new Set(
+  routeGovernance.articles
+    .filter((article) => article.status === "INDEX")
+    .map((article) => `/blog/${article.slug}`)
+);
 
 function formatPostDate(value: string) {
   const date = new Date(value);
@@ -157,7 +160,7 @@ export default function BlogClient({ posts }: Props) {
       description:
         "Use this when paid traffic or promotions need a page built to capture leads cleanly.",
     },
-  ].filter((guide) => !LOW_CPU_EMERGENCY_MODE || APPROVED_BLOG_PATHS.has(guide.href));
+  ].filter((guide) => APPROVED_BLOG_PATHS.has(guide.href));
 
   useEffect(() => {
     const reduceMotion =

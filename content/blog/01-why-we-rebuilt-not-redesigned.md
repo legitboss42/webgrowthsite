@@ -1,5 +1,9 @@
 ---
 title: 'Why We Rebuilt, Not Redesigned: Website Strategy for More Leads and Sales'
+seoTitle: "Why We Rebuilt, Not Redesigned | Web Growth"
+primaryKeyword: "website rebuild strategy"
+searchIntent: "Informational - first-hand case study and implementation lessons"
+coverAlt: "Why We Rebuilt, Not Redesigned: Website Strategy for More Leads and Sales - practical Web Growth guide visual"
 excerpt: >-
   Part 1 of the J Luxe rebuild series: why a full website rebuild beats a
   surface redesign when you want better SEO, higher conversion rates, and more
@@ -379,6 +383,8 @@ If your website currently functions like a brochure and not a sales system, star
 That is how you get more than a better-looking site.
 
 That is how you get better business outcomes.
+
+If your current site needs the same strategy-led treatment, review the [website redesign service](/services/website-redesign/) before choosing a cosmetic refresh.
 
 ---
 

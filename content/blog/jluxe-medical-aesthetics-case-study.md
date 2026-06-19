@@ -3,6 +3,10 @@ slug: jluxe-medical-aesthetics-case-study
 title: >-
   Case Study: Rebuilding J Luxe Medical Aesthetics for Trust, Clarity, and a
   Stronger London Presence
+seoTitle: "J Luxe Website Redesign Case Study | Web Growth"
+primaryKeyword: "medical aesthetics website redesign case study"
+searchIntent: "Informational - first-hand case study and implementation lessons"
+coverAlt: "Case Study: Rebuilding J Luxe Medical Aesthetics for Trust, Clarity, and a Stronger London Presence - practical Web Growth g"
 excerpt: >-
   A practical case study on rebuilding the J Luxe Medical Aesthetics website for
   a London clinic that needed a more premium first impression, clearer treatment
@@ -228,6 +232,8 @@ They were about getting the right fundamentals right:
 - a more obvious next step
 
 If your website already gets attention but still feels too weak to support real enquiries, this is the kind of problem a rebuild should solve.
+
+The [website redesign service](/services/website-redesign/) applies this evidence-led process to active business websites without inventing results or discarding what already works.
 
 ## Related guides and next step
 

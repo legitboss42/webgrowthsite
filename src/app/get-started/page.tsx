@@ -10,6 +10,7 @@ export const metadata = buildPageMetadata({
   title: "Get Started | Website Design in 48 Hours",
   description: pageDescription,
   path: "/get-started",
+  noIndex: true,
   keywords: [
     "website design in 48 hours",
     "get started website launch",

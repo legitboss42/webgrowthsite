@@ -1,6 +1,9 @@
 ---
 title: "How to Build a Small Business Website That Converts"
 seoTitle: "How to Build a Small Business Website That Converts | Web Growth"
+primaryKeyword: "small business website that converts"
+searchIntent: "Informational - improve website conversion and lead quality"
+coverAlt: "How to Build a Small Business Website That Converts - practical Web Growth guide visual"
 excerpt: "Learn how to build a small business website that converts visitors into calls, bookings, WhatsApp enquiries, or leads through clarity, trust, speed, and CTAs."
 date: 2026-02-08T00:00:00.000Z
 category: Conversion

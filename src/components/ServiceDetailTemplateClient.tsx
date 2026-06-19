@@ -17,7 +17,7 @@ import FAQBlock from "@/components/content/FAQBlock";
 import EvidenceGallery from "@/components/content/EvidenceGallery";
 import InternalResourceCallout from "@/components/content/InternalResourceCallout";
 import type { ServicePageConfig } from "@/lib/newServiceConfigs";
-import { buildBreadcrumbSchema, buildFaqSchema } from "@/lib/seo";
+import { buildBreadcrumbSchema } from "@/lib/seo";
 import { absoluteUrl, SITE_URL } from "@/lib/site";
 
 type Props = {
@@ -39,9 +39,8 @@ export default function ServiceDetailTemplateClient({ service }: Props) {
       provider: {
         "@id": `${SITE_URL}#professional-service`,
       },
-      category: "Web Design Service",
+      category: service.title,
     },
-    buildFaqSchema(service.faqs),
     buildBreadcrumbSchema([
       { name: "Home", path: "/" },
       { name: "Services", path: "/services" },
@@ -56,7 +55,7 @@ export default function ServiceDetailTemplateClient({ service }: Props) {
     hrefLabel: "Request this service",
   }));
 
-  const relatedGuides = (service.relatedGuideSlugs || []).slice(0, 4).map((slug) => ({
+  const relatedGuides = service.relatedGuideSlugs.slice(0, 4).map((slug) => ({
     href: `/blog/${slug}`,
     title: slug.replace(/-/g, " "),
   }));
@@ -86,77 +85,15 @@ export default function ServiceDetailTemplateClient({ service }: Props) {
       },
     ];
 
-  const whoFor =
-    service.targetAudience && service.targetAudience.length
-      ? service.targetAudience
-      : [
-          "Businesses with a clear offer and a measurable growth objective.",
-          "Teams that want implementation quality, not generic templates.",
-          "Owners willing to provide approvals and inputs fast.",
-          "Brands that need better conversion quality from existing traffic.",
-        ];
+  const whoFor = service.targetAudience;
 
-  const whoNotFor =
-    service.notFor && service.notFor.length
-      ? service.notFor
-      : service.exclusions && service.exclusions.length
-      ? service.exclusions
-      : [
-          "Businesses choosing only by lowest upfront price.",
-          "Teams that are not ready to provide access or approvals.",
-          "Projects with no clear commercial objective.",
-          "Buyers looking for vague advice without implementation support.",
-        ];
+  const whoNotFor = service.notFor;
 
-  const mistakes =
-    service.commonMistakes && service.commonMistakes.length
-      ? service.commonMistakes
-      : [
-          `Treating ${service.title.toLowerCase()} as a one-time task instead of a growth system.`,
-          "Skipping baseline measurement before implementation starts.",
-          "Over-prioritizing design polish while ignoring conversion flow.",
-          "Delaying approvals, then expecting rushed high-quality delivery.",
-        ];
+  const mistakes = service.commonMistakes;
 
-  const examples =
-    service.examples && service.examples.length
-      ? service.examples
-      : [
-          `A business with weak enquiry quality uses ${service.title.toLowerCase()} to tighten buyer qualification.`,
-          "A team with scattered tools uses implementation to reduce operational friction.",
-          "A growth-focused brand uses technical cleanup to support conversion and SEO at the same time.",
-          "A premium service business improves trust signals and conversion path before scaling traffic spend.",
-        ];
-
-  const beforeAfter =
-    service.beforeAfter && service.beforeAfter.length
-      ? service.beforeAfter
-      : [
-          {
-            before: "Low clarity and weak structure cause traffic drop-off.",
-            after: "Clearer hierarchy and conversion flow support better lead quality.",
-          },
-          {
-            before: "Execution is reactive and hard to measure.",
-            after: "Delivery runs against explicit scope and measurable outcomes.",
-          },
-        ];
-
-  const evidence =
-    service.evidence && service.evidence.length
-      ? service.evidence
-      : [
-          {
-            src: service.heroImage,
-            alt: `${service.title} evidence visual 1`,
-            note: "Representative implementation visual from this service area.",
-          },
-          {
-            src: service.detailImage,
-            alt: `${service.title} evidence visual 2`,
-            note: "Supporting visual for output quality and service delivery direction.",
-          },
-        ];
+  const examples = service.useCases;
+  const beforeAfter = service.beforeAfter;
+  const evidence = service.evidence;
 
   return (
     <div className="bg-black text-white">
@@ -310,8 +247,8 @@ export default function ServiceDetailTemplateClient({ service }: Props) {
         <div className="relative mx-auto max-w-6xl px-6">
           <SectionHeading
             eyebrow="Evidence"
-            title="Before and after outcomes from real implementation patterns"
-            description="This section increases specificity and reduces generic service-page feel."
+            title="How the service changes the working state"
+            description="These are representative before-and-after patterns, not promises of a specific result."
           />
           <div className="mt-10 grid gap-6 md:grid-cols-2">
             <BeforeAfterResults items={beforeAfter} />

@@ -1,5 +1,9 @@
 ---
 title: "Small Business SEO Checklist: 12 Fixes to Improve Rankings and Leads"
+seoTitle: "Small Business SEO Checklist | Web Growth"
+primaryKeyword: "small business SEO checklist"
+searchIntent: "Informational - improve search visibility with practical steps"
+coverAlt: "Small Business SEO Checklist: 12 Fixes to Improve Rankings and Leads - practical Web Growth guide visual"
 excerpt: "Use this small business SEO checklist to improve crawlability, intent targeting, internal links, local visibility, and conversion quality from organic traffic."
 date: 2026-02-04T00:00:00.000Z
 category: SEO
@@ -245,5 +249,4 @@ Execute fundamentals better than competitors:
 - internal link discipline
 - conversion-ready page structure
 
-If you want this implemented with measurable priorities, [request a quote](/contact).
-
+If you want this implemented with measurable priorities, review the [SEO service](/services/search-engine-optimisation/) before requesting a quote.

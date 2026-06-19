@@ -1,5 +1,9 @@
 ---
 title: 'Results, Mistakes, and Reusable Playbook: The J Luxe Rebuild Retrospective'
+seoTitle: "Results, Mistakes, and Reusable Playbook | Web Growth"
+primaryKeyword: "website rebuild retrospective"
+searchIntent: "Informational - first-hand case study and implementation lessons"
+coverAlt: "Results, Mistakes, and Reusable Playbook: The J Luxe Rebuild Retrospective - practical Web Growth guide visual"
 excerpt: >-
   Part 8 of the J Luxe rebuild series: the real results, most expensive
   mistakes, and reusable website growth playbook that came out of the full

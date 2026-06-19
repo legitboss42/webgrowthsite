@@ -1,5 +1,9 @@
 ---
 title: "Email Marketing for Small Business: A Practical System That Converts"
+seoTitle: "Email Marketing for Small Business | Web Growth"
+primaryKeyword: "email marketing for small business"
+searchIntent: "Informational - plan and improve a small-business website"
+coverAlt: "Email Marketing for Small Business: A Practical System That Converts - practical Web Growth guide visual"
 excerpt: "This email marketing for small business guide shows how to capture qualified subscribers, automate follow-up, and turn email into consistent enquiries."
 date: 2026-02-10T00:00:00.000Z
 category: Strategy
@@ -188,7 +192,7 @@ Track these first:
 
 Open rate is useful but incomplete. Outcome metrics matter more.
 
-If tracking is weak, use the [GA4 and pixel setup guide](/blog/ga4-meta-tiktok-clarity-setup-guide).
+If tracking is weak, use the [website tracking setup guide](/blog/website-tracking-setup-for-small-businesses).
 
 ## Step 9: Run a monthly optimization cycle
 
@@ -262,4 +266,3 @@ Email marketing for small business works when you combine:
 - conversion-ready website pages
 
 If you want this implemented with your current offer and service pages, [request a quote](/contact).
-

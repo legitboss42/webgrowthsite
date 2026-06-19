@@ -1,6 +1,9 @@
 ---
 title: "High-Converting Landing Page Guide: What Every Business Page Needs"
 seoTitle: "High-Converting Landing Page Guide | Web Growth"
+primaryKeyword: "high-converting landing page"
+searchIntent: "Informational - improve website conversion and lead quality"
+coverAlt: "High-Converting Landing Page Guide: What Every Business Page Needs - practical Web Growth guide visual"
 excerpt: "Learn what makes a high-converting landing page work, including offer clarity, trust signals, CTA flow, mobile layout, speed, and focused page structure."
 date: 2026-02-07T00:00:00.000Z
 category: Conversion

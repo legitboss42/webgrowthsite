@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 type ReviewedByBlockProps = {
   reviewerName: string;
   reviewerRole?: string;
@@ -12,6 +14,12 @@ export default function ReviewedByBlock({
       <p className="text-xs uppercase tracking-[0.18em] text-emerald-300/80">Reviewed By</p>
       <p className="mt-2 text-base font-semibold text-white">{reviewerName}</p>
       <p className="text-sm text-white/66">{reviewerRole}</p>
+      <Link
+        href="/editorial-policy/"
+        className="mt-3 inline-flex text-xs font-medium text-emerald-300 transition hover:text-emerald-200"
+      >
+        Review standards
+      </Link>
     </section>
   );
 }

@@ -2,6 +2,10 @@
 title: >-
   Best Website Hosting for Small Business Websites: What to Choose Before You
   Pay
+seoTitle: "Best Website Hosting for Small Business Websites | Web Growth"
+primaryKeyword: "best website hosting for small business"
+searchIntent: "Commercial investigation - compare options before making a purchase decision"
+coverAlt: "Best Website Hosting for Small Business Websites: What to Choose Before You Pay - practical Web Growth guide visual"
 excerpt: >-
   Most small businesses do not need the 'best' host. They need the right setup
   for their actual site, traffic level, and support needs.
@@ -46,7 +50,7 @@ steps:
     sites.
 relatedGuideSlugs:
   - how-to-make-your-website-load-fast
-  - small-business-website-launch-qa-checklist
+  - website-launch-checklist-for-small-businesses
 faq:
   - question: Should I fix hosting first or on-page issues first?
     answer: >-
@@ -224,7 +228,7 @@ If you are about to buy hosting for a new website, decide based on site type and
 ## Related guides and next step
 
 - [How To Make Your Website Load Fast](/blog/how-to-make-your-website-load-fast)
-- [Small Business Website Launch Qa Checklist](/blog/small-business-website-launch-qa-checklist)
+- [Website Launch Checklist for Small Businesses](/blog/website-launch-checklist-for-small-businesses)
 - [Website Tracking Setup For Small Businesses](/blog/website-tracking-setup-for-small-businesses)
 
 If you want implementation support, review [this related service](/services/performance-optimisation).

@@ -1,3 +1,26 @@
+import fs from "node:fs";
+
+const routeGovernance = JSON.parse(
+  fs.readFileSync(new URL("./src/lib/route-governance.json", import.meta.url), "utf8")
+);
+
+const governanceRedirects = [
+  ...routeGovernance.routes
+    .filter((route) => route.status === "REDIRECT")
+    .map((route) => ({
+      source: route.path === "/" ? "/" : route.path.replace(/\/$/, ""),
+      destination: route.destination,
+      permanent: true,
+    })),
+  ...routeGovernance.articles
+    .filter((article) => article.status === "REDIRECT")
+    .map((article) => ({
+      source: `/blog/${article.slug}`,
+      destination: article.destination,
+      permanent: true,
+    })),
+];
+
 /** @type {import('next').NextConfig} */
 const securityHeaders = [
   { key: "X-Content-Type-Options", value: "nosniff" },
@@ -20,7 +43,6 @@ const securityHeaders = [
       "connect-src 'self' https://analytics.tiktok.com https://www.google-analytics.com https://analytics-dashboard-fqnf.vercel.app https://api.mailersend.com",
       "frame-src https://www.googletagmanager.com",
       "form-action 'self' https://assets.mailerlite.com",
-      "upgrade-insecure-requests",
     ].join("; "),
   },
 ];
@@ -28,6 +50,9 @@ const securityHeaders = [
 const nextConfig = {
   reactStrictMode: true,
   trailingSlash: true,
+  experimental: {
+    cpus: 1,
+  },
   // Keep Vercel builds on the default `.next` output so deployment manifests resolve.
   // Optional local override: WEBGROWTH_ALT_DISTDIR=1
   distDir:
@@ -49,56 +74,7 @@ const nextConfig = {
   },
   async redirects() {
     return [
-      {
-        source: "/sitemap.xml",
-        destination: "/sitemap-index.xml",
-        permanent: true,
-      },
-      {
-        source: "/home",
-        destination: "/",
-        permanent: true,
-      },
-      {
-        source: "/blog/07-launch-week-checklist-and-first-7-days-image-prompts",
-        destination: "/blog/03-seo-migration-without-losing-traffic/",
-        permanent: true,
-      },
-      {
-        source: "/blog/01-why-we-rebuilt-not-redesigned",
-        destination: "/blog/03-seo-migration-without-losing-traffic/",
-        permanent: true,
-      },
-      {
-        source: "/blog/02-the-audit-that-created-the-roadmap",
-        destination: "/services/website-audit/",
-        permanent: true,
-      },
-      {
-        source: "/blog/06-nextjs-architecture-and-build-decisions",
-        destination: "/blog/05-premium-design-without-slow-pages/",
-        permanent: true,
-      },
-      {
-        source: "/blog/jluxe-website-redesign-series-announcement",
-        destination: "/blog/03-seo-migration-without-losing-traffic/",
-        permanent: true,
-      },
-      {
-        source: "/services/website-maintenance-and-support",
-        destination: "https://webgrowth.info/services/website-maintenance/",
-        permanent: true,
-      },
-      {
-        source: "/services/speed-and-performance-optimization",
-        destination: "https://webgrowth.info/services/performance-optimisation/",
-        permanent: true,
-      },
-      {
-        source: "/services/website-audit-and-consultation",
-        destination: "https://webgrowth.info/services/website-audit/",
-        permanent: true,
-      },
+      ...governanceRedirects,
       {
         source: "/images/:path*.png",
         destination: "/images/:path*.webp",

@@ -1,6 +1,9 @@
 ---
 title: "Premium Website Design Without Slow Pages"
 seoTitle: "Premium Website Design Without Slow Pages | Web Growth"
+primaryKeyword: "premium website design without slow pages"
+searchIntent: "Informational - first-hand case study and implementation lessons"
+coverAlt: "Premium Website Design Without Slow Pages - practical Web Growth guide visual"
 excerpt: "Learn how premium website design can stay fast by controlling images, scripts, animations, fonts, mobile layout, and performance-heavy sections."
 date: 2026-02-22T00:00:00.000Z
 category: Series

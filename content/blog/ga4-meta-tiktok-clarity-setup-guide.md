@@ -1,5 +1,9 @@
 ---
 title: "GA4 + Meta Pixel + TikTok Pixel + Clarity Setup Guide"
+seoTitle: "GA4, Meta, TikTok and Clarity Setup | Web Growth"
+primaryKeyword: "GA4 pixel setup guide"
+searchIntent: "Informational - diagnose and improve website performance"
+coverAlt: "GA4 + Meta Pixel + TikTok Pixel + Clarity Setup Guide - practical Web Growth guide visual"
 excerpt: "A practical setup guide for GA4, Meta Pixel, TikTok Pixel, and Microsoft Clarity so small businesses can trust their website data."
 date: 2026-04-09
 updatedAt: 2026-04-09
@@ -9,7 +13,7 @@ topic: Analytics
 difficulty: Intermediate
 tags: ["GA4", "Meta Pixel", "TikTok Pixel", "Clarity", "Tracking"]
 readTime: 13 min read
-cover: /images/blog/generated/ga4-meta-tiktok-clarity-setup-guide.svg
+cover: "/images/blog/analytics-tracking-hero-generated.jpg"
 author: victor-chinukwue
 reviewedBy: web-growth-editorial
 isCornerstone: true
@@ -34,7 +38,7 @@ steps:
   - "Run final end-to-end QA across desktop and mobile."
 relatedGuideSlugs:
   - "website-tracking-setup-for-small-businesses"
-  - "small-business-website-launch-qa-checklist"
+  - "website-launch-checklist-for-small-businesses"
 faq:
   - question: "Should I install all pixels through GTM?"
     answer: "Use one consistent implementation route. GTM is fine if your team can maintain it cleanly."
@@ -132,7 +136,7 @@ If your numbers do not align, do not launch larger ad budgets yet. Clean data qu
 
 After this setup, use these guides to improve the rest of your measurement and conversion flow:
 
-- [Small Business Website Launch QA Checklist](/blog/small-business-website-launch-qa-checklist)
+- [Website Launch Checklist for Small Businesses](/blog/website-launch-checklist-for-small-businesses)
 - [Website Tracking Setup for Small Businesses](/blog/website-tracking-setup-for-small-businesses)
 - [Conversion Audit Checklist for a Service Business Homepage](/blog/conversion-audit-checklist-service-homepage)
 

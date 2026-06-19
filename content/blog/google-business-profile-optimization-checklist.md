@@ -1,5 +1,9 @@
 ---
 title: "Google Business Profile Optimization Checklist"
+seoTitle: "Google Business Profile Optimization Checklist | Web Growth"
+primaryKeyword: "Google Business Profile optimization checklist"
+searchIntent: "Informational - improve search visibility with practical steps"
+coverAlt: "Google Business Profile Optimization Checklist - practical Web Growth guide visual"
 excerpt: "A practical Google Business Profile checklist for local businesses that want better Maps visibility and stronger enquiry quality."
 date: 2026-04-03
 updatedAt: 2026-04-03
@@ -9,7 +13,7 @@ topic: Local SEO
 difficulty: Beginner
 tags: ["Google Business Profile", "Google Maps", "Local SEO", "Checklist"]
 readTime: 11 min read
-cover: /images/blog/generated/google-business-profile-optimization-checklist.svg
+cover: "/images/blog/local-seo-hero.webp"
 author: victor-chinukwue
 reviewedBy: web-growth-editorial
 isCornerstone: false
@@ -32,8 +36,8 @@ steps:
   - "Add media, Q&A answers, and conversion-focused details."
   - "Maintain review and activity cadence."
 relatedGuideSlugs:
-  - "local-seo-basics-service-business-lagos"
   - "local-seo-for-small-business-google-maps-ranking-guide"
+  - "small-business-website-seo-checklist"
 faq:
   - question: "How quickly can profile optimization improve visibility?"
     answer: "Early quality improvements can appear fast, but stable gains usually build over weeks and months."
@@ -118,8 +122,8 @@ When they conflict, conversion quality usually drops.
 
 ## Related guides and execution support
 
-- [Local SEO Basics for a Service Business in Lagos](/blog/local-seo-basics-service-business-lagos)
-- [Local SEO for Small Business: Google Maps Ranking Guide](/blog/local-seo-for-small-business-google-maps-ranking-guide)
+- [Local SEO for Small Businesses and Google Maps](/blog/local-seo-for-small-business-google-maps-ranking-guide)
+- [Small Business Website SEO Checklist](/blog/small-business-website-seo-checklist)
 - [Google My Business Setup and Optimisation service](/services/google-my-business-setup-optimisation)
 
 ## 30-day Google Business Profile action plan

@@ -2,6 +2,10 @@
 title: >-
   Website Tracking Setup for Small Businesses (GA4, Meta Pixel, TikTok Pixel,
   and Clarity)
+seoTitle: "Website Tracking Setup for Small Businesses | Web Growth"
+primaryKeyword: "website tracking setup for small business"
+searchIntent: "Informational - plan and improve a small-business website"
+coverAlt: "Website Tracking Setup for Small Businesses (GA4, Meta Pixel, TikTok Pixel, and Clarity) - practical Web Growth guide visual"
 excerpt: >-
   Most small business websites collect visits but not answers. This guide shows
   how to track the pages, buttons, campaigns, and actions that actually generate

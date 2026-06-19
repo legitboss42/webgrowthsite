@@ -24,11 +24,6 @@ const AUTHORS: Record<string, AuthorProfile> = {
     ],
     image: "/images/about/about-hero.webp",
     profileUrl: "https://webgrowth.info/about",
-    sameAs: [
-      "https://www.linkedin.com/company/webgrowthinfo",
-      "https://www.instagram.com/webgrowthinfo",
-      "https://x.com/webgrowthinfo",
-    ],
   },
   "web-growth-editorial": {
     id: "web-growth-editorial",

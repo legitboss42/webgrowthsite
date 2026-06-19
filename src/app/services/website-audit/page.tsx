@@ -5,7 +5,7 @@ import HeroSection from "@/components/HeroSection";
 import StructuredData from "@/components/StructuredData";
 import WhatYouGetSection from "@/components/WhatYouGetSection";
 import GeneratedSectionBackground from "@/components/GeneratedSectionBackground";
-import { buildBreadcrumbSchema, buildFaqSchema, buildPageMetadata } from "@/lib/seo";
+import { buildBreadcrumbSchema, buildPageMetadata } from "@/lib/seo";
 import { SITE_URL } from "@/lib/site";
 
 const canonicalUrl = "https://webgrowth.info/services/website-audit/";
@@ -273,7 +273,6 @@ export default function Page() {
       },
       category: "Web Design Service",
     },
-    buildFaqSchema(faqs),
     buildBreadcrumbSchema([
       { name: "Home", path: "/" },
       { name: "Services", path: "/services/" },

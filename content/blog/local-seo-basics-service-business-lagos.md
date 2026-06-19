@@ -1,5 +1,9 @@
 ---
 title: "Local SEO Basics for a Service Business in Lagos"
+seoTitle: "Local SEO Basics for a Service Business in Lagos | Web Growth"
+primaryKeyword: "local SEO basics for Lagos service business"
+searchIntent: "Informational - improve search visibility with practical steps"
+coverAlt: "Local SEO Basics for a Service Business in Lagos - practical Web Growth guide visual"
 excerpt: "A practical local SEO baseline for Lagos service businesses that want more map visibility and qualified enquiries."
 date: 2026-04-04
 updatedAt: 2026-04-04
@@ -9,7 +13,7 @@ topic: Local SEO
 difficulty: Beginner
 tags: ["Local SEO", "Lagos", "Service Business", "Google Maps"]
 readTime: 11 min read
-cover: /images/blog/generated/local-seo-basics-service-business-lagos.svg
+cover: "/images/blog/local-seo.webp"
 author: victor-chinukwue
 reviewedBy: web-growth-editorial
 isCornerstone: false

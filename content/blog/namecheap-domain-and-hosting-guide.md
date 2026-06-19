@@ -1,5 +1,9 @@
 ---
 title: 'Namecheap for Small Business Websites: When It Fits and When It Does Not'
+seoTitle: "Namecheap for Small Business Websites | Web Growth"
+primaryKeyword: "Namecheap for small business websites"
+searchIntent: "Commercial investigation - compare options before making a purchase decision"
+coverAlt: "Namecheap for Small Business Websites: When It Fits and When It Does Not - practical Web Growth guide visual"
 excerpt: >-
   Namecheap can be a fine low-cost starting point for domains and simple
   websites, but it is not automatically the right hosting choice for every
@@ -194,6 +198,8 @@ It fits well for domains and can be fine for simple sites. It becomes a weaker c
 Use Namecheap when it fits.
 
 Do not use it by reflex.
+
+If you need the domain, DNS, email, and hosting choices reviewed together, use the [domain registration and hosting guidance service](/services/domain-registration-hosting-guidance/).
 
 ## Related guides and next step
 

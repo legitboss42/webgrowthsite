@@ -1,5 +1,9 @@
 ---
 title: 'J Luxe Website Rebuild Series: 8 Parts on SEO and Conversion'
+seoTitle: "J Luxe Website Rebuild Series | Web Growth"
+primaryKeyword: "website rebuild case study series"
+searchIntent: "Informational - first-hand case study and implementation lessons"
+coverAlt: "J Luxe Website Rebuild Series: 8 Parts on SEO and Conversion - practical Web Growth guide visual"
 excerpt: >-
   An 8-part series on rebuilding jluxemedicalaesthetics.com, covering SEO
   migration, service page conversion, launch strategy, and Next.js architecture
@@ -311,7 +315,7 @@ Start with [why your website is not getting leads](/blog/why-your-website-isnt-g
 
 The first post in this series is next.
 
-If you want this process applied to your business, [request a quote](/contact).
+If you want this process applied to your business, start with the [website redesign service](/services/website-redesign/) or [request a quote](/contact/).
 
 ---
 

@@ -3,8 +3,7 @@ import path from "path";
 import matter from "gray-matter";
 import { DEFAULT_AUTHOR_ID, DEFAULT_REVIEWER_ID } from "@/lib/authors";
 import { warnOnPostQuality } from "@/lib/contentQuality";
-import { LOW_CPU_EMERGENCY_MODE } from "@/lib/emergency";
-import sitemapConfig from "@/lib/sitemap-config.json";
+import routeGovernance from "@/lib/route-governance.json";
 
 export const CATEGORY_ORDER = [
   "Series",
@@ -52,23 +51,14 @@ export type Post = {
   ctaVariant?: "none" | "soft" | "service" | "consultation" | string;
   evidenceNote?: string;
   methodologyNote?: string;
+  primaryKeyword: string;
+  searchIntent: string;
+  coverAlt: string;
 };
 
 const postsDirectory = path.join(process.cwd(), "content/blog");
 let postsCache: Post[] | null = null;
 let postsBySlugCache: Map<string, Post> | null = null;
-export const NEW_POST_PRIORITY_SLUGS = [
-  "ga4-meta-tiktok-clarity-setup-guide",
-  "landing-page-wireframe-local-service-business",
-  "website-redesign-cost-breakdown-nigeria",
-  "how-to-audit-slow-wordpress-site",
-  "google-business-profile-optimization-checklist",
-  "conversion-audit-checklist-service-homepage",
-  "small-business-website-launch-qa-checklist",
-  "how-to-plan-website-copy-before-hiring-developer",
-  "local-seo-basics-service-business-lagos",
-  "website-platform-comparison-small-business",
-];
 const SERIES_SLUGS = new Set([
   "01-why-we-rebuilt-not-redesigned",
   "02-the-audit-that-created-the-roadmap",
@@ -79,7 +69,11 @@ const SERIES_SLUGS = new Set([
   "07-launch-week-checklist-and-first-7-days",
   "08-results-mistakes-and-reusable-playbook",
 ]);
-const APPROVED_BLOG_SLUGS = new Set(sitemapConfig.blogSlugs);
+export const APPROVED_BLOG_SLUGS = new Set(
+  routeGovernance.articles
+    .filter((article) => article.status === "INDEX")
+    .map((article) => article.slug)
+);
 
 function resolveCategory(slug: string, category: unknown): Category {
   if (SERIES_SLUGS.has(slug)) return "Series";
@@ -166,7 +160,6 @@ function toTime(value?: string) {
 }
 
 export function isPublicBlogSlug(slug: string) {
-  if (!LOW_CPU_EMERGENCY_MODE) return true;
   return APPROVED_BLOG_SLUGS.has(slug);
 }
 
@@ -218,6 +211,9 @@ export function getPosts(): Post[] {
       ctaVariant: toSafeString(data.ctaVariant) || undefined,
       evidenceNote: toSafeString(data.evidenceNote) || undefined,
       methodologyNote: toSafeString(data.methodologyNote) || undefined,
+      primaryKeyword: toSafeString(data.primaryKeyword),
+      searchIntent: toSafeString(data.searchIntent),
+      coverAlt: toSafeString(data.coverAlt, toSafeString(data.title, slug.replace(/-/g, " "))),
     } as Post;
   });
 

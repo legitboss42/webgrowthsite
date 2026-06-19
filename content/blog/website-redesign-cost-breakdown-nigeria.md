@@ -1,6 +1,9 @@
 ---
 title: "Website Redesign Cost in Nigeria: What Affects the Price?"
 seoTitle: "Website Redesign Cost in Nigeria | Web Growth"
+primaryKeyword: "website redesign cost in Nigeria"
+searchIntent: "Commercial investigation - compare options before making a purchase decision"
+coverAlt: "Website Redesign Cost in Nigeria: What Affects the Price? - practical Web Growth guide visual"
 excerpt: "Learn what affects website redesign cost in Nigeria, including page count, content, speed, SEO, mobile experience, integrations, and redesign scope."
 date: 2026-03-31
 updatedAt: 2026-04-29
@@ -10,7 +13,7 @@ topic: Pricing
 difficulty: Beginner
 tags: ["Website Redesign", "Nigeria", "Pricing", "Budgeting"]
 readTime: 14 min read
-cover: /images/blog/generated/website-redesign-cost-breakdown-nigeria.svg
+cover: "/images/blog/redesign-checklist-cover-generated.webp"
 author: victor-chinukwue
 reviewedBy: web-growth-editorial
 isCornerstone: false

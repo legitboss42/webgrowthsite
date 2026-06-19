@@ -161,8 +161,8 @@ function renderBlocks(content: string) {
       continue;
     }
 
-    if (line.startsWith("### ")) {
-      const title = line.replace(/^###\s+/, "").trim();
+    if (/^#{3,6}\s+/.test(line)) {
+      const title = line.replace(/^#{3,6}\s+/, "").trim();
       index += 1;
 
       const cardLines: string[] = [];

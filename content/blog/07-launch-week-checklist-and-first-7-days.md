@@ -1,5 +1,9 @@
 ---
 title: 'Launch Week Checklist and First 7 Days: SEO, QA, and Post-Launch Monitoring'
+seoTitle: "Launch Week Checklist and First 7 Days | Web Growth"
+primaryKeyword: "website launch week checklist"
+searchIntent: "Informational - first-hand case study and implementation lessons"
+coverAlt: "Launch Week Checklist and First 7 Days: SEO, QA, and Post-Launch Monitoring - practical Web Growth guide visual"
 excerpt: >-
   Part 7 of the J Luxe rebuild series: the exact website launch checklist, SEO
   QA routine, analytics checks, and first 7-day monitoring process used to avoid
@@ -650,6 +654,8 @@ If your system is strong, launch becomes controlled.
 If your system is weak, launch exposes every hidden assumption at once.
 
 That is why post-launch discipline is part of the build, not something separate from it.
+
+Ongoing checks can be handled through the [website maintenance service](/services/website-maintenance/) when the business does not have internal technical ownership.
 
 ---
 

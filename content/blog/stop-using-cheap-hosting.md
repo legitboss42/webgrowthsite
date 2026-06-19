@@ -1,6 +1,10 @@
 ---
 slug: stop-using-cheap-hosting
-title: Stop Hosting Your Business on a $3 Server (The Cloudways Migration Protocol)
+title: "When Cheap Hosting Hurts a Business Website: A Practical Migration Guide"
+seoTitle: "When Cheap Hosting Hurts Your Website | Web Growth"
+primaryKeyword: "cheap hosting migration"
+searchIntent: "Informational - diagnose and improve website performance"
+coverAlt: "Business website hosting migration and performance planning guide"
 excerpt: >-
   Shared hosting is a false economy that costs you leads. Here is why I moved my
   entire agency infrastructure to Cloudways, and how you can replicate the setup
@@ -41,7 +45,7 @@ steps:
   - 'Apply: The "Agency Control" Features.'
 relatedGuideSlugs:
   - how-to-make-your-website-load-fast
-  - small-business-website-launch-qa-checklist
+  - website-launch-checklist-for-small-businesses
 faq:
   - question: Should I fix hosting first or on-page issues first?
     answer: >-
@@ -248,6 +252,8 @@ If another managed provider meets those standards for your market, the same prot
 
 Ready to test a managed cloud setup?
 [Get $25 free Cloudways credit](https://www.cloudways.com/en/?id=2076084)
+
+For an independent review before migrating, use the [domain registration and hosting guidance service](/services/domain-registration-hosting-guidance/).
 
 ---
 

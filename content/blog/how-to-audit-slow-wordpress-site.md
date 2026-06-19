@@ -1,6 +1,9 @@
 ---
 title: "How to Audit a Slow WordPress Site Before You Rebuild"
 seoTitle: "How to Audit a Slow WordPress Site | Web Growth"
+primaryKeyword: "audit a slow WordPress site"
+searchIntent: "Informational - diagnose and improve website performance"
+coverAlt: "How to Audit a Slow WordPress Site Before You Rebuild - practical Web Growth guide visual"
 excerpt: "Learn how to audit a slow WordPress site by checking images, plugins, scripts, hosting, mobile experience, Core Web Vitals, and page weight."
 date: 2026-04-01
 updatedAt: 2026-04-29
@@ -10,7 +13,7 @@ topic: WordPress
 difficulty: Beginner
 tags: ["WordPress", "Speed Audit", "Performance", "Website Audit"]
 readTime: 14 min read
-cover: /images/blog/generated/how-to-audit-slow-wordpress-site.svg
+cover: "/images/blog/wordpress.webp"
 author: victor-chinukwue
 reviewedBy: web-growth-editorial
 isCornerstone: false

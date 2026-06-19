@@ -2,7 +2,7 @@ import FAQSection from "@/components/FAQSection";
 import FinalCTASection from "@/components/FinalCTASection";
 import StructuredData from "@/components/StructuredData";
 import { launchFaqs } from "@/lib/launchOffer";
-import { buildFaqSchema, buildPageMetadata, buildProfessionalServiceSchema } from "@/lib/seo";
+import { buildPageMetadata, buildProfessionalServiceSchema } from "@/lib/seo";
 
 const pageDescription =
   "Frequently asked questions about Web Growth's 48-hour website launch service for businesses in Lagos, Nigeria, and remote markets.";
@@ -23,10 +23,7 @@ export default function FaqPage() {
   return (
     <>
       <StructuredData
-        data={[
-          buildProfessionalServiceSchema("/faq", pageDescription),
-          buildFaqSchema(launchFaqs),
-        ]}
+        data={buildProfessionalServiceSchema("/faq", pageDescription)}
       />
 
       <main className="bg-[#050806] text-white">

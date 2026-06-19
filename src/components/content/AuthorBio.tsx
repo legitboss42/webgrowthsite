@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import type { AuthorProfile } from "@/lib/authors";
 
 type AuthorBioProps = {
@@ -29,6 +30,12 @@ export default function AuthorBio({ author }: AuthorBioProps) {
               ))}
             </ul>
           ) : null}
+          <Link
+            href="/editorial-policy/"
+            className="mt-4 inline-flex text-sm font-medium text-emerald-300 transition hover:text-emerald-200"
+          >
+            Read our editorial and review standards
+          </Link>
         </div>
       </div>
     </section>

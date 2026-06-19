@@ -4,7 +4,6 @@ import ContactClient from "@/components/ContactClient";
 import StructuredData from "@/components/StructuredData";
 import TrackedLink from "@/components/analytics/TrackedLink";
 import {
-  buildFaqSchema,
   buildPageMetadata,
   buildProfessionalServiceSchema,
 } from "@/lib/seo";
@@ -12,29 +11,6 @@ import { BUSINESS_PHONE_DISPLAY, CONTACT_EMAIL, CONTACT_EMAIL_HREF, buildWhatsAp
 
 const pageDescription =
   "Request a website review from Web Growth. Send your website link or business details and get guidance on clarity, trust, speed, mobile experience, and enquiry flow.";
-
-const faqs = [
-  {
-    question: "What should I send for a website review?",
-    answer:
-      "The fastest start is your website link, what the business does, and the main issue you want fixed. If you do not have a live site yet, business details are enough to begin.",
-  },
-  {
-    question: "Will I get a full audit immediately?",
-    answer:
-      "Not always. You may receive a quick initial response first. A deeper audit, redesign plan, or implementation quote can be discussed after reviewing your request.",
-  },
-  {
-    question: "Can I use WhatsApp instead of the form?",
-    answer:
-      "Yes. If you prefer, you can send your website link or business details directly on WhatsApp and continue the conversation there.",
-  },
-  {
-    question: "What kinds of requests fit this page?",
-    answer:
-      "This page is designed for website reviews, redesigns, new business websites, landing pages, ecommerce website requests, speed improvement work, and cases where you are not sure what the next step should be.",
-  },
-] as const;
 
 const serviceLinks = [
   { href: "/services/website-audit/", label: "Website Audit" },
@@ -70,10 +46,7 @@ export default function ContactPage() {
   return (
     <>
       <StructuredData
-        data={[
-          buildProfessionalServiceSchema("/contact/", pageDescription),
-          buildFaqSchema(faqs),
-        ]}
+        data={buildProfessionalServiceSchema("/contact/", pageDescription)}
       />
 
       <main className="bg-[#050806] text-white">

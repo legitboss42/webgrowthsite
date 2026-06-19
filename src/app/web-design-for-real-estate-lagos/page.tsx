@@ -4,7 +4,6 @@ import CTASection from "@/components/CTASection";
 import SectionHeading from "@/components/SectionHeading";
 import StructuredData from "@/components/StructuredData";
 import {
-  buildFaqSchema,
   buildPageMetadata,
   buildProfessionalServiceSchema,
 } from "@/lib/seo";
@@ -89,7 +88,6 @@ export default function Page() {
           pageDescription
         )}
       />
-      <StructuredData data={buildFaqSchema(faqs)} />
 
       <main className="bg-black text-white">
         <section className="relative overflow-hidden py-24">

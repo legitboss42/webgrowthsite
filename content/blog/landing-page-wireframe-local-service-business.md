@@ -1,5 +1,9 @@
 ---
 title: "Landing Page Wireframe for a Local Service Business"
+seoTitle: "Local Service Landing Page Wireframe | Web Growth"
+primaryKeyword: "landing page wireframe for local service business"
+searchIntent: "Informational - improve website conversion and lead quality"
+coverAlt: "Landing Page Wireframe for a Local Service Business - practical Web Growth guide visual"
 excerpt: "A practical wireframe structure local service businesses can use to turn ad clicks and referrals into calls and quote requests."
 date: 2026-04-02
 updatedAt: 2026-04-02
@@ -9,7 +13,7 @@ topic: Landing Pages
 difficulty: Beginner
 tags: ["Landing Page", "Local Business", "Conversion", "Wireframe"]
 readTime: 12 min read
-cover: /images/blog/generated/landing-page-wireframe-local-service-business.svg
+cover: "/images/blog/wireframe-preview.webp"
 author: victor-chinukwue
 reviewedBy: web-growth-editorial
 isCornerstone: true

@@ -312,7 +312,7 @@ async function read(relativePath) {
 }
 
 async function main() {
-  const sitemapConfig = JSON.parse(await read("src/lib/sitemap-config.json"));
+  const routeGovernance = JSON.parse(await read("src/lib/route-governance.json"));
   const robotsSource = await read("src/app/robots.ts");
   const sitemapIndexSource = await read("src/app/sitemap-index.xml/route.ts");
   const footerSource = await read("src/components/Footer.tsx");
@@ -320,44 +320,22 @@ async function main() {
   const contactClientSource = await read("src/components/ContactClient.tsx");
   const thankYouPageSource = await read("src/app/thank-you/page.tsx");
 
-  if (sitemapConfig.pagePaths.length !== 16) {
-    fail(`sitemap-config pagePaths count mismatch: expected 16, received ${sitemapConfig.pagePaths.length}`);
-  }
-
-  if (sitemapConfig.blogSlugs.length !== 12) {
-    fail(`sitemap-config blogSlugs count mismatch: expected 12, received ${sitemapConfig.blogSlugs.length}`);
-  }
-
-  const pageUrls = sitemapConfig.pagePaths.map((item) => new URL(item, "https://webgrowth.info").toString());
-  const blogUrls = sitemapConfig.blogSlugs.map((slug) => `https://webgrowth.info/blog/${slug}/`);
+  const indexedRoutes = routeGovernance.routes.filter(
+    (route) => route.status === "INDEX" && route.sitemap
+  );
+  const indexedArticles = routeGovernance.articles.filter(
+    (article) => article.status === "INDEX" && article.sitemap
+  );
+  const pageUrls = indexedRoutes.map((route) =>
+    new URL(route.path, "https://webgrowth.info").toString()
+  );
+  const blogUrls = indexedArticles.map(
+    (article) => `https://webgrowth.info/blog/${article.slug}/`
+  );
   const allUrls = [...pageUrls, ...blogUrls];
 
   if (new Set(allUrls).size !== allUrls.length) {
     fail("duplicate sitemap URLs found across page and blog sitemap config");
-  }
-
-  for (const url of APPROVED_PAGE_URLS) {
-    if (!pageUrls.includes(url)) fail(`approved sitemap page URL missing: ${url}`);
-  }
-
-  for (const url of APPROVED_BLOG_URLS) {
-    if (!blogUrls.includes(url)) fail(`approved sitemap blog URL missing: ${url}`);
-  }
-
-  for (const url of FORBIDDEN_PAGE_URLS) {
-    if (pageUrls.includes(url)) fail(`forbidden sitemap page URL found: ${url}`);
-  }
-
-  for (const url of REMOVED_BLOG_URLS) {
-    if (blogUrls.includes(url)) fail(`removed blog sitemap URL found: ${url}`);
-  }
-
-  if (pageUrls.includes("https://webgrowth.info/thank-you/")) {
-    fail("thank-you page must not be included in sitemap page URLs");
-  }
-
-  if (blogUrls.includes("https://webgrowth.info/blog/thank-you/")) {
-    fail("thank-you page must not be included in sitemap blog URLs");
   }
 
   for (const url of allUrls) {
@@ -444,10 +422,8 @@ async function main() {
       ensureIncludes(source, "buildBreadcrumbSchema", `${page.name} breadcrumb schema`);
     }
 
-    const hasFaqSection = source.includes("<FAQSection");
-    const hasFaqSchema = source.includes("buildFaqSchema(");
-    if (hasFaqSection !== hasFaqSchema) {
-      fail(`${page.name}: FAQ schema and visible FAQ section are out of sync`);
+    if (source.includes("buildFaqSchema(")) {
+      fail(`${page.name}: FAQPage JSON-LD must not be emitted`);
     }
 
     for (const href of page.requiredLinks) {

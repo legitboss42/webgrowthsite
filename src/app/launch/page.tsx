@@ -11,7 +11,6 @@ import WhatYouGetSection from "@/components/WhatYouGetSection";
 import { launchFaqs, pricingTiers, whatYouGetItems } from "@/lib/launchOffer";
 import { featuredPortfolioCases } from "@/lib/portfolioCases";
 import {
-  buildFaqSchema,
   buildPageMetadata,
   buildProfessionalServiceSchema,
   launchKeywordSet,
@@ -124,28 +123,11 @@ const comparisonColumns = [
   },
 ] as const;
 
-const launchStructuredFaqs = [
-  {
-    question: "Why do custom Next.js websites cost more than WordPress templates?",
-    answer:
-      "Custom Next.js websites cost more because they are engineered for speed, cleaner conversion paths, leaner architecture, zero template bloat, and better long-term scalability for serious brands.",
-  },
-  {
-    question: "Do you handle hosting and domain management?",
-    answer:
-      "Yes. Web Growth can handle managed premium hosting, technical setup, domain connection, SSL, and the key launch details so the process stays streamlined and controlled.",
-  },
-  {
-    question: "How long does a custom website build take?",
-    answer:
-      "Most full custom website builds take around 4 to 6 weeks, depending on the scope and feedback speed. This launch package is designed for a much tighter turnaround when the scope is streamlined and content is ready.",
-  },
-] as const;
-
 export const metadata = buildPageMetadata({
   title: "Premium Website Launch Package | Web Growth",
   description: pageDescription,
   path: "/launch",
+  noIndex: true,
   keywords: [
     "website launch package",
     "premium website launch package",
@@ -165,7 +147,6 @@ export default function LaunchPage() {
       <StructuredData
         data={[
           buildProfessionalServiceSchema("/launch", pageDescription),
-          buildFaqSchema(launchStructuredFaqs),
         ]}
       />
 

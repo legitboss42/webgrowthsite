@@ -1,5 +1,9 @@
 ---
 title: "Small Business Website Launch QA Checklist"
+seoTitle: "Small Business Website Launch QA Checklist | Web Growth"
+primaryKeyword: "small business website launch QA checklist"
+searchIntent: "Informational - plan and improve a small-business website"
+coverAlt: "Small Business Website Launch QA Checklist - practical Web Growth guide visual"
 excerpt: "A launch QA checklist for small businesses to catch trust, technical, and conversion issues before going live."
 date: 2026-04-06
 updatedAt: 2026-04-06
@@ -9,7 +13,7 @@ topic: Launch QA
 difficulty: Beginner
 tags: ["Website Launch", "QA Checklist", "Small Business", "Website QA"]
 readTime: 11 min read
-cover: /images/blog/generated/small-business-website-launch-qa-checklist.svg
+cover: "/images/blog/growth-process.webp"
 author: victor-chinukwue
 reviewedBy: web-growth-editorial
 isCornerstone: true
@@ -33,7 +37,7 @@ steps:
   - "Monitor first 72 hours for regressions."
 relatedGuideSlugs:
   - "website-launch-checklist-for-small-businesses"
-  - "ga4-meta-tiktok-clarity-setup-guide"
+  - "website-tracking-setup-for-small-businesses"
 faq:
   - question: "How long should launch QA take?"
     answer: "For most small business sites, one focused QA session plus final checks is enough."
@@ -111,7 +115,7 @@ This creates accountability and reduces launch chaos.
 ## Related guides and support
 
 - [Website Launch Checklist for Small Businesses](/blog/website-launch-checklist-for-small-businesses)
-- [GA4 + Meta Pixel + TikTok Pixel + Clarity Setup Guide](/blog/ga4-meta-tiktok-clarity-setup-guide)
+- [Website Tracking Setup for Small Businesses](/blog/website-tracking-setup-for-small-businesses)
 - [Website Maintenance service](/services/website-maintenance)
 
 ## Launch communication checklist for client-facing teams

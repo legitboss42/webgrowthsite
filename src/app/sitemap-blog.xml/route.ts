@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getPosts, type Post } from "@/lib/posts";
-import sitemapConfig from "@/lib/sitemap-config.json";
+import routeGovernance from "@/lib/route-governance.json";
 import { absoluteUrl } from "@/lib/site";
 
 export const dynamic = "force-static";
@@ -39,8 +39,9 @@ export function GET() {
     safeGetPosts().map((post) => [post.slug, post] as const)
   );
 
-  const blogUrls: SitemapUrl[] = sitemapConfig.blogSlugs
-    .map((slug) => postMap.get(slug))
+  const blogUrls: SitemapUrl[] = routeGovernance.articles
+    .filter((article) => article.status === "INDEX" && article.sitemap)
+    .map((article) => postMap.get(article.slug))
     .filter((post): post is Post => Boolean(post && typeof post.slug === "string"))
     .map((post) => ({
       loc: absoluteUrl(`/blog/${post.slug}/`),

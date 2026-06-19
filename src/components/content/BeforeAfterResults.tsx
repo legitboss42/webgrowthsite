@@ -7,7 +7,7 @@ export default function BeforeAfterResults({ items }: BeforeAfterResultsProps) {
 
   return (
     <section className="rounded-2xl border border-white/10 bg-black/35 p-6">
-      <p className="text-xs uppercase tracking-[0.18em] text-emerald-300/85">Before / After Results</p>
+      <p className="text-xs uppercase tracking-[0.18em] text-emerald-300/85">Before / After Pattern</p>
       <div className="mt-4 grid gap-4 md:grid-cols-2">
         {items.map((item, index) => (
           <article key={`${item.before}-${index}`} className="rounded-xl border border-white/10 bg-black/30 p-4">

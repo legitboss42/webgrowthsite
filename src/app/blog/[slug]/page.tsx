@@ -17,27 +17,13 @@ import ReviewedByBlock from "@/components/content/ReviewedByBlock";
 import TableOfContents from "@/components/content/TableOfContents";
 import WhatYouNeed from "@/components/content/WhatYouNeed";
 import { getAuthorProfile } from "@/lib/authors";
-import { LOW_CPU_EMERGENCY_MODE } from "@/lib/emergency";
 import { getPost, getPosts, getRelatedGuidesForPost, isPublicBlogSlug, type Post } from "@/lib/posts";
-import sitemapConfig from "@/lib/sitemap-config.json";
+import routeGovernance from "@/lib/route-governance.json";
 import { buildArticleSchema, buildBreadcrumbSchema, buildPageMetadata } from "@/lib/seo";
 import { DEFAULT_OG_IMAGE, SITE_URL } from "@/lib/site";
 
 export const dynamic = "force-static";
 export const dynamicParams = false;
-
-const ENHANCED_POST_SLUGS = new Set([
-  "ga4-meta-tiktok-clarity-setup-guide",
-  "landing-page-wireframe-local-service-business",
-  "website-redesign-cost-breakdown-nigeria",
-  "how-to-audit-slow-wordpress-site",
-  "google-business-profile-optimization-checklist",
-  "conversion-audit-checklist-service-homepage",
-  "small-business-website-launch-qa-checklist",
-  "how-to-plan-website-copy-before-hiring-developer",
-  "local-seo-basics-service-business-lagos",
-  "website-platform-comparison-small-business",
-]);
 
 function slugifyHeading(text: string) {
   return text
@@ -71,11 +57,14 @@ function getSafeTags(post: Pick<Post, "tags">): string[] {
 }
 
 export function generateStaticParams() {
-  if (LOW_CPU_EMERGENCY_MODE) {
-    return sitemapConfig.blogSlugs.map((slug) => ({ slug }));
-  }
-
-  return getPosts().map((post) => ({ slug: post.slug }));
+  const approvedSlugs = new Set(
+    routeGovernance.articles
+      .filter((article) => article.status === "INDEX")
+      .map((article) => article.slug)
+  );
+  return getPosts()
+    .filter((post) => approvedSlugs.has(post.slug))
+    .map((post) => ({ slug: post.slug }));
 }
 
 export async function generateMetadata({
@@ -126,9 +115,6 @@ export default async function BlogPostPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  if (process.env.NODE_ENV === "production" && !LOW_CPU_EMERGENCY_MODE) {
-    console.log(`[build][blog] rendering ${slug}`);
-  }
   if (!isPublicBlogSlug(slug)) return notFound();
   const post = getPost(slug);
   if (!post) return notFound();
@@ -169,7 +155,6 @@ export default async function BlogPostPage({
   ]);
 
   const hasEnhancedBlocks =
-    ENHANCED_POST_SLUGS.has(post.slug) ||
     Boolean(post.topic) ||
     Boolean(post.difficulty) ||
     Boolean(post.updatedAt) ||
@@ -260,7 +245,7 @@ export default async function BlogPostPage({
               <div className="relative aspect-[16/9]">
                 <Image
                   src={post.cover}
-                  alt={post.title}
+                  alt={post.coverAlt}
                   fill
                   className="object-cover"
                   sizes="(max-width: 768px) 100vw, 960px"

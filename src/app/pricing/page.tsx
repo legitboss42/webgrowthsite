@@ -2,7 +2,7 @@ import Link from "next/link";
 import FAQSection from "@/components/FAQSection";
 import StructuredData from "@/components/StructuredData";
 import TrackedLink from "@/components/analytics/TrackedLink";
-import { buildBreadcrumbSchema, buildFaqSchema, buildPageMetadata } from "@/lib/seo";
+import { buildBreadcrumbSchema, buildPageMetadata } from "@/lib/seo";
 import { absoluteUrl } from "@/lib/site";
 
 const pageDescription =
@@ -272,7 +272,6 @@ export default function PricingPage() {
       <StructuredData
         data={[
           webPageSchema,
-          buildFaqSchema(faqItems),
           buildBreadcrumbSchema([
             { name: "Home", path: "/" },
             { name: "Pricing", path: "/pricing/" },

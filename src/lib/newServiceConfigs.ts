@@ -19,6 +19,7 @@ export type ServicePageConfig = {
   seoTitle?: string;
   seoDescription?: string;
   keywords: string[];
+  searchIntent: string;
   heroTitle: string;
   heroDescription: string;
   heroImage: string;
@@ -29,13 +30,14 @@ export type ServicePageConfig = {
   faqs: { question: string; answer: string }[];
   ctaTitle: string;
   ctaDescription: string;
-  targetAudience?: string[];
-  notFor?: string[];
-  commonMistakes?: string[];
-  examples?: string[];
-  beforeAfter?: { before: string; after: string }[];
-  evidence?: { src: string; alt: string; note?: string }[];
-  relatedGuideSlugs?: string[];
+  targetAudience: string[];
+  notFor: string[];
+  commonMistakes: string[];
+  examples: string[];
+  useCases: string[];
+  beforeAfter: { before: string; after: string }[];
+  evidence: { src: string; alt: string; note?: string }[];
+  relatedGuideSlugs: string[];
   exclusions?: string[];
   relatedLinks?: {
     href: string;
@@ -45,7 +47,34 @@ export type ServicePageConfig = {
   }[];
 };
 
-export const NEW_SERVICE_PAGES: Record<string, ServicePageConfig> = {
+export type ServicePageInput = Omit<
+  ServicePageConfig,
+  | "searchIntent"
+  | "targetAudience"
+  | "notFor"
+  | "commonMistakes"
+  | "examples"
+  | "useCases"
+  | "beforeAfter"
+  | "evidence"
+  | "relatedGuideSlugs"
+> &
+  Partial<
+    Pick<
+      ServicePageConfig,
+      | "searchIntent"
+      | "targetAudience"
+      | "notFor"
+      | "commonMistakes"
+      | "examples"
+      | "useCases"
+      | "beforeAfter"
+      | "evidence"
+      | "relatedGuideSlugs"
+    >
+  >;
+
+export const NEW_SERVICE_PAGES: Record<string, ServicePageInput> = {
   "email-marketing-setup-strategy": {
     title: "Email Marketing Setup and Strategy",
     slug: "email-marketing-setup-strategy",
@@ -905,10 +934,102 @@ export const NEW_SERVICE_PAGES: Record<string, ServicePageConfig> = {
   },
 };
 
-export const ALL_SERVICE_PAGES: Record<string, ServicePageConfig> = {
-  ...CORE_SERVICE_PAGES,
-  ...NEW_SERVICE_PAGES,
+const RELATED_GUIDES_BY_SERVICE: Record<string, string[]> = {
+  "email-marketing-setup-strategy": [
+    "email-marketing-for-small-business",
+    "email-automation-architecture",
+    "website-tracking-setup-for-small-businesses",
+  ],
+  "search-engine-optimisation": [
+    "small-business-website-seo-checklist",
+    "local-seo-for-small-business-google-maps-ranking-guide",
+    "03-seo-migration-without-losing-traffic",
+  ],
+  "google-my-business-setup-optimisation": [
+    "google-business-profile-optimization-checklist",
+    "local-seo-for-small-business-google-maps-ranking-guide",
+    "small-business-website-seo-checklist",
+  ],
+  "booking-platform-setup-integration": [
+    "high-converting-service-page",
+    "website-tracking-setup-for-small-businesses",
+    "why-your-website-isnt-getting-leads",
+  ],
+  "crm-system-setup-configuration": [
+    "website-tracking-setup-for-small-businesses",
+    "email-automation-architecture",
+    "why-your-website-isnt-getting-leads",
+  ],
+  "marketing-automation-build-implementation": [
+    "email-automation-architecture",
+    "email-marketing-for-small-business",
+    "website-tracking-setup-for-small-businesses",
+  ],
+  "analytics-tracking-setup": [
+    "website-tracking-setup-for-small-businesses",
+    "conversion-audit-checklist-service-homepage",
+    "why-your-website-isnt-getting-leads",
+  ],
+  "domain-registration-hosting-guidance": [
+    "best-web-hosting-for-small-business-websites",
+    "namecheap-domain-and-hosting-guide",
+    "stop-using-cheap-hosting",
+  ],
+  "lead-magnet-strategy-build": [
+    "high-converting-landing-pages-guide",
+    "email-marketing-for-small-business",
+    "why-your-website-isnt-getting-leads",
+  ],
 };
+
+function normalizeService(service: ServicePageInput): ServicePageConfig {
+  const examples = service.examples ?? [];
+  const mistakes = service.commonMistakes ?? [];
+  const useCases = service.useCases ?? examples.map((item) => `Example scenario: ${item}`);
+  const beforeAfter =
+    service.beforeAfter ??
+    service.highlights.slice(0, 2).map((highlight, index) => ({
+      before: mistakes[index] ?? `The ${service.title.toLowerCase()} workflow lacks a clear operating standard.`,
+      after: highlight,
+    }));
+  const evidence =
+    service.evidence ??
+    [
+      {
+        src: service.heroImage,
+        alt: `${service.title} service overview visual`,
+        note: "Representative Web Growth service visual; not a client-results claim.",
+      },
+      {
+        src: service.detailImage,
+        alt: `${service.title} implementation detail visual`,
+        note: "Representative implementation visual; outcomes depend on project scope.",
+      },
+    ];
+
+  return {
+    ...service,
+    searchIntent:
+      service.searchIntent ||
+      `Transactional - evaluate and request ${service.title.toLowerCase()} support`,
+    targetAudience: service.targetAudience ?? [],
+    notFor: service.notFor ?? service.exclusions ?? [],
+    commonMistakes: mistakes,
+    examples,
+    useCases,
+    beforeAfter,
+    evidence,
+    relatedGuideSlugs:
+      service.relatedGuideSlugs ?? RELATED_GUIDES_BY_SERVICE[service.slug] ?? [],
+  };
+}
+
+export const ALL_SERVICE_PAGES: Record<string, ServicePageConfig> = Object.fromEntries(
+  Object.entries({ ...CORE_SERVICE_PAGES, ...NEW_SERVICE_PAGES }).map(([slug, service]) => [
+    slug,
+    normalizeService(service),
+  ])
+);
 
 warnOnServiceQuality(Object.values(ALL_SERVICE_PAGES));
 

@@ -1,6 +1,9 @@
 ---
 title: "Writing Service Pages That Convert: What Your Page Needs to Say"
 seoTitle: "Writing Service Pages That Convert | Web Growth"
+primaryKeyword: "writing service pages that convert"
+searchIntent: "Informational - first-hand case study and implementation lessons"
+coverAlt: "Writing Service Pages That Convert: What Your Page Needs to Say - practical Web Growth guide visual"
 excerpt: "Learn how to write service pages that convert by clarifying the offer, explaining outcomes, building trust, answering objections, and guiding enquiries."
 date: 2026-02-21T00:00:00.000Z
 category: Series

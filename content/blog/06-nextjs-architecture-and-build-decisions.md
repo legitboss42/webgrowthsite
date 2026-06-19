@@ -2,6 +2,10 @@
 title: >-
   Next.js Architecture and Build Decisions: Technical SEO and Website
   Maintainability
+seoTitle: "Next.js Architecture and Build Decisions | Web Growth"
+primaryKeyword: "Next.js architecture for SEO"
+searchIntent: "Informational - first-hand case study and implementation lessons"
+coverAlt: "Next.js Architecture and Build Decisions: Technical SEO and Website Maintainability - practical Web Growth guide visual"
 excerpt: >-
   Part 6 of the J Luxe rebuild series: the Next.js architecture decisions that
   improved performance, crawlability, publishing speed, and long-term
@@ -624,6 +628,8 @@ Architecture is not the glamorous part of a rebuild.
 But it decides whether the good ideas in strategy, SEO, design, and conversion can actually survive launch and scale after it.
 
 That is why technical decisions are business decisions.
+
+For teams that need this architecture implemented rather than assembled from plugins, see the [business website design service](/services/business-website-design/).
 
 ---
 
