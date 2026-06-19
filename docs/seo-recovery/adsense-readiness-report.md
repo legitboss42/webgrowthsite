@@ -2,7 +2,7 @@
 
 ## Website Quality
 
-Route governance, self-canonicals, sitemaps, robots controls, permanent redirects, mobile-first components, and trust navigation are implemented locally. Production verification remains pending until deployment.
+Route governance, self-canonicals, sitemaps, robots controls, permanent redirects, mobile-first components, and trust navigation are deployed and verified on `webgrowth.info` as of June 19, 2026.
 
 ## Content Quality
 
@@ -22,19 +22,19 @@ Ownership, contact, legal pages, author/reviewer presentation, and editorial acc
 
 ## SEO and Indexing
 
-Locally validated inventory: 32 indexed pages, 33 indexed articles, 8 noindex operational pages, 5 noindex API routes, 11 route redirects, and 3 article redirects.
+Live validated inventory: 32 indexed pages, 33 indexed articles, 8 noindex operational pages, 5 noindex API routes, 11 route redirects, and 3 article redirects. Representative production pages passed canonical, robots, Open Graph, Twitter, schema, image, overflow, and rendering checks.
 
 ## Approval Readiness Score
 
-- Probability: not assigned; production and traffic evidence are unavailable.
+- Probability: estimated 70% based on visible production signals only; traffic and account-level evidence remain unavailable.
 - Strengths: governed index, improved trust, approved content registry, clean sitemap parity, restrained schema.
-- Risks: production behavior and traffic quality remain unverified; service and article depth still require ongoing human editorial review.
-- Critical fixes: pass production build and browser QA, deploy, repeat live crawl, then review authenticated traffic and indexing data.
+- Risks: traffic quality and actual index coverage remain unverified; service and article depth still require ongoing human editorial review.
+- Critical fixes: review authenticated traffic and indexing data, then monitor the live site for stability before applying.
 
 ## First-Attempt Approval Roadmap
 
-1. Complete local lint, build, smoke, and browser gates.
-2. Deploy and verify all live route states, metadata, sitemaps, images, and redirects.
+1. Completed: local lint, build, smoke, and browser gates.
+2. Completed: deployment and live route, metadata, sitemap, image, and redirect verification.
 3. Review GA4 and Search Console traffic quality when authenticated access is available.
 4. Confirm no copyrighted or undocumented media remains.
 5. Apply only after the live site is stable and traffic sources are understood.

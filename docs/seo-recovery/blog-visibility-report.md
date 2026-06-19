@@ -14,4 +14,4 @@ The same governance allowlist now controls static generation, blog listing visib
 
 ## Remaining Verification
 
-Production crawl and rendered-link verification must be repeated after deployment.
+Production crawl and representative desktop/mobile rendering were verified on June 19, 2026. The live blog sitemap contains 33 approved articles, restored series pages return `200`, and consolidated articles return permanent redirects.
