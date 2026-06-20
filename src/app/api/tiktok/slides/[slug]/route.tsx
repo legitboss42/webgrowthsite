@@ -6,6 +6,8 @@ import { buildTikTokPhotoDraftContent } from "@/lib/tiktokPublishing";
 
 export const runtime = "nodejs";
 
+const tikTokVerificationPattern = /^tiktok([A-Za-z0-9]+)\.txt$/;
+
 const slideColors = [
   {
     accent: "#10b981",
@@ -42,6 +44,20 @@ export async function GET(
 ) {
   const { slug } = await context.params;
   const slideIndex = Number(new URL(request.url).searchParams.get("index") || "0");
+  const verificationMatch = slug.match(tikTokVerificationPattern);
+
+  if (verificationMatch) {
+    const token = verificationMatch[1];
+    return new NextResponse(
+      `tiktok-developers-site-verification=${token}`,
+      {
+        headers: {
+          ...noIndexHeaders(),
+          "Content-Type": "text/plain; charset=utf-8",
+        },
+      }
+    );
+  }
 
   if (!isPublicBlogSlug(slug)) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
