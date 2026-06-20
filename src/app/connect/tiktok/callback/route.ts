@@ -3,10 +3,12 @@ import {
   exchangeTikTokCode,
   getTikTokConnectPath,
   getTikTokConnectionCookieName,
-  getTikTokConnectionTtlSeconds,
+  getTikTokConnectionMaxAgeSeconds,
   getTikTokStateCookieName,
+  getTikTokTokenCookieName,
   readTikTokStateCookie,
   serializeTikTokConnectionCookie,
+  serializeTikTokTokenCookie,
 } from "@/lib/tiktok";
 
 export const runtime = "nodejs";
@@ -81,19 +83,31 @@ export async function GET(request: Request) {
     const failureResponse = NextResponse.redirect(redirectTarget, 302);
     failureResponse.cookies.delete(getTikTokStateCookieName());
     failureResponse.cookies.delete(getTikTokConnectionCookieName());
+    failureResponse.cookies.delete(getTikTokTokenCookieName());
     failureResponse.headers.set("Cache-Control", "no-store");
     failureResponse.headers.set("X-Robots-Tag", "noindex, nofollow");
     return failureResponse;
   }
 
   redirectTarget.searchParams.set("status", "connected");
+  redirectTarget.searchParams.set("mode", parsedState.scopeMode);
+  const maxAge = getTikTokConnectionMaxAgeSeconds(exchangeResult.record.refreshExpiresIn);
 
   const successResponse = NextResponse.redirect(redirectTarget, 302);
   successResponse.cookies.delete(getTikTokStateCookieName());
   successResponse.cookies.set({
     name: getTikTokConnectionCookieName(),
     value: serializeTikTokConnectionCookie(exchangeResult.summary),
-    maxAge: getTikTokConnectionTtlSeconds(),
+    maxAge,
+    httpOnly: true,
+    sameSite: "lax",
+    secure: secureCookies,
+    path: "/",
+  });
+  successResponse.cookies.set({
+    name: getTikTokTokenCookieName(),
+    value: serializeTikTokTokenCookie(exchangeResult.record),
+    maxAge,
     httpOnly: true,
     sameSite: "lax",
     secure: secureCookies,
