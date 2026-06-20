@@ -9,6 +9,7 @@ import {
   getTikTokRequiredScopes,
   isTikTokConfigured,
   maskOpenId,
+  normalizeTikTokScopeMode,
   readTikTokConnectionCookie,
 } from "@/lib/tiktok";
 
@@ -49,7 +50,13 @@ export default async function TikTokConnectPage({ searchParams }: TikTokConnectP
     cookieStore.get(getTikTokConnectionCookieName())?.value
   );
   const configured = isTikTokConfigured();
+  const scopeMode = normalizeTikTokScopeMode(
+    Array.isArray(resolvedSearchParams.mode)
+      ? resolvedSearchParams.mode[0] || ""
+      : resolvedSearchParams.mode || ""
+  );
   const redirectUri = getTikTokRedirectUri();
+  const requiredScopes = getTikTokRequiredScopes(scopeMode);
 
   return (
     <main className="bg-[#050806] text-white">
@@ -112,7 +119,7 @@ export default async function TikTokConnectPage({ searchParams }: TikTokConnectP
               <Link
                 href={
                   configured
-                    ? `${getTikTokAuthorizePath()}?returnTo=/connect/tiktok/`
+                    ? `${getTikTokAuthorizePath()}?returnTo=/connect/tiktok/&mode=login`
                     : "/connect/tiktok/?status=config-missing"
                 }
                 className={`inline-flex items-center justify-center rounded-md px-6 py-4 text-sm font-semibold transition ${
@@ -122,7 +129,20 @@ export default async function TikTokConnectPage({ searchParams }: TikTokConnectP
                 }`}
                 aria-disabled={!configured}
               >
-                Start TikTok authorization
+                Start TikTok login authorization
+              </Link>
+              <Link
+                href={
+                  configured
+                    ? `${getTikTokAuthorizePath()}?returnTo=/connect/tiktok/&mode=publishing`
+                    : "/connect/tiktok/?status=config-missing"
+                }
+                className={`inline-flex items-center justify-center rounded-md border border-white/10 bg-white/5 px-6 py-4 text-sm font-semibold text-white transition ${
+                  configured ? "hover:bg-white/10" : "cursor-not-allowed opacity-50"
+                }`}
+                aria-disabled={!configured}
+              >
+                Request publishing scope
               </Link>
               <Link
                 href="/"
@@ -143,9 +163,17 @@ export default async function TikTokConnectPage({ searchParams }: TikTokConnectP
                 </p>
               </div>
               <div>
+                <p className="font-semibold text-white">Authorization mode</p>
+                <p className="mt-2 text-white/70">
+                  {scopeMode === "publishing"
+                    ? "Publishing mode requests TikTok draft upload access after basic login works."
+                    : "Login mode requests the minimum TikTok profile scope first so the callback flow can be verified cleanly."}
+                </p>
+              </div>
+              <div>
                 <p className="font-semibold text-white">Required scopes</p>
                 <ul className="mt-2 space-y-2">
-                  {getTikTokRequiredScopes().map((scope) => (
+                  {requiredScopes.map((scope) => (
                     <li key={scope} className="rounded-xl border border-white/10 bg-black/20 px-4 py-3">
                       {scope}
                     </li>

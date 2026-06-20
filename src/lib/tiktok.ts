@@ -6,15 +6,20 @@ const TIKTOK_STATE_COOKIE = "wg_tiktok_oauth_state";
 const TIKTOK_CONNECTION_COOKIE = "wg_tiktok_connection";
 const TIKTOK_DEFAULT_RETURN_PATH = "/connect/tiktok/";
 const TIKTOK_CALLBACK_PATH = "/connect/tiktok/callback/";
-const TIKTOK_SCOPE_LIST = ["user.info.basic", "video.upload"] as const;
-const TIKTOK_SCOPE_VALUE = TIKTOK_SCOPE_LIST.join(",");
+const TIKTOK_SCOPE_MAP = {
+  login: ["user.info.basic"],
+  publishing: ["user.info.basic", "video.upload"],
+} as const;
 const TIKTOK_STATE_TTL_SECONDS = 10 * 60;
 const TIKTOK_CONNECTION_TTL_SECONDS = 24 * 60 * 60;
+
+export type TikTokScopeMode = keyof typeof TIKTOK_SCOPE_MAP;
 
 type TikTokStatePayload = {
   state: string;
   returnTo: string;
   issuedAt: number;
+  scopeMode: TikTokScopeMode;
 };
 
 type TikTokConnectionSummary = {
@@ -86,8 +91,12 @@ export function getTikTokRedirectUri() {
   return process.env.TIKTOK_REDIRECT_URI?.trim() || absoluteUrl(TIKTOK_CALLBACK_PATH);
 }
 
-export function getTikTokRequiredScopes() {
-  return TIKTOK_SCOPE_LIST;
+export function normalizeTikTokScopeMode(value?: string | null): TikTokScopeMode {
+  return value === "publishing" ? "publishing" : "login";
+}
+
+export function getTikTokRequiredScopes(scopeMode: TikTokScopeMode = "login") {
+  return TIKTOK_SCOPE_MAP[scopeMode];
 }
 
 export function getTikTokAuthorizePath() {
@@ -110,11 +119,12 @@ export function isTikTokConfigured() {
   return Boolean(getTikTokClientKey() && getTikTokClientSecret());
 }
 
-export function buildTikTokStatePayload(returnTo?: string) {
+export function buildTikTokStatePayload(returnTo?: string, scopeMode: TikTokScopeMode = "login") {
   return {
     state: crypto.randomUUID(),
     returnTo: normalizeReturnPath(returnTo),
     issuedAt: Date.now(),
+    scopeMode,
   } satisfies TikTokStatePayload;
 }
 
@@ -142,12 +152,12 @@ export function getTikTokConnectionTtlSeconds() {
   return TIKTOK_CONNECTION_TTL_SECONDS;
 }
 
-export function buildTikTokAuthorizeUrl(state: string) {
+export function buildTikTokAuthorizeUrl(state: string, scopeMode: TikTokScopeMode = "login") {
   const url = new URL(TIKTOK_AUTHORIZE_URL);
   url.searchParams.set("client_key", getTikTokClientKey());
   url.searchParams.set("redirect_uri", getTikTokRedirectUri());
   url.searchParams.set("response_type", "code");
-  url.searchParams.set("scope", TIKTOK_SCOPE_VALUE);
+  url.searchParams.set("scope", getTikTokRequiredScopes(scopeMode).join(","));
   url.searchParams.set("state", state);
   return url.toString();
 }
@@ -212,7 +222,7 @@ export async function exchangeTikTokCode(code: string): Promise<TikTokCallbackRe
     ok: true,
     summary: {
       openId: payload.open_id,
-      scope: payload.scope || TIKTOK_SCOPE_VALUE,
+      scope: payload.scope || getTikTokRequiredScopes("login").join(","),
       connectedAt: new Date().toISOString(),
       expiresIn: payload.expires_in,
       refreshExpiresIn: payload.refresh_expires_in,

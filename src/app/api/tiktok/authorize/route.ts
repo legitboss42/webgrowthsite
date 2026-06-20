@@ -6,6 +6,7 @@ import {
   getTikTokStateCookieName,
   getTikTokStateTtlSeconds,
   isTikTokConfigured,
+  normalizeTikTokScopeMode,
   serializeTikTokStateCookie,
 } from "@/lib/tiktok";
 
@@ -14,6 +15,7 @@ export const runtime = "nodejs";
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
   const returnTo = requestUrl.searchParams.get("returnTo") || getTikTokConnectPath();
+  const scopeMode = normalizeTikTokScopeMode(requestUrl.searchParams.get("mode"));
   const secureCookies = process.env.NODE_ENV === "production";
 
   if (!isTikTokConfigured()) {
@@ -25,8 +27,11 @@ export async function GET(request: Request) {
     return missingConfigResponse;
   }
 
-  const statePayload = buildTikTokStatePayload(returnTo);
-  const response = NextResponse.redirect(buildTikTokAuthorizeUrl(statePayload.state), 302);
+  const statePayload = buildTikTokStatePayload(returnTo, scopeMode);
+  const response = NextResponse.redirect(
+    buildTikTokAuthorizeUrl(statePayload.state, statePayload.scopeMode),
+    302
+  );
 
   response.cookies.set({
     name: getTikTokStateCookieName(),
