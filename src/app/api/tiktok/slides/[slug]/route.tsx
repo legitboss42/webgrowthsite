@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 import { NextResponse } from "next/server";
 import sharp from "sharp";
-import { getPost, isPublicBlogSlug } from "@/lib/posts";
+import { getPost } from "@/lib/posts";
 import { buildTikTokPhotoDraftContent } from "@/lib/tiktokPublishing";
 
 export const runtime = "nodejs";
@@ -38,41 +38,67 @@ function noIndexHeaders() {
   };
 }
 
+function normalizeSlideSlug(slug: string) {
+  return decodeURIComponent(slug)
+    .trim()
+    .replace(/\.jpe?g$/i, "")
+    .replace(/\.png$/i, "");
+}
+
 export async function GET(
   request: Request,
   context: { params: Promise<{ slug: string }> }
 ) {
-  const { slug } = await context.params;
-  const slideIndex = Number(new URL(request.url).searchParams.get("index") || "0");
-  const verificationMatch = slug.match(tikTokVerificationPattern);
+  const { slug: rawSlug } = await context.params;
+  const slug = normalizeSlideSlug(rawSlug);
+
+  const url = new URL(request.url);
+  const slideIndex = Number(url.searchParams.get("index") || "0");
+
+  const verificationMatch = rawSlug.match(tikTokVerificationPattern);
 
   if (verificationMatch) {
     const token = verificationMatch[1];
-    return new NextResponse(
-      `tiktok-developers-site-verification=${token}`,
-      {
-        headers: {
-          ...noIndexHeaders(),
-          "Content-Type": "text/plain; charset=utf-8",
-        },
-      }
-    );
-  }
 
-  if (!isPublicBlogSlug(slug)) {
-    return NextResponse.json({ error: "Not found" }, { status: 404 });
+    return new NextResponse(`tiktok-developers-site-verification=${token}`, {
+      headers: {
+        ...noIndexHeaders(),
+        "Content-Type": "text/plain; charset=utf-8",
+      },
+    });
   }
 
   const post = getPost(slug);
+
   if (!post) {
-    return NextResponse.json({ error: "Not found" }, { status: 404 });
+    return NextResponse.json(
+      {
+        error: "Not found",
+        slug,
+      },
+      {
+        status: 404,
+        headers: noIndexHeaders(),
+      }
+    );
   }
 
   const slides = buildTikTokPhotoDraftContent(post).slides;
   const slide = slides[slideIndex];
 
   if (!slide) {
-    return NextResponse.json({ error: "Slide not found" }, { status: 404 });
+    return NextResponse.json(
+      {
+        error: "Slide not found",
+        slug,
+        slideIndex,
+        availableSlides: slides.length,
+      },
+      {
+        status: 404,
+        headers: noIndexHeaders(),
+      }
+    );
   }
 
   const palette = slideColors[slideIndex % slideColors.length];
@@ -170,9 +196,8 @@ export async function GET(
 
   const pngBuffer = Buffer.from(await imageResponse.arrayBuffer());
   const jpegBuffer = await sharp(pngBuffer).jpeg({ quality: 90 }).toBuffer();
-  const responseBody = new Uint8Array(jpegBuffer);
 
-  return new NextResponse(responseBody, {
+  return new NextResponse(new Uint8Array(jpegBuffer), {
     headers: {
       ...noIndexHeaders(),
       "Content-Type": "image/jpeg",
