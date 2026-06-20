@@ -1,5 +1,6 @@
 import { ImageResponse } from "next/og";
 import { NextResponse } from "next/server";
+import sharp from "sharp";
 import { getPost, isPublicBlogSlug } from "@/lib/posts";
 import { buildTikTokPhotoDraftContent } from "@/lib/tiktokPublishing";
 
@@ -60,7 +61,7 @@ export async function GET(
 
   const palette = slideColors[slideIndex % slideColors.length];
 
-  return new ImageResponse(
+  const imageResponse = new ImageResponse(
     (
       <div
         style={{
@@ -148,7 +149,18 @@ export async function GET(
     {
       width: 1080,
       height: 1920,
-      headers: noIndexHeaders(),
     }
   );
+
+  const pngBuffer = Buffer.from(await imageResponse.arrayBuffer());
+  const jpegBuffer = await sharp(pngBuffer).jpeg({ quality: 90 }).toBuffer();
+  const responseBody = new Uint8Array(jpegBuffer);
+
+  return new NextResponse(responseBody, {
+    headers: {
+      ...noIndexHeaders(),
+      "Content-Type": "image/jpeg",
+      "Content-Length": String(jpegBuffer.length),
+    },
+  });
 }
