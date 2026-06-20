@@ -3,6 +3,8 @@ import { openCookiePayload, sealCookiePayload } from "@/lib/secureCookie";
 
 const TIKTOK_AUTHORIZE_URL = "https://www.tiktok.com/v2/auth/authorize/";
 const TIKTOK_TOKEN_URL = "https://open.tiktokapis.com/v2/oauth/token/";
+const TIKTOK_PHOTO_INIT_URL = "https://open.tiktokapis.com/v2/post/publish/content/init/";
+const TIKTOK_PUBLISH_STATUS_URL = "https://open.tiktokapis.com/v2/post/publish/status/fetch/";
 const TIKTOK_STATE_COOKIE = "wg_tiktok_oauth_state";
 const TIKTOK_CONNECTION_COOKIE = "wg_tiktok_connection";
 const TIKTOK_TOKEN_COOKIE = "wg_tiktok_tokens";
@@ -41,6 +43,14 @@ export type TikTokConnectionRecord = TikTokConnectionSummary & {
   refreshExpiresAt: string;
 };
 
+export type TikTokPublishStatus = {
+  downloadedBytes?: number;
+  failReason?: string;
+  publiclyAvailablePostIds: Array<number | string>;
+  status: string;
+  uploadedBytes?: number;
+};
+
 type TikTokTokenSuccess = {
   access_token: string;
   expires_in: number;
@@ -58,9 +68,45 @@ type TikTokTokenError = {
 
 type TikTokTokenResponse = TikTokTokenSuccess & TikTokTokenError;
 
+type TikTokApiErrorPayload = {
+  error?: {
+    code?: string;
+    log_id?: string;
+    message?: string;
+  };
+};
+
+type TikTokPhotoDraftResponse = {
+  data?: {
+    publish_id?: string;
+  };
+} & TikTokApiErrorPayload;
+
+type TikTokPublishStatusResponse = {
+  data?: {
+    downloaded_bytes?: number;
+    fail_reason?: string;
+    publicaly_available_post_id?: Array<number | string>;
+    status?: string;
+    uploaded_bytes?: number;
+  };
+} & TikTokApiErrorPayload;
+
 type TikTokCallbackResult =
   | { ok: true; summary: TikTokConnectionSummary; record: TikTokConnectionRecord }
   | { ok: false; message: string };
+
+type TikTokRefreshResult =
+  | { ok: true; summary: TikTokConnectionSummary; record: TikTokConnectionRecord }
+  | { ok: false; message: string; needsReconnect?: boolean };
+
+type TikTokPhotoDraftResult =
+  | { ok: true; publishId: string }
+  | { ok: false; message: string; code?: string };
+
+type TikTokStatusResult =
+  | { ok: true; status: TikTokPublishStatus }
+  | { ok: false; message: string; code?: string };
 
 function base64UrlEncode(value: string) {
   return Buffer.from(value, "utf8")
@@ -96,6 +142,24 @@ function getTikTokTokenCookieSecret() {
     process.env.TIKTOK_CLIENT_SECRET?.trim() ||
     ""
   );
+}
+
+function getTikTokApiErrorMessage(
+  payload: TikTokApiErrorPayload | TikTokTokenError | null,
+  fallback: string
+) {
+  const errorCode =
+    "error" in (payload || {}) && typeof payload?.error === "object"
+      ? payload.error?.code
+      : "error" in (payload || {})
+        ? (payload as TikTokTokenError | null)?.error
+        : undefined;
+  const errorMessage =
+    "error" in (payload || {}) && typeof payload?.error === "object"
+      ? payload.error?.message
+      : (payload as TikTokTokenError | null)?.error_description;
+
+  return [errorCode, errorMessage].filter(Boolean).join(": ") || fallback;
 }
 
 export function getTikTokClientKey() {
@@ -191,6 +255,15 @@ export function getTikTokConnectionMaxAgeSeconds(refreshExpiresIn?: number) {
   return Math.min(Math.floor(refreshExpiresIn), TIKTOK_CONNECTION_TTL_CAP_SECONDS);
 }
 
+export function isTikTokTokenExpiringSoon(
+  record: TikTokConnectionRecord,
+  withinSeconds = 10 * 60
+) {
+  const expiresAtMs = new Date(record.expiresAt).getTime();
+  if (Number.isNaN(expiresAtMs)) return true;
+  return expiresAtMs - Date.now() <= withinSeconds * 1000;
+}
+
 export function buildTikTokAuthorizeUrl(state: string, scopeMode: TikTokScopeMode = "login") {
   const url = new URL(TIKTOK_AUTHORIZE_URL);
   url.searchParams.set("client_key", getTikTokClientKey());
@@ -246,14 +319,12 @@ export async function exchangeTikTokCode(code: string): Promise<TikTokCallbackRe
   const payload = (await response.json().catch(() => null)) as TikTokTokenResponse | null;
 
   if (!response.ok || !payload?.open_id) {
-    const message =
-      payload?.error_description ||
-      payload?.error ||
-      "TikTok did not return a usable access token response.";
-
     return {
       ok: false,
-      message,
+      message: getTikTokApiErrorMessage(
+        payload,
+        "TikTok did not return a usable access token response."
+      ),
     };
   }
 
@@ -283,5 +354,182 @@ export async function exchangeTikTokCode(code: string): Promise<TikTokCallbackRe
     ok: true,
     summary,
     record,
+  };
+}
+
+export async function refreshTikTokTokens(
+  record: TikTokConnectionRecord
+): Promise<TikTokRefreshResult> {
+  const clientKey = getTikTokClientKey();
+  const clientSecret = getTikTokClientSecret();
+
+  if (!clientKey || !clientSecret) {
+    return {
+      ok: false,
+      message: "TikTok client credentials are missing.",
+      needsReconnect: true,
+    };
+  }
+
+  const body = new URLSearchParams({
+    client_key: clientKey,
+    client_secret: clientSecret,
+    grant_type: "refresh_token",
+    refresh_token: record.refreshToken,
+  });
+
+  const response = await fetch(TIKTOK_TOKEN_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      "Cache-Control": "no-store",
+    },
+    body,
+    cache: "no-store",
+  });
+
+  const payload = (await response.json().catch(() => null)) as TikTokTokenResponse | null;
+
+  if (!response.ok || !payload?.access_token) {
+    const message = getTikTokApiErrorMessage(
+      payload,
+      "TikTok rejected the token refresh request."
+    );
+    const normalized = message.toLowerCase();
+
+    return {
+      ok: false,
+      message,
+      needsReconnect:
+        normalized.includes("invalid_grant") ||
+        normalized.includes("invalid refresh token") ||
+        normalized.includes("expired"),
+    };
+  }
+
+  const refreshedAt = new Date();
+  const expiresIn = Math.max(0, payload.expires_in || 0);
+  const refreshExpiresIn = Math.max(
+    0,
+    payload.refresh_expires_in || record.refreshExpiresIn || 0
+  );
+  const scope = payload.scope || record.scope;
+  const openId = payload.open_id || record.openId;
+  const summary: TikTokConnectionSummary = {
+    openId,
+    scope,
+    connectedAt: record.connectedAt,
+    expiresIn,
+    refreshExpiresIn,
+  };
+  const refreshedRecord: TikTokConnectionRecord = {
+    ...summary,
+    accessToken: payload.access_token,
+    refreshToken: payload.refresh_token || record.refreshToken,
+    tokenType: payload.token_type || record.tokenType || "Bearer",
+    expiresAt: new Date(refreshedAt.getTime() + expiresIn * 1000).toISOString(),
+    refreshExpiresAt: new Date(
+      refreshedAt.getTime() + refreshExpiresIn * 1000
+    ).toISOString(),
+  };
+
+  return {
+    ok: true,
+    summary,
+    record: refreshedRecord,
+  };
+}
+
+export async function createTikTokPhotoDraft(options: {
+  accessToken: string;
+  description: string;
+  photoCoverIndex: number;
+  photoImages: string[];
+  title: string;
+}): Promise<TikTokPhotoDraftResult> {
+  const response = await fetch(TIKTOK_PHOTO_INIT_URL, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${options.accessToken}`,
+      "Content-Type": "application/json; charset=UTF-8",
+      "Cache-Control": "no-store",
+    },
+    body: JSON.stringify({
+      media_type: "PHOTO",
+      post_mode: "MEDIA_UPLOAD",
+      post_info: {
+        title: options.title,
+        description: options.description,
+      },
+      source_info: {
+        source: "PULL_FROM_URL",
+        photo_cover_index: options.photoCoverIndex,
+        photo_images: options.photoImages,
+      },
+    }),
+    cache: "no-store",
+  });
+
+  const payload = (await response.json().catch(() => null)) as TikTokPhotoDraftResponse | null;
+  const publishId = payload?.data?.publish_id;
+  const errorCode = payload?.error?.code;
+
+  if (!response.ok || !publishId || (errorCode && errorCode !== "ok")) {
+    return {
+      ok: false,
+      code: errorCode,
+      message: getTikTokApiErrorMessage(
+        payload,
+        "TikTok could not create the photo draft."
+      ),
+    };
+  }
+
+  return {
+    ok: true,
+    publishId,
+  };
+}
+
+export async function fetchTikTokPublishStatus(options: {
+  accessToken: string;
+  publishId: string;
+}): Promise<TikTokStatusResult> {
+  const response = await fetch(TIKTOK_PUBLISH_STATUS_URL, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${options.accessToken}`,
+      "Content-Type": "application/json; charset=UTF-8",
+      "Cache-Control": "no-store",
+    },
+    body: JSON.stringify({
+      publish_id: options.publishId,
+    }),
+    cache: "no-store",
+  });
+
+  const payload = (await response.json().catch(() => null)) as TikTokPublishStatusResponse | null;
+  const errorCode = payload?.error?.code;
+
+  if (!response.ok || !payload?.data?.status || (errorCode && errorCode !== "ok")) {
+    return {
+      ok: false,
+      code: errorCode,
+      message: getTikTokApiErrorMessage(
+        payload,
+        "TikTok did not return a usable publish status."
+      ),
+    };
+  }
+
+  return {
+    ok: true,
+    status: {
+      status: payload.data.status,
+      failReason: payload.data.fail_reason,
+      publiclyAvailablePostIds: payload.data.publicaly_available_post_id || [],
+      uploadedBytes: payload.data.uploaded_bytes,
+      downloadedBytes: payload.data.downloaded_bytes,
+    },
   };
 }

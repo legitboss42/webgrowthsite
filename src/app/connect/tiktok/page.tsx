@@ -3,10 +3,16 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import {
   clearTikTokConnection,
+  createTikTokArticleDraft,
   lockInternalWorkflow,
+  refreshTikTokDraftStatusAction,
   unlockInternalWorkflow,
 } from "./actions";
-import { readInternalWorkflowCookie, getInternalWorkflowCookieName, isInternalWorkflowConfigured } from "@/lib/internalWorkflowAuth";
+import {
+  getInternalWorkflowCookieName,
+  isInternalWorkflowConfigured,
+  readInternalWorkflowCookie,
+} from "@/lib/internalWorkflowAuth";
 import { getPublicPosts } from "@/lib/posts";
 import { buildPageMetadata } from "@/lib/seo";
 import {
@@ -21,7 +27,14 @@ import {
   readTikTokConnectionCookie,
   readTikTokTokenCookie,
 } from "@/lib/tiktok";
-import { buildTikTokWorkflowBrief } from "@/lib/tiktokPublishing";
+import {
+  buildTikTokPhotoDraftContent,
+  buildTikTokWorkflowBrief,
+} from "@/lib/tiktokPublishing";
+import {
+  getTikTokWorkflowCookieName,
+  readTikTokWorkflowCookie,
+} from "@/lib/tiktokWorkflowStore";
 
 const pageDescription =
   "Internal TikTok Login Kit and Content Posting API connection page for the Web Growth publishing workflow.";
@@ -82,7 +95,9 @@ function getWorkflowTone(workflowStatus: string) {
 }
 
 function getWorkflowMessage(workflowStatus: string, unlocked: boolean) {
-  if (workflowStatus === "invalid") return "The internal workflow passphrase did not match the server secret.";
+  if (workflowStatus === "invalid") {
+    return "The internal workflow passphrase did not match the server secret.";
+  }
   if (workflowStatus === "ready") return "Internal workflow unlocked for this browser session.";
   if (workflowStatus === "locked") return "Internal workflow session cleared.";
   if (workflowStatus === "config-missing") {
@@ -91,6 +106,46 @@ function getWorkflowMessage(workflowStatus: string, unlocked: boolean) {
   return unlocked
     ? "Protected publishing tools are available in this browser session."
     : "Unlock the protected panel to review article briefs and future publishing actions.";
+}
+
+function getStatusHeading(options: {
+  connectionPresent: boolean;
+  loginGranted: boolean;
+  publishingGranted: boolean;
+  scopeMode: "login" | "publishing";
+  status: string;
+}) {
+  const { connectionPresent, loginGranted, publishingGranted, scopeMode, status } = options;
+
+  if (status === "error") return "TikTok authorization returned an error.";
+  if (status === "config-missing") return "Server credentials still need to be configured.";
+  if (status === "cleared") return "Saved TikTok connection cookies were cleared from this browser.";
+  if (status === "connected") {
+    if (scopeMode === "publishing") {
+      return publishingGranted
+        ? "TikTok publishing scope granted."
+        : "TikTok returned to the site, but publishing scope is still missing.";
+    }
+    return loginGranted
+      ? "TikTok login authorization completed."
+      : "TikTok returned to the site, but the base login scope is missing.";
+  }
+  if (connectionPresent && publishingGranted) return "TikTok publishing scope is active in this browser.";
+  if (connectionPresent && loginGranted) return "TikTok login authorization is active in this browser.";
+  return "Ready to start the TikTok connection flow.";
+}
+
+function getPublishStatusHint(status: string, failReason?: string) {
+  if (status === "SUBMITTED") return "Draft request sent. TikTok should begin pulling the slide images.";
+  if (status === "PROCESSING_DOWNLOAD") return "TikTok is downloading the photo slides from webgrowth.info.";
+  if (status === "SEND_TO_USER_INBOX") return "Draft delivered. Open your TikTok inbox to edit and post it.";
+  if (status === "PUBLISH_COMPLETE") return "The TikTok draft was used to create a post successfully.";
+  if (status === "FAILED") {
+    return failReason
+      ? `TikTok reported a failure: ${failReason}.`
+      : "TikTok reported that the draft failed.";
+  }
+  return "Status available. Refresh again if you need the latest delivery state.";
 }
 
 export default async function TikTokConnectPage({ searchParams }: TikTokConnectPageProps) {
@@ -110,6 +165,9 @@ export default async function TikTokConnectPage({ searchParams }: TikTokConnectP
   const workflowSession = readInternalWorkflowCookie(
     cookieStore.get(getInternalWorkflowCookieName())?.value
   );
+  const workflowJobs = readTikTokWorkflowCookie(
+    cookieStore.get(getTikTokWorkflowCookieName())?.value
+  );
   const unlocked = Boolean(workflowSession);
 
   const configured = isTikTokConfigured();
@@ -124,27 +182,24 @@ export default async function TikTokConnectPage({ searchParams }: TikTokConnectP
   const statusTone = getStatusTone(status, publishingGranted, scopeMode);
   const workflowTone = getWorkflowTone(workflowStatus);
   const workflowMessage = getWorkflowMessage(workflowStatus, unlocked);
-  const statusHeading =
-    status === "connected"
-      ? scopeMode === "publishing"
-        ? publishingGranted
-          ? "TikTok publishing scope granted."
-          : "TikTok returned to the site, but publishing scope is still missing."
-        : loginGranted
-          ? "TikTok login authorization completed."
-          : "TikTok returned to the site, but the base login scope is missing."
-      : status === "error"
-        ? "TikTok authorization returned an error."
-        : status === "config-missing"
-          ? "Server credentials still need to be configured."
-          : status === "cleared"
-            ? "Saved TikTok connection cookies were cleared from this browser."
-            : "Ready to start the TikTok connection flow.";
+  const statusHeading = getStatusHeading({
+    connectionPresent: Boolean(connection || tokenRecord),
+    loginGranted,
+    publishingGranted,
+    scopeMode,
+    status,
+  });
 
   const publicPosts = unlocked ? getPublicPosts() : [];
   const selectedPost =
     publicPosts.find((post) => post.slug === requestedArticleSlug) || publicPosts[0];
   const workflowBrief = selectedPost ? buildTikTokWorkflowBrief(selectedPost) : null;
+  const photoDraftContent = selectedPost
+    ? buildTikTokPhotoDraftContent(selectedPost)
+    : null;
+  const selectedPostJobs = selectedPost
+    ? workflowJobs.filter((job) => job.articleSlug === selectedPost.slug)
+    : workflowJobs;
 
   return (
     <main className="bg-[#050806] text-white">
@@ -325,9 +380,14 @@ export default async function TikTokConnectPage({ searchParams }: TikTokConnectP
                   </form>
                 </div>
               ) : (
-                <form action={unlockInternalWorkflow} className="mt-4 grid gap-3 sm:grid-cols-[1fr_auto]">
+                <form
+                  action={unlockInternalWorkflow}
+                  className="mt-4 grid gap-3 sm:grid-cols-[1fr_auto]"
+                >
                   <label className="space-y-2">
-                    <span className="text-sm font-medium text-white">Internal workflow passphrase</span>
+                    <span className="text-sm font-medium text-white">
+                      Internal workflow passphrase
+                    </span>
                     <input
                       type="password"
                       name="passphrase"
@@ -353,8 +413,8 @@ export default async function TikTokConnectPage({ searchParams }: TikTokConnectP
                   <div>
                     <h2 className="text-2xl font-semibold">Article publishing workspace</h2>
                     <p className="mt-2 max-w-3xl text-sm text-white/70">
-                      Pick an approved article to review its keyword intent, TikTok-ready
-                      framing, and content depth before we add live publishing actions.
+                      Pick an approved article, review the draft brief, then send a TikTok photo
+                      draft to your inbox using generated slide images hosted on webgrowth.info.
                     </p>
                   </div>
                   {publicPosts.length ? (
@@ -383,125 +443,223 @@ export default async function TikTokConnectPage({ searchParams }: TikTokConnectP
                   ) : null}
                 </div>
 
-                {selectedPost && workflowBrief ? (
-                  <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
-                    <div className="space-y-5 rounded-2xl border border-white/10 bg-black/20 p-5">
-                      <div>
-                        <p className="text-xs uppercase tracking-[0.16em] text-white/45">
-                          Selected article
-                        </p>
-                        <h3 className="mt-3 text-2xl font-semibold">{selectedPost.title}</h3>
-                        <p className="mt-3 text-sm leading-7 text-white/72">{selectedPost.excerpt}</p>
+                {selectedPost && workflowBrief && photoDraftContent ? (
+                  <>
+                    <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+                      <div className="space-y-5 rounded-2xl border border-white/10 bg-black/20 p-5">
+                        <div>
+                          <p className="text-xs uppercase tracking-[0.16em] text-white/45">
+                            Selected article
+                          </p>
+                          <h3 className="mt-3 text-2xl font-semibold">{selectedPost.title}</h3>
+                          <p className="mt-3 text-sm leading-7 text-white/72">
+                            {selectedPost.excerpt}
+                          </p>
+                        </div>
+
+                        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+                          <div className="rounded-xl border border-white/10 bg-white/5 p-4">
+                            <p className="text-xs uppercase tracking-[0.16em] text-white/45">
+                              Primary keyword
+                            </p>
+                            <p className="mt-2 text-sm font-medium text-white">
+                              {selectedPost.primaryKeyword || "Missing"}
+                            </p>
+                          </div>
+                          <div className="rounded-xl border border-white/10 bg-white/5 p-4">
+                            <p className="text-xs uppercase tracking-[0.16em] text-white/45">
+                              Search intent
+                            </p>
+                            <p className="mt-2 text-sm font-medium text-white">
+                              {selectedPost.searchIntent || "Missing"}
+                            </p>
+                          </div>
+                          <div className="rounded-xl border border-white/10 bg-white/5 p-4">
+                            <p className="text-xs uppercase tracking-[0.16em] text-white/45">
+                              Internal links
+                            </p>
+                            <p className="mt-2 text-sm font-medium text-white">
+                              {workflowBrief.internalLinkCount}
+                            </p>
+                          </div>
+                          <div className="rounded-xl border border-white/10 bg-white/5 p-4">
+                            <p className="text-xs uppercase tracking-[0.16em] text-white/45">
+                              FAQ entries
+                            </p>
+                            <p className="mt-2 text-sm font-medium text-white">
+                              {selectedPost.faq.length}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="grid gap-5 lg:grid-cols-2">
+                          <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
+                            <p className="text-sm font-semibold text-white">Quick editorial checks</p>
+                            <ul className="mt-3 space-y-2 text-sm text-white/72">
+                              <li>
+                                Updated: {selectedPost.updatedAt || selectedPost.lastReviewedAt || "Needs review date"}
+                              </li>
+                              <li>Author: {selectedPost.author || "Missing"}</li>
+                              <li>Reviewer: {selectedPost.reviewedBy || "Missing"}</li>
+                              <li>Cover alt: {selectedPost.coverAlt || "Missing"}</li>
+                              <li>Related guides: {selectedPost.relatedGuideSlugs.length}</li>
+                            </ul>
+                          </div>
+                          <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
+                            <p className="text-sm font-semibold text-white">Publishing readiness</p>
+                            <ul className="mt-3 space-y-2 text-sm text-white/72">
+                              <li>
+                                {publishingGranted
+                                  ? "TikTok publishing scope is present."
+                                  : "Publishing scope is still missing."}
+                              </li>
+                              <li>
+                                {hasTokenCookie
+                                  ? "Encrypted TikTok token cookie is available."
+                                  : "No saved token payload for server-side publishing yet."}
+                              </li>
+                              <li>
+                                {workflowBrief.internalLinkCount >= 3
+                                  ? "Internal linking floor is met."
+                                  : "Add more contextual internal links before distribution."}
+                              </li>
+                              <li>
+                                {selectedPost.primaryKeyword && selectedPost.searchIntent
+                                  ? "SEO intent fields are present."
+                                  : "SEO intent fields need completion."}
+                              </li>
+                            </ul>
+                          </div>
+                        </div>
+
+                        <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/10 p-5 text-sm text-emerald-100">
+                          This version creates a TikTok <strong>photo draft</strong> using four
+                          generated slide images from your approved article. TikTok should send
+                          the draft to your inbox for final editing and posting.
+                        </div>
                       </div>
 
-                      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-                        <div className="rounded-xl border border-white/10 bg-white/5 p-4">
+                      <div className="space-y-5 rounded-2xl border border-white/10 bg-black/20 p-5">
+                        <div>
                           <p className="text-xs uppercase tracking-[0.16em] text-white/45">
-                            Primary keyword
+                            TikTok draft brief
                           </p>
-                          <p className="mt-2 text-sm font-medium text-white">
-                            {selectedPost.primaryKeyword || "Missing"}
-                          </p>
+                          <h3 className="mt-3 text-2xl font-semibold">{workflowBrief.headline}</h3>
                         </div>
-                        <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-                          <p className="text-xs uppercase tracking-[0.16em] text-white/45">
-                            Search intent
-                          </p>
-                          <p className="mt-2 text-sm font-medium text-white">
-                            {selectedPost.searchIntent || "Missing"}
-                          </p>
-                        </div>
-                        <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-                          <p className="text-xs uppercase tracking-[0.16em] text-white/45">
-                            Internal links
-                          </p>
-                          <p className="mt-2 text-sm font-medium text-white">
-                            {workflowBrief.internalLinkCount}
-                          </p>
-                        </div>
-                        <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-                          <p className="text-xs uppercase tracking-[0.16em] text-white/45">
-                            FAQ entries
-                          </p>
-                          <p className="mt-2 text-sm font-medium text-white">
-                            {selectedPost.faq.length}
-                          </p>
-                        </div>
-                      </div>
 
-                      <div className="grid gap-5 lg:grid-cols-2">
                         <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
-                          <p className="text-sm font-semibold text-white">Quick editorial checks</p>
-                          <ul className="mt-3 space-y-2 text-sm text-white/72">
-                            <li>Updated: {selectedPost.updatedAt || selectedPost.lastReviewedAt || "Needs review date"}</li>
-                            <li>Author: {selectedPost.author || "Missing"}</li>
-                            <li>Reviewer: {selectedPost.reviewedBy || "Missing"}</li>
-                            <li>Cover alt: {selectedPost.coverAlt || "Missing"}</li>
-                            <li>Related guides: {selectedPost.relatedGuideSlugs.length}</li>
-                          </ul>
+                          <p className="text-sm font-semibold text-white">Draft title</p>
+                          <p className="mt-3 text-sm text-white/75">{photoDraftContent.title}</p>
                         </div>
+
                         <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
-                          <p className="text-sm font-semibold text-white">Publishing readiness</p>
-                          <ul className="mt-3 space-y-2 text-sm text-white/72">
-                            <li>{publishingGranted ? "TikTok publishing scope is present." : "Publishing scope is still missing."}</li>
-                            <li>{hasTokenCookie ? "Encrypted TikTok token cookie is available." : "No saved token payload for server-side publishing yet."}</li>
-                            <li>{workflowBrief.internalLinkCount >= 3 ? "Internal linking floor is met." : "Add more contextual internal links before distribution."}</li>
-                            <li>{selectedPost.primaryKeyword && selectedPost.searchIntent ? "SEO intent fields are present." : "SEO intent fields need completion."}</li>
-                          </ul>
+                          <p className="text-sm font-semibold text-white">Draft description</p>
+                          <pre className="mt-3 whitespace-pre-wrap text-sm leading-7 text-white/75">
+                            {photoDraftContent.description}
+                          </pre>
                         </div>
+
+                        <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
+                          <p className="text-sm font-semibold text-white">Slide sequence</p>
+                          <ol className="mt-3 space-y-3 text-sm text-white/75">
+                            {photoDraftContent.slides.map((slide, index) => (
+                              <li key={`${slide.headline}-${index}`}>
+                                <strong className="text-white">Slide {index + 1}:</strong>{" "}
+                                {slide.headline}
+                              </li>
+                            ))}
+                          </ol>
+                        </div>
+
+                        <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
+                          <p className="text-sm font-semibold text-white">Hashtag starter set</p>
+                          <p className="mt-3 text-sm text-white/75">
+                            {workflowBrief.hashtags.join(" ")}
+                          </p>
+                        </div>
+
+                        <form action={createTikTokArticleDraft} className="space-y-3">
+                          <input type="hidden" name="articleSlug" value={selectedPost.slug} />
+                          <button
+                            type="submit"
+                            className="inline-flex w-full items-center justify-center rounded-md bg-emerald-600 px-6 py-4 text-sm font-semibold text-white transition hover:bg-emerald-500 disabled:cursor-not-allowed disabled:opacity-50"
+                            disabled={!publishingGranted || !hasTokenCookie}
+                          >
+                            Create TikTok photo draft
+                          </button>
+                        </form>
                       </div>
                     </div>
 
-                    <div className="space-y-5 rounded-2xl border border-white/10 bg-black/20 p-5">
-                      <div>
-                        <p className="text-xs uppercase tracking-[0.16em] text-white/45">
-                          TikTok draft brief
+                    <div className="rounded-2xl border border-white/10 bg-black/20 p-5">
+                      <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+                        <div>
+                          <p className="text-sm font-semibold text-white">Recent TikTok drafts</p>
+                          <p className="mt-2 text-sm text-white/65">
+                            These are stored for this protected browser workflow session.
+                          </p>
+                        </div>
+                      </div>
+
+                      {selectedPostJobs.length ? (
+                        <div className="mt-5 space-y-4">
+                          {selectedPostJobs.map((job) => (
+                            <div
+                              key={job.publishId}
+                              className="rounded-2xl border border-white/10 bg-white/5 p-4"
+                            >
+                              <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                                <div className="space-y-2">
+                                  <p className="text-sm font-semibold text-white">{job.title}</p>
+                                  <p className="text-xs uppercase tracking-[0.16em] text-white/45">
+                                    {job.publishId}
+                                  </p>
+                                  <p className="text-sm text-white/70">
+                                    {getPublishStatusHint(job.status, job.failReason)}
+                                  </p>
+                                  <div className="flex flex-wrap gap-3 text-xs text-white/55">
+                                    <span>Status: {job.status}</span>
+                                    <span>Images: {job.imageCount}</span>
+                                    <span>Created: {formatDate(job.createdAt)}</span>
+                                    <span>Updated: {formatDate(job.updatedAt)}</span>
+                                  </div>
+                                  {job.failReason ? (
+                                    <p className="text-sm text-rose-300">
+                                      Failure reason: {job.failReason}
+                                    </p>
+                                  ) : null}
+                                </div>
+
+                                <form action={refreshTikTokDraftStatusAction}>
+                                  <input
+                                    type="hidden"
+                                    name="articleSlug"
+                                    value={job.articleSlug}
+                                  />
+                                  <input
+                                    type="hidden"
+                                    name="publishId"
+                                    value={job.publishId}
+                                  />
+                                  <button
+                                    type="submit"
+                                    className="inline-flex items-center justify-center rounded-md border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
+                                  >
+                                    Refresh status
+                                  </button>
+                                </form>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="mt-5 text-sm text-white/65">
+                          No TikTok drafts have been created for this article in the current
+                          browser workflow yet.
                         </p>
-                        <h3 className="mt-3 text-2xl font-semibold">{workflowBrief.headline}</h3>
-                      </div>
-
-                      <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
-                        <p className="text-sm font-semibold text-white">Suggested caption</p>
-                        <pre className="mt-3 whitespace-pre-wrap text-sm leading-7 text-white/75">
-                          {workflowBrief.caption}
-                        </pre>
-                      </div>
-
-                      <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
-                        <p className="text-sm font-semibold text-white">Talking points</p>
-                        <ol className="mt-3 space-y-2 text-sm text-white/75">
-                          {workflowBrief.talkingPoints.map((point) => (
-                            <li key={point}>{point}</li>
-                          ))}
-                        </ol>
-                      </div>
-
-                      <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
-                        <p className="text-sm font-semibold text-white">Carousel sequence</p>
-                        <ol className="mt-3 space-y-2 text-sm text-white/75">
-                          {workflowBrief.carouselSlides.map((slide, index) => (
-                            <li key={`${slide}-${index}`}>Slide {index + 1}: {slide}</li>
-                          ))}
-                        </ol>
-                      </div>
-
-                      <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
-                        <p className="text-sm font-semibold text-white">Short-form video beats</p>
-                        <ol className="mt-3 space-y-2 text-sm text-white/75">
-                          {workflowBrief.videoShots.map((shot) => (
-                            <li key={shot}>{shot}</li>
-                          ))}
-                        </ol>
-                      </div>
-
-                      <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
-                        <p className="text-sm font-semibold text-white">Hashtag starter set</p>
-                        <p className="mt-3 text-sm text-white/75">
-                          {workflowBrief.hashtags.join(" ")}
-                        </p>
-                      </div>
+                      )}
                     </div>
-                  </div>
+                  </>
                 ) : (
                   <p className="rounded-2xl border border-white/10 bg-black/20 p-5 text-sm text-white/72">
                     No approved article is available for the publishing workspace yet.
