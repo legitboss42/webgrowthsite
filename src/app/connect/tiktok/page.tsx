@@ -32,7 +32,17 @@ function readMessageParam(value: string | string[] | undefined) {
   return decodeURIComponent(Array.isArray(value) ? value[0] || "" : value).slice(0, 240);
 }
 
-function getStatusTone(status: string) {
+function parseGrantedScopes(scopeValue?: string) {
+  return (scopeValue || "")
+    .split(",")
+    .map((scope) => scope.trim())
+    .filter(Boolean);
+}
+
+function getStatusTone(status: string, publishingGranted: boolean, scopeMode: "login" | "publishing") {
+  if (status === "connected" && scopeMode === "publishing" && !publishingGranted) {
+    return "border-amber-500/30 bg-amber-500/10 text-amber-100";
+  }
   if (status === "connected") return "border-emerald-500/30 bg-emerald-500/10 text-emerald-100";
   if (status === "error") return "border-rose-500/30 bg-rose-500/10 text-rose-100";
   if (status === "config-missing") return "border-amber-500/30 bg-amber-500/10 text-amber-100";
@@ -57,6 +67,24 @@ export default async function TikTokConnectPage({ searchParams }: TikTokConnectP
   );
   const redirectUri = getTikTokRedirectUri();
   const requiredScopes = getTikTokRequiredScopes(scopeMode);
+  const grantedScopes = parseGrantedScopes(connection?.scope);
+  const publishingGranted = grantedScopes.includes("video.upload");
+  const loginGranted = grantedScopes.includes("user.info.basic");
+  const statusTone = getStatusTone(status, publishingGranted, scopeMode);
+  const statusHeading =
+    status === "connected"
+      ? scopeMode === "publishing"
+        ? publishingGranted
+          ? "TikTok publishing scope granted."
+          : "TikTok returned to the site, but publishing scope is still missing."
+        : loginGranted
+          ? "TikTok login authorization completed."
+          : "TikTok returned to the site, but the base login scope is missing."
+      : status === "error"
+        ? "TikTok authorization returned an error."
+        : status === "config-missing"
+          ? "Server credentials still need to be configured."
+          : "Ready to start the TikTok connection flow.";
 
   return (
     <main className="bg-[#050806] text-white">
@@ -76,22 +104,14 @@ export default async function TikTokConnectPage({ searchParams }: TikTokConnectP
               </p>
             </div>
 
-            <div className={`rounded-2xl border p-5 ${getStatusTone(status)}`}>
+            <div className={`rounded-2xl border p-5 ${statusTone}`}>
               <p className="text-sm font-semibold uppercase tracking-[0.18em] text-white/60">
                 Connection status
               </p>
-              <p className="mt-3 text-lg font-medium">
-                {status === "connected"
-                  ? "TikTok authorization completed."
-                  : status === "error"
-                    ? "TikTok authorization returned an error."
-                    : status === "config-missing"
-                      ? "Server credentials still need to be configured."
-                      : "Ready to start the TikTok connection flow."}
-              </p>
+              <p className="mt-3 text-lg font-medium">{statusHeading}</p>
               {message ? <p className="mt-2 text-sm text-white/75">{message}</p> : null}
               {connection ? (
-                <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
                   <div className="rounded-xl border border-white/10 bg-black/20 p-4">
                     <p className="text-xs uppercase tracking-[0.16em] text-white/45">
                       Connected account
@@ -111,7 +131,29 @@ export default async function TikTokConnectPage({ searchParams }: TikTokConnectP
                       })}
                     </p>
                   </div>
+                  <div className="rounded-xl border border-white/10 bg-black/20 p-4">
+                    <p className="text-xs uppercase tracking-[0.16em] text-white/45">
+                      Granted scopes
+                    </p>
+                    <p className="mt-2 text-sm font-medium text-white">
+                      {grantedScopes.length ? grantedScopes.join(", ") : "None returned"}
+                    </p>
+                  </div>
+                  <div className="rounded-xl border border-white/10 bg-black/20 p-4">
+                    <p className="text-xs uppercase tracking-[0.16em] text-white/45">
+                      Publishing access
+                    </p>
+                    <p className="mt-2 text-sm font-medium text-white">
+                      {publishingGranted ? "Granted" : "Not granted yet"}
+                    </p>
+                  </div>
                 </div>
+              ) : null}
+              {status === "connected" && scopeMode === "publishing" && !publishingGranted ? (
+                <p className="mt-4 text-sm text-white/75">
+                  TikTok redirected back successfully, but the returned scope set still does not
+                  include <code className="rounded bg-black/30 px-2 py-1">video.upload</code>.
+                </p>
               ) : null}
             </div>
 
