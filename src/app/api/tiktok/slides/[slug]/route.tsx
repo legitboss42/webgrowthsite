@@ -127,7 +127,7 @@ export async function GET(
             letterSpacing: 6,
             padding: "12px 24px",
             textTransform: "uppercase",
-            width: "fit-content",
+            alignSelf: "flex-start",
           }}
         >
           {slide.eyebrow}
