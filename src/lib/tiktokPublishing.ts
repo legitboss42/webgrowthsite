@@ -17,6 +17,23 @@ export type TikTokPhotoSlide = {
   headline: string;
 };
 
+export type TikTokVideoScene = {
+  durationInSeconds: number;
+  kicker: string;
+  narration: string;
+  onScreenText: string;
+  visualDirection: string;
+};
+
+export type TikTokVideoScript = {
+  aspectRatio: "9:16";
+  durationInSeconds: number;
+  scenes: TikTokVideoScene[];
+  title: string;
+  caption: string;
+  hashtags: string[];
+};
+
 function sentenceCase(value: string) {
   const trimmed = value.trim();
   if (!trimmed) return "";
@@ -254,5 +271,95 @@ export function buildTikTokPhotoDraftContent(post: Post) {
     title: clipText(workflowBrief.headline, 88),
     description: clipText(workflowBrief.caption, 350),
     slides: buildTikTokPhotoSlides(post),
+  };
+}
+
+export function buildTikTokVideoScript(post: Post): TikTokVideoScript {
+  const workflowBrief = buildTikTokWorkflowBrief(post);
+
+  const problemLine = buildProblemLine(
+    post,
+    "The page looked fine, but it was not turning enough visitors into leads."
+  );
+
+  const solutionLine = buildSolutionLine(
+    post,
+    "We fixed the message, structure, proof, and conversion path first."
+  );
+
+  const secondSolutionLine = buildSecondSolutionLine(
+    post,
+    "Then the design supported the strategy instead of hiding the problem."
+  );
+
+  const proofLine = clipText(
+    firstAvailable(
+      post.methodologyNote,
+      post.evidenceNote,
+      post.steps[2],
+      "The best website decisions came from the audit, not guesswork."
+    ),
+    130
+  );
+
+  const scenes: TikTokVideoScene[] = [
+    {
+      durationInSeconds: 4,
+      kicker: "Hook",
+      narration: clipText(buildHook(post), 120),
+      onScreenText: clipText(buildHook(post), 70),
+      visualDirection:
+        "Dark premium background. Large bold text enters quickly. Subtle website wireframe moves behind the text.",
+    },
+    {
+      durationInSeconds: 5,
+      kicker: "Problem",
+      narration: clipText(
+        `The real issue was this: ${problemLine}`,
+        150
+      ),
+      onScreenText: clipText("Traffic was not the real problem.", 70),
+      visualDirection:
+        "Show a simple funnel graphic with visitors dropping off before enquiry. Add slow zoom and warning accent.",
+    },
+    {
+      durationInSeconds: 6,
+      kicker: "Fix",
+      narration: clipText(
+        `So the fix was not just prettier visuals. ${solutionLine}`,
+        160
+      ),
+      onScreenText: clipText("Strategy came before design.", 70),
+      visualDirection:
+        "Animate three cards: Message, Structure, CTA. Cards lock into place like a website blueprint.",
+    },
+    {
+      durationInSeconds: 5,
+      kicker: "Proof",
+      narration: clipText(
+        `${secondSolutionLine} ${proofLine}`,
+        170
+      ),
+      onScreenText: clipText("Design should support the sales path.", 70),
+      visualDirection:
+        "Before and after layout blocks slide across the screen. Highlight proof, CTA, and service section.",
+    },
+    {
+      durationInSeconds: 4,
+      kicker: "CTA",
+      narration: "Read the full breakdown on Web Growth.",
+      onScreenText: "Read the full guide on webgrowth.info",
+      visualDirection:
+        "End card with Web Growth branding, domain, and a clean call to action.",
+    },
+  ];
+
+  return {
+    aspectRatio: "9:16",
+    durationInSeconds: scenes.reduce((total, scene) => total + scene.durationInSeconds, 0),
+    scenes,
+    title: clipText(workflowBrief.headline, 88),
+    caption: clipText(workflowBrief.caption, 350),
+    hashtags: workflowBrief.hashtags,
   };
 }
