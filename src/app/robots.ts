@@ -10,7 +10,13 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "*",
         allow: "/",
-        disallow: ["/api/", "/contact/thanks", "/thank-you/", "/mockup"],
+        disallow: [
+          "/api/",
+          "/connect/tiktok",
+          "/contact/thanks",
+          "/thank-you/",
+          "/mockup",
+        ],
       },
     ],
     host: BASE_URL,
