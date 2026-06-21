@@ -23,6 +23,9 @@ export type TikTokVideoScene = {
   narration: string;
   onScreenText: string;
   visualDirection: string;
+  spokenLines?: string[];
+  startTimeInSeconds?: number;
+  endTimeInSeconds?: number;
 };
 
 export type TikTokVideoScript = {
@@ -57,13 +60,88 @@ function firstAvailable(...values: Array<string | undefined | null>) {
   return values.find((value) => typeof value === "string" && value.trim().length)?.trim() || "";
 }
 
-function buildHook(post: Post) {
+function toSentence(value: string) {
+  const trimmed = value
+    .trim()
+    .replace(/^Apply:\s*/i, "")
+    .replace(/^Avoid:\s*/i, "Avoid ")
+    .replace(/\s+/g, " ")
+    .replace(/\s+([,.!?])/g, "$1")
+    .replace(/\s*[:;]\s*/g, ". ");
+
+  if (!trimmed) return "";
+
+  const sentence = /[.!?]$/.test(trimmed) ? trimmed : `${trimmed}.`;
+
+  return sentence
+    .replace(/^The problem is not /i, "The problem wasn't ")
+    .replace(
+      /^If the answer to most of these was no, the project became a rebuild\.$/i,
+      "When the answer kept coming back no, this stopped being a redesign job."
+    )
+    .replace(
+      /^For this project, the honest answer was no on almost every line\.$/i,
+      "For this project, the honest answer was no almost everywhere."
+    )
+    .replace(
+      /^It was a systems rebuild across five layers\.$/i,
+      "This turned into a full systems rebuild."
+    );
+}
+
+function stripMarkdown(value: string) {
+  return value
+    .replace(/!\[[^\]]*]\([^)]*\)/g, " ")
+    .replace(/\[([^\]]+)]\(([^)]+)\)/g, "$1")
+    .replace(/`{1,3}[^`]+`{1,3}/g, " ")
+    .replace(/^#{1,6}\s+/gm, "")
+    .replace(/^\s*[-*+]\s+/gm, "")
+    .replace(/^\s*\d+\.\s+/gm, "")
+    .replace(/\r/g, "")
+    .replace(/\n{2,}/g, "\n")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function extractArticleSentences(content: string) {
+  const prose = content
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .filter((line) => line !== "---")
+    .filter((line) => !line.startsWith("#"))
+    .filter((line) => !line.startsWith("!["))
+    .filter((line) => !line.startsWith("[LEAD|"))
+    .filter((line) => !/^\d+\.\s/.test(line))
+    .filter((line) => !/^[-*+]\s/.test(line))
+    .join(" ");
+
+  return stripMarkdown(prose)
+    .split(/(?<=[.!?])\s+/)
+    .map((sentence) => sentence.trim())
+    .filter((sentence) => sentence.length >= 24)
+    .filter((sentence) => !sentence.startsWith("LEAD|"));
+}
+
+function findSentence(sentences: string[], patterns: RegExp[], fallback: string) {
+  const match = sentences.find((sentence) =>
+    patterns.some((pattern) => pattern.test(sentence))
+  );
+
+  return match || fallback;
+}
+
+function buildHook(post: Post, sentences?: string[]) {
   const category = String(post.category || "").toLowerCase();
   const keyword = String(post.primaryKeyword || "").toLowerCase();
   const title = String(post.title || "").toLowerCase();
 
-  if (category.includes("case study") || title.includes("rebuilt")) {
-    return "The website wasn't ugly. It just wasn't selling.";
+  if (category.includes("case study") || title.includes("rebuilt") || title.includes("redesigned")) {
+    return findSentence(
+      sentences || [],
+      [/fail before design starts/i, /looked good/i, /not the problem/i],
+      "The website looked good. That wasn't the problem."
+    );
   }
 
   if (keyword.includes("seo") || title.includes("seo")) {
@@ -88,9 +166,8 @@ function buildHook(post: Post) {
 function buildProblemLine(post: Post, fallback: string) {
   return clipText(
     firstAvailable(
-      post.searchIntent,
+      post.commonMistakes[0] ? `The mistake was ${post.commonMistakes[0].toLowerCase()}` : "",
       post.excerpt,
-      post.commonMistakes[0],
       fallback
     ),
     86
@@ -183,7 +260,7 @@ export function buildTikTokWorkflowBrief(post: Post): WorkflowBrief {
     `Hook: ${clipText(buildHook(post), 80)}`,
     `Problem: ${buildProblemLine(post, excerpt)}`,
     `Fix: ${buildSolutionLine(post, "Show the reader exactly what to do next.")}`,
-    `CTA: Read the full guide on webgrowth.info`,
+    "CTA: Read the full guide on webgrowth.info",
   ];
 
   return {
@@ -274,83 +351,113 @@ export function buildTikTokPhotoDraftContent(post: Post) {
   };
 }
 
+function estimateSpeechDuration(text: string) {
+  const words = toSentence(text)
+    .replace(/[.,!?;:()[\]"]/g, " ")
+    .split(/\s+/)
+    .filter(Boolean).length;
+
+  return Math.max(1.5, words / 2.6);
+}
+
 export function buildTikTokVideoScript(post: Post): TikTokVideoScript {
   const workflowBrief = buildTikTokWorkflowBrief(post);
+  const sentences = extractArticleSentences(post.content);
 
-  const problemLine = buildProblemLine(
-    post,
-    "The page looked fine, but it was not turning enough visitors into leads."
+  const hookLine = toSentence(buildHook(post, sentences));
+  const problemLine = toSentence(
+    findSentence(
+      sentences,
+      [/leaking revenue/i, /under the surface/i, /real issue/i, /problem is not/i],
+      firstAvailable(
+        post.commonMistakes[0] ? `The mistake was ${post.commonMistakes[0].toLowerCase()}` : "",
+        post.excerpt,
+        "The real problem was underneath the design."
+      )
+    )
   );
-
-  const solutionLine = buildSolutionLine(
-    post,
-    "We fixed the message, structure, proof, and conversion path first."
+  const rebuildLine = toSentence(
+    findSentence(
+      sentences,
+      [/not a redesign/i, /that made the decision simple/i, /\ba rebuild\b/i],
+      firstAvailable(
+        "That made the decision simple. Not a redesign. A rebuild.",
+        "Not a redesign. A rebuild.",
+        post.keyTakeaways[0]
+      )
+    )
   );
-
-  const secondSolutionLine = buildSecondSolutionLine(
-    post,
-    "Then the design supported the strategy instead of hiding the problem."
+  const strategyLine = toSentence(
+    findSentence(
+      sentences,
+      [/reduces decision friction/i, /systems rebuild/i, /strategy layer/i, /it was a systems rebuild/i],
+      firstAvailable(
+        "We fixed the structure, the message, and the next step first.",
+        post.keyTakeaways[1],
+        "We fixed the message, the structure, and the next step first."
+      )
+    )
   );
-
-  const proofLine = clipText(
-    firstAvailable(
-      post.methodologyNote,
-      post.evidenceNote,
-      post.steps[2],
-      "The best website decisions came from the audit, not guesswork."
-    ),
-    130
+  const proofLine = toSentence(
+    findSentence(
+      sentences,
+      [/sales asset/i, /business outcomes/i, /qualified enquiries/i, /conversion is what turns/i],
+      firstAvailable(
+        "That is what turns a website into a sales asset.",
+        post.keyTakeaways[2],
+        "That is what turns a website into a sales asset."
+      )
+    )
   );
+  const ctaLine = "If you want the full breakdown, read the guide on Web Growth.";
 
   const scenes: TikTokVideoScene[] = [
     {
-      durationInSeconds: 4,
       kicker: "Hook",
-      narration: clipText(buildHook(post), 120),
-      onScreenText: clipText(buildHook(post), 70),
+      spokenLines: [hookLine],
+      narration: hookLine,
+      onScreenText: clipText(hookLine, 72),
       visualDirection:
         "Dark premium background. Large bold text enters quickly. Subtle website wireframe moves behind the text.",
+      durationInSeconds: estimateSpeechDuration(hookLine),
     },
     {
-      durationInSeconds: 5,
       kicker: "Problem",
-      narration: clipText(
-        `The real issue was this: ${problemLine}`,
-        150
-      ),
-      onScreenText: clipText("Traffic was not the real problem.", 70),
+      spokenLines: [problemLine],
+      narration: problemLine,
+      onScreenText: clipText("The real problem was underneath.", 72),
       visualDirection:
         "Show a simple funnel graphic with visitors dropping off before enquiry. Add slow zoom and warning accent.",
+      durationInSeconds: estimateSpeechDuration(problemLine),
     },
     {
-      durationInSeconds: 6,
-      kicker: "Fix",
-      narration: clipText(
-        `So the fix was not just prettier visuals. ${solutionLine}`,
-        160
-      ),
-      onScreenText: clipText("Strategy came before design.", 70),
+      kicker: "Decision",
+      spokenLines: [rebuildLine],
+      narration: rebuildLine,
+      onScreenText: clipText("This needed a rebuild, not a refresh.", 72),
       visualDirection:
         "Animate three cards: Message, Structure, CTA. Cards lock into place like a website blueprint.",
+      durationInSeconds: estimateSpeechDuration(rebuildLine),
     },
     {
-      durationInSeconds: 5,
-      kicker: "Proof",
-      narration: clipText(
-        `${secondSolutionLine} ${proofLine}`,
-        170
-      ),
-      onScreenText: clipText("Design should support the sales path.", 70),
+      kicker: "Why it worked",
+      spokenLines: [strategyLine, proofLine],
+      narration: `${strategyLine} ${proofLine}`,
+      onScreenText: clipText("Strategy gave the design a job to do.", 72),
       visualDirection:
         "Before and after layout blocks slide across the screen. Highlight proof, CTA, and service section.",
+      durationInSeconds: estimateSpeechDuration(
+        `${strategyLine} ${proofLine}`
+      ),
     },
     {
-      durationInSeconds: 4,
       kicker: "CTA",
-      narration: "Read the full breakdown on Web Growth.",
+      spokenLines: [ctaLine],
+      narration: ctaLine,
       onScreenText: "Read the full guide on webgrowth.info",
       visualDirection:
         "End card with Web Growth branding, domain, and a clean call to action.",
+      durationInSeconds: estimateSpeechDuration(ctaLine),
     },
   ];
 

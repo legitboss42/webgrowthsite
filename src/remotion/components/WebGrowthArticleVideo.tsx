@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import {
   AbsoluteFill,
   Audio,
@@ -9,47 +9,130 @@ import {
   useVideoConfig,
 } from "remotion";
 
-type Scene = {
+export type WebGrowthVideoScene = {
   durationInSeconds: number;
   kicker: string;
   narration: string;
   onScreenText: string;
   visualDirection: string;
+  spokenLines?: string[];
+  startTimeInSeconds?: number;
+  endTimeInSeconds?: number;
 };
 
-type Props = {
+export type SubtitleCue = {
+  start: number;
+  end: number;
+  text: string;
+};
+
+export type WebGrowthArticleVideoProps = {
   title: string;
   caption: string;
   hashtags: string[];
-  scenes: Scene[];
+  scenes: WebGrowthVideoScene[];
+  subtitles?: SubtitleCue[];
+  audioSrc?: string;
+  durationInSeconds?: number;
+  durationInFrames?: number;
+  slug?: string;
 };
 
-function getSceneAtFrame(frame: number, scenes: Scene[], fps: number) {
-  let startFrame = 0;
+type ResolvedScene = WebGrowthVideoScene & {
+  startTimeInSeconds: number;
+  endTimeInSeconds: number;
+  startFrame: number;
+  endFrame: number;
+};
 
-  for (let index = 0; index < scenes.length; index += 1) {
-    const scene = scenes[index];
-    const durationFrames = Math.max(1, Math.round(scene.durationInSeconds * fps));
-    const endFrame = startFrame + durationFrames;
+type SubtitlePage = {
+  start: number;
+  end: number;
+  text: string;
+  tokens: SubtitleCue[];
+};
 
-    if (frame >= startFrame && frame < endFrame) {
-      return {
-        scene,
-        sceneIndex: index,
-        sceneFrame: frame - startFrame,
-      };
+function resolveScenes(scenes: WebGrowthVideoScene[], fps: number): ResolvedScene[] {
+  let cursor = 0;
+
+  return scenes.map((scene) => {
+    const startTimeInSeconds = scene.startTimeInSeconds ?? cursor;
+    const endTimeInSeconds = Math.max(
+      scene.endTimeInSeconds ?? startTimeInSeconds + scene.durationInSeconds,
+      startTimeInSeconds + 0.6
+    );
+    const durationInSeconds = Math.max(endTimeInSeconds - startTimeInSeconds, 0.6);
+    const startFrame = Math.max(0, Math.round(startTimeInSeconds * fps));
+    const endFrame = Math.max(startFrame + 1, Math.round(endTimeInSeconds * fps));
+
+    cursor = endTimeInSeconds;
+
+    return {
+      ...scene,
+      durationInSeconds,
+      startTimeInSeconds,
+      endTimeInSeconds,
+      startFrame,
+      endFrame,
+    };
+  });
+}
+
+function buildSubtitlePages(subtitles: SubtitleCue[]) {
+  const pages: SubtitlePage[] = [];
+
+  for (const cue of subtitles) {
+    const current = pages[pages.length - 1];
+
+    if (!current) {
+      pages.push({
+        start: cue.start,
+        end: cue.end,
+        text: cue.text,
+        tokens: [cue],
+      });
+      continue;
     }
 
-    startFrame = endFrame;
+    const nextText = `${current.text} ${cue.text}`.trim();
+    const nextDurationMs = (cue.end - current.start) * 1000;
+    const gapMs = (cue.start - current.end) * 1000;
+    const shouldSplit =
+      gapMs > 260 ||
+      nextText.length > 42 ||
+      nextDurationMs > 1600 ||
+      /[.!?]$/.test(current.text);
+
+    if (shouldSplit) {
+      pages.push({
+        start: cue.start,
+        end: cue.end,
+        text: cue.text,
+        tokens: [cue],
+      });
+      continue;
+    }
+
+    current.end = cue.end;
+    current.text = nextText;
+    current.tokens.push(cue);
   }
 
-  const fallbackScene = scenes[scenes.length - 1];
+  return pages;
+}
 
-  return {
-    scene: fallbackScene,
-    sceneIndex: Math.max(0, scenes.length - 1),
-    sceneFrame: 0,
-  };
+function getActiveScene(currentSecond: number, scenes: ResolvedScene[]) {
+  const match = scenes.find(
+    (scene) =>
+      currentSecond >= scene.startTimeInSeconds &&
+      currentSecond < scene.endTimeInSeconds
+  );
+
+  return match ?? scenes[scenes.length - 1];
+}
+
+function getActiveSubtitlePage(currentSecond: number, pages: SubtitlePage[]) {
+  return pages.find((page) => currentSecond >= page.start && currentSecond <= page.end);
 }
 
 function AnimatedCard({
@@ -102,14 +185,7 @@ function SceneVisual({
     const bars = [0.82, 0.45, 0.12];
 
     return (
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: 22,
-          marginTop: 56,
-        }}
-      >
+      <div style={{ display: "flex", flexDirection: "column", gap: 22, marginTop: 56 }}>
         {["1,000 visitors", "100 readers", "2 leads"].map((label, index) => {
           const width = interpolate(
             sceneFrame,
@@ -123,15 +199,10 @@ function SceneVisual({
 
           return (
             <div key={label}>
-              <div
-                style={{
-                  color: "#d1d5db",
-                  fontSize: 28,
-                  marginBottom: 8,
-                }}
-              >
+              <div style={{ color: "#d1d5db", fontSize: 28, marginBottom: 8 }}>
                 {label}
               </div>
+
               <div
                 style={{
                   height: 22,
@@ -183,14 +254,7 @@ function SceneVisual({
     });
 
     return (
-      <div
-        style={{
-          alignItems: "center",
-          display: "flex",
-          gap: 28,
-          marginTop: 56,
-        }}
-      >
+      <div style={{ alignItems: "center", display: "flex", gap: 28, marginTop: 56 }}>
         <AnimatedCard delay={10} sceneFrame={sceneFrame}>
           BEFORE
           <div style={{ color: "#9ca3af", fontSize: 24, marginTop: 12 }}>
@@ -207,7 +271,7 @@ function SceneVisual({
             transform: `scale(${0.8 + arrowProgress * 0.2})`,
           }}
         >
-          →
+          -&gt;
         </div>
 
         <AnimatedCard delay={34} sceneFrame={sceneFrame}>
@@ -242,70 +306,60 @@ function SceneVisual({
         >
           WEBGROWTH.INFO
         </div>
-        <div
-          style={{
-            color: "#f9fafb",
-            fontSize: 28,
-            lineHeight: 1.35,
-          }}
-        >
+
+        <div style={{ color: "#f9fafb", fontSize: 28, lineHeight: 1.35 }}>
           Read the full strategy breakdown
         </div>
       </div>
     );
   }
 
-  return (
-    <div
-      style={{
-        marginTop: 56,
-        display: "flex",
-        gap: 16,
-      }}
-    >
-      {[0, 1, 2].map((item) => {
-        const pulse = interpolate(sceneFrame % 40, [0, 20, 40], [0.45, 1, 0.45]);
-
-        return (
-          <div
-            key={item}
-            style={{
-              height: 18,
-              width: 18,
-              borderRadius: 999,
-              background: "#10b981",
-              opacity: pulse,
-            }}
-          />
-        );
-      })}
-    </div>
-  );
+  return null;
 }
 
-export const WebGrowthArticleVideo: React.FC<Props> = ({
+export const WebGrowthArticleVideo: React.FC<WebGrowthArticleVideoProps> = ({
   title,
   caption,
   hashtags,
   scenes,
+  subtitles = [],
+  audioSrc = "article-voice.mp3",
+  durationInSeconds,
 }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
+  const currentSecond = frame / fps;
 
-  const activeScenes =
-    scenes.length > 0
-      ? scenes
-      : [
-          {
-            durationInSeconds: 4,
-            kicker: "Hook",
-            narration: title,
-            onScreenText: title,
-            visualDirection: "Fallback title scene.",
-          },
-        ];
+  const resolvedScenes = useMemo(() => {
+    const activeScenes =
+      scenes.length > 0
+        ? scenes
+        : [
+            {
+              durationInSeconds: 3,
+              kicker: "Hook",
+              narration: title,
+              spokenLines: [title],
+              onScreenText: title,
+              visualDirection: "Fallback title scene.",
+              startTimeInSeconds: 0,
+              endTimeInSeconds: 3,
+            },
+          ];
 
-  const { scene, sceneIndex, sceneFrame } = getSceneAtFrame(frame, activeScenes, fps);
+    return resolveScenes(activeScenes, fps);
+  }, [fps, scenes, title]);
+
+  const subtitlePages = useMemo(() => buildSubtitlePages(subtitles), [subtitles]);
+
+  const scene = getActiveScene(currentSecond, resolvedScenes);
+  const sceneIndex = resolvedScenes.findIndex(
+    (item) =>
+      item.startTimeInSeconds === scene.startTimeInSeconds &&
+      item.endTimeInSeconds === scene.endTimeInSeconds
+  );
+  const sceneFrame = Math.max(0, frame - scene.startFrame);
+  const activeSubtitlePage = getActiveSubtitlePage(currentSecond, subtitlePages);
 
   const entrance = spring({
     frame: sceneFrame,
@@ -321,7 +375,7 @@ export const WebGrowthArticleVideo: React.FC<Props> = ({
     extrapolateRight: "clamp",
   });
 
-  const sceneDurationFrames = Math.max(1, scene.durationInSeconds * fps);
+  const sceneDurationFrames = Math.max(1, scene.endFrame - scene.startFrame);
 
   const fadeOut = interpolate(
     sceneFrame,
@@ -333,12 +387,20 @@ export const WebGrowthArticleVideo: React.FC<Props> = ({
     }
   );
 
-  const totalFrames = Math.max(
+  const effectiveDurationInFrames = Math.max(
     1,
-    activeScenes.reduce((total, item) => total + item.durationInSeconds * fps, 0)
+    Math.ceil(
+      (durationInSeconds ??
+        resolvedScenes[resolvedScenes.length - 1]?.endTimeInSeconds ??
+        1) * fps
+    )
   );
 
-  const progress = Math.min(1, frame / totalFrames);
+  const progress = Math.min(1, frame / Math.max(1, effectiveDurationInFrames - 1));
+  const supportLines = scene.spokenLines?.slice(1, 3) ?? [];
+  const activeWord = activeSubtitlePage?.tokens.find(
+    (token) => currentSecond >= token.start && currentSecond <= token.end
+  );
 
   return (
     <AbsoluteFill
@@ -351,7 +413,7 @@ export const WebGrowthArticleVideo: React.FC<Props> = ({
         padding: 72,
       }}
     >
-      <Audio src={staticFile("article-voice.mp3")} />
+      <Audio src={staticFile(audioSrc)} />
 
       <AbsoluteFill
         style={{
@@ -422,17 +484,64 @@ export const WebGrowthArticleVideo: React.FC<Props> = ({
         <div
           style={{
             color: "#d1d5db",
-            fontSize: 32,
+            display: "flex",
+            flexDirection: "column",
+            fontSize: 30,
+            gap: 14,
             lineHeight: 1.35,
             marginTop: 34,
             maxWidth: 900,
           }}
         >
-          {scene.narration}
+          {supportLines.length > 0 ? (
+            supportLines.map((line) => <div key={line}>{line}</div>)
+          ) : (
+            <div>{scene.narration}</div>
+          )}
         </div>
 
         <SceneVisual sceneIndex={sceneIndex} sceneFrame={sceneFrame} />
       </div>
+
+      {activeSubtitlePage ? (
+        <div
+          style={{
+            position: "absolute",
+            left: 72,
+            right: 72,
+            bottom: 210,
+            zIndex: 5,
+            background: "rgba(0,0,0,0.74)",
+            border: "1px solid rgba(255,255,255,0.16)",
+            borderRadius: 28,
+            color: "#ffffff",
+            fontSize: 34,
+            fontWeight: 800,
+            lineHeight: 1.25,
+            padding: "22px 28px",
+            textAlign: "center",
+          }}
+        >
+          {activeSubtitlePage.tokens.map((token, index) => {
+            const isActive =
+              activeWord?.start === token.start &&
+              activeWord?.end === token.end &&
+              activeWord?.text === token.text;
+
+            return (
+              <span
+                key={`${token.start}-${token.end}-${index}`}
+                style={{
+                  color: isActive ? "#10b981" : "#ffffff",
+                }}
+              >
+                {token.text}
+                {index < activeSubtitlePage.tokens.length - 1 ? " " : ""}
+              </span>
+            );
+          })}
+        </div>
+      ) : null}
 
       <div
         style={{
@@ -449,11 +558,11 @@ export const WebGrowthArticleVideo: React.FC<Props> = ({
       >
         <div>WEB GROWTH</div>
         <div>
-          {sceneIndex + 1}/{activeScenes.length}
+          {sceneIndex + 1}/{resolvedScenes.length}
         </div>
       </div>
 
-      {sceneIndex === activeScenes.length - 1 ? (
+      {sceneIndex === resolvedScenes.length - 1 ? (
         <div
           style={{
             position: "absolute",

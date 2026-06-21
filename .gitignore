@@ -17,6 +17,7 @@
 /.next/
 /.next-webgrowth/
 /out/
+/public/article-voice*.mp3
 
 # production
 /build
