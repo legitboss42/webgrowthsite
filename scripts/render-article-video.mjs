@@ -143,8 +143,17 @@ function toSentence(value) {
   return `${trimmed}.`;
 }
 
-function toSpokenLine(value, fallback) {
-  const sentence = toSentence(value || fallback)
+function simplifyForSpeech(value) {
+  return toSentence(value)
+    .replace(/\butilize\b/gi, "use")
+    .replace(/\btherefore\b/gi, "so")
+    .replace(/\bhowever\b/gi, "but")
+    .replace(/\bprior to\b/gi, "before")
+    .replace(/\bapproximately\b/gi, "about")
+    .replace(/\bconversion path\b/gi, "path to action")
+    .replace(/\buser experience\b/gi, "experience")
+    .replace(/\bcosmetic redesign\b/gi, "visual refresh")
+    .replace(/\bwebsite strategy\b/gi, "website plan")
     .replace(/^The problem is not /i, "The problem wasn't ")
     .replace(
       /^If the answer to most of these was no, the project became a rebuild\.$/i,
@@ -158,6 +167,10 @@ function toSpokenLine(value, fallback) {
       /^It was a systems rebuild across five layers\.$/i,
       "This turned into a full systems rebuild."
     );
+}
+
+function toSpokenLine(value, fallback) {
+  const sentence = simplifyForSpeech(value || fallback);
   return clipText(sentence, 140);
 }
 
@@ -174,11 +187,7 @@ function buildHook(post, sentences) {
   const keyword = String(post.primaryKeyword || "").toLowerCase();
 
   if (title.includes("rebuilt") || title.includes("redesigned")) {
-    return findSentence(
-      sentences,
-      [/fail before design starts/i, /looked good/i, /not the problem/i],
-      "The website looked good. That wasn't the problem."
-    );
+    return "The website looked good. That wasn't the problem.";
   }
 
   if (keyword.includes("seo") || title.includes("seo")) {
@@ -197,7 +206,10 @@ function buildHook(post, sentences) {
     return "Most websites do not need a redesign. They need a better plan.";
   }
 
-  return `Most people get ${post.primaryKeyword || "their website strategy"} wrong.`;
+  return firstAvailable(
+    sentences[0],
+    `Most people get ${post.primaryKeyword || "their website strategy"} wrong.`
+  );
 }
 
 function buildHashtags(post) {
@@ -232,6 +244,60 @@ function buildHashtags(post) {
   return hashtags;
 }
 
+function splitIntoShortLines(value) {
+  const sentence = normalizeSpacing(value);
+  if (!sentence) return [];
+
+  const hardSplits = sentence
+    .replace(/\bbut\b/gi, ". But")
+    .replace(/\bso\b/gi, ". So")
+    .replace(/\bbecause\b/gi, ". Because")
+    .replace(/\bthen\b/gi, ". Then")
+    .split(/(?<=[.!?])\s+/)
+    .map((line) => normalizeSpacing(line))
+    .filter(Boolean);
+
+  const result = [];
+
+  for (const line of hardSplits) {
+    const words = line.split(/\s+/);
+
+    if (words.length <= 12) {
+      result.push(line);
+      continue;
+    }
+
+    for (let index = 0; index < words.length; index += 10) {
+      const chunk = words.slice(index, index + 10).join(" ");
+      result.push(toSentence(chunk));
+    }
+  }
+
+  return result;
+}
+
+function makeScene(kicker, spokenLines, onScreenText, visualDirection) {
+  const cleanedLines = spokenLines
+    .flatMap((line) => splitIntoShortLines(line))
+    .map((line) => clipText(line, 120))
+    .filter(Boolean)
+    .slice(0, 3);
+
+  const safeLines = cleanedLines.length ? cleanedLines : ["This is where the strategy changed."];
+
+  const narration = safeLines.join(" ");
+  const estimatedDuration = estimateSpeechDuration(narration);
+
+  return {
+    kicker,
+    spokenLines: safeLines,
+    narration,
+    onScreenText: clipText(onScreenText, 72),
+    visualDirection,
+    durationInSeconds: Number(estimatedDuration.toFixed(3)),
+  };
+}
+
 function buildVideoScript(post, content) {
   const sentences = extractArticleSentences(content);
   const commonMistakes = toArray(post.commonMistakes);
@@ -243,6 +309,7 @@ function buildVideoScript(post, content) {
     buildHook(post, sentences),
     "The website looked good. That wasn't the problem."
   );
+
   const problemLine = toSpokenLine(
     findSentence(
       sentences,
@@ -255,85 +322,85 @@ function buildVideoScript(post, content) {
     ),
     "The real problem was underneath the design."
   );
-  const rebuildLine = toSpokenLine(
+
+  const decisionLine = toSpokenLine(
     findSentence(
       sentences,
       [/not a redesign/i, /that made the decision simple/i, /\ba rebuild\b/i],
       firstAvailable(
         "That made the decision simple. Not a redesign. A rebuild.",
-        "Not a redesign. A rebuild.",
-        keyTakeaways[0]
+        keyTakeaways[0],
+        "Not a redesign. A rebuild."
       )
     ),
     "Not a redesign. A rebuild."
   );
-  const strategyLine = toSpokenLine(
+
+  const fixLine = toSpokenLine(
     findSentence(
       sentences,
       [/reduces decision friction/i, /systems rebuild/i, /strategy layer/i, /it was a systems rebuild/i],
       firstAvailable(
-        "We fixed the structure, the message, and the next step first.",
+        steps[0],
         keyTakeaways[1],
-        "We fixed the message, the structure, and the next step first."
+        "We fixed the structure, the message, and the next step first."
       )
     ),
-    "We fixed the message, the structure, and the next step first."
+    "We fixed the structure, the message, and the next step first."
   );
+
   const proofLine = toSpokenLine(
     findSentence(
       sentences,
       [/sales asset/i, /business outcomes/i, /qualified enquiries/i, /conversion is what turns/i],
       firstAvailable(
-        "That is what turns a website into a sales asset.",
         keyTakeaways[2],
-        "That is what gave the new design something useful to support."
+        "That is what turns a website into a sales asset."
       )
     ),
     "That is what turns a website into a sales asset."
   );
-  const ctaLine = "If you want the full breakdown, read the guide on Web Growth.";
+
+  const ctaLine = "Want the full breakdown? Read the guide on Web Growth.";
 
   const scenes = [
-    {
-      kicker: "Hook",
-      spokenLines: [hookLine],
-      onScreenText: clipText(hookLine, 72),
-      visualDirection: "Bold hook scene with premium motion.",
-    },
-    {
-      kicker: "Problem",
-      spokenLines: [problemLine],
-      onScreenText: "The real problem was underneath.",
-      visualDirection: "Funnel problem scene with drop-off motion.",
-    },
-    {
-      kicker: "Decision",
-      spokenLines: [rebuildLine],
-      onScreenText: "This needed a rebuild, not a refresh.",
-      visualDirection: "Blueprint and decision cards scene.",
-    },
-    {
-      kicker: "Why it worked",
-      spokenLines: [strategyLine, proofLine],
-      onScreenText: "Strategy gave the design a job to do.",
-      visualDirection: "Before and after scene with proof highlights.",
-    },
-    {
-      kicker: "Read more",
-      spokenLines: [ctaLine],
-      onScreenText: "Read the full guide on webgrowth.info",
-      visualDirection: "CTA scene with Web Growth branding.",
-    },
-  ].map((scene) => {
-    const narration = scene.spokenLines.join(" ");
-    const estimatedDuration = estimateSpeechDuration(narration);
-
-    return {
-      ...scene,
-      narration,
-      durationInSeconds: Number(estimatedDuration.toFixed(3)),
-    };
-  });
+    makeScene(
+      "Hook",
+      [hookLine, "That changed the whole project."],
+      hookLine,
+      "Bold hook scene with premium motion."
+    ),
+    makeScene(
+      "Problem",
+      ["At first glance, the site looked fine.", problemLine],
+      "The real problem was underneath.",
+      "Funnel problem scene with drop-off motion."
+    ),
+    makeScene(
+      "Decision",
+      [decisionLine],
+      "This needed a rebuild, not a refresh.",
+      "Blueprint and decision cards scene."
+    ),
+    makeScene(
+      "Fix",
+      [fixLine],
+      "The message came first.",
+      "Strategy cards scene with message, structure, proof, and CTA."
+    ),
+    makeScene(
+      "Why it worked",
+      [proofLine],
+      "Strategy gave the design a job to do.",
+      "Before and after scene with proof highlights."
+    ),
+    makeScene(
+      "Read more",
+      [ctaLine],
+      "Read the full guide on webgrowth.info",
+      "CTA scene with Web Growth branding."
+    ),
+  ];
 
   return {
     title: clipText(hookLine, 88),
@@ -442,7 +509,8 @@ function applySubtitleTimingToScenes(scenes, subtitles) {
     const startTimeInSeconds =
       index === 0 ? 0 : entry.start ?? matchedRanges[index - 1].end ?? 0;
     const nextStart = matchedRanges[index + 1]?.start ?? null;
-    const fallbackEnd = entry.end ?? startTimeInSeconds + estimateSpeechDuration(entry.scene.narration);
+    const fallbackEnd =
+      entry.end ?? startTimeInSeconds + estimateSpeechDuration(entry.scene.narration);
     const endTimeInSeconds = Math.max(
       fallbackEnd,
       nextStart ?? fallbackEnd,
@@ -511,6 +579,11 @@ async function main() {
   await fs.writeFile(archivedVttPath, vtt);
   await fs.writeFile(propsPath, JSON.stringify(props, null, 2));
   await fs.writeFile(archivedPropsPath, JSON.stringify(props, null, 2));
+
+  console.log("Video script:");
+  for (const scene of scenes) {
+    console.log(`- ${scene.kicker}: ${scene.narration}`);
+  }
 
   console.log("Rendering video...");
   await run("npx", [
