@@ -1,0 +1,18 @@
+{
+  "slug": "03-seo-migration-without-losing-traffic",
+  "title": "SEO Migration Without Losing Traffic During a Website Redesign",
+  "source": "http://localhost:3000",
+  "generatedAt": "2026-06-21T18:31:59.839Z",
+  "assets": [
+    "hero.png",
+    "problem.png",
+    "solution.png",
+    "result.png"
+  ],
+  "targets": {
+    "hero": "/blog/03-seo-migration-without-losing-traffic",
+    "problem": "/blog/03-seo-migration-without-losing-traffic",
+    "solution": "/services/search-engine-optimisation",
+    "result": "/services/performance-optimisation"
+  }
+}

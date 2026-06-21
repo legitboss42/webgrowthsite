@@ -2,6 +2,7 @@ import React, { useMemo } from "react";
 import {
   AbsoluteFill,
   Audio,
+  Img,
   interpolate,
   spring,
   staticFile,
@@ -135,6 +136,84 @@ function getActiveSubtitlePage(currentSecond: number, pages: SubtitlePage[]) {
   return pages.find((page) => currentSecond >= page.start && currentSecond <= page.end);
 }
 
+function ScreenshotVisual({
+  slug,
+  sceneIndex,
+  sceneFrame,
+}: {
+  slug?: string;
+  sceneIndex: number;
+  sceneFrame: number;
+}) {
+  const assetNames = ["hero.png", "problem.png", "solution.png", "result.png"];
+  const assetName = assetNames[Math.min(sceneIndex, assetNames.length - 1)] ?? "hero.png";
+
+  const zoom = interpolate(sceneFrame, [0, 120], [1.03, 1.12], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  });
+
+  const y = interpolate(sceneFrame, [0, 120], [0, -34], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  });
+
+  if (!slug) return null;
+
+  return (
+    <div
+      style={{
+        marginTop: 48,
+        borderRadius: 36,
+        border: "1px solid rgba(255,255,255,0.18)",
+        boxShadow: "0 34px 100px rgba(0,0,0,0.42)",
+        height: 640,
+        overflow: "hidden",
+        position: "relative",
+        background: "rgba(255,255,255,0.08)",
+      }}
+    >
+      <Img
+        src={staticFile(`article-assets/${slug}/${assetName}`)}
+        style={{
+          height: "100%",
+          objectFit: "cover",
+          opacity: 0.9,
+          transform: `translateY(${y}px) scale(${zoom})`,
+          width: "100%",
+        }}
+      />
+
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          background:
+            "linear-gradient(180deg, rgba(2,4,3,0.12) 0%, rgba(2,4,3,0.72) 100%)",
+        }}
+      />
+
+      <div
+        style={{
+          position: "absolute",
+          bottom: 28,
+          left: 28,
+          right: 28,
+          background: "rgba(0,0,0,0.54)",
+          border: "1px solid rgba(255,255,255,0.16)",
+          borderRadius: 24,
+          color: "#f9fafb",
+          fontSize: 26,
+          fontWeight: 800,
+          padding: "18px 22px",
+        }}
+      >
+        {assetName.replace(".png", "").toUpperCase()} VIEW
+      </div>
+    </div>
+  );
+}
+
 function AnimatedCard({
   children,
   delay,
@@ -174,7 +253,7 @@ function AnimatedCard({
   );
 }
 
-function SceneVisual({
+function FallbackVisual({
   sceneIndex,
   sceneFrame,
 }: {
@@ -182,14 +261,14 @@ function SceneVisual({
   sceneFrame: number;
 }) {
   if (sceneIndex === 1) {
-    const bars = [0.82, 0.45, 0.12];
+    const bars = [0.92, 0.48, 0.08];
 
     return (
       <div style={{ display: "flex", flexDirection: "column", gap: 22, marginTop: 56 }}>
-        {["1,000 visitors", "100 readers", "2 leads"].map((label, index) => {
+        {["1,000 visitors", "142 engaged", "3 enquiries"].map((label, index) => {
           const width = interpolate(
             sceneFrame,
-            [18 + index * 8, 42 + index * 8],
+            [14 + index * 8, 42 + index * 8],
             [0, bars[index] * 100],
             {
               extrapolateLeft: "clamp",
@@ -205,7 +284,7 @@ function SceneVisual({
 
               <div
                 style={{
-                  height: 22,
+                  height: 24,
                   width: "100%",
                   background: "rgba(255,255,255,0.10)",
                   borderRadius: 999,
@@ -233,13 +312,16 @@ function SceneVisual({
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "1fr 1fr",
           gap: 22,
+          gridTemplateColumns: "1fr 1fr",
           marginTop: 56,
         }}
       >
-        {["MESSAGE", "STRUCTURE", "PROOF", "CTA"].map((label, index) => (
-          <AnimatedCard key={label} delay={18 + index * 7} sceneFrame={sceneFrame}>
+        {["Message", "Structure", "Proof", "Next Step"].map((label, index) => (
+          <AnimatedCard key={label} delay={12 + index * 7} sceneFrame={sceneFrame}>
+            <div style={{ color: "#10b981", fontSize: 24, marginBottom: 10 }}>
+              0{index + 1}
+            </div>
             {label}
           </AnimatedCard>
         ))}
@@ -247,74 +329,23 @@ function SceneVisual({
     );
   }
 
-  if (sceneIndex === 3) {
-    const arrowProgress = interpolate(sceneFrame, [24, 54], [0, 1], {
-      extrapolateLeft: "clamp",
-      extrapolateRight: "clamp",
-    });
-
-    return (
-      <div style={{ alignItems: "center", display: "flex", gap: 28, marginTop: 56 }}>
-        <AnimatedCard delay={10} sceneFrame={sceneFrame}>
-          BEFORE
-          <div style={{ color: "#9ca3af", fontSize: 24, marginTop: 12 }}>
-            Pretty but unclear
-          </div>
-        </AnimatedCard>
-
-        <div
-          style={{
-            color: "#10b981",
-            fontSize: 54,
-            fontWeight: 900,
-            opacity: arrowProgress,
-            transform: `scale(${0.8 + arrowProgress * 0.2})`,
-          }}
-        >
-          -&gt;
-        </div>
-
-        <AnimatedCard delay={34} sceneFrame={sceneFrame}>
-          AFTER
-          <div style={{ color: "#9ca3af", fontSize: 24, marginTop: 12 }}>
-            Built to convert
-          </div>
-        </AnimatedCard>
-      </div>
-    );
-  }
-
-  if (sceneIndex === 4) {
-    return (
-      <div
-        style={{
-          marginTop: 56,
-          background: "rgba(16,185,129,0.12)",
-          border: "2px solid rgba(16,185,129,0.45)",
-          borderRadius: 36,
-          padding: 40,
-          textAlign: "center",
-        }}
-      >
-        <div
-          style={{
-            color: "#10b981",
-            fontSize: 34,
-            fontWeight: 900,
-            marginBottom: 18,
-          }}
-        >
-          WEBGROWTH.INFO
-        </div>
-
-        <div style={{ color: "#f9fafb", fontSize: 28, lineHeight: 1.35 }}>
-          Read the full strategy breakdown
-        </div>
-      </div>
-    );
-  }
-
   return null;
+}
+
+function SceneVisual({
+  sceneIndex,
+  sceneFrame,
+  slug,
+}: {
+  sceneIndex: number;
+  sceneFrame: number;
+  slug?: string;
+}) {
+  if (slug) {
+    return <ScreenshotVisual slug={slug} sceneIndex={sceneIndex} sceneFrame={sceneFrame} />;
+  }
+
+  return <FallbackVisual sceneIndex={sceneIndex} sceneFrame={sceneFrame} />;
 }
 
 export const WebGrowthArticleVideo: React.FC<WebGrowthArticleVideoProps> = ({
@@ -325,6 +356,7 @@ export const WebGrowthArticleVideo: React.FC<WebGrowthArticleVideoProps> = ({
   subtitles = [],
   audioSrc = "article-voice.mp3",
   durationInSeconds,
+  slug,
 }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
@@ -471,7 +503,7 @@ export const WebGrowthArticleVideo: React.FC<WebGrowthArticleVideoProps> = ({
 
         <div
           style={{
-            fontSize: 78,
+            fontSize: 70,
             fontWeight: 950,
             letterSpacing: -3,
             lineHeight: 1.02,
@@ -486,10 +518,10 @@ export const WebGrowthArticleVideo: React.FC<WebGrowthArticleVideoProps> = ({
             color: "#d1d5db",
             display: "flex",
             flexDirection: "column",
-            fontSize: 30,
+            fontSize: 28,
             gap: 14,
             lineHeight: 1.35,
-            marginTop: 34,
+            marginTop: 28,
             maxWidth: 900,
           }}
         >
@@ -500,7 +532,7 @@ export const WebGrowthArticleVideo: React.FC<WebGrowthArticleVideoProps> = ({
           )}
         </div>
 
-        <SceneVisual sceneIndex={sceneIndex} sceneFrame={sceneFrame} />
+        <SceneVisual sceneIndex={sceneIndex} sceneFrame={sceneFrame} slug={slug} />
       </div>
 
       {activeSubtitlePage ? (
