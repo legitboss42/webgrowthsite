@@ -1,5 +1,6 @@
 import { Composition, type CalculateMetadataFunction } from "remotion";
 
+import { MrWebGrowthTest } from "./components/MrWebGrowth";
 import {
   WebGrowthArticleVideo,
   type WebGrowthArticleVideoProps,
@@ -8,6 +9,7 @@ import {
 const VIDEO_FPS = 30;
 const VIDEO_WIDTH = 1080;
 const VIDEO_HEIGHT = 1920;
+const PREVIEW_DURATION_SECONDS = 8;
 
 const defaultScenes: WebGrowthArticleVideoProps["scenes"] = [
   {
@@ -60,8 +62,10 @@ const calculateMetadata: CalculateMetadataFunction<WebGrowthArticleVideoProps> =
     1
   );
 
+  const durationInFrames = Math.max(1, Math.ceil(durationInSeconds * VIDEO_FPS));
+
   return {
-    durationInFrames: Math.max(1, Math.ceil(durationInSeconds * VIDEO_FPS)),
+    durationInFrames,
     fps: VIDEO_FPS,
     width: VIDEO_WIDTH,
     height: VIDEO_HEIGHT,
@@ -69,22 +73,80 @@ const calculateMetadata: CalculateMetadataFunction<WebGrowthArticleVideoProps> =
       ...props,
       audioSrc: props.audioSrc ?? "article-voice.mp3",
       durationInSeconds,
-      durationInFrames: Math.max(1, Math.ceil(durationInSeconds * VIDEO_FPS)),
+      durationInFrames,
+    },
+  };
+};
+
+const calculatePreviewMetadata: CalculateMetadataFunction<WebGrowthArticleVideoProps> = async ({
+  props,
+}) => {
+  const durationInSeconds = Math.min(
+    PREVIEW_DURATION_SECONDS,
+    Math.max(props.durationInSeconds ?? PREVIEW_DURATION_SECONDS, 1)
+  );
+
+  const durationInFrames = Math.max(1, Math.ceil(durationInSeconds * VIDEO_FPS));
+
+  return {
+    durationInFrames,
+    fps: VIDEO_FPS,
+    width: VIDEO_WIDTH,
+    height: VIDEO_HEIGHT,
+    props: {
+      ...props,
+      audioSrc: props.audioSrc ?? "article-voice.mp3",
+      durationInSeconds,
+      durationInFrames,
+      previewMode: true,
     },
   };
 };
 
 export function RemotionRoot() {
   return (
-    <Composition
-      id="WebGrowthArticleVideo"
-      component={WebGrowthArticleVideo}
-      durationInFrames={defaultProps.durationInFrames!}
-      fps={VIDEO_FPS}
-      width={VIDEO_WIDTH}
-      height={VIDEO_HEIGHT}
-      defaultProps={defaultProps}
-      calculateMetadata={calculateMetadata}
-    />
+    <>
+      <Composition
+        id="WebGrowthArticleVideo"
+        component={WebGrowthArticleVideo}
+        durationInFrames={defaultProps.durationInFrames!}
+        fps={VIDEO_FPS}
+        width={VIDEO_WIDTH}
+        height={VIDEO_HEIGHT}
+        defaultProps={defaultProps}
+        calculateMetadata={calculateMetadata}
+      />
+
+      <Composition
+        id="WebGrowthArticleVideoPreview"
+        component={WebGrowthArticleVideo}
+        durationInFrames={Math.ceil(PREVIEW_DURATION_SECONDS * VIDEO_FPS)}
+        fps={VIDEO_FPS}
+        width={VIDEO_WIDTH}
+        height={VIDEO_HEIGHT}
+        defaultProps={{
+          ...defaultProps,
+          previewMode: true,
+          durationInSeconds: PREVIEW_DURATION_SECONDS,
+          durationInFrames: Math.ceil(PREVIEW_DURATION_SECONDS * VIDEO_FPS),
+        }}
+        calculateMetadata={calculatePreviewMetadata}
+      />
+
+      <Composition
+        id="MrWebGrowthTest"
+        component={MrWebGrowthTest}
+        durationInFrames={180}
+        fps={VIDEO_FPS}
+        width={VIDEO_WIDTH}
+        height={VIDEO_HEIGHT}
+        defaultProps={{
+          debug: true,
+          talking: true,
+          motionPreset: "hook",
+          motionIntensity: 0.9,
+        }}
+      />
+    </>
   );
 }

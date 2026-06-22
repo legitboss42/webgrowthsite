@@ -1,0 +1,39 @@
+<svg width="320" height="460" viewBox="0 0 320 460" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="neck" x1="160" y1="24" x2="160" y2="110" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#B77045"/>
+      <stop offset="1" stop-color="#8A5431"/>
+    </linearGradient>
+    <linearGradient id="jacket" x1="160" y1="88" x2="160" y2="460" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#1A2230"/>
+      <stop offset="1" stop-color="#070B12"/>
+    </linearGradient>
+    <linearGradient id="shirt" x1="160" y1="118" x2="160" y2="452" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FBFDFF"/>
+      <stop offset="1" stop-color="#D8E0EA"/>
+    </linearGradient>
+    <linearGradient id="shadow" x1="160" y1="180" x2="160" y2="460" gradientUnits="userSpaceOnUse">
+      <stop stop-color="rgba(0,0,0,0)" stop-opacity="0"/>
+      <stop offset="1" stop-color="#020407" stop-opacity="0.44"/>
+    </linearGradient>
+  </defs>
+
+  <path d="M139 26H181L190 116H130L139 26Z" fill="url(#neck)"/>
+
+  <path
+    d="M56 164C66 126 104 96 160 96C216 96 254 126 264 164L316 460H4L56 164Z"
+    fill="url(#jacket)"
+  />
+  <path
+    d="M120 116L160 154L200 116L236 460H84L120 116Z"
+    fill="url(#shirt)"
+  />
+  <path d="M120 116L102 242L140 226L160 154L120 116Z" fill="#0F1620"/>
+  <path d="M200 116L218 242L180 226L160 154L200 116Z" fill="#0F1620"/>
+  <path d="M144 102L160 154L176 102L160 90L144 102Z" fill="#FBFDFF"/>
+  <path d="M90 162C108 144 130 132 160 132C190 132 212 144 230 162" stroke="#263140" stroke-width="3" stroke-linecap="round" opacity="0.4"/>
+  <path d="M56 164C66 126 104 96 160 96C216 96 254 126 264 164L316 460H4L56 164Z" fill="url(#shadow)"/>
+  <circle cx="252" cy="260" r="18" fill="#D7B25D"/>
+  <circle cx="252" cy="260" r="11" fill="#112033"/>
+  <path d="M252 249L255.8 256.2L264 257.3L258 262.8L259.5 271L252 267L244.5 271L246 262.8L240 257.3L248.2 256.2L252 249Z" fill="#D7B25D"/>
+</svg>
