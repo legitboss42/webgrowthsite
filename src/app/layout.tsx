@@ -76,6 +76,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           content="f14352c8-ac00-4455-ad6a-4c0615d5653b"
         />
 
+        <Script
+          id="google-adsense"
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4073948936216175"
+          crossOrigin="anonymous"
+          strategy="afterInteractive"
+        />
+
         {IS_PRODUCTION ? (
           <Script id="tiktok-pixel" strategy="lazyOnload">
             {`
