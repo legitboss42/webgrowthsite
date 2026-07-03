@@ -50,6 +50,7 @@ const securityHeaders = [
 const nextConfig = {
   reactStrictMode: true,
   trailingSlash: true,
+  serverExternalPackages: ["edge-tts-universal", "ws", "bufferutil", "utf-8-validate"],
   experimental: {
     cpus: 1,
   },
