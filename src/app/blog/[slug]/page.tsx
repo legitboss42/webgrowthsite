@@ -16,11 +16,12 @@ import RelatedGuides from "@/components/content/RelatedGuides";
 import ReviewedByBlock from "@/components/content/ReviewedByBlock";
 import TableOfContents from "@/components/content/TableOfContents";
 import WhatYouNeed from "@/components/content/WhatYouNeed";
+import EditorialTrustNote from "@/components/EditorialTrustNote";
 import { getAuthorProfile } from "@/lib/authors";
 import { getPost, getPosts, getRelatedGuidesForPost, isPublicBlogSlug, type Post } from "@/lib/posts";
 import routeGovernance from "@/lib/route-governance.json";
 import { buildArticleSchema, buildBreadcrumbSchema, buildPageMetadata } from "@/lib/seo";
-import { DEFAULT_OG_IMAGE, SITE_URL } from "@/lib/site";
+import { absoluteUrl, DEFAULT_OG_IMAGE, SITE_URL } from "@/lib/site";
 
 export const dynamic = "force-static";
 export const dynamicParams = false;
@@ -54,6 +55,48 @@ function getSafeTags(post: Pick<Post, "tags">): string[] {
   return Array.isArray(post.tags)
     ? post.tags.filter((tag): tag is string => typeof tag === "string")
     : [];
+}
+
+function getArticleCta(post: Pick<Post, "category" | "topic" | "tags">) {
+  const haystack = [post.category, post.topic, ...post.tags].join(" ").toLowerCase();
+
+  if (haystack.includes("speed") || haystack.includes("performance")) {
+    return {
+      title: "Need this fixed on a live site?",
+      description:
+        "Get a senior review of your slow templates, scripts, asset loading, and conversion bottlenecks.",
+      href: "/services/performance-optimisation",
+      label: "Explore Speed Optimisation",
+    };
+  }
+
+  if (haystack.includes("seo") || haystack.includes("migration")) {
+    return {
+      title: "Planning a higher-stakes SEO move?",
+      description:
+        "Use this guide as the strategy layer, then bring in implementation support for redirects, metadata, content structure, and launch QA.",
+      href: "/services/search-engine-optimisation",
+      label: "View SEO Service",
+    };
+  }
+
+  if (haystack.includes("landing") || haystack.includes("conversion")) {
+    return {
+      title: "Want the page built, not just planned?",
+      description:
+        "Translate the strategy into page structure, offer hierarchy, proof placement, and clean conversion flow.",
+      href: "/services/landing-page-design",
+      label: "See Landing Page Service",
+    };
+  }
+
+  return {
+    title: "Need senior implementation support?",
+    description:
+      "Use the Academy for clarity, then bring in Web Growth when you need a scoped execution partner.",
+    href: "/contact",
+    label: "Request a Website Review",
+  };
 }
 
 export function generateStaticParams() {
@@ -100,7 +143,7 @@ export async function generateMetadata({
   );
 
   return buildPageMetadata({
-    title: post.seoTitle || `${post.title} | Web Growth Blog`,
+    title: post.seoTitle || `${post.title} | Web Growth Academy`,
     description: post.excerpt,
     path: `/blog/${post.slug}`,
     keywords,
@@ -123,7 +166,8 @@ export default async function BlogPostPage({
   const reviewer = post.reviewedBy ? getAuthorProfile(post.reviewedBy) : undefined;
   const headings = extractHeadings(post.content);
   const tags = getSafeTags(post);
-  const canonicalUrl = `${SITE_URL}/blog/${post.slug}`;
+  const canonicalUrl = absoluteUrl(`/blog/${post.slug}`);
+  const articleCta = getArticleCta(post);
   const relatedGuides = getRelatedGuidesForPost(post).map((guide) => ({
     slug: guide.slug,
     title: guide.title,
@@ -143,14 +187,14 @@ export default async function BlogPostPage({
     tags,
     wordCount: estimateWordCount(post.content),
     authorName: author.name,
-    authorUrl: author.profileUrl || `${SITE_URL}/about`,
+    authorUrl: author.profileUrl || absoluteUrl("/about"),
     reviewedByName:
       reviewer && reviewer.name !== author.name ? reviewer.name : undefined,
   });
 
   const breadcrumbSchema = buildBreadcrumbSchema([
     { name: "Home", path: "/" },
-    { name: "Blog", path: "/blog" },
+    { name: "Academy", path: "/blog" },
     { name: post.title, path: `/blog/${post.slug}` },
   ]);
 
@@ -169,7 +213,7 @@ export default async function BlogPostPage({
     post.faq.length > 0;
 
   return (
-    <article className="bg-black text-white">
+    <article className="bg-[#f7f8fc] text-slate-950">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -177,78 +221,158 @@ export default async function BlogPostPage({
         }}
       />
 
-      <section className="relative overflow-hidden border-b border-white/10">
-        <div className="absolute inset-0">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(16,185,129,0.14),transparent_55%)]" />
-          <div className="absolute -top-24 left-1/2 h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-emerald-500/10 blur-3xl" />
-          <div className="absolute inset-0 bg-black/55" />
+      <section className="relative overflow-hidden border-b border-slate-200 bg-[linear-gradient(180deg,#f8f9fd_0%,#eef3ff_100%)]">
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          <div className="absolute left-[-10%] top-[-8%] h-72 w-72 rounded-full bg-[radial-gradient(circle,rgba(79,107,255,0.14),transparent_70%)]" />
+          <div className="absolute right-[-12%] top-[4%] h-[28rem] w-[28rem] rounded-full bg-[radial-gradient(circle,rgba(124,92,255,0.12),transparent_72%)]" />
+          <div className="absolute inset-x-0 top-0 h-full bg-[linear-gradient(180deg,rgba(255,255,255,0.35),rgba(255,255,255,0))]" />
         </div>
 
-        <div className="relative mx-auto max-w-6xl px-6 py-16">
-          <nav aria-label="Breadcrumb" className="mb-5 text-sm text-white/55">
+        <div className="relative mx-auto max-w-6xl px-5 py-16 sm:px-6 md:py-20">
+          <nav aria-label="Breadcrumb" className="mb-5 text-sm text-slate-500">
             <ol className="flex flex-wrap items-center gap-2">
               <li>
-                <Link href="/" className="transition hover:text-white">
+                <Link href="/" className="transition hover:text-slate-900">
                   Home
                 </Link>
               </li>
               <li aria-hidden="true">/</li>
               <li>
-                <Link href="/blog" className="transition hover:text-white">
-                  Blog
+                <Link href="/blog" className="transition hover:text-slate-900">
+                  Academy
                 </Link>
               </li>
               <li aria-hidden="true">/</li>
-              <li className="text-white/82">{post.title}</li>
+              <li className="text-slate-800">{post.title}</li>
             </ol>
           </nav>
 
-          <div className="flex flex-wrap gap-2 text-xs text-white/65">
-            <span className="rounded-full border border-white/20 bg-black/35 px-3 py-1 text-white">
-              {post.category}
-            </span>
-            {post.topic ? (
-              <span className="rounded-full border border-white/20 bg-black/35 px-3 py-1">
-                {post.topic}
-              </span>
-            ) : null}
-            {post.difficulty ? (
-              <span className="rounded-full border border-white/20 bg-black/35 px-3 py-1">
-                {post.difficulty}
-              </span>
-            ) : null}
-            <span className="rounded-full border border-white/20 bg-black/35 px-3 py-1">
-              {post.readTime}
-            </span>
+          <div className="grid gap-10 md:grid-cols-[minmax(0,1.15fr)_minmax(280px,0.85fr)] md:items-end">
+            <div>
+              <div className="flex flex-wrap gap-2 text-xs text-slate-500">
+                <span className="rounded-full border border-slate-200 bg-white px-3 py-1 font-medium text-slate-700">
+                  {post.category}
+                </span>
+                {post.topic ? (
+                  <span className="rounded-full border border-slate-200 bg-white px-3 py-1">
+                    {post.topic}
+                  </span>
+                ) : null}
+                {post.difficulty ? (
+                  <span className="rounded-full border border-slate-200 bg-white px-3 py-1">
+                    {post.difficulty}
+                  </span>
+                ) : null}
+                <span className="rounded-full border border-slate-200 bg-white px-3 py-1">
+                  {post.readTime}
+                </span>
+              </div>
+
+              <h1 className="mt-5 max-w-4xl text-balance text-4xl font-semibold leading-[0.95] tracking-[-0.05em] text-slate-950 md:text-6xl">
+                {post.title}
+              </h1>
+              <p className="mt-5 max-w-3xl text-lg leading-8 text-slate-600">{post.excerpt}</p>
+
+              <div className="mt-8 grid gap-4 sm:grid-cols-3">
+                <div className="rounded-[1.5rem] border border-white/70 bg-white/90 p-4 shadow-[0_18px_45px_rgba(15,23,42,0.06)] backdrop-blur">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-blue-700">
+                    Search intent
+                  </p>
+                  <p className="mt-2 text-sm leading-6 text-slate-600">
+                    {post.searchIntent || "Informational planning and implementation support."}
+                  </p>
+                </div>
+                <div className="rounded-[1.5rem] border border-white/70 bg-white/90 p-4 shadow-[0_18px_45px_rgba(15,23,42,0.06)] backdrop-blur">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-blue-700">
+                    Primary focus
+                  </p>
+                  <p className="mt-2 text-sm leading-6 text-slate-600">
+                    {post.primaryKeyword || post.topic || post.category}
+                  </p>
+                </div>
+                <div className="rounded-[1.5rem] border border-white/70 bg-white/90 p-4 shadow-[0_18px_45px_rgba(15,23,42,0.06)] backdrop-blur">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-blue-700">
+                    Built for
+                  </p>
+                  <p className="mt-2 text-sm leading-6 text-slate-600">
+                    Teams that need clearer website decisions before they spend.
+                  </p>
+                </div>
+              </div>
+
+              {tags.length ? (
+                <div className="mt-6 flex flex-wrap gap-2">
+                  {tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="rounded-full border border-slate-200 bg-slate-50/90 px-3 py-1 text-xs text-slate-500"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              ) : null}
+            </div>
+
+            <div className="space-y-4">
+              <div className="rounded-[1.75rem] border border-slate-200/80 bg-white/92 p-6 shadow-[0_24px_60px_rgba(15,23,42,0.08)] backdrop-blur">
+                <div className="flex items-center gap-3">
+                  {author.image ? (
+                    <div className="relative h-14 w-14 overflow-hidden rounded-2xl border border-slate-200">
+                      <Image src={author.image} alt={author.name} fill className="object-cover" sizes="56px" />
+                    </div>
+                  ) : null}
+                  <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-blue-700">
+                      Academy article
+                    </p>
+                    <p className="mt-1 text-base font-semibold text-slate-950">{author.name}</p>
+                    <p className="text-sm text-slate-500">{author.role}</p>
+                  </div>
+                </div>
+
+                <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                      Published
+                    </p>
+                    <p className="mt-2 text-sm font-medium text-slate-950">{post.date}</p>
+                  </div>
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                      Reviewed
+                    </p>
+                    <p className="mt-2 text-sm font-medium text-slate-950">
+                      {post.lastReviewedAt || post.updatedAt || "In editorial rotation"}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-5 rounded-2xl border border-blue-100 bg-[linear-gradient(135deg,rgba(239,244,255,0.95),rgba(247,244,255,0.95))] p-4">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-blue-700">
+                    Best next move
+                  </p>
+                  <p className="mt-2 text-sm leading-6 text-slate-600">{articleCta.description}</p>
+                  <Link
+                    href={articleCta.href}
+                    className="mt-4 inline-flex min-h-11 items-center justify-center rounded-xl bg-[linear-gradient(135deg,#3b82f6,#7c5cff)] px-4 py-2 text-sm font-semibold text-white shadow-[0_16px_34px_rgba(79,107,255,0.24)] transition hover:-translate-y-0.5"
+                  >
+                    {articleCta.label}
+                  </Link>
+                </div>
+              </div>
+            </div>
           </div>
 
-          <h1 className="mt-5 max-w-4xl text-balance text-4xl font-semibold leading-tight md:text-6xl">
-            {post.title}
-          </h1>
-          <p className="mt-5 max-w-3xl text-lg leading-8 text-white/72">{post.excerpt}</p>
-
-          {tags.length ? (
-            <div className="mt-6 flex flex-wrap gap-2">
-              {tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/70"
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
-          ) : null}
-
           {post.cover ? (
-            <div className="mt-10 max-w-4xl overflow-hidden rounded-2xl border border-white/10">
+            <div className="mt-10 overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-[0_24px_60px_rgba(15,23,42,0.10)]">
               <div className="relative aspect-[16/9]">
                 <Image
                   src={post.cover}
                   alt={post.coverAlt}
                   fill
                   className="object-cover"
-                  sizes="(max-width: 768px) 100vw, 960px"
+                  sizes="(max-width: 768px) 100vw, 1200px"
                   priority
                 />
               </div>
@@ -257,47 +381,77 @@ export default async function BlogPostPage({
         </div>
       </section>
 
-      <section className="mx-auto max-w-6xl px-6 py-14">
-        <div className="grid gap-10 lg:grid-cols-[1fr_320px]">
+      <section className="mx-auto max-w-6xl px-5 py-14 sm:px-6">
+        <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_320px]">
           <div className="space-y-8">
             {hasEnhancedBlocks ? (
               <>
-                <ContentLastUpdated
-                  publishedAt={post.date}
-                  updatedAt={post.updatedAt}
-                  lastReviewedAt={post.lastReviewedAt}
-                />
-                <AuthorBio author={author} />
-                {reviewer && reviewer.name !== author.name ? (
-                  <ReviewedByBlock reviewerName={reviewer.name} reviewerRole={reviewer.role} />
-                ) : null}
-                <EditorialNote
-                  note={
-                    post.evidenceNote ||
-                    "This guide is written to be useful even if you never hire Web Growth. It focuses on practical decisions, implementation risks, and measurable outcomes."
-                  }
-                  methodology={post.methodologyNote}
-                />
-                <KeyTakeaways items={post.keyTakeaways} />
-                <WhatYouNeed items={post.whatYouNeed} />
-                <CommonMistakes items={post.commonMistakes} />
-                <ProcessSteps items={post.steps} />
+                <div className="grid gap-6 xl:grid-cols-[minmax(0,1.1fr)_minmax(280px,0.9fr)]">
+                  <div className="space-y-6">
+                    <ContentLastUpdated
+                      publishedAt={post.date}
+                      updatedAt={post.updatedAt}
+                      lastReviewedAt={post.lastReviewedAt}
+                    />
+                    <EditorialNote
+                      note={
+                        post.evidenceNote ||
+                        "This guide is written to be useful even if you never hire Web Growth. It focuses on practical decisions, implementation risks, and measurable outcomes."
+                      }
+                      methodology={post.methodologyNote}
+                    />
+                  </div>
+                  <div className="space-y-6">
+                    <AuthorBio author={author} />
+                    {reviewer && reviewer.name !== author.name ? (
+                      <ReviewedByBlock reviewerName={reviewer.name} reviewerRole={reviewer.role} />
+                    ) : null}
+                  </div>
+                </div>
+
+                <div className="grid gap-6 xl:grid-cols-2">
+                  <KeyTakeaways items={post.keyTakeaways} />
+                  <WhatYouNeed items={post.whatYouNeed} />
+                </div>
+                <div className="grid gap-6 xl:grid-cols-2">
+                  <CommonMistakes items={post.commonMistakes} />
+                  <ProcessSteps items={post.steps} />
+                </div>
               </>
             ) : null}
 
-            <BlogPostClient
-              content={post.content}
-              blogSlug={post.slug}
-              blogTitle={post.title}
-              blogCategory={post.category}
-              blogTags={tags}
-            />
+            <div className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-[0_24px_60px_rgba(15,23,42,0.08)] md:p-8">
+              <div className="mb-8 flex flex-wrap items-end justify-between gap-4 border-b border-slate-200 pb-6">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-blue-700">
+                    Academy lesson
+                  </p>
+                  <h2 className="mt-3 text-2xl font-semibold tracking-[-0.03em] text-slate-950">
+                    Strategy, implementation notes, and decision support
+                  </h2>
+                </div>
+                <Link
+                  href="/blog"
+                  className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-blue-200 hover:text-blue-700"
+                >
+                  Back to Academy
+                </Link>
+              </div>
+
+              <BlogPostClient
+                content={post.content}
+                blogSlug={post.slug}
+                blogTitle={post.title}
+                blogCategory={post.category}
+                blogTags={tags}
+              />
+            </div>
 
             {hasEnhancedBlocks ? (
               <FAQBlock
                 items={post.faq}
                 title={`${post.title} FAQ`}
-                description="Short answers to common planning and implementation questions."
+                description="Short answers to the planning, implementation, and decision questions readers usually ask next."
               />
             ) : null}
 
@@ -311,26 +465,39 @@ export default async function BlogPostPage({
 
             {hasEnhancedBlocks ? <RelatedGuides guides={relatedGuides} /> : null}
 
+            <EditorialTrustNote />
+
             {hasEnhancedBlocks ? (
               <InternalResourceCallout
-                title="Need implementation support for this guide?"
-                description="If you want this executed with senior-level speed and quality control, request a scoped recommendation."
-                href="/contact"
-                label="Request Implementation Scope"
+                title={articleCta.title}
+                description={articleCta.description}
+                href={articleCta.href}
+                label={articleCta.label}
               />
             ) : null}
           </div>
 
           <aside className="space-y-6 lg:sticky lg:top-32 lg:h-fit">
             <TableOfContents items={headings} />
-            {hasEnhancedBlocks ? (
-              <InternalResourceCallout
-                title="Start Here"
-                description="Browse resource-first guides by topic before choosing a service."
-                href="/blog"
-                label="Open Resource Hub"
-              />
-            ) : null}
+            <div className="rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-[0_20px_50px_rgba(15,23,42,0.07)]">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-blue-700">
+                Reading path
+              </p>
+              <div className="mt-4 space-y-3 text-sm leading-6 text-slate-600">
+                <p className="rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-3">
+                  Start with the takeaways, then move through the full guide section by section.
+                </p>
+                <p className="rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-3">
+                  Use the related guides below the article to deepen one problem area at a time.
+                </p>
+              </div>
+            </div>
+            <InternalResourceCallout
+              title="Browse the Academy"
+              description="Explore structured articles on SEO, website design, speed, lead generation, and monetization."
+              href="/blog"
+              label="Open Academy Hub"
+            />
           </aside>
         </div>
       </section>

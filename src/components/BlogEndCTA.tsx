@@ -2,7 +2,7 @@ import TrackedLink from "@/components/analytics/TrackedLink";
 import { BOOKING_URL, buildWhatsAppUrl } from "@/lib/site";
 
 const whatsappHref = buildWhatsAppUrl(
-  "Hello, I want to launch my business website in 48 hours."
+  "Hello, I want help reviewing and improving my website."
 );
 
 export default function BlogEndCTA({
@@ -15,39 +15,38 @@ export default function BlogEndCTA({
   blogCategory?: string;
 }) {
   return (
-    <div className="rounded-3xl border border-emerald-400/24 bg-[radial-gradient(circle_at_16%_-10%,rgba(16,185,129,0.22),rgba(3,14,11,0.94)_46%,rgba(2,8,7,0.98)_100%)] p-7 shadow-[0_18px_40px_rgba(0,0,0,0.24)]">
-      <p className="text-xs uppercase tracking-[0.2em] text-emerald-200/90">Ready to launch</p>
-      <h3 className="mt-3 text-2xl font-semibold text-white">
-        Launch your website in 48 hours with a done-for-you setup
+    <div className="rounded-[28px] border border-slate-200 bg-[radial-gradient(circle_at_top_left,rgba(79,107,255,0.12),transparent_35%),radial-gradient(circle_at_top_right,rgba(124,92,255,0.1),transparent_30%),#ffffff] p-7 shadow-[0_24px_70px_rgba(15,23,42,0.08)]">
+      <p className="text-xs uppercase tracking-[0.2em] text-blue-700">Need implementation support?</p>
+      <h3 className="mt-3 text-2xl font-semibold tracking-[-0.03em] text-slate-950">
+        Turn the strategy into a sharper website, stronger SEO, and clearer conversion paths.
       </h3>
-      <p className="mt-3 max-w-2xl text-sm leading-7 text-white/74">
-        If this article helped you clarify the next step, the launch offer gives you a
-        mobile-first business website, domain guidance, hosting setup, and a clear CTA
-        flow without dragging the project out.
+      <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600">
+        If this guide clarified the next move, Web Growth can help you translate it into a
+        better website build, redesign, audit, or conversion-focused improvement plan.
       </p>
 
       <div className="mt-6 flex flex-col gap-3 sm:flex-row">
         <TrackedLink
-          href="/launch"
-          className="inline-flex items-center justify-center rounded-xl bg-emerald-700 px-6 py-3 text-sm font-semibold text-white transition hover:bg-emerald-600"
-          ctaName="start_your_website"
+          href="/contact/"
+          className="inline-flex items-center justify-center rounded-xl bg-[linear-gradient(135deg,#4f6bff_0%,#7c5cff_100%)] px-6 py-3 text-sm font-semibold text-white shadow-[0_16px_32px_rgba(79,107,255,0.22)] transition hover:brightness-105"
+          ctaName="website_review"
           ctaLocation="blog_end"
-          destination="/launch"
+          destination="/contact/"
           pageType="blog_post"
-          offerType="website_launch"
+          offerType="website_review"
           contentGroup="blog"
           blogSlug={blogSlug}
           blogTitle={blogTitle}
           blogCategory={blogCategory}
           trackView
         >
-          View the 48-hour launch offer
+          Start With a Website Review
         </TrackedLink>
         <TrackedLink
           href={BOOKING_URL}
           target={BOOKING_URL.startsWith("http") ? "_blank" : undefined}
           rel={BOOKING_URL.startsWith("http") ? "noreferrer" : undefined}
-          className="inline-flex items-center justify-center rounded-xl border border-white/15 bg-black/30 px-6 py-3 text-sm font-semibold text-white/90 transition hover:bg-black/50"
+          className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-6 py-3 text-sm font-semibold text-slate-800 transition hover:border-blue-200 hover:text-blue-700"
           ctaName="booking"
           ctaLocation="blog_end"
           destination="booking"
@@ -66,7 +65,7 @@ export default function BlogEndCTA({
         href={whatsappHref}
         target="_blank"
         rel="noreferrer"
-        className="mt-4 inline-flex text-sm font-semibold text-emerald-200 transition hover:text-emerald-100"
+        className="mt-4 inline-flex text-sm font-semibold text-blue-700 transition hover:text-blue-900"
         ctaName="whatsapp"
         ctaLocation="blog_end"
         destination="whatsapp"

@@ -36,6 +36,12 @@ const INITIAL_VALUES: FormValues = {
   message: "",
 };
 
+const inputClassName =
+  "w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-300 focus:ring-4 focus:ring-blue-100";
+const selectClassName =
+  "w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-300 focus:ring-4 focus:ring-blue-100";
+const labelClassName = "mb-2 block text-sm font-medium text-slate-700";
+
 function pushToDataLayer(eventName: string, payload: Record<string, unknown>) {
   if (typeof window === "undefined") return;
   const win = window as Window & { dataLayer?: Array<Record<string, unknown>> };
@@ -103,9 +109,9 @@ export default function ContactClient({ directDeliveryConfigured }: ContactClien
   const budgetOptions = useMemo(
     () => [
       "Not sure yet",
-      "₦200,000 – ₦250,000",
-      "₦250,000 – ₦500,000",
-      "₦500,000+",
+      "NGN 200,000 - 250,000",
+      "NGN 250,000 - 500,000",
+      "NGN 500,000+",
       "I need an audit first",
     ],
     []
@@ -116,7 +122,7 @@ export default function ContactClient({ directDeliveryConfigured }: ContactClien
       "As soon as possible",
       "This week",
       "This month",
-      "1–3 months",
+      "1-3 months",
       "I am planning ahead",
     ],
     []
@@ -151,8 +157,7 @@ export default function ContactClient({ directDeliveryConfigured }: ContactClien
     };
 
     const matched =
-      helpOptions.find((option) => option.toLowerCase() === normalized) ||
-      helpMap[normalized];
+      helpOptions.find((option) => option.toLowerCase() === normalized) || helpMap[normalized];
 
     if (matched) {
       setValues((current) => ({ ...current, helpNeeded: matched }));
@@ -255,11 +260,7 @@ export default function ContactClient({ directDeliveryConfigured }: ContactClien
       setTurnstileResetKey((current) => current + 1);
 
       window.setTimeout(() => {
-        router.push(
-          data?.delivery === "setup_required"
-            ? "/thank-you/?delivery=setup-required"
-            : "/thank-you/"
-        );
+        router.push(data?.delivery === "setup_required" ? "/thank-you/?delivery=setup-required" : "/thank-you/");
       }, 700);
     } catch {
       setStatus("error");
@@ -271,40 +272,38 @@ export default function ContactClient({ directDeliveryConfigured }: ContactClien
   return (
     <div
       id="contact-form"
-      className="rounded-3xl border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.012))] p-7 shadow-[0_20px_50px_rgba(0,0,0,0.28)] backdrop-blur-xl"
+      className="rounded-[2rem] border border-slate-200 bg-white p-7 shadow-[0_24px_60px_rgba(15,23,42,0.10)]"
     >
-      <h2 className="text-2xl font-semibold tracking-[-0.02em] text-white">
+      <h2 className="text-2xl font-semibold tracking-[-0.02em] text-slate-950">
         Start your website review request
       </h2>
-      <p className="mt-3 text-sm leading-7 text-white/70">
-        Share the essentials and Web Growth can assess what may be hurting trust,
-        clarity, speed, mobile experience, and enquiry flow.
+      <p className="mt-3 text-sm leading-7 text-slate-600">
+        Share the essentials and Web Growth can assess what may be hurting trust, clarity, speed,
+        mobile experience, and enquiry flow.
       </p>
 
-      <div className="mt-5 rounded-2xl border border-emerald-400/20 bg-emerald-500/10 p-4">
-        <p className="text-xs uppercase tracking-[0.16em] text-emerald-200/90">
-          To get the most useful response
-        </p>
-        <ul className="mt-3 space-y-2 text-sm leading-6 text-white/78">
+      <div className="mt-5 rounded-2xl border border-blue-100 bg-blue-50 p-4">
+        <p className="text-xs uppercase tracking-[0.16em] text-blue-700">To get the most useful response</p>
+        <ul className="mt-3 space-y-2 text-sm leading-6 text-slate-600">
           <li className="flex gap-2">
-            <span className="mt-[9px] h-1.5 w-1.5 rounded-full bg-emerald-300" />
+            <span className="mt-[9px] h-1.5 w-1.5 rounded-full bg-blue-500" />
             <span>Add your website link if you already have one.</span>
           </li>
           <li className="flex gap-2">
-            <span className="mt-[9px] h-1.5 w-1.5 rounded-full bg-emerald-300" />
+            <span className="mt-[9px] h-1.5 w-1.5 rounded-full bg-blue-500" />
             <span>Choose the main issue so the response starts in the right place.</span>
           </li>
           <li className="flex gap-2">
-            <span className="mt-[9px] h-1.5 w-1.5 rounded-full bg-emerald-300" />
+            <span className="mt-[9px] h-1.5 w-1.5 rounded-full bg-blue-500" />
             <span>You do not need a polished brief. Clear business details are enough.</span>
           </li>
         </ul>
       </div>
 
       {!directDeliveryConfigured ? (
-        <p className="mt-5 rounded-2xl border border-amber-400/35 bg-amber-500/10 px-4 py-3 text-sm leading-6 text-amber-100">
-          Direct email delivery is still being connected. You can still submit this
-          request safely, and WhatsApp is the fastest backup path for urgent reviews.
+        <p className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-800">
+          Direct email delivery is still being connected. You can still submit this request safely,
+          and WhatsApp is the fastest backup path for urgent reviews.
         </p>
       ) : null}
 
@@ -313,10 +312,10 @@ export default function ContactClient({ directDeliveryConfigured }: ContactClien
           className={[
             "mt-6 rounded-2xl border p-4 text-sm",
             status === "success"
-              ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-200"
+              ? "border-emerald-200 bg-emerald-50 text-emerald-800"
               : status === "error"
-                ? "border-red-500/30 bg-red-500/10 text-red-200"
-                : "border-white/10 bg-white/5 text-white/70",
+                ? "border-red-200 bg-red-50 text-red-800"
+                : "border-slate-200 bg-slate-50 text-slate-600",
           ].join(" ")}
         >
           {status === "sending" ? "Sending..." : statusMsg}
@@ -326,8 +325,8 @@ export default function ContactClient({ directDeliveryConfigured }: ContactClien
       <form onSubmit={handleSubmit} className="mt-8 space-y-5">
         <div className="grid gap-5 md:grid-cols-2">
           <div>
-            <label htmlFor="contact-name" className="mb-2 block text-sm text-white/70">
-              Name <span className="text-emerald-300">*</span>
+            <label htmlFor="contact-name" className={labelClassName}>
+              Name <span className="text-blue-700">*</span>
             </label>
             <input
               id="contact-name"
@@ -335,13 +334,13 @@ export default function ContactClient({ directDeliveryConfigured }: ContactClien
               required
               value={values.name}
               onChange={(event) => updateValue("name", event.target.value)}
-              className="w-full rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-white outline-none transition focus:border-emerald-400/50"
+              className={inputClassName}
             />
           </div>
 
           <div>
-            <label htmlFor="contact-email" className="mb-2 block text-sm text-white/70">
-              Email <span className="text-emerald-300">*</span>
+            <label htmlFor="contact-email" className={labelClassName}>
+              Email <span className="text-blue-700">*</span>
             </label>
             <input
               id="contact-email"
@@ -349,14 +348,14 @@ export default function ContactClient({ directDeliveryConfigured }: ContactClien
               required
               value={values.email}
               onChange={(event) => updateValue("email", event.target.value)}
-              className="w-full rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-white outline-none transition focus:border-emerald-400/50"
+              className={inputClassName}
             />
           </div>
         </div>
 
         <div className="grid gap-5 md:grid-cols-2">
           <div>
-            <label htmlFor="contact-whatsapp" className="mb-2 block text-sm text-white/70">
+            <label htmlFor="contact-whatsapp" className={labelClassName}>
               WhatsApp number
             </label>
             <input
@@ -364,12 +363,12 @@ export default function ContactClient({ directDeliveryConfigured }: ContactClien
               type="tel"
               value={values.whatsappNumber}
               onChange={(event) => updateValue("whatsappNumber", event.target.value)}
-              className="w-full rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-white outline-none transition focus:border-emerald-400/50"
+              className={inputClassName}
             />
           </div>
 
           <div>
-            <label htmlFor="contact-business-name" className="mb-2 block text-sm text-white/70">
+            <label htmlFor="contact-business-name" className={labelClassName}>
               Business name
             </label>
             <input
@@ -377,13 +376,13 @@ export default function ContactClient({ directDeliveryConfigured }: ContactClien
               type="text"
               value={values.businessName}
               onChange={(event) => updateValue("businessName", event.target.value)}
-              className="w-full rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-white outline-none transition focus:border-emerald-400/50"
+              className={inputClassName}
             />
           </div>
         </div>
 
         <div>
-          <label htmlFor="contact-website-url" className="mb-2 block text-sm text-white/70">
+          <label htmlFor="contact-website-url" className={labelClassName}>
             Website URL
           </label>
           <input
@@ -391,24 +390,24 @@ export default function ContactClient({ directDeliveryConfigured }: ContactClien
             type="url"
             value={values.websiteUrl}
             onChange={(event) => updateValue("websiteUrl", event.target.value)}
-            className="w-full rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-white outline-none transition focus:border-emerald-400/50"
+            className={inputClassName}
           />
         </div>
 
         <div className="grid gap-5 md:grid-cols-2">
           <div>
-            <label htmlFor="contact-help-needed" className="mb-2 block text-sm text-white/70">
-              What do you need help with? <span className="text-emerald-300">*</span>
+            <label htmlFor="contact-help-needed" className={labelClassName}>
+              What do you need help with? <span className="text-blue-700">*</span>
             </label>
             <select
               id="contact-help-needed"
               required
               value={values.helpNeeded}
               onChange={(event) => updateValue("helpNeeded", event.target.value)}
-              className="w-full rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-white outline-none transition focus:border-emerald-400/50"
+              className={selectClassName}
             >
               {helpOptions.map((option) => (
-                <option key={option} value={option} className="bg-black">
+                <option key={option} value={option}>
                   {option}
                 </option>
               ))}
@@ -416,18 +415,18 @@ export default function ContactClient({ directDeliveryConfigured }: ContactClien
           </div>
 
           <div>
-            <label htmlFor="contact-main-issue" className="mb-2 block text-sm text-white/70">
-              Main issue <span className="text-emerald-300">*</span>
+            <label htmlFor="contact-main-issue" className={labelClassName}>
+              Main issue <span className="text-blue-700">*</span>
             </label>
             <select
               id="contact-main-issue"
               required
               value={values.mainIssue}
               onChange={(event) => updateValue("mainIssue", event.target.value)}
-              className="w-full rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-white outline-none transition focus:border-emerald-400/50"
+              className={selectClassName}
             >
               {mainIssueOptions.map((option) => (
-                <option key={option} value={option} className="bg-black">
+                <option key={option} value={option}>
                   {option}
                 </option>
               ))}
@@ -437,17 +436,17 @@ export default function ContactClient({ directDeliveryConfigured }: ContactClien
 
         <div className="grid gap-5 md:grid-cols-2">
           <div>
-            <label htmlFor="contact-budget-range" className="mb-2 block text-sm text-white/70">
+            <label htmlFor="contact-budget-range" className={labelClassName}>
               Budget range
             </label>
             <select
               id="contact-budget-range"
               value={values.budgetRange}
               onChange={(event) => updateValue("budgetRange", event.target.value)}
-              className="w-full rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-white outline-none transition focus:border-emerald-400/50"
+              className={selectClassName}
             >
               {budgetOptions.map((option) => (
-                <option key={option} value={option} className="bg-black">
+                <option key={option} value={option}>
                   {option}
                 </option>
               ))}
@@ -455,17 +454,17 @@ export default function ContactClient({ directDeliveryConfigured }: ContactClien
           </div>
 
           <div>
-            <label htmlFor="contact-timeline" className="mb-2 block text-sm text-white/70">
+            <label htmlFor="contact-timeline" className={labelClassName}>
               Timeline
             </label>
             <select
               id="contact-timeline"
               value={values.timeline}
               onChange={(event) => updateValue("timeline", event.target.value)}
-              className="w-full rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-white outline-none transition focus:border-emerald-400/50"
+              className={selectClassName}
             >
               {timelineOptions.map((option) => (
-                <option key={option} value={option} className="bg-black">
+                <option key={option} value={option}>
                   {option}
                 </option>
               ))}
@@ -474,7 +473,7 @@ export default function ContactClient({ directDeliveryConfigured }: ContactClien
         </div>
 
         <div>
-          <label htmlFor="contact-message" className="mb-2 block text-sm text-white/70">
+          <label htmlFor="contact-message" className={labelClassName}>
             Message
           </label>
           <textarea
@@ -482,13 +481,13 @@ export default function ContactClient({ directDeliveryConfigured }: ContactClien
             rows={6}
             value={values.message}
             onChange={(event) => updateValue("message", event.target.value)}
-            className="w-full rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-white outline-none transition focus:border-emerald-400/50"
+            className={inputClassName}
           />
         </div>
 
         {isTurnstileEnabled ? (
           <div className="space-y-2">
-            <p className="text-sm text-white/70">Spam check</p>
+            <p className="text-sm font-medium text-slate-700">Spam check</p>
             <TurnstileWidget
               action="website_review_request"
               onTokenChange={setTurnstileToken}
@@ -496,10 +495,9 @@ export default function ContactClient({ directDeliveryConfigured }: ContactClien
             />
           </div>
         ) : (
-          <p className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/62">
-            Spam protection is not configured yet. This form still uses server-side
-            validation and rate limiting, and WhatsApp is available if you need a
-            faster route.
+          <p className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
+            Spam protection is not configured yet. This form still uses server-side validation and
+            rate limiting, and WhatsApp is available if you need a faster route.
           </p>
         )}
 
@@ -509,16 +507,16 @@ export default function ContactClient({ directDeliveryConfigured }: ContactClien
           className={[
             "w-full rounded-2xl px-6 py-4 text-sm font-semibold text-white transition",
             status === "sending"
-              ? "cursor-not-allowed bg-emerald-600/60"
-              : "bg-emerald-700 hover:bg-emerald-600",
+              ? "cursor-not-allowed bg-blue-400"
+              : "bg-[linear-gradient(135deg,#4f6bff_0%,#7c5cff_100%)] shadow-[0_18px_38px_rgba(79,107,255,0.24)] hover:-translate-y-0.5 hover:brightness-105",
           ].join(" ")}
         >
           {status === "sending" ? "Sending..." : "Submit Website Review Request"}
         </button>
 
-        <p className="text-xs leading-6 text-white/55">
-          No fake guarantees and no bloated sales process. Just a practical next
-          step based on what you send.
+        <p className="text-xs leading-6 text-slate-500">
+          No fake guarantees and no bloated sales process. Just a practical next step based on what
+          you send.
         </p>
       </form>
     </div>

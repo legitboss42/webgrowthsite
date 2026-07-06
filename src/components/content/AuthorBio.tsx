@@ -8,23 +8,23 @@ type AuthorBioProps = {
 
 export default function AuthorBio({ author }: AuthorBioProps) {
   return (
-    <section className="rounded-2xl border border-white/10 bg-white/5 p-6">
-      <p className="text-xs uppercase tracking-[0.18em] text-emerald-300/85">Author</p>
+    <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_18px_40px_rgba(15,23,42,0.06)]">
+      <p className="text-xs uppercase tracking-[0.18em] text-blue-700">Author</p>
       <div className="mt-4 flex items-start gap-4">
         {author.image ? (
-          <div className="relative h-16 w-16 overflow-hidden rounded-xl border border-white/10">
+          <div className="relative h-16 w-16 overflow-hidden rounded-2xl border border-slate-200">
             <Image src={author.image} alt={author.name} fill className="object-cover" sizes="64px" />
           </div>
         ) : null}
         <div className="min-w-0 flex-1">
-          <p className="text-lg font-semibold text-white">{author.name}</p>
-          <p className="text-sm text-emerald-200/90">{author.role}</p>
-          <p className="mt-3 text-sm leading-7 text-white/74">{author.bio}</p>
+          <p className="text-lg font-semibold text-slate-950">{author.name}</p>
+          <p className="text-sm text-blue-700">{author.role}</p>
+          <p className="mt-3 text-sm leading-7 text-slate-600">{author.bio}</p>
           {author.expertise.length ? (
             <ul className="mt-4 grid gap-2 sm:grid-cols-2">
               {author.expertise.map((item) => (
-                <li key={item} className="flex gap-2 text-xs text-white/68">
-                  <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-emerald-400/80" />
+                <li key={item} className="flex gap-2 text-xs text-slate-500">
+                  <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-blue-500/80" />
                   <span>{item}</span>
                 </li>
               ))}
@@ -32,7 +32,7 @@ export default function AuthorBio({ author }: AuthorBioProps) {
           ) : null}
           <Link
             href="/editorial-policy/"
-            className="mt-4 inline-flex text-sm font-medium text-emerald-300 transition hover:text-emerald-200"
+            className="mt-4 inline-flex text-sm font-medium text-blue-700 transition hover:text-blue-800"
           >
             Read our editorial and review standards
           </Link>

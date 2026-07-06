@@ -2,11 +2,11 @@
 
 import Link from "next/link";
 import TrackedLink from "@/components/analytics/TrackedLink";
-import { BOOKING_URL, buildWhatsAppUrl } from "@/lib/site";
+import { buildWhatsAppUrl } from "@/lib/site";
 
-const launchHref = "/launch";
+const reviewHref = "/contact/";
 const whatsappHref = buildWhatsAppUrl(
-  "Hello, I want to ask about website design in 48 hours."
+  "Hello, I want to ask about a website review and the right next step for my website."
 );
 
 export default function BlogInlineCTA({
@@ -29,64 +29,58 @@ export default function BlogInlineCTA({
   return (
     <div
       className={[
-        "rounded-2xl border border-emerald-400/20 bg-emerald-500/10",
+        "rounded-[1.5rem] border border-slate-200 bg-[linear-gradient(180deg,#ffffff_0%,#f7f9ff_100%)] shadow-[0_20px_50px_rgba(15,23,42,0.06)]",
         compact ? "p-5" : "p-6",
       ].join(" ")}
     >
-      <div className="text-xs uppercase tracking-[0.18em] text-emerald-200/90">Launch offer</div>
-      <h3 className={compact ? "mt-2 text-lg font-semibold text-white" : "mt-2 text-2xl font-semibold text-white"}>
-        Need website design in 48 hours?
+      <div className="text-xs uppercase tracking-[0.18em] text-blue-700">Implementation support</div>
+      <h3 className={compact ? "mt-2 text-lg font-semibold text-slate-950" : "mt-2 text-2xl font-semibold text-slate-950"}>
+        Need help turning the strategy into a stronger website?
       </h3>
-      <p className="mt-3 text-sm leading-6 text-white/75">
-        If you need a professional website live fast for Nigeria-based or international clients, the launch offer is built for that exact use case.
+      <p className="mt-3 text-sm leading-6 text-slate-600">
+        If this article helped you spot the real issue, the next step is a website review, service recommendation, or direct implementation plan.
       </p>
-      <p className="mt-3 text-sm leading-6 text-white/72">
-        Explore the full service at{" "}
-        <Link href="/launch" className="font-semibold text-emerald-200 hover:text-emerald-100">
-          website design in 48 hours
+      <p className="mt-3 text-sm leading-6 text-slate-600">
+        Start with a{" "}
+        <Link href="/contact/" className="font-semibold text-blue-700 hover:text-blue-800">
+          Website Review
         </Link>
-        , see how to{" "}
-        <Link href="/launch" className="font-semibold text-emerald-200 hover:text-emerald-100">
-          launch your website in 48 hours
+        , explore the{" "}
+        <Link href="/services/" className="font-semibold text-blue-700 hover:text-blue-800">
+          full service lineup
         </Link>
-        , or review the{" "}
-        <Link href="/launch" className="font-semibold text-emerald-200 hover:text-emerald-100">
-          done-for-you website launch
-        </Link>
-        {" "}details.
+        , or keep learning inside the Academy before you commit.
       </p>
       <div className="mt-5 flex flex-col gap-3 sm:flex-row">
         <TrackedLink
-          href={launchHref}
-          className="inline-flex items-center justify-center rounded-xl bg-emerald-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-600"
-          ctaName="start_your_website"
+          href={reviewHref}
+          className="inline-flex items-center justify-center rounded-xl bg-blue-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-800"
+          ctaName="website_review"
           ctaLocation={ctaLocation}
-          destination={launchHref}
+          destination={reviewHref}
           pageType={pageType}
-          offerType="website_launch"
+          offerType="website_review"
           contentGroup={contentGroup}
           blogSlug={blogSlug}
           blogTitle={blogTitle}
           blogCategory={blogCategory}
         >
-          View Launch Offer
+          Start With a Website Review
         </TrackedLink>
         <TrackedLink
-          href={BOOKING_URL}
-          target={BOOKING_URL.startsWith("http") ? "_blank" : undefined}
-          rel={BOOKING_URL.startsWith("http") ? "noreferrer" : undefined}
-          className="inline-flex items-center justify-center rounded-xl border border-white/15 bg-black/30 px-5 py-3 text-sm font-semibold text-white/90 transition hover:bg-black/50"
-          ctaName="booking"
+          href="/services/"
+          className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-blue-200 hover:text-blue-700"
+          ctaName="view_services"
           ctaLocation={ctaLocation}
-          destination="booking"
+          destination="/services/"
           pageType={pageType}
-          offerType="consultation"
+          offerType="services"
           contentGroup={contentGroup}
           blogSlug={blogSlug}
           blogTitle={blogTitle}
           blogCategory={blogCategory}
         >
-          Book a Call
+          View Services
         </TrackedLink>
       </div>
       <div className="mt-3">
@@ -94,7 +88,7 @@ export default function BlogInlineCTA({
           href={whatsappHref}
           target="_blank"
           rel="noreferrer"
-          className="text-sm font-semibold text-emerald-200 transition hover:text-emerald-100"
+          className="text-sm font-semibold text-blue-700 transition hover:text-blue-800"
           ctaName="whatsapp"
           ctaLocation={ctaLocation}
           destination="whatsapp"

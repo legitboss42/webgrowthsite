@@ -1,17 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import dynamic from "next/dynamic";
-import { useEffect, useState } from "react";
 import TrackedLink from "@/components/analytics/TrackedLink";
-
-const HomeAnimations = dynamic(() => import("@/components/HomeAnimations"), {
-  ssr: false,
-});
-
-const CodeRain = dynamic(() => import("@/components/CodeRain"), {
-  ssr: false,
-});
 
 type HeroSectionProps = {
   eyebrow: string;
@@ -52,13 +42,14 @@ function ActionLink({
   pageType: string;
   offerType?: string;
 }) {
-  const className = primary
-    ? "inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-emerald-700 px-8 py-3 text-base font-semibold text-white shadow-[0_14px_34px_rgba(5,150,105,0.25)] transition-colors hover:bg-emerald-600 sm:w-auto"
-    : "inline-flex min-h-12 w-full items-center justify-center rounded-xl border border-white/25 bg-black/35 px-8 py-3 text-base font-semibold text-white transition-colors hover:border-white/40 hover:bg-black/50 sm:w-auto";
   return (
     <TrackedLink
       href={href}
-      className={className}
+      className={
+        primary
+          ? "inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-[linear-gradient(135deg,#4f6bff_0%,#7c5cff_100%)] px-6 py-3 text-sm font-semibold text-white shadow-[0_18px_38px_rgba(79,107,255,0.24)] transition hover:-translate-y-0.5 hover:brightness-105 sm:w-auto"
+          : "inline-flex min-h-12 w-full items-center justify-center rounded-xl border border-slate-200 bg-white px-6 py-3 text-sm font-semibold text-slate-900 shadow-sm transition hover:-translate-y-0.5 hover:border-blue-200 hover:bg-blue-50 sm:w-auto"
+      }
       target={href.startsWith("http") ? "_blank" : undefined}
       rel={href.startsWith("http") ? "noreferrer" : undefined}
       ctaName={ctaName}
@@ -87,141 +78,79 @@ export default function HeroSection({
   asideItems,
   imageSrc = "/images/hero/Hero-Image-1.webp",
   imageAlt = "Modern business website launch workspace",
-  showCodeRain = false,
-  showHomeAnimations = false,
   pageType = "homepage",
 }: HeroSectionProps) {
-  const [effectsReady, setEffectsReady] = useState(false);
-
-  useEffect(() => {
-    if (!showCodeRain && !showHomeAnimations) return;
-    if (typeof window === "undefined") return;
-
-    const reduceMotion =
-      window.matchMedia &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-    if (reduceMotion) return;
-
-    let cancelled = false;
-    let timeoutId: ReturnType<typeof setTimeout> | null = null;
-    let idleId: number | null = null;
-
-    const enableEffects = () => {
-      if (!cancelled) {
-        setEffectsReady(true);
-      }
-    };
-
-    const schedule = () => {
-      if ("requestIdleCallback" in window) {
-        idleId = window.requestIdleCallback(enableEffects, { timeout: 1800 });
-        return;
-      }
-
-      timeoutId = setTimeout(enableEffects, 900);
-    };
-
-    if (document.readyState === "complete") {
-      schedule();
-    } else {
-      const onLoad = () => schedule();
-      window.addEventListener("load", onLoad, { once: true });
-      return () => {
-        cancelled = true;
-        window.removeEventListener("load", onLoad);
-        if (timeoutId) clearTimeout(timeoutId);
-        if (idleId && "cancelIdleCallback" in window) {
-          window.cancelIdleCallback(idleId);
-        }
-      };
-    }
-
-    return () => {
-      cancelled = true;
-      if (timeoutId) clearTimeout(timeoutId);
-      if (idleId && "cancelIdleCallback" in window) {
-        window.cancelIdleCallback(idleId);
-      }
-    };
-  }, [showCodeRain, showHomeAnimations]);
-
   return (
-    <section className="relative overflow-hidden border-b border-white/10">
-      {showHomeAnimations && effectsReady ? <HomeAnimations /> : null}
+    <section className="relative overflow-hidden border-b border-slate-200 bg-[#f7f8fc]">
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="absolute left-[-10%] top-[-8%] h-72 w-72 rounded-full bg-[radial-gradient(circle,rgba(79,107,255,0.14),transparent_70%)]" />
+        <div className="absolute right-[-12%] top-[4%] h-[28rem] w-[28rem] rounded-full bg-[radial-gradient(circle,rgba(124,92,255,0.12),transparent_72%)]" />
+      </div>
 
-      <Image
-        src={imageSrc}
-        alt={imageAlt}
-        fill
-        priority
-        quality={60}
-        sizes="100vw"
-        className="absolute inset-0 object-cover object-center opacity-55"
-      />
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_22%,rgba(16,185,129,0.18),transparent_42%),radial-gradient(circle_at_85%_0%,rgba(16,185,129,0.09),transparent_34%),linear-gradient(180deg,rgba(5,8,6,0.45)_0%,rgba(7,11,9,0.6)_56%,rgba(5,8,6,0.84)_100%)]" />
-      {showCodeRain && effectsReady ? (
-        <div className="pointer-events-none absolute inset-0 mix-blend-screen opacity-45">
-          <CodeRain />
-        </div>
-      ) : null}
-      <div className="pointer-events-none absolute left-1/2 top-16 h-72 w-72 -translate-x-1/2 rounded-full bg-emerald-400/15 blur-3xl" />
-
-      <div className="relative z-10 mx-auto max-w-6xl px-6 pb-20 pt-14 md:pt-20">
-        <div className="grid gap-8 lg:grid-cols-[1.15fr_0.85fr] lg:items-start">
-          <div className="text-center lg:text-left">
-            <span className="hero-kicker inline-flex rounded-full border border-emerald-400/35 bg-emerald-500/10 px-4 py-2 text-[11px] uppercase tracking-[0.18em] text-emerald-100">
+      <div className="relative z-10 mx-auto max-w-6xl px-5 py-16 sm:px-6 md:py-20">
+        <div className="grid gap-8 lg:grid-cols-[1.06fr_0.94fr] lg:items-start">
+          <div className="max-w-3xl">
+            <span className="inline-flex rounded-full border border-blue-100 bg-white/90 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.18em] text-blue-700 shadow-sm">
               {eyebrow}
             </span>
 
-            <h1 className="hero-title mt-6 max-w-4xl text-balance text-4xl font-semibold leading-[1.02] tracking-[-0.02em] sm:text-5xl md:text-6xl">
+            <h1 className="mt-6 max-w-4xl text-balance text-4xl font-semibold leading-[0.96] tracking-[-0.05em] text-slate-950 sm:text-5xl md:text-6xl">
               {title}
             </h1>
 
-            <p className="hero-copy mx-auto mt-5 max-w-2xl text-lg leading-8 text-white/75 lg:mx-0 lg:text-xl">
+            <p className="mt-5 max-w-2xl text-lg leading-8 text-slate-600 lg:text-xl">
               {description}
             </p>
 
-            <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row lg:justify-start">
-              <div className="hero-cta w-full sm:w-auto">
-                <ActionLink
-                  href={primaryHref}
-                  label={primaryLabel}
-                  primary
-                  ctaName="get_started"
-                  ctaLocation={`${pageType}_hero_primary`}
-                  destination={primaryHref}
-                  pageType={pageType}
-                  offerType="website_launch"
-                />
-              </div>
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <ActionLink
+                href={primaryHref}
+                label={primaryLabel}
+                primary
+                ctaName="get_started"
+                ctaLocation={`${pageType}_hero_primary`}
+                destination={primaryHref}
+                pageType={pageType}
+                offerType="website_growth"
+              />
               <ActionLink
                 href={secondaryHref}
                 label={secondaryLabel}
-                ctaName="launch_offer"
+                ctaName="secondary"
                 ctaLocation={`${pageType}_hero_secondary`}
                 destination={secondaryHref}
                 pageType={pageType}
-                offerType="website_launch"
+                offerType="website_growth"
               />
             </div>
 
-            <p className="hero-meta mt-4 text-sm text-white/65">{trustLine}</p>
+            <p className="mt-4 text-sm text-slate-500">{trustLine}</p>
 
-            <div className="hero-stat relative mt-8 max-w-2xl overflow-hidden rounded-2xl border border-emerald-400/30 bg-[radial-gradient(circle_at_14%_-20%,rgba(16,185,129,0.26),rgba(4,18,14,0.9)_45%,rgba(2,8,7,0.98)_100%)] p-5 text-left shadow-[0_18px_50px_rgba(0,0,0,0.25)]">
-              <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(115deg,rgba(16,185,129,0.08)_0%,transparent_46%,rgba(16,185,129,0.04)_100%)]" />
-              <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:24px_24px] opacity-15" />
-
-              <div className="relative z-10">
-                <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-emerald-200">
-                  [ BEST FIT ]
-                </p>
-                <p className="mt-2 text-sm leading-7 text-white/82">{locationNote}</p>
-                <div className="mt-4 flex flex-wrap gap-2">
+            <div className="mt-8 overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white shadow-[0_18px_48px_rgba(15,23,42,0.08)]">
+              <div className="relative aspect-[16/9]">
+                <Image
+                  src={imageSrc}
+                  alt={imageAlt}
+                  fill
+                  priority
+                  quality={60}
+                  sizes="(max-width: 768px) 100vw, 720px"
+                  className="object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/55 via-slate-950/8 to-transparent" />
+              </div>
+              <div className="grid gap-4 border-t border-slate-200 px-5 py-5 md:grid-cols-[1fr_auto] md:items-center">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-blue-700">
+                    Best fit
+                  </p>
+                  <p className="mt-2 text-sm leading-7 text-slate-600">{locationNote}</p>
+                </div>
+                <div className="flex flex-wrap gap-2">
                   {fitTags.map((tag) => (
                     <span
                       key={tag}
-                      className="rounded-full border border-white/25 bg-black/45 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.12em] text-white/80"
+                      className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.12em] text-slate-500"
                     >
                       {tag}
                     </span>
@@ -231,30 +160,25 @@ export default function HeroSection({
             </div>
           </div>
 
-          <aside className="hero-aside relative overflow-hidden rounded-2xl border border-emerald-400/28 bg-[radial-gradient(circle_at_14%_-20%,rgba(16,185,129,0.24),rgba(4,16,13,0.9)_45%,rgba(2,8,7,0.98)_100%)] p-7 shadow-[0_18px_50px_rgba(0,0,0,0.25)]">
-            <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(115deg,rgba(16,185,129,0.08)_0%,transparent_46%,rgba(16,185,129,0.04)_100%)]" />
-            <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:22px_22px] opacity-15" />
-
-            <p className="relative z-10 font-mono text-[11px] uppercase tracking-[0.2em] text-emerald-200/95">
-              [ {asideTitle} ]
-            </p>
-            <ul className="mt-6 space-y-4">
+          <aside className="overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white shadow-[0_22px_60px_rgba(15,23,42,0.12)]">
+            <div className="border-b border-slate-200 px-6 py-5">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-blue-700">
+                {asideTitle}
+              </p>
+            </div>
+            <div className="grid gap-4 p-6">
               {asideItems.map((item, index) => (
-                <li
+                <div
                   key={item}
-                  className="relative overflow-hidden rounded-xl border border-emerald-400/22 bg-black/35 shadow-[0_10px_24px_rgba(0,0,0,0.2)]"
+                  className="rounded-2xl border border-slate-200 bg-[linear-gradient(180deg,#ffffff_0%,#f8faff_100%)] p-4 shadow-sm"
                 >
-                  <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(115deg,rgba(16,185,129,0.08)_0%,transparent_46%,rgba(16,185,129,0.03)_100%)]" />
-                  <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.015)_1px,transparent_1px)] bg-[size:20px_20px] opacity-15" />
-                  <div className="relative z-10 px-4 py-3">
-                    <span className="inline-flex items-center rounded-md border border-white/20 bg-black/45 px-2 py-1 font-mono text-[11px] font-semibold text-emerald-200/95">
-                      {String(index + 1).padStart(2, "0")}
-                    </span>
-                    <p className="mt-2 text-sm leading-6 text-white/84">{item}</p>
-                  </div>
-                </li>
+                  <span className="inline-flex items-center rounded-full border border-blue-100 bg-blue-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-blue-700">
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
+                  <p className="mt-3 text-sm leading-7 text-slate-600">{item}</p>
+                </div>
               ))}
-            </ul>
+            </div>
           </aside>
         </div>
       </div>

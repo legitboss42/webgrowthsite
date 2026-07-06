@@ -1,144 +1,93 @@
 "use client";
 
 import Link from "next/link";
+import SectionShell from "@/components/home/SectionShell";
+
+const sections = [
+  {
+    title: "What we publish",
+    text: "Web Growth publishes original Academy guides, case studies, service guidance, and implementation-focused website growth resources intended to help business owners make better digital decisions.",
+  },
+  {
+    title: "How content is created",
+    text: "A named author drafts each guide. An editorial reviewer checks scope, clarity, links, claims, and fit with the article's search intent before it is approved for public use.",
+  },
+  {
+    title: "Content standards",
+    text: "Articles must answer a defined reader need, use original explanation, distinguish examples from documented outcomes, and avoid filler, copied passages, keyword stuffing, or unsupported claims.",
+  },
+  {
+    title: "Sources and claims",
+    text: "Platform, policy, and technical claims should link to the relevant first-party documentation where practical. Statistics require an identifiable source. We do not invent customer outcomes, credentials, ratings, or research findings.",
+  },
+  {
+    title: "Review and updates",
+    text: "Publication and review dates are shown on articles where applicable. We update a guide when a platform, process, source, or recommendation has materially changed.",
+  },
+  {
+    title: "Corrections",
+    text: "Confirmed factual errors are corrected promptly. Material corrections are reflected in the page and its review date. A correction request should identify the page, disputed text, and a reliable supporting source.",
+  },
+  {
+    title: "AI assistance",
+    text: "AI tools may assist with outlining, editing, code checks, or research organization. They do not replace editorial review. A human remains accountable for accuracy, originality, source selection, and publication decisions.",
+  },
+  {
+    title: "Advertising and monetization",
+    text: "Any advertising or monetization must remain secondary to usefulness, readability, and trust. Web Growth does not publish made-for-ads content or thin filler pages.",
+  },
+] as const;
 
 export default function EditorialPolicyClient() {
   return (
-    <main className="bg-black text-white">
-      <section className="border-b border-white/10 py-20">
-        <div className="mx-auto max-w-4xl px-6">
-          <p className="text-xs uppercase tracking-[0.2em] text-emerald-300/80">
-            Editorial Policy
-          </p>
-          <h1 className="mt-4 text-4xl font-semibold leading-tight md:text-5xl">
-            How Web Growth plans, writes, reviews, and updates content
-          </h1>
-          <p className="mt-5 max-w-3xl text-lg leading-8 text-white/72">
-            This site publishes practical content about website design, launch
-            strategy, technical SEO, conversion improvement, and digital
-            infrastructure for businesses in Nigeria and international markets.
-            We keep our guidance tied to first-party implementation processes,
-            clearly identified examples, and sources readers can inspect.
-          </p>
+    <main className="bg-[#f7f8fc] text-slate-950">
+      <SectionShell tone="canvas" spacing="hero">
+        <p className="inline-flex rounded-full border border-blue-100 bg-white/92 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.22em] text-blue-700 shadow-sm">
+          Editorial Policy
+        </p>
+        <h1 className="mt-5 max-w-4xl text-balance text-[3.6rem] font-semibold leading-[0.9] tracking-[-0.07em] text-slate-950 md:text-[4.6rem]">
+          How Web Growth plans, writes, reviews, updates, and stands behind Academy content.
+        </h1>
+        <p className="mt-4 max-w-3xl text-lg leading-8 text-slate-600">
+          The platform publishes practical content about website design, launch
+          strategy, technical SEO, conversion improvement, and digital
+          infrastructure. The editorial process is built for usefulness, trust, and
+          accountability.
+        </p>
+      </SectionShell>
+
+      <SectionShell tone="white" spacing="compact">
+        <div className="grid gap-5 md:grid-cols-2">
+          {sections.map((section) => (
+            <article key={section.title} className="rounded-[1.45rem] border border-slate-200 bg-white p-5 shadow-[0_14px_30px_rgba(15,23,42,0.04)]">
+              <h2 className="text-[1.2rem] font-semibold tracking-[-0.03em] text-slate-950">
+                {section.title}
+              </h2>
+              <p className="mt-4 text-sm leading-7 text-slate-600">{section.text}</p>
+            </article>
+          ))}
         </div>
-      </section>
+      </SectionShell>
 
-      <section className="py-16">
-        <div className="mx-auto max-w-4xl px-6">
-          <div className="grid gap-6 md:grid-cols-2">
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
-              <h2 className="text-xl font-semibold text-white">
-                What we publish
-              </h2>
-              <p className="mt-3 text-white/72 leading-7">
-                We publish original articles, case studies, service guidance,
-                and website launch resources intended to help business owners
-                make better digital decisions.
-              </p>
-            </div>
-
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
-              <h2 className="text-xl font-semibold text-white">
-                How content is created
-              </h2>
-              <p className="mt-3 text-white/72 leading-7">
-                A named author drafts each guide. An editorial reviewer checks
-                its scope, instructions, links, claims, and fit with the stated
-                search intent before it is approved for the public blog.
-              </p>
-            </div>
-
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
-              <h2 className="text-xl font-semibold text-white">
-                How content is updated
-              </h2>
-              <p className="mt-3 text-white/72 leading-7">
-                Publication and review dates are shown on articles. We update a
-                guide when a platform, process, source, or recommendation has
-                materially changed. Minor formatting edits do not receive a
-                new substantive review date.
-              </p>
-            </div>
-
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
-              <h2 className="text-xl font-semibold text-white">
-                Advertising and monetization
-              </h2>
-              <p className="mt-3 text-white/72 leading-7">
-                Our primary focus is publishing useful first-party content and
-                showcasing our services. Any advertising or monetization must
-                remain secondary to user experience, clarity, and content
-                quality.
-              </p>
-            </div>
-          </div>
-
-          <div className="mt-8 grid gap-6 md:grid-cols-2">
-            <section className="rounded-2xl border border-white/10 bg-white/5 p-6">
-              <h2 className="text-xl font-semibold text-white">Content standards</h2>
-              <p className="mt-3 leading-7 text-white/72">
-                Articles must answer a defined reader need, use original
-                explanations, distinguish examples from documented results,
-                and avoid filler, copied passages, keyword stuffing, or claims
-                the author cannot support.
-              </p>
-            </section>
-
-            <section className="rounded-2xl border border-white/10 bg-white/5 p-6">
-              <h2 className="text-xl font-semibold text-white">Sources and claims</h2>
-              <p className="mt-3 leading-7 text-white/72">
-                Product, policy, and technical claims should link to the
-                relevant first-party documentation where practical. Statistics
-                require an identifiable source. We do not invent customer
-                outcomes, credentials, ratings, or research findings.
-              </p>
-            </section>
-
-            <section className="rounded-2xl border border-white/10 bg-white/5 p-6">
-              <h2 className="text-xl font-semibold text-white">AI assistance</h2>
-              <p className="mt-3 leading-7 text-white/72">
-                AI tools may assist with outlining, editing, code checks, or
-                research organization. They do not replace editorial review.
-                A human remains accountable for accuracy, originality, source
-                selection, and the decision to publish.
-              </p>
-            </section>
-
-            <section className="rounded-2xl border border-white/10 bg-white/5 p-6">
-              <h2 className="text-xl font-semibold text-white">Corrections</h2>
-              <p className="mt-3 leading-7 text-white/72">
-                Confirmed factual errors are corrected promptly. Material
-                corrections are reflected in the article and its review date.
-                A correction request should identify the page, disputed text,
-                and a reliable supporting source.
-              </p>
-            </section>
-          </div>
-
-          <div className="mt-8 rounded-2xl border border-white/10 bg-white/5 p-6">
-            <h2 className="text-xl font-semibold text-white">Accountability and contact</h2>
-            <p className="mt-3 text-white/72 leading-7">
-              Web Growth is responsible for the content published on this
-              domain. If you find an error, need clarification, or want to
-              request a correction, contact us at{" "}
-              <a
-                href="mailto:admin@webgrowth.info"
-                className="text-emerald-300 transition hover:text-emerald-200"
-              >
-                admin@webgrowth.info
-              </a>
-              . For project enquiries, you can also use our{" "}
-              <Link
-                href="/contact"
-                className="text-emerald-300 transition hover:text-emerald-200"
-              >
-                contact page
-              </Link>
-              .
-            </p>
-          </div>
-        </div>
-      </section>
+      <SectionShell tone="canvas" spacing="compact">
+        <article className="rounded-[1.45rem] border border-slate-200 bg-white p-6 shadow-[0_14px_30px_rgba(15,23,42,0.04)]">
+          <h2 className="text-[1.2rem] font-semibold tracking-[-0.03em] text-slate-950">
+            Accountability and contact
+          </h2>
+          <p className="mt-4 text-sm leading-7 text-slate-600">
+            If you find an error, need clarification, or want to request a correction,
+            contact{" "}
+            <a href="mailto:admin@webgrowth.info" className="font-medium text-blue-700 hover:text-blue-800">
+              admin@webgrowth.info
+            </a>
+            . For project enquiries, use the{" "}
+            <Link href="/contact/" className="font-medium text-blue-700 hover:text-blue-800">
+              contact page
+            </Link>
+            .
+          </p>
+        </article>
+      </SectionShell>
     </main>
   );
 }

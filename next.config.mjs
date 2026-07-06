@@ -54,16 +54,19 @@ const nextConfig = {
   experimental: {
     cpus: 1,
   },
-  // Keep Vercel builds on the default `.next` output so deployment manifests resolve.
-  // Optional local override: WEBGROWTH_ALT_DISTDIR=1
-  distDir:
-    process.env.VERCEL === "1"
-      ? ".next"
-      : process.env.WEBGROWTH_ALT_DISTDIR === "1"
-        ? ".next-webgrowth"
-        : ".next",
+  // Use the default `.next` output. Cleaning is handled explicitly through `dev:clean`.
+  distDir: ".next",
   images: {
     qualities: [60, 65, 68, 75],
+  },
+  webpack(config, { dev }) {
+    if (dev) {
+      // Disable webpack filesystem cache in local dev on Windows.
+      // This avoids recurring ENOENT pack.gz cache corruption/noise in `.next/cache`.
+      config.cache = false;
+    }
+
+    return config;
   },
   async headers() {
     return [

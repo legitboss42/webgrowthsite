@@ -6,7 +6,7 @@ const pageDescription =
   "Explore selected Web Growth website projects featuring real responsive screenshots, redesign work, ecommerce builds, landing pages, and product-focused interfaces.";
 
 export const metadata = buildPageMetadata({
-  title: "Next.js Web Design Portfolio | Web Growth",
+  title: "Website Case Studies | Web Growth",
   description: pageDescription,
   path: "/portfolio",
   keywords: [

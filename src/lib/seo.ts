@@ -65,12 +65,13 @@ export function buildPageMetadata({
 }
 
 export function buildProfessionalServiceSchema(path: string, description: string) {
+  const pageUrl = absoluteUrl(path);
   return {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    "@id": absoluteUrl(path),
+    "@id": pageUrl,
     name: SITE_NAME,
-    url: absoluteUrl(path),
+    url: pageUrl,
     description,
     isPartOf: {
       "@id": `${SITE_URL}#website`,
@@ -138,17 +139,19 @@ export function buildArticleSchema({
   authorUrl?: string;
   reviewedByName?: string;
 }) {
+  const canonicalUrl = absoluteUrl(url);
+
   return {
     "@context": "https://schema.org",
     "@type": "BlogPosting",
-    "@id": `${url}#article`,
+    "@id": `${canonicalUrl}#article`,
     headline: title,
-    url,
+    url: canonicalUrl,
     description,
     datePublished,
     mainEntityOfPage: {
       "@type": "WebPage",
-      "@id": url,
+      "@id": canonicalUrl,
     },
     author: {
       "@type": "Person",
@@ -176,6 +179,8 @@ export function buildArticleSchema({
 }
 
 export function buildPersonSchema(author: AuthorProfile) {
+  const profileUrl = absoluteUrl(author.profileUrl || "/about");
+
   return {
     "@context": "https://schema.org",
     "@type": "Person",
@@ -183,7 +188,7 @@ export function buildPersonSchema(author: AuthorProfile) {
     name: author.name,
     jobTitle: author.role,
     description: author.bio,
-    url: author.profileUrl || `${SITE_URL}/about`,
+    url: profileUrl,
     knowsAbout: author.expertise,
     image: author.image ? absoluteUrl(author.image) : absoluteUrl(DEFAULT_OG_IMAGE),
     worksFor: {
@@ -202,7 +207,7 @@ export function buildOrganizationSchema() {
     alternateName: "WebGrowth",
     url: SITE_URL,
     description:
-      "A premium web design agency specializing in high-performance, custom Next.js websites.",
+      "Web Growth is a premium website growth platform that helps businesses build stronger websites, grow qualified traffic, and monetize digital presence responsibly.",
     logo: {
       "@type": "ImageObject",
       url: absoluteUrl("/images/brand/web-growth-logo.webp"),
@@ -211,9 +216,9 @@ export function buildOrganizationSchema() {
     email: CONTACT_EMAIL,
     telephone: BUSINESS_PHONE_DISPLAY,
     serviceType: [
-      "High-performance web design",
-      "Custom Next.js website development",
-      "Technical SEO-ready website builds",
+      "Business website design",
+      "Website redesign and conversion improvement",
+      "SEO, analytics, and website growth strategy",
     ],
     areaServed: [
       {
@@ -246,12 +251,13 @@ export function buildWebsiteSchema() {
     "@id": `${SITE_URL}#website`,
     name: SITE_NAME,
     url: SITE_URL,
+    description: DEFAULT_DESCRIPTION,
     publisher: {
       "@id": `${SITE_URL}#professional-service`,
     },
     potentialAction: {
       "@type": "ContactAction",
-      target: `${SITE_URL}/contact`,
+      target: absoluteUrl("/contact"),
     },
   };
 }
@@ -287,9 +293,9 @@ export function buildBlogCollectionSchema(
     "@type": "Blog",
     "@id": `${blogUrl}#blog`,
     url: blogUrl,
-    name: `${SITE_NAME} Blog`,
+    name: `${SITE_NAME} Academy`,
     description:
-      "Website launch, SEO, conversion, and growth guides for small businesses.",
+      "Academy resources covering SEO, AdSense readiness, website strategy, conversion improvement, and website growth systems.",
     publisher: {
       "@id": `${SITE_URL}#professional-service`,
     },

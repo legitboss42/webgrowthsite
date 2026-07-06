@@ -4,19 +4,19 @@ import Link from "next/link";
 
 export default function RelatedServiceCTA() {
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/5 p-7">
-      <div className="text-xs uppercase tracking-[0.18em] text-emerald-200/90">Related service</div>
-      <h3 className="mt-3 text-xl font-semibold text-white">
-        Website design in 48 hours for businesses that need to go live fast
+    <div className="rounded-[24px] border border-slate-200 bg-white p-7 shadow-[0_18px_50px_rgba(15,23,42,0.07)]">
+      <div className="text-xs uppercase tracking-[0.18em] text-blue-700">Related service</div>
+      <h3 className="mt-3 text-xl font-semibold tracking-[-0.03em] text-slate-950">
+        Get a website review before you invest in the wrong fix.
       </h3>
-      <p className="mt-3 text-sm leading-6 text-white/72">
-        The 48-hour launch offer is built for businesses that need a clean, mobile-first site live fast with pricing, CTA flow, and basic SEO already handled.
+      <p className="mt-3 text-sm leading-7 text-slate-600">
+        If your site needs a clearer plan around structure, content, UX, SEO, or conversion flow, a website review is the best starting point.
       </p>
       <Link
-        href="/launch"
-        className="mt-5 inline-flex items-center rounded-xl bg-emerald-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-600"
+        href="/services/website-audit/"
+        className="mt-5 inline-flex items-center rounded-xl bg-[linear-gradient(135deg,#4f6bff_0%,#7c5cff_100%)] px-5 py-3 text-sm font-semibold text-white shadow-[0_16px_32px_rgba(79,107,255,0.22)] transition hover:brightness-105"
       >
-        See the done-for-you website launch
+        Review the website audit service
       </Link>
     </div>
   );

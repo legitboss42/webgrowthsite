@@ -2,7 +2,7 @@ export const SITE_NAME = "Web Growth";
 export const SITE_URL = "https://webgrowth.info";
 export const DEFAULT_OG_IMAGE = "/images/hero/Hero-Image-1.webp";
 export const DEFAULT_DESCRIPTION =
-  "Web Growth builds websites for Lagos service businesses that want to look more credible, work better on mobile, and get more enquiries.";
+  "Web Growth is a premium website growth platform focused on building better websites, growing search traffic, improving conversions, and monetizing digital presence responsibly.";
 export const PRIMARY_KEYWORD = "website design lagos";
 export const CONTACT_EMAIL = "Admin@webgrowth.info";
 export const CONTACT_EMAIL_HREF = "mailto:admin@webgrowth.info";

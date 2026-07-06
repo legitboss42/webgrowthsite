@@ -14,6 +14,7 @@ const config = [
   {
     ignores: [
       ".next/**",
+      ".next-webgrowth/**",
       "out/**",
       "build/**",
       "next-env.d.ts",

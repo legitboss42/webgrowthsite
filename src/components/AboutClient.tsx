@@ -1,534 +1,236 @@
-"use client";
-
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useRef } from "react";
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import CTASection from "@/components/CTASection";
-import FAQAccordion from "@/components/FAQAccordion";
+import {
+  BuildIcon,
+  GrowthChartIcon,
+  IconBadge,
+  MonetizeIcon,
+  SearchIcon,
+} from "@/components/home/HomeIcons";
+import SectionShell from "@/components/home/SectionShell";
 
-const customCodeWins = [
+const principles = [
   {
-    title: "Faster by default",
-    text: "Custom-coded Next.js websites avoid the drag created by heavy themes, unnecessary plugins, and builder clutter that slow serious brands down.",
+    title: "Clarity before decoration",
+    text: "Every page should make the offer, proof, and next step easier to understand.",
+    icon: <BuildIcon />,
   },
   {
-    title: "Built to scale cleanly",
-    text: "When the business needs more pages, better SEO, deeper integrations, or a refined conversion flow, the codebase is easier to extend without becoming messy.",
-  },
-  {
-    title: "Cleaner UX control",
-    text: "Custom architecture gives tighter control over hierarchy, motion, booking flow, and mobile behaviour so the site feels more deliberate from the first click.",
-  },
-  {
-    title: "Stronger conversion foundations",
-    text: "The structure is engineered around clarity, trust, and action, not just visual decoration. That matters when the website is supposed to help revenue, not just exist.",
-  },
-] as const;
-
-const whatWeDo = [
-  "Custom-coded Next.js website builds and redesigns for service and ecommerce brands.",
-  "Conversion-focused structure, copy hierarchy, and UX flow decisions.",
-  "Performance, technical SEO foundations, and launch readiness implementation.",
-  "Founder-led delivery with direct strategy-to-build continuity.",
-] as const;
-
-const whatWeDoNot = [
-  "Mass template deployments across unrelated niches.",
-  "Cheap, rushed builds optimized only for low upfront cost.",
-  "Vanity redesigns with no business objective or conversion focus.",
-  "Long retainers without clear scope and measurable output.",
-] as const;
-
-const methodology = [
-  {
-    title: "Clarity",
-    text: "We define the exact offer and page hierarchy so serious buyers understand your business fast.",
-  },
-  {
-    title: "Conversion path",
-    text: "We map intentional next steps so visitors move from interest to enquiry or purchase with less friction.",
-  },
-  {
-    title: "Performance",
-    text: "We treat speed and mobile experience as commercial factors, not optional polish.",
-  },
-  {
-    title: "Launch readiness",
-    text: "We QA the build before go-live so technical issues do not sabotage first impressions.",
-  },
-  {
-    title: "Scalable codebase",
-    text: "We structure the build to support future SEO, service expansion, and integrations cleanly.",
-  },
-] as const;
-
-const reviewStandards = [
-  "Every page is reviewed for message clarity before visual polishing.",
-  "CTA paths are checked for friction across desktop and mobile states.",
-  "Performance, metadata, and technical hygiene are reviewed before launch.",
-  "Content quality follows an editorial standard: practical, specific, and commercially useful.",
-] as const;
-
-const proofLinks = [
-  {
-    href: "/portfolio",
-    title: "Portfolio",
-    text: "See executed client work and build quality.",
-  },
-  {
-    href: "/blog/jluxe-medical-aesthetics-case-study",
-    title: "Case Study",
-    text: "Review a practical project breakdown and outcomes.",
-  },
-  {
-    href: "/services",
-    title: "Service System",
-    text: "Understand scope depth, deliverables, and process logic.",
-  },
-] as const;
-
-const bestFitClients = [
-  {
-    title: "High-ticket clinics",
-    text: "Clinics that need a stronger first impression, cleaner treatment journeys, and a website that looks as premium as the service being sold.",
-  },
-  {
-    title: "Medical aesthetics brands",
-    text: "Aesthetic businesses that rely on trust, clarity, and a polished presentation before colder traffic will take the next step.",
-  },
-  {
-    title: "Premium e-commerce brands",
-    text: "Stores that need a faster storefront, stronger product hierarchy, and a shopping experience that feels cleaner and easier to buy from.",
-  },
-  {
-    title: "Quality-focused businesses",
-    text: "Businesses with real growth intent that understand a weak website drags down paid traffic, SEO, referrals, and brand perception.",
-  },
-] as const;
-
-const coreValues = [
-  {
-    title: "Precision",
-    text: "Every page should have a job. Every section should earn its place. Every technical choice should support the business, not inflate the build.",
-  },
-  {
-    title: "Performance",
-    text: "Fast-loading pages, cleaner code decisions, and mobile-first execution are treated as part of the product, not an optional extra.",
-  },
-  {
-    title: "Clarity",
-    text: "If buyers cannot quickly understand the offer, the website is already losing. Copy, structure, and hierarchy are shaped to remove that friction.",
-  },
-  {
-    title: "Trust",
-    text: "Premium brands need websites that feel credible the moment they load. Visual quality and technical quality both matter here.",
+    title: "Performance as trust",
+    text: "Speed, mobile quality, and technical stability are part of perceived brand value.",
+    icon: <SearchIcon />,
   },
   {
     title: "Business-first execution",
-    text: "The objective is not to impress other designers. It is to help a real business convert traffic, support growth, and look stronger online.",
+    text: "The website should help generate enquiries, support SEO, and improve revenue potential.",
+    icon: <GrowthChartIcon />,
+  },
+  {
+    title: "Premium through discipline",
+    text: "Polish comes from better hierarchy, structure, and implementation choices, not noise.",
+    icon: <MonetizeIcon />,
   },
 ] as const;
 
-const faqs = [
-  {
-    question: "Who do I actually work with?",
-    answer:
-      "You work directly with Victor Chinukwue. Strategy, design, and development stay in one workflow instead of being handed between separate teams.",
-  },
-  {
-    question: "Why does Web Growth focus on custom-coded websites?",
-    answer:
-      "Because serious brands usually need better speed, cleaner UX control, and a more scalable technical foundation than page builders tend to provide.",
-  },
-  {
-    question: "Which businesses are the best fit?",
-    answer:
-      "High-end service businesses, medical aesthetics clinics, premium local brands, and ambitious e-commerce businesses are the strongest fit.",
-  },
-  {
-    question: "What matters most in the work?",
-    answer:
-      "Performance, clarity, trust, and conversion support. The website needs to help the business win, not just sit online looking acceptable.",
-  },
+const fitItems = [
+  "Premium service businesses that need stronger trust and presentation",
+  "Founders replacing a weak brochure site with a growth asset",
+  "Local or national brands preparing for better SEO and conversion support",
+  "Businesses that value senior-led implementation over cheap generic delivery",
 ] as const;
 
 export default function AboutClient() {
-  const pageRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    gsap.registerPlugin(ScrollTrigger);
-
-    const root = pageRef.current;
-    if (!root) return;
-
-    const reduceMotion =
-      typeof window !== "undefined" &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-    if (reduceMotion) return;
-
-    const ctx = gsap.context(() => {
-      gsap.fromTo(
-        "[data-about-hero]",
-        { opacity: 0, y: 36, filter: "blur(10px)" },
-        { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.9, ease: "power3.out" }
-      );
-
-      gsap.utils.toArray<HTMLElement>("[data-reveal]").forEach((section) => {
-        gsap.fromTo(
-          section,
-          { opacity: 0, y: 54, filter: "blur(8px)" },
-          {
-            opacity: 1,
-            y: 0,
-            filter: "blur(0px)",
-            duration: 0.85,
-            ease: "power3.out",
-            scrollTrigger: {
-              trigger: section,
-              start: "top 76%",
-            },
-          }
-        );
-      });
-    }, root);
-
-    ScrollTrigger.refresh();
-    return () => ctx.revert();
-  }, []);
-
   return (
-    <div ref={pageRef} className="bg-black text-white">
-      <section className="relative overflow-hidden border-b border-white/10 py-24 md:py-28">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(16,185,129,0.18),transparent_55%)]" />
-        <div className="mx-auto grid max-w-6xl gap-12 px-6 md:grid-cols-[1.05fr_0.95fr] md:items-center">
-          <div data-about-hero className="relative z-10">
-            <p className="text-sm uppercase tracking-[0.25em] text-emerald-300/80">
-              Founder intro
+    <main className="bg-[#f7f8fc] text-slate-950">
+      <SectionShell tone="canvas" spacing="hero" className="relative overflow-hidden">
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-full">
+          <div className="absolute left-[-10%] top-[-6%] h-72 w-72 rounded-full bg-[radial-gradient(circle,rgba(79,107,255,0.12),transparent_70%)]" />
+          <div className="absolute right-[-8%] top-[4%] h-[25rem] w-[25rem] rounded-full bg-[radial-gradient(circle,rgba(124,92,255,0.12),transparent_70%)]" />
+        </div>
+
+        <div className="relative grid gap-8 lg:grid-cols-[0.84fr_1.16fr] lg:items-center">
+          <div>
+            <p className="inline-flex rounded-full border border-blue-100 bg-white/92 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.22em] text-blue-700 shadow-sm">
+              About Web Growth
             </p>
-            <h1 className="mt-4 max-w-3xl text-4xl font-semibold leading-tight tracking-[-0.03em] md:text-6xl">
-              Web Growth is the technical partner serious brands hire when generic websites are no longer acceptable
+            <h1 className="mt-5 max-w-[34rem] text-balance text-[3.9rem] font-semibold leading-[0.9] tracking-[-0.07em] text-slate-950 md:text-[5rem]">
+              A premium website growth platform built around clarity, performance, and revenue support.
             </h1>
-            <p className="mt-6 max-w-2xl text-lg leading-8 text-white/72">
-              I&apos;m Victor Chinukwue, founder of Web Growth. I build custom-coded
-              websites for businesses that need stronger performance, better
-              conversion foundations, and a more premium digital presence than a
-              typical page builder setup can deliver.
+            <p className="mt-4 max-w-[33rem] text-lg leading-8 text-slate-600">
+              Web Growth is led by Victor Chinukwue and built for businesses that need
+              more than a generic website. The goal is to create digital experiences
+              that support stronger trust, better search performance, clearer
+              conversion flow, and long-term monetization.
             </p>
-
-            <div className="mt-8 flex flex-wrap gap-3 text-sm text-white/72">
-              <span className="rounded-full border border-white/10 bg-black/35 px-4 py-2">
-                Founder-led
-              </span>
-              <span className="rounded-full border border-white/10 bg-black/35 px-4 py-2">
-                Custom-coded
-              </span>
-              <span className="rounded-full border border-white/10 bg-black/35 px-4 py-2">
-                Same-day response in most cases
-              </span>
-            </div>
-
-            <div className="mt-10 flex flex-col gap-3 sm:flex-row">
+            <div className="mt-7 flex flex-col gap-3 sm:flex-row">
               <Link
-                href="/contact"
-                className="inline-flex min-h-12 items-center justify-center rounded-xl bg-emerald-700 px-7 py-3 text-sm font-semibold text-white transition hover:bg-emerald-600"
+                href="/contact/"
+                className="inline-flex min-h-12 items-center justify-center rounded-xl bg-[linear-gradient(135deg,#3557ff_0%,#4f6bff_45%,#7c5cff_100%)] px-6 text-sm font-semibold text-white shadow-[0_16px_34px_rgba(79,107,255,0.28)] transition hover:brightness-105"
               >
-                Request a Premium Website Quote
+                Request a Website Review
               </Link>
               <Link
-                href="/portfolio"
-                className="inline-flex min-h-12 items-center justify-center rounded-xl border border-white/15 bg-black/30 px-7 py-3 text-sm font-semibold text-white/90 transition hover:bg-black/50"
+                href="/services/"
+                className="inline-flex min-h-12 items-center justify-center rounded-xl border border-blue-200 bg-white px-6 text-sm font-semibold text-blue-800 transition hover:border-blue-300 hover:bg-blue-50"
               >
-                Review the Portfolio
+                View Services
               </Link>
             </div>
           </div>
 
-          <div data-about-hero className="relative z-10">
-            <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-black/40 shadow-[0_20px_50px_rgba(0,0,0,0.26)]">
-              <div className="relative aspect-[4/4.6]">
+          <div className="relative">
+            <div className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-[0_24px_70px_rgba(15,23,42,0.12)]">
+              <div className="relative aspect-[4/4.5]">
                 <Image
                   src="/images/about/about-hero.webp"
                   alt="Founder visual for Web Growth"
                   fill
                   priority
+                  className="object-cover"
                   sizes="(max-width: 768px) 100vw, 40vw"
-                  className="object-cover object-center"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/35 to-black/5" />
-              </div>
-
-              <div className="absolute inset-x-4 bottom-4 rounded-2xl border border-white/10 bg-black/60 p-5 backdrop-blur-xl">
-                <p className="text-xs uppercase tracking-[0.16em] text-emerald-200/90">
-                  Technical partner
-                </p>
-                <p className="mt-3 text-sm leading-7 text-white/76">
-                  The work stays close to the business problem: stronger speed,
-                  sharper positioning, cleaner UX, and a site that looks expensive
-                  for the right reasons.
-                </p>
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-slate-950/10 to-transparent" />
               </div>
             </div>
           </div>
         </div>
-      </section>
+      </SectionShell>
 
-      <section data-reveal className="border-b border-white/10 bg-black py-20">
-        <div className="mx-auto max-w-6xl px-6">
-          <p className="text-xs uppercase tracking-[0.2em] text-emerald-300/80">
-            Scope clarity
-          </p>
-          <h2 className="mt-4 text-3xl font-semibold leading-tight tracking-[-0.02em] md:text-5xl">
-            What Web Growth does and does not do
-          </h2>
-          <div className="mt-10 grid gap-6 md:grid-cols-2">
-            <article className="rounded-2xl border border-emerald-400/24 bg-emerald-500/10 p-6">
-              <h3 className="text-xl font-semibold text-white">What we do</h3>
-              <ul className="mt-4 space-y-2 text-sm leading-7 text-white/78">
-                {whatWeDo.map((item) => (
-                  <li key={item} className="flex gap-2">
-                    <span className="mt-[10px] h-2 w-2 rounded-full bg-emerald-300/90" />
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </article>
-            <article className="rounded-2xl border border-white/10 bg-black/35 p-6">
-              <h3 className="text-xl font-semibold text-white">What we do not do</h3>
-              <ul className="mt-4 space-y-2 text-sm leading-7 text-white/74">
-                {whatWeDoNot.map((item) => (
-                  <li key={item} className="flex gap-2">
-                    <span className="mt-[10px] h-2 w-2 rounded-full bg-white/65" />
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </article>
-          </div>
-        </div>
-      </section>
-
-      <section data-reveal className="border-b border-white/10 bg-[#060907] py-20">
-        <div className="mx-auto max-w-6xl px-6">
-          <p className="text-xs uppercase tracking-[0.2em] text-emerald-300/80">
-            Methodology
-          </p>
-          <h2 className="mt-4 text-3xl font-semibold leading-tight tracking-[-0.02em] md:text-5xl">
-            How delivery is reviewed before launch
-          </h2>
-          <div className="mt-10 grid gap-6 md:grid-cols-5">
-            {methodology.map((item) => (
-              <article key={item.title} className="rounded-2xl border border-white/10 bg-black/35 p-5">
-                <h3 className="text-base font-semibold text-white">{item.title}</h3>
-                <p className="mt-3 text-sm leading-7 text-white/72">{item.text}</p>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section data-reveal className="border-b border-white/10 bg-[#060907] py-24">
-        <div className="mx-auto grid max-w-6xl gap-10 px-6 md:grid-cols-[1.05fr_0.95fr] md:items-start">
-          <div>
-            <p className="text-xs uppercase tracking-[0.2em] text-emerald-300/80">
-              Why custom code wins
+      <SectionShell tone="white" spacing="compact">
+        <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
+          <article className="rounded-[1.55rem] border border-slate-200 bg-white p-6 shadow-[0_18px_36px_rgba(15,23,42,0.05)]">
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-blue-700">
+              Direct answer
             </p>
-            <h2 className="mt-4 text-3xl font-semibold leading-tight tracking-[-0.02em] md:text-5xl">
-              Serious brands usually outgrow page builders before they realize how much they are costing them
+            <h2 className="mt-4 text-4xl font-semibold tracking-[-0.05em] text-slate-950">
+              What is Web Growth?
             </h2>
-            <div className="mt-8 space-y-4 text-base leading-8 text-white/72">
-              <p>
-                When the website has to carry paid traffic, organic search,
-                bookings, product discovery, or high-ticket enquiries, the build
-                quality matters. Cheap setups tend to feel fine until speed, trust,
-                or flexibility start costing the business money.
-              </p>
-              <p>
-                That is why Web Growth leans into custom-coded architecture. The
-                point is cleaner performance, tighter UX control, and a stronger
-                long-term foundation for SEO, integrations, redesigns, and scale.
-              </p>
-              <p>
-                It is not custom code for its own sake. It is custom code because
-                serious brands need better technical leverage than a generic website
-                can usually provide.
-              </p>
+            <p className="mt-4 text-base leading-8 text-slate-600">
+              Web Growth is a premium website growth platform. It combines services,
+              Academy content, case studies, and practical tools to help businesses
+              build stronger websites, grow qualified traffic, and monetize digital
+              attention more responsibly.
+            </p>
+          </article>
+
+          <article className="rounded-[1.55rem] border border-slate-200 bg-slate-50 p-6 shadow-[0_18px_36px_rgba(15,23,42,0.04)]">
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-blue-700">
+              Trust surfaces
+            </p>
+            <div className="mt-5 grid gap-3 sm:grid-cols-2">
+              <Link href="/editorial-policy/" className="rounded-[1.1rem] border border-slate-200 bg-white px-4 py-4 transition hover:border-blue-200">
+                <h3 className="text-sm font-semibold text-slate-950">Editorial Policy</h3>
+                <p className="mt-2 text-sm leading-6 text-slate-600">See how Academy content is planned, reviewed, updated, and corrected.</p>
+              </Link>
+              <Link href="/disclaimer/" className="rounded-[1.1rem] border border-slate-200 bg-white px-4 py-4 transition hover:border-blue-200">
+                <h3 className="text-sm font-semibold text-slate-950">Disclaimer</h3>
+                <p className="mt-2 text-sm leading-6 text-slate-600">Understand the limits around results claims, platform advice, and examples.</p>
+              </Link>
+              <Link href="/services/" className="rounded-[1.1rem] border border-slate-200 bg-white px-4 py-4 transition hover:border-blue-200">
+                <h3 className="text-sm font-semibold text-slate-950">Services</h3>
+                <p className="mt-2 text-sm leading-6 text-slate-600">Explore implementation support across design, SEO, performance, and growth systems.</p>
+              </Link>
+              <Link href="/blog/" className="rounded-[1.1rem] border border-slate-200 bg-white px-4 py-4 transition hover:border-blue-200">
+                <h3 className="text-sm font-semibold text-slate-950">Academy</h3>
+                <p className="mt-2 text-sm leading-6 text-slate-600">Use practical guides if you want to understand the thinking before you invest.</p>
+              </Link>
             </div>
-          </div>
-
-          <div className="grid gap-4">
-            {customCodeWins.map((item) => (
-              <article
-                key={item.title}
-                className="rounded-2xl border border-emerald-400/20 bg-[radial-gradient(circle_at_16%_-10%,rgba(16,185,129,0.18),rgba(3,14,11,0.94)_46%,rgba(2,8,7,0.98)_100%)] p-6 shadow-[0_18px_40px_rgba(0,0,0,0.24)]"
-              >
-                <h3 className="text-xl font-semibold text-white">{item.title}</h3>
-                <p className="mt-3 text-sm leading-7 text-white/76">{item.text}</p>
-              </article>
-            ))}
-          </div>
+          </article>
         </div>
-      </section>
+      </SectionShell>
 
-      <section data-reveal className="border-b border-white/10 bg-black py-20">
-        <div className="mx-auto max-w-6xl px-6">
-          <p className="text-xs uppercase tracking-[0.2em] text-emerald-300/80">
-            Review standard
-          </p>
-          <h2 className="mt-4 text-3xl font-semibold leading-tight tracking-[-0.02em] md:text-5xl">
-            How work is reviewed before delivery
-          </h2>
-          <div className="mt-8 rounded-2xl border border-white/10 bg-black/35 p-6">
-            <ul className="space-y-2 text-sm leading-7 text-white/74">
-              {reviewStandards.map((item) => (
-                <li key={item} className="flex gap-2">
-                  <span className="mt-[10px] h-2 w-2 rounded-full bg-emerald-400/80" />
+      <SectionShell tone="white" spacing="compact">
+        <div className="grid gap-6 lg:grid-cols-2">
+          <article className="rounded-[1.55rem] border border-slate-200 bg-white p-6 shadow-[0_18px_36px_rgba(15,23,42,0.05)]">
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-blue-700">
+              What Web Growth does
+            </p>
+            <p className="mt-4 text-lg leading-8 text-slate-600">
+              Web Growth combines premium website services, Academy-led education,
+              future tools, and proof-driven case studies into one platform designed
+              to help businesses build better websites, grow search traffic, and
+              monetize more effectively.
+            </p>
+          </article>
+          <article className="rounded-[1.55rem] border border-slate-200 bg-white p-6 shadow-[0_18px_36px_rgba(15,23,42,0.05)]">
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-blue-700">
+              What Web Growth is not
+            </p>
+            <p className="mt-4 text-lg leading-8 text-slate-600">
+              It is not a cheap template shop, a made-for-ads content site, or a
+              generic freelancer brochure. The platform is designed around trust,
+              performance, and practical implementation.
+            </p>
+          </article>
+        </div>
+      </SectionShell>
+
+      <SectionShell tone="canvas" spacing="compact">
+        <p className="text-xs font-bold uppercase tracking-[0.18em] text-blue-700">
+          Operating principles
+        </p>
+        <h2 className="mt-4 text-4xl font-semibold tracking-[-0.05em] text-slate-950">
+          The standards behind the platform
+        </h2>
+        <div className="mt-8 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+          {principles.map((item) => (
+            <article key={item.title} className="rounded-[1.4rem] border border-slate-200 bg-white p-5 shadow-[0_14px_30px_rgba(15,23,42,0.04)]">
+              <IconBadge tone="blue" className="h-11 w-11 rounded-[1rem]">
+                {item.icon}
+              </IconBadge>
+              <h3 className="mt-5 text-[1.2rem] font-semibold tracking-[-0.03em] text-slate-950">
+                {item.title}
+              </h3>
+              <p className="mt-3 text-sm leading-7 text-slate-600">{item.text}</p>
+            </article>
+          ))}
+        </div>
+      </SectionShell>
+
+      <SectionShell tone="canvas" spacing="compact">
+        <div className="grid gap-6 lg:grid-cols-2">
+          <article className="rounded-[1.55rem] border border-slate-200 bg-white p-6 shadow-[0_18px_36px_rgba(15,23,42,0.05)]">
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-blue-700">
+              Best fit
+            </p>
+            <ul className="mt-5 space-y-3">
+              {fitItems.map((item) => (
+                <li key={item} className="flex gap-3 text-sm leading-7 text-slate-600">
+                  <span className="mt-[9px] h-2 w-2 rounded-full bg-blue-500/80" />
                   <span>{item}</span>
                 </li>
               ))}
             </ul>
-          </div>
+          </article>
 
-          <p className="mt-10 text-xs uppercase tracking-[0.2em] text-emerald-300/80">
-            Proof of work
-          </p>
-          <div className="mt-4 grid gap-4 md:grid-cols-3">
-            {proofLinks.map((item) => (
+          <article className="rounded-[1.55rem] border border-slate-200 bg-white p-6 shadow-[0_18px_36px_rgba(15,23,42,0.05)]">
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-blue-700">
+              Next step
+            </p>
+            <h2 className="mt-4 text-3xl font-semibold tracking-[-0.04em] text-slate-950">
+              If the website is no longer helping the business, start with a direct review.
+            </h2>
+            <p className="mt-4 text-base leading-8 text-slate-600">
+              Web Growth helps clarify what should be rebuilt, what should be improved,
+              and what will likely create the strongest commercial return first.
+            </p>
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row">
               <Link
-                key={item.href}
-                href={item.href}
-                className="rounded-2xl border border-white/10 bg-black/35 p-5 transition hover:border-emerald-400/28"
+                href="/contact/"
+                className="inline-flex min-h-12 items-center justify-center rounded-xl bg-[linear-gradient(135deg,#3557ff_0%,#4f6bff_45%,#7c5cff_100%)] px-6 text-sm font-semibold text-white shadow-[0_16px_34px_rgba(79,107,255,0.28)] transition hover:brightness-105"
               >
-                <h3 className="text-lg font-semibold text-white">{item.title}</h3>
-                <p className="mt-2 text-sm leading-7 text-white/70">{item.text}</p>
+                Request a Website Review
               </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section data-reveal className="border-b border-white/10 bg-black py-24">
-        <div className="mx-auto max-w-6xl px-6">
-          <div className="max-w-3xl">
-            <p className="text-xs uppercase tracking-[0.2em] text-emerald-300/80">
-              Our best-fit clients
-            </p>
-            <h2 className="mt-4 text-3xl font-semibold leading-tight tracking-[-0.02em] md:text-5xl">
-              The kinds of businesses this work moves hardest for
-            </h2>
-            <p className="mt-4 max-w-2xl text-lg leading-7 text-white/72">
-              Web Growth fits best where trust, performance, and premium presentation
-              directly affect leads, bookings, or sales.
-            </p>
-          </div>
-
-          <div className="mt-12 grid gap-6 md:grid-cols-2 xl:grid-cols-4">
-            {bestFitClients.map((item) => (
-              <article
-                key={item.title}
-                className="rounded-2xl border border-white/10 bg-black/40 p-7 shadow-[0_14px_32px_rgba(0,0,0,0.22)] backdrop-blur"
+              <Link
+                href="/portfolio/"
+                className="inline-flex min-h-12 items-center justify-center rounded-xl border border-blue-200 bg-white px-6 text-sm font-semibold text-blue-800 transition hover:border-blue-300 hover:bg-blue-50"
               >
-                <h3 className="text-xl font-semibold text-white">{item.title}</h3>
-                <p className="mt-3 text-sm leading-7 text-white/68">{item.text}</p>
-              </article>
-            ))}
-          </div>
+                View Case Studies
+              </Link>
+            </div>
+          </article>
         </div>
-      </section>
-
-      <section data-reveal className="border-b border-white/10 bg-[#060907] py-20">
-        <div className="mx-auto max-w-6xl px-6">
-          <p className="text-xs uppercase tracking-[0.2em] text-emerald-300/80">
-            Fit check
-          </p>
-          <h2 className="mt-4 text-3xl font-semibold leading-tight tracking-[-0.02em] md:text-5xl">
-            Who this is for and who it is not for
-          </h2>
-          <div className="mt-10 grid gap-6 md:grid-cols-2">
-            <article className="rounded-2xl border border-emerald-400/24 bg-emerald-500/10 p-6">
-              <h3 className="text-xl font-semibold text-white">Best fit</h3>
-              <ul className="mt-4 space-y-2 text-sm leading-7 text-white/80">
-                <li>Founder-led or lean teams with clear growth intent.</li>
-                <li>Businesses where website quality affects sales conversations.</li>
-                <li>Teams willing to provide fast approvals and implementation inputs.</li>
-                <li>Brands prioritizing quality, speed, and conversion outcomes.</li>
-              </ul>
-            </article>
-            <article className="rounded-2xl border border-white/10 bg-black/35 p-6">
-              <h3 className="text-xl font-semibold text-white">Not a fit</h3>
-              <ul className="mt-4 space-y-2 text-sm leading-7 text-white/74">
-                <li>Projects choosing providers only by lowest price.</li>
-                <li>Businesses expecting premium outcomes without collaboration.</li>
-                <li>Teams wanting generic templates with no strategic depth.</li>
-                <li>Buyers looking for vague advice instead of implementation progress.</li>
-              </ul>
-            </article>
-          </div>
-        </div>
-      </section>
-
-      <section data-reveal className="border-b border-white/10 bg-[#060907] py-24">
-        <div className="mx-auto max-w-6xl px-6">
-          <div className="max-w-3xl">
-            <p className="text-xs uppercase tracking-[0.2em] text-emerald-300/80">
-              Core values
-            </p>
-            <h2 className="mt-4 text-3xl font-semibold leading-tight tracking-[-0.02em] md:text-5xl">
-              The standards behind every build
-            </h2>
-            <p className="mt-4 max-w-2xl text-lg leading-7 text-white/72">
-              The work is guided by business-first execution, not soft agency slogans.
-            </p>
-          </div>
-
-          <div className="mt-12 grid gap-6 md:grid-cols-2 xl:grid-cols-5">
-            {coreValues.map((item) => (
-              <article
-                key={item.title}
-                className="rounded-2xl border border-white/10 bg-black/40 p-7 shadow-[0_14px_32px_rgba(0,0,0,0.22)] backdrop-blur"
-              >
-                <h3 className="text-xl font-semibold text-white">{item.title}</h3>
-                <p className="mt-3 text-sm leading-7 text-white/68">{item.text}</p>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section data-reveal className="border-b border-white/10 bg-black py-24">
-        <div className="mx-auto max-w-4xl px-6">
-          <p className="text-xs uppercase tracking-[0.2em] text-emerald-300/80">
-            FAQ
-          </p>
-          <h2 className="mt-4 text-3xl font-semibold leading-tight tracking-[-0.02em] md:text-5xl">
-            The answers serious buyers want before they hire a web partner
-          </h2>
-          <p className="mt-4 max-w-2xl text-lg leading-7 text-white/72">
-            Straight answers on fit, build quality, and how the work is handled.
-          </p>
-
-          <div className="mt-10">
-            <FAQAccordion items={faqs} />
-          </div>
-        </div>
-      </section>
-
-      <section className="py-24">
-        <div className="mx-auto max-w-6xl px-6">
-          <CTASection
-            eyebrow="Ready"
-            title="If the business needs a premium website partner, start with a direct build recommendation"
-            description="Send the basics and get a straight answer on the right build, the likely scope, and where the strongest commercial return is likely to come from."
-            primaryCtaText="Request a Premium Website Quote"
-            primaryHref="/contact"
-            secondaryCtaText="See the Portfolio"
-            secondaryHref="/portfolio"
-            imageUrl="/images/portfolio/jluxe-mockup.webp"
-          />
-        </div>
-      </section>
-    </div>
+      </SectionShell>
+    </main>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useMemo, type ReactNode } from "react";
 import ClarityPageTags from "@/components/analytics/ClarityPageTags";
 import LeadMagnetCTA from "@/components/LeadMagnetCTA";
@@ -126,7 +127,7 @@ function renderBlocks(content: string) {
     if (imageMatch) {
       blocks.push({
         type: "img",
-        alt: (imageMatch[1] || "Blog image").trim(),
+        alt: (imageMatch[1] || "Academy image").trim(),
         src: imageMatch[2].trim(),
       });
       index += 1;
@@ -234,7 +235,7 @@ function renderInline(text: string) {
         href={href}
         target={isExternal ? "_blank" : undefined}
         rel={isExternal ? "noreferrer noopener sponsored" : undefined}
-        className="text-emerald-300 underline underline-offset-4 hover:text-emerald-200"
+        className="font-medium text-blue-700 underline underline-offset-4 hover:text-blue-800"
       >
         {label}
       </a>
@@ -266,9 +267,9 @@ export default function BlogPostClient({
   const blocks = useMemo(() => renderBlocks(content), [content]);
 
   const calloutStyles = (tone: "tip" | "note" | "warn") => {
-    if (tone === "tip") return "border-emerald-400/25 bg-emerald-500/10 text-emerald-50";
-    if (tone === "warn") return "border-red-400/25 bg-red-500/10 text-red-50";
-    return "border-white/15 bg-white/5 text-white";
+    if (tone === "tip") return "border-blue-200 bg-blue-50 text-slate-800";
+    if (tone === "warn") return "border-amber-200 bg-amber-50 text-slate-800";
+    return "border-slate-200 bg-slate-50 text-slate-800";
   };
 
   return (
@@ -284,16 +285,16 @@ export default function BlogPostClient({
         }}
       />
 
-      <div className="space-y-7 text-[17px] leading-[1.85] text-white/80">
+      <div className="space-y-7 text-[17px] leading-[1.9] text-slate-700">
         {blocks.map((block, index) => {
-          if (block.type === "hr") return <div key={index} className="my-10 h-px bg-white/10" />;
+          if (block.type === "hr") return <div key={index} className="my-10 h-px bg-slate-200" />;
 
           if (block.type === "h2") {
             return (
               <h2
                 key={index}
                 id={block.id}
-                className="scroll-mt-32 mt-12 text-2xl font-semibold text-white md:text-3xl"
+                className="scroll-mt-32 mt-12 text-2xl font-semibold tracking-[-0.03em] text-slate-950 md:text-3xl"
               >
                 {block.text}
               </h2>
@@ -309,13 +310,13 @@ export default function BlogPostClient({
             return (
               <div
                 key={index}
-                className="rounded-2xl border border-emerald-400/20 bg-emerald-500/10 p-6"
+                className="rounded-2xl border border-blue-200 bg-blue-50 p-6"
               >
                 <a
                   href={block.href}
                   target={isExternal ? "_blank" : undefined}
                   rel={isExternal ? "noreferrer noopener sponsored" : undefined}
-                  className="inline-flex w-full items-center justify-center rounded-xl bg-emerald-600 px-5 py-4 text-sm font-semibold text-white transition hover:bg-emerald-500"
+                  className="inline-flex w-full items-center justify-center rounded-xl bg-[linear-gradient(135deg,#4f6bff_0%,#7c5cff_100%)] px-5 py-4 text-sm font-semibold text-white shadow-[0_18px_38px_rgba(79,107,255,0.24)] transition hover:-translate-y-0.5 hover:brightness-105"
                 >
                   {block.label}
                 </a>
@@ -327,11 +328,11 @@ export default function BlogPostClient({
             return (
               <div
                 key={index}
-                className="rounded-2xl border border-white/10 bg-white/5 p-6 transition hover:border-emerald-500/25"
+                className="rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_18px_40px_rgba(15,23,42,0.06)]"
               >
-                <h3 className="text-lg font-semibold text-white">{block.title}</h3>
+                <h3 className="text-lg font-semibold text-slate-950">{block.title}</h3>
                 {block.lines.length ? (
-                  <div className="mt-3 space-y-2 text-white/75">
+                  <div className="mt-3 space-y-2 text-slate-600">
                     {block.lines.map((line, lineIndex) => (
                       <p key={lineIndex} className="leading-relaxed">
                         {renderInline(line)}
@@ -349,10 +350,10 @@ export default function BlogPostClient({
                 key={index}
                 className={["rounded-2xl border p-5", calloutStyles(block.tone)].join(" ")}
               >
-                <div className="text-sm uppercase tracking-widest opacity-70">
+                <div className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
                   {block.tone === "tip" ? "Tip" : block.tone === "warn" ? "Warning" : "Note"}
                 </div>
-                <div className="mt-2 text-white/80">{renderInline(block.text)}</div>
+                <div className="mt-2">{renderInline(block.text)}</div>
               </div>
             );
           }
@@ -361,7 +362,7 @@ export default function BlogPostClient({
             return (
               <figure
                 key={index}
-                className="overflow-hidden rounded-2xl border border-white/10 bg-white/5"
+                className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_18px_40px_rgba(15,23,42,0.06)]"
               >
                 <div className="relative aspect-[16/9] w-full">
                   <Image
@@ -381,8 +382,8 @@ export default function BlogPostClient({
               <ul key={index} className="space-y-3">
                 {block.items.map((item) => (
                   <li key={item} className="flex gap-3">
-                    <span className="mt-[9px] h-2 w-2 rounded-full bg-emerald-400/80" />
-                    <span className="text-white/75">{renderInline(item)}</span>
+                    <span className="mt-[9px] h-2 w-2 rounded-full bg-blue-500/80" />
+                    <span>{renderInline(item)}</span>
                   </li>
                 ))}
               </ul>
@@ -394,10 +395,10 @@ export default function BlogPostClient({
               <ol key={index} className="space-y-3">
                 {block.items.map((item, itemIndex) => (
                   <li key={item} className="flex gap-3">
-                    <span className="mt-[1px] inline-flex h-7 w-7 items-center justify-center rounded-full border border-white/10 bg-white/5 text-xs text-white/70">
+                    <span className="mt-[1px] inline-flex h-7 w-7 items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-xs text-slate-600">
                       {itemIndex + 1}
                     </span>
-                    <span className="text-white/75">{renderInline(item)}</span>
+                    <span>{renderInline(item)}</span>
                   </li>
                 ))}
               </ol>
@@ -405,11 +406,28 @@ export default function BlogPostClient({
           }
 
           return (
-            <p key={index} className="text-white/75">
+            <p key={index}>
               {renderInline(block.text)}
             </p>
           );
         })}
+
+        <div className="rounded-2xl border border-slate-200 bg-[linear-gradient(180deg,#ffffff_0%,#f8faff_100%)] p-5">
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-blue-700">
+            Continue learning
+          </p>
+          <div className="mt-3 flex flex-wrap gap-3 text-sm">
+            <Link href="/blog/" className="font-medium text-blue-700 hover:text-blue-800">
+              Back to Academy
+            </Link>
+            <Link href="/services/" className="font-medium text-blue-700 hover:text-blue-800">
+              View services
+            </Link>
+            <Link href="/contact/" className="font-medium text-blue-700 hover:text-blue-800">
+              Request a website review
+            </Link>
+          </div>
+        </div>
       </div>
     </>
   );

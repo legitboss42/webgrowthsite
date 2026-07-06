@@ -5,10 +5,10 @@ type EditorialNoteProps = {
 
 export default function EditorialNote({ note, methodology }: EditorialNoteProps) {
   return (
-    <section className="rounded-2xl border border-emerald-400/25 bg-emerald-500/10 p-6">
-      <p className="text-xs uppercase tracking-[0.18em] text-emerald-200/90">Editorial Note</p>
-      <p className="mt-3 text-sm leading-7 text-white/80">{note}</p>
-      {methodology ? <p className="mt-3 text-sm leading-7 text-white/72">{methodology}</p> : null}
+    <section className="rounded-3xl border border-blue-200 bg-blue-50/80 p-6 shadow-[0_18px_40px_rgba(59,130,246,0.08)]">
+      <p className="text-xs uppercase tracking-[0.18em] text-blue-700">Editorial Note</p>
+      <p className="mt-3 text-sm leading-7 text-slate-700">{note}</p>
+      {methodology ? <p className="mt-3 text-sm leading-7 text-slate-600">{methodology}</p> : null}
     </section>
   );
 }

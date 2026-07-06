@@ -13,12 +13,12 @@ export default function Page() {
   return (
     <>
       <ServiceDetailTemplateClient service={service} />
-      <div className="bg-black pb-24">
+      <div className="bg-[#f7f8fc] pb-24">
         <div className="mx-auto max-w-6xl px-6">
           <HostingSupportBlock
-            title="Need hosting support before the website goes live?"
-            description="The hosting offer gives you a lower-cost starting point for getting online, with a direct path into the website launch service when you are ready."
-            ctaLabel="View Hosting Offer"
+            title="Need help choosing the right hosting and domain setup?"
+            description="Use this support block when you want clearer guidance on hosting, ownership, launch readiness, and the right implementation path."
+            ctaLabel="Review pricing guidance"
           />
         </div>
       </div>

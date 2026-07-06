@@ -1,6 +1,6 @@
 import Image from "next/image";
-import Link from "next/link";
-import GeneratedSectionBackground from "@/components/GeneratedSectionBackground";
+import PremiumButton from "@/components/platform/PremiumButton";
+import SurfaceCard from "@/components/platform/SurfaceCard";
 
 interface CTASectionProps {
   eyebrow?: string;
@@ -12,34 +12,6 @@ interface CTASectionProps {
   secondaryHref?: string;
   imageUrl?: string;
   className?: string;
-}
-
-function CTAButton({
-  href,
-  children,
-  primary = false,
-}: {
-  href: string;
-  children: React.ReactNode;
-  primary?: boolean;
-}) {
-  const className = primary
-    ? "inline-flex min-h-12 items-center justify-center rounded-xl bg-emerald-700 px-6 py-3 text-sm font-semibold text-white shadow-[0_14px_34px_rgba(5,150,105,0.24)] transition hover:bg-emerald-600"
-    : "inline-flex min-h-12 items-center justify-center rounded-xl border border-white/15 bg-black/30 px-6 py-3 text-sm font-semibold text-white/90 transition hover:border-white/25 hover:bg-black/45";
-
-  if (/^https?:\/\//i.test(href)) {
-    return (
-      <a href={href} target="_blank" rel="noreferrer" className={className}>
-        {children}
-      </a>
-    );
-  }
-
-  return (
-    <Link href={href} className={className}>
-      {children}
-    </Link>
-  );
 }
 
 export default function CTASection({
@@ -55,37 +27,37 @@ export default function CTASection({
 }: CTASectionProps) {
   return (
     <section className={`relative overflow-hidden py-16 sm:py-20 ${className || ""}`}>
-      <GeneratedSectionBackground variant="cta" />
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_16%_18%,rgba(16,185,129,0.16),transparent_32%),radial-gradient(circle_at_82%_82%,rgba(16,185,129,0.1),transparent_28%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_16%_18%,rgba(59,130,246,0.10),transparent_32%),radial-gradient(circle_at_82%_82%,rgba(139,92,246,0.12),transparent_28%)]" />
       <div className="relative mx-auto max-w-6xl px-6">
-        <div className="relative overflow-hidden rounded-3xl border border-emerald-500/25 bg-[linear-gradient(135deg,rgba(16,185,129,0.12),rgba(8,12,10,0.96)_55%,rgba(0,0,0,0.92))] p-6 shadow-[0_20px_50px_rgba(0,0,0,0.24)] sm:p-8">
-          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(115deg,rgba(16,185,129,0.08)_0%,transparent_46%,rgba(16,185,129,0.04)_100%)]" />
-          <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-emerald-300/70 to-transparent" />
+        <SurfaceCard className="relative overflow-hidden rounded-[2rem] border-slate-200/80 bg-white p-6 shadow-[0_30px_90px_rgba(15,23,42,0.10)] sm:p-8">
+          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(120deg,rgba(59,130,246,0.05),transparent_38%,rgba(139,92,246,0.07)_100%)]" />
+          <div className="pointer-events-none absolute -right-24 top-0 h-48 w-48 rounded-full bg-purple-100/70 blur-3xl" />
+          <div className="pointer-events-none absolute -left-20 bottom-0 h-44 w-44 rounded-full bg-blue-100/70 blur-3xl" />
 
           <div className="relative grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
             <div>
               {eyebrow ? (
-                <span className="text-xs uppercase tracking-[0.22em] text-emerald-300/80">
+                <span className="inline-flex rounded-full border border-blue-100 bg-blue-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-blue-700">
                   {eyebrow}
                 </span>
               ) : null}
-              <h2 className="mt-4 text-balance text-3xl font-semibold leading-tight tracking-[-0.02em] md:text-5xl">
+              <h2 className="mt-4 text-balance text-3xl font-semibold leading-tight tracking-[-0.03em] text-slate-950 md:text-5xl">
                 {title}
               </h2>
-              <p className="mt-4 max-w-2xl text-base leading-7 text-white/72 sm:text-lg">
+              <p className="mt-4 max-w-2xl text-base leading-7 text-slate-600 sm:text-lg">
                 {description}
               </p>
               <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-                <CTAButton href={primaryHref} primary>
-                  {primaryCtaText}
-                </CTAButton>
-                <CTAButton href={secondaryHref}>{secondaryCtaText}</CTAButton>
+                <PremiumButton href={primaryHref}>{primaryCtaText}</PremiumButton>
+                <PremiumButton href={secondaryHref} variant="secondary">
+                  {secondaryCtaText}
+                </PremiumButton>
               </div>
             </div>
 
             <div className="relative">
-              <div className="relative aspect-[16/10] overflow-hidden rounded-2xl border border-white/10 bg-black/30 shadow-[0_18px_40px_rgba(0,0,0,0.22)]">
-                <div className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-t from-black/45 via-black/10 to-transparent" />
+              <div className="relative aspect-[16/10] overflow-hidden rounded-[1.75rem] border border-slate-200 bg-slate-950 shadow-[0_22px_60px_rgba(15,23,42,0.22)]">
+                <div className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-t from-slate-950/70 via-slate-950/10 to-transparent" />
                 <Image
                   src={imageUrl}
                   alt={`${title} supporting visual`}
@@ -98,7 +70,7 @@ export default function CTASection({
               </div>
             </div>
           </div>
-        </div>
+        </SurfaceCard>
       </div>
     </section>
   );

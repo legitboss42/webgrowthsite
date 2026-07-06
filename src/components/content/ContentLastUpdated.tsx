@@ -25,12 +25,18 @@ export default function ContentLastUpdated({
   const reviewed = formatDate(lastReviewedAt);
 
   return (
-    <section className="rounded-2xl border border-white/10 bg-black/35 p-5">
-      <p className="text-xs uppercase tracking-[0.18em] text-emerald-300/85">Article History</p>
-      <div className="mt-3 grid gap-2 text-sm text-white/72 sm:grid-cols-3">
-        <p>Published: <span className="text-white">{published || "N/A"}</span></p>
-        <p>Updated: <span className="text-white">{updated || "Not updated yet"}</span></p>
-        <p>Reviewed: <span className="text-white">{reviewed || "Not reviewed yet"}</span></p>
+    <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-[0_18px_40px_rgba(15,23,42,0.06)]">
+      <p className="text-xs uppercase tracking-[0.18em] text-blue-700">Article History</p>
+      <div className="mt-3 grid gap-2 text-sm text-slate-600 sm:grid-cols-3">
+        <p>
+          Published: <span className="font-medium text-slate-950">{published || "N/A"}</span>
+        </p>
+        <p>
+          Updated: <span className="font-medium text-slate-950">{updated || "Not updated yet"}</span>
+        </p>
+        <p>
+          Reviewed: <span className="font-medium text-slate-950">{reviewed || "Not reviewed yet"}</span>
+        </p>
       </div>
     </section>
   );

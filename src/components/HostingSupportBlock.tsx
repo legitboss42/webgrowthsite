@@ -1,9 +1,9 @@
 import TrackedLink from "@/components/analytics/TrackedLink";
 
 export default function HostingSupportBlock({
-  title = "Need reliable hosting before you launch?",
-  description = "Compare the shared hosting offer, save 68%, and start your business website with a stronger foundation.",
-  ctaLabel = "View Hosting Offer",
+  title = "Need a clearer domain and hosting setup before the website goes live?",
+  description = "Get practical guidance on the setup choices that affect performance, security, ownership, and long-term website stability.",
+  ctaLabel = "Review pricing guidance",
   compact = false,
   pageType = "hosting_support_block",
 }: {
@@ -16,44 +16,44 @@ export default function HostingSupportBlock({
   return (
     <section
       className={[
-        "relative overflow-hidden rounded-3xl border border-emerald-400/24 bg-[radial-gradient(circle_at_14%_-20%,rgba(16,185,129,0.2),rgba(4,16,13,0.9)_45%,rgba(2,8,7,0.98)_100%)] shadow-[0_18px_50px_rgba(0,0,0,0.22)]",
+        "relative overflow-hidden rounded-3xl border border-slate-200 bg-[linear-gradient(180deg,#ffffff_0%,#f6f8ff_100%)] shadow-[0_18px_50px_rgba(15,23,42,0.08)]",
         compact ? "p-6" : "p-8 md:p-10",
       ].join(" ")}
     >
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(115deg,rgba(16,185,129,0.08)_0%,transparent_46%,rgba(16,185,129,0.04)_100%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(115deg,rgba(59,130,246,0.06)_0%,transparent_46%,rgba(139,92,246,0.05)_100%)]" />
       <div className="relative z-10">
-        <p className="text-xs uppercase tracking-[0.18em] text-emerald-200/85">
+        <p className="text-xs uppercase tracking-[0.18em] text-blue-700">
           Hosting Support
         </p>
-        <h2 className="mt-4 text-balance text-2xl font-semibold leading-tight md:text-4xl">
+        <h2 className="mt-4 text-balance text-2xl font-semibold leading-tight text-slate-950 md:text-4xl">
           {title}
         </h2>
-        <p className="mt-4 max-w-2xl text-base leading-7 text-white/72 md:text-lg">
+        <p className="mt-4 max-w-2xl text-base leading-7 text-slate-600 md:text-lg">
           {description}
         </p>
 
         <div className="mt-8 flex flex-col gap-3 sm:flex-row">
           <TrackedLink
-            href="/hosting-offer"
-            className="offer-button inline-flex min-h-12 items-center justify-center rounded-xl bg-emerald-700 px-8 py-3 text-base font-semibold text-white shadow-[0_14px_34px_rgba(5,150,105,0.25)] transition-colors hover:bg-emerald-600"
-            ctaName="hosting_offer"
+            href="/pricing/"
+            className="offer-button inline-flex min-h-12 items-center justify-center rounded-xl bg-blue-700 px-8 py-3 text-base font-semibold text-white shadow-[0_14px_34px_rgba(37,99,235,0.22)] transition-colors hover:bg-blue-800"
+            ctaName="pricing"
             ctaLocation={`${pageType}_primary`}
-            destination="/hosting-offer"
+            destination="/pricing/"
             pageType={pageType}
-            offerType="hosting"
+            offerType="pricing"
           >
             <span className="relative z-10">{ctaLabel}</span>
           </TrackedLink>
           <TrackedLink
-            href="/launch"
-            className="offer-button-soft inline-flex min-h-12 items-center justify-center rounded-xl border border-white/25 bg-black/35 px-8 py-3 text-base font-semibold text-white transition-colors hover:border-white/40 hover:bg-black/50"
-            ctaName="start_your_website"
+            href="/contact/"
+            className="offer-button-soft inline-flex min-h-12 items-center justify-center rounded-xl border border-slate-200 bg-white px-8 py-3 text-base font-semibold text-slate-700 transition-colors hover:border-blue-200 hover:text-blue-700"
+            ctaName="website_review"
             ctaLocation={`${pageType}_secondary`}
-            destination="/launch"
+            destination="/contact/"
             pageType={pageType}
-            offerType="website_launch"
+            offerType="website_review"
           >
-            Start Your Website
+            Request a Website Review
           </TrackedLink>
         </div>
       </div>

@@ -1,0 +1,48 @@
+
+> webgrowth-info@0.1.0 dev
+> node scripts/prepare-dev.mjs && next dev
+
+ ⚠ Port 3000 is in use by an unknown process, using available port 3003 instead.
+   ▲ Next.js 15.5.14
+   - Local:        http://localhost:3003
+   - Network:      http://192.168.0.199:3003
+   - Environments: .env.local
+   - Experiments (use with caution):
+     · cpus: 1
+
+ ✓ Starting...
+ ✓ Ready in 22.1s
+ ○ Compiling /middleware ...
+ ✓ Compiled /middleware in 11.1s (157 modules)
+ ○ Compiling /tools ...
+ ✓ Compiled /tools in 68.8s (777 modules)
+ GET /tools/ 200 in 79238ms
+ ✓ Compiled in 3.7s (281 modules)
+ ✓ Compiled in 1974ms (281 modules)
+ ✓ Compiled in 3.4s (281 modules)
+ ✓ Compiled in 2s (281 modules)
+ ✓ Compiled in 1868ms (281 modules)
+ ✓ Compiled in 1782ms (281 modules)
+ ✓ Compiled in 1716ms (281 modules)
+ ✓ Compiled in 1699ms (281 modules)
+ ✓ Compiled in 1733ms (281 modules)
+ ✓ Compiled in 1639ms (281 modules)
+ ✓ Compiled in 1520ms (281 modules)
+ ✓ Compiled in 1869ms (281 modules)
+ ✓ Compiled in 2.3s (281 modules)
+ ✓ Compiled in 2.3s (281 modules)
+ ✓ Compiled in 7.4s (438 modules)
+ ✓ Compiled in 3.5s (424 modules)
+ ✓ Compiled in 3.3s (281 modules)
+ ✓ Compiled in 2.3s (281 modules)
+ ✓ Compiled in 2s (281 modules)
+ ✓ Compiled in 2.6s (281 modules)
+ ✓ Compiled in 2.2s (281 modules)
+ ✓ Compiled in 2.2s (281 modules)
+ ✓ Compiled in 2.5s (281 modules)
+ ✓ Compiled in 1762ms (281 modules)
+ ✓ Compiled in 2s (281 modules)
+ ✓ Compiled in 2.1s (281 modules)
+ ✓ Compiled in 1730ms (281 modules)
+ ✓ Compiled in 3.6s (281 modules)
+ ✓ Compiled in 1631ms (281 modules)

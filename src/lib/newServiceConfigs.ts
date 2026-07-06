@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { warnOnServiceQuality } from "@/lib/contentQuality";
 import { CORE_SERVICE_PAGES } from "@/lib/coreServiceConfigs";
+import { absoluteUrl } from "@/lib/site";
 
 export type ServiceListItem = {
   title: string;
@@ -79,6 +80,9 @@ export const NEW_SERVICE_PAGES: Record<string, ServicePageInput> = {
     title: "Email Marketing Setup and Strategy",
     slug: "email-marketing-setup-strategy",
     serviceParam: "Email Marketing Setup and Strategy",
+    seoTitle: "Email Marketing Setup and Strategy | Web Growth",
+    seoDescription:
+      "Email marketing setup and strategy for small businesses that need segmentation, nurture flows, campaigns, and conversion-focused email systems tied to real revenue goals.",
     metaDescription:
       "Email marketing setup and strategy for small businesses: list growth flow, segmentation, nurture sequences, campaigns, and measurable conversion tracking.",
     keywords: [
@@ -169,6 +173,9 @@ export const NEW_SERVICE_PAGES: Record<string, ServicePageInput> = {
     title: "Search Engine Optimisation (SEO)",
     slug: "search-engine-optimisation",
     serviceParam: "Search Engine Optimisation (SEO)",
+    seoTitle: "SEO Service for Service Businesses | Web Growth",
+    seoDescription:
+      "SEO service for service businesses that need stronger local visibility, better service-page targeting, cleaner technical foundations, and more qualified search enquiries.",
     metaDescription:
       "SEO for service businesses that already have a real offer and need stronger local visibility, cleaner service pages, and better-qualified enquiries.",
     keywords: [
@@ -259,6 +266,9 @@ export const NEW_SERVICE_PAGES: Record<string, ServicePageInput> = {
     title: "Google Business Profile Optimization Lagos",
     slug: "google-my-business-setup-optimisation",
     serviceParam: "Google Business Profile Optimization Lagos",
+    seoTitle: "Google Business Profile Optimization Lagos | Web Growth",
+    seoDescription:
+      "Google Business Profile optimization in Lagos for service businesses that need stronger Maps visibility, cleaner profile trust signals, and more qualified local enquiries.",
     metaDescription:
       "Google Business Profile optimization in Lagos to improve Google Maps visibility, local rankings, profile quality, and enquiry volume for service businesses.",
     keywords: [
@@ -479,6 +489,9 @@ export const NEW_SERVICE_PAGES: Record<string, ServicePageInput> = {
     title: "CRM System Setup and Configuration",
     slug: "crm-system-setup-configuration",
     serviceParam: "CRM System Setup and Configuration",
+    seoTitle: "CRM System Setup and Configuration | Web Growth",
+    seoDescription:
+      "CRM system setup and configuration for businesses that need cleaner lead routing, pipeline visibility, follow-up logic, and a stronger handoff from marketing to sales.",
     metaDescription:
       "CRM setup and configuration service for small businesses: pipeline setup, lead capture flows, tagging, automations, and reporting-ready structure.",
     keywords: [
@@ -569,6 +582,9 @@ export const NEW_SERVICE_PAGES: Record<string, ServicePageInput> = {
     title: "Marketing Automation Build and Implementation",
     slug: "marketing-automation-build-implementation",
     serviceParam: "Marketing Automation Build and Implementation",
+    seoTitle: "Marketing Automation Build and Implementation | Web Growth",
+    seoDescription:
+      "Marketing automation build and implementation for businesses that need lead follow-up, routing, lifecycle flows, and conversion logic that works across the website and CRM stack.",
     metaDescription:
       "Marketing automation build and implementation services: automated lead nurture workflows, follow-up sequences, segmentation logic, and conversion tracking.",
     keywords: [
@@ -754,6 +770,9 @@ export const NEW_SERVICE_PAGES: Record<string, ServicePageInput> = {
     title: "Website Hosting and Launch Setup Guidance",
     slug: "domain-registration-hosting-guidance",
     serviceParam: "Website Hosting and Launch Setup Guidance",
+    seoTitle: "Hosting and Launch Setup Guidance | Web Growth",
+    seoDescription:
+      "Hosting and launch setup guidance for businesses that need the right domain, DNS, SSL, hosting, and migration decisions before building or moving a website.",
     metaDescription:
       "Launch setup guidance for small businesses that need the right domain, hosting, SSL, and DNS decisions before building or moving a website.",
     keywords: [
@@ -1112,6 +1131,8 @@ export function buildServiceMetadata(
 ): Metadata {
   const title = service.seoTitle ?? service.title;
   const description = service.seoDescription ?? service.metaDescription;
+  const canonical = absoluteUrl(canonicalUrl);
+  const imageUrl = absoluteUrl("/images/hero/Hero-Image-1.webp");
 
   return {
     title,
@@ -1122,16 +1143,16 @@ export function buildServiceMetadata(
       ...service.keywords,
     ],
     alternates: {
-      canonical: canonicalUrl,
+      canonical,
     },
     openGraph: {
       title,
       description,
-      url: canonicalUrl,
+      url: canonical,
       siteName: "Web Growth",
       images: [
         {
-          url: "https://webgrowth.info/images/hero/Hero-Image-1.webp",
+          url: imageUrl,
           width: 1200,
           height: 630,
           alt: title,
@@ -1143,7 +1164,7 @@ export function buildServiceMetadata(
       card: "summary_large_image",
       title,
       description,
-      images: ["https://webgrowth.info/images/hero/Hero-Image-1.webp"],
+      images: [imageUrl],
     },
     robots: { index: true, follow: true },
   };

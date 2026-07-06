@@ -412,6 +412,9 @@ export const CORE_SERVICE_PAGES: Record<string, ServicePageInput> = {
     title: "Website Maintenance and Support",
     slug: "website-maintenance",
     serviceParam: "Website Maintenance & Support",
+    seoTitle: "Website Maintenance Service | Web Growth",
+    seoDescription:
+      "Website maintenance service for businesses that need reliable updates, monitoring, support, and performance hygiene without letting trust or enquiry flow drift over time.",
     metaDescription:
       "Website maintenance and support service covering updates, reliability checks, and performance hygiene for business-critical websites.",
     keywords: [
@@ -504,7 +507,7 @@ export const CORE_SERVICE_PAGES: Record<string, ServicePageInput> = {
     ],
     relatedGuideSlugs: [
       "website-launch-checklist-for-small-businesses",
-      "website-launch-checklist-for-small-businesses",
+      "07-launch-week-checklist-and-first-7-days",
       "how-to-audit-slow-wordpress-site",
     ],
   },
@@ -512,6 +515,7 @@ export const CORE_SERVICE_PAGES: Record<string, ServicePageInput> = {
     title: "Performance Optimisation",
     slug: "performance-optimisation",
     serviceParam: "Speed & Performance Optimisation",
+    seoTitle: "Website Speed Optimization Service | Web Growth",
     metaDescription:
       "Website performance optimisation service for businesses that need better Core Web Vitals, faster mobile experience, and stronger conversion support.",
     keywords: [
@@ -612,6 +616,9 @@ export const CORE_SERVICE_PAGES: Record<string, ServicePageInput> = {
     title: "Website Audit and Consultation",
     slug: "website-audit",
     serviceParam: "Website Audit & Consultation",
+    seoTitle: "Website Audit Service | Web Growth",
+    seoDescription:
+      "Website audit service for businesses that need a practical diagnosis of SEO, trust, speed, mobile UX, and conversion blockers before investing in bigger website changes.",
     metaDescription:
       "Website audit and consultation service to identify what is hurting SEO, trust, speed, and conversion, with a practical action roadmap.",
     keywords: [

@@ -35,8 +35,7 @@
     ".next/dev/types/**/*.ts",
     ".next/types/**/*.ts",
     "next-env.d.ts",
-    "next.config.mjs",
-    ".next-webgrowth/types/**/*.ts"
+    "next.config.mjs"
   ],
   "exclude": [
     "node_modules"

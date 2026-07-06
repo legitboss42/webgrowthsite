@@ -8,19 +8,19 @@ import {
 } from "@/lib/seo";
 
 export const metadata = buildPageMetadata({
-  title: "Web Growth Blog | SEO, Conversion, and Launch Guides",
+  title: "Web Growth Academy | SEO, AdSense, and Website Growth Guides",
   description:
-    "Practical web design, SEO, launch, and conversion guides for businesses in Nigeria and international markets.",
+    "Structured Academy resources on SEO, AdSense, website speed, redesign strategy, and conversions for businesses building stronger websites.",
   path: "/blog",
   keywords: [
-    "web design blog",
-    "small business website tips",
-    "website launch strategy",
-    "seo for service businesses",
-    "small business website redesign checklist",
-    "small business website seo checklist",
-    "website not generating leads",
-    "email marketing for small business",
+    "website growth academy",
+    "adsense academy",
+    "seo academy",
+    "website redesign guides",
+    "website conversion guides",
+    "website speed guides",
+    "small business website strategy",
+    "web growth academy",
   ],
 });
 
@@ -33,7 +33,7 @@ export default function BlogPage() {
           buildBlogCollectionSchema(posts),
           buildBreadcrumbSchema([
             { name: "Home", path: "/" },
-            { name: "Blog", path: "/blog" },
+            { name: "Academy", path: "/blog" },
           ]),
         ]}
       />

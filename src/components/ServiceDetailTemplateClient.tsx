@@ -1,28 +1,35 @@
 import Link from "next/link";
 import StructuredData from "@/components/StructuredData";
-
-import AnswerHighlightsSection from "@/components/AnswerHighlightsSection";
-import CorePageLinks from "@/components/CorePageLinks";
-import SectionHeading from "@/components/SectionHeading";
-import CTASection from "@/components/CTASection";
-import GeneratedSectionBackground from "@/components/GeneratedSectionBackground";
+import BeforeAfterResults from "@/components/content/BeforeAfterResults";
+import CommonMistakes from "@/components/content/CommonMistakes";
+import EvidenceGallery from "@/components/content/EvidenceGallery";
+import FAQBlock from "@/components/content/FAQBlock";
+import InternalResourceCallout from "@/components/content/InternalResourceCallout";
+import ProcessSteps from "@/components/content/ProcessSteps";
+import RealExamples from "@/components/content/RealExamples";
 import ServiceDeliverables from "@/components/content/ServiceDeliverables";
 import WhoThisIsFor from "@/components/content/WhoThisIsFor";
 import WhoThisIsNotFor from "@/components/content/WhoThisIsNotFor";
-import CommonMistakes from "@/components/content/CommonMistakes";
-import RealExamples from "@/components/content/RealExamples";
-import BeforeAfterResults from "@/components/content/BeforeAfterResults";
-import ProcessSteps from "@/components/content/ProcessSteps";
-import FAQBlock from "@/components/content/FAQBlock";
-import EvidenceGallery from "@/components/content/EvidenceGallery";
-import InternalResourceCallout from "@/components/content/InternalResourceCallout";
-import type { ServicePageConfig } from "@/lib/newServiceConfigs";
+import {
+  BuildIcon,
+  ConvertIcon,
+  GrowthChartIcon,
+  IconBadge,
+  MonetizeIcon,
+  OptimizeIcon,
+  PlanIcon,
+  SearchIcon,
+} from "@/components/home/HomeIcons";
+import SectionShell from "@/components/home/SectionShell";
 import { buildBreadcrumbSchema } from "@/lib/seo";
 import { absoluteUrl, SITE_URL } from "@/lib/site";
+import type { ServicePageConfig } from "@/lib/newServiceConfigs";
 
 type Props = {
   service: ServicePageConfig;
 };
+
+const processIcons = [<PlanIcon key="1" />, <BuildIcon key="2" />, <OptimizeIcon key="3" />, <ConvertIcon key="4" />];
 
 export default function ServiceDetailTemplateClient({ service }: Props) {
   const servicePath = `/services/${service.slug}`;
@@ -43,279 +50,268 @@ export default function ServiceDetailTemplateClient({ service }: Props) {
     },
     buildBreadcrumbSchema([
       { name: "Home", path: "/" },
-      { name: "Services", path: "/services" },
+      { name: "Services", path: "/services/" },
       { name: service.title, path: servicePath },
     ]),
   ];
 
-  const answerItems = service.faqs.slice(0, 4).map((item) => ({
-    title: item.question,
-    answer: item.answer,
-    href: `/contact?service=${encodeURIComponent(service.serviceParam)}`,
-    hrefLabel: "Request this service",
-  }));
-
-  const relatedGuides = service.relatedGuideSlugs.slice(0, 4).map((slug) => ({
-    href: `/blog/${slug}`,
-    title: slug.replace(/-/g, " "),
-  }));
-
   const supportLinks =
     service.relatedLinks ?? [
       {
-        href: "/services/website-audit",
+        href: "/services/website-audit/",
         label: "Audit",
-        title: "Need diagnosis before implementation?",
+        title: "Start with diagnosis",
         description:
-          "Start with a website audit if the bottleneck is not fully clear yet.",
+          "Use a website review when the bottleneck is still unclear and you need the right implementation path first.",
       },
       {
-        href: "/launch",
-        label: "Launch",
-        title: "Need a faster commercial launch path?",
-        description:
-          "Use the launch package if speed to market matters more than full custom scope right now.",
-      },
-      {
-        href: "/pricing",
+        href: "/pricing/",
         label: "Pricing",
-        title: "Need scope and budget context first?",
+        title: "Review scope and budget",
         description:
-          "Review package pricing to compare implementation routes before kickoff.",
+          "See how Web Growth frames scope, pricing context, and the right next step before kickoff.",
+      },
+      {
+        href: "/blog/",
+        label: "Academy",
+        title: "Learn before you buy",
+        description:
+          "Use Academy resources to understand the build, growth, and monetization decisions around this service.",
       },
     ];
 
-  const whoFor = service.targetAudience;
-
-  const whoNotFor = service.notFor;
-
-  const mistakes = service.commonMistakes;
-
-  const examples = service.useCases;
-  const beforeAfter = service.beforeAfter;
-  const evidence = service.evidence;
-
   return (
-    <div className="bg-black text-white">
+    <main className="bg-[#f7f8fc] text-slate-950">
       <StructuredData data={schema} />
 
-      <section className="relative overflow-hidden py-24">
-        <GeneratedSectionBackground variant="service" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(16,185,129,0.18),transparent_55%)]" />
-        <div className="relative mx-auto max-w-6xl px-6">
-          <div className="grid gap-12 md:grid-cols-2 md:items-center">
-            <div>
-              <div className="text-sm uppercase tracking-[0.25em] text-white/50">{service.title}</div>
-              <h1 className="mt-4 text-4xl font-semibold leading-tight md:text-5xl">{service.heroTitle}</h1>
-              <p className="mt-6 text-lg leading-relaxed text-white/70">{service.heroDescription}</p>
+      <SectionShell tone="canvas" spacing="hero" className="relative overflow-hidden">
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-full">
+          <div className="absolute left-[-10%] top-[-6%] h-72 w-72 rounded-full bg-[radial-gradient(circle,rgba(79,107,255,0.12),transparent_70%)]" />
+          <div className="absolute right-[-8%] top-[4%] h-[25rem] w-[25rem] rounded-full bg-[radial-gradient(circle,rgba(124,92,255,0.12),transparent_70%)]" />
+        </div>
 
-              <div className="mt-10 flex gap-3 flex-col sm:flex-row">
-                <Link
-                  href={`/contact?service=${encodeURIComponent(service.serviceParam)}`}
-                  className="rounded-md bg-emerald-600 px-7 py-3.5 text-sm font-semibold text-white text-center hover:bg-emerald-500 transition"
-                >
-                  Request a Quote
-                </Link>
-                <Link
-                  href="/services"
-                  className="rounded-md border border-white/15 bg-black/30 px-7 py-3.5 text-sm font-semibold text-white/90 text-center hover:bg-black/50 transition"
-                >
-                  View Services
-                </Link>
-              </div>
+        <div className="relative grid gap-8 lg:grid-cols-[0.84fr_1.16fr] lg:items-center">
+          <div>
+            <p className="inline-flex rounded-full border border-blue-100 bg-white/92 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.22em] text-blue-700 shadow-sm">
+              {service.title}
+            </p>
+            <h1 className="mt-5 max-w-[34rem] text-balance text-[3.8rem] font-semibold leading-[0.9] tracking-[-0.07em] text-slate-950 md:text-[5rem]">
+              {service.heroTitle}
+            </h1>
+            <p className="mt-4 max-w-[33rem] text-lg leading-8 text-slate-600">
+              {service.heroDescription}
+            </p>
 
-              <ul className="mt-8 space-y-2">
-                {service.highlights.map((item) => (
-                  <li key={item} className="flex gap-2 text-sm text-white/70">
-                    <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-emerald-400/80" />
+            <div className="mt-6 flex flex-wrap gap-2">
+              {service.highlights.map((item, index) => (
+                <span
+                  key={item}
+                  className={[
+                    "rounded-full border px-3 py-1 text-xs font-medium",
+                    index === 0
+                      ? "border-blue-200 bg-blue-50 text-blue-700"
+                      : "border-slate-200 bg-white text-slate-600",
+                  ].join(" ")}
+                >
+                  {item}
+                </span>
+              ))}
+            </div>
+
+            <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+              <Link
+                href={`/contact?service=${encodeURIComponent(service.serviceParam)}`}
+                className="inline-flex min-h-12 items-center justify-center rounded-xl bg-[linear-gradient(135deg,#3557ff_0%,#4f6bff_45%,#7c5cff_100%)] px-6 text-sm font-semibold text-white shadow-[0_16px_34px_rgba(79,107,255,0.28)] transition hover:brightness-105"
+              >
+                Request This Service
+              </Link>
+              <Link
+                href="/services/"
+                className="inline-flex min-h-12 items-center justify-center rounded-xl border border-blue-200 bg-white px-6 text-sm font-semibold text-blue-800 transition hover:border-blue-300 hover:bg-blue-50"
+              >
+                View All Services
+              </Link>
+            </div>
+          </div>
+
+          <div className="grid gap-4 lg:grid-cols-[1.02fr_0.98fr]">
+            <article className="rounded-[1.5rem] border border-slate-200 bg-white p-5 shadow-[0_18px_36px_rgba(15,23,42,0.05)]">
+              <p className="text-xs font-bold uppercase tracking-[0.18em] text-blue-700">
+                Who this is for
+              </p>
+              <ul className="mt-5 space-y-3">
+                {service.targetAudience.slice(0, 4).map((item) => (
+                  <li key={item} className="flex gap-3 text-sm leading-6 text-slate-600">
+                    <span className="mt-[9px] h-2 w-2 rounded-full bg-blue-500/80" />
                     <span>{item}</span>
                   </li>
                 ))}
               </ul>
-            </div>
-
-            <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-black/40">
-              <div className="h-[360px] bg-cover bg-center opacity-80" style={{ backgroundImage: `url(${service.heroImage})` }} />
-              <div className="absolute inset-0 bg-black/35" />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <AnswerHighlightsSection
-        eyebrow="Quick answers"
-        title={`What people usually want to know about ${service.title.toLowerCase()}`}
-        description="Practical answers to help you choose this service only when it clearly matches your business objective."
-        items={answerItems}
-      />
-
-      <section data-reveal=".fit-reveal" className="fit-reveal relative overflow-hidden border-y border-white/10 bg-[#060907] py-20">
-        <GeneratedSectionBackground variant="snapshot" />
-        <div className="relative mx-auto max-w-6xl px-6">
-          <SectionHeading
-            eyebrow="Fit Check"
-            title="Who this service is for and who it is not for"
-            description="Specific fit criteria reduce low-intent enquiries and keep delivery focused on outcomes."
-          />
-          <div className="mt-10 grid gap-6 md:grid-cols-2">
-            <WhoThisIsFor items={whoFor} />
-            <WhoThisIsNotFor items={whoNotFor} />
-          </div>
-        </div>
-      </section>
-
-      <section data-reveal=".deliverables-reveal" className="deliverables-reveal relative overflow-hidden py-20 bg-gray-950">
-        <GeneratedSectionBackground variant="service" />
-        <div className="relative mx-auto max-w-6xl px-6">
-          <SectionHeading
-            eyebrow="Deliverables"
-            title="What is included and what you receive"
-            description="A clear scope reduces ambiguity and improves implementation speed."
-          />
-          <div className="mt-10">
-            <ServiceDeliverables items={service.deliverables} />
-          </div>
-        </div>
-      </section>
-
-      <section data-reveal=".builder-reveal" className="builder-reveal relative overflow-hidden border-y border-white/10 bg-[#060907] py-20">
-        <GeneratedSectionBackground variant="service" />
-        <div className="relative mx-auto max-w-6xl px-6">
-          <SectionHeading
-            eyebrow="Differentiator"
-            title="How this differs from a generic page-builder setup"
-            description="This service is engineered for commercial outcomes, not just visual delivery."
-          />
-          <div className="mt-10 grid gap-6 md:grid-cols-2">
-            <article className="rounded-2xl border border-white/10 bg-black/35 p-6">
-              <p className="text-xs uppercase tracking-[0.16em] text-white/60">
-                Generic builder workflow
-              </p>
-              <ul className="mt-4 space-y-2 text-sm leading-7 text-white/72">
-                <li>Template-first layout with weak differentiation.</li>
-                <li>Plugin and visual bloat that hurts performance.</li>
-                <li>Low flexibility when conversion goals evolve.</li>
-                <li>Inconsistent implementation quality across pages.</li>
-              </ul>
             </article>
-            <article className="rounded-2xl border border-emerald-400/25 bg-emerald-500/10 p-6">
-              <p className="text-xs uppercase tracking-[0.16em] text-emerald-200/90">
-                Web Growth implementation
+            <article className="rounded-[1.5rem] border border-slate-200 bg-white p-5 shadow-[0_18px_36px_rgba(15,23,42,0.05)]">
+              <p className="text-xs font-bold uppercase tracking-[0.18em] text-blue-700">
+                Included
               </p>
-              <ul className="mt-4 space-y-2 text-sm leading-7 text-white/82">
-                <li>Business-first architecture tied to conversion intent.</li>
-                <li>Cleaner performance and stronger mobile usability.</li>
-                <li>Scalable structure that supports future SEO and growth.</li>
-                <li>Senior-led implementation with measurable priorities.</li>
+              <ul className="mt-5 space-y-3">
+                {service.deliverables.slice(0, 4).map((item) => (
+                  <li key={item} className="flex gap-3 text-sm leading-6 text-slate-600">
+                    <span className="mt-[9px] h-2 w-2 rounded-full bg-blue-500/80" />
+                    <span>{item}</span>
+                  </li>
+                ))}
               </ul>
             </article>
           </div>
         </div>
-      </section>
+      </SectionShell>
 
-      <section data-reveal=".process-reveal" className="process-reveal relative overflow-hidden py-20">
-        <GeneratedSectionBackground variant="service" />
-        <div className="relative mx-auto max-w-6xl px-6">
-          <SectionHeading
-            eyebrow="Process"
-            title="How implementation runs in practice"
-            description="Execution sequence is designed to protect quality and reduce delays."
-          />
-          <div className="mt-10">
-            <ProcessSteps items={service.process.map((step) => `${step.title}: ${step.text}`)} />
+      <SectionShell tone="white" spacing="compact">
+        <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
+          <div className="grid gap-6">
+            <WhoThisIsFor items={service.targetAudience} />
+            <WhoThisIsNotFor items={service.notFor} />
+          </div>
+          <ServiceDeliverables items={service.deliverables} />
+        </div>
+      </SectionShell>
+
+      <SectionShell tone="canvas" spacing="compact">
+        <div className="grid gap-6 lg:grid-cols-[0.88fr_1.12fr]">
+          <article className="rounded-[1.55rem] border border-slate-200 bg-white p-6 shadow-[0_18px_36px_rgba(15,23,42,0.05)]">
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-blue-700">
+              Process
+            </p>
+            <div className="mt-5 space-y-4">
+              {service.process.map((step, index) => (
+                <div key={step.title} className="flex items-start gap-4 rounded-[1.15rem] border border-slate-200 bg-slate-50 px-4 py-4">
+                  <IconBadge tone="blue" className="h-10 w-10 rounded-[1rem] shrink-0">
+                    {processIcons[index] ?? <GrowthChartIcon />}
+                  </IconBadge>
+                  <div>
+                    <p className="text-sm font-semibold text-slate-950">{step.title}</p>
+                    <p className="mt-1 text-sm leading-6 text-slate-600">{step.text}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </article>
+
+          <div className="grid gap-6">
+            <CommonMistakes items={service.commonMistakes} />
+            <RealExamples items={service.useCases} />
           </div>
         </div>
-      </section>
+      </SectionShell>
 
-      <section data-reveal=".mistakes-reveal" className="mistakes-reveal relative overflow-hidden border-y border-white/10 bg-[#060907] py-20">
-        <GeneratedSectionBackground variant="snapshot" />
-        <div className="relative mx-auto max-w-6xl px-6">
-          <SectionHeading
-            eyebrow="Risk Reduction"
-            title="Common mistakes businesses make before hiring"
-            description="Knowing these mistakes helps you avoid scope waste and delayed outcomes."
-          />
-          <div className="mt-10 grid gap-6 md:grid-cols-2">
-            <CommonMistakes items={mistakes} />
-            <RealExamples items={examples} />
+      <SectionShell tone="canvas" spacing="compact">
+        <div className="overflow-hidden rounded-[1.7rem] border border-slate-200 bg-white shadow-[0_22px_54px_rgba(15,23,42,0.06)]">
+          <div className="grid gap-6 px-6 py-7 md:px-8 md:py-8 lg:grid-cols-[0.95fr_1.05fr]">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.18em] text-blue-700">
+                Transformation
+              </p>
+              <h2 className="mt-4 text-4xl font-semibold tracking-[-0.05em] text-slate-950">
+                What changes when this work is implemented well
+              </h2>
+              <p className="mt-4 text-base leading-8 text-slate-600">
+                These before-and-after patterns show the kind of commercial lift the
+                service is meant to create.
+              </p>
+            </div>
+            <EvidenceGallery items={service.evidence} />
+          </div>
+          <div className="border-t border-slate-200 px-6 py-7 md:px-8">
+            <BeforeAfterResults items={service.beforeAfter} />
           </div>
         </div>
-      </section>
+      </SectionShell>
 
-      <section data-reveal=".proof-reveal" className="proof-reveal relative overflow-hidden py-20 bg-gray-950">
-        <GeneratedSectionBackground variant="service" />
-        <div className="relative mx-auto max-w-6xl px-6">
-          <SectionHeading
-            eyebrow="Evidence"
-            title="How the service changes the working state"
-            description="These are representative before-and-after patterns, not promises of a specific result."
-          />
-          <div className="mt-10 grid gap-6 md:grid-cols-2">
-            <BeforeAfterResults items={beforeAfter} />
-            <EvidenceGallery items={evidence} />
-          </div>
-        </div>
-      </section>
-
-      <section data-reveal=".faq-reveal" className="faq-reveal relative overflow-hidden py-20">
-        <GeneratedSectionBackground variant="faq" />
-        <div className="relative mx-auto max-w-6xl px-6">
+      <SectionShell tone="white" spacing="compact">
+        <div className="grid gap-6 lg:grid-cols-[1.08fr_0.92fr]">
           <FAQBlock
             items={service.faqs}
             title={`${service.title} FAQs`}
-            description="Service-specific questions to help you decide with less uncertainty."
+            description="Direct answers to common planning, scope, and implementation questions."
           />
-        </div>
-      </section>
-
-      <section className="border-y border-white/10 bg-[#060907] py-16">
-        <div className="mx-auto max-w-6xl px-6">
-          {relatedGuides.length ? (
-            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-              {relatedGuides.map((guide) => (
-                <InternalResourceCallout
-                  key={guide.href}
-                  title={guide.title}
-                  description="Read the guide before kickoff to improve inputs and speed up implementation."
-                  href={guide.href}
-                  label="Read Guide"
-                />
+          <article className="rounded-[1.55rem] border border-slate-200 bg-white p-6 shadow-[0_18px_36px_rgba(15,23,42,0.05)]">
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-blue-700">
+              Related Academy guides
+            </p>
+            <div className="mt-5 space-y-3">
+              {service.relatedGuideSlugs.slice(0, 4).map((slug) => (
+                <Link
+                  key={slug}
+                  href={`/blog/${slug}/`}
+                  className="flex items-center gap-3 rounded-[1.1rem] border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-700 transition hover:border-blue-200 hover:text-blue-700"
+                >
+                  <IconBadge tone="purple" className="h-9 w-9 rounded-[0.9rem]">
+                    <SearchIcon />
+                  </IconBadge>
+                  <span>{slug.replace(/-/g, " ")}</span>
+                </Link>
               ))}
             </div>
-          ) : (
             <InternalResourceCallout
-              title="Need practical preparation guidance before this service?"
-              description="Use the blog resources to understand scope, priorities, and quality standards before implementation starts."
-              href="/blog"
-              label="Browse Guides"
+              title="Browse the Academy"
+              description="Use Academy resources to understand this work before you invest in implementation."
+              href="/blog/"
+              label="Explore Academy"
             />
-          )}
+          </article>
         </div>
-      </section>
+      </SectionShell>
 
-      <section className="py-20">
-        <div className="mx-auto max-w-6xl px-6">
-          <div className="mb-12">
-            <CorePageLinks
-              eyebrow="Useful next steps"
-              title="Choose the next page that supports this service"
-              description="Use these pages for pricing context, diagnostic support, or a faster launch path."
-              links={supportLinks}
-            />
+      <SectionShell tone="canvas" spacing="compact">
+        <div className="grid gap-4 lg:grid-cols-3">
+          {supportLinks.map((item) => (
+            <article
+              key={item.href}
+              className="rounded-[1.35rem] border border-slate-200 bg-white p-5 shadow-[0_14px_30px_rgba(15,23,42,0.04)]"
+            >
+              <p className="text-xs font-bold uppercase tracking-[0.18em] text-blue-700">
+                {item.label}
+              </p>
+              <h3 className="mt-3 text-[1.25rem] font-semibold tracking-[-0.03em] text-slate-950">
+                {item.title}
+              </h3>
+              <p className="mt-3 text-sm leading-7 text-slate-600">{item.description}</p>
+              <Link href={item.href} className="mt-5 inline-flex text-sm font-semibold text-blue-700">
+                Open page -&gt;
+              </Link>
+            </article>
+          ))}
+        </div>
+      </SectionShell>
+
+      <SectionShell tone="canvas" spacing="compact">
+        <div className="overflow-hidden rounded-[1.8rem] border border-blue-950/60 bg-[radial-gradient(circle_at_88%_14%,rgba(108,84,255,0.42),transparent_24%),linear-gradient(135deg,#091226_0%,#0c1631_48%,#0b1230_100%)] px-8 py-9 shadow-[0_26px_70px_rgba(6,14,35,0.28)]">
+          <div className="grid gap-6 lg:grid-cols-[1fr_auto] lg:items-center">
+            <div>
+              <h2 className="max-w-2xl text-[2.2rem] font-semibold tracking-[-0.05em] text-white">
+                {service.ctaTitle}
+              </h2>
+              <p className="mt-3 max-w-xl text-base leading-8 text-blue-100">
+                {service.ctaDescription}
+              </p>
+            </div>
+
+            <div className="flex flex-col items-start gap-3 sm:flex-row">
+              <Link
+                href={`/contact?service=${encodeURIComponent(service.serviceParam)}`}
+                className="inline-flex min-h-12 items-center justify-center rounded-xl bg-white px-6 text-sm font-semibold text-blue-900 transition hover:bg-blue-50"
+              >
+                Request a Website Review
+              </Link>
+              <Link
+                href="/portfolio/"
+                className="inline-flex min-h-12 items-center justify-center rounded-xl border border-white/30 bg-transparent px-6 text-sm font-semibold text-white transition hover:bg-white/10"
+              >
+                View Case Studies
+              </Link>
+            </div>
           </div>
-
-          <CTASection
-            eyebrow="READY"
-            title={service.ctaTitle}
-            description={service.ctaDescription}
-            primaryCtaText="Request a Quote"
-            primaryHref={`/contact?service=${encodeURIComponent(service.serviceParam)}`}
-            secondaryCtaText="View Portfolio"
-            secondaryHref="/portfolio"
-            imageUrl={service.detailImage}
-          />
         </div>
-      </section>
-    </div>
+      </SectionShell>
+    </main>
   );
 }

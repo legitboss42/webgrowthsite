@@ -1,6 +1,5 @@
 import { finalCtaLinks } from "@/lib/launchOffer";
 import TrackedLink from "@/components/analytics/TrackedLink";
-import GeneratedSectionBackground from "@/components/GeneratedSectionBackground";
 
 export default function FinalCTASection({
   title = "Website Design in 48 Hours | Get a Professional Website Live Fast",
@@ -12,40 +11,30 @@ export default function FinalCTASection({
   pageType?: string;
 }) {
   return (
-    <section className="relative overflow-hidden bg-[#050806] py-20">
-      <GeneratedSectionBackground variant="cta" />
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.16),transparent_35%),radial-gradient(circle_at_bottom_right,rgba(16,185,129,0.1),transparent_32%)]" />
-
-      <div className="relative mx-auto max-w-6xl px-6">
-        <article className="relative overflow-hidden rounded-3xl border border-emerald-500/35 bg-[linear-gradient(135deg,rgba(16,185,129,0.18),rgba(8,12,10,0.96)_55%,rgba(0,0,0,0.9))] p-8 shadow-[0_20px_50px_rgba(0,0,0,0.25)]">
-          <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-emerald-300/70 to-transparent" />
-
-          <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
+    <section className="bg-white py-16 md:py-20">
+      <div className="mx-auto max-w-6xl px-5 sm:px-6">
+        <article className="overflow-hidden rounded-[2rem] border border-slate-200 bg-[linear-gradient(135deg,#eff4ff_0%,#ffffff_42%,#f4efff_100%)] p-8 shadow-[0_24px_60px_rgba(15,23,42,0.10)] md:p-10">
+          <div className="grid gap-8 lg:grid-cols-[1.08fr_0.92fr] lg:items-center">
             <div>
-              <h2 className="text-balance text-3xl font-semibold leading-tight tracking-[-0.01em] md:text-5xl">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-blue-700">
+                Next step
+              </p>
+              <h2 className="mt-4 text-balance text-3xl font-semibold tracking-[-0.03em] text-slate-950 md:text-5xl">
                 {title}
               </h2>
-              <p className="mt-4 max-w-2xl text-lg leading-7 text-white/78">
-                {description}
-              </p>
+              <p className="mt-4 max-w-2xl text-lg leading-8 text-slate-600">{description}</p>
 
-              <div className="mt-6 flex flex-wrap gap-3 text-sm text-white/72">
-                <span className="rounded-full border border-white/10 bg-black/25 px-4 py-2">
-                  Fast delivery
-                </span>
-                <span className="rounded-full border border-white/10 bg-black/25 px-4 py-2">
-                  USD pricing
-                </span>
-                <span className="rounded-full border border-white/10 bg-black/25 px-4 py-2">
-                  Nigeria + remote clients
-                </span>
+              <div className="mt-6 flex flex-wrap gap-2 text-sm text-slate-500">
+                <span className="rounded-full border border-slate-200 bg-white px-4 py-2">Fast delivery</span>
+                <span className="rounded-full border border-slate-200 bg-white px-4 py-2">USD pricing</span>
+                <span className="rounded-full border border-slate-200 bg-white px-4 py-2">Nigeria + remote clients</span>
               </div>
             </div>
 
             <div className="flex flex-col gap-3">
               <TrackedLink
                 href={finalCtaLinks.primaryHref}
-                className="inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-emerald-700 px-8 py-3 text-base font-semibold text-white shadow-[0_14px_34px_rgba(5,150,105,0.25)] transition-colors hover:bg-emerald-600"
+                className="inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-[linear-gradient(135deg,#4f6bff_0%,#7c5cff_100%)] px-8 py-3 text-sm font-semibold text-white shadow-[0_18px_38px_rgba(79,107,255,0.24)] transition hover:-translate-y-0.5 hover:brightness-105"
                 ctaName="start_your_website"
                 ctaLocation={`${pageType}_primary`}
                 destination={finalCtaLinks.primaryHref}
@@ -59,7 +48,7 @@ export default function FinalCTASection({
                 href={finalCtaLinks.bookingHref}
                 target={finalCtaLinks.bookingHref.startsWith("http") ? "_blank" : undefined}
                 rel={finalCtaLinks.bookingHref.startsWith("http") ? "noreferrer" : undefined}
-                className="inline-flex min-h-12 w-full items-center justify-center rounded-xl border border-white/25 bg-black/35 px-8 py-3 text-base font-semibold text-white transition-colors hover:border-white/40 hover:bg-black/50"
+                className="inline-flex min-h-12 w-full items-center justify-center rounded-xl border border-slate-200 bg-white px-8 py-3 text-sm font-semibold text-slate-900 shadow-sm transition hover:-translate-y-0.5 hover:border-blue-200 hover:bg-blue-50"
                 ctaName="booking"
                 ctaLocation={`${pageType}_booking`}
                 destination="booking"
@@ -73,7 +62,7 @@ export default function FinalCTASection({
                 href={finalCtaLinks.whatsappHref}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex min-h-11 w-full items-center justify-center rounded-xl text-sm font-semibold text-emerald-200 transition hover:text-emerald-100"
+                className="inline-flex min-h-11 w-full items-center justify-center rounded-xl px-6 py-3 text-sm font-semibold text-blue-700 transition hover:text-blue-800"
                 ctaName="whatsapp"
                 ctaLocation={`${pageType}_whatsapp`}
                 destination="whatsapp"
@@ -85,21 +74,18 @@ export default function FinalCTASection({
             </div>
           </div>
 
-          <div className="mt-7 border-t border-white/10 pt-5 text-sm text-white/70">
+          <div className="mt-7 border-t border-slate-200 pt-5 text-sm text-slate-500">
             <span>Email: </span>
-            <a
-              href={finalCtaLinks.emailHref}
-              className="text-emerald-300 hover:text-emerald-200"
-            >
+            <a href={finalCtaLinks.emailHref} className="font-medium text-blue-700 hover:text-blue-800">
               {finalCtaLinks.emailLabel}
             </a>
-            <span className="mx-2 text-white/40">|</span>
+            <span className="mx-2 text-slate-300">|</span>
             <span>WhatsApp: </span>
             <a
               href={finalCtaLinks.whatsappHref}
               target="_blank"
               rel="noreferrer"
-              className="text-emerald-300 hover:text-emerald-200"
+              className="font-medium text-blue-700 hover:text-blue-800"
             >
               {finalCtaLinks.whatsappLabel}
             </a>

@@ -10,41 +10,41 @@ export default function EditorialTrustNote({
   return (
     <div
       className={[
-        "rounded-2xl border border-white/10 bg-white/5",
+        "rounded-[1.5rem] border border-slate-200 bg-white shadow-[0_18px_45px_rgba(15,23,42,0.05)]",
         compact ? "p-5" : "p-6",
       ].join(" ")}
     >
-      <div className="flex flex-wrap items-center gap-2 text-xs uppercase tracking-[0.18em] text-emerald-300/80">
-        <span>Editorial Note</span>
-        <span className="h-1 w-1 rounded-full bg-emerald-400/60" />
+      <div className="flex flex-wrap items-center gap-2 text-xs uppercase tracking-[0.18em] text-blue-700">
+        <span>Editorial Standard</span>
+        <span className="h-1 w-1 rounded-full bg-blue-300" />
         <span>Web Growth</span>
       </div>
 
-      <p className="mt-3 max-w-3xl text-sm leading-7 text-white/72">
+      <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-600">
         Our articles are written and reviewed in-house using real website launch,
         redesign, technical SEO, and conversion work. We update posts when our
         process changes, and we keep the advice aligned with what we actually
         implement for businesses in Nigeria and remote international markets.
       </p>
 
-      <div className="mt-4 flex flex-wrap gap-3 text-sm text-white/70">
+      <div className="mt-4 flex flex-wrap gap-3 text-sm text-slate-600">
         <Link
           href="/about"
-          className="rounded-full border border-white/12 bg-black/25 px-3 py-1.5 transition hover:border-white/20 hover:text-white"
+          className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 transition hover:border-blue-200 hover:text-blue-700"
         >
           About Web Growth
         </Link>
         <Link
           href="/contact"
-          className="rounded-full border border-white/12 bg-black/25 px-3 py-1.5 transition hover:border-white/20 hover:text-white"
+          className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 transition hover:border-blue-200 hover:text-blue-700"
         >
           Contact
         </Link>
         <Link
-          href="/launch"
-          className="rounded-full border border-emerald-400/20 bg-emerald-500/10 px-3 py-1.5 text-emerald-100 transition hover:border-emerald-300/35 hover:bg-emerald-500/15"
+          href="/services"
+          className="rounded-full border border-blue-100 bg-blue-50 px-3 py-1.5 text-blue-700 transition hover:border-blue-200 hover:bg-blue-100"
         >
-          Website design in 48 hours
+          View Services
         </Link>
       </div>
     </div>

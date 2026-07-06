@@ -23,12 +23,12 @@ export const metadata: Metadata = {
     canonical: SITE_URL,
   },
   keywords: [
-    "web design",
-    "web design services",
-    "website design in 48 hours",
-    "website design nigeria",
-    "lagos web design",
-    "remote web design service",
+    "website growth platform",
+    "website growth services",
+    "website redesign and seo",
+    "website monetization",
+    "website strategy nigeria",
+    "premium website growth",
   ],
   openGraph: {
     title: SITE_NAME,
@@ -40,7 +40,7 @@ export const metadata: Metadata = {
         url: `${SITE_URL}/images/hero/Hero-Image-1.webp`,
         width: 1200,
         height: 630,
-        alt: "Web Growth 48-hour website launch",
+        alt: "Web Growth premium website growth platform",
       },
     ],
     type: "website",
@@ -74,14 +74,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta
           name="impact-site-verification"
           content="f14352c8-ac00-4455-ad6a-4c0615d5653b"
-        />
-
-        <Script
-          id="google-adsense"
-          async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4073948936216175"
-          crossOrigin="anonymous"
-          strategy="afterInteractive"
         />
 
         {IS_PRODUCTION ? (
