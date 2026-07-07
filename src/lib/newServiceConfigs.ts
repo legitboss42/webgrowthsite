@@ -82,7 +82,7 @@ export const NEW_SERVICE_PAGES: Record<string, ServicePageInput> = {
     serviceParam: "Email Marketing Setup and Strategy",
     seoTitle: "Email Marketing Setup and Strategy | Web Growth",
     seoDescription:
-      "Email marketing setup and strategy for small businesses that need segmentation, nurture flows, campaigns, and conversion-focused email systems tied to real revenue goals.",
+      "Email marketing setup and strategy for small businesses that need smarter segmentation, nurture flows, and conversion-focused campaigns tied to revenue goals.",
     metaDescription:
       "Email marketing setup and strategy for small businesses: list growth flow, segmentation, nurture sequences, campaigns, and measurable conversion tracking.",
     keywords: [
@@ -175,7 +175,7 @@ export const NEW_SERVICE_PAGES: Record<string, ServicePageInput> = {
     serviceParam: "Search Engine Optimisation (SEO)",
     seoTitle: "SEO Service for Service Businesses | Web Growth",
     seoDescription:
-      "SEO service for service businesses that need stronger local visibility, better service-page targeting, cleaner technical foundations, and more qualified search enquiries.",
+      "SEO service for service businesses that need stronger local visibility, clearer service-page targeting, and more qualified search enquiries.",
     metaDescription:
       "SEO for service businesses that already have a real offer and need stronger local visibility, cleaner service pages, and better-qualified enquiries.",
     keywords: [
@@ -268,7 +268,7 @@ export const NEW_SERVICE_PAGES: Record<string, ServicePageInput> = {
     serviceParam: "Google Business Profile Optimization Lagos",
     seoTitle: "Google Business Profile Optimization Lagos | Web Growth",
     seoDescription:
-      "Google Business Profile optimization in Lagos for service businesses that need stronger Maps visibility, cleaner profile trust signals, and more qualified local enquiries.",
+      "Google Business Profile optimization in Lagos for service businesses that need better Maps visibility, stronger profile trust signals, and more qualified enquiries.",
     metaDescription:
       "Google Business Profile optimization in Lagos to improve Google Maps visibility, local rankings, profile quality, and enquiry volume for service businesses.",
     keywords: [
@@ -491,7 +491,7 @@ export const NEW_SERVICE_PAGES: Record<string, ServicePageInput> = {
     serviceParam: "CRM System Setup and Configuration",
     seoTitle: "CRM System Setup and Configuration | Web Growth",
     seoDescription:
-      "CRM system setup and configuration for businesses that need cleaner lead routing, pipeline visibility, follow-up logic, and a stronger handoff from marketing to sales.",
+      "CRM system setup for businesses that need cleaner lead routing, better pipeline visibility, and a stronger handoff from marketing to sales.",
     metaDescription:
       "CRM setup and configuration service for small businesses: pipeline setup, lead capture flows, tagging, automations, and reporting-ready structure.",
     keywords: [
@@ -584,7 +584,7 @@ export const NEW_SERVICE_PAGES: Record<string, ServicePageInput> = {
     serviceParam: "Marketing Automation Build and Implementation",
     seoTitle: "Marketing Automation Build and Implementation | Web Growth",
     seoDescription:
-      "Marketing automation build and implementation for businesses that need lead follow-up, routing, lifecycle flows, and conversion logic that works across the website and CRM stack.",
+      "Marketing automation build for businesses that need lead follow-up, lifecycle flows, and conversion logic that works across the website and CRM stack.",
     metaDescription:
       "Marketing automation build and implementation services: automated lead nurture workflows, follow-up sequences, segmentation logic, and conversion tracking.",
     keywords: [

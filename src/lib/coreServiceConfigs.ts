@@ -5,6 +5,9 @@ export const CORE_SERVICE_PAGES: Record<string, ServicePageInput> = {
     title: "Business Website Design",
     slug: "business-website-design",
     serviceParam: "Business Website Design",
+    seoTitle: "Business Website Design Service | Web Growth",
+    seoDescription:
+      "Business website design for service brands that need clearer positioning, stronger trust, and more qualified enquiries from the right visitors.",
     metaDescription:
       "Business website design service for growth-focused companies that need clearer positioning, stronger trust, and higher-quality enquiries.",
     keywords: [
@@ -112,6 +115,9 @@ export const CORE_SERVICE_PAGES: Record<string, ServicePageInput> = {
     title: "Landing Page Design",
     slug: "landing-page-design",
     serviceParam: "Landing Page Design",
+    seoTitle: "Landing Page Design Service | Web Growth",
+    seoDescription:
+      "Landing page design for campaigns and offers that need better message match, stronger trust, and more qualified conversions from paid or outbound traffic.",
     metaDescription:
       "Landing page design service for campaigns, outreach, and paid traffic that need stronger message match and higher conversion quality.",
     keywords: [
@@ -212,6 +218,9 @@ export const CORE_SERVICE_PAGES: Record<string, ServicePageInput> = {
     title: "Website Redesign",
     slug: "website-redesign",
     serviceParam: "Website Redesign",
+    seoTitle: "Website Redesign Service | Web Growth",
+    seoDescription:
+      "Website redesign for businesses with outdated, low-trust websites that need stronger positioning, cleaner UX, and better enquiry performance.",
     metaDescription:
       "Website redesign service for businesses with outdated, low-trust, or underperforming websites that need stronger conversion and scalability.",
     keywords: [
@@ -616,11 +625,11 @@ export const CORE_SERVICE_PAGES: Record<string, ServicePageInput> = {
     title: "Website Audit and Consultation",
     slug: "website-audit",
     serviceParam: "Website Audit & Consultation",
-    seoTitle: "Website Audit Service | Web Growth",
+    seoTitle: "Website Audit Service for SEO, UX, and Conversion Diagnosis | Web Growth",
     seoDescription:
-      "Website audit service for businesses that need a practical diagnosis of SEO, trust, speed, mobile UX, and conversion blockers before investing in bigger website changes.",
+      "Website audit service for businesses that need a practical diagnosis of SEO, trust, speed, mobile UX, and conversion blockers before bigger website changes.",
     metaDescription:
-      "Website audit and consultation service to identify what is hurting SEO, trust, speed, and conversion, with a practical action roadmap.",
+      "Website audit and consultation to identify what is hurting rankings, trust, speed, and conversion, with a prioritized action roadmap you can implement confidently.",
     keywords: [
       "website audit service",
       "website consultation service",

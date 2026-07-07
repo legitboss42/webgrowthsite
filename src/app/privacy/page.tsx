@@ -2,9 +2,9 @@ import PrivacyClient from "@/components/PrivacyClient";
 import { buildPageMetadata } from "@/lib/seo";
 
 export const metadata = buildPageMetadata({
-  title: "Privacy Policy | Web Growth",
+  title: "Privacy Policy and Data Use | Web Growth",
   description:
-    "Web Growth Privacy Policy. Learn how we collect, use, and protect your information when you use our website and services.",
+    "Read how Web Growth collects, uses, protects, and stores information when you use our website, forms, tools, and services.",
   path: "/privacy",
   keywords: [
     "web growth privacy policy",

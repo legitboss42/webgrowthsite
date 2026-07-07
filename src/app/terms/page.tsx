@@ -2,9 +2,9 @@ import TermsClient from "@/components/TermsClient";
 import { buildPageMetadata } from "@/lib/seo";
 
 export const metadata = buildPageMetadata({
-  title: "Terms of Service | Web Growth",
+  title: "Terms of Service for Web Growth Clients | Web Growth",
   description:
-    "Web Growth Terms of Service. Clear terms for using our website and working with us on web design and development projects.",
+    "Review the terms for using the Web Growth website and working with us on website strategy, design, development, and support projects.",
   path: "/terms",
   keywords: [
     "web growth terms of service",

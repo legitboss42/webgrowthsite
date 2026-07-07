@@ -9,7 +9,7 @@ import { featuredPortfolioCases } from "@/lib/portfolioCases";
 import { buildPageMetadata } from "@/lib/seo";
 
 const pageDescription =
-  "Web Growth helps businesses and creators build better websites, grow search traffic, improve conversions, and monetize with services, Academy resources, free tools, and practical case studies.";
+  "Web Growth helps businesses build better websites, improve search visibility, increase enquiries, and monetize with services, tools, and practical guides.";
 
 export const metadata = buildPageMetadata({
   title: "Build, Grow, and Monetize Your Website | Web Growth",

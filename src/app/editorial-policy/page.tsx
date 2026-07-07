@@ -2,10 +2,10 @@ import EditorialPolicyClient from "@/components/EditorialPolicyClient";
 import { buildPageMetadata } from "@/lib/seo";
 
 const pageDescription =
-  "Learn how Web Growth creates, reviews, updates, and maintains website strategy, SEO, and launch content published on this site.";
+  "See how Web Growth researches, reviews, updates, and corrects website strategy, SEO, and growth content published on this site.";
 
 export const metadata = buildPageMetadata({
-  title: "Editorial Policy | Web Growth",
+  title: "Editorial Policy and Review Standards | Web Growth",
   description: pageDescription,
   path: "/editorial-policy",
   keywords: [

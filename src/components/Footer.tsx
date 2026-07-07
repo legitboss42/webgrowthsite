@@ -8,9 +8,11 @@ const footerColumns = [
     title: "Platform",
     links: [
       { href: "/services/", label: "Services" },
-      { href: "/blog/", label: "Academy" },
-      { href: "/tools/", label: "Tools" },
-      { href: "/portfolio/", label: "Case Studies" },
+      { href: "/services/business-website-design/", label: "Business Websites" },
+      { href: "/services/website-redesign/", label: "Website Redesign" },
+      { href: "/services/landing-page-design/", label: "Landing Pages" },
+      { href: "/services/ecommerce-website-design/", label: "Ecommerce Websites" },
+      { href: "/services/website-audit/", label: "Website Audit" },
     ],
   },
   {
@@ -18,16 +20,32 @@ const footerColumns = [
     links: [
       { href: "/about/", label: "About" },
       { href: "/contact/", label: "Contact" },
-      { href: "/services/website-audit/", label: "Website Review" },
-      { href: "/faq/", label: "FAQ" },
+      { href: "/pricing/", label: "Pricing" },
+      { href: "/blog/", label: "Academy" },
+      { href: "/portfolio/", label: "Case Studies" },
+      { href: "/tools/", label: "Tools" },
     ],
   },
   {
-    title: "Resources",
+    title: "Growth Systems",
     links: [
-      { href: "/blog/", label: "Academy" },
-      { href: "/blog/", label: "Guides" },
-      { href: "/tools/", label: "Templates" },
+      { href: "/services/analytics-tracking-setup/", label: "Analytics Setup" },
+      { href: "/services/crm-system-setup-configuration/", label: "CRM Setup" },
+      { href: "/services/booking-platform-setup-integration/", label: "Booking Integration" },
+      { href: "/services/email-marketing-setup-strategy/", label: "Email Marketing" },
+      { href: "/services/marketing-automation-build-implementation/", label: "Marketing Automation" },
+    ],
+  },
+  {
+    title: "Support",
+    links: [
+      { href: "/services/google-my-business-setup-optimisation/", label: "Google Business Profile" },
+      { href: "/services/domain-registration-hosting-guidance/", label: "Domain and Hosting" },
+      { href: "/services/website-maintenance/", label: "Website Maintenance" },
+      { href: "/tools/homepage-checklist/", label: "Homepage Checklist" },
+      { href: "/tools/adsense-readiness-checker/", label: "AdSense Checker" },
+      { href: "/tools/sitemap-validator/", label: "Sitemap Validator" },
+      { href: "/faq/", label: "FAQ" },
       { href: "/editorial-policy/", label: "Editorial Policy" },
     ],
   },
@@ -37,7 +55,6 @@ const footerColumns = [
       { href: "/privacy/", label: "Privacy Policy" },
       { href: "/terms/", label: "Terms of Service" },
       { href: "/disclaimer/", label: "Disclaimer" },
-      { href: "/editorial-policy/", label: "Editorial Standards" },
       { href: "/contact/", label: "Support" },
     ],
   },
@@ -95,7 +112,7 @@ export default function Footer() {
             </div>
           </div>
 
-          <nav className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4" aria-label="Footer navigation">
+          <nav className="grid gap-8 sm:grid-cols-2 lg:grid-cols-5" aria-label="Footer navigation">
             {footerColumns.map((column) => (
               <div key={column.title}>
                 <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">

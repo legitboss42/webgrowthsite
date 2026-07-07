@@ -2,10 +2,10 @@ import { buildPageMetadata } from "@/lib/seo";
 import SectionShell from "@/components/home/SectionShell";
 
 const pageDescription =
-  "Read the Web Growth disclaimer covering educational content, implementation guidance, affiliate context, and the limits of results claims or platform-specific advice.";
+  "Read the Web Growth disclaimer on educational guidance, affiliate context, and the limits of results claims, platform advice, and implementation examples.";
 
 export const metadata = buildPageMetadata({
-  title: "Disclaimer | Web Growth",
+  title: "Website Disclaimer and Affiliate Disclosure | Web Growth",
   description: pageDescription,
   path: "/disclaimer",
   keywords: [
