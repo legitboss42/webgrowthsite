@@ -54,7 +54,7 @@ const plannedTools = [
 export const metadata = buildPageMetadata({
   title: "Web Growth Tools | Practical Website Growth Utilities",
   description:
-    "Explore the upcoming Web Growth tools hub for website audits, AdSense readiness, SEO checks, and launch planning.",
+    "Use live Web Growth tools for website audits, AdSense readiness, SEO checks, launch planning, and conversion-focused website reviews.",
   path: "/tools/",
   keywords: [
     "website growth tools",
@@ -119,7 +119,7 @@ export default function ToolsPage() {
                   {tool.title}
                 </h2>
                 <p className="mt-3 text-sm leading-7 text-slate-600">{tool.description}</p>
-                <p className="mt-5 text-sm font-semibold text-blue-700">Open tool -&gt;</p>
+            <p className="mt-5 text-sm font-semibold text-blue-700">Open tool -&gt;</p>
               </Link>
             ))}
           </div>

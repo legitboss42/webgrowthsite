@@ -53,7 +53,7 @@ const auditAnswers = [
     title: "When should I request an audit?",
     answer:
       "Request an audit when traffic is not turning into leads, rankings feel weak, the site feels slow, or you know the website is underperforming but cannot clearly see why.",
-    href: "/blog/why-your-website-isnt-getting-leads",
+    href: "/blog/why-your-website-isnt-getting-leads/",
     hrefLabel: "See common lead leaks",
   },
   {
@@ -67,14 +67,14 @@ const auditAnswers = [
     title: "Can this lead into implementation?",
     answer:
       "Yes. Many audits naturally turn into redesign, SEO, speed optimisation, or a simpler 48-hour launch depending on what the business actually needs.",
-    href: "/services/website-redesign",
+    href: "/services/website-redesign/",
     hrefLabel: "See redesign service",
   },
   {
     title: "Is this useful before paying for more traffic?",
     answer:
       "Absolutely. It is often smarter to fix clarity, trust, speed, and conversion flow before spending more on SEO or ads.",
-    href: "/services/search-engine-optimisation",
+    href: "/services/search-engine-optimisation/",
     hrefLabel: "See SEO support",
   },
 ] as const;

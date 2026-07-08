@@ -12,8 +12,11 @@ import {
   sanitizeText,
 } from "@/lib/security";
 import { verifyTurnstileToken } from "@/lib/turnstile";
+import {
+  ADMIN_EMAIL,
+  sendTransactionalEmail,
+} from "@/lib/email";
 
-const ADMIN_EMAIL = "admin@webgrowth.info";
 export const runtime = "nodejs";
 
 type GetStartedBody = {
@@ -100,11 +103,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: turnstile.error }, { status: 400 });
     }
 
-    const token = process.env.MAILERSEND_API_TOKEN;
-    const fromEmail = process.env.MAILERSEND_FROM_EMAIL;
-    const fromName = process.env.MAILERSEND_FROM_NAME || "Web Growth";
-
-    if (!token || !fromEmail) {
+    if (!process.env.BREVO_API_KEY || !process.env.BREVO_FROM_EMAIL) {
       return NextResponse.json(
         {
           error:
@@ -130,40 +129,56 @@ export async function POST(req: Request) {
     const textBody = lines.join("\n");
     const htmlBody = lines.map((line) => `<p>${escapeHtml(line)}</p>`).join("");
 
-    const msRes = await fetch("https://api.mailersend.com/v1/email", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
+    await sendTransactionalEmail({
+      to: [{ email: ADMIN_EMAIL, name: "Web Growth Admin" }],
+      subject,
+      text: textBody,
+      html: htmlBody,
+      replyTo: {
+        email,
+        name: fullName,
       },
-      signal: AbortSignal.timeout(10000),
-      body: JSON.stringify({
-        from: {
-          email: fromEmail,
-          name: fromName,
-        },
-        to: [{ email: ADMIN_EMAIL, name: "Web Growth Admin" }],
-        reply_to: {
-          email,
-          name: fullName,
-        },
-        subject,
-        text: textBody,
-        html: htmlBody,
-      }),
     });
 
-    if (!msRes.ok) {
-      return NextResponse.json(
-        {
-          error: "Could not send your request right now.",
-        },
-        { status: 502 }
-      );
-    }
+    const confirmationText = [
+      "Thanks for starting your website request with Web Growth.",
+      "",
+      "We received your details and will review the right next step for your business.",
+      "",
+      `Selected package: ${selectedPackage || "Not specified"}`,
+      `What you need: ${projectNeed}`,
+      `Domain already owned: ${hasDomain}`,
+      `Business name: ${businessName}`,
+      "",
+      "We will reply within one business day.",
+      "",
+      "Reply to this email if you want to add more context before we respond.",
+    ].join("\n");
+
+    const confirmationHtml = [
+      "<p>Thanks for starting your website request with Web Growth.</p>",
+      "<p>We received your details and will review the right next step for your business.</p>",
+      "<ul>",
+      `<li>${escapeHtml(`Selected package: ${selectedPackage || "Not specified"}`)}</li>`,
+      `<li>${escapeHtml(`What you need: ${projectNeed}`)}</li>`,
+      `<li>${escapeHtml(`Domain already owned: ${hasDomain}`)}</li>`,
+      `<li>${escapeHtml(`Business name: ${businessName}`)}</li>`,
+      "</ul>",
+      "<p>We will reply within one business day.</p>",
+      "<p>Reply to this email if you want to add more context before we respond.</p>",
+    ].join("");
+
+    await sendTransactionalEmail({
+      to: [{ email, name: fullName }],
+      subject: "We received your website request",
+      text: confirmationText,
+      html: confirmationHtml,
+      replyTo: { email: ADMIN_EMAIL, name: "Web Growth" },
+    });
 
     return NextResponse.json({ ok: true });
-  } catch {
+  } catch (error) {
+    console.error("[get-started]", error);
     return NextResponse.json(
       { error: "Invalid request payload." },
       { status: 400 }

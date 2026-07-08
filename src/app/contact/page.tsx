@@ -22,12 +22,13 @@ import {
   CONTACT_EMAIL_HREF,
   buildWhatsAppUrl,
 } from "@/lib/site";
+import { isEmailDeliveryConfigured } from "@/lib/email";
 
 const pageDescription =
   "Request a website review from Web Growth. Send your website link or business details and get guidance on clarity, trust, speed, mobile experience, and enquiry flow.";
 
 export const metadata = buildPageMetadata({
-  title: "Contact Web Growth | Start With a Website Review",
+  title: "Contact Web Growth | Website Review, SEO, and Redesign Enquiries",
   description: pageDescription,
   path: "/contact/",
   keywords: [
@@ -60,6 +61,33 @@ const reasons = [
     title: "Partnership",
     text: "Agencies, SaaS, and brands. We love building strategic partnerships.",
     icon: <ConvertIcon />,
+  },
+] as const;
+
+const popularStartingPoints = [
+  {
+    href: "/services/website-audit/",
+    title: "Website Audit",
+    description:
+      "Start here when you need to find the main trust, conversion, SEO, or performance blockers first.",
+  },
+  {
+    href: "/services/website-redesign/",
+    title: "Website Redesign",
+    description:
+      "Start here when the current site feels outdated, unclear, or too weak to support serious enquiries.",
+  },
+  {
+    href: "/services/search-engine-optimisation/",
+    title: "SEO Service",
+    description:
+      "Start here when you need stronger search visibility, internal linking, and better commercial page targeting.",
+  },
+  {
+    href: "/blog/small-business-website-seo-checklist/",
+    title: "SEO Checklist Guide",
+    description:
+      "Start here if you want a practical next read before deciding whether the problem is traffic, trust, or conversion.",
   },
 ] as const;
 
@@ -110,9 +138,7 @@ const faqItems = [
 ] as const;
 
 export default function ContactPage() {
-  const directDeliveryConfigured = Boolean(
-    process.env.MAILERSEND_API_TOKEN && process.env.MAILERSEND_FROM_EMAIL
-  );
+  const directDeliveryConfigured = isEmailDeliveryConfigured();
   const whatsappHref = buildWhatsAppUrl(
     "Hello Web Growth, I would like a website review. Here is my website/business detail:"
   );
@@ -134,7 +160,7 @@ export default function ContactPage() {
                 Let&apos;s grow together
               </p>
               <h1 className="mt-5 max-w-[35rem] text-balance text-[3.7rem] font-semibold leading-[0.92] tracking-[-0.065em] text-slate-950 md:text-[5rem]">
-                Let&apos;s build your next{" "}
+                Request a Website Review and build your next{" "}
                 <span className="bg-[linear-gradient(90deg,#3557ff_0%,#7c5cff_70%,#5e7cff_100%)] bg-clip-text text-transparent">
                   growth chapter.
                 </span>
@@ -241,6 +267,27 @@ export default function ContactPage() {
                         <p className="mt-1 text-sm leading-6 text-slate-600">{item.text}</p>
                       </div>
                     </div>
+                  ))}
+                </div>
+              </article>
+
+              <article className="rounded-[1.6rem] border border-slate-200 bg-white p-6 shadow-[0_14px_30px_rgba(15,23,42,0.04)]">
+                <h2 className="text-2xl font-semibold tracking-[-0.04em] text-slate-950">
+                  Popular Starting Points
+                </h2>
+                <p className="mt-3 text-sm leading-7 text-slate-600">
+                  If you already know the type of help you need, start with the page that best matches the problem.
+                </p>
+                <div className="mt-6 space-y-4">
+                  {popularStartingPoints.map((item) => (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className="block rounded-[1.1rem] border border-slate-200 bg-slate-50 px-4 py-4 transition hover:border-blue-200 hover:bg-blue-50"
+                    >
+                      <p className="text-sm font-semibold text-slate-950">{item.title}</p>
+                      <p className="mt-2 text-sm leading-6 text-slate-600">{item.description}</p>
+                    </Link>
                   ))}
                 </div>
               </article>

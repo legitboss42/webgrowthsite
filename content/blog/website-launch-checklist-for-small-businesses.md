@@ -2,13 +2,13 @@
 title: >-
   Website Launch Checklist for Small Businesses (Avoid Expensive Mistakes on Day
   One)
-seoTitle: "Website Launch Checklist for Small Businesses | Web Growth"
+seoTitle: "Website Launch Checklist for Small Businesses That Convert | Web Growth"
 primaryKeyword: "website launch checklist for small business"
 searchIntent: "Informational - plan and improve a small-business website"
 coverAlt: "Website Launch Checklist for Small Businesses (Avoid Expensive Mistakes on Day One) - practical Web Growth guide visual"
 excerpt: >-
-  Launch day should not be chaos. Use this practical checklist to ship a fast,
-  credible, conversion-ready website that actually generates enquiries.
+  Launch day should not be chaos. Use this practical checklist to launch a
+  fast, credible, conversion-ready website that actually generates enquiries.
 date: 2026-02-15T00:00:00.000Z
 category: Strategy
 tags:

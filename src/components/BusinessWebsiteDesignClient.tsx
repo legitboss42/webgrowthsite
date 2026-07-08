@@ -276,14 +276,14 @@ export default function BusinessWebsiteDesignClient() {
                     "Use the 48-hour launch offer if you want a focused one-page website live fast before expanding later.",
                 },
                 {
-                  href: "/services/website-audit",
+                  href: "/services/website-audit/",
                   label: "Audit",
                   title: "Need clarity before rebuilding?",
                   description:
                     "Start with a website audit if you are not fully sure what is blocking trust, enquiries, or SEO performance.",
                 },
                 {
-                  href: "/blog/how-to-build-a-small-business-website-that-converts",
+                  href: "/blog/how-to-build-a-small-business-website-that-converts/",
                   label: "Guide",
                   title: "Need the strategy first?",
                   description:
@@ -300,7 +300,7 @@ export default function BusinessWebsiteDesignClient() {
             primaryCtaText="Request a Quote"
             primaryHref="/contact?service=Business Website Design"
             secondaryCtaText="View Services"
-            secondaryHref="/services"
+            secondaryHref="/services/"
             imageUrl="/images/services/services-business-cta.webp"
           />
         </div>

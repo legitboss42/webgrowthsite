@@ -1,6 +1,6 @@
 ---
 title: 'Launch Week Checklist and First 7 Days: SEO, QA, and Post-Launch Monitoring'
-seoTitle: "Launch Week Checklist and First 7 Days | Web Growth"
+seoTitle: "Launch Week Checklist and First 7 Days for SEO QA | Web Growth"
 primaryKeyword: "website launch week checklist"
 searchIntent: "Informational - first-hand case study and implementation lessons"
 coverAlt: "Launch Week Checklist and First 7 Days: SEO, QA, and Post-Launch Monitoring - practical Web Growth guide visual"
@@ -165,7 +165,7 @@ We checked that all priority pages had:
 - visible CTA paths
 - mobile-ready layout
 
-Any page that was still “mostly done” was treated as not ready.
+Any page that was still "mostly done" was treated as not ready.
 
 ### 2) Redirect readiness
 
@@ -299,7 +299,7 @@ Immediately after launch, confirm whether:
 - forms and thank-you routes are tracked correctly
 - source and landing-page data still make sense
 
-Launch day is the wrong time to “assume analytics probably works.”
+Launch day is the wrong time to "assume analytics probably works."
 
 ### 6) Submit and verify crawl assets
 
@@ -586,7 +586,7 @@ Use this before and during your next launch.
 - confirm conversion tracking integrity
 - triage fixes by business and SEO impact
 
-This should be a shared checklist, not one person’s memory.
+This should be a shared checklist, not one person's memory.
 
 For broader reference, pair this with:
 [Website Launch Checklist for Small Businesses](/blog/website-launch-checklist-for-small-businesses).

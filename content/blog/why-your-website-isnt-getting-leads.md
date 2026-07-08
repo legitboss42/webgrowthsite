@@ -1,10 +1,10 @@
 ---
 title: "Why Your Website Is Not Getting Leads — and What to Fix First"
-seoTitle: "Why Your Website Is Not Getting Leads | Web Growth"
+seoTitle: "Why Your Website Is Not Getting Leads and What to Fix | Web Growth"
 primaryKeyword: "why a website is not getting leads"
 searchIntent: "Informational - improve website conversion and lead quality"
 coverAlt: "Why Your Website Is Not Getting Leads — and What to Fix First - practical Web Growth guide visual"
-excerpt: "Find out why your website is not getting leads and what issues may be affecting trust, clarity, speed, CTAs, mobile experience, and enquiry flow."
+excerpt: "Find out why your website is not getting leads and which trust, clarity, speed, CTA, mobile, or enquiry-flow issues to fix first."
 date: 2026-02-05T00:00:00.000Z
 category: Conversion
 tags:

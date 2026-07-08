@@ -47,28 +47,28 @@ const landingPageAnswers = [
     title: "Who actually needs a landing page?",
     answer:
       "Businesses running ads, campaigns, outreach, or focused offers usually need a dedicated landing page instead of sending traffic to a generic homepage.",
-    href: "/blog/high-converting-landing-pages-guide",
+    href: "/blog/high-converting-landing-pages-guide/",
     hrefLabel: "Read the landing page guide",
   },
   {
     title: "What usually hurts conversions first?",
     answer:
       "Weak message match, clutter, poor proof placement, and a CTA flow that asks visitors to think too hard before they act.",
-    href: "/blog/why-your-website-isnt-getting-leads",
+    href: "/blog/why-your-website-isnt-getting-leads/",
     hrefLabel: "See common conversion leaks",
   },
   {
     title: "Do I need this or a full website?",
     answer:
       "Choose this when one campaign or offer needs a focused page. Choose a full site when the business needs broader trust, service coverage, and ongoing content support.",
-    href: "/services/business-website-design",
+    href: "/services/business-website-design/",
     hrefLabel: "See full website design",
   },
   {
     title: "What if I need it live quickly?",
     answer:
       "If speed matters more than a bigger build, the 48-hour launch offer can be the fast-start option before you move into more specialized pages.",
-    href: "/launch",
+    href: "/launch/",
     hrefLabel: "See the 48-hour launch",
   },
 ] as const;

@@ -11,7 +11,7 @@ type Props = {
 const SITE_URL = "https://webgrowth.info";
 
 export default function SocialShare({ title, excerpt, slug }: Props) {
-  const url = `${SITE_URL}/blog/${slug}`;
+  const url = `${SITE_URL}/blog/${slug}/`;
 
   // short summary the user shares
   const text = `${title} - ${excerpt}`;

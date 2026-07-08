@@ -66,7 +66,7 @@ function IconTelegram(props: { className?: string }) {
 }
 
 export default function SocialShareDock({ title, excerpt, slug }: Props) {
-  const url = `${SITE_URL}/blog/${slug}`;
+  const url = `${SITE_URL}/blog/${slug}/`;
   const text = `${title} - ${excerpt}`;
 
   const links = useMemo(

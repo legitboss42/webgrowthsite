@@ -3,14 +3,14 @@ slug: jluxe-medical-aesthetics-case-study
 title: >-
   Case Study: Rebuilding J Luxe Medical Aesthetics for Trust, Clarity, and a
   Stronger London Presence
-seoTitle: "J Luxe Website Redesign Case Study | Web Growth"
+seoTitle: "Medical Aesthetics Website Redesign Case Study | Web Growth"
 primaryKeyword: "medical aesthetics website redesign case study"
 searchIntent: "Informational - first-hand case study and implementation lessons"
 coverAlt: "Case Study: Rebuilding J Luxe Medical Aesthetics for Trust, Clarity, and a Stronger London Presence - practical Web Growth g"
 excerpt: >-
-  A practical case study on rebuilding the J Luxe Medical Aesthetics website for
-  a London clinic that needed a more premium first impression, clearer treatment
-  pages, and a better path to enquiry.
+  A practical case study on rebuilding the J Luxe Medical Aesthetics website
+  for a London clinic that needed stronger trust, clearer treatment pages, and
+  a better path to enquiry.
 date: 2026-02-13T00:00:00.000Z
 category: Case Study
 tags:

@@ -1,10 +1,10 @@
 ---
 title: "Small Business SEO Checklist: 12 Fixes to Improve Rankings and Leads"
-seoTitle: "Small Business SEO Checklist | Web Growth"
+seoTitle: "Small Business SEO Checklist for Rankings and Leads | Web Growth"
 primaryKeyword: "small business SEO checklist"
 searchIntent: "Informational - improve search visibility with practical steps"
 coverAlt: "Small Business SEO Checklist: 12 Fixes to Improve Rankings and Leads - practical Web Growth guide visual"
-excerpt: "Use this small business SEO checklist to improve crawlability, intent targeting, internal links, local visibility, and conversion quality from organic traffic."
+excerpt: "Use this small business SEO checklist to improve crawlability, keyword intent, internal links, local visibility, and lead quality from organic traffic."
 date: 2026-02-04T00:00:00.000Z
 category: SEO
 tags:

@@ -1,6 +1,6 @@
 ---
 title: "High-Converting Landing Page Guide: What Every Business Page Needs"
-seoTitle: "High-Converting Landing Page Guide | Web Growth"
+seoTitle: "High-Converting Landing Page Guide for Leads | Web Growth"
 primaryKeyword: "high-converting landing page"
 searchIntent: "Informational - improve website conversion and lead quality"
 coverAlt: "High-Converting Landing Page Guide: What Every Business Page Needs - practical Web Growth guide visual"

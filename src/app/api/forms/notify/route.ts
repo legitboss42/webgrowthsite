@@ -11,8 +11,11 @@ import {
   sanitizeText,
 } from "@/lib/security";
 import { verifyTurnstileToken } from "@/lib/turnstile";
+import {
+  ADMIN_EMAIL,
+  sendTransactionalEmail,
+} from "@/lib/email";
 
-const ADMIN_EMAIL = "admin@webgrowth.info";
 export const runtime = "nodejs";
 
 type NotifyBody = {
@@ -21,6 +24,39 @@ type NotifyBody = {
   fields?: Record<string, unknown>;
   turnstileToken?: string;
 };
+
+function prettifyKey(value: string) {
+  return value
+    .split("_")
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
+
+function buildConfirmationCopy(formType: string) {
+  switch (formType) {
+    case "website_review_request":
+      return {
+        subject: "We received your website review request",
+        intro: "Thanks for requesting a website review from Web Growth.",
+        outro:
+          "We will review what you sent and reply with the clearest next step within one business day.",
+      };
+    case "website_build_inquiry":
+      return {
+        subject: "We received your website build inquiry",
+        intro: "Thanks for reaching out about your website build.",
+        outro:
+          "We will review your project details and send the next-step recommendation within one business day.",
+      };
+    default:
+      return {
+        subject: "We received your request",
+        intro: "Thanks for contacting Web Growth.",
+        outro:
+          "We will review your message and reply with the best next step within one business day.",
+      };
+  }
+}
 
 export async function POST(req: Request) {
   try {
@@ -106,11 +142,7 @@ export async function POST(req: Request) {
       }
     }
 
-    const token = process.env.MAILERSEND_API_TOKEN;
-    const fromEmail = process.env.MAILERSEND_FROM_EMAIL;
-    const fromName = process.env.MAILERSEND_FROM_NAME || "Web Growth";
-
-    if (!token || !fromEmail) {
+    if (!process.env.BREVO_API_KEY || !process.env.BREVO_FROM_EMAIL) {
       if (process.env.NODE_ENV !== "production") {
         console.info("[forms-notify][fallback]", { formType, subject, fields: fieldMap });
       }
@@ -130,34 +162,53 @@ export async function POST(req: Request) {
       .map((line) => `<p>${escapeHtml(line)}</p>`)
       .join("");
 
-    const msRes = await fetch("https://api.mailersend.com/v1/email", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      signal: AbortSignal.timeout(10000),
-      body: JSON.stringify({
-        from: {
-          email: fromEmail,
-          name: fromName,
-        },
-        to: [{ email: ADMIN_EMAIL, name: "Web Growth Admin" }],
-        subject,
-        text: textBody,
-        html: htmlBody,
-      }),
+    await sendTransactionalEmail({
+      to: [{ email: ADMIN_EMAIL, name: "Web Growth Admin" }],
+      subject,
+      text: textBody,
+      html: htmlBody,
+      replyTo: email ? { email, name: fieldMap.name || "Website lead" } : undefined,
     });
 
-    if (!msRes.ok) {
-      return NextResponse.json(
-        { error: "Could not send your request right now." },
-        { status: 502 }
-      );
+    if (email) {
+      const confirmation = buildConfirmationCopy(formType);
+      const summaryLines = Object.entries(fieldMap)
+        .filter(([key]) => key !== "page_path" && key !== "local_spam_bypass")
+        .map(([key, value]) => `${prettifyKey(key)}: ${value}`);
+
+      const confirmationText = [
+        confirmation.intro,
+        "",
+        "We received the following details:",
+        ...summaryLines,
+        "",
+        confirmation.outro,
+        "",
+        "Reply to this email if you need to add anything else.",
+      ].join("\n");
+
+      const confirmationHtml = [
+        `<p>${escapeHtml(confirmation.intro)}</p>`,
+        "<p>We received the following details:</p>",
+        `<ul>${summaryLines
+          .map((line) => `<li>${escapeHtml(line)}</li>`)
+          .join("")}</ul>`,
+        `<p>${escapeHtml(confirmation.outro)}</p>`,
+        "<p>Reply to this email if you need to add anything else.</p>",
+      ].join("");
+
+      await sendTransactionalEmail({
+        to: [{ email, name: fieldMap.name || undefined }],
+        subject: confirmation.subject,
+        text: confirmationText,
+        html: confirmationHtml,
+        replyTo: { email: ADMIN_EMAIL, name: "Web Growth" },
+      });
     }
 
     return NextResponse.json({ ok: true, delivery: "email" });
-  } catch {
+  } catch (error) {
+    console.error("[forms-notify]", error);
     return NextResponse.json({ error: "Invalid request payload." }, { status: 400 });
   }
 }

@@ -1,10 +1,10 @@
 ---
 title: "Email Marketing for Small Business: A Practical System That Converts"
-seoTitle: "Email Marketing for Small Business | Web Growth"
+seoTitle: "Email Marketing for Small Business That Converts | Web Growth"
 primaryKeyword: "email marketing for small business"
 searchIntent: "Informational - plan and improve a small-business website"
 coverAlt: "Email Marketing for Small Business: A Practical System That Converts - practical Web Growth guide visual"
-excerpt: "This email marketing for small business guide shows how to capture qualified subscribers, automate follow-up, and turn email into consistent enquiries."
+excerpt: "This email marketing for small business guide shows how to capture qualified subscribers, automate follow-up, and turn email into steady enquiries."
 date: 2026-02-10T00:00:00.000Z
 category: Strategy
 tags:

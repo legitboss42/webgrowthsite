@@ -12,6 +12,11 @@ export default function robots(): MetadataRoute.Robots {
         allow: "/",
         disallow: [
           "/api/",
+          "/get-started",
+          "/hosting-offer",
+          "/launch",
+          "/website-build",
+          "/internal/",
           "/connect/tiktok",
           "/contact/thanks",
           "/thank-you/",

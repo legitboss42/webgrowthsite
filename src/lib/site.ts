@@ -4,7 +4,7 @@ export const DEFAULT_OG_IMAGE = "/images/hero/Hero-Image-1.webp";
 export const DEFAULT_DESCRIPTION =
   "Web Growth is a premium website growth platform focused on building better websites, growing search traffic, improving conversions, and monetizing digital presence responsibly.";
 export const PRIMARY_KEYWORD = "website design lagos";
-export const CONTACT_EMAIL = "Admin@webgrowth.info";
+export const CONTACT_EMAIL = "admin@webgrowth.info";
 export const CONTACT_EMAIL_HREF = "mailto:admin@webgrowth.info";
 export const WHATSAPP_NUMBER = "2348066706336";
 export const WHATSAPP_BASE_URL = `https://wa.me/${WHATSAPP_NUMBER}`;

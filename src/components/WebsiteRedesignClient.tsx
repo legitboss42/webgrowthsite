@@ -43,28 +43,28 @@ const redesignAnswers = [
     title: "How do I know it is time for a redesign?",
     answer:
       "If the site feels outdated, does not convert, loads poorly on mobile, or no longer reflects the quality of the business, redesign becomes a growth issue rather than a cosmetic one.",
-    href: "/services/website-audit",
+    href: "/services/website-audit/",
     hrefLabel: "Audit the current site first",
   },
   {
     title: "What should a redesign improve first?",
     answer:
       "The biggest gains usually come from better messaging, stronger trust signals, clearer CTA flow, and a more stable mobile experience.",
-    href: "/blog/why-your-website-isnt-getting-leads",
+    href: "/blog/why-your-website-isnt-getting-leads/",
     hrefLabel: "See common conversion leaks",
   },
   {
     title: "Will redesign hurt SEO?",
     answer:
       "Handled properly, no. A careful redesign can improve structure, speed, internal links, and page clarity without sacrificing the foundations that matter.",
-    href: "/services/search-engine-optimisation",
+    href: "/services/search-engine-optimisation/",
     hrefLabel: "See SEO support",
   },
   {
     title: "What if I need something faster first?",
     answer:
       "If you need a clean stopgap before a larger redesign, the 48-hour launch offer can get you a focused website live while the bigger rebuild waits.",
-    href: "/launch",
+    href: "/launch/",
     hrefLabel: "See the fast launch option",
   },
 ] as const;

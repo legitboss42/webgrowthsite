@@ -36,7 +36,7 @@ export default function RelatedGuides({
         {guides.map((guide) => (
           <Link
             key={guide.slug}
-            href={`/blog/${guide.slug}`}
+            href={`/blog/${guide.slug}/`}
             className="group rounded-[1.5rem] border border-slate-200 bg-[linear-gradient(180deg,#ffffff_0%,#f8faff_100%)] p-5 transition hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-[0_18px_45px_rgba(79,107,255,0.10)]"
           >
             <div className="flex items-center justify-between gap-4">
