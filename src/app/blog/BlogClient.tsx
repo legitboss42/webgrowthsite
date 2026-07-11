@@ -1,5 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
+import CinematicHero from "@/components/platform/CinematicHero";
+import SectionReveal from "@/components/platform/SectionReveal";
 import ClarityPageTags from "@/components/analytics/ClarityPageTags";
 import EditorialTrustNote from "@/components/EditorialTrustNote";
 import {
@@ -16,6 +18,9 @@ import {
   SpeedIcon,
 } from "@/components/home/HomeIcons";
 import SectionShell from "@/components/home/SectionShell";
+import { NEW_SERVICES_LIST } from "@/lib/newServiceConfigs";
+import { CONTACT_EMAIL, CONTACT_EMAIL_HREF } from "@/lib/site";
+import { PUBLIC_TOOLS } from "@/lib/tools";
 
 type BlogPostPreview = {
   slug: string;
@@ -34,10 +39,10 @@ type Props = {
 
 const FALLBACK_COVER = "/images/hero/Hero-Image-1.webp";
 
-const academyTopics = [
+const topicDefinitions = [
   {
     title: "SEO",
-    description: "Rank higher and get discovered with proven SEO strategies.",
+    description: "Rank higher and get discovered with practical search-growth guidance.",
     icon: <SearchIcon />,
     slugs: [
       "small-business-website-seo-checklist",
@@ -48,8 +53,8 @@ const academyTopics = [
     ],
   },
   {
-    title: "AdSense & Monetization",
-    description: "Turn traffic into revenue with AdSense and smarter monetization.",
+    title: "AdSense and Monetization",
+    description: "Build revenue paths without undermining trust or content quality.",
     icon: <DollarIcon />,
     slugs: [
       "why-your-website-isnt-getting-leads",
@@ -58,8 +63,8 @@ const academyTopics = [
     ],
   },
   {
-    title: "Web Design",
-    description: "Design websites that build trust and drive conversions.",
+    title: "Web Design and Conversion",
+    description: "Improve structure, messaging, and buyer clarity across key pages.",
     icon: <CodeWindowIcon />,
     slugs: [
       "how-to-build-a-small-business-website-that-converts",
@@ -69,8 +74,8 @@ const academyTopics = [
     ],
   },
   {
-    title: "Website Speed",
-    description: "Improve Core Web Vitals and deliver a faster experience.",
+    title: "Performance",
+    description: "Protect speed, Core Web Vitals, and technical stability as the site grows.",
     icon: <SpeedIcon />,
     slugs: [
       "how-to-make-your-website-load-fast",
@@ -81,7 +86,7 @@ const academyTopics = [
   },
   {
     title: "Lead Generation",
-    description: "Attract, engage, and convert your ideal audience.",
+    description: "Turn search, traffic, and landing-page intent into better enquiries.",
     icon: <GrowthChartIcon />,
     slugs: [
       "high-converting-landing-pages-guide",
@@ -90,8 +95,8 @@ const academyTopics = [
     ],
   },
   {
-    title: "Case Studies",
-    description: "Real projects and the decisions behind them.",
+    title: "Case Studies and Series",
+    description: "Study first-hand rebuild decisions, tradeoffs, and reusable lessons.",
     icon: <AuditIcon />,
     slugs: [
       "jluxe-medical-aesthetics-case-study",
@@ -102,84 +107,54 @@ const academyTopics = [
   },
 ] as const;
 
-const learningPaths = [
+const learningPathDefinitions = [
   {
-    title: "Start a Profitable Website",
-    description: "From idea to live site. Build a solid foundation and launch with confidence.",
-    meta: "Guided path",
+    title: "Start and Launch",
+    description: "Use these guides when the website still needs its foundation, launch plan, and first conversion structure.",
+    href: "/blog/how-to-build-a-small-business-website-that-converts/",
+    slugs: [
+      "how-to-build-a-small-business-website-that-converts",
+      "website-launch-checklist-for-small-businesses",
+      "small-business-website-launch-qa-checklist",
+    ],
+    tools: ["website-launch-checklist", "website-cost-calculator"],
     icon: <CapIcon />,
   },
   {
     title: "Rank in Google",
-    description: "Learn SEO step-by-step and grow sustainable organic traffic.",
-    meta: "SEO path",
+    description: "Move from broad SEO theory to concrete page, snippet, and local-visibility improvements.",
+    href: "/blog/small-business-website-seo-checklist/",
+    slugs: [
+      "small-business-website-seo-checklist",
+      "local-seo-for-small-business-google-maps-ranking-guide",
+      "03-seo-migration-without-losing-traffic",
+    ],
+    tools: ["meta-description-generator", "sitemap-validator"],
     icon: <SearchIcon />,
   },
   {
-    title: "Monetize with Confidence",
-    description: "Build revenue streams that scale without sacrificing user experience.",
-    meta: "Revenue path",
+    title: "Convert and Monetize",
+    description: "Tighten lead quality, nurture systems, and monetization decisions without cheapening the user experience.",
+    href: "/blog/why-your-website-isnt-getting-leads/",
+    slugs: [
+      "why-your-website-isnt-getting-leads",
+      "email-marketing-for-small-business",
+      "email-automation-architecture",
+    ],
+    tools: ["adsense-readiness-checker", "homepage-checklist"],
     icon: <MonetizeIcon />,
   },
   {
-    title: "Optimize & Scale",
-    description: "Improve speed, conversions, and automation to scale your growth.",
-    meta: "Scale path",
+    title: "Optimize and Scale",
+    description: "Improve speed, tracking, and operating discipline once the website is already doing meaningful work.",
+    href: "/blog/how-to-make-your-website-load-fast/",
+    slugs: [
+      "how-to-make-your-website-load-fast",
+      "website-tracking-setup-for-small-businesses",
+      "ga4-meta-tiktok-clarity-setup-guide",
+    ],
+    tools: ["homepage-checklist", "sitemap-validator"],
     icon: <ShieldIcon />,
-  },
-] as const;
-
-const academySupportPaths = [
-  {
-    href: "/services/website-audit/",
-    title: "Get a Website Audit",
-    text: "Move from reading to diagnosis when you need clarity on trust, SEO, speed, and conversion blockers.",
-  },
-  {
-    href: "/services/search-engine-optimisation/",
-    title: "Connect Learning to SEO Implementation",
-    text: "Use the Academy for strategy, then move into SEO implementation when service pages need hands-on cleanup.",
-  },
-  {
-    href: "/tools/",
-    title: "Use the Free Tools",
-    text: "Check metadata, sitemaps, homepage quality, and launch readiness with practical utilities.",
-  },
-  {
-    href: "/contact/",
-    title: "Request a Website Review",
-    text: "Talk to Web Growth when you want help applying the guidance to a live website.",
-  },
-] as const;
-
-const masterResources = [
-  {
-    title: "Top Guides",
-    description: "Step-by-step tutorials for every stage.",
-    icon: <CapIcon />,
-    href: "/blog/",
-    cta: "Explore Guides",
-  },
-  {
-    title: "Toolkits",
-    description: "Free tools and resources to get more done.",
-    icon: <AuditIcon />,
-    href: "/tools/",
-    cta: "Explore Tools",
-  },
-  {
-    title: "Downloads",
-    description: "Checklists, templates, and swipe files.",
-    icon: <PencilIcon />,
-    href: "/blog/",
-    cta: "Browse Downloads",
-  },
-  {
-    title: "Updates",
-    description: "What is new in SEO, AdSense, and more.",
-    icon: <GrowthChartIcon />,
-    href: "/blog/",
-    cta: "Read Updates",
   },
 ] as const;
 
@@ -198,99 +173,114 @@ function findPost(posts: BlogPostPreview[], slug: string) {
   return posts.find((post) => post.slug === slug);
 }
 
+function countByCategory(posts: BlogPostPreview[], category: string) {
+  return posts.filter((post) => post.category.toLowerCase() === category.toLowerCase()).length;
+}
+
 export default function BlogClient({ posts }: Props) {
+  const availableSlugs = new Set(posts.map((post) => post.slug));
+  const uniqueCategories = new Set(posts.map((post) => post.category));
   const featured =
     findPost(posts, "how-to-build-a-small-business-website-that-converts") ?? posts[0];
   const latestPosts = posts.slice(0, 4);
+  const caseStudyAndSeriesCount =
+    countByCategory(posts, "Case Study") + countByCategory(posts, "Series");
+  const academyTopics = topicDefinitions.map((topic) => {
+    const liveSlugs = topic.slugs.filter((slug) => availableSlugs.has(slug));
+    return {
+      ...topic,
+      count: liveSlugs.length,
+      href: liveSlugs[0] ? `/blog/${liveSlugs[0]}/` : "/blog/",
+    };
+  });
+  const learningPaths = learningPathDefinitions.map((path) => ({
+    ...path,
+    guideCount: path.slugs.filter((slug) => availableSlugs.has(slug)).length,
+    toolCount: path.tools.filter((slug) =>
+      PUBLIC_TOOLS.some((tool) => tool.slug === slug)
+    ).length,
+  }));
+  const implementationPaths = [
+    {
+      href: "/services/website-audit/",
+      title: "Start with a Website Audit",
+      text: "Use an audit when you need clarity on the main trust, SEO, speed, or conversion bottleneck first.",
+    },
+    {
+      href: "/services/",
+      title: "Move into Implementation",
+      text: `Connect Academy learning to ${NEW_SERVICES_LIST.length} live service paths when you need hands-on execution.`,
+    },
+    {
+      href: "/tools/",
+      title: "Use the Tool Stack",
+      text: `Open ${PUBLIC_TOOLS.length} live public tools for homepage, launch, SEO, sitemap, and AdSense checks.`,
+    },
+    {
+      href: "/contact/",
+      title: "Request a Website Review",
+      text: "Use the contact route when you want tailored advice applied to a real business website.",
+    },
+  ] as const;
+  const academyResources = [
+    {
+      title: "Published Guides",
+      description: `${posts.length} Academy guides are live now across strategy, SEO, performance, conversion, and case-study content.`,
+      icon: <CapIcon />,
+      href: "/blog/",
+      cta: "Browse all guides",
+    },
+    {
+      title: "Live Tools",
+      description: `${PUBLIC_TOOLS.length} public utilities support launch reviews, snippet writing, sitemap checks, and monetization readiness.`,
+      icon: <AuditIcon />,
+      href: "/tools/",
+      cta: "Open the tools hub",
+    },
+    {
+      title: "Service Connections",
+      description: `${NEW_SERVICES_LIST.length} service routes connect education to implementation without hiding the commercial next step.`,
+      icon: <PencilIcon />,
+      href: "/services/",
+      cta: "View services",
+    },
+    {
+      title: "Editorial Coverage",
+      description: `${uniqueCategories.size} active content categories now support a broader platform model than a standard blog archive.`,
+      icon: <GrowthChartIcon />,
+      href: "/editorial-policy/",
+      cta: "Read the editorial policy",
+    },
+  ] as const;
 
   return (
     <main className="bg-[#f7f8fc] text-slate-950">
       <ClarityPageTags tags={{ page_type: "blog_index", content_group: "academy" }} />
 
-      <SectionShell tone="canvas" spacing="hero" className="relative overflow-hidden">
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-full">
-          <div className="absolute left-[-10%] top-[-6%] h-72 w-72 rounded-full bg-[radial-gradient(circle,rgba(79,107,255,0.12),transparent_70%)]" />
-          <div className="absolute right-[-6%] top-[10%] h-[24rem] w-[24rem] rounded-full bg-[radial-gradient(circle,rgba(124,92,255,0.12),transparent_70%)]" />
-        </div>
-
-        <div className="relative grid gap-8 lg:grid-cols-[0.84fr_1.16fr] lg:items-center">
-          <div>
-            <p className="inline-flex rounded-full border border-blue-100 bg-white/90 px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] text-blue-700 shadow-sm">
-              Web Growth Academy
-            </p>
-            <h1 className="mt-5 text-balance text-[3.8rem] font-semibold leading-[0.92] tracking-[-0.065em] text-slate-950 md:text-[5rem]">
-              Learn. Apply.{" "}
-              <span className="bg-[linear-gradient(90deg,#3557ff_0%,#7c5cff_70%,#5e7cff_100%)] bg-clip-text text-transparent">
-                Grow.
-              </span>
-            </h1>
-            <p className="mt-4 max-w-[33rem] text-[1.02rem] leading-8 text-slate-600">
-              The Web Growth Academy is your hub for practical guides, strategies,
-              and tools to build better websites, rank higher, and monetize with
-              confidence.
-            </p>
-
-            <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-              <Link
-                href="/blog/"
-                className="inline-flex min-h-12 items-center justify-center rounded-xl bg-[linear-gradient(135deg,#3557ff_0%,#4f6bff_45%,#7c5cff_100%)] px-6 text-sm font-semibold text-white shadow-[0_16px_34px_rgba(79,107,255,0.28)] transition hover:brightness-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-700"
-              >
-                Start With Foundations
-              </Link>
-              <Link
-                href="#academy-topics"
-                className="inline-flex min-h-12 items-center justify-center rounded-xl border border-blue-200 bg-white px-6 text-sm font-semibold text-blue-800 transition hover:border-blue-300 hover:bg-blue-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-700"
-              >
-                Browse All Topics
-              </Link>
-            </div>
-
-            <div className="mt-6 flex items-center gap-3">
-              <div className="flex -space-x-2">
-                {[1, 2, 3, 4].map((item) => (
-                  <span
-                    key={item}
-                    className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-white bg-[linear-gradient(135deg,#dbeafe_0%,#ede9fe_100%)] text-[11px] font-bold text-blue-700 shadow-sm"
-                  >
-                    WG
-                  </span>
-                ))}
-              </div>
-              <p className="text-sm leading-6 text-slate-600">
-                Join growth-focused website owners
-              </p>
-            </div>
+      <CinematicHero
+        eyebrow="Web Growth Academy / Field notes"
+        title={<>Learn the system. <span className="text-accent-gold">Apply it with confidence.</span></>}
+        description="Practical, evidence-aware guidance for building stronger websites, earning search visibility, improving conversion, and preparing responsible revenue systems."
+        pageType="blog_index"
+        variant="editorial"
+        primaryAction={{ label: "Start With Foundations", href: featured ? `/blog/${featured.slug}/` : "/blog/", ctaName: "start_with_foundations", destination: "featured_article" }}
+        secondaryAction={{ label: "Browse All Topics", href: "#academy-topics", ctaName: "browse_topics", destination: "academy_topics" }}
+        aside={featured ? (
+          <article className="border-l border-border-hairline pl-6">
+            <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-accent-teal">Editor&apos;s selection</p>
+            <h2 className="mt-5 font-display text-3xl font-normal leading-tight text-text-primary">{featured.title}</h2>
+            <p className="mt-4 text-sm leading-7 text-text-muted">{featured.excerpt}</p>
+            <p className="mt-5 text-xs uppercase tracking-[0.14em] text-accent-gold">{featured.category} / {featured.readTime}</p>
+          </article>
+        ) : undefined}
+        footer={
+          <div className="grid gap-px overflow-hidden rounded-2xl border border-border-hairline bg-border-hairline sm:grid-cols-3">
+            {[[posts.length, "published guides"], [uniqueCategories.size, "active categories"], [caseStudyAndSeriesCount, "case studies + series"]].map(([value, label]) => (
+              <div key={label} className="bg-bg-ink px-5 py-4"><span className="font-display text-2xl text-text-primary">{value}</span><span className="ml-3 text-sm text-text-muted">{label}</span></div>
+            ))}
           </div>
-
-          {featured ? (
-            <article className="overflow-hidden rounded-[1.8rem] border border-slate-200 bg-white shadow-[0_28px_70px_rgba(15,23,42,0.08)]">
-              <div className="relative h-32 bg-[linear-gradient(135deg,#7aa2ff_0%,#4f6bff_36%,#7c5cff_100%)] md:h-36">
-                <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.06),rgba(255,255,255,0))]" />
-              </div>
-              <div className="p-7 md:p-8">
-                <p className="text-xs font-bold uppercase tracking-[0.18em] text-blue-700">
-                  Featured insight
-                </p>
-                <h2 className="mt-4 text-[1.95rem] font-semibold leading-tight tracking-[-0.05em] text-slate-950 md:text-[2.15rem]">
-                  {featured.title}
-                </h2>
-                <p className="mt-4 text-base leading-8 text-slate-600">{featured.excerpt}</p>
-                <div className="mt-6 flex flex-wrap items-center gap-5 text-sm text-slate-500">
-                  <span>By Web Growth</span>
-                  <span>{formatPostDate(featured.date)}</span>
-                  <span>{featured.readTime}</span>
-                </div>
-                <Link
-                  href={`/blog/${featured.slug}/`}
-                  className="mt-6 inline-flex min-h-11 items-center justify-center rounded-xl border border-blue-200 bg-blue-50 px-5 text-sm font-semibold text-blue-800 transition hover:border-blue-300 hover:bg-blue-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-700"
-                >
-                  Read featured guide
-                </Link>
-              </div>
-            </article>
-          ) : null}
-        </div>
-      </SectionShell>
+        }
+      />
 
       <SectionShell tone="white" spacing="compact">
         <EditorialTrustNote />
@@ -308,13 +298,13 @@ export default function BlogClient({ posts }: Props) {
             <p className="mt-4 text-base leading-8 text-slate-600">
               The Web Growth Academy is the educational arm of Web Growth. It
               publishes practical guides on SEO, AdSense readiness, website
-              strategy, conversions, performance, and growth systems so businesses
-              can understand what to improve before they invest.
+              strategy, performance, conversion, and real rebuild lessons so
+              businesses can understand what to improve before they invest.
             </p>
             <p className="mt-4 text-sm leading-7 text-slate-600">
-              Each article is meant to answer a clear website-growth question,
-              connect to related resources, and create a sensible next step into
-              tools, services, or implementation planning.
+              Every strong article should answer one clear question, connect to
+              related implementation paths, and move the reader toward a useful next
+              step instead of trapping them inside a dead archive.
             </p>
           </article>
 
@@ -323,7 +313,7 @@ export default function BlogClient({ posts }: Props) {
               Implementation paths
             </p>
             <div className="mt-5 grid gap-3 sm:grid-cols-2">
-              {academySupportPaths.map((item) => (
+              {implementationPaths.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
@@ -345,7 +335,7 @@ export default function BlogClient({ posts }: Props) {
               Explore by topic
             </p>
             <p className="mt-3 text-sm leading-6 text-slate-600">
-              Find exactly what you need to grow your website.
+              Start with the topic that matches your immediate website-growth bottleneck.
             </p>
           </div>
           <Link
@@ -356,30 +346,26 @@ export default function BlogClient({ posts }: Props) {
           </Link>
         </div>
 
-        <div className="mt-7 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {academyTopics.map((topic) => {
-            const count = topic.slugs.filter((slug) => posts.some((post) => post.slug === slug)).length;
-
-            return (
-              <Link
-                key={topic.title}
-                href="/blog/"
-                className="rounded-[1.35rem] border border-slate-200 bg-white p-5 shadow-[0_14px_30px_rgba(15,23,42,0.04)] transition hover:-translate-y-0.5 hover:shadow-[0_20px_38px_rgba(79,107,255,0.08)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-700"
-              >
-                <IconBadge tone="blue" className="h-11 w-11 rounded-[1rem]">
-                  {topic.icon}
-                </IconBadge>
-                <h3 className="mt-5 text-[1.3rem] font-semibold tracking-[-0.03em] text-slate-950">
-                  {topic.title}
-                </h3>
-                <p className="mt-3 text-sm leading-7 text-slate-600">{topic.description}</p>
-                <p className="mt-5 text-sm font-semibold text-blue-700">
-                  {count} {count === 1 ? "article" : "articles"}
-                </p>
-              </Link>
-            );
-          })}
-        </div>
+        <SectionReveal className="mt-7 grid gap-px overflow-hidden rounded-2xl border border-border-hairline bg-border-hairline sm:grid-cols-2 xl:grid-cols-3">
+          {academyTopics.map((topic) => (
+            <Link
+              key={topic.title}
+              href={topic.href}
+              className="bg-[#11161f] p-6 transition hover:bg-white/[0.06] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-accent-gold"
+            >
+              <IconBadge tone="blue" className="h-11 w-11 rounded-[1rem]">
+                {topic.icon}
+              </IconBadge>
+              <h3 className="mt-5 font-display text-[1.55rem] font-normal tracking-[-0.03em] text-text-primary">
+                {topic.title}
+              </h3>
+              <p className="mt-3 text-sm leading-7 text-text-muted">{topic.description}</p>
+              <p className="mt-5 text-sm font-semibold text-accent-gold">
+                {topic.count} live {topic.count === 1 ? "guide" : "guides"}
+              </p>
+            </Link>
+          ))}
+        </SectionReveal>
       </SectionShell>
 
       <SectionShell tone="canvas" spacing="compact">
@@ -389,7 +375,7 @@ export default function BlogClient({ posts }: Props) {
               Learning paths
             </p>
             <p className="mt-3 text-sm leading-6 text-slate-600">
-              Structured paths to take you from where you are to where you want to be.
+              Follow a path that matches your stage instead of guessing which guide to read next.
             </p>
           </div>
           <Link
@@ -404,7 +390,7 @@ export default function BlogClient({ posts }: Props) {
           {learningPaths.map((path) => (
             <Link
               key={path.title}
-              href="/blog/"
+              href={path.href}
               className="group rounded-[1.4rem] border border-slate-200 bg-white p-5 shadow-[0_14px_30px_rgba(15,23,42,0.04)] transition hover:-translate-y-0.5 hover:shadow-[0_20px_38px_rgba(79,107,255,0.08)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-700"
             >
               <div className="flex items-center justify-between">
@@ -417,7 +403,14 @@ export default function BlogClient({ posts }: Props) {
                 {path.title}
               </h3>
               <p className="mt-3 text-sm leading-7 text-slate-600">{path.description}</p>
-              <p className="mt-5 text-sm font-semibold text-blue-700">{path.meta}</p>
+              <div className="mt-5 flex flex-wrap gap-2 text-xs font-semibold text-blue-700">
+                <span className="rounded-full border border-blue-100 bg-blue-50 px-3 py-1.5">
+                  {path.guideCount} guides
+                </span>
+                <span className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-slate-600">
+                  {path.toolCount} tools
+                </span>
+              </div>
             </Link>
           ))}
         </div>
@@ -430,11 +423,11 @@ export default function BlogClient({ posts }: Props) {
               Latest articles
             </p>
             <p className="mt-3 text-sm leading-6 text-slate-600">
-              Actionable insights, strategies, and tutorials.
+              The most recent published guides across the live Academy inventory.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
-            {["All", "SEO", "Monetization", "Web Design", "Speed"].map((label, index) => (
+            {[...uniqueCategories].slice(0, 5).map((label, index) => (
               <span
                 key={label}
                 className={[
@@ -511,20 +504,19 @@ export default function BlogClient({ posts }: Props) {
       </SectionShell>
 
       <SectionShell tone="canvas" spacing="compact">
-        <div className="max-w-2xl">
-          <p className="text-xs font-bold uppercase tracking-[0.18em] text-blue-700">
-            Master your growth
-          </p>
-          <h2 className="mt-4 text-4xl font-semibold tracking-[-0.05em] text-slate-950 md:text-[3.05rem]">
-            Curated resources to help you implement faster
-          </h2>
-          <p className="mt-3 text-sm leading-6 text-slate-600">
-            Move from reading to action with tools, downloads, and strategic resource hubs.
-          </p>
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-blue-700">
+              Resource connections
+            </p>
+            <p className="mt-3 text-sm leading-6 text-slate-600">
+              Move from reading to action with tools, services, and clearer platform paths.
+            </p>
+          </div>
         </div>
 
         <div className="mt-7 grid gap-4 lg:grid-cols-4">
-          {masterResources.map((item) => (
+          {academyResources.map((item) => (
             <Link
               key={item.title}
               href={item.href}
@@ -552,34 +544,34 @@ export default function BlogClient({ posts }: Props) {
           <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
             <div>
               <p className="text-xs font-bold uppercase tracking-[0.18em] text-blue-100">
-                Stay ahead
+                Newsletter status
               </p>
               <h2 className="mt-3 max-w-xl text-[2.2rem] font-semibold tracking-[-0.05em] text-white">
-                Get the latest growth strategies delivered to your inbox.
+                The Academy newsletter is being rolled out carefully, not faked with a dead form.
               </h2>
               <p className="mt-3 max-w-xl text-base leading-8 text-blue-100">
-                Weekly insights, new guides, and proven tactics to grow your website.
+                If you want updates before the live newsletter system is enabled, use
+                the contact route or email directly and ask to be added to the early
+                interest list.
               </p>
             </div>
 
-            <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
-              <input
-                type="email"
-                placeholder="Enter your email address"
-                aria-label="Email address"
-                disabled
-                className="min-h-12 rounded-xl border border-white/30 bg-white px-4 text-sm text-slate-500 shadow-sm disabled:cursor-not-allowed disabled:opacity-100"
-              />
-              <button
-                type="button"
-                disabled
-                className="min-h-12 rounded-xl bg-[linear-gradient(135deg,#3557ff_0%,#4f6bff_45%,#7c5cff_100%)] px-6 text-sm font-semibold text-white shadow-[0_16px_34px_rgba(79,107,255,0.22)] disabled:cursor-not-allowed disabled:opacity-100"
+            <div className="grid gap-3 sm:grid-cols-2">
+              <Link
+                href="/contact/"
+                className="inline-flex min-h-12 items-center justify-center rounded-xl bg-white px-6 text-sm font-semibold text-blue-900 transition hover:bg-blue-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
               >
-                Subscribe Now
-              </button>
+                Request updates
+              </Link>
+              <Link
+                href={CONTACT_EMAIL_HREF}
+                className="inline-flex min-h-12 items-center justify-center rounded-xl border border-white/30 bg-transparent px-6 text-sm font-semibold text-white transition hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
+              >
+                Email {CONTACT_EMAIL}
+              </Link>
               <p className="text-xs leading-6 text-blue-100 sm:col-span-2">
-                Newsletter UI is shown as part of the rebuild direction. The live
-                backend will only be enabled when the audience system is ready.
+                This keeps the conversion path honest until a real newsletter backend
+                and onboarding sequence are ready.
               </p>
             </div>
           </div>

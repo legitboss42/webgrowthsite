@@ -12,6 +12,7 @@ import {
   SearchIcon,
 } from "@/components/home/HomeIcons";
 import SectionShell from "@/components/home/SectionShell";
+import CinematicHero from "@/components/platform/CinematicHero";
 import {
   buildPageMetadata,
   buildProfessionalServiceSchema,
@@ -148,99 +149,32 @@ export default function ContactPage() {
       <StructuredData data={buildProfessionalServiceSchema("/contact/", pageDescription)} />
 
       <main className="bg-[#f7f8fc] text-slate-950">
-        <SectionShell tone="canvas" spacing="hero" className="relative overflow-hidden">
-          <div className="pointer-events-none absolute inset-x-0 top-0 h-full">
-            <div className="absolute left-[-10%] top-[-6%] h-72 w-72 rounded-full bg-[radial-gradient(circle,rgba(79,107,255,0.12),transparent_70%)]" />
-            <div className="absolute right-[-6%] top-[10%] h-[24rem] w-[24rem] rounded-full bg-[radial-gradient(circle,rgba(124,92,255,0.12),transparent_70%)]" />
-          </div>
-
-          <div className="relative grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
-            <div>
-              <p className="inline-flex rounded-full border border-blue-100 bg-white/90 px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] text-blue-700 shadow-sm">
-                Let&apos;s grow together
-              </p>
-              <h1 className="mt-5 max-w-[35rem] text-balance text-[3.7rem] font-semibold leading-[0.92] tracking-[-0.065em] text-slate-950 md:text-[5rem]">
-                Request a Website Review and build your next{" "}
-                <span className="bg-[linear-gradient(90deg,#3557ff_0%,#7c5cff_70%,#5e7cff_100%)] bg-clip-text text-transparent">
-                  growth chapter.
-                </span>
-              </h1>
-              <p className="mt-4 max-w-[33rem] text-[1.02rem] leading-8 text-slate-600">
-                Get a website review, ask a question, or discuss a project. We&apos;ll
-                respond within 1 business day.
-              </p>
-
-              <div className="mt-6 grid gap-4 md:grid-cols-3">
-                {[
-                  ["Strategic first", "We look at the big picture."],
-                  ["Data-backed", "Our recommendations are evidence-driven."],
-                  ["Results-focused", "Everything we do ties to growth."],
-                ].map(([title, text]) => (
-                  <div key={title} className="flex gap-3">
-                    <IconBadge tone="blue" className="mt-1 h-8 w-8 rounded-[0.9rem]">
-                      <SearchIcon className="h-4 w-4" />
-                    </IconBadge>
-                    <div>
-                      <p className="text-sm font-semibold text-slate-950">{title}</p>
-                      <p className="mt-1 text-sm leading-6 text-slate-600">{text}</p>
-                    </div>
-                  </div>
+        <CinematicHero
+          eyebrow="Contact / A direct route to clarity"
+          title={<>Request a Website Review. <span className="text-accent-gold">We&apos;ll find the next move.</span></>}
+          description="Request a review, ask a focused question, or discuss implementation. You do not need a polished brief; useful context is enough."
+          pageType="contact"
+          variant="split"
+          primaryAction={{ label: "Start Your Website Review", href: "#contact-form", ctaName: "start_website_review", destination: "contact_form" }}
+          secondaryAction={{ label: "See Case Studies", href: "/portfolio/", ctaName: "see_case_studies", destination: "portfolio" }}
+          aside={
+            <div className="border-l border-border-hairline pl-6 md:pl-9">
+              <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-accent-teal">What happens next</p>
+              <ol className="mt-6 space-y-5">
+                {nextSteps.slice(0, 3).map((step) => (
+                  <li key={step.number} className="grid grid-cols-[2rem_1fr] gap-4 border-b border-border-hairline pb-5">
+                    <span className="font-display text-xl text-accent-gold">0{step.number}</span>
+                    <div><p className="text-sm font-semibold text-text-primary">{step.title}</p><p className="mt-1 text-xs leading-5 text-text-muted">{step.meta}</p></div>
+                  </li>
                 ))}
-              </div>
-
-              <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-                <Link
-                  href="#contact-form"
-                  className="inline-flex min-h-12 items-center justify-center rounded-xl bg-[linear-gradient(135deg,#3557ff_0%,#4f6bff_45%,#7c5cff_100%)] px-6 text-sm font-semibold text-white shadow-[0_16px_34px_rgba(79,107,255,0.28)] transition hover:brightness-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-700"
-                >
-                  Start With a Website Review
-                </Link>
-                <Link
-                  href="/portfolio/"
-                  className="inline-flex min-h-12 items-center justify-center rounded-xl border border-blue-200 bg-white px-6 text-sm font-semibold text-blue-800 transition hover:border-blue-300 hover:bg-blue-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-700"
-                >
-                  See Case Studies
-                </Link>
-              </div>
+              </ol>
+              <p className="mt-6 text-sm text-text-muted">Email: <a className="text-accent-gold" href={CONTACT_EMAIL_HREF}>{CONTACT_EMAIL}</a><br />Phone: {BUSINESS_PHONE_DISPLAY}</p>
             </div>
+          }
+        />
 
-            <div className="relative min-h-[23rem]">
-              <div className="pointer-events-none absolute inset-0 rounded-[2rem] bg-[radial-gradient(circle_at_62%_16%,rgba(124,92,255,0.14),transparent_30%),radial-gradient(circle_at_20%_72%,rgba(79,107,255,0.1),transparent_30%)]" />
-              <div className="absolute right-6 top-2 w-[21rem] rotate-[12deg] rounded-[1.9rem] border border-white/80 bg-white/90 p-5 shadow-[0_30px_70px_rgba(15,23,42,0.09)] backdrop-blur">
-                <p className="text-sm font-semibold text-slate-950">Website Review</p>
-                <div className="mt-4 space-y-3">
-                  {["SEO", "Performance", "UX", "Monetization"].map((item, index) => (
-                    <div key={item}>
-                      <div className="flex items-center justify-between text-xs font-medium text-slate-500">
-                        <span>{item}</span>
-                        <span>{index < 2 ? "Priority" : "Review"}</span>
-                      </div>
-                      <div className="mt-2 h-1.5 rounded-full bg-slate-100">
-                        <div
-                          className="h-full rounded-full bg-[linear-gradient(90deg,#4f6bff_0%,#7c5cff_100%)]"
-                          style={{ width: `${58 + index * 10}%` }}
-                        />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <div className="absolute bottom-6 left-8 w-[19rem] rotate-[-8deg] rounded-[1.8rem] border border-white/80 bg-white/80 p-5 shadow-[0_24px_60px_rgba(15,23,42,0.08)] backdrop-blur">
-                <p className="text-sm font-semibold text-slate-950">What happens next</p>
-                <div className="mt-4 space-y-3">
-                  {["We review your message", "We analyse and respond", "We recommend the next step"].map((item) => (
-                    <div key={item} className="rounded-xl border border-slate-100 bg-slate-50 px-3 py-3 text-sm text-slate-600">
-                      {item}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </SectionShell>
-
-        <SectionShell tone="white" spacing="compact">
-          <div className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
+        <SectionShell tone="dark" spacing="compact">
+          <div className="grid gap-8 lg:grid-cols-[1.25fr_0.75fr] lg:items-start">
             <Suspense
               fallback={
                 <div className="rounded-[2rem] border border-slate-200 bg-white p-6 text-slate-600 shadow-[0_24px_60px_rgba(15,23,42,0.10)]">

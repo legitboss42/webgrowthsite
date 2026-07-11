@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import CinematicHero from "@/components/platform/CinematicHero";
 import {
   BuildIcon,
   GrowthChartIcon,
@@ -42,59 +43,23 @@ const fitItems = [
 export default function AboutClient() {
   return (
     <main className="bg-[#f7f8fc] text-slate-950">
-      <SectionShell tone="canvas" spacing="hero" className="relative overflow-hidden">
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-full">
-          <div className="absolute left-[-10%] top-[-6%] h-72 w-72 rounded-full bg-[radial-gradient(circle,rgba(79,107,255,0.12),transparent_70%)]" />
-          <div className="absolute right-[-8%] top-[4%] h-[25rem] w-[25rem] rounded-full bg-[radial-gradient(circle,rgba(124,92,255,0.12),transparent_70%)]" />
-        </div>
-
-        <div className="relative grid gap-8 lg:grid-cols-[0.84fr_1.16fr] lg:items-center">
-          <div>
-            <p className="inline-flex rounded-full border border-blue-100 bg-white/92 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.22em] text-blue-700 shadow-sm">
-              About Web Growth
-            </p>
-            <h1 className="mt-5 max-w-[34rem] text-balance text-[3.9rem] font-semibold leading-[0.9] tracking-[-0.07em] text-slate-950 md:text-[5rem]">
-              A premium website growth platform built around clarity, performance, and revenue support.
-            </h1>
-            <p className="mt-4 max-w-[33rem] text-lg leading-8 text-slate-600">
-              Web Growth is led by Victor Chinukwue and built for businesses that need
-              more than a generic website. The goal is to create digital experiences
-              that support stronger trust, better search performance, clearer
-              conversion flow, and long-term monetization.
-            </p>
-            <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-              <Link
-                href="/contact/"
-                className="inline-flex min-h-12 items-center justify-center rounded-xl bg-[linear-gradient(135deg,#3557ff_0%,#4f6bff_45%,#7c5cff_100%)] px-6 text-sm font-semibold text-white shadow-[0_16px_34px_rgba(79,107,255,0.28)] transition hover:brightness-105"
-              >
-                Request a Website Review
-              </Link>
-              <Link
-                href="/services/"
-                className="inline-flex min-h-12 items-center justify-center rounded-xl border border-blue-200 bg-white px-6 text-sm font-semibold text-blue-800 transition hover:border-blue-300 hover:bg-blue-50"
-              >
-                View Services
-              </Link>
+      <CinematicHero
+        eyebrow="About Web Growth"
+        title="A growth platform built with a human point of view."
+        description="Web Growth is led by Victor Chinukwue for businesses that need more than a generic website: clearer trust, better search performance, stronger conversion flow, and responsible monetization."
+        pageType="about"
+        variant="split"
+        primaryAction={{ label: "Request a Website Review", href: "/contact/", ctaName: "request_website_review", destination: "contact" }}
+        secondaryAction={{ label: "View Services", href: "/services/", ctaName: "view_services", destination: "services" }}
+        aside={
+          <div className="relative ml-auto max-w-md overflow-hidden rounded-[2rem] border border-border-hairline shadow-2xl">
+            <div className="relative aspect-[4/4.5]">
+              <Image src="/images/about/about-hero.webp" alt="Victor Chinukwue, founder of Web Growth" fill priority className="object-cover" sizes="(max-width: 768px) 100vw, 420px" />
+              <div className="absolute inset-0 bg-gradient-to-t from-bg-ink/80 via-transparent to-transparent" />
             </div>
           </div>
-
-          <div className="relative">
-            <div className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-[0_24px_70px_rgba(15,23,42,0.12)]">
-              <div className="relative aspect-[4/4.5]">
-                <Image
-                  src="/images/about/about-hero.webp"
-                  alt="Founder visual for Web Growth"
-                  fill
-                  priority
-                  className="object-cover"
-                  sizes="(max-width: 768px) 100vw, 40vw"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-slate-950/10 to-transparent" />
-              </div>
-            </div>
-          </div>
-        </div>
-      </SectionShell>
+        }
+      />
 
       <SectionShell tone="white" spacing="compact">
         <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">

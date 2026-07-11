@@ -67,8 +67,8 @@ export default function Header() {
         className={[
           "transition-all duration-300",
           scrolled
-            ? "border-b border-slate-200/80 bg-white/88 backdrop-blur-2xl shadow-[0_10px_40px_rgba(15,23,42,0.05)]"
-            : "border-b border-slate-200/45 bg-white/62 backdrop-blur-xl",
+            ? "border-b border-border-hairline bg-bg-ink/88 backdrop-blur-2xl shadow-[0_10px_40px_rgba(0,0,0,0.22)]"
+            : "border-b border-border-hairline/70 bg-bg-ink/58 backdrop-blur-xl",
         ].join(" ")}
       >
         <div className="mx-auto flex max-w-[1280px] items-center justify-between px-5 py-3.5 sm:px-6">
@@ -95,14 +95,14 @@ export default function Header() {
                   href={item.href}
                   aria-current={active ? "page" : undefined}
                   className={[
-                    "group relative text-[15px] font-medium transition-colors duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-700",
-                    active ? "text-blue-700" : "text-slate-700 hover:text-blue-700",
+                    "group relative text-[15px] font-medium transition-colors duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent-gold",
+                    active ? "text-accent-gold" : "text-text-muted hover:text-text-primary",
                   ].join(" ")}
                 >
                   {item.label}
                   <span
                     className={[
-                      "absolute -bottom-2 left-0 h-[2px] rounded-full bg-[linear-gradient(90deg,#4f6bff_0%,#7c5cff_100%)] transition-all duration-200",
+                      "absolute -bottom-2 left-0 h-[2px] rounded-full bg-accent-gold transition-all duration-200",
                       active ? "w-full opacity-100" : "w-0 opacity-0 group-hover:w-full group-hover:opacity-100",
                     ].join(" ")}
                   />
@@ -112,13 +112,13 @@ export default function Header() {
           </nav>
 
           <div className="flex items-center gap-3">
-            <span className="hidden rounded-full border border-slate-200/80 bg-white/78 px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500 shadow-sm md:inline-flex">
+            <span className="hidden rounded-full border border-border-hairline bg-white/[0.04] px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-text-muted shadow-sm md:inline-flex">
               Platform-first
             </span>
 
             <Link
               href="/contact/"
-              className="hidden min-h-11 items-center justify-center rounded-xl bg-[linear-gradient(135deg,#3557ff_0%,#4f6bff_45%,#7c5cff_100%)] px-6 text-sm font-semibold text-white shadow-[0_16px_32px_rgba(79,107,255,0.24)] transition hover:brightness-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-700 md:inline-flex"
+              className="hidden min-h-11 items-center justify-center rounded-full bg-accent-gold px-6 text-sm font-bold text-bg-ink shadow-[0_16px_32px_rgba(232,163,61,0.18)] transition hover:bg-[#f1b75d] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent-gold md:inline-flex"
             >
               Start With a Website Review
             </Link>
@@ -128,7 +128,7 @@ export default function Header() {
               aria-label={menuOpen ? "Close menu" : "Open menu"}
               aria-expanded={menuOpen}
               onClick={() => setMenuOpen((current) => !current)}
-              className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-800 transition hover:border-blue-200 hover:text-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-700 md:hidden"
+              className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-border-hairline bg-white/[0.04] text-text-primary transition hover:border-accent-gold/55 hover:text-accent-gold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent-gold md:hidden"
             >
               <span className="relative block h-4 w-5">
                 <span
@@ -161,10 +161,10 @@ export default function Header() {
             type="button"
             aria-label="Close mobile menu overlay"
             onClick={() => setMenuOpen(false)}
-            className="fixed inset-0 z-40 bg-slate-950/30 backdrop-blur-sm md:hidden"
+            className="fixed inset-0 z-40 bg-bg-ink/70 backdrop-blur-sm md:hidden"
           />
           <div className="fixed inset-x-0 top-[78px] z-50 px-5 md:hidden">
-            <div className="mx-auto max-w-6xl rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_22px_60px_rgba(15,23,42,0.18)]">
+            <div className="mx-auto max-w-6xl rounded-2xl border border-border-hairline bg-bg-ink p-4 shadow-[0_22px_60px_rgba(0,0,0,0.34)]">
               <div className="flex flex-col gap-3">
                 {NAV_ITEMS.map((item) => {
                   const active = isActive(item);
@@ -176,10 +176,10 @@ export default function Header() {
                       onClick={() => setMenuOpen(false)}
                       aria-current={active ? "page" : undefined}
                       className={[
-                        "rounded-xl border px-4 py-3 text-sm font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-700",
+                        "rounded-xl border px-4 py-3 text-sm font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent-gold",
                         active
-                          ? "border-blue-200 bg-blue-50 text-blue-800"
-                          : "border-slate-200 bg-white text-slate-700 hover:border-blue-200 hover:text-blue-700",
+                          ? "border-accent-gold/55 bg-accent-gold/10 text-accent-gold"
+                          : "border-border-hairline bg-white/[0.035] text-text-muted hover:border-accent-gold/45 hover:text-text-primary",
                       ].join(" ")}
                     >
                       {item.label}
@@ -190,7 +190,7 @@ export default function Header() {
                 <Link
                   href="/contact/"
                   onClick={() => setMenuOpen(false)}
-                  className="mt-2 inline-flex min-h-12 items-center justify-center rounded-xl bg-[linear-gradient(135deg,#4f6bff_0%,#7c5cff_100%)] px-5 py-3 text-sm font-semibold text-white shadow-[0_16px_32px_rgba(79,107,255,0.24)] transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-700"
+                  className="mt-2 inline-flex min-h-12 items-center justify-center rounded-full bg-accent-gold px-5 py-3 text-sm font-bold text-bg-ink shadow-[0_16px_32px_rgba(232,163,61,0.18)] transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent-gold"
                 >
                   Start With a Website Review
                 </Link>

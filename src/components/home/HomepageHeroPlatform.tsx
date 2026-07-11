@@ -1,11 +1,13 @@
+import Image from "next/image";
 import Link from "next/link";
-import CinematicOrbitScene from "./CinematicOrbitScene";
+import { getPublicPosts } from "@/lib/posts";
+import { NEW_SERVICES_LIST } from "@/lib/newServiceConfigs";
+import { PUBLIC_TOOLS } from "@/lib/tools";
 import {
   AttractIcon,
   BuildIcon,
   ConvertIcon,
   GrowthChartIcon,
-  IconBadge,
   MonetizeIcon,
   OptimizeIcon,
   PlanIcon,
@@ -18,48 +20,36 @@ const orbitSteps = [
     number: "1",
     title: "Plan",
     description: "Research, positioning, and website architecture.",
-    angleClass: "-rotate-90",
-    cardClass: "-translate-x-1/2 -translate-y-[26%]",
     icon: <PlanIcon />,
   },
   {
     number: "2",
     title: "Build",
     description: "Premium builds engineered for trust and conversion.",
-    angleClass: "-rotate-[35deg]",
-    cardClass: "translate-x-[24%] -translate-y-[30%]",
     icon: <BuildIcon />,
   },
   {
     number: "3",
     title: "Optimize",
     description: "SEO, speed, analytics, and UX refinement.",
-    angleClass: "rotate-[35deg]",
-    cardClass: "translate-x-[25%] -translate-y-[30%]",
     icon: <OptimizeIcon />,
   },
   {
     number: "4",
     title: "Attract",
     description: "Content systems that attract the right audience.",
-    angleClass: "rotate-90",
-    cardClass: "-translate-x-1/2 -translate-y-[26%]",
     icon: <AttractIcon />,
   },
   {
     number: "5",
     title: "Convert",
     description: "Turn more visits into qualified leads and customers.",
-    angleClass: "rotate-[145deg]",
-    cardClass: "-translate-x-[125%] -translate-y-[30%]",
     icon: <ConvertIcon />,
   },
   {
     number: "6",
     title: "Monetize",
     description: "Services, digital assets, and AdSense-safe revenue paths.",
-    angleClass: "-rotate-[145deg]",
-    cardClass: "-translate-x-[124%] -translate-y-[30%]",
     icon: <MonetizeIcon />,
   },
 ] as const;
@@ -69,44 +59,17 @@ const valueCards = [
     title: "Build a better website foundation",
     text: "Premium design, clearer offers, better trust, and stronger structure from the start.",
     stat: "Build",
-    accent: "from-blue-500/20 via-blue-100/60 to-white",
     lines: ["Offer clarity", "Trust UX"],
     cta: "Learn more",
     icon: <BuildIcon />,
-    picture: (
-      <div className="relative h-16 overflow-hidden rounded-2xl border border-white/70 bg-[linear-gradient(135deg,#eef4ff_0%,#ffffff_52%,#ede9ff_100%)]">
-        <div className="absolute left-3 top-3 h-3 w-20 rounded-full bg-blue-200" />
-        <div className="absolute left-3 top-9 h-9 w-24 rounded-2xl bg-blue-600/85" />
-        <div className="absolute right-3 top-4 h-12 w-16 rounded-[1.25rem] bg-white shadow-[0_14px_28px_rgba(79,107,255,0.18)]" />
-        <div className="absolute right-6 top-8 h-2 w-8 rounded-full bg-slate-200" />
-        <div className="absolute right-6 top-[3.4rem] h-2 w-6 rounded-full bg-slate-100" />
-      </div>
-    ),
   },
   {
     title: "Grow traffic and monetize responsibly",
     text: "SEO, speed, lead generation, and AdSense-safe monetization that support long-term growth.",
     stat: "Grow + Monetize",
-    accent: "from-violet-500/18 via-blue-100/55 to-white",
     lines: ["SEO systems", "Lead capture"],
     cta: "Learn more",
     icon: <SearchIcon />,
-    picture: (
-      <div className="relative h-16 overflow-hidden rounded-2xl border border-white/70 bg-[linear-gradient(135deg,#f3edff_0%,#ffffff_52%,#eef4ff_100%)]">
-        {[36, 58, 42, 70, 82].map((height, index) => (
-          <div
-            key={height}
-            className="absolute bottom-3 rounded-t-xl bg-[linear-gradient(180deg,#7c5cff_0%,#4f6bff_100%)]"
-            style={{
-              left: `${14 + index * 14}%`,
-              width: "9%",
-              height: `${height}%`,
-            }}
-          />
-        ))}
-        <div className="absolute inset-x-3 top-4 h-px bg-slate-200" />
-      </div>
-    ),
   },
 ] as const;
 
@@ -128,222 +91,302 @@ const trustItems = [
   },
 ] as const;
 
-export default function HomepageHeroPlatform() {
+function GrowthLineHero() {
   return (
-    <SectionShell
-      tone="canvas"
-      spacing="hero"
-      className="relative overflow-hidden"
-      innerClassName="relative"
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 560 260"
+      className="wg-growth-glow absolute inset-x-0 bottom-2 z-0 mx-auto h-[15rem] w-full max-w-[39rem] text-accent-gold opacity-90"
     >
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-full">
-        <div className="absolute left-[-8%] top-[-10%] h-64 w-64 rounded-full bg-[radial-gradient(circle,rgba(79,107,255,0.16),transparent_68%)]" />
-        <div className="absolute right-[-4%] top-[8%] h-[24rem] w-[24rem] rounded-full bg-[radial-gradient(circle,rgba(124,92,255,0.14),transparent_70%)]" />
-        <div className="absolute inset-x-0 top-6 h-px bg-[linear-gradient(90deg,transparent,rgba(79,107,255,0.16),transparent)]" />
-      </div>
+      <path
+        data-growth-path
+        data-growth-hero="true"
+        d="M22 218 C 88 192, 104 148, 158 157 S 246 196, 292 123 S 386 49, 448 73 S 511 69, 538 30"
+        fill="none"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeWidth="4"
+      />
+      {[
+        [158, 157, "Build"],
+        [292, 123, "Grow"],
+        [538, 30, "Monetize"],
+      ].map(([cx, cy, label]) => (
+        <g key={label as string}>
+          <circle className="growth-dot" cx={cx as number} cy={cy as number} r="6" fill="currentColor" />
+          <text
+            x={cx as number}
+            y={(cy as number) - 16}
+            textAnchor="middle"
+            className="fill-text-primary text-[13px] font-semibold"
+          >
+            {label}
+          </text>
+        </g>
+      ))}
+    </svg>
+  );
+}
 
-      <CinematicOrbitScene className="relative">
-        <div className="grid gap-5 lg:grid-cols-[0.84fr_1.16fr] lg:items-start">
-          <div className="relative z-10 pt-4">
-            <p className="inline-flex rounded-full border border-blue-100 bg-white/92 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.22em] text-blue-700 shadow-sm">
+export default function HomepageHeroPlatform() {
+  const publishedGuideCount = getPublicPosts().length;
+  const serviceCount = NEW_SERVICES_LIST.length;
+  const toolCount = PUBLIC_TOOLS.length;
+
+  return (
+    <>
+      <SectionShell
+        tone="canvas"
+        spacing="hero"
+        className="relative overflow-hidden"
+        innerClassName="relative"
+      >
+        <div data-parallax-section className="pointer-events-none absolute inset-0 overflow-hidden">
+          <Image
+            data-parallax-bg
+            src="/images/cinematic/hero-bg.webp"
+            alt=""
+            fill
+            priority
+            sizes="100vw"
+            className="scale-110 object-cover opacity-[0.72]"
+          />
+          <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(12,15,20,0.2),rgba(12,15,20,0.9))]" />
+          <div className="wg-hairline-grid absolute inset-0 opacity-30" />
+        </div>
+
+        <div className="relative grid gap-10 lg:grid-cols-[0.92fr_1.08fr] lg:items-center">
+          <div className="relative z-10">
+            <p
+              data-reveal
+              className="inline-flex rounded-full border border-accent-gold/25 bg-white/[0.04] px-4 py-2 text-[11px] font-bold uppercase tracking-[0.24em] text-accent-gold"
+            >
               The platform for website growth
             </p>
 
-            <h1 className="mt-4 text-balance text-[3.95rem] font-semibold leading-[0.85] tracking-[-0.075em] text-slate-950 md:text-[5.9rem]">
-              Build.
-              <br />
-              Grow.
-              <br />
-              <span className="bg-[linear-gradient(90deg,#3557ff_0%,#7c5cff_60%,#5e7cff_100%)] bg-clip-text text-transparent">
-                Monetize.
-              </span>
+            <h1 className="font-display mt-6 text-balance text-[clamp(64px,9vw,128px)] font-medium leading-[0.78] tracking-[-0.075em] text-text-primary">
+              <span data-reveal className="block">Build.</span>
+              <span data-reveal className="block">Grow.</span>
+              <span data-reveal className="block text-accent-gold">Monetize.</span>
             </h1>
 
-            <p className="mt-4 max-w-[31rem] text-[1.02rem] leading-8 text-slate-600">
+            <p data-reveal className="mt-6 max-w-[35rem] text-[1.05rem] leading-8 text-text-muted">
               Web Growth combines premium builds, search growth systems, Academy
               guidance, and monetization-aware strategy so your website becomes a
               stronger business asset, not a static brochure.
             </p>
 
-            <div className="mt-5 flex flex-col gap-3 sm:flex-row">
+            <div data-reveal className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Link
                 href="/contact/"
-                className="inline-flex min-h-12 items-center justify-center rounded-xl bg-[linear-gradient(135deg,#3557ff_0%,#7c5cff_100%)] px-6 text-sm font-semibold text-white shadow-[0_18px_42px_rgba(79,107,255,0.28)] transition hover:-translate-y-0.5 hover:brightness-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-700"
+                className="inline-flex min-h-12 items-center justify-center rounded-full bg-accent-gold px-6 text-sm font-bold text-bg-ink shadow-[0_18px_42px_rgba(232,163,61,0.24)] transition hover:-translate-y-0.5 hover:bg-[#f1b75d] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent-gold"
               >
                 Start With a Website Review
               </Link>
               <Link
                 href="/blog/"
-                className="inline-flex min-h-12 items-center justify-center rounded-xl border border-blue-200 bg-white px-6 text-sm font-semibold text-blue-800 transition hover:border-blue-300 hover:bg-blue-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-700"
+                className="inline-flex min-h-12 items-center justify-center rounded-full border border-border-hairline bg-white/[0.04] px-6 text-sm font-semibold text-text-primary transition hover:border-accent-gold/55 hover:text-accent-gold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent-gold"
               >
                 Explore the Academy
               </Link>
             </div>
 
-            <div className="mt-5 grid gap-3 md:max-w-[34rem] md:grid-cols-2">
+            <div data-stagger className="mt-8 grid gap-3 md:max-w-[36rem] md:grid-cols-2">
               {valueCards.map((card) => (
                 <article
                   key={card.title}
-                  data-float-card
-                  className="group rounded-[1.35rem] border border-slate-200/80 bg-white/90 p-4 shadow-[0_18px_36px_rgba(15,23,42,0.05)] backdrop-blur transition duration-300 hover:-translate-y-1 hover:shadow-[0_22px_40px_rgba(79,107,255,0.08)]"
+                  className="wg-card-hover rounded-[1.35rem] border border-border-hairline bg-[#11161f]/82 p-5 shadow-[0_18px_48px_rgba(0,0,0,0.24)]"
                 >
-                  <div className={`rounded-[0.95rem] bg-gradient-to-br p-2 ${card.accent}`}>
-                    {card.picture}
-                  </div>
-                  <div className="mt-2.5 flex items-center gap-2.5">
-                    <IconBadge tone="blue" className="h-10 w-10 rounded-[1rem]">
+                  <div className="flex items-start gap-3">
+                    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-accent-gold/10 text-accent-gold ring-1 ring-accent-gold/25">
                       {card.icon}
-                    </IconBadge>
+                    </span>
                     <div>
-                      <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-blue-700">
+                      <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-accent-gold">
                         {card.stat}
                       </p>
-                      <h2 className="text-[0.92rem] font-semibold leading-5 text-slate-950">
+                      <h2 className="font-display mt-1 text-[1.2rem] font-medium leading-6 text-text-primary">
                         {card.title}
                       </h2>
                     </div>
                   </div>
-                  <p className="mt-2.5 text-[0.87rem] leading-6 text-slate-600">{card.text}</p>
-                  <div className="mt-2.5 flex flex-wrap gap-2">
+                  <p className="mt-4 text-[0.9rem] leading-6 text-text-muted">{card.text}</p>
+                  <div className="mt-4 flex flex-wrap gap-2">
                     {card.lines.map((line) => (
                       <span
                         key={line}
-                        className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[11px] font-semibold text-slate-500"
+                        className="rounded-full border border-border-hairline bg-white/[0.03] px-2.5 py-1 text-[11px] font-semibold text-text-muted"
                       >
                         {line}
                       </span>
                     ))}
                   </div>
-                  <p className="mt-3.5 text-sm font-semibold text-blue-700">{card.cta} -&gt;</p>
+                  <p className="mt-4 text-sm font-semibold text-accent-gold">{card.cta} -&gt;</p>
                 </article>
               ))}
             </div>
-
-            <div className="mt-4 flex items-center gap-3.5">
-              <div className="flex -space-x-2">
-                {[1, 2, 3, 4, 5].map((item) => (
-                  <span
-                    key={item}
-                    className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-white bg-[linear-gradient(135deg,#dbeafe_0%,#ede9fe_100%)] text-[11px] font-bold text-blue-700 shadow-sm"
-                  >
-                    WG
-                  </span>
-                ))}
-              </div>
-              <p className="max-w-[18rem] text-[0.92rem] leading-6 text-slate-600">
-                Built for website redesign, SEO growth, lead generation, and
-                monetization systems that do not undermine trust.
-              </p>
-            </div>
           </div>
 
-          <div className="relative z-10">
-            <div className="relative mx-auto flex w-full max-w-[47rem] translate-x-4 items-center justify-center lg:mt-0 lg:translate-x-6">
-              <div className="relative aspect-square w-full">
-                <div
-                  data-orbit-glow
-                  className="pointer-events-none absolute inset-[6%] rounded-full bg-[radial-gradient(circle,rgba(79,107,255,0.2)_0%,rgba(124,92,255,0.16)_38%,transparent_72%)] blur-3xl"
-                />
-                <div
-                  data-orbit-ring
-                  className="pointer-events-none absolute inset-[0.2%] rounded-full border border-blue-100/70"
-                />
-                <div
-                  data-orbit-ring
-                  className="pointer-events-none absolute inset-[3.5%] rounded-full border border-dashed border-violet-200/70"
-                />
-                <div
-                  data-orbit-ring
-                  className="pointer-events-none absolute inset-[7.5%] rounded-full border-2 border-blue-500/80 border-r-violet-500 border-b-blue-300"
-                />
-                <div
-                  data-orbit-ring
-                  className="pointer-events-none absolute inset-[15.5%] rounded-full border border-blue-100/70"
-                />
-                <div
-                  data-orbit-ring
-                  className="pointer-events-none absolute inset-[23%] rounded-full border border-dashed border-slate-200"
-                />
-
-                <div className="absolute left-1/2 top-1/2 z-20 flex h-[34%] w-[34%] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-slate-200 bg-white/97 text-center shadow-[0_24px_60px_rgba(15,23,42,0.09)]">
-                  <div className="px-6">
-                    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-blue-700">
-                      Web Growth
+          <div className="relative z-10 min-h-[36rem]">
+            <GrowthLineHero />
+            <div data-reveal className="relative ml-auto max-w-[42rem] overflow-hidden rounded-[2rem] border border-border-hairline bg-[#11161f]/78 p-4 shadow-[0_34px_90px_rgba(0,0,0,0.34)] backdrop-blur">
+              <Image
+                src="/images/cinematic/audit-glow.webp"
+                alt=""
+                fill
+                loading="lazy"
+                sizes="(max-width: 1024px) 100vw, 680px"
+                className="object-cover opacity-[0.55]"
+              />
+              <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(12,15,20,0.2),rgba(12,15,20,0.9))]" />
+              <div className="relative z-10 rounded-[1.45rem] border border-white/8 bg-bg-ink/78 p-5">
+                <div className="flex items-center justify-between border-b border-border-hairline pb-4">
+                  <div>
+                    <p className="text-xs font-bold uppercase tracking-[0.2em] text-accent-gold">
+                      Audit summary
                     </p>
-                    <p className="mt-2 text-[2.15rem] font-semibold leading-tight tracking-[-0.055em] text-slate-950">
-                      Website
-                      <br />
-                      Growth
-                      <br />
-                      Cycle
-                    </p>
-                    <div className="mt-4 flex justify-center gap-2">
-                      <IconBadge tone="blue" shape="circle" className="h-9 w-9">
-                        <GrowthChartIcon className="h-4 w-4" />
-                      </IconBadge>
-                      <IconBadge tone="purple" shape="circle" className="h-9 w-9">
-                        <MonetizeIcon className="h-4 w-4" />
-                      </IconBadge>
-                    </div>
+                    <p className="mt-1 text-sm text-text-muted">Live-feeling growth snapshot</p>
                   </div>
+                  <span className="rounded-full border border-accent-teal/45 bg-accent-teal/14 px-3 py-1 text-xs font-semibold text-text-primary">
+                    Ready
+                  </span>
                 </div>
 
+                <div className="mt-5 grid gap-3 sm:grid-cols-3">
+                  {[
+                    ["Academy", publishedGuideCount, "published guides"],
+                    ["Services", serviceCount, "live implementation paths"],
+                    ["Tools", toolCount, "public utilities live now"],
+                  ].map(([label, value, description]) => (
+                    <div key={label as string} className="rounded-2xl border border-border-hairline bg-white/[0.035] p-4">
+                      <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-accent-gold">
+                        {label}
+                      </p>
+                      <p className="font-display mt-2 text-3xl font-medium tracking-[-0.04em] text-text-primary">
+                        {value}
+                      </p>
+                      <p className="mt-1 text-xs leading-5 text-text-muted">{description}</p>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="mt-5 rounded-2xl border border-border-hairline bg-[#0a0d12] p-4">
+                  <div className="flex items-center gap-2 text-xs font-semibold text-text-muted">
+                    <span className="h-2 w-2 rounded-full bg-accent-gold" />
+                    Growth trajectory
+                  </div>
+                  <div className="mt-5 h-36 overflow-hidden rounded-xl bg-[linear-gradient(180deg,rgba(232,163,61,0.08),rgba(27,110,99,0.06))] p-4">
+                    <svg viewBox="0 0 420 120" className="h-full w-full text-accent-gold">
+                      <path
+                        data-growth-path
+                        d="M8 104 C 72 80, 83 94, 128 65 S 202 32, 260 47 S 346 78, 412 14"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeLinecap="round"
+                        strokeWidth="3"
+                      />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </SectionShell>
+
+      <SectionShell tone="canvas" spacing="default" className="relative" innerClassName="relative">
+        <div data-growth-section data-parallax-section className="relative overflow-hidden rounded-[2rem] border border-border-hairline bg-[#11161f]/78 p-5 shadow-[0_28px_80px_rgba(0,0,0,0.25)] md:p-8">
+          <Image
+            data-parallax-bg
+            src="/images/cinematic/growth-cycle-bg.webp"
+            alt=""
+            fill
+            loading="lazy"
+            sizes="(max-width: 1280px) 100vw, 1240px"
+            className="scale-110 object-cover opacity-[0.42]"
+          />
+          <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(12,15,20,0.2),rgba(12,15,20,0.9))]" />
+          <div
+            data-cycle-light
+            className="pointer-events-none absolute left-[10%] top-[38%] h-36 w-36 rounded-full bg-accent-gold/22 blur-3xl"
+          />
+          <div className="relative z-10 grid gap-8 lg:grid-cols-[0.76fr_1.24fr] lg:items-center">
+            <div data-reveal>
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-accent-gold">
+                Website Growth Cycle
+              </p>
+              <h2 className="font-display mt-4 text-4xl font-medium tracking-[-0.05em] text-text-primary md:text-5xl">
+                A single line from plan to monetization.
+              </h2>
+              <p className="mt-4 max-w-md text-sm leading-7 text-text-muted">
+                The platform connects strategy, build quality, search visibility,
+                conversion, and ethical revenue paths into one operating system.
+              </p>
+            </div>
+
+            <div className="relative">
+              <svg
+                aria-hidden="true"
+                viewBox="0 0 820 180"
+                className="wg-growth-glow absolute left-0 right-0 top-8 hidden h-36 w-full text-accent-gold md:block"
+              >
+                <path
+                  data-growth-path
+                  d="M20 150 C 126 126, 156 70, 244 92 S 370 142, 446 76 S 576 18, 676 48 S 770 54, 802 20"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeLinecap="round"
+                  strokeWidth="3"
+                />
+              </svg>
+
+              <div data-stagger className="relative z-10 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
                 {orbitSteps.map((step) => (
-                  <div
+                  <article
                     key={step.number}
-                    data-orbit-track
-                    className={["absolute inset-[0.5%]", step.angleClass].join(" ")}
+                    data-cycle-step
+                    className="group rounded-[1.35rem] border border-border-hairline bg-bg-ink/70 p-5 shadow-[0_14px_40px_rgba(0,0,0,0.22)] transition data-[active=true]:border-accent-gold"
                   >
-                    <div className="relative h-full w-full">
-                      <div
-                        data-orbit-card
-                        className={[
-                          "absolute left-1/2 top-0 w-[7rem] md:w-[7.7rem]",
-                          step.cardClass,
-                        ].join(" ")}
-                      >
-                        <div className="rounded-[1.35rem] border border-white/85 bg-white/96 p-2.5 text-center shadow-[0_12px_24px_rgba(79,107,255,0.06)] backdrop-blur">
-                          <div className="mx-auto flex h-9 w-9 items-center justify-center rounded-[1rem] border border-blue-100 bg-[linear-gradient(135deg,#eef4ff_0%,#f5efff_100%)] text-sm font-bold text-blue-700 shadow-sm">
-                            {step.icon}
-                          </div>
-                          <p className="mt-2 text-[8px] font-bold uppercase tracking-[0.18em] text-blue-700">
-                            {step.number}
-                          </p>
-                          <p className="mt-1 text-[12px] font-semibold uppercase tracking-[0.12em] text-slate-950">
-                            {step.title}
-                          </p>
-                          <p className="mt-1 text-[9px] leading-4 text-slate-500">
-                            {step.description}
-                          </p>
-                        </div>
+                    <div className="flex items-start gap-3">
+                      <span className="flex h-11 w-11 items-center justify-center rounded-full border border-accent-gold/25 bg-accent-gold/10 text-sm font-bold text-accent-gold transition group-[.is-active]:scale-110 group-[.is-active]:bg-accent-gold group-[.is-active]:text-bg-ink">
+                        {step.icon}
+                      </span>
+                      <div>
+                        <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-accent-gold">
+                          {step.number}
+                        </p>
+                        <h3 className="font-display mt-1 text-xl font-medium text-text-primary">
+                          {step.title}
+                        </h3>
                       </div>
                     </div>
-                  </div>
+                    <p className="mt-4 text-sm leading-6 text-text-muted">{step.description}</p>
+                  </article>
                 ))}
               </div>
             </div>
           </div>
         </div>
 
-        <div className="mt-4 grid gap-2.5 rounded-[1.4rem] border border-slate-200/80 bg-white/88 p-2.5 shadow-[0_10px_24px_rgba(15,23,42,0.05)] backdrop-blur md:grid-cols-3">
+        <div data-stagger className="mt-6 grid gap-3 md:grid-cols-3">
           {trustItems.map((item) => (
             <div
               key={item.title}
-              className="rounded-[1rem] bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(247,249,255,0.98))] px-3 py-2.5"
+              className="rounded-[1.2rem] border border-border-hairline bg-white/[0.035] px-4 py-4"
             >
               <div className="flex items-start gap-3">
-                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[linear-gradient(135deg,#eef4ff_0%,#f3edff_100%)] text-sm font-bold text-blue-700 ring-1 ring-blue-100">
+                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent-teal/18 text-accent-gold ring-1 ring-accent-teal/35">
                   {item.icon}
                 </span>
                 <div>
-                  <p className="text-[0.95rem] font-semibold text-slate-950">{item.title}</p>
-                  <p className="mt-1 text-[0.8rem] leading-5 text-slate-600">{item.text}</p>
+                  <p className="font-display text-[1.08rem] font-medium text-text-primary">{item.title}</p>
+                  <p className="mt-1 text-[0.84rem] leading-5 text-text-muted">{item.text}</p>
                 </div>
               </div>
             </div>
           ))}
         </div>
-      </CinematicOrbitScene>
-    </SectionShell>
+      </SectionShell>
+    </>
   );
 }

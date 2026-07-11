@@ -10,16 +10,16 @@ type SectionShellProps = {
 };
 
 const toneClasses = {
-  canvas: "bg-[#f7f8fc]",
-  white: "bg-white",
-  tint: "bg-[linear-gradient(180deg,#f5f7ff_0%,#eef4ff_100%)]",
-  dark: "bg-[linear-gradient(180deg,#081122_0%,#0f172a_60%,#111c34_100%)] text-white",
+  canvas: "bg-transparent",
+  white: "bg-[#11161f]",
+  tint: "bg-[linear-gradient(180deg,rgba(232,163,61,0.06)_0%,rgba(27,110,99,0.08)_100%)]",
+  dark: "bg-[linear-gradient(180deg,#080a0e_0%,#11161f_100%)] text-text-primary",
 };
 
 const spacingClasses = {
-  compact: "py-10 md:py-12",
-  default: "py-12 md:py-16",
-  hero: "pb-6 pt-14 md:pb-8 md:pt-18",
+  compact: "py-10 md:py-14",
+  default: "py-14 md:py-20",
+  hero: "pb-8 pt-14 md:pb-12 md:pt-20",
 };
 
 export default function SectionShell({

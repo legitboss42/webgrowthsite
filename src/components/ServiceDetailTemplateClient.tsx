@@ -1,4 +1,6 @@
 import Link from "next/link";
+import TrackedLink from "@/components/analytics/TrackedLink";
+import CinematicHero from "@/components/platform/CinematicHero";
 import StructuredData from "@/components/StructuredData";
 import BeforeAfterResults from "@/components/content/BeforeAfterResults";
 import CommonMistakes from "@/components/content/CommonMistakes";
@@ -21,6 +23,7 @@ import {
   SearchIcon,
 } from "@/components/home/HomeIcons";
 import SectionShell from "@/components/home/SectionShell";
+import { getPost } from "@/lib/posts";
 import { buildBreadcrumbSchema } from "@/lib/seo";
 import { absoluteUrl, SITE_URL } from "@/lib/site";
 import type { ServicePageConfig } from "@/lib/newServiceConfigs";
@@ -34,6 +37,12 @@ const processIcons = [<PlanIcon key="1" />, <BuildIcon key="2" />, <OptimizeIcon
 export default function ServiceDetailTemplateClient({ service }: Props) {
   const servicePath = `/services/${service.slug}`;
   const serviceUrl = absoluteUrl(servicePath);
+  const relatedGuides = service.relatedGuideSlugs
+    .slice(0, 4)
+    .map((slug) => ({
+      slug,
+      post: getPost(slug),
+    }));
   const schema = [
     {
       "@context": "https://schema.org",
@@ -84,86 +93,45 @@ export default function ServiceDetailTemplateClient({ service }: Props) {
     <main className="bg-[#f7f8fc] text-slate-950">
       <StructuredData data={schema} />
 
-      <SectionShell tone="canvas" spacing="hero" className="relative overflow-hidden">
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-full">
-          <div className="absolute left-[-10%] top-[-6%] h-72 w-72 rounded-full bg-[radial-gradient(circle,rgba(79,107,255,0.12),transparent_70%)]" />
-          <div className="absolute right-[-8%] top-[4%] h-[25rem] w-[25rem] rounded-full bg-[radial-gradient(circle,rgba(124,92,255,0.12),transparent_70%)]" />
-        </div>
-
-        <div className="relative grid gap-8 lg:grid-cols-[0.84fr_1.16fr] lg:items-center">
-          <div>
-            <p className="inline-flex rounded-full border border-blue-100 bg-white/92 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.22em] text-blue-700 shadow-sm">
-              {service.title}
-            </p>
-            <h1 className="mt-5 max-w-[34rem] text-balance text-[3.8rem] font-semibold leading-[0.9] tracking-[-0.07em] text-slate-950 md:text-[5rem]">
-              {service.heroTitle}
-            </h1>
-            <p className="mt-4 max-w-[33rem] text-lg leading-8 text-slate-600">
-              {service.heroDescription}
-            </p>
-
-            <div className="mt-6 flex flex-wrap gap-2">
-              {service.highlights.map((item, index) => (
-                <span
-                  key={item}
-                  className={[
-                    "rounded-full border px-3 py-1 text-xs font-medium",
-                    index === 0
-                      ? "border-blue-200 bg-blue-50 text-blue-700"
-                      : "border-slate-200 bg-white text-slate-600",
-                  ].join(" ")}
-                >
-                  {item}
-                </span>
+      <CinematicHero
+        eyebrow={service.title}
+        title={service.heroTitle}
+        description={service.heroDescription}
+        pageType="service_detail"
+        variant="split"
+        primaryAction={{
+          label: "Request This Service",
+          href: `/contact?service=${encodeURIComponent(service.serviceParam)}`,
+          ctaName: "request_this_service",
+          destination: "contact",
+        }}
+        secondaryAction={{
+          label: "View All Services",
+          href: "/services/",
+          ctaName: "view_all_services",
+          destination: "services",
+        }}
+        aside={
+          <div className="border-l border-border-hairline pl-6 md:pl-9">
+            <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-accent-teal">Engagement dossier</p>
+            <ol className="mt-6 space-y-5">
+              {service.deliverables.slice(0, 4).map((item, index) => (
+                <li key={item} className="grid grid-cols-[2rem_1fr] gap-4 border-b border-border-hairline pb-5 text-sm leading-6 text-text-muted">
+                  <span className="font-display text-xl text-accent-gold">0{index + 1}</span>
+                  <span>{item}</span>
+                </li>
               ))}
-            </div>
-
-            <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-              <Link
-                href={`/contact?service=${encodeURIComponent(service.serviceParam)}`}
-                className="inline-flex min-h-12 items-center justify-center rounded-xl bg-[linear-gradient(135deg,#3557ff_0%,#4f6bff_45%,#7c5cff_100%)] px-6 text-sm font-semibold text-white shadow-[0_16px_34px_rgba(79,107,255,0.28)] transition hover:brightness-105"
-              >
-                Request This Service
-              </Link>
-              <Link
-                href="/services/"
-                className="inline-flex min-h-12 items-center justify-center rounded-xl border border-blue-200 bg-white px-6 text-sm font-semibold text-blue-800 transition hover:border-blue-300 hover:bg-blue-50"
-              >
-                View All Services
-              </Link>
-            </div>
+            </ol>
           </div>
-
-          <div className="grid gap-4 lg:grid-cols-[1.02fr_0.98fr]">
-            <article className="rounded-[1.5rem] border border-slate-200 bg-white p-5 shadow-[0_18px_36px_rgba(15,23,42,0.05)]">
-              <p className="text-xs font-bold uppercase tracking-[0.18em] text-blue-700">
-                Who this is for
-              </p>
-              <ul className="mt-5 space-y-3">
-                {service.targetAudience.slice(0, 4).map((item) => (
-                  <li key={item} className="flex gap-3 text-sm leading-6 text-slate-600">
-                    <span className="mt-[9px] h-2 w-2 rounded-full bg-blue-500/80" />
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </article>
-            <article className="rounded-[1.5rem] border border-slate-200 bg-white p-5 shadow-[0_18px_36px_rgba(15,23,42,0.05)]">
-              <p className="text-xs font-bold uppercase tracking-[0.18em] text-blue-700">
-                Included
-              </p>
-              <ul className="mt-5 space-y-3">
-                {service.deliverables.slice(0, 4).map((item) => (
-                  <li key={item} className="flex gap-3 text-sm leading-6 text-slate-600">
-                    <span className="mt-[9px] h-2 w-2 rounded-full bg-blue-500/80" />
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </article>
+        }
+        footer={
+          <div className="grid gap-px overflow-hidden rounded-2xl border border-border-hairline bg-border-hairline sm:grid-cols-3">
+            {service.highlights.slice(0, 3).map((item) => (
+              <div key={item} className="bg-bg-ink px-5 py-4 text-sm text-text-muted">{item}</div>
+            ))}
           </div>
-        </div>
-      </SectionShell>
+        }
+      />
 
       <SectionShell tone="white" spacing="compact">
         <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
@@ -238,7 +206,7 @@ export default function ServiceDetailTemplateClient({ service }: Props) {
               Related Academy guides
             </p>
             <div className="mt-5 space-y-3">
-              {service.relatedGuideSlugs.slice(0, 4).map((slug) => (
+              {relatedGuides.map(({ slug, post }) => (
                 <Link
                   key={slug}
                   href={`/blog/${slug}/`}
@@ -247,7 +215,7 @@ export default function ServiceDetailTemplateClient({ service }: Props) {
                   <IconBadge tone="purple" className="h-9 w-9 rounded-[0.9rem]">
                     <SearchIcon />
                   </IconBadge>
-                  <span>{slug.replace(/-/g, " ")}</span>
+                  <span>{post?.title ?? slug.replace(/-/g, " ")}</span>
                 </Link>
               ))}
             </div>
@@ -296,18 +264,26 @@ export default function ServiceDetailTemplateClient({ service }: Props) {
             </div>
 
             <div className="flex flex-col items-start gap-3 sm:flex-row">
-              <Link
+              <TrackedLink
                 href={`/contact?service=${encodeURIComponent(service.serviceParam)}`}
+                ctaName="request_website_review"
+                ctaLocation="service_final_cta"
+                destination="contact"
+                pageType="service_detail"
                 className="inline-flex min-h-12 items-center justify-center rounded-xl bg-white px-6 text-sm font-semibold text-blue-900 transition hover:bg-blue-50"
               >
                 Request a Website Review
-              </Link>
-              <Link
+              </TrackedLink>
+              <TrackedLink
                 href="/portfolio/"
+                ctaName="view_case_studies"
+                ctaLocation="service_final_cta"
+                destination="portfolio"
+                pageType="service_detail"
                 className="inline-flex min-h-12 items-center justify-center rounded-xl border border-white/30 bg-transparent px-6 text-sm font-semibold text-white transition hover:bg-white/10"
               >
                 View Case Studies
-              </Link>
+              </TrackedLink>
             </div>
           </div>
         </div>

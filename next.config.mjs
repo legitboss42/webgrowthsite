@@ -51,22 +51,10 @@ const nextConfig = {
   reactStrictMode: true,
   trailingSlash: true,
   serverExternalPackages: ["edge-tts-universal", "ws", "bufferutil", "utf-8-validate"],
-  experimental: {
-    cpus: 1,
-  },
   // Use the default `.next` output. Cleaning is handled explicitly through `dev:clean`.
   distDir: ".next",
   images: {
     qualities: [60, 65, 68, 75],
-  },
-  webpack(config, { dev }) {
-    if (dev) {
-      // Disable webpack filesystem cache in local dev on Windows.
-      // This avoids recurring ENOENT pack.gz cache corruption/noise in `.next/cache`.
-      config.cache = false;
-    }
-
-    return config;
   },
   async headers() {
     return [
@@ -79,6 +67,12 @@ const nextConfig = {
   async redirects() {
     return [
       ...governanceRedirects,
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "www.webgrowth.info" }],
+        destination: "https://webgrowth.info/:path*",
+        permanent: true,
+      },
       {
         source: "/images/:path*.png",
         destination: "/images/:path*.webp",

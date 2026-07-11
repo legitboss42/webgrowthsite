@@ -1,5 +1,6 @@
 import Link from "next/link";
-import CinematicOrbitScene from "@/components/home/CinematicOrbitScene";
+import CinematicHero from "@/components/platform/CinematicHero";
+import SectionReveal from "@/components/platform/SectionReveal";
 import {
   AttractIcon,
   BuildIcon,
@@ -258,132 +259,29 @@ export default function ServicesClient({ services = [] }: Props) {
 
   return (
     <main className="bg-[#f7f8fc] text-slate-950">
-      <SectionShell tone="canvas" spacing="hero" className="relative overflow-hidden">
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-full">
-          <div className="absolute left-[-8%] top-[-8%] h-72 w-72 rounded-full bg-[radial-gradient(circle,rgba(79,107,255,0.15),transparent_66%)]" />
-          <div className="absolute right-[-6%] top-[2%] h-[26rem] w-[26rem] rounded-full bg-[radial-gradient(circle,rgba(124,92,255,0.14),transparent_72%)]" />
-        </div>
-
-        <CinematicOrbitScene className="relative">
-          <div className="grid gap-6 lg:grid-cols-[0.86fr_1.14fr] lg:items-start">
-            <div className="relative z-10 pt-4">
-              <p className="inline-flex rounded-full border border-blue-100 bg-white/92 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.22em] text-blue-700 shadow-sm">
-                Services
-              </p>
-
-              <h1 className="mt-4 max-w-[34rem] text-balance text-[3.85rem] font-semibold leading-[0.89] tracking-[-0.075em] text-slate-950 md:text-[5.2rem]">
-                Growth-Focused
-                <br />
-                Web Solutions
-                <br />
-                That Deliver Real{" "}
-                <span className="bg-[linear-gradient(90deg,#3557ff_0%,#7c5cff_65%,#5e7cff_100%)] bg-clip-text text-transparent">
-                  Results.
-                </span>
-              </h1>
-
-              <p className="mt-4 max-w-[33rem] text-[1.02rem] leading-8 text-slate-600">
-                We build, optimize, and scale websites that attract the right traffic,
-                earn trust, and convert visitors into customers more consistently.
-              </p>
-
-              <ul className="mt-4 space-y-3">
-                {[
-                  "Strategy-led solutions. Not cookie-cutter builds.",
-                  "Built for SEO, speed, and long-term growth.",
-                ].map((item) => (
-                  <li key={item} className="flex items-start gap-3 text-sm leading-6 text-slate-700">
-                    <IconBadge tone="blue" shape="circle" className="mt-0.5 h-6 w-6 shrink-0">
-                      <SearchIcon className="h-3.5 w-3.5" />
-                    </IconBadge>
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-
-              <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-                <Link
-                  href="/contact/"
-                  className="inline-flex min-h-12 items-center justify-center rounded-xl bg-[linear-gradient(135deg,#3557ff_0%,#4f6bff_45%,#7c5cff_100%)] px-6 text-sm font-semibold text-white shadow-[0_18px_42px_rgba(79,107,255,0.28)] transition hover:-translate-y-0.5 hover:brightness-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-700"
-                >
-                  Start With a Website Review
-                </Link>
-                <Link
-                  href="/blog/"
-                  className="inline-flex min-h-12 items-center justify-center rounded-xl bg-transparent px-3 text-sm font-semibold text-blue-700 transition hover:text-blue-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-700"
-                >
-                  Explore the Academy -&gt;
-                </Link>
-              </div>
-            </div>
-
-            <div className="relative z-10">
-              <div className="relative mx-auto flex w-full max-w-[44rem] items-center justify-center translate-x-2 lg:translate-x-4">
-                <div className="relative aspect-square w-full">
-                  <div
-                    data-orbit-glow
-                    className="pointer-events-none absolute inset-[6%] rounded-full bg-[radial-gradient(circle,rgba(79,107,255,0.18)_0%,rgba(124,92,255,0.14)_38%,transparent_72%)] blur-3xl"
-                  />
-                  <div data-orbit-ring className="pointer-events-none absolute inset-[0.2%] rounded-full border border-blue-100/70" />
-                  <div data-orbit-ring className="pointer-events-none absolute inset-[4%] rounded-full border border-dashed border-violet-200/70" />
-                  <div data-orbit-ring className="pointer-events-none absolute inset-[8%] rounded-full border-2 border-blue-500/80 border-r-violet-500 border-b-blue-300" />
-                  <div data-orbit-ring className="pointer-events-none absolute inset-[16%] rounded-full border border-blue-100/70" />
-                  <div data-orbit-ring className="pointer-events-none absolute inset-[24%] rounded-full border border-dashed border-slate-200" />
-
-                  <div className="absolute left-1/2 top-1/2 z-20 flex h-[34%] w-[34%] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-slate-200 bg-white/97 text-center shadow-[0_24px_60px_rgba(15,23,42,0.09)]">
-                    <div className="px-6">
-                      <p className="text-xs font-semibold uppercase tracking-[0.2em] text-blue-700">
-                        Web Growth
-                      </p>
-                      <p className="mt-2 text-[2rem] font-semibold leading-tight tracking-[-0.055em] text-slate-950">
-                        Service
-                        <br />
-                        Architecture
-                      </p>
-                      <p className="mt-3 text-sm leading-6 text-slate-500">
-                        A connected system for compounding growth.
-                      </p>
-                    </div>
-                  </div>
-
-                  {heroSteps.map((step) => (
-                    <div
-                      key={step.number}
-                      data-orbit-track
-                      className={["absolute inset-[0.5%]", step.angleClass].join(" ")}
-                    >
-                      <div className="relative h-full w-full">
-                        <div
-                          data-orbit-card
-                          className={[
-                            "absolute left-1/2 top-0 w-[7rem] md:w-[7.4rem]",
-                            step.cardClass,
-                          ].join(" ")}
-                        >
-                          <div className="rounded-[1.35rem] border border-white/85 bg-white/96 p-2.5 text-center shadow-[0_12px_24px_rgba(79,107,255,0.06)] backdrop-blur">
-                            <div className="mx-auto flex h-9 w-9 items-center justify-center rounded-[1rem] border border-blue-100 bg-[linear-gradient(135deg,#eef4ff_0%,#f5efff_100%)] text-sm font-bold text-blue-700 shadow-sm">
-                              {step.icon}
-                            </div>
-                            <p className="mt-2 text-[8px] font-bold uppercase tracking-[0.18em] text-blue-700">
-                              {step.number}
-                            </p>
-                            <p className="mt-1 text-[12px] font-semibold uppercase tracking-[0.12em] text-slate-950">
-                              {step.title}
-                            </p>
-                            <p className="mt-1 text-[9px] leading-4 text-slate-500">
-                              {step.description}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+      <CinematicHero
+        eyebrow="Services / Build. Grow. Monetize."
+        title={<>One growth system. <span className="text-accent-gold">Built around your bottleneck.</span></>}
+        description="Websites, search, performance, conversion, analytics, and automation delivered as connected growth infrastructure rather than disconnected tasks."
+        pageType="services_hub"
+        variant="split"
+        primaryAction={{ label: "Start With a Website Review", href: "/contact/", ctaName: "start_website_review", destination: "contact" }}
+        secondaryAction={{ label: "Explore the Academy", href: "/blog/", ctaName: "explore_academy", destination: "academy" }}
+        aside={
+          <div className="border-l border-border-hairline pl-6 md:pl-9">
+            <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-accent-teal">Growth architecture</p>
+            <div className="mt-6 grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-border-hairline bg-border-hairline">
+              {heroSteps.map((step) => (
+                <div key={step.number} className="bg-bg-ink p-4">
+                  <span className="font-display text-xl text-accent-gold">0{step.number}</span>
+                  <p className="mt-3 text-sm font-semibold text-text-primary">{step.title}</p>
+                  <p className="mt-1 text-xs leading-5 text-text-muted">{step.description}</p>
                 </div>
-              </div>
+              ))}
             </div>
           </div>
-        </CinematicOrbitScene>
-      </SectionShell>
+        }
+      />
 
       <SectionShell tone="white" spacing="compact">
         <div className="grid gap-6 lg:grid-cols-[0.92fr_1.08fr]">
@@ -427,21 +325,21 @@ export default function ServicesClient({ services = [] }: Props) {
         </div>
       </SectionShell>
 
-      <SectionShell tone="white" spacing="default">
-        <div className="rounded-[2rem] border border-slate-200 bg-white px-6 py-7 shadow-[0_28px_70px_rgba(15,23,42,0.06)] md:px-10">
-          <p className="text-center text-xs font-bold uppercase tracking-[0.18em] text-blue-700">
+      <SectionShell tone="dark" spacing="default">
+        <div className="border-y border-border-hairline py-10">
+          <p className="text-xs font-bold uppercase tracking-[0.18em] text-accent-gold">
             Our core services
           </p>
-          <h2 className="mt-4 text-center text-4xl font-semibold tracking-[-0.06em] text-slate-950 md:text-[3.2rem]">
+          <h2 className="mt-4 max-w-3xl font-display text-4xl font-normal tracking-[-0.04em] text-text-primary md:text-[3.2rem]">
             Everything Your Website Needs to Grow
           </h2>
 
-          <div className="mt-8 grid gap-4 lg:grid-cols-3">
+          <SectionReveal className="mt-10 grid gap-px overflow-hidden rounded-2xl border border-border-hairline bg-border-hairline lg:grid-cols-3">
             {coreServices.map((service, index) => (
               <Link
                 key={service.slug}
                 href={service.slug}
-                className="rounded-[1.45rem] border border-slate-200 bg-[linear-gradient(180deg,#ffffff_0%,#fbfcff_100%)] p-5 shadow-[0_14px_30px_rgba(15,23,42,0.04)] transition hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-[0_20px_38px_rgba(79,107,255,0.08)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-700"
+                className="group bg-bg-ink p-6 transition hover:bg-white/[0.04] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-accent-gold"
               >
                 <div className="flex items-start gap-3">
                   <IconBadge tone="blue" className="h-11 w-11 rounded-[1rem]">
@@ -451,17 +349,17 @@ export default function ServicesClient({ services = [] }: Props) {
                     <p className="text-xs font-bold uppercase tracking-[0.16em] text-slate-500">
                       {pickServiceLabel(index)}
                     </p>
-                    <h3 className="mt-1 text-[1.1rem] font-semibold tracking-[-0.03em] text-slate-950">
+                    <h3 className="mt-1 text-[1.1rem] font-semibold tracking-[-0.03em] text-text-primary">
                       {service.title}
                     </h3>
                   </div>
                 </div>
 
-                <p className="mt-4 text-sm leading-7 text-slate-600">{service.short}</p>
-                <p className="mt-4 text-sm font-semibold text-blue-700">Learn more -&gt;</p>
+                <p className="mt-4 text-sm leading-7 text-text-muted">{service.short}</p>
+                <p className="mt-4 text-sm font-semibold text-accent-gold">Explore service -&gt;</p>
               </Link>
             ))}
-          </div>
+          </SectionReveal>
 
           <div className="mt-7 text-center">
             <Link

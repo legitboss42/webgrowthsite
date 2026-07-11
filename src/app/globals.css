@@ -1,5 +1,16 @@
 @import "tailwindcss";
 
+@theme {
+  --font-sans: var(--font-inter);
+  --font-display: var(--font-fraunces);
+  --color-bg-ink: #0C0F14;
+  --color-accent-gold: #E8A33D;
+  --color-accent-teal: #1B6E63;
+  --color-text-primary: #EDEAE9;
+  --color-text-muted: #8B8F98;
+  --color-border-hairline: #2A2E36;
+}
+
 html { scroll-behavior: smooth; }
 
 /* Prevent fixed header from covering anchored sections */
@@ -8,27 +19,120 @@ html { scroll-behavior: smooth; }
 }
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg-ink: #0C0F14;
+  --accent-gold: #E8A33D;
+  --accent-teal: #1B6E63;
+  --text-primary: #EDEAE9;
+  --text-muted: #8B8F98;
+  --border-hairline: #2A2E36;
+  --background: var(--bg-ink);
+  --foreground: var(--text-primary);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-inter);
+  --font-display: var(--font-fraunces);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: var(--bg-ink);
+    --foreground: var(--text-primary);
   }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: system-ui, -apple-system, BlinkMacSystemFont,
-    "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell,
-    "Open Sans", "Helvetica Neue", sans-serif;
+  font-family: var(--font-inter), system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", sans-serif;
+}
+
+::selection {
+  background: rgba(232, 163, 61, 0.34);
+  color: var(--text-primary);
+}
+
+.font-display {
+  font-family: var(--font-fraunces), Georgia, serif;
+}
+
+.wg-cinematic-surface {
+  background:
+    radial-gradient(circle at 20% 15%, rgba(232, 163, 61, 0.16), transparent 28rem),
+    radial-gradient(circle at 82% 22%, rgba(27, 110, 99, 0.22), transparent 30rem),
+    linear-gradient(180deg, #10141c 0%, var(--bg-ink) 48%, #080a0e 100%);
+}
+
+.wg-hairline-grid {
+  background-image:
+    linear-gradient(rgba(237, 234, 233, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(237, 234, 233, 0.045) 1px, transparent 1px);
+  background-size: 72px 72px;
+}
+
+.wg-growth-glow {
+  filter: drop-shadow(0 0 10px rgba(232, 163, 61, 0.55));
+}
+
+.wg-card-hover {
+  transition:
+    transform 220ms ease,
+    border-color 220ms ease,
+    box-shadow 220ms ease,
+    background-color 220ms ease;
+}
+
+.wg-card-hover:hover,
+.wg-card-hover:focus-visible {
+  transform: translateY(-3px);
+}
+
+[data-reveal],
+[data-stagger] > * {
+  opacity: 0;
+  transform: translateY(22px);
+}
+
+html.wg-reduced-motion [data-reveal],
+html.wg-reduced-motion [data-stagger] > *,
+html.wg-motion-ready [data-reveal].is-visible,
+html.wg-motion-ready [data-stagger] > *.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+.growth-dot {
+  box-shadow: 0 0 0 0 rgba(232, 163, 61, 0.42);
+  animation: growth-dot-pulse 2.2s ease-out infinite;
+}
+
+@keyframes growth-dot-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(232, 163, 61, 0.42);
+  }
+  72% {
+    box-shadow: 0 0 0 14px rgba(232, 163, 61, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(232, 163, 61, 0);
+  }
+}
+
+.ambient-drift {
+  animation: ambient-drift 16s ease-in-out infinite alternate;
+}
+
+.ambient-drift-slow {
+  animation: ambient-drift 18s ease-in-out infinite alternate-reverse;
+}
+
+@keyframes ambient-drift {
+  from {
+    transform: translate3d(-1.5%, 1%, 0) scale(0.96);
+  }
+  to {
+    transform: translate3d(2%, -1.5%, 0) scale(1.06);
+  }
 }
 
 .latest-headline-ticker {
@@ -90,6 +194,22 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .ambient-drift,
+  .ambient-drift-slow,
+  .growth-dot {
+    animation: none;
+  }
+
+  [data-reveal],
+  [data-stagger] > * {
+    opacity: 1;
+    transform: none;
+  }
+
   .latest-headline-track {
     animation: none;
   }

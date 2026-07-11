@@ -1,4 +1,5 @@
 ﻿﻿import type { Metadata } from "next";
+import { Fraunces, Inter } from "next/font/google";
 import Script from "next/script";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import Header from "@/components/Header";
@@ -16,6 +17,19 @@ import { getAuthorProfile } from "@/lib/authors";
 import { DEFAULT_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site";
 import { WebVitals } from "./components/WebVitals";
 import "./globals.css";
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+});
+
+const fraunces = Fraunces({
+  subsets: ["latin"],
+  variable: "--font-fraunces",
+  display: "swap",
+  weight: ["300", "400", "500"],
+});
 
 export const metadata: Metadata = {
   ...defaultSiteMetadata,
@@ -69,7 +83,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   ];
 
   return (
-    <html lang="en">
+    <html lang="en" className={`${inter.variable} ${fraunces.variable}`}>
       <head>
         <meta
           name="impact-site-verification"
@@ -118,7 +132,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
       </head>
 
-      <body>
+      <body className="font-sans">
         <Script id="scroll-top-on-refresh" strategy="beforeInteractive">
           {`
             (function () {

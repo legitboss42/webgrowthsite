@@ -1,4 +1,4 @@
-import Link from "next/link";
+import TrackedLink from "@/components/analytics/TrackedLink";
 
 type PremiumButtonProps = {
   href?: string;
@@ -71,8 +71,15 @@ export default function PremiumButton({
   }
 
   return (
-    <Link href={href} className={resolvedClassName}>
+    <TrackedLink
+      href={href}
+      className={resolvedClassName}
+      ctaName={typeof children === "string" ? children.toLowerCase().replace(/\s+/g, "_") : "premium_button"}
+      ctaLocation="platform_component"
+      destination={href}
+      pageType="platform_page"
+    >
       {children}
-    </Link>
+    </TrackedLink>
   );
 }

@@ -1,5 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
+import CinematicHero from "@/components/platform/CinematicHero";
+import SectionReveal from "@/components/platform/SectionReveal";
 import {
   BuildIcon,
   ConvertIcon,
@@ -46,85 +48,35 @@ export default function PortfolioClient() {
 
   return (
     <main className="bg-[#f7f8fc] text-slate-950">
-      <SectionShell tone="canvas" spacing="hero" className="relative overflow-hidden">
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-full">
-          <div className="absolute left-[-10%] top-[-6%] h-72 w-72 rounded-full bg-[radial-gradient(circle,rgba(79,107,255,0.12),transparent_70%)]" />
-          <div className="absolute right-[-8%] top-[4%] h-[25rem] w-[25rem] rounded-full bg-[radial-gradient(circle,rgba(124,92,255,0.12),transparent_70%)]" />
-        </div>
-
-        <div className="relative">
-          <p className="inline-flex rounded-full border border-blue-100 bg-white/92 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.22em] text-blue-700 shadow-sm">
-            Case studies
-          </p>
-
-          <div className="mt-4 overflow-hidden rounded-[1.9rem] border border-slate-200 bg-white shadow-[0_28px_70px_rgba(15,23,42,0.08)]">
-            <div className="grid gap-8 px-6 py-7 md:px-8 md:py-8 lg:grid-cols-[0.84fr_1.16fr] lg:items-center">
-              <div>
-                <h1 className="max-w-[30rem] text-balance text-[3.5rem] font-semibold leading-[0.92] tracking-[-0.07em] text-slate-950 md:text-[4.6rem]">
-                  Premium Website Growth for Real Businesses
-                </h1>
-                <p className="mt-4 max-w-[32rem] text-[1.02rem] leading-8 text-slate-600">
-                  We use featured projects to show how Web Growth improves trust,
-                  structure, and conversion paths, not just how a finished homepage
-                  looks in a screenshot.
-                </p>
-
-                <div className="mt-6 grid gap-3 sm:grid-cols-2">
-                  <div className="rounded-[1.2rem] border border-slate-200 bg-slate-50 p-4">
-                    <p className="text-xs font-bold uppercase tracking-[0.18em] text-blue-700">
-                      Business context
-                    </p>
-                    <p className="mt-3 text-sm leading-7 text-slate-600">{featuredCase.summary}</p>
-                  </div>
-                  <div className="rounded-[1.2rem] border border-slate-200 bg-slate-50 p-4">
-                    <p className="text-xs font-bold uppercase tracking-[0.18em] text-blue-700">
-                      Focus
-                    </p>
-                    <p className="mt-3 text-sm leading-7 text-slate-600">{featuredCase.whatToNotice}</p>
-                  </div>
-                </div>
-
-                <div className="mt-7 flex flex-wrap gap-2">
-                  {featuredCase.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-600"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              <div className="relative min-h-[25rem]">
-                <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_74%_18%,rgba(124,92,255,0.18),transparent_42%),radial-gradient(circle_at_18%_82%,rgba(79,107,255,0.16),transparent_40%)]" />
-                <div className="absolute inset-0 rounded-[1.6rem] border border-slate-200 bg-white/60 backdrop-blur-sm" />
-                <div className="relative h-full p-5">
-                  <div className="relative h-full overflow-hidden rounded-[1.45rem] border border-slate-200 bg-white shadow-[0_18px_45px_rgba(15,23,42,0.08)]">
-                    <Image
-                      src={featuredCase.imageUrl}
-                      alt={featuredCase.imageAlt}
-                      fill
-                      priority
-                      className="object-cover"
-                      sizes="(max-width: 1024px) 100vw, 52vw"
-                    />
-                  </div>
-                </div>
-              </div>
+      <CinematicHero
+        eyebrow={`Case studies / ${featuredCase.industry}`}
+        title={<>The work, <span className="text-accent-gold">and the thinking behind it.</span></>}
+        description="Real project context, strategic decisions, and implementation evidence. No invented performance claims and no gallery without explanation."
+        pageType="portfolio_hub"
+        variant="case-study"
+        primaryAction={{ label: "Discuss Your Website", href: "/contact/", ctaName: "discuss_website", destination: "contact" }}
+        secondaryAction={{ label: "Explore Services", href: "/services/", ctaName: "explore_services", destination: "services" }}
+        aside={
+          <div className="relative min-h-[24rem] overflow-hidden rounded-[2rem] border border-border-hairline shadow-2xl">
+            <Image src={featuredCase.imageUrl} alt={featuredCase.imageAlt} fill priority className="object-cover" sizes="(max-width: 1024px) 100vw, 620px" />
+            <div className="absolute inset-0 bg-gradient-to-t from-bg-ink via-bg-ink/15 to-transparent" />
+            <div className="absolute inset-x-0 bottom-0 p-6">
+              <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-accent-gold">Featured project</p>
+              <p className="mt-2 font-display text-3xl text-text-primary">{featuredCase.title}</p>
+              <p className="mt-2 text-sm text-text-muted">{featuredCase.whatToNotice}</p>
             </div>
           </div>
-        </div>
-      </SectionShell>
+        }
+      />
 
-      <SectionShell tone="white" spacing="compact">
-        <div className="grid gap-4 lg:grid-cols-3">
-          <article className="rounded-[1.4rem] border border-slate-200 bg-white p-5 shadow-[0_14px_30px_rgba(15,23,42,0.04)]">
-            <p className="text-xs font-bold uppercase tracking-[0.18em] text-blue-700">01</p>
-            <h2 className="mt-4 text-2xl font-semibold tracking-[-0.04em] text-slate-950">
+      <SectionShell tone="dark" spacing="compact">
+        <SectionReveal className="grid gap-px overflow-hidden rounded-2xl border border-border-hairline bg-border-hairline lg:grid-cols-3">
+          <article className="bg-bg-ink p-6">
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-accent-gold">01</p>
+            <h2 className="mt-4 font-display text-3xl font-normal tracking-[-0.04em] text-text-primary">
               The Challenge
             </h2>
-            <p className="mt-4 text-sm leading-7 text-slate-600">
+            <p className="mt-4 text-sm leading-7 text-text-muted">
               {featuredCase.purpose}
             </p>
             <ul className="mt-5 space-y-2">
@@ -139,9 +91,9 @@ export default function PortfolioClient() {
             </ul>
           </article>
 
-          <article className="rounded-[1.4rem] border border-slate-200 bg-white p-5 shadow-[0_14px_30px_rgba(15,23,42,0.04)]">
-            <p className="text-xs font-bold uppercase tracking-[0.18em] text-blue-700">02</p>
-            <h2 className="mt-4 text-2xl font-semibold tracking-[-0.04em] text-slate-950">
+          <article className="bg-bg-ink p-6">
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-accent-gold">02</p>
+            <h2 className="mt-4 font-display text-3xl font-normal tracking-[-0.04em] text-text-primary">
               Our Strategy
             </h2>
             <ul className="mt-4 space-y-3">
@@ -154,9 +106,9 @@ export default function PortfolioClient() {
             </ul>
           </article>
 
-          <article className="rounded-[1.4rem] border border-slate-200 bg-white p-5 shadow-[0_14px_30px_rgba(15,23,42,0.04)]">
-            <p className="text-xs font-bold uppercase tracking-[0.18em] text-blue-700">03</p>
-            <h2 className="mt-4 text-2xl font-semibold tracking-[-0.04em] text-slate-950">
+          <article className="bg-bg-ink p-6">
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-accent-gold">03</p>
+            <h2 className="mt-4 font-display text-3xl font-normal tracking-[-0.04em] text-text-primary">
               Implementation
             </h2>
             <ul className="mt-4 space-y-3">
@@ -168,7 +120,7 @@ export default function PortfolioClient() {
               ))}
             </ul>
           </article>
-        </div>
+        </SectionReveal>
       </SectionShell>
 
       <SectionShell tone="white" spacing="compact">

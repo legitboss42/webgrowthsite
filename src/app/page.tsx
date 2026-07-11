@@ -1,6 +1,7 @@
 import AcademyCategoryGrid from "@/components/home/AcademyCategoryGrid";
 import FeaturedProofSection from "@/components/home/FeaturedProofSection";
 import FreeToolsSection from "@/components/home/FreeToolsSection";
+import HomeMotion from "@/components/home/HomeMotion";
 import HomepageHeroPlatform from "@/components/home/HomepageHeroPlatform";
 import LearningPathsSection from "@/components/home/LearningPathsSection";
 import NewsletterSection from "@/components/home/NewsletterSection";
@@ -30,7 +31,8 @@ export const metadata = buildPageMetadata({
 
 export default function Page() {
   return (
-    <main className="overflow-x-clip bg-[#f7f8fc] text-slate-950">
+    <main className="wg-cinematic-surface overflow-x-clip text-text-primary">
+      <HomeMotion />
       <HomepageHeroPlatform />
       <AcademyCategoryGrid />
       <LearningPathsSection />

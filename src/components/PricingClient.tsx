@@ -15,49 +15,49 @@ type PricingPackage = {
 
 const packages: readonly PricingPackage[] = [
   {
-    name: "Starter",
-    price: "$150",
-    bestFor: "New businesses needing a clear, credible online presence.",
-    timeline: "7-10 days",
+    name: "Foundation",
+    price: "From $1,500",
+    bestFor: "Businesses that need a credible launch-ready website with clear offer structure and stronger trust fundamentals.",
+    timeline: "2-3 weeks",
     highlights: [
-      "Up to 5 pages",
-      "$20 per extra page",
-      "Mobile-first build",
-      "Basic SEO foundation",
+      "Strategy-led scope for core marketing pages",
+      "Mobile-first design and development",
+      "SEO, trust, and conversion baseline",
+      "Launch-ready forms and CTA structure",
     ],
   },
   {
     name: "Growth",
-    price: "$250",
-    bestFor: "Businesses that need stronger conversion and a more premium presence.",
-    timeline: "10-14 days",
+    price: "From $3,500",
+    bestFor: "Businesses that need a more premium sales experience, stronger conversion paths, and cleaner marketing infrastructure.",
+    timeline: "3-5 weeks",
     highlights: [
-      "Up to 8 pages",
-      "$20 per extra page",
-      "Stronger conversion structure",
-      "SEO polish and better content sections",
+      "Expanded information architecture and premium polish",
+      "Sharper service-page and homepage conversion flow",
+      "Deeper SEO, content, and UX refinement",
+      "Analytics, lead-routing, and growth-ready setup",
     ],
     badge: "Most popular",
   },
   {
-    name: "Pro",
-    price: "$400",
-    bestFor: "Brands that want deeper polish, premium presentation, and scalable structure.",
-    timeline: "2-3 weeks",
+    name: "Platform",
+    price: "From $6,500",
+    bestFor: "Brands building a real website growth platform with services, academy content, tools, authority assets, and ongoing optimization needs.",
+    timeline: "5-8 weeks",
     highlights: [
-      "Up to 12 pages",
-      "$20 per extra page",
-      "Premium interface polish",
-      "Advanced SEO and analytics foundations",
+      "Platform-level IA across services, content, and lead generation",
+      "Advanced motion, premium UI systems, and reusable components",
+      "Schema, internal linking, and authority architecture",
+      "Growth roadmap for post-launch optimization and monetization",
     ],
   },
 ] as const;
 
 const pricingNotes = [
-  "Hosting and domain costs are paid directly by the client.",
-  "Add-ons are scoped separately when the work falls outside the core package.",
-  "The right package depends on the website's real job, not only page count.",
-  "A website review is the best starting point if scope is still unclear.",
+  "These are starting ranges, not one-size-fits-all fixed-price promises.",
+  "Hosting, domain, paid plugins, and third-party subscriptions are scoped separately when required.",
+  "The right investment depends on business model, content readiness, integrations, and growth ambition, not page count alone.",
+  "A website review is still the best entry point when the real bottleneck is unclear.",
 ] as const;
 
 export default function PricingClient() {

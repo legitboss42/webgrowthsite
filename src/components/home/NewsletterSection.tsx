@@ -1,48 +1,46 @@
 import Link from "next/link";
+import { CONTACT_EMAIL, CONTACT_EMAIL_HREF } from "@/lib/site";
 import { IconBadge, MailIcon } from "./HomeIcons";
 import SectionShell from "./SectionShell";
 
 export default function NewsletterSection() {
   return (
     <SectionShell tone="canvas" spacing="compact">
-      <div className="border-t border-slate-200 pt-6">
+      <div data-reveal className="border-t border-border-hairline pt-6">
         <div className="grid gap-6 lg:grid-cols-[0.92fr_1.08fr] lg:items-center">
           <div className="flex items-start gap-4">
-            <IconBadge tone="purple" shape="circle" className="h-16 w-16 shrink-0">
+            <IconBadge tone="purple" shape="circle" className="h-16 w-16 shrink-0 bg-accent-gold/10 text-accent-gold ring-1 ring-accent-gold/25">
               <MailIcon />
             </IconBadge>
             <div>
-              <p className="text-xs font-bold uppercase tracking-[0.18em] text-blue-700">
+              <p className="text-xs font-bold uppercase tracking-[0.18em] text-accent-gold">
                 Stay ahead
               </p>
-              <h2 className="mt-2 text-2xl font-semibold tracking-[-0.03em] text-slate-950">
+              <h2 className="font-display mt-2 text-2xl font-medium tracking-[-0.03em] text-text-primary">
                 Growth insights. Delivered weekly.
               </h2>
-              <p className="mt-2 text-sm leading-6 text-slate-600">
+              <p className="mt-2 text-sm leading-6 text-text-muted">
                 Actionable strategies on SEO, content, and monetization.
               </p>
             </div>
           </div>
 
-          <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
-            <input
-              type="email"
-              placeholder="Enter your email address"
-              aria-label="Email address"
-              disabled
-              className="min-h-12 rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-500 shadow-sm disabled:cursor-not-allowed disabled:opacity-100"
-            />
-            <button
-              type="button"
-              disabled
-              className="min-h-12 rounded-xl bg-[linear-gradient(135deg,#3557ff_0%,#4f6bff_45%,#7c5cff_100%)] px-6 text-sm font-semibold text-white shadow-[0_16px_34px_rgba(79,107,255,0.22)] disabled:cursor-not-allowed disabled:opacity-100"
+          <div className="grid gap-3 sm:grid-cols-2">
+            <Link
+              href="/contact/"
+              className="inline-flex min-h-12 items-center justify-center rounded-full bg-accent-gold px-6 text-sm font-bold text-bg-ink shadow-[0_16px_34px_rgba(232,163,61,0.18)] transition hover:bg-[#f1b75d] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent-gold"
             >
-              Subscribe
-            </button>
-            <p className="text-xs leading-6 text-slate-500 sm:col-span-2">
-              Signup UI is shown as part of the rebuild direction. The live submission
-              flow will only be enabled when the backend and onboarding sequence are
-              ready.
+              Request updates
+            </Link>
+            <Link
+              href={CONTACT_EMAIL_HREF}
+              className="inline-flex min-h-12 items-center justify-center rounded-full border border-border-hairline bg-white/[0.04] px-6 text-sm font-semibold text-text-primary transition hover:border-accent-gold/55 hover:text-accent-gold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent-gold"
+            >
+              Email {CONTACT_EMAIL}
+            </Link>
+            <p className="text-xs leading-6 text-text-muted sm:col-span-2">
+              The newsletter backend is not live yet, so this section now points to
+              honest working contact paths instead of a disabled signup form.
             </p>
           </div>
         </div>
@@ -50,13 +48,13 @@ export default function NewsletterSection() {
         <div className="mt-4 flex gap-3">
           <Link
             href="/blog/"
-            className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-900 transition hover:border-blue-200 hover:bg-blue-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-700"
+            className="inline-flex min-h-11 items-center justify-center rounded-full border border-border-hairline bg-white/[0.04] px-5 text-sm font-semibold text-text-primary transition hover:border-accent-gold/55 hover:text-accent-gold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent-gold"
           >
             Explore the Academy
           </Link>
           <Link
             href="/contact/"
-            className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-900 transition hover:border-blue-200 hover:bg-blue-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-700"
+            className="inline-flex min-h-11 items-center justify-center rounded-full border border-border-hairline bg-white/[0.04] px-5 text-sm font-semibold text-text-primary transition hover:border-accent-gold/55 hover:text-accent-gold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent-gold"
           >
             Request a Website Review
           </Link>

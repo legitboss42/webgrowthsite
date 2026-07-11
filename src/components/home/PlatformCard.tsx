@@ -18,22 +18,22 @@ type PlatformCardProps = {
 
 const variantClasses: Record<PlatformCardVariant, string> = {
   category:
-    "border-slate-200 bg-white p-5 shadow-[0_16px_40px_rgba(15,23,42,0.05)] hover:border-blue-200 hover:shadow-[0_20px_46px_rgba(79,107,255,0.12)]",
+    "border-border-hairline bg-[#11161f]/88 p-5 shadow-[0_18px_50px_rgba(0,0,0,0.22)] hover:border-accent-gold/55 hover:shadow-[0_22px_54px_rgba(232,163,61,0.1)]",
   path:
-    "border-slate-200 bg-[linear-gradient(180deg,#ffffff_0%,#f8fbff_100%)] p-6 shadow-[0_18px_45px_rgba(15,23,42,0.06)] hover:border-blue-200 hover:shadow-[0_22px_54px_rgba(79,107,255,0.14)]",
+    "border-border-hairline bg-[linear-gradient(180deg,rgba(237,234,233,0.07),rgba(237,234,233,0.025))] p-6 shadow-[0_18px_45px_rgba(0,0,0,0.2)] hover:border-accent-gold/55 hover:shadow-[0_22px_54px_rgba(232,163,61,0.1)]",
   tool:
-    "border-slate-200 bg-white p-5 shadow-[0_14px_34px_rgba(15,23,42,0.05)]",
+    "border-border-hairline bg-[#11161f]/88 p-5 shadow-[0_14px_34px_rgba(0,0,0,0.2)] hover:border-accent-teal/70",
   highlight:
-    "border-slate-200 bg-[linear-gradient(135deg,#ffffff_0%,#f4f7ff_100%)] p-6 shadow-[0_24px_60px_rgba(15,23,42,0.08)] hover:border-blue-200 hover:shadow-[0_28px_68px_rgba(79,107,255,0.14)]",
+    "border-border-hairline bg-[linear-gradient(135deg,rgba(237,234,233,0.08)_0%,rgba(27,110,99,0.08)_100%)] p-6 shadow-[0_24px_60px_rgba(0,0,0,0.24)] hover:border-accent-gold/55 hover:shadow-[0_28px_68px_rgba(232,163,61,0.12)]",
 };
 
 const iconClasses: Record<PlatformCardVariant, string> = {
   category:
-    "h-12 w-12 rounded-lg bg-[linear-gradient(135deg,#eef4ff_0%,#f4efff_100%)] text-blue-700 ring-1 ring-blue-100",
-  path: "h-14 w-14 rounded-full bg-[linear-gradient(135deg,#eef4ff_0%,#f3f0ff_100%)] text-blue-700 ring-1 ring-blue-100",
-  tool: "h-12 w-12 rounded-lg bg-[linear-gradient(135deg,#f0f7ff_0%,#f6f0ff_100%)] text-blue-700 ring-1 ring-blue-100",
+    "h-12 w-12 rounded-lg bg-accent-gold/10 text-accent-gold ring-1 ring-accent-gold/25",
+  path: "h-14 w-14 rounded-full bg-accent-teal/18 text-accent-gold ring-1 ring-accent-teal/35",
+  tool: "h-12 w-12 rounded-lg bg-accent-teal/18 text-accent-gold ring-1 ring-accent-teal/35",
   highlight:
-    "h-12 w-12 rounded-lg bg-[linear-gradient(135deg,#eef4ff_0%,#f3efff_100%)] text-blue-700 ring-1 ring-blue-100",
+    "h-12 w-12 rounded-lg bg-accent-gold/10 text-accent-gold ring-1 ring-accent-gold/25",
 };
 
 export default function PlatformCard({
@@ -62,23 +62,23 @@ export default function PlatformCard({
           </div>
         ) : null}
         {badge ? (
-          <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">
+          <span className="rounded-full border border-border-hairline bg-white/[0.03] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-text-muted">
             {badge}
           </span>
         ) : null}
       </div>
       {eyebrow ? (
-        <p className="mt-5 text-xs font-bold uppercase tracking-[0.16em] text-blue-700">
+        <p className="mt-5 text-xs font-bold uppercase tracking-[0.16em] text-accent-gold">
           {eyebrow}
         </p>
       ) : null}
-      <h3 className="mt-4 text-xl font-semibold leading-tight tracking-[-0.02em] text-slate-950">
+      <h3 className="font-display mt-4 text-xl font-medium leading-tight tracking-[-0.02em] text-text-primary">
         {title}
       </h3>
-      <p className="mt-3 text-sm leading-6 text-slate-600">{description}</p>
+      <p className="mt-3 text-sm leading-6 text-text-muted">{description}</p>
       {children ? <div className="mt-5">{children}</div> : null}
       {ctaLabel ? (
-        <span className="mt-5 inline-flex text-sm font-semibold text-blue-700">
+        <span className="mt-5 inline-flex text-sm font-semibold text-accent-gold">
           {ctaLabel}
           <span aria-hidden="true" className="ml-2">
             -&gt;
@@ -89,7 +89,7 @@ export default function PlatformCard({
   );
 
   const cardClass = [
-    "block h-full rounded-xl border transition duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-600",
+    "wg-card-hover block h-full rounded-xl border transition duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent-gold",
     variantClasses[variant],
     href ? "hover:-translate-y-0.5" : "",
     className,

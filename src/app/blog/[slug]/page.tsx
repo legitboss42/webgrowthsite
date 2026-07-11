@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import TrackedLink from "@/components/analytics/TrackedLink";
 import { notFound } from "next/navigation";
 import BlogPostClient from "./BlogPostClient";
 import AuthorBio from "@/components/content/AuthorBio";
@@ -213,7 +214,7 @@ export default async function BlogPostPage({
     post.faq.length > 0;
 
   return (
-    <article className="bg-[#f7f8fc] text-slate-950">
+    <article className="bg-[#f4f1eb] text-slate-950">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -221,15 +222,14 @@ export default async function BlogPostPage({
         }}
       />
 
-      <section className="relative overflow-hidden border-b border-slate-200 bg-[linear-gradient(180deg,#f8f9fd_0%,#eef3ff_100%)]">
+      <section className="relative overflow-hidden border-b border-border-hairline bg-bg-ink text-text-primary">
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
-          <div className="absolute left-[-10%] top-[-8%] h-72 w-72 rounded-full bg-[radial-gradient(circle,rgba(79,107,255,0.14),transparent_70%)]" />
-          <div className="absolute right-[-12%] top-[4%] h-[28rem] w-[28rem] rounded-full bg-[radial-gradient(circle,rgba(124,92,255,0.12),transparent_72%)]" />
-          <div className="absolute inset-x-0 top-0 h-full bg-[linear-gradient(180deg,rgba(255,255,255,0.35),rgba(255,255,255,0))]" />
+          <div className="absolute left-[-10%] top-[-8%] h-72 w-72 rounded-full bg-[radial-gradient(circle,rgba(27,110,99,0.22),transparent_70%)]" />
+          <div className="absolute right-[-12%] top-[4%] h-[28rem] w-[28rem] rounded-full bg-[radial-gradient(circle,rgba(232,163,61,0.12),transparent_72%)]" />
         </div>
 
         <div className="relative mx-auto max-w-6xl px-5 py-16 sm:px-6 md:py-20">
-          <nav aria-label="Breadcrumb" className="mb-5 text-sm text-slate-500">
+          <nav aria-label="Breadcrumb" className="mb-10 text-sm text-text-muted">
             <ol className="flex flex-wrap items-center gap-2">
               <li>
                 <Link href="/" className="transition hover:text-slate-900">
@@ -243,14 +243,14 @@ export default async function BlogPostPage({
                 </Link>
               </li>
               <li aria-hidden="true">/</li>
-              <li className="text-slate-800">{post.title}</li>
+              <li className="max-w-72 truncate text-text-primary">{post.title}</li>
             </ol>
           </nav>
 
-          <div className="grid gap-10 md:grid-cols-[minmax(0,1.15fr)_minmax(280px,0.85fr)] md:items-end">
+          <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_18rem] lg:items-end">
             <div>
-              <div className="flex flex-wrap gap-2 text-xs text-slate-500">
-                <span className="rounded-full border border-slate-200 bg-white px-3 py-1 font-medium text-slate-700">
+              <div className="flex flex-wrap gap-2 text-xs text-text-muted">
+                <span className="rounded-full border border-border-hairline bg-white/[0.04] px-3 py-1 font-medium text-accent-gold">
                   {post.category}
                 </span>
                 {post.topic ? (
@@ -268,33 +268,33 @@ export default async function BlogPostPage({
                 </span>
               </div>
 
-              <h1 className="mt-5 max-w-4xl text-balance text-4xl font-semibold leading-[0.95] tracking-[-0.05em] text-slate-950 md:text-6xl">
+              <h1 className="mt-6 max-w-5xl text-balance font-display text-5xl font-normal leading-[0.96] tracking-[-0.045em] text-text-primary md:text-7xl">
                 {post.title}
               </h1>
-              <p className="mt-5 max-w-3xl text-lg leading-8 text-slate-600">{post.excerpt}</p>
+              <p className="mt-6 max-w-3xl text-lg leading-8 text-text-muted">{post.excerpt}</p>
 
-              <div className="mt-8 grid gap-4 sm:grid-cols-3">
-                <div className="rounded-[1.5rem] border border-white/70 bg-white/90 p-4 shadow-[0_18px_45px_rgba(15,23,42,0.06)] backdrop-blur">
+              <div className="mt-10 grid gap-px overflow-hidden border-y border-border-hairline bg-border-hairline sm:grid-cols-3">
+                <div className="bg-bg-ink py-4 pr-4">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-blue-700">
                     Search intent
                   </p>
-                  <p className="mt-2 text-sm leading-6 text-slate-600">
+                  <p className="mt-2 text-sm leading-6 text-text-muted">
                     {post.searchIntent || "Informational planning and implementation support."}
                   </p>
                 </div>
-                <div className="rounded-[1.5rem] border border-white/70 bg-white/90 p-4 shadow-[0_18px_45px_rgba(15,23,42,0.06)] backdrop-blur">
+                <div className="bg-bg-ink px-4 py-4">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-blue-700">
                     Primary focus
                   </p>
-                  <p className="mt-2 text-sm leading-6 text-slate-600">
+                  <p className="mt-2 text-sm leading-6 text-text-muted">
                     {post.primaryKeyword || post.topic || post.category}
                   </p>
                 </div>
-                <div className="rounded-[1.5rem] border border-white/70 bg-white/90 p-4 shadow-[0_18px_45px_rgba(15,23,42,0.06)] backdrop-blur">
+                <div className="bg-bg-ink px-4 py-4">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-blue-700">
                     Built for
                   </p>
-                  <p className="mt-2 text-sm leading-6 text-slate-600">
+                  <p className="mt-2 text-sm leading-6 text-text-muted">
                     Teams that need clearer website decisions before they spend.
                   </p>
                 </div>
@@ -315,7 +315,7 @@ export default async function BlogPostPage({
             </div>
 
             <div className="space-y-4">
-              <div className="rounded-[1.75rem] border border-slate-200/80 bg-white/92 p-6 shadow-[0_24px_60px_rgba(15,23,42,0.08)] backdrop-blur">
+              <div className="border-l border-border-hairline pl-6">
                 <div className="flex items-center gap-3">
                   {author.image ? (
                     <div className="relative h-14 w-14 overflow-hidden rounded-2xl border border-slate-200">
@@ -326,8 +326,8 @@ export default async function BlogPostPage({
                     <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-blue-700">
                       Academy article
                     </p>
-                    <p className="mt-1 text-base font-semibold text-slate-950">{author.name}</p>
-                    <p className="text-sm text-slate-500">{author.role}</p>
+                    <p className="mt-1 text-base font-semibold text-text-primary">{author.name}</p>
+                    <p className="text-sm text-text-muted">{author.role}</p>
                   </div>
                 </div>
 
@@ -353,12 +353,16 @@ export default async function BlogPostPage({
                     Best next move
                   </p>
                   <p className="mt-2 text-sm leading-6 text-slate-600">{articleCta.description}</p>
-                  <Link
+                  <TrackedLink
                     href={articleCta.href}
+                    ctaName="article_best_next_move"
+                    ctaLocation="article_masthead"
+                    destination={articleCta.href}
+                    pageType="blog_post"
                     className="mt-4 inline-flex min-h-11 items-center justify-center rounded-xl bg-[linear-gradient(135deg,#3b82f6,#7c5cff)] px-4 py-2 text-sm font-semibold text-white shadow-[0_16px_34px_rgba(79,107,255,0.24)] transition hover:-translate-y-0.5"
                   >
                     {articleCta.label}
-                  </Link>
+                  </TrackedLink>
                 </div>
               </div>
             </div>

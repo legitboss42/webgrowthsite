@@ -34,10 +34,21 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+.env.local
+.env.*.local
+*.local.json
+credentials.local.json
+wgos-runtime/secrets/
 
 # vercel
 .vercel
 .codex-temp/
+.codex/
+.codex-*.log
+
+# WGOS is maintained as a separate sibling repository.
+/WGOS/
+/wgos-runtime/
 
 # typescript
 *.tsbuildinfo

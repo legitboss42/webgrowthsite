@@ -1,4 +1,7 @@
 import Link from "next/link";
+import TrackedLink from "@/components/analytics/TrackedLink";
+import CinematicHero from "@/components/platform/CinematicHero";
+import SectionReveal from "@/components/platform/SectionReveal";
 import {
   AuditIcon,
   GrowthChartIcon,
@@ -69,73 +72,43 @@ export const metadata = buildPageMetadata({
 export default function ToolsPage() {
   return (
     <main className="bg-[#f7f8fc] text-slate-950">
-      <SectionShell tone="canvas" spacing="hero" className="relative overflow-hidden">
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-full">
-          <div className="absolute left-[-10%] top-[-6%] h-72 w-72 rounded-full bg-[radial-gradient(circle,rgba(79,107,255,0.12),transparent_70%)]" />
-          <div className="absolute right-[-8%] top-[4%] h-[25rem] w-[25rem] rounded-full bg-[radial-gradient(circle,rgba(124,92,255,0.12),transparent_70%)]" />
-        </div>
-
-        <div className="relative grid gap-8 lg:grid-cols-[0.82fr_1.18fr] lg:items-center">
-          <div>
-            <p className="inline-flex rounded-full border border-blue-100 bg-white/92 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.22em] text-blue-700 shadow-sm">
-              Tools
-            </p>
-            <h1 className="mt-5 max-w-[34rem] text-balance text-[3.9rem] font-semibold leading-[0.9] tracking-[-0.07em] text-slate-950 md:text-[5rem]">
-              Practical website growth tools built around real implementation.
-            </h1>
-            <p className="mt-4 max-w-[33rem] text-lg leading-8 text-slate-600">
-              Use focused utilities for website reviews, AdSense readiness, SEO planning,
-              launch QA, and conversion support. The first tool set is live now.
-            </p>
-            <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-              <Link
-                href="/blog/"
-                className="inline-flex min-h-12 items-center justify-center rounded-xl bg-[linear-gradient(135deg,#3557ff_0%,#4f6bff_45%,#7c5cff_100%)] px-6 text-sm font-semibold text-white shadow-[0_16px_34px_rgba(79,107,255,0.28)] transition hover:brightness-105"
-              >
-                Explore the Academy
-              </Link>
-              <Link
-                href="/contact/"
-                className="inline-flex min-h-12 items-center justify-center rounded-xl border border-blue-200 bg-white px-6 text-sm font-semibold text-blue-800 transition hover:border-blue-300 hover:bg-blue-50"
-              >
-                Request a Website Review
-              </Link>
+      <CinematicHero
+        eyebrow="Tools laboratory"
+        title={<>Small utilities. <span className="text-accent-gold">Sharper decisions.</span></>}
+        description="Focused tools for website reviews, AdSense readiness, SEO planning, launch QA, and conversion support. Built to be useful before you hire anyone."
+        pageType="tools_hub"
+        variant="utility"
+        primaryAction={{ label: "Open the tool library", href: "#tool-library", ctaName: "open_tool_library", destination: "tool_library" }}
+        secondaryAction={{ label: "Explore the Academy", href: "/blog/", ctaName: "explore_academy", destination: "academy" }}
+        aside={
+          <div className="relative overflow-hidden rounded-[1.75rem] border border-border-hairline bg-[#080b0f] p-6 font-mono text-xs text-text-muted shadow-2xl">
+            <div className="mb-6 flex gap-2"><span className="h-2.5 w-2.5 rounded-full bg-accent-gold" /><span className="h-2.5 w-2.5 rounded-full bg-accent-teal" /><span className="h-2.5 w-2.5 rounded-full bg-border-hairline" /></div>
+            <p className="text-accent-teal">webgrowth.tools / inventory</p>
+            <div className="mt-5 space-y-3">
+              {PUBLIC_TOOLS.slice(0, 4).map((tool, index) => <p key={tool.slug}><span className="mr-3 text-accent-gold">0{index + 1}</span>{tool.title}</p>)}
             </div>
+            <p className="mt-6 border-t border-border-hairline pt-4 text-text-primary">{PUBLIC_TOOLS.length} utilities online</p>
           </div>
+        }
+      />
 
-          <div className="grid gap-4 lg:grid-cols-2">
-            {PUBLIC_TOOLS.slice(0, 4).map((tool) => (
-              <Link
-                key={tool.title}
-                href={`/tools/${tool.slug}/`}
-                className="rounded-[1.45rem] border border-slate-200 bg-white p-5 shadow-[0_18px_36px_rgba(15,23,42,0.05)] transition hover:-translate-y-0.5 hover:shadow-[0_24px_48px_rgba(79,107,255,0.10)]"
-              >
-                <IconBadge tone="blue" className="h-11 w-11 rounded-[1rem]">
-                  {
-                    plannedTools.find((item) => item.title === tool.title)?.icon ?? <AuditIcon />
-                  }
-                </IconBadge>
-                <h2 className="mt-5 text-[1.25rem] font-semibold tracking-[-0.03em] text-slate-950">
-                  {tool.title}
-                </h2>
-                <p className="mt-3 text-sm leading-7 text-slate-600">{tool.description}</p>
-            <p className="mt-5 text-sm font-semibold text-blue-700">Open tool -&gt;</p>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </SectionShell>
-
-      <SectionShell tone="white" spacing="compact">
-        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-          {PUBLIC_TOOLS.map((tool) => {
+      <SectionShell id="tool-library" tone="white" spacing="compact">
+        <SectionReveal className="grid gap-5 md:grid-cols-2 xl:grid-cols-12">
+          {PUBLIC_TOOLS.map((tool, index) => {
             const matched = plannedTools.find((item) => item.title === tool.title);
 
             return (
-            <Link
+            <TrackedLink
               key={tool.title}
               href={`/tools/${tool.slug}/`}
-              className="rounded-[1.45rem] border border-slate-200 bg-white p-5 shadow-[0_14px_30px_rgba(15,23,42,0.04)] transition hover:-translate-y-0.5 hover:shadow-[0_20px_38px_rgba(79,107,255,0.08)]"
+              ctaName={`open_${tool.slug}`}
+              ctaLocation="tools_library"
+              destination={`/tools/${tool.slug}/`}
+              pageType="tools_hub"
+              className={[
+                "rounded-[1.45rem] border border-slate-200 bg-white p-6 shadow-[0_14px_30px_rgba(15,23,42,0.04)] transition hover:-translate-y-0.5 hover:shadow-[0_20px_38px_rgba(27,110,99,0.12)] md:col-span-1",
+                index === 0 ? "xl:col-span-7" : index === 1 ? "xl:col-span-5" : "xl:col-span-4",
+              ].join(" ")}
             >
               <div className="flex items-start justify-between gap-4">
                 <IconBadge tone="blue" className="h-11 w-11 rounded-[1rem]">
@@ -150,9 +123,9 @@ export default function ToolsPage() {
               </h2>
               <p className="mt-3 text-sm leading-7 text-slate-600">{tool.description}</p>
               <p className="mt-5 text-sm font-semibold text-blue-700">Use tool -&gt;</p>
-            </Link>
+            </TrackedLink>
           )})}
-        </div>
+        </SectionReveal>
       </SectionShell>
 
       <SectionShell tone="canvas" spacing="compact">
