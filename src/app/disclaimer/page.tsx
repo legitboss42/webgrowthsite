@@ -1,5 +1,5 @@
+import Link from "next/link";
 import { buildPageMetadata } from "@/lib/seo";
-import SectionShell from "@/components/home/SectionShell";
 
 const pageDescription =
   "Read the Web Growth disclaimer on educational guidance, affiliate context, and the limits of results claims, platform advice, and implementation examples.";
@@ -52,35 +52,59 @@ const sections = [
 
 export default function DisclaimerPage() {
   return (
-    <main className="bg-[#f7f8fc] text-slate-950">
-      <SectionShell tone="canvas" spacing="hero">
-        <p className="inline-flex rounded-full border border-blue-100 bg-white/92 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.22em] text-blue-700 shadow-sm">
-          Disclaimer
-        </p>
-        <h1 className="mt-5 max-w-4xl text-balance text-[3.6rem] font-semibold leading-[0.9] tracking-[-0.07em] text-slate-950 md:text-[4.6rem]">
-          Clear boundaries around guidance, examples, and website growth claims.
-        </h1>
-        <p className="mt-4 max-w-3xl text-lg leading-8 text-slate-600">
-          This page explains how to interpret the educational, strategic, and
-          commercial information published on Web Growth.
-        </p>
-      </SectionShell>
-
-      <SectionShell tone="white" spacing="compact">
-        <div className="grid gap-5 md:grid-cols-2">
-          {sections.map((section) => (
-            <article
-              key={section.title}
-              className="rounded-[1.45rem] border border-slate-200 bg-white p-5 shadow-[0_14px_30px_rgba(15,23,42,0.04)]"
-            >
-              <h2 className="text-[1.2rem] font-semibold tracking-[-0.03em] text-slate-950">
-                {section.title}
-              </h2>
-              <p className="mt-4 text-sm leading-7 text-slate-600">{section.body}</p>
-            </article>
-          ))}
+    <main className="trust-page">
+      <section className="trust-hero">
+        <div className="trust-container">
+          <p className="trust-kicker">Disclaimer</p>
+          <h1>Clear boundaries around guidance, examples, and website growth claims.</h1>
+          <p>
+            This page explains how to interpret the educational, strategic, and commercial
+            information published on Web Growth.
+          </p>
         </div>
-      </SectionShell>
+      </section>
+
+      <section className="trust-content">
+        <div className="trust-container trust-layout">
+          <aside className="trust-sidebar" aria-label="Disclaimer summary">
+            <p className="trust-kicker">Results boundary</p>
+            <h2>Guidance is not a guarantee.</h2>
+            <p>
+              Web Growth does not guarantee rankings, revenue, AdSense approval, or a specific
+              number of enquiries. Website outcomes depend on factors outside any single build.
+            </p>
+          </aside>
+
+          <div className="trust-section-list">
+            {sections.map((section, index) => (
+              <article key={section.title} className="trust-section">
+                <span>{String(index + 1).padStart(2, "0")}</span>
+                <div>
+                  <h2>{section.title}</h2>
+                  <p>{section.body}</p>
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="trust-contact">
+        <div className="trust-container trust-contact-inner">
+          <div>
+            <p className="trust-kicker">Need context?</p>
+            <h2>Use this page alongside the editorial and privacy policies.</h2>
+            <p>
+              Review the <Link href="/editorial-policy/">Editorial Policy</Link>,{" "}
+              <Link href="/privacy/">Privacy Policy</Link>, or{" "}
+              <Link href="/contact/">contact Web Growth</Link> if you need clarification.
+            </p>
+          </div>
+          <Link className="trust-button" href="/contact/">
+            Contact Web Growth
+          </Link>
+        </div>
+      </section>
     </main>
   );
 }

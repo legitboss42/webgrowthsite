@@ -36,11 +36,9 @@ const INITIAL_VALUES: FormValues = {
   message: "",
 };
 
-const inputClassName =
-  "w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-300 focus:ring-4 focus:ring-blue-100";
-const selectClassName =
-  "w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-300 focus:ring-4 focus:ring-blue-100";
-const labelClassName = "mb-2 block text-sm font-medium text-slate-700";
+const inputClassName = "contact-control";
+const selectClassName = "contact-control";
+const labelClassName = "contact-label";
 
 function pushToDataLayer(eventName: string, payload: Record<string, unknown>) {
   if (typeof window === "undefined") return;
@@ -272,36 +270,37 @@ export default function ContactClient({ directDeliveryConfigured }: ContactClien
   return (
     <div
       id="contact-form"
-      className="rounded-[2rem] border border-slate-200 bg-white p-7 shadow-[0_24px_60px_rgba(15,23,42,0.10)]"
+      className="contact-form-shell"
     >
-      <h2 className="text-2xl font-semibold tracking-[-0.02em] text-slate-950">
+      <p className="contact-kicker">Website review request</p>
+      <h2>
         Start your website review request
       </h2>
-      <p className="mt-3 text-sm leading-7 text-slate-600">
+      <p className="contact-form-intro">
         Share the essentials and Web Growth can assess what may be hurting trust, clarity, speed,
         mobile experience, and enquiry flow.
       </p>
 
-      <div className="mt-5 rounded-2xl border border-blue-100 bg-blue-50 p-4">
-        <p className="text-xs uppercase tracking-[0.16em] text-blue-700">To get the most useful response</p>
-        <ul className="mt-3 space-y-2 text-sm leading-6 text-slate-600">
-          <li className="flex gap-2">
-            <span className="mt-[9px] h-1.5 w-1.5 rounded-full bg-blue-500" />
+      <div className="contact-form-guidance">
+        <p>To get the most useful response</p>
+        <ul>
+          <li>
+            <span />
             <span>Add your website link if you already have one.</span>
           </li>
-          <li className="flex gap-2">
-            <span className="mt-[9px] h-1.5 w-1.5 rounded-full bg-blue-500" />
+          <li>
+            <span />
             <span>Choose the main issue so the response starts in the right place.</span>
           </li>
-          <li className="flex gap-2">
-            <span className="mt-[9px] h-1.5 w-1.5 rounded-full bg-blue-500" />
+          <li>
+            <span />
             <span>You do not need a polished brief. Clear business details are enough.</span>
           </li>
         </ul>
       </div>
 
       {!directDeliveryConfigured ? (
-        <p className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-800">
+        <p className="contact-form-alert">
           Direct email delivery is still being connected. You can still submit this request safely,
           and WhatsApp is the fastest backup path for urgent reviews.
         </p>
@@ -310,20 +309,20 @@ export default function ContactClient({ directDeliveryConfigured }: ContactClien
       {status !== "idle" ? (
         <div
           className={[
-            "mt-6 rounded-2xl border p-4 text-sm",
+            "contact-form-status",
             status === "success"
-              ? "border-emerald-200 bg-emerald-50 text-emerald-800"
+              ? "contact-form-status-success"
               : status === "error"
-                ? "border-red-200 bg-red-50 text-red-800"
-                : "border-slate-200 bg-slate-50 text-slate-600",
+                ? "contact-form-status-error"
+                : "contact-form-status-neutral",
           ].join(" ")}
         >
           {status === "sending" ? "Sending..." : statusMsg}
         </div>
       ) : null}
 
-      <form onSubmit={handleSubmit} className="mt-8 space-y-5">
-        <div className="grid gap-5 md:grid-cols-2">
+      <form onSubmit={handleSubmit} className="contact-form-fields">
+        <div className="contact-form-grid">
           <div>
             <label htmlFor="contact-name" className={labelClassName}>
               Name <span className="text-blue-700">*</span>
@@ -353,7 +352,7 @@ export default function ContactClient({ directDeliveryConfigured }: ContactClien
           </div>
         </div>
 
-        <div className="grid gap-5 md:grid-cols-2">
+        <div className="contact-form-grid">
           <div>
             <label htmlFor="contact-whatsapp" className={labelClassName}>
               WhatsApp number
@@ -394,7 +393,7 @@ export default function ContactClient({ directDeliveryConfigured }: ContactClien
           />
         </div>
 
-        <div className="grid gap-5 md:grid-cols-2">
+        <div className="contact-form-grid">
           <div>
             <label htmlFor="contact-help-needed" className={labelClassName}>
               What do you need help with? <span className="text-blue-700">*</span>
@@ -434,7 +433,7 @@ export default function ContactClient({ directDeliveryConfigured }: ContactClien
           </div>
         </div>
 
-        <div className="grid gap-5 md:grid-cols-2">
+        <div className="contact-form-grid">
           <div>
             <label htmlFor="contact-budget-range" className={labelClassName}>
               Budget range
@@ -486,8 +485,8 @@ export default function ContactClient({ directDeliveryConfigured }: ContactClien
         </div>
 
         {isTurnstileEnabled ? (
-          <div className="space-y-2">
-            <p className="text-sm font-medium text-slate-700">Spam check</p>
+          <div className="contact-spam-check">
+            <p>Spam check</p>
             <TurnstileWidget
               action="website_review_request"
               onTokenChange={setTurnstileToken}
@@ -495,7 +494,7 @@ export default function ContactClient({ directDeliveryConfigured }: ContactClien
             />
           </div>
         ) : (
-          <p className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
+          <p className="contact-form-muted">
             Spam protection is not configured yet. This form still uses server-side validation and
             rate limiting, and WhatsApp is available if you need a faster route.
           </p>
@@ -505,16 +504,16 @@ export default function ContactClient({ directDeliveryConfigured }: ContactClien
           type="submit"
           disabled={status === "sending"}
           className={[
-            "w-full rounded-2xl px-6 py-4 text-sm font-semibold text-white transition",
+            "contact-submit",
             status === "sending"
-              ? "cursor-not-allowed bg-blue-400"
-              : "bg-[linear-gradient(135deg,#4f6bff_0%,#7c5cff_100%)] shadow-[0_18px_38px_rgba(79,107,255,0.24)] hover:-translate-y-0.5 hover:brightness-105",
+              ? "contact-submit-disabled"
+              : "contact-submit-ready",
           ].join(" ")}
         >
           {status === "sending" ? "Sending..." : "Submit Website Review Request"}
         </button>
 
-        <p className="text-xs leading-6 text-slate-500">
+        <p className="contact-form-footnote">
           No fake guarantees and no bloated sales process. Just a practical next step based on what
           you send.
         </p>

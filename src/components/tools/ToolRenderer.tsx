@@ -29,7 +29,7 @@ type PageAuditResult = {
 };
 
 function FieldLabel({ children }: { children: React.ReactNode }) {
-  return <label className="text-sm font-semibold text-slate-900">{children}</label>;
+  return <label className="tool-field-label text-sm font-semibold text-slate-900">{children}</label>;
 }
 
 function Input(props: React.InputHTMLAttributes<HTMLInputElement>) {
@@ -37,7 +37,7 @@ function Input(props: React.InputHTMLAttributes<HTMLInputElement>) {
     <input
       {...props}
       className={[
-        "min-h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-900 shadow-sm outline-none transition",
+        "tool-control min-h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-900 shadow-sm outline-none transition",
         "focus:border-blue-300 focus:ring-2 focus:ring-blue-100",
         props.className ?? "",
       ].join(" ")}
@@ -50,7 +50,7 @@ function Textarea(props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
     <textarea
       {...props}
       className={[
-        "w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm leading-7 text-slate-900 shadow-sm outline-none transition",
+        "tool-control w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm leading-7 text-slate-900 shadow-sm outline-none transition",
         "focus:border-blue-300 focus:ring-2 focus:ring-blue-100",
         props.className ?? "",
       ].join(" ")}
@@ -63,7 +63,7 @@ function Select(props: React.SelectHTMLAttributes<HTMLSelectElement>) {
     <select
       {...props}
       className={[
-        "min-h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-900 shadow-sm outline-none transition",
+        "tool-control min-h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-900 shadow-sm outline-none transition",
         "focus:border-blue-300 focus:ring-2 focus:ring-blue-100",
         props.className ?? "",
       ].join(" ")}
@@ -88,7 +88,7 @@ function Card({
         : "border-slate-200 bg-white";
 
   return (
-    <section className={["rounded-[1.8rem] border p-6 shadow-[0_18px_45px_rgba(15,23,42,0.06)]", toneClass].join(" ")}>
+    <section className={["tool-renderer-card rounded-[1.8rem] border p-6 shadow-[0_18px_45px_rgba(15,23,42,0.06)]", toneClass].join(" ")}>
       {title ? <h2 className="text-2xl font-semibold tracking-[-0.03em]">{title}</h2> : null}
       <div className={title ? "mt-5" : ""}>{children}</div>
     </section>
@@ -112,7 +112,7 @@ function CopyButton({ text, label = "Copy summary" }: { text: string; label?: st
     <button
       type="button"
       onClick={handleCopy}
-      className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-blue-200 hover:text-blue-700"
+      className="tool-copy-button inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-blue-200 hover:text-blue-700"
     >
       {copied ? "Copied" : label}
     </button>
@@ -923,11 +923,12 @@ function SitemapValidator() {
 }
 
 export default function ToolRenderer({ slug }: { slug: PublicToolSlug }) {
-  if (slug === "meta-description-generator") return <MetaDescriptionGenerator />;
-  if (slug === "website-cost-calculator") return <WebsiteCostCalculator />;
-  if (slug === "homepage-checklist") return <HomepageChecklist />;
-  if (slug === "adsense-readiness-checker") return <AdSenseReadinessChecker />;
-  if (slug === "website-launch-checklist") return <WebsiteLaunchChecklist />;
-  if (slug === "sitemap-validator") return <SitemapValidator />;
-  return null;
+  let tool: React.ReactNode = null;
+  if (slug === "meta-description-generator") tool = <MetaDescriptionGenerator />;
+  if (slug === "website-cost-calculator") tool = <WebsiteCostCalculator />;
+  if (slug === "homepage-checklist") tool = <HomepageChecklist />;
+  if (slug === "adsense-readiness-checker") tool = <AdSenseReadinessChecker />;
+  if (slug === "website-launch-checklist") tool = <WebsiteLaunchChecklist />;
+  if (slug === "sitemap-validator") tool = <SitemapValidator />;
+  return <div className="tool-renderer">{tool}</div>;
 }

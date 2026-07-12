@@ -33,7 +33,7 @@ export async function runSearchConsoleAudit() {
             "GOOGLE_CLIENT_EMAIL, GOOGLE_PRIVATE_KEY, and GSC_SITE_URL are required for Search Console API access.",
           fix: "Complete the service-account setup and save the values in .env.local.",
           pages: [],
-          implementation: "Follow SEO_AUDIT_SETUP.md and re-run the audit.",
+          implementation: "Configure Search Console credentials in the local environment and re-run the audit.",
         }),
       ],
     };

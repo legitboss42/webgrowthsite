@@ -37,12 +37,12 @@ export default function CinematicHero({
   return (
     <section
       className={[
-        "relative isolate overflow-hidden border-b border-border-hairline bg-bg-ink text-text-primary",
+        "relative isolate overflow-hidden border-b border-[#23315e] bg-[#080d24] text-text-primary",
         isUtility ? "py-14 md:py-18" : "py-20 md:py-28",
       ].join(" ")}
     >
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(115deg,rgba(27,110,99,0.2),transparent_38%),radial-gradient(circle_at_84%_18%,rgba(232,163,61,0.14),transparent_28%)]" />
-      <div className="pointer-events-none absolute inset-0 opacity-25 [background-image:linear-gradient(rgba(237,234,233,.05)_1px,transparent_1px),linear-gradient(90deg,rgba(237,234,233,.05)_1px,transparent_1px)] [background-size:64px_64px]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_78%_18%,rgba(79,107,255,0.3),transparent_28%),radial-gradient(circle_at_20%_85%,rgba(124,92,255,0.18),transparent_30%),linear-gradient(115deg,rgba(15,31,80,0.75),transparent_48%)]" />
+      <div className="pointer-events-none absolute inset-0 opacity-25 [background-image:linear-gradient(rgba(126,155,255,.08)_1px,transparent_1px),linear-gradient(90deg,rgba(126,155,255,.08)_1px,transparent_1px)] [background-size:64px_64px]" />
 
       <div
         className={[
@@ -55,7 +55,7 @@ export default function CinematicHero({
         ].join(" ")}
       >
         <div className={isUtility ? "lg:order-2" : ""}>
-          <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-accent-gold">{eyebrow}</p>
+          <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-[#8ea8ff]">{eyebrow}</p>
           <h1
             className={[
               "mt-5 max-w-4xl text-balance font-display font-normal leading-[0.96] tracking-[-0.045em]",
@@ -75,7 +75,7 @@ export default function CinematicHero({
                   ctaLocation="cinematic_hero"
                   destination={primaryAction.destination}
                   pageType={pageType}
-                  className="inline-flex min-h-12 items-center justify-center rounded-full bg-accent-gold px-6 text-sm font-semibold text-bg-ink transition hover:-translate-y-0.5 hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent-gold"
+                  className="inline-flex min-h-12 items-center justify-center rounded-xl bg-[#3157e8] px-6 text-sm font-semibold text-white shadow-[0_14px_32px_rgba(49,87,232,.24)] transition hover:-translate-y-0.5 hover:bg-[#496cff] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#8ea8ff]"
                 >
                   {primaryAction.label}
                 </TrackedLink>
@@ -87,7 +87,7 @@ export default function CinematicHero({
                   ctaLocation="cinematic_hero"
                   destination={secondaryAction.destination}
                   pageType={pageType}
-                  className="inline-flex min-h-12 items-center justify-center rounded-full border border-border-hairline bg-white/[0.04] px-6 text-sm font-semibold text-text-primary transition hover:border-accent-teal hover:bg-white/[0.08] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent-gold"
+                  className="inline-flex min-h-12 items-center justify-center rounded-xl border border-[#536aa9] bg-white/[0.04] px-6 text-sm font-semibold text-text-primary transition hover:border-[#8ea8ff] hover:bg-white/[0.08] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#8ea8ff]"
                 >
                   {secondaryAction.label}
                 </TrackedLink>

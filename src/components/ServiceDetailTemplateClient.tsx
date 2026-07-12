@@ -1,28 +1,8 @@
+import Image from "next/image";
 import Link from "next/link";
 import TrackedLink from "@/components/analytics/TrackedLink";
-import CinematicHero from "@/components/platform/CinematicHero";
 import StructuredData from "@/components/StructuredData";
-import BeforeAfterResults from "@/components/content/BeforeAfterResults";
-import CommonMistakes from "@/components/content/CommonMistakes";
-import EvidenceGallery from "@/components/content/EvidenceGallery";
-import FAQBlock from "@/components/content/FAQBlock";
-import InternalResourceCallout from "@/components/content/InternalResourceCallout";
-import ProcessSteps from "@/components/content/ProcessSteps";
-import RealExamples from "@/components/content/RealExamples";
-import ServiceDeliverables from "@/components/content/ServiceDeliverables";
-import WhoThisIsFor from "@/components/content/WhoThisIsFor";
-import WhoThisIsNotFor from "@/components/content/WhoThisIsNotFor";
-import {
-  BuildIcon,
-  ConvertIcon,
-  GrowthChartIcon,
-  IconBadge,
-  MonetizeIcon,
-  OptimizeIcon,
-  PlanIcon,
-  SearchIcon,
-} from "@/components/home/HomeIcons";
-import SectionShell from "@/components/home/SectionShell";
+import { portfolioCases } from "@/lib/portfolioCases";
 import { getPost } from "@/lib/posts";
 import { buildBreadcrumbSchema } from "@/lib/seo";
 import { absoluteUrl, SITE_URL } from "@/lib/site";
@@ -32,17 +12,56 @@ type Props = {
   service: ServicePageConfig;
 };
 
-const processIcons = [<PlanIcon key="1" />, <BuildIcon key="2" />, <OptimizeIcon key="3" />, <ConvertIcon key="4" />];
+function Arrow() {
+  return <span aria-hidden="true">-&gt;</span>;
+}
+
+function serviceTone(service: ServicePageConfig) {
+  const title = service.title.toLowerCase();
+  if (title.includes("seo") || title.includes("analytics")) return "Measurement";
+  if (title.includes("landing") || title.includes("lead")) return "Conversion";
+  if (title.includes("maintenance") || title.includes("hosting")) return "Support";
+  if (title.includes("automation") || title.includes("crm") || title.includes("email")) return "Systems";
+  return "Website design";
+}
+
+function relatedGuides(service: ServicePageConfig) {
+  return service.relatedGuideSlugs
+    .slice(0, 4)
+    .map((slug) => ({ slug, post: getPost(slug) }));
+}
+
+function supportLinks(service: ServicePageConfig) {
+  return (
+    service.relatedLinks ?? [
+      {
+        href: "/services/website-audit/",
+        label: "Audit",
+        title: "Start with diagnosis",
+        description: "Use a website review when the bottleneck is unclear and the right implementation path matters.",
+      },
+      {
+        href: "/services/",
+        label: "Services",
+        title: "Compare service paths",
+        description: "Review the wider Web Growth service system before choosing the correct scope.",
+      },
+      {
+        href: "/blog/",
+        label: "Academy",
+        title: "Learn before you buy",
+        description: "Use Academy resources to understand the build, growth, and monetization decisions around this work.",
+      },
+    ]
+  );
+}
 
 export default function ServiceDetailTemplateClient({ service }: Props) {
-  const servicePath = `/services/${service.slug}`;
+  const servicePath = `/services/${service.slug}/`;
   const serviceUrl = absoluteUrl(servicePath);
-  const relatedGuides = service.relatedGuideSlugs
-    .slice(0, 4)
-    .map((slug) => ({
-      slug,
-      post: getPost(slug),
-    }));
+  const featuredCase = portfolioCases[0];
+  const guides = relatedGuides(service);
+
   const schema = [
     {
       "@context": "https://schema.org",
@@ -64,230 +83,282 @@ export default function ServiceDetailTemplateClient({ service }: Props) {
     ]),
   ];
 
-  const supportLinks =
-    service.relatedLinks ?? [
-      {
-        href: "/services/website-audit/",
-        label: "Audit",
-        title: "Start with diagnosis",
-        description:
-          "Use a website review when the bottleneck is still unclear and you need the right implementation path first.",
-      },
-      {
-        href: "/pricing/",
-        label: "Pricing",
-        title: "Review scope and budget",
-        description:
-          "See how Web Growth frames scope, pricing context, and the right next step before kickoff.",
-      },
-      {
-        href: "/blog/",
-        label: "Academy",
-        title: "Learn before you buy",
-        description:
-          "Use Academy resources to understand the build, growth, and monetization decisions around this service.",
-      },
-    ];
-
   return (
-    <main className="bg-[#f7f8fc] text-slate-950">
+    <main className="service-detail-system">
       <StructuredData data={schema} />
 
-      <CinematicHero
-        eyebrow={service.title}
-        title={service.heroTitle}
-        description={service.heroDescription}
-        pageType="service_detail"
-        variant="split"
-        primaryAction={{
-          label: "Request This Service",
-          href: `/contact?service=${encodeURIComponent(service.serviceParam)}`,
-          ctaName: "request_this_service",
-          destination: "contact",
-        }}
-        secondaryAction={{
-          label: "View All Services",
-          href: "/services/",
-          ctaName: "view_all_services",
-          destination: "services",
-        }}
-        aside={
-          <div className="border-l border-border-hairline pl-6 md:pl-9">
-            <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-accent-teal">Engagement dossier</p>
-            <ol className="mt-6 space-y-5">
-              {service.deliverables.slice(0, 4).map((item, index) => (
-                <li key={item} className="grid grid-cols-[2rem_1fr] gap-4 border-b border-border-hairline pb-5 text-sm leading-6 text-text-muted">
-                  <span className="font-display text-xl text-accent-gold">0{index + 1}</span>
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ol>
+      <section className="service-detail-hero" aria-labelledby="service-detail-title">
+        <div className="services-container service-detail-hero-grid">
+          <div>
+            <Link href="/services/" className="service-breadcrumb">
+              Services <Arrow />
+            </Link>
+            <p className="services-kicker">{serviceTone(service)}</p>
+            <h1 id="service-detail-title">{service.heroTitle}</h1>
+            <p>{service.heroDescription}</p>
+            <div className="services-actions">
+              <TrackedLink
+                href={`/contact?service=${encodeURIComponent(service.serviceParam)}`}
+                ctaName="request_service"
+                ctaLocation="service_hero"
+                destination="contact"
+                pageType="service_detail"
+                className="services-button services-button-primary"
+              >
+                Request This Service <Arrow />
+              </TrackedLink>
+              <TrackedLink
+                href="/services/"
+                ctaName="view_all_services"
+                ctaLocation="service_hero"
+                destination="services"
+                pageType="service_detail"
+                className="services-button services-button-secondary"
+              >
+                View All Services
+              </TrackedLink>
+            </div>
           </div>
-        }
-        footer={
-          <div className="grid gap-px overflow-hidden rounded-2xl border border-border-hairline bg-border-hairline sm:grid-cols-3">
-            {service.highlights.slice(0, 3).map((item) => (
-              <div key={item} className="bg-bg-ink px-5 py-4 text-sm text-text-muted">{item}</div>
-            ))}
+          <div className="service-detail-visual">
+            <Image
+              src={service.heroImage}
+              alt={`${service.title} service presentation`}
+              width={1300}
+              height={960}
+              quality={75}
+              priority
+            />
+            <div>
+              <span>Engagement focus</span>
+              <strong>{service.title}</strong>
+              <small>{service.highlights.slice(0, 3).join(" / ")}</small>
+            </div>
           </div>
-        }
-      />
-
-      <SectionShell tone="white" spacing="compact">
-        <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
-          <div className="grid gap-6">
-            <WhoThisIsFor items={service.targetAudience} />
-            <WhoThisIsNotFor items={service.notFor} />
-          </div>
-          <ServiceDeliverables items={service.deliverables} />
         </div>
-      </SectionShell>
+      </section>
 
-      <SectionShell tone="canvas" spacing="compact">
-        <div className="grid gap-6 lg:grid-cols-[0.88fr_1.12fr]">
-          <article className="rounded-[1.55rem] border border-slate-200 bg-white p-6 shadow-[0_18px_36px_rgba(15,23,42,0.05)]">
-            <p className="text-xs font-bold uppercase tracking-[0.18em] text-blue-700">
-              Process
-            </p>
-            <div className="mt-5 space-y-4">
-              {service.process.map((step, index) => (
-                <div key={step.title} className="flex items-start gap-4 rounded-[1.15rem] border border-slate-200 bg-slate-50 px-4 py-4">
-                  <IconBadge tone="blue" className="h-10 w-10 rounded-[1rem] shrink-0">
-                    {processIcons[index] ?? <GrowthChartIcon />}
-                  </IconBadge>
-                  <div>
-                    <p className="text-sm font-semibold text-slate-950">{step.title}</p>
-                    <p className="mt-1 text-sm leading-6 text-slate-600">{step.text}</p>
-                  </div>
-                </div>
+      <section className="service-detail-answer" aria-labelledby="service-answer-title">
+        <div className="services-container service-detail-answer-grid">
+          <article>
+            <p className="services-kicker">Business problem</p>
+            <h2 id="service-answer-title">What this service is designed to fix.</h2>
+            <p>{service.metaDescription}</p>
+          </article>
+          <article>
+            <p className="services-kicker">Service outcome</p>
+            <h2>What changes when the work is done well.</h2>
+            <div className="service-highlight-list">
+              {service.highlights.slice(0, 3).map((item) => (
+                <span key={item}>{item}</span>
               ))}
             </div>
           </article>
-
-          <div className="grid gap-6">
-            <CommonMistakes items={service.commonMistakes} />
-            <RealExamples items={service.useCases} />
-          </div>
         </div>
-      </SectionShell>
+      </section>
 
-      <SectionShell tone="canvas" spacing="compact">
-        <div className="overflow-hidden rounded-[1.7rem] border border-slate-200 bg-white shadow-[0_22px_54px_rgba(15,23,42,0.06)]">
-          <div className="grid gap-6 px-6 py-7 md:px-8 md:py-8 lg:grid-cols-[0.95fr_1.05fr]">
-            <div>
-              <p className="text-xs font-bold uppercase tracking-[0.18em] text-blue-700">
-                Transformation
-              </p>
-              <h2 className="mt-4 text-4xl font-semibold tracking-[-0.05em] text-slate-950">
-                What changes when this work is implemented well
-              </h2>
-              <p className="mt-4 text-base leading-8 text-slate-600">
-                These before-and-after patterns show the kind of commercial lift the
-                service is meant to create.
-              </p>
-            </div>
-            <EvidenceGallery items={service.evidence} />
-          </div>
-          <div className="border-t border-slate-200 px-6 py-7 md:px-8">
-            <BeforeAfterResults items={service.beforeAfter} />
-          </div>
-        </div>
-      </SectionShell>
-
-      <SectionShell tone="white" spacing="compact">
-        <div className="grid gap-6 lg:grid-cols-[1.08fr_0.92fr]">
-          <FAQBlock
-            items={service.faqs}
-            title={`${service.title} FAQs`}
-            description="Direct answers to common planning, scope, and implementation questions."
-          />
-          <article className="rounded-[1.55rem] border border-slate-200 bg-white p-6 shadow-[0_18px_36px_rgba(15,23,42,0.05)]">
-            <p className="text-xs font-bold uppercase tracking-[0.18em] text-blue-700">
-              Related Academy guides
+      <section className="services-section" aria-labelledby="deliverables-title">
+        <div className="services-container service-detail-split">
+          <div>
+            <p className="services-kicker">Deliverables</p>
+            <h2 id="deliverables-title">The practical work included in this service.</h2>
+            <p>
+              Each deliverable is tied to clarity, trust, technical quality, conversion, or maintainability rather than
+              decorative website work.
             </p>
-            <div className="mt-5 space-y-3">
-              {relatedGuides.map(({ slug, post }) => (
-                <Link
-                  key={slug}
-                  href={`/blog/${slug}/`}
-                  className="flex items-center gap-3 rounded-[1.1rem] border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-700 transition hover:border-blue-200 hover:text-blue-700"
-                >
-                  <IconBadge tone="purple" className="h-9 w-9 rounded-[0.9rem]">
-                    <SearchIcon />
-                  </IconBadge>
-                  <span>{post?.title ?? slug.replace(/-/g, " ")}</span>
+          </div>
+          <div className="service-deliverable-grid">
+            {service.deliverables.map((item, index) => (
+              <article key={item}>
+                <span>{String(index + 1).padStart(2, "0")}</span>
+                <p>{item}</p>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="service-detail-dark" aria-labelledby="service-process-title">
+        <div className="services-container service-process-grid">
+          <div>
+            <p className="services-kicker">Process</p>
+            <h2 id="service-process-title">How this service moves from diagnosis to implementation.</h2>
+            <p>
+              The process keeps the work commercially focused while protecting content quality, SEO foundations, and
+              responsive usability.
+            </p>
+          </div>
+          <div className="service-process-list">
+            {service.process.map((step, index) => (
+              <article key={step.title}>
+                <span>{String(index + 1).padStart(2, "0")}</span>
+                <div>
+                  <h3>{step.title}</h3>
+                  <p>{step.text}</p>
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="services-section" aria-labelledby="fit-title">
+        <div className="services-container service-fit-grid">
+          <article>
+            <p className="services-kicker">Good fit</p>
+            <h2 id="fit-title">Who this is for.</h2>
+            <ul>
+              {service.targetAudience.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </article>
+          <article>
+            <p className="services-kicker">Not a fit</p>
+            <h2>Who this is not for.</h2>
+            <ul>
+              {service.notFor.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section className="service-detail-proof" aria-labelledby="proof-title">
+        <div className="services-container service-proof-grid">
+          <div>
+            <p className="services-kicker">Visual proof area</p>
+            <h2 id="proof-title">Premium presentation with practical constraints.</h2>
+            <p>
+              Service pages use real project framing and honest qualitative outcomes. No invented performance statistics
+              are added.
+            </p>
+            <Link href="/portfolio/" className="services-button services-button-secondary">
+              View Case Studies <Arrow />
+            </Link>
+          </div>
+          <div className="service-image-stack">
+            <Image
+              src={service.detailImage}
+              alt={`${service.title} detail visual`}
+              width={1100}
+              height={820}
+              quality={75}
+              sizes="(max-width: 900px) 100vw, 48vw"
+            />
+            {featuredCase ? (
+              <div>
+                <span>{featuredCase.type}</span>
+                <strong>{featuredCase.title}</strong>
+                <small>{featuredCase.results.join(" / ")}</small>
+              </div>
+            ) : null}
+          </div>
+        </div>
+      </section>
+
+      <section className="services-section" aria-labelledby="transformation-title">
+        <div className="services-container service-transformation-grid">
+          <div>
+            <p className="services-kicker">Transformation</p>
+            <h2 id="transformation-title">Before and after patterns this service addresses.</h2>
+          </div>
+          <div className="service-before-after">
+            {service.beforeAfter.map((item) => (
+              <article key={`${item.before}-${item.after}`}>
+                <div>
+                  <span>Before</span>
+                  <p>{item.before}</p>
+                </div>
+                <div>
+                  <span>After</span>
+                  <p>{item.after}</p>
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="services-section" aria-labelledby="mistakes-title">
+        <div className="services-container service-mistakes-grid">
+          <article>
+            <p className="services-kicker">Common mistakes</p>
+            <h2 id="mistakes-title">What this service helps you avoid.</h2>
+            <ul>
+              {service.commonMistakes.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </article>
+          <article>
+            <p className="services-kicker">Realistic examples</p>
+            <h2>How the work can show up in practice.</h2>
+            <ul>
+              {service.useCases.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section className="services-section" aria-labelledby="service-faq-title">
+        <div className="services-container service-faq-related-grid">
+          <article>
+            <p className="services-kicker">FAQs</p>
+            <h2 id="service-faq-title">{service.title} FAQs</h2>
+            <div className="services-faq-grid">
+              {service.faqs.map((item) => (
+                <details key={item.question}>
+                  <summary>{item.question}</summary>
+                  <p>{item.answer}</p>
+                </details>
+              ))}
+            </div>
+          </article>
+          <aside>
+            <p className="services-kicker">Related links</p>
+            <div className="service-related-list">
+              {guides.map(({ slug, post }) => (
+                <Link href={`/blog/${slug}/`} key={slug}>
+                  <span>Academy</span>
+                  <strong>{post?.title ?? slug.replace(/-/g, " ")}</strong>
+                </Link>
+              ))}
+              {supportLinks(service).map((item) => (
+                <Link href={item.href} key={item.href}>
+                  <span>{item.label}</span>
+                  <strong>{item.title}</strong>
+                  <small>{item.description}</small>
                 </Link>
               ))}
             </div>
-            <InternalResourceCallout
-              title="Browse the Academy"
-              description="Use Academy resources to understand this work before you invest in implementation."
-              href="/blog/"
-              label="Explore Academy"
-            />
-          </article>
+          </aside>
         </div>
-      </SectionShell>
+      </section>
 
-      <SectionShell tone="canvas" spacing="compact">
-        <div className="grid gap-4 lg:grid-cols-3">
-          {supportLinks.map((item) => (
-            <article
-              key={item.href}
-              className="rounded-[1.35rem] border border-slate-200 bg-white p-5 shadow-[0_14px_30px_rgba(15,23,42,0.04)]"
+      <section className="services-final-cta">
+        <div className="services-container services-final-inner">
+          <div>
+            <p className="services-kicker">Next step</p>
+            <h2>{service.ctaTitle}</h2>
+          </div>
+          <div>
+            <p>{service.ctaDescription}</p>
+            <TrackedLink
+              href={`/contact?service=${encodeURIComponent(service.serviceParam)}`}
+              ctaName="request_service_final"
+              ctaLocation="service_final_cta"
+              destination="contact"
+              pageType="service_detail"
+              className="services-button services-button-primary"
             >
-              <p className="text-xs font-bold uppercase tracking-[0.18em] text-blue-700">
-                {item.label}
-              </p>
-              <h3 className="mt-3 text-[1.25rem] font-semibold tracking-[-0.03em] text-slate-950">
-                {item.title}
-              </h3>
-              <p className="mt-3 text-sm leading-7 text-slate-600">{item.description}</p>
-              <Link href={item.href} className="mt-5 inline-flex text-sm font-semibold text-blue-700">
-                Open page -&gt;
-              </Link>
-            </article>
-          ))}
-        </div>
-      </SectionShell>
-
-      <SectionShell tone="canvas" spacing="compact">
-        <div className="overflow-hidden rounded-[1.8rem] border border-blue-950/60 bg-[radial-gradient(circle_at_88%_14%,rgba(108,84,255,0.42),transparent_24%),linear-gradient(135deg,#091226_0%,#0c1631_48%,#0b1230_100%)] px-8 py-9 shadow-[0_26px_70px_rgba(6,14,35,0.28)]">
-          <div className="grid gap-6 lg:grid-cols-[1fr_auto] lg:items-center">
-            <div>
-              <h2 className="max-w-2xl text-[2.2rem] font-semibold tracking-[-0.05em] text-white">
-                {service.ctaTitle}
-              </h2>
-              <p className="mt-3 max-w-xl text-base leading-8 text-blue-100">
-                {service.ctaDescription}
-              </p>
-            </div>
-
-            <div className="flex flex-col items-start gap-3 sm:flex-row">
-              <TrackedLink
-                href={`/contact?service=${encodeURIComponent(service.serviceParam)}`}
-                ctaName="request_website_review"
-                ctaLocation="service_final_cta"
-                destination="contact"
-                pageType="service_detail"
-                className="inline-flex min-h-12 items-center justify-center rounded-xl bg-white px-6 text-sm font-semibold text-blue-900 transition hover:bg-blue-50"
-              >
-                Request a Website Review
-              </TrackedLink>
-              <TrackedLink
-                href="/portfolio/"
-                ctaName="view_case_studies"
-                ctaLocation="service_final_cta"
-                destination="portfolio"
-                pageType="service_detail"
-                className="inline-flex min-h-12 items-center justify-center rounded-xl border border-white/30 bg-transparent px-6 text-sm font-semibold text-white transition hover:bg-white/10"
-              >
-                View Case Studies
-              </TrackedLink>
-            </div>
+              Request a Website Review <Arrow />
+            </TrackedLink>
           </div>
         </div>
-      </SectionShell>
+      </section>
     </main>
   );
 }

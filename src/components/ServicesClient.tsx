@@ -1,22 +1,6 @@
+import Image from "next/image";
 import Link from "next/link";
-import CinematicHero from "@/components/platform/CinematicHero";
-import SectionReveal from "@/components/platform/SectionReveal";
-import {
-  AttractIcon,
-  BuildIcon,
-  ConvertIcon,
-  GrowthChartIcon,
-  IconBadge,
-  MonetizeIcon,
-  OptimizeIcon,
-  PlanIcon,
-  SearchIcon,
-  ShieldIcon,
-  SpeedIcon,
-  TargetIcon,
-} from "@/components/home/HomeIcons";
-import SectionShell from "@/components/home/SectionShell";
-import { ProofDeviceMockup } from "@/components/home/HomepageVisuals";
+import { portfolioCases } from "@/lib/portfolioCases";
 import type { Post } from "@/lib/posts";
 import { getPublicPosts } from "@/lib/posts";
 
@@ -33,520 +17,304 @@ type Props = {
   services?: Service[];
 };
 
-const heroSteps = [
-  {
-    number: "1",
-    title: "Strategy",
-    description: "Growth diagnosis, site planning, and architecture.",
-    angleClass: "-rotate-90",
-    cardClass: "-translate-x-1/2 -translate-y-[20%]",
-    icon: <PlanIcon />,
-  },
-  {
-    number: "2",
-    title: "Build",
-    description: "Conversion-focused website development.",
-    angleClass: "-rotate-[30deg]",
-    cardClass: "translate-x-[20%] -translate-y-[24%]",
-    icon: <BuildIcon />,
-  },
-  {
-    number: "3",
-    title: "Optimize",
-    description: "Speed, SEO, and UX optimization.",
-    angleClass: "rotate-[30deg]",
-    cardClass: "translate-x-[22%] -translate-y-[24%]",
-    icon: <OptimizeIcon />,
-  },
-  {
-    number: "4",
-    title: "Monetize",
-    description: "Offers, affiliates, and revenue systems.",
-    angleClass: "rotate-[145deg]",
-    cardClass: "-translate-x-[124%] -translate-y-[26%]",
-    icon: <MonetizeIcon />,
-  },
-  {
-    number: "5",
-    title: "Analyze",
-    description: "Tracking, reporting, and insights.",
-    angleClass: "rotate-90",
-    cardClass: "-translate-x-1/2 -translate-y-[20%]",
-    icon: <GrowthChartIcon />,
-  },
-  {
-    number: "6",
-    title: "Convert",
-    description: "CRO, funnels, and user-journey optimization.",
-    angleClass: "-rotate-[145deg]",
-    cardClass: "-translate-x-[124%] -translate-y-[26%]",
-    icon: <ConvertIcon />,
-  },
-] as const;
+const preferredCoreSlugs = [
+  "business-website-design",
+  "landing-page-design",
+  "website-redesign",
+  "ecommerce-website-design",
+  "search-engine-optimisation",
+  "performance-optimisation",
+  "website-maintenance",
+  "website-audit",
+];
+
+const infrastructureSlugs = [
+  "analytics-tracking-setup",
+  "booking-platform-setup-integration",
+  "crm-system-setup-configuration",
+  "google-my-business-setup-optimisation",
+  "email-marketing-setup-strategy",
+  "marketing-automation-build-implementation",
+  "domain-registration-hosting-guidance",
+  "lead-magnet-strategy-build",
+];
 
 const processSteps = [
-  {
-    label: "01",
-    title: "Discover",
-    text: "Audit, research, and competitor analysis",
-    icon: <SearchIcon />,
-  },
-  {
-    label: "02",
-    title: "Plan",
-    text: "Strategy, architecture, and content roadmap",
-    icon: <PlanIcon />,
-  },
-  {
-    label: "03",
-    title: "Build",
-    text: "Design, develop, and quality assurance",
-    icon: <BuildIcon />,
-  },
-  {
-    label: "04",
-    title: "Optimize",
-    text: "Speed, SEO, UX, and conversion tuning",
-    icon: <OptimizeIcon />,
-  },
-  {
-    label: "05",
-    title: "Grow",
-    text: "Content, authority, and traffic compounding",
-    icon: <AttractIcon />,
-  },
-  {
-    label: "06",
-    title: "Monetize",
-    text: "Revenue systems and scaling strategy",
-    icon: <MonetizeIcon />,
-  },
+  ["01", "Diagnose", "Clarify the real bottleneck before design, SEO, or automation work starts."],
+  ["02", "Architect", "Map the offer, content, user journey, trust sequence, and implementation path."],
+  ["03", "Build", "Design and implement a premium website system with conversion and SEO foundations."],
+  ["04", "Improve", "Use performance, tracking, content, and automation to keep the system moving."],
 ] as const;
 
 const faqItems = [
   {
-    question: "How long does a project take?",
+    question: "Can Web Growth handle only one service?",
     answer:
-      "The timeline depends on scope, page count, content readiness, integrations, and whether strategy work needs to happen before design or development.",
+      "Yes. You can request a focused service such as website redesign, SEO setup, analytics tracking, or performance optimisation.",
   },
   {
-    question: "What do I need to get started?",
+    question: "Can services be combined?",
     answer:
-      "A clear business offer, access to the current site or analytics where relevant, and enough context for us to diagnose whether the problem is trust, traffic, conversion, or technical performance.",
+      "Yes. Many projects combine strategy, design, SEO foundations, tracking, and post-launch optimisation when that is the right scope.",
   },
   {
-    question: "Do you work with multiple CMS platforms?",
+    question: "Do these services include fabricated results or guarantees?",
     answer:
-      "Yes. The right platform depends on your content needs, editing workflow, performance priorities, and how much growth flexibility the business needs over time.",
+      "No. Web Growth presents honest outcomes and does not promise traffic, revenue, rankings, or AdSense approval that cannot be verified.",
   },
   {
-    question: "Do you offer ongoing support?",
+    question: "What is the best first step?",
     answer:
-      "Yes, when the engagement needs maintenance, optimization, reporting, or iterative improvements after launch.",
-  },
-  {
-    question: "Will my website be SEO-friendly?",
-    answer:
-      "That is part of the baseline. We build with search structure, performance, content intent, and indexation discipline in mind rather than treating SEO as a last-minute add-on.",
-  },
-  {
-    question: "How do you measure success?",
-    answer:
-      "We look at the signals that matter for the service: stronger positioning, better lead quality, cleaner user journeys, improved search visibility, and more commercially useful website behavior.",
+      "If the problem is unclear, start with a website audit or consultation. If the problem is obvious, choose the relevant service page and request that scope.",
   },
 ] as const;
 
-const growthInfrastructureServices = [
-  {
-    href: "/services/google-my-business-setup-optimisation/",
-    title: "Google Business Profile Optimization",
-    text: "Improve local visibility, Maps trust signals, and service-area clarity.",
-  },
-  {
-    href: "/services/crm-system-setup-configuration/",
-    title: "CRM System Setup",
-    text: "Create cleaner lead routing, pipeline visibility, and follow-up structure.",
-  },
-  {
-    href: "/services/booking-platform-setup-integration/",
-    title: "Booking Platform Integration",
-    text: "Reduce booking friction and improve completed appointments from the website.",
-  },
-  {
-    href: "/services/analytics-tracking-setup/",
-    title: "Analytics and Tracking Setup",
-    text: "Measure enquiries, calls, and paid traffic performance with cleaner data.",
-  },
-  {
-    href: "/services/email-marketing-setup-strategy/",
-    title: "Email Marketing Strategy",
-    text: "Build nurture systems that turn subscribers into better sales conversations.",
-  },
-  {
-    href: "/services/marketing-automation-build-implementation/",
-    title: "Marketing Automation",
-    text: "Automate lead follow-up, lifecycle messaging, and conversion support.",
-  },
-  {
-    href: "/services/domain-registration-hosting-guidance/",
-    title: "Hosting and Launch Guidance",
-    text: "Choose the right domain, DNS, SSL, and hosting setup before launch or migration.",
-  },
-  {
-    href: "/services/website-maintenance/",
-    title: "Website Maintenance",
-    text: "Protect trust, uptime, and conversion-critical flows after launch.",
-  },
-] as const;
-
-function pickServiceIcon(title: string) {
-  const lower = title.toLowerCase();
-  if (lower.includes("seo")) return <SearchIcon />;
-  if (lower.includes("landing")) return <TargetIcon />;
-  if (lower.includes("performance")) return <SpeedIcon />;
-  if (lower.includes("maintenance")) return <ShieldIcon />;
-  if (lower.includes("analytics")) return <GrowthChartIcon />;
-  if (lower.includes("booking")) return <ConvertIcon />;
-  if (lower.includes("crm")) return <ConvertIcon />;
-  if (lower.includes("marketing")) return <MonetizeIcon />;
-  return <BuildIcon />;
+function Arrow() {
+  return <span aria-hidden="true">-&gt;</span>;
 }
 
-function pickServiceLabel(index: number) {
-  return String(index + 1).padStart(2, "0");
+function normalizeSlug(href: string) {
+  return href.replace(/^\/services\//, "").replace(/\/$/, "");
 }
 
-function selectCoreServices(services: Service[]) {
-  const preferred = [
-    "business-website-design",
-    "website-redesign",
-    "search-engine-optimisation",
-    "performance-optimisation",
-    "landing-page-design",
-    "analytics-tracking-setup",
-    "lead-magnet-strategy-build",
-    "google-my-business-setup-optimisation",
-    "website-maintenance",
-  ];
+function normalizeHref(href: string) {
+  return href.endsWith("/") ? href : `${href}/`;
+}
 
-  const map = new Map(services.map((service) => [service.slug.replace(/^\/services\/|\/$/g, ""), service]));
-  const curated = preferred
-    .map((slug) => map.get(slug))
-    .filter((service): service is Service => Boolean(service));
-
-  if (curated.length >= 9) return curated;
-  return services.slice(0, 9);
+function selectBySlug(services: Service[], slugs: string[]) {
+  const serviceMap = new Map(services.map((service) => [normalizeSlug(service.slug), service]));
+  return slugs.map((slug) => serviceMap.get(slug)).filter((service): service is Service => Boolean(service));
 }
 
 function selectResources(): Post[] {
   const posts = getPublicPosts();
   const desired = [
-    "small-business-website-seo-checklist",
+    "how-to-build-a-small-business-website-that-converts",
+    "small-business-website-redesign-checklist",
+    "conversion-audit-checklist-service-homepage",
     "how-to-make-your-website-load-fast",
-    "homepage-structure-that-converts-visitors-into-customers",
-    "jluxe-medical-aesthetics-case-study",
   ];
 
-  const map = new Map(posts.map((post) => [post.slug, post]));
-  return desired
-    .map((slug) => map.get(slug))
-    .filter((post): post is Post => Boolean(post));
+  const postMap = new Map(posts.map((post) => [post.slug, post]));
+  const selected = desired.map((slug) => postMap.get(slug)).filter((post): post is Post => Boolean(post));
+  return selected.length ? selected : posts.slice(0, 4);
+}
+
+function ServicePanel({ service, index }: { service: Service; index: number }) {
+  return (
+    <Link href={normalizeHref(service.slug)} className={`services-premium-card services-premium-card-${(index % 4) + 1}`}>
+      <span>{String(index + 1).padStart(2, "0")}</span>
+      <h3>{service.title}</h3>
+      <p>{service.short}</p>
+      <ul>
+        {service.bullets.slice(0, 3).map((bullet) => (
+          <li key={bullet}>{bullet}</li>
+        ))}
+      </ul>
+      <small>
+        Explore service <Arrow />
+      </small>
+    </Link>
+  );
 }
 
 export default function ServicesClient({ services = [] }: Props) {
-  const coreServices = selectCoreServices(services);
+  const coreServices = selectBySlug(services, preferredCoreSlugs);
+  const infrastructureServices = selectBySlug(services, infrastructureSlugs);
+  const featuredService = coreServices[0] ?? services[0];
+  const featuredCase = portfolioCases.find((item) => item.slug === "jluxe") ?? portfolioCases[0];
   const resources = selectResources();
 
   return (
-    <main className="bg-[#f7f8fc] text-slate-950">
-      <CinematicHero
-        eyebrow="Services / Build. Grow. Monetize."
-        title={<>One growth system. <span className="text-accent-gold">Built around your bottleneck.</span></>}
-        description="Websites, search, performance, conversion, analytics, and automation delivered as connected growth infrastructure rather than disconnected tasks."
-        pageType="services_hub"
-        variant="split"
-        primaryAction={{ label: "Start With a Website Review", href: "/contact/", ctaName: "start_website_review", destination: "contact" }}
-        secondaryAction={{ label: "Explore the Academy", href: "/blog/", ctaName: "explore_academy", destination: "academy" }}
-        aside={
-          <div className="border-l border-border-hairline pl-6 md:pl-9">
-            <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-accent-teal">Growth architecture</p>
-            <div className="mt-6 grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-border-hairline bg-border-hairline">
-              {heroSteps.map((step) => (
-                <div key={step.number} className="bg-bg-ink p-4">
-                  <span className="font-display text-xl text-accent-gold">0{step.number}</span>
-                  <p className="mt-3 text-sm font-semibold text-text-primary">{step.title}</p>
-                  <p className="mt-1 text-xs leading-5 text-text-muted">{step.description}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        }
-      />
-
-      <SectionShell tone="white" spacing="compact">
-        <div className="grid gap-6 lg:grid-cols-[0.92fr_1.08fr]">
-          <article className="rounded-[1.55rem] border border-slate-200 bg-white p-6 shadow-[0_18px_36px_rgba(15,23,42,0.05)]">
-            <p className="text-xs font-bold uppercase tracking-[0.18em] text-blue-700">
-              Direct answer
+    <main className="services-system">
+      <section className="services-hero" aria-labelledby="services-title">
+        <div className="services-container services-hero-grid">
+          <div>
+            <p className="services-kicker">Premium web design services</p>
+            <h1 id="services-title">Website services for businesses ready to build, grow, and scale.</h1>
+            <p>
+              Web Growth combines design, SEO foundations, conversion strategy, analytics, automation, and support into
+              a practical service system for business websites.
             </p>
-            <h2 className="mt-4 text-4xl font-semibold tracking-[-0.05em] text-slate-950">
-              What do Web Growth services actually help with?
-            </h2>
-            <p className="mt-4 text-base leading-8 text-slate-600">
-              Web Growth services help businesses build stronger websites, improve
-              search visibility, fix conversion blockers, and install the tracking,
-              automation, and support systems needed to grow and monetize more
-              reliably.
-            </p>
-            <p className="mt-4 text-sm leading-7 text-slate-600">
-              This page covers both the visible website work and the growth
-              infrastructure behind it, so buyers can move from diagnosis to
-              implementation without piecing together separate providers.
-            </p>
-          </article>
-
-          <article className="rounded-[1.55rem] border border-slate-200 bg-slate-50 p-6 shadow-[0_18px_36px_rgba(15,23,42,0.04)]">
-            <p className="text-xs font-bold uppercase tracking-[0.18em] text-blue-700">
-              Growth infrastructure
-            </p>
-            <div className="mt-5 grid gap-3 sm:grid-cols-2">
-              {growthInfrastructureServices.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="rounded-[1.1rem] border border-slate-200 bg-white px-4 py-4 transition hover:border-blue-200 hover:text-blue-700"
-                >
-                  <h3 className="text-sm font-semibold text-slate-950">{item.title}</h3>
-                  <p className="mt-2 text-sm leading-6 text-slate-600">{item.text}</p>
-                </Link>
-              ))}
-            </div>
-          </article>
-        </div>
-      </SectionShell>
-
-      <SectionShell tone="dark" spacing="default">
-        <div className="border-y border-border-hairline py-10">
-          <p className="text-xs font-bold uppercase tracking-[0.18em] text-accent-gold">
-            Our core services
-          </p>
-          <h2 className="mt-4 max-w-3xl font-display text-4xl font-normal tracking-[-0.04em] text-text-primary md:text-[3.2rem]">
-            Everything Your Website Needs to Grow
-          </h2>
-
-          <SectionReveal className="mt-10 grid gap-px overflow-hidden rounded-2xl border border-border-hairline bg-border-hairline lg:grid-cols-3">
-            {coreServices.map((service, index) => (
-              <Link
-                key={service.slug}
-                href={service.slug}
-                className="group bg-bg-ink p-6 transition hover:bg-white/[0.04] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-accent-gold"
-              >
-                <div className="flex items-start gap-3">
-                  <IconBadge tone="blue" className="h-11 w-11 rounded-[1rem]">
-                    {pickServiceIcon(service.title)}
-                  </IconBadge>
-                  <div>
-                    <p className="text-xs font-bold uppercase tracking-[0.16em] text-slate-500">
-                      {pickServiceLabel(index)}
-                    </p>
-                    <h3 className="mt-1 text-[1.1rem] font-semibold tracking-[-0.03em] text-text-primary">
-                      {service.title}
-                    </h3>
-                  </div>
-                </div>
-
-                <p className="mt-4 text-sm leading-7 text-text-muted">{service.short}</p>
-                <p className="mt-4 text-sm font-semibold text-accent-gold">Explore service -&gt;</p>
+            <div className="services-actions">
+              <Link href="/contact/" className="services-button services-button-primary">
+                Request a Website Review <Arrow />
               </Link>
-            ))}
-          </SectionReveal>
-
-          <div className="mt-7 text-center">
-            <Link
-              href="/services/"
-              className="inline-flex min-h-11 items-center justify-center rounded-xl px-5 text-sm font-semibold text-blue-700 transition hover:text-blue-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-700"
-            >
-              See All Services -&gt;
-            </Link>
-          </div>
-        </div>
-      </SectionShell>
-
-      <SectionShell tone="canvas" spacing="compact">
-        <p className="text-center text-xs font-bold uppercase tracking-[0.18em] text-blue-700">
-          Our process. Your outcomes.
-        </p>
-        <h2 className="mt-4 text-center text-4xl font-semibold tracking-[-0.06em] text-slate-950 md:text-[3.1rem]">
-          A Growth System, Not Just a Checklist
-        </h2>
-        <p className="mx-auto mt-4 max-w-3xl text-center text-lg leading-8 text-slate-600">
-          We follow a proven framework that turns your website into your strongest
-          growth asset.
-        </p>
-
-        <div className="mt-10 grid gap-4 lg:grid-cols-6">
-          {processSteps.map((step) => (
-            <div key={step.label} className="relative rounded-[1.3rem] bg-transparent p-2 text-center">
-              <IconBadge tone="blue" shape="circle" className="mx-auto h-11 w-11">
-                {step.icon}
-              </IconBadge>
-              <p className="mt-4 text-xs font-bold uppercase tracking-[0.18em] text-blue-700">
-                {step.label}
-              </p>
-              <h3 className="mt-2 text-lg font-semibold text-slate-950">{step.title}</h3>
-              <p className="mt-2 text-sm leading-6 text-slate-600">{step.text}</p>
-            </div>
-          ))}
-        </div>
-      </SectionShell>
-
-      <SectionShell tone="canvas" spacing="compact">
-        <div className="overflow-hidden rounded-[1.9rem] border border-blue-950/60 bg-[radial-gradient(circle_at_86%_18%,rgba(108,84,255,0.42),transparent_24%),linear-gradient(135deg,#091226_0%,#0c1631_48%,#0b1230_100%)] px-6 py-7 shadow-[0_26px_70px_rgba(6,14,35,0.28)] md:px-8">
-          <div className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr] lg:items-center">
-            <div>
-              <p className="text-xs font-bold uppercase tracking-[0.18em] text-blue-200">
-                Proof built on real implementation
-              </p>
-              <div className="mt-6 grid gap-4 md:grid-cols-4">
-                {[
-                  ["Live website launches", "Across service, redesign, and local business projects."],
-                  ["SEO-ready structure", "Built around performance, content, and indexation discipline."],
-                  ["Conversion clarity", "Offers, trust, and user journeys designed to work together."],
-                  ["Long-term support", "Ongoing care, updates, tracking, and optimization where needed."],
-                ].map(([title, text]) => (
-                  <div key={title} className="rounded-[1.25rem] border border-white/10 bg-white/[0.04] p-4 text-white">
-                    <p className="text-lg font-semibold tracking-[-0.03em]">{title}</p>
-                    <p className="mt-2 text-sm leading-6 text-slate-300">{text}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="rounded-[1.6rem] border border-white/10 bg-white/[0.04] p-4">
-              <div className="relative min-h-[18rem]">
-                <ProofDeviceMockup />
-              </div>
-              <div className="mt-4 rounded-[1.2rem] border border-white/10 bg-white/[0.04] p-4 text-white">
-                <p className="text-sm font-semibold">Featured live project</p>
-                <p className="mt-2 text-xl font-semibold tracking-[-0.03em]">J Luxe Medical Aesthetics</p>
-                <p className="mt-2 text-sm leading-6 text-slate-300">
-                  Premium treatment presentation, calmer trust signals, and a clearer
-                  consultation path across devices.
-                </p>
-                <Link href="/portfolio/" className="mt-3 inline-flex text-sm font-semibold text-blue-200">
-                  View case study -&gt;
-                </Link>
-              </div>
+              <Link href="/portfolio/" className="services-button services-button-secondary">
+                View Case Studies
+              </Link>
             </div>
           </div>
-        </div>
-      </SectionShell>
-
-      <SectionShell tone="canvas" spacing="compact">
-        <p className="text-center text-xs font-bold uppercase tracking-[0.18em] text-blue-700">
-          Learn. Apply. Grow.
-        </p>
-        <h2 className="mt-4 text-center text-4xl font-semibold tracking-[-0.06em] text-slate-950 md:text-[3.1rem]">
-          Resources to Help You Win Online
-        </h2>
-        <p className="mx-auto mt-4 max-w-3xl text-center text-lg leading-8 text-slate-600">
-          Step-by-step strategies, guides, and playbooks from our Academy.
-        </p>
-
-        <div className="mt-8 grid gap-4 lg:grid-cols-4">
-          {resources.map((post, index) => (
-            <Link
-              key={post.slug}
-              href={`/blog/${post.slug}/`}
-              className="group rounded-[1.45rem] border border-slate-200 bg-white p-4 shadow-[0_14px_30px_rgba(15,23,42,0.04)] transition hover:-translate-y-0.5 hover:shadow-[0_20px_38px_rgba(79,107,255,0.08)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-700"
-            >
-              <div
-                className={[
-                  "h-28 rounded-[1.1rem]",
-                  index === 0
-                    ? "bg-[linear-gradient(135deg,#2647ff_0%,#4f6bff_40%,#7c5cff_100%)]"
-                    : index === 1
-                      ? "bg-[linear-gradient(135deg,#0f172a_0%,#1e293b_60%,#334155_100%)]"
-                      : index === 2
-                        ? "bg-[linear-gradient(135deg,#f3f4f6_0%,#ffffff_52%,#eef4ff_100%)]"
-                        : "bg-[linear-gradient(135deg,#111827_0%,#1d4ed8_80%,#312e81_100%)]",
-                ].join(" ")}
+          {featuredService ? (
+            <div className="services-hero-feature">
+              <Image
+                src={featuredService.image}
+                alt={`${featuredService.title} service visual`}
+                width={1100}
+                height={820}
+                quality={75}
+                priority
               />
-              <p className="mt-4 text-[11px] font-bold uppercase tracking-[0.18em] text-blue-700">
-                {post.category}
-              </p>
-              <h3 className="mt-2 text-[1.15rem] font-semibold leading-6 tracking-[-0.03em] text-slate-950">
-                {post.title}
-              </h3>
-              <p className="mt-2 text-sm leading-6 text-slate-600">{post.excerpt}</p>
-              <p className="mt-4 text-sm font-semibold text-blue-700">
-                {index === 1 ? "View Tutorial" : index === 3 ? "View Case Study" : "Read Guide"} -&gt;
-              </p>
-            </Link>
-          ))}
+              <div>
+                <span>Featured service</span>
+                <strong>{featuredService.title}</strong>
+                <small>{featuredService.bullets.slice(0, 3).join(" / ")}</small>
+              </div>
+            </div>
+          ) : null}
         </div>
+      </section>
 
-        <div className="mt-7 text-center">
-          <Link
-            href="/blog/"
-            className="inline-flex min-h-11 items-center justify-center rounded-xl px-5 text-sm font-semibold text-blue-700 transition hover:text-blue-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-700"
-          >
-            Explore All Academy Resources -&gt;
+      <section className="services-direct-answer" aria-labelledby="services-answer-title">
+        <div className="services-container services-answer-grid">
+          <article>
+            <p className="services-kicker">Direct answer</p>
+            <h2 id="services-answer-title">What do Web Growth services actually help with?</h2>
+          </article>
+          <div>
+            <p>
+              Web Growth services help businesses create stronger websites, improve search visibility, fix conversion
+              blockers, measure what matters, and install the technical systems needed to grow online.
+            </p>
+            <div className="services-answer-points">
+              <span>Credibility</span>
+              <span>Traffic</span>
+              <span>Conversion</span>
+              <span>Revenue systems</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="services-section" aria-labelledby="core-services-title">
+        <div className="services-container services-section-heading">
+          <div>
+            <p className="services-kicker">Core website services</p>
+            <h2 id="core-services-title">The visible website work that shapes first impressions.</h2>
+          </div>
+          <Link href="/contact/" className="services-text-link">
+            Discuss your project <Arrow />
           </Link>
         </div>
-      </SectionShell>
+        <div className="services-container services-core-layout">
+          {coreServices.map((service, index) => (
+            <ServicePanel service={service} index={index} key={service.slug} />
+          ))}
+        </div>
+      </section>
 
-      <SectionShell tone="canvas" spacing="compact">
-        <p className="text-center text-xs font-bold uppercase tracking-[0.18em] text-blue-700">
-          Common questions
-        </p>
-        <h2 className="mt-4 text-center text-4xl font-semibold tracking-[-0.05em] text-slate-950">
-          Quick Answers to Common Questions
-        </h2>
+      <section className="services-dark-band" aria-labelledby="infrastructure-title">
+        <div className="services-container services-infrastructure-grid">
+          <div>
+            <p className="services-kicker">Growth infrastructure</p>
+            <h2 id="infrastructure-title">The systems behind a website that keeps improving.</h2>
+            <p>
+              These services support lead capture, measurement, booking, follow-up, and launch readiness after the main
+              website structure is in place.
+            </p>
+          </div>
+          <div className="services-infrastructure-list">
+            {infrastructureServices.map((service) => (
+              <Link href={normalizeHref(service.slug)} key={service.slug}>
+                <span>{service.title}</span>
+                <small>{service.short}</small>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
 
-        <div className="mt-8 grid gap-4 lg:grid-cols-2">
+      <section className="services-section services-process" aria-labelledby="service-process-title">
+        <div className="services-container services-section-heading">
+          <div>
+            <p className="services-kicker">Process</p>
+            <h2 id="service-process-title">A premium service system, not disconnected tasks.</h2>
+          </div>
+        </div>
+        <div className="services-container services-process-grid">
+          {processSteps.map(([number, title, text]) => (
+            <article key={title}>
+              <span>{number}</span>
+              <h3>{title}</h3>
+              <p>{text}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="services-proof" aria-labelledby="services-proof-title">
+        <div className="services-container services-proof-grid">
+          <div>
+            <p className="services-kicker">Proof from real implementation</p>
+            <h2 id="services-proof-title">Services are tied to real project constraints.</h2>
+            <p>{featuredCase.summary}</p>
+            <Link href="/portfolio/" className="services-button services-button-secondary">
+              View Case Studies <Arrow />
+            </Link>
+          </div>
+          <Image
+            src={featuredCase.imageUrl}
+            alt={featuredCase.imageAlt}
+            width={1500}
+            height={1000}
+            quality={75}
+            sizes="(max-width: 900px) 100vw, 54vw"
+          />
+        </div>
+      </section>
+
+      <section className="services-section" aria-labelledby="services-academy-title">
+        <div className="services-container services-section-heading">
+          <div>
+            <p className="services-kicker">Academy resources</p>
+            <h2 id="services-academy-title">Learn before you invest in implementation.</h2>
+          </div>
+          <Link href="/blog/" className="services-text-link">
+            Explore Academy <Arrow />
+          </Link>
+        </div>
+        <div className="services-container services-resource-grid">
+          {resources.map((post) => (
+            <Link href={`/blog/${post.slug}/`} key={post.slug}>
+              <span>{String(post.category)}</span>
+              <strong>{post.title}</strong>
+              <small>{post.excerpt}</small>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      <section className="services-section services-faq" aria-labelledby="services-faq-title">
+        <div className="services-container services-section-heading">
+          <div>
+            <p className="services-kicker">Common questions</p>
+            <h2 id="services-faq-title">Clear answers before you choose a service.</h2>
+          </div>
+        </div>
+        <div className="services-container services-faq-grid">
           {faqItems.map((item) => (
-            <details
-              key={item.question}
-              className="group rounded-[1.2rem] border border-slate-200 bg-white px-5 py-4 shadow-[0_12px_24px_rgba(15,23,42,0.04)]"
-            >
-              <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-base font-semibold text-slate-950">
-                <span>{item.question}</span>
-                <span className="text-blue-700 transition group-open:rotate-45">+</span>
-              </summary>
-              <p className="mt-4 text-sm leading-7 text-slate-600">{item.answer}</p>
+            <details key={item.question}>
+              <summary>{item.question}</summary>
+              <p>{item.answer}</p>
             </details>
           ))}
         </div>
-      </SectionShell>
+      </section>
 
-      <SectionShell tone="canvas" spacing="compact">
-        <div className="overflow-hidden rounded-[1.8rem] border border-blue-200 bg-[radial-gradient(circle_at_14%_24%,rgba(59,130,246,0.22),transparent_24%),radial-gradient(circle_at_92%_18%,rgba(124,92,255,0.22),transparent_22%),linear-gradient(135deg,#2f53ff_0%,#4f6bff_45%,#7c3aed_100%)] px-8 py-9 shadow-[0_26px_70px_rgba(79,107,255,0.18)]">
-          <div className="grid gap-6 lg:grid-cols-[1fr_auto] lg:items-center">
-            <div>
-              <h2 className="max-w-2xl text-[2.2rem] font-semibold tracking-[-0.05em] text-white">
-                Ready to Build, Grow & Monetize Your Website?
-              </h2>
-              <p className="mt-3 max-w-xl text-base leading-8 text-blue-100">
-                Get a free website review and a custom growth plan built for your
-                goals.
-              </p>
-            </div>
-
-            <div className="flex flex-col items-start gap-3 rounded-[1.3rem] bg-white/12 p-4 backdrop-blur">
-              <Link
-                href="/contact/"
-                className="inline-flex min-h-12 items-center justify-center rounded-xl bg-white px-6 text-sm font-semibold text-blue-900 transition hover:bg-blue-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
-              >
-                Start My Website Review -&gt;
-              </Link>
-              <p className="text-sm text-blue-100">
-                No obligation. Just actionable insights.
-              </p>
-            </div>
+      <section className="services-final-cta">
+        <div className="services-container services-final-inner">
+          <div>
+            <p className="services-kicker">Next step</p>
+            <h2>Need the right service path for your website?</h2>
+          </div>
+          <div>
+            <p>Tell Web Growth what is not working and what the website needs to help the business do next.</p>
+            <Link href="/contact/" className="services-button services-button-primary">
+              Start Your Website Review <Arrow />
+            </Link>
           </div>
         </div>
-      </SectionShell>
+      </section>
     </main>
   );
 }

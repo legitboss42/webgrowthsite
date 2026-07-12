@@ -9,14 +9,11 @@ import {
   ConvertIcon,
   GrowthChartIcon,
   IconBadge,
+  MailIcon,
   SearchIcon,
+  TargetIcon,
 } from "@/components/home/HomeIcons";
-import SectionShell from "@/components/home/SectionShell";
-import CinematicHero from "@/components/platform/CinematicHero";
-import {
-  buildPageMetadata,
-  buildProfessionalServiceSchema,
-} from "@/lib/seo";
+import { buildPageMetadata, buildProfessionalServiceSchema } from "@/lib/seo";
 import {
   BUSINESS_PHONE_DISPLAY,
   CONTACT_EMAIL,
@@ -42,99 +39,88 @@ export const metadata = buildPageMetadata({
   ],
 });
 
-const reasons = [
+const enquiryReasons = [
   {
-    title: "Website Review",
-    text: "Get a comprehensive review of your website and growth opportunities.",
+    title: "The site is not earning trust",
+    text: "The business may be credible, but the current website does not make that clear fast enough.",
     icon: <SearchIcon />,
   },
   {
-    title: "Growth Strategy",
-    text: "Discuss your goals and get a custom roadmap to grow traffic, leads, and revenue.",
-    icon: <GrowthChartIcon />,
+    title: "The offer needs a stronger path",
+    text: "Visitors need clearer service pages, better CTAs, and a more confident enquiry journey.",
+    icon: <TargetIcon />,
   },
   {
-    title: "Project Enquiry",
-    text: "Planning a redesign, migration, or new build? Let's make it a success.",
+    title: "The build needs senior execution",
+    text: "A redesign, migration, landing page, or new website needs strategy and implementation to stay connected.",
     icon: <BuildIcon />,
   },
   {
-    title: "Partnership",
-    text: "Agencies, SaaS, and brands. We love building strategic partnerships.",
-    icon: <ConvertIcon />,
-  },
-] as const;
-
-const popularStartingPoints = [
-  {
-    href: "/services/website-audit/",
-    title: "Website Audit",
-    description:
-      "Start here when you need to find the main trust, conversion, SEO, or performance blockers first.",
-  },
-  {
-    href: "/services/website-redesign/",
-    title: "Website Redesign",
-    description:
-      "Start here when the current site feels outdated, unclear, or too weak to support serious enquiries.",
-  },
-  {
-    href: "/services/search-engine-optimisation/",
-    title: "SEO Service",
-    description:
-      "Start here when you need stronger search visibility, internal linking, and better commercial page targeting.",
-  },
-  {
-    href: "/blog/small-business-website-seo-checklist/",
-    title: "SEO Checklist Guide",
-    description:
-      "Start here if you want a practical next read before deciding whether the problem is traffic, trust, or conversion.",
+    title: "Growth systems are missing",
+    text: "SEO, tracking, speed, content structure, and automation need to support the website after launch.",
+    icon: <GrowthChartIcon />,
   },
 ] as const;
 
 const nextSteps = [
   {
-    number: "1",
-    title: "We review your message",
-    text: "Our team reviews your information and website.",
-    meta: "Within 1 business day",
-    icon: <SearchIcon />,
+    number: "01",
+    title: "Send the context",
+    text: "Share the website, business type, main issue, and what you want the website to help achieve.",
+    icon: <MailIcon />,
   },
   {
-    number: "2",
-    title: "We analyse & respond",
-    text: "You will receive tailored insights and recommendations.",
-    meta: "1-2 days",
+    number: "02",
+    title: "Web Growth reviews the signal",
+    text: "The response focuses on the clearest blockers across trust, clarity, SEO, speed, and enquiry flow.",
     icon: <AuditIcon />,
   },
   {
-    number: "3",
-    title: "We hop on a call",
-    text: "Optional strategy call to discuss opportunities in detail.",
-    meta: "15-30 minutes",
-    icon: <GrowthChartIcon />,
+    number: "03",
+    title: "Choose the right next move",
+    text: "That may be an audit, redesign, landing page, SEO improvement, or a more complete website build.",
+    icon: <ConvertIcon />,
+  },
+] as const;
+
+const startingPoints = [
+  {
+    href: "/services/website-audit/",
+    title: "Website Audit",
+    text: "Best when you need the main trust, SEO, conversion, and performance blockers identified first.",
   },
   {
-    number: "4",
-    title: "We build your roadmap",
-    text: "Clear next steps to grow your website and your business.",
-    meta: "Actionable plan",
-    icon: <BuildIcon />,
+    href: "/services/business-website-design/",
+    title: "Business Website Design",
+    text: "Best when the current site is missing the structure and polish needed to represent the business well.",
+  },
+  {
+    href: "/services/website-redesign/",
+    title: "Website Redesign",
+    text: "Best when an existing website needs a stronger premium presentation and better conversion path.",
+  },
+  {
+    href: "/services/search-engine-optimisation/",
+    title: "SEO Setup",
+    text: "Best when discoverability, technical SEO, internal linking, and commercial search pages need attention.",
   },
 ] as const;
 
 const faqItems = [
   {
-    question: "How long does a website review take?",
-    answer: "Most reviews are delivered within 1-2 business days.",
+    question: "Do I need a complete project brief before contacting Web Growth?",
+    answer:
+      "No. A website link, business context, and the main problem are enough to start the conversation.",
   },
   {
-    question: "Is there a cost for the review?",
-    answer: "No. Our website review is completely free.",
+    question: "Can I ask about a specific service?",
+    answer:
+      "Yes. Use the service interest field or include the service in your message so the response can focus on the right scope.",
   },
   {
-    question: "Do you work with businesses outside my niche?",
-    answer: "Yes, we work with a wide range of industries.",
+    question: "Is a website review a guaranteed result or ranking promise?",
+    answer:
+      "No. It is a practical review of visible website issues and possible next steps, not a guarantee of traffic, rankings, leads, or revenue.",
   },
 ] as const;
 
@@ -148,213 +134,164 @@ export default function ContactPage() {
     <>
       <StructuredData data={buildProfessionalServiceSchema("/contact/", pageDescription)} />
 
-      <main className="bg-[#f7f8fc] text-slate-950">
-        <CinematicHero
-          eyebrow="Contact / A direct route to clarity"
-          title={<>Request a Website Review. <span className="text-accent-gold">We&apos;ll find the next move.</span></>}
-          description="Request a review, ask a focused question, or discuss implementation. You do not need a polished brief; useful context is enough."
-          pageType="contact"
-          variant="split"
-          primaryAction={{ label: "Start Your Website Review", href: "#contact-form", ctaName: "start_website_review", destination: "contact_form" }}
-          secondaryAction={{ label: "See Case Studies", href: "/portfolio/", ctaName: "see_case_studies", destination: "portfolio" }}
-          aside={
-            <div className="border-l border-border-hairline pl-6 md:pl-9">
-              <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-accent-teal">What happens next</p>
-              <ol className="mt-6 space-y-5">
-                {nextSteps.slice(0, 3).map((step) => (
-                  <li key={step.number} className="grid grid-cols-[2rem_1fr] gap-4 border-b border-border-hairline pb-5">
-                    <span className="font-display text-xl text-accent-gold">0{step.number}</span>
-                    <div><p className="text-sm font-semibold text-text-primary">{step.title}</p><p className="mt-1 text-xs leading-5 text-text-muted">{step.meta}</p></div>
-                  </li>
-                ))}
-              </ol>
-              <p className="mt-6 text-sm text-text-muted">Email: <a className="text-accent-gold" href={CONTACT_EMAIL_HREF}>{CONTACT_EMAIL}</a><br />Phone: {BUSINESS_PHONE_DISPLAY}</p>
-            </div>
-          }
-        />
-
-        <SectionShell tone="dark" spacing="compact">
-          <div className="grid gap-8 lg:grid-cols-[1.25fr_0.75fr] lg:items-start">
-            <Suspense
-              fallback={
-                <div className="rounded-[2rem] border border-slate-200 bg-white p-6 text-slate-600 shadow-[0_24px_60px_rgba(15,23,42,0.10)]">
-                  Loading form...
-                </div>
-              }
-            >
-              <ContactClient directDeliveryConfigured={directDeliveryConfigured} />
-            </Suspense>
-
-            <div className="space-y-5">
-              <article className="rounded-[1.6rem] border border-slate-200 bg-white p-6 shadow-[0_14px_30px_rgba(15,23,42,0.04)]">
-                <h2 className="text-3xl font-semibold tracking-[-0.04em] text-slate-950">
-                  Good reasons to reach out
-                </h2>
-                <div className="mt-6 space-y-5">
-                  {reasons.map((item) => (
-                    <div key={item.title} className="flex gap-4">
-                      <IconBadge tone="blue" className="h-10 w-10 rounded-[1rem] shrink-0">
-                        {item.icon}
-                      </IconBadge>
-                      <div>
-                        <p className="text-sm font-semibold text-slate-950">{item.title}</p>
-                        <p className="mt-1 text-sm leading-6 text-slate-600">{item.text}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </article>
-
-              <article className="rounded-[1.6rem] border border-slate-200 bg-white p-6 shadow-[0_14px_30px_rgba(15,23,42,0.04)]">
-                <h2 className="text-2xl font-semibold tracking-[-0.04em] text-slate-950">
-                  Popular Starting Points
-                </h2>
-                <p className="mt-3 text-sm leading-7 text-slate-600">
-                  If you already know the type of help you need, start with the page that best matches the problem.
-                </p>
-                <div className="mt-6 space-y-4">
-                  {popularStartingPoints.map((item) => (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      className="block rounded-[1.1rem] border border-slate-200 bg-slate-50 px-4 py-4 transition hover:border-blue-200 hover:bg-blue-50"
-                    >
-                      <p className="text-sm font-semibold text-slate-950">{item.title}</p>
-                      <p className="mt-2 text-sm leading-6 text-slate-600">{item.description}</p>
-                    </Link>
-                  ))}
-                </div>
-              </article>
-
-              <article className="rounded-[1.6rem] border border-blue-950/60 bg-[radial-gradient(circle_at_88%_14%,rgba(108,84,255,0.42),transparent_24%),linear-gradient(135deg,#091226_0%,#0c1631_48%,#0b1230_100%)] p-6 text-white shadow-[0_26px_70px_rgba(6,14,35,0.28)]">
-                <h2 className="text-3xl font-semibold tracking-[-0.04em]">Need a quick answer?</h2>
-                <p className="mt-3 text-sm leading-7 text-slate-300">
-                  Chat with our growth team on WhatsApp for faster support.
-                </p>
-                <p className="mt-3 text-sm leading-7 text-slate-300">
-                  Response time: usually within a few hours.
-                </p>
+      <main className="contact-page">
+        <section className="contact-hero">
+          <div className="contact-container contact-hero-grid">
+            <div>
+              <p className="contact-kicker">Contact Web Growth</p>
+              <h1>Request a Website Review. Start with the website problem.</h1>
+              <p>
+                Request a website review, ask a focused project question, or discuss implementation.
+                You do not need a polished brief. Clear business context is enough.
+              </p>
+              <div className="contact-actions">
+                <Link className="contact-button contact-button-primary" href="#contact-form">
+                  Start Your Website Review
+                </Link>
                 <TrackedLink
                   href={whatsappHref}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="mt-6 inline-flex min-h-12 items-center justify-center rounded-xl border border-white/20 bg-white/10 px-5 text-sm font-semibold text-white transition hover:bg-white/16"
+                  className="contact-button contact-button-secondary"
                   ctaName="whatsapp"
-                  ctaLocation="contact_whatsapp_section"
+                  ctaLocation="contact_hero"
                   destination="whatsapp"
                   pageType="contact"
                   offerType="website_review"
                 >
-                  Message us on WhatsApp
+                  Message on WhatsApp
                 </TrackedLink>
-                <div className="mt-5 space-y-2 text-sm text-slate-300">
-                  <p>
-                    Email:{" "}
-                    <a href={CONTACT_EMAIL_HREF} className="text-blue-200 hover:text-white">
-                      {CONTACT_EMAIL}
-                    </a>
-                  </p>
-                  <p>
-                    WhatsApp:{" "}
-                    <a href={whatsappHref} target="_blank" rel="noreferrer" className="text-blue-200 hover:text-white">
-                      {BUSINESS_PHONE_DISPLAY}
-                    </a>
-                  </p>
-                </div>
-              </article>
+              </div>
             </div>
+
+            <aside className="contact-hero-panel" aria-label="Contact details and response process">
+              <p className="contact-kicker">Direct contact</p>
+              <div className="contact-detail-list">
+                <a href={CONTACT_EMAIL_HREF}>
+                  <span>Email</span>
+                  <strong>{CONTACT_EMAIL}</strong>
+                </a>
+                <a href={whatsappHref} target="_blank" rel="noopener noreferrer">
+                  <span>WhatsApp</span>
+                  <strong>{BUSINESS_PHONE_DISPLAY}</strong>
+                </a>
+              </div>
+              <ol>
+                {nextSteps.map((step) => (
+                  <li key={step.number}>
+                    <span>{step.number}</span>
+                    <div>
+                      <strong>{step.title}</strong>
+                      <small>{step.text}</small>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            </aside>
           </div>
-        </SectionShell>
+        </section>
 
-        <SectionShell tone="canvas" spacing="compact">
-          <p className="text-center text-xs font-bold uppercase tracking-[0.18em] text-blue-700">
-            Our process
-          </p>
-          <h2 className="mt-4 text-center text-4xl font-semibold tracking-[-0.05em] text-slate-950">
-            What happens next?
-          </h2>
+        <section className="contact-intake">
+          <div className="contact-container contact-intake-grid">
+            <Suspense fallback={<div className="contact-form-loading">Loading form...</div>}>
+              <ContactClient directDeliveryConfigured={directDeliveryConfigured} />
+            </Suspense>
 
-          <div className="mt-8 grid gap-4 lg:grid-cols-4">
-            {nextSteps.map((step) => (
-              <article
-                key={step.number}
-                className="rounded-[1.35rem] border border-slate-200 bg-white p-5 shadow-[0_14px_30px_rgba(15,23,42,0.04)]"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-bold text-blue-700">{step.number}</span>
-                  <IconBadge tone="blue" className="h-10 w-10 rounded-[1rem]">
-                    {step.icon}
-                  </IconBadge>
-                </div>
-                <h3 className="mt-5 text-[1.2rem] font-semibold tracking-[-0.03em] text-slate-950">
-                  {step.title}
-                </h3>
-                <p className="mt-3 text-sm leading-7 text-slate-600">{step.text}</p>
-                <p className="mt-5 text-sm font-semibold text-blue-700">{step.meta}</p>
-              </article>
-            ))}
-          </div>
-        </SectionShell>
-
-        <SectionShell tone="canvas" spacing="compact">
-          <div className="flex items-end justify-between gap-4">
-            <div>
-              <p className="text-xs font-bold uppercase tracking-[0.18em] text-blue-700">
-                Common questions
+            <aside className="contact-side">
+              <p className="contact-kicker">Best use of this form</p>
+              <h2>Send enough context to make the response useful.</h2>
+              <p>
+                The most useful enquiries include the website URL, what feels weak, the type of
+                service you are considering, and the business outcome you want the site to support.
               </p>
-              <h2 className="mt-3 text-4xl font-semibold tracking-[-0.05em] text-slate-950">
-                Have a different question?
-              </h2>
-              <p className="mt-3 text-sm leading-6 text-slate-600">
-                Here are quick answers to what we hear most.
-              </p>
-            </div>
-            <Link
-              href="/faq/"
-              className="inline-flex min-h-11 items-center rounded-xl text-sm font-semibold text-blue-700 transition hover:text-blue-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-700"
-            >
-              View all FAQs -&gt;
-            </Link>
-          </div>
-
-          <div className="mt-7 grid gap-4 lg:grid-cols-3">
-            {faqItems.map((item) => (
-              <details
-                key={item.question}
-                className="group rounded-[1.2rem] border border-slate-200 bg-white px-5 py-4 shadow-[0_12px_24px_rgba(15,23,42,0.04)]"
-              >
-                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-base font-semibold text-slate-950">
-                  <span>{item.question}</span>
-                  <span className="text-blue-700 transition group-open:rotate-45">+</span>
-                </summary>
-                <p className="mt-4 text-sm leading-7 text-slate-600">{item.answer}</p>
-              </details>
-            ))}
-          </div>
-        </SectionShell>
-
-        <SectionShell tone="canvas" spacing="compact">
-          <div className="overflow-hidden rounded-[1.8rem] border border-blue-950/60 bg-[radial-gradient(circle_at_88%_14%,rgba(108,84,255,0.42),transparent_24%),linear-gradient(135deg,#091226_0%,#0c1631_48%,#0b1230_100%)] px-8 py-9 shadow-[0_26px_70px_rgba(6,14,35,0.28)]">
-            <div className="grid gap-6 lg:grid-cols-[1fr_auto] lg:items-center">
-              <div>
-                <h2 className="max-w-2xl text-[2.2rem] font-semibold tracking-[-0.05em] text-white">
-                  Ready to grow your website the right way?
-                </h2>
-                <p className="mt-3 max-w-xl text-base leading-8 text-blue-100">
-                  Start with a free review and get a clear path to more traffic, leads,
-                  and revenue.
+              <div className="contact-side-note">
+                <span>No fake guarantees</span>
+                <p>
+                  Web Growth will not promise rankings, traffic, enquiries, or revenue from a form
+                  submission. The goal is to identify the next practical step.
                 </p>
               </div>
+            </aside>
+          </div>
+        </section>
 
-              <Link
-                href="#contact-form"
-                className="inline-flex min-h-12 items-center justify-center rounded-xl bg-white px-6 text-sm font-semibold text-blue-900 transition hover:bg-blue-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
-              >
-                Start With a Website Review
-              </Link>
+        <section className="contact-reasons">
+          <div className="contact-container">
+            <div className="contact-section-heading">
+              <p className="contact-kicker">When to enquire</p>
+              <h2>Useful reasons to start a conversation.</h2>
+              <p>
+                Web Growth is strongest when the website has to improve trust, search visibility,
+                conversion quality, and business presentation together.
+              </p>
+            </div>
+            <div className="contact-reason-grid">
+              {enquiryReasons.map((item) => (
+                <article key={item.title}>
+                  <IconBadge tone="blue" className="h-11 w-11">
+                    {item.icon}
+                  </IconBadge>
+                  <h3>{item.title}</h3>
+                  <p>{item.text}</p>
+                </article>
+              ))}
             </div>
           </div>
-        </SectionShell>
+        </section>
+
+        <section className="contact-starting">
+          <div className="contact-container contact-starting-grid">
+            <div>
+              <p className="contact-kicker">Starting points</p>
+              <h2>If you already know the issue, start with the closest service.</h2>
+            </div>
+            <div className="contact-link-list">
+              {startingPoints.map((item) => (
+                <Link key={item.href} href={item.href}>
+                  <span>{item.title}</span>
+                  <small>{item.text}</small>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="contact-faq">
+          <div className="contact-container">
+            <div className="contact-section-heading">
+              <p className="contact-kicker">Common questions</p>
+              <h2>Before you send the enquiry.</h2>
+              <Link href="/faq/">View all FAQs</Link>
+            </div>
+            <div className="contact-faq-grid">
+              {faqItems.map((item) => (
+                <details key={item.question}>
+                  <summary>
+                    <span>{item.question}</span>
+                    <b>+</b>
+                  </summary>
+                  <p>{item.answer}</p>
+                </details>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="contact-final">
+          <div className="contact-container contact-final-inner">
+            <div>
+              <p className="contact-kicker">Final trust message</p>
+              <h2>A better website starts with a clearer diagnosis.</h2>
+              <p>
+                Send the current state honestly. The reply can then focus on whether the right next
+                step is audit, rebuild, SEO, performance, conversion work, or a smaller fix first.
+              </p>
+            </div>
+            <Link className="contact-button contact-button-primary" href="#contact-form">
+              Start Your Website Review
+            </Link>
+          </div>
+        </section>
       </main>
     </>
   );

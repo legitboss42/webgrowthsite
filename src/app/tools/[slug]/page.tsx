@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import CinematicHero from "@/components/platform/CinematicHero";
 import { notFound } from "next/navigation";
 import ToolRenderer from "@/components/tools/ToolRenderer";
-import SectionShell from "@/components/home/SectionShell";
 import StructuredData from "@/components/StructuredData";
 import { getPublicTool, PUBLIC_TOOLS } from "@/lib/tools";
 import { buildBreadcrumbSchema, buildPageMetadata } from "@/lib/seo";
@@ -205,91 +203,80 @@ export default async function ToolPage({
         ])}
       />
 
-      <main className="bg-[#f7f8fc] text-slate-950">
-        <CinematicHero
-          eyebrow={tool.eyebrow}
-          title={tool.title}
-          description={tool.intro}
-          pageType="tool_detail"
-          variant="utility"
-          primaryAction={{ label: "Use the tool", href: "#tool-workspace", ctaName: "use_tool", destination: "tool_workspace" }}
-          secondaryAction={{ label: "Back to Tools", href: "/tools/", ctaName: "back_to_tools", destination: "tools" }}
-          aside={
-            <div className="rounded-[1.75rem] border border-border-hairline bg-white/[0.04] p-5">
-              <div className="flex items-center justify-between border-b border-border-hairline pb-4">
-                <span className="text-xs uppercase tracking-[0.18em] text-text-muted">{tool.category}</span>
-                <span className="inline-flex items-center gap-2 text-xs font-semibold text-accent-gold"><span className="h-2 w-2 rounded-full bg-accent-gold" />Live</span>
+      <main className="tool-detail-system">
+        <section className="tool-detail-hero" aria-labelledby="tool-title">
+          <div className="tools-container tool-detail-hero-grid">
+            <div>
+              <Link href="/tools/" className="tool-detail-back"><span aria-hidden="true">←</span> All tools</Link>
+              <p className="tools-kicker">{tool.eyebrow}</p>
+              <h1 id="tool-title">{tool.title}</h1>
+              <p className="tool-detail-intro">{tool.intro}</p>
+              <div className="tools-actions">
+                <a href="#tool-workspace" className="tools-button tools-button-primary">Use the tool</a>
+                <Link href="/blog/" className="tools-button tools-button-secondary">Read the Academy</Link>
               </div>
-              <p className="mt-5 max-w-xl text-sm leading-7 text-text-muted">This utility is designed to create standalone value before a sales conversation. Your inputs stay central; the cinematic shell stays quiet.</p>
             </div>
-          }
-        />
+            <aside className="tool-detail-status" aria-label="Tool status and expectations">
+              <div><span>{tool.category}</span><strong><i /> Available now</strong></div>
+              <p>This utility provides practical guidance from the information you enter. It is not a guarantee of rankings, AdSense approval, pricing, or business results.</p>
+              <dl>
+                <div><dt>Access</dt><dd>Free</dd></div>
+                <div><dt>Route</dt><dd>Public</dd></div>
+                <div><dt>Status</dt><dd>Live</dd></div>
+              </dl>
+            </aside>
+          </div>
+        </section>
 
-        <SectionShell id="tool-workspace" tone="white" spacing="compact">
-          <ToolRenderer slug={tool.slug} />
-        </SectionShell>
+        <section id="tool-workspace" className="tool-workspace-section" aria-labelledby="tool-workspace-title">
+          <div className="tools-container">
+            <div className="tool-workspace-heading">
+              <div><p className="tools-kicker">Interactive workspace</p><h2 id="tool-workspace-title">Run your {tool.shortTitle.toLowerCase()}.</h2></div>
+              <p>Enter only the information requested below. Review the output as decision support, then verify important changes before publishing.</p>
+            </div>
+            <div className="tool-workspace-shell"><ToolRenderer slug={tool.slug} /></div>
+          </div>
+        </section>
 
         {support ? (
-          <SectionShell tone="canvas" spacing="compact">
-            <div className="grid gap-6 lg:grid-cols-[0.92fr_1.08fr]">
-              <article className="rounded-[1.7rem] border border-slate-200 bg-white p-6 shadow-[0_18px_45px_rgba(15,23,42,0.06)]">
-                <p className="text-xs font-bold uppercase tracking-[0.18em] text-blue-700">
-                  Best used when
-                </p>
-                <h2 className="mt-4 text-3xl font-semibold tracking-[-0.04em] text-slate-950">
-                  Use this tool to make a better decision before implementation
-                </h2>
-                <div className="mt-5 space-y-3">
+          <section className="tool-support-section" aria-labelledby="tool-support-title">
+            <div className="tools-container tool-support-grid">
+              <article className="tool-support-primary">
+                <p className="tools-kicker">Best used when</p>
+                <h2 id="tool-support-title">Use this tool to make a better decision before implementation.</h2>
+                <div className="tool-use-list">
                   {support.useCases.map((item) => (
-                    <div
-                      key={item}
-                      className="rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-4 text-sm leading-7 text-slate-600"
-                    >
-                      {item}
-                    </div>
+                    <div key={item}><span aria-hidden="true">✓</span>{item}</div>
                   ))}
                 </div>
               </article>
 
-              <div className="grid gap-6">
-                <article className="rounded-[1.7rem] border border-slate-200 bg-white p-6 shadow-[0_18px_45px_rgba(15,23,42,0.06)]">
-                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-blue-700">
-                    Related services
-                  </p>
-                  <div className="mt-5 space-y-3">
+              <div className="tool-support-links">
+                <article>
+                  <p className="tools-kicker">Related services</p>
+                  <div>
                     {support.services.map((item) => (
-                      <Link
-                        key={item.href}
-                        href={item.href}
-                        className="block rounded-2xl border border-slate-200 bg-slate-50/70 px-4 py-4 transition hover:border-blue-200 hover:bg-white"
-                      >
-                        <h3 className="text-base font-semibold text-slate-950">{item.label}</h3>
-                        <p className="mt-2 text-sm leading-7 text-slate-600">{item.description}</p>
+                      <Link key={item.href} href={item.href}>
+                        <h3>{item.label}</h3><p>{item.description}</p><small>Explore service →</small>
                       </Link>
                     ))}
                   </div>
                 </article>
 
-                <article className="rounded-[1.7rem] border border-slate-200 bg-white p-6 shadow-[0_18px_45px_rgba(15,23,42,0.06)]">
-                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-blue-700">
-                    Related Academy guides
-                  </p>
-                  <div className="mt-5 space-y-3">
+                <article>
+                  <p className="tools-kicker">Related Academy guides</p>
+                  <div>
                     {support.guides.map((item) => (
-                      <Link
-                        key={item.href}
-                        href={item.href}
-                        className="block rounded-2xl border border-slate-200 bg-slate-50/70 px-4 py-4 text-sm font-medium text-slate-700 transition hover:border-blue-200 hover:bg-white hover:text-blue-700"
-                      >
-                        {item.label}
-                      </Link>
+                      <Link key={item.href} href={item.href}>{item.label}<span aria-hidden="true">→</span></Link>
                     ))}
                   </div>
                 </article>
               </div>
             </div>
-          </SectionShell>
+          </section>
         ) : null}
+
+        <section className="tool-detail-final"><div className="tools-container tools-final-inner"><div><p className="tools-kicker">Need deeper context?</p><h2>Turn the result into a focused website improvement plan.</h2></div><Link href="/contact/" className="tools-button tools-button-primary">Request a website review</Link></div></section>
       </main>
     </>
   );

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import SectionShell from "@/components/home/SectionShell";
+import { CONTACT_EMAIL, CONTACT_EMAIL_HREF } from "@/lib/site";
 
 const sections = [
   {
@@ -40,54 +40,59 @@ const sections = [
 
 export default function EditorialPolicyClient() {
   return (
-    <main className="bg-[#f7f8fc] text-slate-950">
-      <SectionShell tone="canvas" spacing="hero">
-        <p className="inline-flex rounded-full border border-blue-100 bg-white/92 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.22em] text-blue-700 shadow-sm">
-          Editorial Policy
-        </p>
-        <h1 className="mt-5 max-w-4xl text-balance text-[3.6rem] font-semibold leading-[0.9] tracking-[-0.07em] text-slate-950 md:text-[4.6rem]">
-          How Web Growth plans, writes, reviews, updates, and stands behind Academy content.
-        </h1>
-        <p className="mt-4 max-w-3xl text-lg leading-8 text-slate-600">
-          The platform publishes practical content about website design, launch
-          strategy, technical SEO, conversion improvement, and digital
-          infrastructure. The editorial process is built for usefulness, trust, and
-          accountability.
-        </p>
-      </SectionShell>
-
-      <SectionShell tone="white" spacing="compact">
-        <div className="grid gap-5 md:grid-cols-2">
-          {sections.map((section) => (
-            <article key={section.title} className="rounded-[1.45rem] border border-slate-200 bg-white p-5 shadow-[0_14px_30px_rgba(15,23,42,0.04)]">
-              <h2 className="text-[1.2rem] font-semibold tracking-[-0.03em] text-slate-950">
-                {section.title}
-              </h2>
-              <p className="mt-4 text-sm leading-7 text-slate-600">{section.text}</p>
-            </article>
-          ))}
-        </div>
-      </SectionShell>
-
-      <SectionShell tone="canvas" spacing="compact">
-        <article className="rounded-[1.45rem] border border-slate-200 bg-white p-6 shadow-[0_14px_30px_rgba(15,23,42,0.04)]">
-          <h2 className="text-[1.2rem] font-semibold tracking-[-0.03em] text-slate-950">
-            Accountability and contact
-          </h2>
-          <p className="mt-4 text-sm leading-7 text-slate-600">
-            If you find an error, need clarification, or want to request a correction,
-            contact{" "}
-            <a href="mailto:admin@webgrowth.info" className="font-medium text-blue-700 hover:text-blue-800">
-              admin@webgrowth.info
-            </a>
-            . For project enquiries, use the{" "}
-            <Link href="/contact/" className="font-medium text-blue-700 hover:text-blue-800">
-              contact page
-            </Link>
-            .
+    <main className="trust-page">
+      <section className="trust-hero">
+        <div className="trust-container">
+          <p className="trust-kicker">Editorial Policy</p>
+          <h1>How Web Growth plans, writes, reviews, updates, and stands behind Academy content.</h1>
+          <p>
+            The platform publishes practical content about website design, launch strategy,
+            technical SEO, conversion improvement, and digital infrastructure. The editorial process
+            is built for usefulness, trust, and accountability.
           </p>
-        </article>
-      </SectionShell>
+        </div>
+      </section>
+
+      <section className="trust-content">
+        <div className="trust-container trust-layout">
+          <aside className="trust-sidebar" aria-label="Editorial policy summary">
+            <p className="trust-kicker">Publishing standard</p>
+            <h2>Useful, original, reviewed, and accountable.</h2>
+            <p>
+              Academy content must answer a real reader need and avoid unsupported claims, filler,
+              copied passages, and made-for-ads publishing patterns.
+            </p>
+          </aside>
+
+          <div className="trust-section-list">
+            {sections.map((section, index) => (
+              <article key={section.title} className="trust-section">
+                <span>{String(index + 1).padStart(2, "0")}</span>
+                <div>
+                  <h2>{section.title}</h2>
+                  <p>{section.text}</p>
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="trust-contact">
+        <div className="trust-container trust-contact-inner">
+          <div>
+            <p className="trust-kicker">Accountability and contact</p>
+            <h2>Found an error or need clarification?</h2>
+            <p>
+              Send correction requests to <a href={CONTACT_EMAIL_HREF}>{CONTACT_EMAIL}</a>. For
+              project enquiries, use the <Link href="/contact/">contact page</Link>.
+            </p>
+          </div>
+          <Link className="trust-button" href="/contact/">
+            Contact Web Growth
+          </Link>
+        </div>
+      </section>
     </main>
   );
 }

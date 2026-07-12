@@ -1,347 +1,250 @@
 import Image from "next/image";
 import Link from "next/link";
-import CinematicHero from "@/components/platform/CinematicHero";
-import SectionReveal from "@/components/platform/SectionReveal";
-import {
-  BuildIcon,
-  ConvertIcon,
-  GrowthChartIcon,
-  IconBadge,
-  OptimizeIcon,
-  PlanIcon,
-  SearchIcon,
-} from "@/components/home/HomeIcons";
-import SectionShell from "@/components/home/SectionShell";
-import { ProofDeviceMockup } from "@/components/home/HomepageVisuals";
 import { portfolioCases } from "@/lib/portfolioCases";
+import { getPost, getPublicPosts } from "@/lib/posts";
+import type { Post } from "@/lib/posts";
 
-const systemSteps = [
-  {
-    title: "Plan",
-    text: "Research, positioning, and site architecture",
-    icon: <PlanIcon />,
-  },
-  {
-    title: "Build",
-    text: "SEO-ready structure and content foundation",
-    icon: <BuildIcon />,
-  },
-  {
-    title: "Optimize",
-    text: "Technical, analytics, and UX refinement",
-    icon: <OptimizeIcon />,
-  },
-  {
-    title: "Convert",
-    text: "Turn traffic into revenue with CRO and offers",
-    icon: <ConvertIcon />,
-  },
+const processSteps = [
+  ["01", "Context", "Understand the business, offer, audience, and trust gaps before shaping the page."],
+  ["02", "Structure", "Organise services, products, proof, and calls to action around buyer decisions."],
+  ["03", "Presentation", "Use responsive visuals, hierarchy, and premium spacing to make the brand easier to trust."],
+  ["04", "Growth path", "Connect the project to SEO, conversion, booking, ordering, or lead-generation priorities."],
 ] as const;
 
-export default function PortfolioClient() {
-  const featuredCase = portfolioCases[0];
-  const supportingCases = portfolioCases.slice(1, 4);
+const relatedServices = [
+  { href: "/services/business-website-design/", label: "Business Website Design" },
+  { href: "/services/website-redesign/", label: "Website Redesign" },
+  { href: "/services/ecommerce-website-design/", label: "eCommerce Website Design" },
+  { href: "/services/landing-page-design/", label: "Landing Page Design" },
+  { href: "/services/search-engine-optimisation/", label: "SEO Setup" },
+  { href: "/services/performance-optimisation/", label: "Performance Optimisation" },
+] as const;
 
-  if (!featuredCase) {
-    return null;
-  }
+const academySlugs = [
+  "jluxe-medical-aesthetics-case-study",
+  "how-to-build-a-small-business-website-that-converts",
+  "small-business-website-redesign-checklist",
+  "conversion-audit-checklist-service-homepage",
+] as const;
+
+function Arrow() {
+  return <span aria-hidden="true">-&gt;</span>;
+}
+
+function getRelatedReads() {
+  const publicPosts = getPublicPosts();
+  const postMap = new Map(publicPosts.map((post) => [post.slug, post]));
+  const selected = academySlugs
+    .map((slug) => postMap.get(slug) ?? getPost(slug))
+    .filter((post): post is Post => Boolean(post));
+  return selected.length ? selected : publicPosts.slice(0, 4);
+}
+
+export default function PortfolioClient() {
+  const featuredCase = portfolioCases.find((item) => item.slug === "jluxe") ?? portfolioCases[0];
+  const supportingCases = portfolioCases.filter((item) => item.slug !== featuredCase?.slug);
+  const relatedReads = getRelatedReads();
+
+  if (!featuredCase) return null;
 
   return (
-    <main className="bg-[#f7f8fc] text-slate-950">
-      <CinematicHero
-        eyebrow={`Case studies / ${featuredCase.industry}`}
-        title={<>The work, <span className="text-accent-gold">and the thinking behind it.</span></>}
-        description="Real project context, strategic decisions, and implementation evidence. No invented performance claims and no gallery without explanation."
-        pageType="portfolio_hub"
-        variant="case-study"
-        primaryAction={{ label: "Discuss Your Website", href: "/contact/", ctaName: "discuss_website", destination: "contact" }}
-        secondaryAction={{ label: "Explore Services", href: "/services/", ctaName: "explore_services", destination: "services" }}
-        aside={
-          <div className="relative min-h-[24rem] overflow-hidden rounded-[2rem] border border-border-hairline shadow-2xl">
-            <Image src={featuredCase.imageUrl} alt={featuredCase.imageAlt} fill priority className="object-cover" sizes="(max-width: 1024px) 100vw, 620px" />
-            <div className="absolute inset-0 bg-gradient-to-t from-bg-ink via-bg-ink/15 to-transparent" />
-            <div className="absolute inset-x-0 bottom-0 p-6">
-              <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-accent-gold">Featured project</p>
-              <p className="mt-2 font-display text-3xl text-text-primary">{featuredCase.title}</p>
-              <p className="mt-2 text-sm text-text-muted">{featuredCase.whatToNotice}</p>
+    <main className="portfolio-system">
+      <section className="portfolio-hero" aria-labelledby="portfolio-title">
+        <div className="portfolio-container portfolio-hero-grid">
+          <div>
+            <p className="portfolio-kicker">Case studies and selected work</p>
+            <h1 id="portfolio-title">Premium websites built around trust, clarity, and action.</h1>
+            <p>
+              Explore real Web Growth projects and the thinking behind them. Each example is presented with honest
+              qualitative outcomes, not fabricated performance claims.
+            </p>
+            <div className="portfolio-actions">
+              <Link href="/contact/" className="portfolio-button portfolio-button-primary">
+                Discuss Your Website <Arrow />
+              </Link>
+              <Link href="/services/" className="portfolio-button portfolio-button-secondary">
+                Explore Services
+              </Link>
             </div>
           </div>
-        }
-      />
-
-      <SectionShell tone="dark" spacing="compact">
-        <SectionReveal className="grid gap-px overflow-hidden rounded-2xl border border-border-hairline bg-border-hairline lg:grid-cols-3">
-          <article className="bg-bg-ink p-6">
-            <p className="text-xs font-bold uppercase tracking-[0.18em] text-accent-gold">01</p>
-            <h2 className="mt-4 font-display text-3xl font-normal tracking-[-0.04em] text-text-primary">
-              The Challenge
-            </h2>
-            <p className="mt-4 text-sm leading-7 text-text-muted">
-              {featuredCase.purpose}
-            </p>
-            <ul className="mt-5 space-y-2">
-              <li className="flex gap-3 text-sm text-slate-600">
-                <span className="mt-[9px] h-2 w-2 rounded-full bg-blue-500/80" />
-                <span>Trust and clarity needed to happen earlier in the journey.</span>
-              </li>
-              <li className="flex gap-3 text-sm text-slate-600">
-                <span className="mt-[9px] h-2 w-2 rounded-full bg-blue-500/80" />
-                <span>Responsive presentation needed to feel more premium and useful.</span>
-              </li>
-            </ul>
-          </article>
-
-          <article className="bg-bg-ink p-6">
-            <p className="text-xs font-bold uppercase tracking-[0.18em] text-accent-gold">02</p>
-            <h2 className="mt-4 font-display text-3xl font-normal tracking-[-0.04em] text-text-primary">
-              Our Strategy
-            </h2>
-            <ul className="mt-4 space-y-3">
-              {featuredCase.stack.map((item) => (
-                <li key={item} className="flex gap-3 text-sm text-slate-600">
-                  <span className="mt-[9px] h-2 w-2 rounded-full bg-blue-500/80" />
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
-          </article>
-
-          <article className="bg-bg-ink p-6">
-            <p className="text-xs font-bold uppercase tracking-[0.18em] text-accent-gold">03</p>
-            <h2 className="mt-4 font-display text-3xl font-normal tracking-[-0.04em] text-text-primary">
-              Implementation
-            </h2>
-            <ul className="mt-4 space-y-3">
-              {featuredCase.results.map((item) => (
-                <li key={item} className="flex gap-3 text-sm text-slate-600">
-                  <span className="mt-[9px] h-2 w-2 rounded-full bg-blue-500/80" />
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
-          </article>
-        </SectionReveal>
-      </SectionShell>
-
-      <SectionShell tone="white" spacing="compact">
-        <div className="grid gap-6 lg:grid-cols-[0.94fr_1.06fr]">
-          <article className="rounded-[1.55rem] border border-slate-200 bg-white p-6 shadow-[0_18px_36px_rgba(15,23,42,0.05)]">
-            <p className="text-xs font-bold uppercase tracking-[0.18em] text-blue-700">
-              Direct answer
-            </p>
-            <h2 className="mt-4 text-4xl font-semibold tracking-[-0.05em] text-slate-950">
-              What do these case studies show?
-            </h2>
-            <p className="mt-4 text-base leading-8 text-slate-600">
-              Web Growth case studies show how strategy, structure, trust design,
-              SEO readiness, and conversion thinking come together on real business
-              websites. They are meant to explain the reasoning behind the work, not
-              inflate claims with invented metrics.
-            </p>
-          </article>
-
-          <article className="rounded-[1.55rem] border border-slate-200 bg-slate-50 p-6 shadow-[0_18px_36px_rgba(15,23,42,0.04)]">
-            <p className="text-xs font-bold uppercase tracking-[0.18em] text-blue-700">
-              Related paths
-            </p>
-            <div className="mt-5 grid gap-3 sm:grid-cols-2">
-              <Link href="/services/website-redesign/" className="rounded-[1.1rem] border border-slate-200 bg-white px-4 py-4 transition hover:border-blue-200">
-                <h3 className="text-sm font-semibold text-slate-950">Website Redesign</h3>
-                <p className="mt-2 text-sm leading-6 text-slate-600">See the service used when trust, structure, and positioning need a broader reset.</p>
-              </Link>
-              <Link href="/services/website-audit/" className="rounded-[1.1rem] border border-slate-200 bg-white px-4 py-4 transition hover:border-blue-200">
-                <h3 className="text-sm font-semibold text-slate-950">Website Audit</h3>
-                <p className="mt-2 text-sm leading-6 text-slate-600">Start with diagnosis when you need clarity before committing to implementation.</p>
-              </Link>
-              <Link href="/blog/" className="rounded-[1.1rem] border border-slate-200 bg-white px-4 py-4 transition hover:border-blue-200">
-                <h3 className="text-sm font-semibold text-slate-950">Academy</h3>
-                <p className="mt-2 text-sm leading-6 text-slate-600">Use related Academy guides to understand the SEO, UX, and conversion decisions behind the work.</p>
-              </Link>
-              <Link href="/contact/" className="rounded-[1.1rem] border border-slate-200 bg-white px-4 py-4 transition hover:border-blue-200">
-                <h3 className="text-sm font-semibold text-slate-950">Request a Review</h3>
-                <p className="mt-2 text-sm leading-6 text-slate-600">Discuss your current website if you want a realistic next-step recommendation.</p>
-              </Link>
-            </div>
-          </article>
-        </div>
-      </SectionShell>
-
-      <SectionShell tone="canvas" spacing="compact">
-        <div className="overflow-hidden rounded-[1.8rem] border border-slate-200 bg-white shadow-[0_22px_54px_rgba(15,23,42,0.06)]">
-          <div className="grid gap-8 px-6 py-7 md:px-8 md:py-8 lg:grid-cols-[0.78fr_1.22fr] lg:items-center">
+          <div className="portfolio-hero-image">
+            <Image
+              src={featuredCase.imageUrl}
+              alt={featuredCase.imageAlt}
+              width={1600}
+              height={1200}
+              quality={75}
+              priority
+              sizes="(max-width: 900px) 100vw, 54vw"
+            />
             <div>
-              <p className="text-xs font-bold uppercase tracking-[0.18em] text-blue-700">
-                The Web Growth system in action
-              </p>
-              <div className="mt-6 space-y-3">
-                {systemSteps.map((step) => (
-                  <div
-                    key={step.title}
-                    className="flex items-start gap-3 rounded-[1.2rem] border border-slate-200 bg-slate-50 px-4 py-3"
-                  >
-                    <IconBadge tone="blue" className="h-10 w-10 rounded-[1rem]">
-                      {step.icon}
-                    </IconBadge>
-                    <div>
-                      <p className="text-sm font-semibold text-slate-950">{step.title}</p>
-                      <p className="mt-1 text-sm leading-6 text-slate-600">{step.text}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="grid gap-6 lg:grid-cols-[0.94fr_1.06fr] lg:items-center">
-              <div>
-                <h2 className="text-4xl font-semibold tracking-[-0.05em] text-slate-950">
-                  Strategic planning and architecture built for long-term growth.
-                </h2>
-                <ul className="mt-5 space-y-3">
-                  {[
-                    "Keyword and intent mapping",
-                    "Competitor gap analysis",
-                    "Content and internal linking plan",
-                    "SEO-ready site structure",
-                  ].map((item) => (
-                    <li key={item} className="flex gap-3 text-sm text-slate-600">
-                      <span className="mt-[9px] h-2 w-2 rounded-full bg-blue-500/80" />
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div className="relative min-h-[22rem]">
-                <ProofDeviceMockup />
-              </div>
+              <span>Featured case study</span>
+              <strong>{featuredCase.title}</strong>
+              <small>{featuredCase.whatToNotice}</small>
             </div>
           </div>
         </div>
-      </SectionShell>
+      </section>
 
-      <SectionShell tone="canvas" spacing="compact">
-        <p className="text-xs font-bold uppercase tracking-[0.18em] text-blue-700">
-          Website screenshots
-        </p>
-        <div className="mt-6 grid gap-4 lg:grid-cols-3">
-          {[featuredCase, ...supportingCases].map((item) => (
-            <article
-              key={item.slug}
-              className="overflow-hidden rounded-[1.45rem] border border-slate-200 bg-white shadow-[0_14px_30px_rgba(15,23,42,0.04)]"
-            >
-              <div className="relative aspect-[16/10]">
+      <section className="portfolio-featured" aria-labelledby="featured-title">
+        <div className="portfolio-container portfolio-featured-grid">
+          <div>
+            <p className="portfolio-kicker">Featured project</p>
+            <h2 id="featured-title">{featuredCase.title}</h2>
+            <p>{featuredCase.summary}</p>
+            <div className="portfolio-meta-row">
+              <span>{featuredCase.type}</span>
+              <span>{featuredCase.industry}</span>
+              <span>{featuredCase.status ?? "Selected work"}</span>
+            </div>
+            <div className="portfolio-actions">
+              <Link href="/blog/jluxe-medical-aesthetics-case-study/" className="portfolio-button portfolio-button-primary">
+                Read Case Study <Arrow />
+              </Link>
+              <Link href={featuredCase.liveUrl} className="portfolio-button portfolio-button-secondary" target="_blank" rel="noreferrer">
+                Visit Live Site
+              </Link>
+            </div>
+          </div>
+          <div className="portfolio-featured-proof">
+            <article>
+              <span>Challenge</span>
+              <p>{featuredCase.purpose}</p>
+            </article>
+            <article>
+              <span>Strategy</span>
+              <ul>
+                {featuredCase.stack.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </article>
+            <article>
+              <span>Qualitative outcomes</span>
+              <ul>
+                {featuredCase.results.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section className="portfolio-section" aria-labelledby="gallery-title">
+        <div className="portfolio-container portfolio-section-heading">
+          <div>
+            <p className="portfolio-kicker">Project gallery</p>
+            <h2 id="gallery-title">Selected website work across service, product, and conversion contexts.</h2>
+          </div>
+          <Link href="/contact/" className="portfolio-text-link">
+            Request a review <Arrow />
+          </Link>
+        </div>
+        <div className="portfolio-container portfolio-gallery">
+          {portfolioCases.map((item, index) => (
+            <article className={`portfolio-card portfolio-card-${(index % 3) + 1}`} key={item.slug}>
+              <div className="portfolio-card-image">
                 <Image
                   src={item.imageUrl}
                   alt={item.imageAlt}
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 1024px) 100vw, 33vw"
+                  width={1200}
+                  height={860}
+                  quality={75}
+                  sizes="(max-width: 900px) 100vw, 33vw"
                 />
               </div>
-              <div className="p-4">
-                <p className="text-sm font-semibold text-slate-950">{item.title}</p>
-                <p className="mt-2 text-sm leading-6 text-slate-600">{item.industry}</p>
+              <div className="portfolio-card-body">
+                <div className="portfolio-card-labels">
+                  <span>{item.type}</span>
+                  <span>{item.status ?? "Selected"}</span>
+                </div>
+                <h3>{item.title}</h3>
+                <p>{item.summary}</p>
+                <ul>
+                  {item.results.map((result) => (
+                    <li key={result}>{result}</li>
+                  ))}
+                </ul>
+                <div className="portfolio-card-actions">
+                  {item.slug === "jluxe" ? (
+                    <Link href="/blog/jluxe-medical-aesthetics-case-study/">Read case study <Arrow /></Link>
+                  ) : null}
+                  <Link href={item.liveUrl} target="_blank" rel="noreferrer">
+                    View live site <Arrow />
+                  </Link>
+                </div>
               </div>
             </article>
           ))}
         </div>
-      </SectionShell>
+      </section>
 
-      <SectionShell tone="white" spacing="compact">
-        <div className="grid gap-4 lg:grid-cols-2">
-          <article className="rounded-[1.45rem] border border-slate-200 bg-white p-6 shadow-[0_14px_30px_rgba(15,23,42,0.04)]">
-            <p className="text-xs font-bold uppercase tracking-[0.18em] text-blue-700">
-              Related services
+      <section className="portfolio-dark" aria-labelledby="process-title">
+        <div className="portfolio-container portfolio-process-grid">
+          <div>
+            <p className="portfolio-kicker">How the work is shaped</p>
+            <h2 id="process-title">Case studies are about decisions, not decoration.</h2>
+            <p>
+              The portfolio highlights how Web Growth connects business context, site structure, responsive presentation,
+              and conversion paths.
             </p>
-            <div className="mt-5 space-y-4">
-              {[
-                { href: "/services/search-engine-optimisation/", label: "SEO Strategy & Growth" },
-                { href: "/services/website-redesign/", label: "Website Redesign" },
-                { href: "/services/performance-optimisation/", label: "Performance Optimisation" },
-                { href: "/services/business-website-design/", label: "Business Website Design" },
-              ].map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="flex items-center gap-3 text-sm font-medium text-slate-700 transition hover:text-blue-700"
-                >
-                  <IconBadge tone="blue" className="h-9 w-9 rounded-[0.9rem]">
-                    <BuildIcon />
-                  </IconBadge>
-                  <span>{item.label}</span>
-                </Link>
-              ))}
-            </div>
-            <Link
-              href="/services/"
-              className="mt-6 inline-flex text-sm font-semibold text-blue-700 transition hover:text-blue-800"
-            >
-              Explore all services -&gt;
-            </Link>
-          </article>
-
-          <article className="rounded-[1.45rem] border border-slate-200 bg-white p-6 shadow-[0_14px_30px_rgba(15,23,42,0.04)]">
-            <p className="text-xs font-bold uppercase tracking-[0.18em] text-blue-700">
-              Related Academy reads
-            </p>
-            <div className="mt-5 space-y-4">
-              {[
-                { href: "/blog/how-to-build-a-small-business-website-that-converts/", label: "How to Build a Small Business Website That Converts" },
-                { href: "/blog/high-converting-service-page/", label: "High-Converting Service Page" },
-                { href: "/blog/how-to-make-your-website-load-fast/", label: "How to Make Your Website Load Fast" },
-                { href: "/blog/jluxe-medical-aesthetics-case-study/", label: "J Luxe Medical Aesthetics Case Study" },
-              ].map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="flex items-center gap-3 text-sm font-medium text-slate-700 transition hover:text-blue-700"
-                >
-                  <IconBadge tone="purple" className="h-9 w-9 rounded-[0.9rem]">
-                    <SearchIcon />
-                  </IconBadge>
-                  <span>{item.label}</span>
-                </Link>
-              ))}
-            </div>
-            <Link
-              href="/blog/"
-              className="mt-6 inline-flex text-sm font-semibold text-blue-700 transition hover:text-blue-800"
-            >
-              Visit the Academy -&gt;
-            </Link>
-          </article>
-        </div>
-      </SectionShell>
-
-      <SectionShell tone="canvas" spacing="compact">
-        <div className="overflow-hidden rounded-[1.8rem] border border-blue-200 bg-[radial-gradient(circle_at_14%_24%,rgba(59,130,246,0.22),transparent_24%),radial-gradient(circle_at_92%_18%,rgba(124,92,255,0.22),transparent_22%),linear-gradient(135deg,#2f53ff_0%,#4f6bff_45%,#7c3aed_100%)] px-8 py-9 shadow-[0_26px_70px_rgba(79,107,255,0.18)]">
-          <div className="grid gap-6 lg:grid-cols-[1fr_auto] lg:items-center">
-            <div>
-              <h2 className="max-w-2xl text-[2.2rem] font-semibold tracking-[-0.05em] text-white">
-                Ready to build your growth story?
-              </h2>
-              <p className="mt-3 max-w-xl text-base leading-8 text-blue-100">
-                Let&apos;s build a platform that attracts, converts, and compounds.
-              </p>
-            </div>
-
-            <div className="flex flex-col items-start gap-3 sm:flex-row">
-              <Link
-                href="/contact/"
-                className="inline-flex min-h-12 items-center justify-center rounded-xl bg-white px-6 text-sm font-semibold text-blue-900 transition hover:bg-blue-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
-              >
-                Start With a Website Review
-              </Link>
-              <Link
-                href="/services/"
-                className="inline-flex min-h-12 items-center justify-center rounded-xl border border-white/30 bg-transparent px-6 text-sm font-semibold text-white transition hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
-              >
-                Explore Our Services
-              </Link>
-            </div>
+          </div>
+          <div className="portfolio-process-list">
+            {processSteps.map(([number, title, text]) => (
+              <article key={title}>
+                <span>{number}</span>
+                <h3>{title}</h3>
+                <p>{text}</p>
+              </article>
+            ))}
           </div>
         </div>
-      </SectionShell>
+      </section>
+
+      <section className="portfolio-section" aria-labelledby="related-title">
+        <div className="portfolio-container portfolio-related-grid">
+          <article>
+            <p className="portfolio-kicker">Related services</p>
+            <h2 id="related-title">Services behind this type of work.</h2>
+            <div className="portfolio-link-grid">
+              {relatedServices.map((item) => (
+                <Link href={item.href} key={item.href}>
+                  <span>Service</span>
+                  <strong>{item.label}</strong>
+                </Link>
+              ))}
+            </div>
+          </article>
+          <article>
+            <p className="portfolio-kicker">Related Academy reads</p>
+            <h2>Learn the strategy behind better websites.</h2>
+            <div className="portfolio-link-grid">
+              {relatedReads.map((post) => (
+                <Link href={`/blog/${post.slug}/`} key={post.slug}>
+                  <span>{String(post.category)}</span>
+                  <strong>{post.title}</strong>
+                </Link>
+              ))}
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section className="portfolio-final-cta">
+        <div className="portfolio-container portfolio-final-inner">
+          <div>
+            <p className="portfolio-kicker">Next step</p>
+            <h2>Want your website to feel this credible?</h2>
+          </div>
+          <div>
+            <p>Send Web Growth your current website or project idea and get a practical recommendation on what to fix, build, or redesign first.</p>
+            <Link href="/contact/" className="portfolio-button portfolio-button-primary">
+              Start With a Website Review <Arrow />
+            </Link>
+          </div>
+        </div>
+      </section>
     </main>
   );
 }

@@ -4,20 +4,32 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { usePathname } from "next/navigation";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 
-type NavItem = {
+type NavLink = {
   href: string;
   label: string;
-  matchPaths?: string[];
+  matchPrefix?: string;
 };
 
-const NAV_ITEMS: NavItem[] = [
-  { href: "/services/", label: "Services" },
-  { href: "/blog/", label: "Academy" },
-  { href: "/tools/", label: "Tools" },
-  { href: "/portfolio/", label: "Case Studies" },
-  { href: "/about/", label: "About" },
-  { href: "/contact/", label: "Contact" },
+const primaryLinks: NavLink[] = [
+  { href: "/blog/", label: "Academy", matchPrefix: "/blog" },
+  { href: "/tools/", label: "Free Tools", matchPrefix: "/tools" },
+  { href: "/services/", label: "Services", matchPrefix: "/services" },
+  { href: "/portfolio/", label: "Case Studies", matchPrefix: "/portfolio" },
+  { href: "/about/", label: "About", matchPrefix: "/about" },
+];
+
+const resourceLinks: NavLink[] = [
+  { href: "/pricing/", label: "Pricing" },
+  { href: "/faq/", label: "FAQ" },
+  { href: "/editorial-policy/", label: "Editorial Policy" },
+  { href: "/disclaimer/", label: "Disclaimer" },
+];
+
+const mobileLinks: Array<NavLink & { group?: string }> = [
+  ...primaryLinks,
+  ...resourceLinks.map((link) => ({ ...link, group: "Resources" })),
 ];
 
 function normalize(path: string) {
@@ -25,12 +37,22 @@ function normalize(path: string) {
   return trimmed.length ? trimmed : "/";
 }
 
+function isActivePath(pathname: string, item: NavLink) {
+  const current = normalize(pathname);
+  const href = normalize(item.href);
+  const matchPrefix = item.matchPrefix ? normalize(item.matchPrefix) : href;
+
+  if (current === href) return true;
+  return matchPrefix !== "/" && current.startsWith(`${matchPrefix}/`);
+}
+
 export default function Header() {
-  const pathname = usePathname();
+  const pathname = usePathname() || "/";
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const reduceMotion = useReducedMotion();
 
-  const activeRoute = useMemo(() => normalize(pathname || "/"), [pathname]);
+  const activeRoute = useMemo(() => normalize(pathname), [pathname]);
 
   useEffect(() => {
     setMenuOpen(false);
@@ -50,44 +72,48 @@ export default function Header() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const isActive = (item: NavItem) => {
-    if (item.href.includes("#")) return false;
-    const href = normalize(item.href);
+  useEffect(() => {
+    if (!menuOpen) return;
 
-    if (activeRoute === href) return true;
-    if (item.matchPaths?.some((path) => normalize(path) === activeRoute)) return true;
-    if (href !== "/" && activeRoute.startsWith(`${href}/`)) return true;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setMenuOpen(false);
+    };
 
-    return false;
-  };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [menuOpen]);
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 border-b border-transparent">
+    <header className="fixed inset-x-0 top-0 z-50">
       <div
         className={[
-          "transition-all duration-300",
+          "border-b transition-all duration-300",
           scrolled
-            ? "border-b border-border-hairline bg-bg-ink/88 backdrop-blur-2xl shadow-[0_10px_40px_rgba(0,0,0,0.22)]"
-            : "border-b border-border-hairline/70 bg-bg-ink/58 backdrop-blur-xl",
+            ? "border-white/70 bg-white/88 shadow-[0_14px_38px_rgba(16,21,37,0.08)] backdrop-blur-2xl"
+            : "border-white/45 bg-white/72 backdrop-blur-xl",
         ].join(" ")}
       >
-        <div className="mx-auto flex max-w-[1280px] items-center justify-between px-5 py-3.5 sm:px-6">
-          <Link href="/" className="flex items-center gap-3" aria-label="Web Growth home">
+        <div className="wg-shell-container flex min-h-[4.5rem] items-center justify-between gap-4">
+          <Link
+            href="/"
+            className="flex shrink-0 items-center gap-3 rounded-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--focus-ring)]"
+            aria-label="Web Growth home"
+          >
             <Image
               src="/images/brand/web-growth-logo.webp"
               alt="Web Growth"
               width={220}
               height={48}
-              sizes="(max-width: 768px) 154px, 210px"
-              quality={60}
-              className="h-8 w-auto md:h-10"
+              sizes="(max-width: 768px) 150px, 186px"
+              quality={75}
+              className="h-8 w-auto md:h-9"
               priority
             />
           </Link>
 
-          <nav className="hidden items-center gap-9 md:flex" aria-label="Primary navigation">
-            {NAV_ITEMS.map((item) => {
-              const active = isActive(item);
+          <nav className="hidden items-center gap-7 lg:flex" aria-label="Primary navigation">
+            {primaryLinks.map((item) => {
+              const active = isActivePath(activeRoute, item);
 
               return (
                 <Link
@@ -95,40 +121,56 @@ export default function Header() {
                   href={item.href}
                   aria-current={active ? "page" : undefined}
                   className={[
-                    "group relative text-[15px] font-medium transition-colors duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent-gold",
-                    active ? "text-accent-gold" : "text-text-muted hover:text-text-primary",
+                    "group relative rounded-md px-1 py-2 text-[13px] font-semibold text-[var(--text-ink)] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--focus-ring)]",
+                    active ? "text-[var(--accent-blue-strong)]" : "hover:text-[var(--accent-blue-strong)]",
                   ].join(" ")}
                 >
                   {item.label}
                   <span
                     className={[
-                      "absolute -bottom-2 left-0 h-[2px] rounded-full bg-accent-gold transition-all duration-200",
-                      active ? "w-full opacity-100" : "w-0 opacity-0 group-hover:w-full group-hover:opacity-100",
+                      "absolute inset-x-1 -bottom-0.5 h-[2px] rounded-full bg-[var(--accent-blue)] transition-all duration-200",
+                      active ? "opacity-100" : "scale-x-0 opacity-0 group-hover:scale-x-100 group-hover:opacity-100",
                     ].join(" ")}
                   />
                 </Link>
               );
             })}
+
+            <div className="group relative">
+              <button
+                type="button"
+                className="rounded-md px-1 py-2 text-[13px] font-semibold text-[var(--text-ink)] transition-colors hover:text-[var(--accent-blue-strong)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--focus-ring)]"
+                aria-haspopup="true"
+              >
+                Resources
+                <span aria-hidden="true" className="ml-1 text-[10px]">
+                  v
+                </span>
+              </button>
+              <div className="invisible absolute left-1/2 top-full w-56 -translate-x-1/2 pt-3 opacity-0 transition group-focus-within:visible group-focus-within:opacity-100 group-hover:visible group-hover:opacity-100">
+                <div className="overflow-hidden rounded-xl border border-[var(--border-hairline)] bg-white shadow-[var(--shadow-soft)]">
+                  {resourceLinks.map((item) => (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className="block px-4 py-3 text-sm font-medium text-[var(--text-soft)] transition hover:bg-[var(--bg-surface-soft)] hover:text-[var(--accent-blue-strong)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-inset focus-visible:outline-[var(--focus-ring)]"
+                    >
+                      {item.label}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </div>
           </nav>
 
           <div className="flex items-center gap-3">
-            <span className="hidden rounded-full border border-border-hairline bg-white/[0.04] px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-text-muted shadow-sm md:inline-flex">
-              Platform-first
-            </span>
-
-            <Link
-              href="/contact/"
-              className="hidden min-h-11 items-center justify-center rounded-full bg-accent-gold px-6 text-sm font-bold text-bg-ink shadow-[0_16px_32px_rgba(232,163,61,0.18)] transition hover:bg-[#f1b75d] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent-gold md:inline-flex"
-            >
-              Start With a Website Review
-            </Link>
-
             <button
               type="button"
               aria-label={menuOpen ? "Close menu" : "Open menu"}
               aria-expanded={menuOpen}
+              aria-controls="mobile-navigation"
               onClick={() => setMenuOpen((current) => !current)}
-              className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-border-hairline bg-white/[0.04] text-text-primary transition hover:border-accent-gold/55 hover:text-accent-gold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent-gold md:hidden"
+              className="inline-flex h-11 w-11 items-center justify-center rounded-lg border border-[var(--border-hairline)] bg-white text-[var(--text-ink)] transition hover:border-[var(--accent-blue)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--focus-ring)] lg:hidden"
             >
               <span className="relative block h-4 w-5">
                 <span
@@ -151,54 +193,83 @@ export default function Header() {
                 />
               </span>
             </button>
+
+            <Link
+              href="/contact/"
+              className="hidden min-h-11 items-center justify-center rounded-lg bg-[var(--accent-blue-strong)] px-5 text-sm font-bold text-white shadow-[var(--shadow-blue)] transition hover:-translate-y-0.5 hover:bg-[var(--accent-blue)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--focus-ring)] sm:inline-flex"
+            >
+              Work With Us <span aria-hidden="true" className="ml-2">-&gt;</span>
+            </Link>
           </div>
         </div>
       </div>
 
-      {menuOpen ? (
-        <>
-          <button
-            type="button"
-            aria-label="Close mobile menu overlay"
-            onClick={() => setMenuOpen(false)}
-            className="fixed inset-0 z-40 bg-bg-ink/70 backdrop-blur-sm md:hidden"
-          />
-          <div className="fixed inset-x-0 top-[78px] z-50 px-5 md:hidden">
-            <div className="mx-auto max-w-6xl rounded-2xl border border-border-hairline bg-bg-ink p-4 shadow-[0_22px_60px_rgba(0,0,0,0.34)]">
-              <div className="flex flex-col gap-3">
-                {NAV_ITEMS.map((item) => {
-                  const active = isActive(item);
+      <AnimatePresence>
+        {menuOpen ? (
+          <>
+            <motion.button
+              type="button"
+              aria-label="Close mobile menu overlay"
+              className="fixed inset-0 z-40 bg-[var(--bg-ink)]/55 backdrop-blur-sm lg:hidden"
+              onClick={() => setMenuOpen(false)}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: reduceMotion ? 0 : 0.16 }}
+            />
+            <motion.div
+              id="mobile-navigation"
+              role="dialog"
+              aria-modal="true"
+              aria-label="Mobile navigation"
+              className="fixed inset-x-0 top-[4.75rem] z-50 px-4 lg:hidden"
+              initial={reduceMotion ? false : { opacity: 0, y: -12, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -10, scale: 0.98 }}
+              transition={{ duration: reduceMotion ? 0 : 0.18, ease: [0.22, 1, 0.36, 1] }}
+            >
+              <nav
+                aria-label="Mobile navigation"
+                className="mx-auto max-w-2xl overflow-hidden rounded-2xl border border-white/70 bg-white shadow-[0_26px_64px_rgba(16,21,37,0.18)]"
+              >
+                <div className="grid gap-1 p-3">
+                  {mobileLinks.map((item) => {
+                    const active = isActivePath(activeRoute, item);
 
-                  return (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      onClick={() => setMenuOpen(false)}
-                      aria-current={active ? "page" : undefined}
-                      className={[
-                        "rounded-xl border px-4 py-3 text-sm font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent-gold",
-                        active
-                          ? "border-accent-gold/55 bg-accent-gold/10 text-accent-gold"
-                          : "border-border-hairline bg-white/[0.035] text-text-muted hover:border-accent-gold/45 hover:text-text-primary",
-                      ].join(" ")}
-                    >
-                      {item.label}
-                    </Link>
-                  );
-                })}
+                    return (
+                      <Link
+                        key={`${item.group ?? "primary"}-${item.href}`}
+                        href={item.href}
+                        aria-current={active ? "page" : undefined}
+                        className={[
+                          "rounded-xl px-4 py-3 text-sm font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]",
+                          active
+                            ? "bg-[var(--accent-violet-soft)] text-[var(--accent-blue-strong)]"
+                            : "text-[var(--text-ink)] hover:bg-[var(--bg-surface-soft)]",
+                        ].join(" ")}
+                      >
+                        {item.group ? (
+                          <span className="mr-2 text-[11px] uppercase tracking-[0.16em] text-[var(--text-soft)]">
+                            {item.group}
+                          </span>
+                        ) : null}
+                        {item.label}
+                      </Link>
+                    );
+                  })}
 
-                <Link
-                  href="/contact/"
-                  onClick={() => setMenuOpen(false)}
-                  className="mt-2 inline-flex min-h-12 items-center justify-center rounded-full bg-accent-gold px-5 py-3 text-sm font-bold text-bg-ink shadow-[0_16px_32px_rgba(232,163,61,0.18)] transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent-gold"
-                >
-                  Start With a Website Review
-                </Link>
-              </div>
-            </div>
-          </div>
-        </>
-      ) : null}
+                  <Link
+                    href="/contact/"
+                    className="mt-2 inline-flex min-h-12 items-center justify-center rounded-xl bg-[var(--accent-blue-strong)] px-5 py-3 text-sm font-bold text-white shadow-[var(--shadow-blue)] transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]"
+                  >
+                    Work With Us <span aria-hidden="true" className="ml-2">-&gt;</span>
+                  </Link>
+                </div>
+              </nav>
+            </motion.div>
+          </>
+        ) : null}
+      </AnimatePresence>
     </header>
   );
 }

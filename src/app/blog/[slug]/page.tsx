@@ -214,7 +214,7 @@ export default async function BlogPostPage({
     post.faq.length > 0;
 
   return (
-    <article className="bg-[#f4f1eb] text-slate-950">
+    <article className="academy-article-page bg-[#f4f1eb] text-slate-950">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -222,13 +222,13 @@ export default async function BlogPostPage({
         }}
       />
 
-      <section className="relative overflow-hidden border-b border-border-hairline bg-bg-ink text-text-primary">
+      <section className="academy-article-hero relative overflow-hidden border-b border-border-hairline bg-bg-ink text-text-primary">
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
           <div className="absolute left-[-10%] top-[-8%] h-72 w-72 rounded-full bg-[radial-gradient(circle,rgba(27,110,99,0.22),transparent_70%)]" />
           <div className="absolute right-[-12%] top-[4%] h-[28rem] w-[28rem] rounded-full bg-[radial-gradient(circle,rgba(232,163,61,0.12),transparent_72%)]" />
         </div>
 
-        <div className="relative mx-auto max-w-6xl px-5 py-16 sm:px-6 md:py-20">
+        <div className="academy-article-container relative mx-auto max-w-6xl px-5 py-16 sm:px-6 md:py-20">
           <nav aria-label="Breadcrumb" className="mb-10 text-sm text-text-muted">
             <ol className="flex flex-wrap items-center gap-2">
               <li>
@@ -247,7 +247,7 @@ export default async function BlogPostPage({
             </ol>
           </nav>
 
-          <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_18rem] lg:items-end">
+          <div className="academy-article-intro grid gap-12 lg:grid-cols-[minmax(0,1fr)_18rem] lg:items-end">
             <div>
               <div className="flex flex-wrap gap-2 text-xs text-text-muted">
                 <span className="rounded-full border border-border-hairline bg-white/[0.04] px-3 py-1 font-medium text-accent-gold">
@@ -273,7 +273,7 @@ export default async function BlogPostPage({
               </h1>
               <p className="mt-6 max-w-3xl text-lg leading-8 text-text-muted">{post.excerpt}</p>
 
-              <div className="mt-10 grid gap-px overflow-hidden border-y border-border-hairline bg-border-hairline sm:grid-cols-3">
+              <div className="academy-article-facts mt-10 grid gap-px overflow-hidden border-y border-border-hairline bg-border-hairline sm:grid-cols-3">
                 <div className="bg-bg-ink py-4 pr-4">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-blue-700">
                     Search intent
@@ -314,7 +314,7 @@ export default async function BlogPostPage({
               ) : null}
             </div>
 
-            <div className="space-y-4">
+            <div className="academy-article-byline space-y-4">
               <div className="border-l border-border-hairline pl-6">
                 <div className="flex items-center gap-3">
                   {author.image ? (
@@ -369,7 +369,7 @@ export default async function BlogPostPage({
           </div>
 
           {post.cover ? (
-            <div className="mt-10 overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-[0_24px_60px_rgba(15,23,42,0.10)]">
+            <div className="academy-article-cover mt-10 overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-[0_24px_60px_rgba(15,23,42,0.10)]">
               <div className="relative aspect-[16/9]">
                 <Image
                   src={post.cover}
@@ -385,9 +385,9 @@ export default async function BlogPostPage({
         </div>
       </section>
 
-      <section className="mx-auto max-w-6xl px-5 py-14 sm:px-6">
-        <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_320px]">
-          <div className="space-y-8">
+      <section className="academy-article-main mx-auto max-w-6xl px-5 py-14 sm:px-6">
+        <div className="academy-article-layout grid gap-10 lg:grid-cols-[minmax(0,1fr)_320px]">
+          <div className="academy-article-flow space-y-8">
             {hasEnhancedBlocks ? (
               <>
                 <div className="grid gap-6 xl:grid-cols-[minmax(0,1.1fr)_minmax(280px,0.9fr)]">
@@ -424,7 +424,7 @@ export default async function BlogPostPage({
               </>
             ) : null}
 
-            <div className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-[0_24px_60px_rgba(15,23,42,0.08)] md:p-8">
+            <div className="academy-reading-surface rounded-[2rem] border border-slate-200 bg-white p-6 shadow-[0_24px_60px_rgba(15,23,42,0.08)] md:p-8">
               <div className="mb-8 flex flex-wrap items-end justify-between gap-4 border-b border-slate-200 pb-6">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.18em] text-blue-700">
@@ -481,7 +481,7 @@ export default async function BlogPostPage({
             ) : null}
           </div>
 
-          <aside className="space-y-6 lg:sticky lg:top-32 lg:h-fit">
+          <aside className="academy-article-sidebar space-y-6 lg:sticky lg:top-32 lg:h-fit">
             <TableOfContents items={headings} />
             <div className="rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-[0_20px_50px_rgba(15,23,42,0.07)]">
               <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-blue-700">

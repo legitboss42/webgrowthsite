@@ -1,58 +1,72 @@
 import Link from "next/link";
 import TrackedLink from "@/components/analytics/TrackedLink";
-import CinematicHero from "@/components/platform/CinematicHero";
-import SectionReveal from "@/components/platform/SectionReveal";
 import {
   AuditIcon,
   GrowthChartIcon,
-  IconBadge,
   LightbulbIcon,
   SearchIcon,
   SitemapIcon,
   TagIcon,
 } from "@/components/home/HomeIcons";
-import SectionShell from "@/components/home/SectionShell";
 import { buildPageMetadata } from "@/lib/seo";
-import { PUBLIC_TOOLS } from "@/lib/tools";
+import { PUBLIC_TOOLS, type PublicToolSlug } from "@/lib/tools";
 
-const plannedTools = [
-  {
-    title: "AdSense Readiness Checker",
-    description:
-      "Review trust pages, content quality, navigation, and layout risks before applying for AdSense.",
+const toolPresentation: Record<
+  PublicToolSlug,
+  { icon: React.ReactNode; number: string; note: string }
+> = {
+  "adsense-readiness-checker": {
     icon: <AuditIcon />,
+    number: "01",
+    note: "Trust, content and policy-alignment signals",
   },
-  {
-    title: "Website Cost Calculator",
-    description:
-      "Estimate likely project scope based on page count, platform complexity, and conversion requirements.",
+  "website-cost-calculator": {
     icon: <GrowthChartIcon />,
+    number: "02",
+    note: "Scope and investment planning",
   },
-  {
-    title: "Homepage Checklist",
-    description:
-      "Use a practical checklist for messaging clarity, trust cues, CTA flow, and layout quality.",
+  "homepage-checklist": {
     icon: <LightbulbIcon />,
+    number: "03",
+    note: "Messaging, trust and conversion flow",
   },
-  {
-    title: "Meta Description Generator",
-    description:
-      "Generate cleaner search snippets for service pages, articles, and landing pages.",
+  "meta-description-generator": {
     icon: <TagIcon />,
+    number: "04",
+    note: "Search snippet drafting",
   },
-  {
-    title: "Sitemap Validator",
-    description:
-      "Check sitemap structure, indexation intent, and route governance consistency.",
+  "sitemap-validator": {
     icon: <SitemapIcon />,
+    number: "05",
+    note: "Technical SEO and sitemap structure",
+  },
+  "website-launch-checklist": {
+    icon: <SearchIcon />,
+    number: "06",
+    note: "Pre-launch quality assurance",
+  },
+};
+
+const categories = [
+  {
+    label: "Plan",
+    title: "Make the scope clearer.",
+    copy: "Estimate investment and define what the website actually needs before implementation begins.",
+    slugs: ["website-cost-calculator"] as PublicToolSlug[],
   },
   {
-    title: "Website Launch Checklist",
-    description:
-      "Run a final QA pass for SEO, metadata, mobile UX, forms, analytics, and trust pages.",
-    icon: <SearchIcon />,
+    label: "Improve",
+    title: "Find the gaps that matter.",
+    copy: "Review homepage clarity, search snippets and technical structure with focused checks.",
+    slugs: ["homepage-checklist", "meta-description-generator", "sitemap-validator"] as PublicToolSlug[],
   },
-] as const;
+  {
+    label: "Launch and monetize",
+    title: "Publish with fewer avoidable risks.",
+    copy: "Check launch readiness and monetization foundations without treating a checklist as a guarantee.",
+    slugs: ["website-launch-checklist", "adsense-readiness-checker"] as PublicToolSlug[],
+  },
+];
 
 export const metadata = buildPageMetadata({
   title: "Web Growth Tools | Practical Website Growth Utilities",
@@ -70,93 +84,155 @@ export const metadata = buildPageMetadata({
 });
 
 export default function ToolsPage() {
+  const featured = PUBLIC_TOOLS.find((tool) => tool.slug === "adsense-readiness-checker")!;
+
   return (
-    <main className="bg-[#f7f8fc] text-slate-950">
-      <CinematicHero
-        eyebrow="Tools laboratory"
-        title={<>Small utilities. <span className="text-accent-gold">Sharper decisions.</span></>}
-        description="Focused tools for website reviews, AdSense readiness, SEO planning, launch QA, and conversion support. Built to be useful before you hire anyone."
-        pageType="tools_hub"
-        variant="utility"
-        primaryAction={{ label: "Open the tool library", href: "#tool-library", ctaName: "open_tool_library", destination: "tool_library" }}
-        secondaryAction={{ label: "Explore the Academy", href: "/blog/", ctaName: "explore_academy", destination: "academy" }}
-        aside={
-          <div className="relative overflow-hidden rounded-[1.75rem] border border-border-hairline bg-[#080b0f] p-6 font-mono text-xs text-text-muted shadow-2xl">
-            <div className="mb-6 flex gap-2"><span className="h-2.5 w-2.5 rounded-full bg-accent-gold" /><span className="h-2.5 w-2.5 rounded-full bg-accent-teal" /><span className="h-2.5 w-2.5 rounded-full bg-border-hairline" /></div>
-            <p className="text-accent-teal">webgrowth.tools / inventory</p>
-            <div className="mt-5 space-y-3">
-              {PUBLIC_TOOLS.slice(0, 4).map((tool, index) => <p key={tool.slug}><span className="mr-3 text-accent-gold">0{index + 1}</span>{tool.title}</p>)}
+    <main className="tools-system">
+      <section className="tools-hero" aria-labelledby="tools-title">
+        <div className="tools-container tools-hero-grid">
+          <div>
+            <p className="tools-kicker">Web Growth utility studio</p>
+            <h1 id="tools-title">Practical tools for better website decisions.</h1>
+            <p className="tools-hero-copy">
+              Six focused utilities for planning, reviewing, launching and improving a website. Each tool is free to use and built around a specific decision.
+            </p>
+            <div className="tools-actions">
+              <a className="tools-button tools-button-primary" href="#tool-library">Explore live tools</a>
+              <Link className="tools-button tools-button-secondary" href="/blog/">Open the Academy</Link>
             </div>
-            <p className="mt-6 border-t border-border-hairline pt-4 text-text-primary">{PUBLIC_TOOLS.length} utilities online</p>
           </div>
-        }
-      />
 
-      <SectionShell id="tool-library" tone="white" spacing="compact">
-        <SectionReveal className="grid gap-5 md:grid-cols-2 xl:grid-cols-12">
-          {PUBLIC_TOOLS.map((tool, index) => {
-            const matched = plannedTools.find((item) => item.title === tool.title);
-
-            return (
-            <TrackedLink
-              key={tool.title}
-              href={`/tools/${tool.slug}/`}
-              ctaName={`open_${tool.slug}`}
-              ctaLocation="tools_library"
-              destination={`/tools/${tool.slug}/`}
-              pageType="tools_hub"
-              className={[
-                "rounded-[1.45rem] border border-slate-200 bg-white p-6 shadow-[0_14px_30px_rgba(15,23,42,0.04)] transition hover:-translate-y-0.5 hover:shadow-[0_20px_38px_rgba(27,110,99,0.12)] md:col-span-1",
-                index === 0 ? "xl:col-span-7" : index === 1 ? "xl:col-span-5" : "xl:col-span-4",
-              ].join(" ")}
-            >
-              <div className="flex items-start justify-between gap-4">
-                <IconBadge tone="blue" className="h-11 w-11 rounded-[1rem]">
-                  {matched?.icon ?? <AuditIcon />}
-                </IconBadge>
-                <span className="rounded-full border border-blue-100 bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700">
-                  Live
+          <aside className="tools-hero-console" aria-label="Live tools inventory">
+            <div className="tools-console-top">
+              <span>WG / UTILITIES</span>
+              <span className="tools-live"><i /> {PUBLIC_TOOLS.length} live</span>
+            </div>
+            <div className="tools-console-orbit" aria-hidden="true">
+              <div className="tools-console-core">BUILD<br />BETTER</div>
+              {PUBLIC_TOOLS.slice(0, 4).map((tool, index) => (
+                <span key={tool.slug} className={`tools-orbit-node tools-orbit-node-${index + 1}`}>
+                  {toolPresentation[tool.slug].number}
                 </span>
-              </div>
-              <h2 className="mt-5 text-[1.2rem] font-semibold tracking-[-0.03em] text-slate-950">
-                {tool.title}
-              </h2>
-              <p className="mt-3 text-sm leading-7 text-slate-600">{tool.description}</p>
-              <p className="mt-5 text-sm font-semibold text-blue-700">Use tool -&gt;</p>
+              ))}
+            </div>
+            <p>Useful before a sales conversation. Clear about what each result can and cannot tell you.</p>
+          </aside>
+        </div>
+      </section>
+
+      <section className="tools-featured" aria-labelledby="featured-tool-title">
+        <div className="tools-container tools-featured-grid">
+          <div className="tools-featured-copy">
+            <p className="tools-kicker">Featured diagnostic</p>
+            <span className="tools-status"><i /> Available now</span>
+            <h2 id="featured-tool-title">{featured.title}</h2>
+            <p>{featured.description}</p>
+            <ul>
+              <li>Review trust and navigation signals</li>
+              <li>Spot content and layout risks</li>
+              <li>Get a practical, non-guaranteed readiness score</li>
+            </ul>
+            <TrackedLink
+              href={`/tools/${featured.slug}/`}
+              className="tools-button tools-button-dark"
+              ctaName="open_adsense_readiness_checker"
+              ctaLocation="tools_featured"
+              destination={`/tools/${featured.slug}/`}
+              pageType="tools_hub"
+            >
+              Run the readiness check <span aria-hidden="true">→</span>
             </TrackedLink>
-          )})}
-        </SectionReveal>
-      </SectionShell>
-
-      <SectionShell tone="canvas" spacing="compact">
-        <div className="overflow-hidden rounded-[1.8rem] border border-blue-950/60 bg-[radial-gradient(circle_at_88%_14%,rgba(108,84,255,0.42),transparent_24%),linear-gradient(135deg,#091226_0%,#0c1631_48%,#0b1230_100%)] px-8 py-9 shadow-[0_26px_70px_rgba(6,14,35,0.28)]">
-          <div className="grid gap-6 lg:grid-cols-[1fr_auto] lg:items-center">
-            <div>
-              <h2 className="max-w-2xl text-[2.2rem] font-semibold tracking-[-0.05em] text-white">
-                The tools hub is now live and ready to expand.
-              </h2>
-              <p className="mt-3 max-w-xl text-base leading-8 text-blue-100">
-                Start with the tools, then move into a website review or Academy guide when you need deeper implementation help.
-              </p>
-            </div>
-
-            <div className="flex flex-col items-start gap-3 sm:flex-row">
-              <Link
-                href="/contact/"
-                className="inline-flex min-h-12 items-center justify-center rounded-xl bg-white px-6 text-sm font-semibold text-blue-900 transition hover:bg-blue-50"
-              >
-                Request a Website Review
-              </Link>
-              <Link
-                href="/blog/"
-                className="inline-flex min-h-12 items-center justify-center rounded-xl border border-white/30 bg-transparent px-6 text-sm font-semibold text-white transition hover:bg-white/10"
-              >
-                Open the Academy
-              </Link>
-            </div>
+          </div>
+          <div className="tools-featured-visual" aria-hidden="true">
+            <div className="tools-signal-card tools-signal-card-a"><span>Trust</span><strong>Pages + identity</strong></div>
+            <div className="tools-signal-card tools-signal-card-b"><span>Content</span><strong>Depth + purpose</strong></div>
+            <div className="tools-signal-card tools-signal-card-c"><span>Experience</span><strong>Navigation + layout</strong></div>
+            <div className="tools-score-disc"><span>Review</span><strong>01</strong><small>of 06 live tools</small></div>
           </div>
         </div>
-      </SectionShell>
+      </section>
+
+      <section className="tools-library" id="tool-library" aria-labelledby="tool-library-title">
+        <div className="tools-container tools-section-heading">
+          <div>
+            <p className="tools-kicker">Live tool library</p>
+            <h2 id="tool-library-title">Choose the decision in front of you.</h2>
+          </div>
+          <p>Every utility below has a working route and a defined purpose. No placeholder products or unavailable features.</p>
+        </div>
+
+        <div className="tools-container tools-editorial-list">
+          {PUBLIC_TOOLS.map((tool, index) => {
+            const presentation = toolPresentation[tool.slug];
+            return (
+              <TrackedLink
+                key={tool.slug}
+                href={`/tools/${tool.slug}/`}
+                className="tools-editorial-item"
+                ctaName={`open_${tool.slug}`}
+                ctaLocation="tools_library"
+                destination={`/tools/${tool.slug}/`}
+                pageType="tools_hub"
+              >
+                <span className="tools-item-number">{presentation.number}</span>
+                <span className="tools-item-icon" aria-hidden="true">{presentation.icon}</span>
+                <span className="tools-item-content">
+                  <small>{tool.category} · {presentation.note}</small>
+                  <strong>{tool.title}</strong>
+                  <span>{tool.description}</span>
+                </span>
+                <span className="tools-item-action"><i /> Live <b aria-hidden="true">↗</b></span>
+              </TrackedLink>
+            );
+          })}
+        </div>
+      </section>
+
+      <section className="tools-categories" aria-labelledby="tools-categories-title">
+        <div className="tools-container">
+          <p className="tools-kicker">A useful sequence</p>
+          <h2 id="tools-categories-title">Plan. Improve. Launch with confidence.</h2>
+          <div className="tools-category-grid">
+            {categories.map((category, index) => (
+              <article key={category.label}>
+                <span>0{index + 1} / {category.label}</span>
+                <h3>{category.title}</h3>
+                <p>{category.copy}</p>
+                <div>
+                  {category.slugs.map((slug) => {
+                    const tool = PUBLIC_TOOLS.find((item) => item.slug === slug)!;
+                    return <Link href={`/tools/${slug}/`} key={slug}>{tool.shortTitle} <span aria-hidden="true">→</span></Link>;
+                  })}
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="tools-guidance" aria-labelledby="tools-guidance-title">
+        <div className="tools-container tools-guidance-grid">
+          <div>
+            <p className="tools-kicker">Tools are a starting point</p>
+            <h2 id="tools-guidance-title">A result becomes valuable when it leads to the right action.</h2>
+          </div>
+          <div className="tools-guidance-links">
+            <Link href="/blog/"><span>Learn the implementation</span><strong>Read practical Academy guides</strong><small>Explore the Academy →</small></Link>
+            <Link href="/services/website-audit/"><span>Need a deeper diagnosis?</span><strong>Review the full website system</strong><small>Explore website audits →</small></Link>
+            <Link href="/contact/"><span>Ready to improve the site?</span><strong>Discuss the right next step</strong><small>Work with Web Growth →</small></Link>
+          </div>
+        </div>
+      </section>
+
+      <section className="tools-final-cta">
+        <div className="tools-container tools-final-inner">
+          <div>
+            <p className="tools-kicker">From diagnosis to implementation</p>
+            <h2>Know what needs attention. Then build the fix properly.</h2>
+          </div>
+          <Link href="/contact/" className="tools-button tools-button-primary">Request a website review</Link>
+        </div>
+      </section>
     </main>
   );
 }
