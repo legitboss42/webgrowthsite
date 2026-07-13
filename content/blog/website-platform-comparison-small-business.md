@@ -12,10 +12,9 @@ category: Strategy
 topic: Platform Selection
 difficulty: Beginner
 tags: ["Platform Comparison", "WordPress", "Next.js", "Shopify", "Small Business"]
-readTime: 15 min read
 cover: "/images/blog/builders-compare.webp"
 author: victor-chinukwue
-reviewedBy: web-growth-editorial
+reviewedBy: victor-chinukwue
 isCornerstone: true
 checklistAvailable: false
 keyTakeaways:

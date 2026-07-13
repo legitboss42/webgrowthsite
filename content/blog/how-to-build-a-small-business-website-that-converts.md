@@ -13,7 +13,6 @@ tags:
   - Website Strategy
   - Local Business
   - UX
-readTime: 15 min read
 cover: /images/blog/converting-website.webp
 updatedAt: "2026-04-29"
 lastReviewedAt: "2026-04-29"
@@ -22,7 +21,7 @@ difficulty: Beginner
 isCornerstone: true
 checklistAvailable: false
 author: victor-chinukwue
-reviewedBy: web-growth-editorial
+reviewedBy: victor-chinukwue
 keyTakeaways:
   - A small business website should help customers understand the business, trust it, and take action.
   - Clear messaging, visible services, trust signals, mobile usability, and speed usually matter more than visual polish alone.

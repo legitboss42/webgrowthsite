@@ -2572,6 +2572,7 @@ html.wg-motion-ready .approved-homepage [data-cycle-node] {
   max-width: 850px;
   margin: 24px 0 0;
   color: white;
+  font-family: var(--font-display), Georgia, serif;
   font-size: clamp(3.6rem, 7vw, 7.2rem);
   font-weight: 800;
   letter-spacing: -0.072em;
@@ -2832,7 +2833,7 @@ html.wg-motion-ready .approved-homepage [data-cycle-node] {
 .academy-article-page { overflow: clip; }
 .academy-article-hero { background: #060b18; }
 .academy-article-hero::before { content: ""; position: absolute; inset: 0; background: linear-gradient(120deg, rgba(48, 90, 255, 0.1), transparent 42%, rgba(112, 72, 244, 0.08)); pointer-events: none; }
-.academy-article-hero h1 { max-width: 900px; }
+.academy-article-hero h1 { max-width: 900px; font-family: var(--font-display), Georgia, serif; }
 .academy-article-facts > div { border-color: rgba(139, 160, 236, 0.18) !important; background: transparent !important; }
 .academy-article-facts p:first-child { color: #88a2ff !important; }
 .academy-article-byline > div { border-color: rgba(139, 160, 236, 0.28); }

@@ -2,10 +2,12 @@
 title: >-
   The Audit That Created the Roadmap: Website Audit Strategy for SEO and
   Conversion
-seoTitle: "The Audit That Created the Roadmap | Web Growth"
-primaryKeyword: "website audit strategy"
-searchIntent: "Informational - first-hand case study and implementation lessons"
-coverAlt: "The Audit That Created the Roadmap: Website Audit Strategy for SEO and Conversion - practical Web Growth guide visual"
+seoTitle: The Audit That Created the Roadmap | Web Growth
+primaryKeyword: website audit strategy
+searchIntent: Informational - first-hand case study and implementation lessons
+coverAlt: >-
+  The Audit That Created the Roadmap: Website Audit Strategy for SEO and
+  Conversion - practical Web Growth guide visual
 excerpt: >-
   Part 2 of the J Luxe rebuild series: how a structured website audit, technical
   SEO audit, and conversion audit created a clear rebuild roadmap without wasted
@@ -19,22 +21,21 @@ tags:
   - Website Strategy
   - Local SEO
   - Conversion Rate Optimization
-readTime: 16 min read
 cover: /images/blog/jluxe-series-audit-roadmap.webp
-updatedAt: '2026-02-19'
-lastReviewedAt: '2026-02-19'
+updatedAt: '2026-07-13'
+lastReviewedAt: '2026-07-13'
 topic: Case Study Series
 difficulty: Intermediate
 isCornerstone: false
 checklistAvailable: false
 author: victor-chinukwue
-reviewedBy: web-growth-editorial
+reviewedBy: victor-chinukwue
 keyTakeaways:
-  - Priority one is why a website audit matters more than mockups.
-  - Sustained results depend on the four-layer audit framework we used.
+  - An audit should convert observations into ranked implementation decisions.
   - >-
-    Execution quality improves when you address the audit scorecard that forced
-    prioritization.
+    Technical, search, content, and conversion findings need one shared
+    scorecard.
+  - Evidence and business impact determine priority; visual preference does not.
 whatYouNeed:
   - Current website URL and business objective.
   - Primary audience and offer clarity notes.
@@ -44,10 +45,10 @@ commonMistakes:
   - Relying on aesthetics without conversion structure.
   - Skipping QA before launch or campaign traffic.
 steps:
-  - 'Apply: Why a website audit matters more than mockups.'
-  - 'Apply: The four-layer audit framework we used.'
-  - 'Apply: The audit scorecard that forced prioritization.'
-  - 'Apply: What the roadmap looked like after the audit.'
+  - 'Capture the current routes, content, analytics, and conversion paths.'
+  - 'Classify findings by technical, search, content, and conversion impact.'
+  - 'Score each finding by severity, reach, confidence, and effort.'
+  - Turn the highest-confidence findings into an ordered roadmap.
 relatedGuideSlugs:
   - jluxe-medical-aesthetics-case-study
   - website-redesign-cost-breakdown-nigeria
@@ -61,10 +62,12 @@ faq:
       Use clear scope, measurable goals, and structured QA before and after
       launch.
 ctaVariant: none
-evidenceNote: Updated using observed implementation patterns and recurring project outcomes.
+evidenceNote: >-
+  This article explains the audit structure used to plan the J Luxe rebuild. It
+  reports the workflow and decisions, not unverified commercial results.
 methodologyNote: >-
-  Recommendations follow practical implementation-first workflows with
-  measurable QA checkpoints.
+  Findings are grouped by user impact and implementation dependency, then
+  prioritized using severity, confidence, reach, and effort.
 ---
 
 # The Audit That Created the Roadmap (Part 2)

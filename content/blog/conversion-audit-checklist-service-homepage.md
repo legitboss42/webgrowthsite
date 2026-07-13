@@ -12,10 +12,9 @@ category: Conversion
 topic: Homepage Conversion
 difficulty: Beginner
 tags: ["Conversion Audit", "Homepage", "Service Pages", "Lead Generation"]
-readTime: 14 min read
 cover: "/images/blog/conversion-hero.webp"
 author: victor-chinukwue
-reviewedBy: web-growth-editorial
+reviewedBy: victor-chinukwue
 isCornerstone: false
 checklistAvailable: true
 keyTakeaways:

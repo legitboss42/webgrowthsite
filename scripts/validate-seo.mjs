@@ -311,6 +311,26 @@ async function read(relativePath) {
   return fs.readFile(path.join(repoRoot, relativePath), "utf8");
 }
 
+async function walk(directory) {
+  const entries = await fs.readdir(directory, { withFileTypes: true });
+  const files = await Promise.all(
+    entries.map((entry) => {
+      const target = path.join(directory, entry.name);
+      return entry.isDirectory() ? walk(target) : target;
+    })
+  );
+  return files.flat();
+}
+
+function appFileToRoute(file) {
+  const relative = path.relative(path.join(repoRoot, "src/app"), file).replaceAll("\\", "/");
+  if (/^page\.tsx?$/.test(relative)) return "/";
+  const isPage = /\/page\.tsx?$/.test(relative);
+  const withoutLeaf = relative.replace(/\/(?:page|route)\.tsx?$/, "");
+  const route = `/${withoutLeaf}`.replace(/\/+/g, "/");
+  return isPage ? `${route}/` : route;
+}
+
 async function main() {
   const routeGovernance = JSON.parse(await read("src/lib/route-governance.json"));
   const robotsSource = await read("src/app/robots.ts");
@@ -333,6 +353,32 @@ async function main() {
     (article) => `https://webgrowth.info/blog/${article.slug}/`
   );
   const allUrls = [...pageUrls, ...blogUrls];
+
+  const governedPaths = new Set(routeGovernance.routes.map((route) => route.path));
+  const appFiles = (await walk(path.join(repoRoot, "src/app"))).filter(
+    (file) => /[\\/](?:page|route)\.tsx?$/.test(file) && !file.includes(`${path.sep}sitemap-`) && !file.endsWith(`${path.sep}llms.txt${path.sep}route.ts`)
+  );
+  for (const file of appFiles) {
+    const route = appFileToRoute(file);
+    if (route === "/blog/[slug]/") continue;
+    const alternate = route.endsWith("/") ? route.slice(0, -1) : `${route}/`;
+    if (!governedPaths.has(route) && !governedPaths.has(alternate)) {
+      fail(`physical public route is not classified in route governance: ${route}`);
+    }
+  }
+
+  for (const route of routeGovernance.routes) {
+    if (route.status !== "INDEX") continue;
+    if (route.path.includes("[slug]")) continue;
+    const relative = route.path === "/" ? "page.tsx" : `${route.path.slice(1)}page.tsx`;
+    try {
+      await fs.access(path.join(repoRoot, "src/app", relative));
+    } catch {
+      if (!route.path.startsWith("/tools/")) {
+        fail(`governed INDEX route has no physical page: ${route.path}`);
+      }
+    }
+  }
 
   if (new Set(allUrls).size !== allUrls.length) {
     fail("duplicate sitemap URLs found across page and blog sitemap config");

@@ -12,7 +12,6 @@ tags:
   - Homepage
   - Website Strategy
   - Sales Psychology
-readTime: 15 min read
 cover: /images/blog/homepage.webp
 updatedAt: "2026-04-29"
 lastReviewedAt: "2026-04-29"
@@ -21,7 +20,7 @@ difficulty: Beginner
 isCornerstone: false
 checklistAvailable: false
 author: victor-chinukwue
-reviewedBy: web-growth-editorial
+reviewedBy: victor-chinukwue
 keyTakeaways:
   - A homepage is often the first sales conversation a visitor has with a business.
   - A homepage structure that converts needs clarity, trust, proof, and a clear next step.

@@ -13,7 +13,6 @@ tags:
   - Page Speed
   - Website Performance
   - UX
-readTime: 14 min read
 cover: /images/blog/jluxe-series-premium-design-speed-cover.webp
 updatedAt: "2026-04-29"
 lastReviewedAt: "2026-04-29"
@@ -22,7 +21,7 @@ difficulty: Beginner
 isCornerstone: false
 checklistAvailable: false
 author: victor-chinukwue
-reviewedBy: web-growth-editorial
+reviewedBy: victor-chinukwue
 keyTakeaways:
   - Premium design should support clarity, trust, and usability instead of making the page heavier or harder to use.
   - Images, videos, animations, scripts, fonts, and mobile layout all affect whether a premium website still feels fast.

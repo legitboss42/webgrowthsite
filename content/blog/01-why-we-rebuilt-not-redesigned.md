@@ -1,9 +1,11 @@
 ---
 title: 'Why We Rebuilt, Not Redesigned: Website Strategy for More Leads and Sales'
-seoTitle: "Why We Rebuilt, Not Redesigned | Web Growth"
-primaryKeyword: "website rebuild strategy"
-searchIntent: "Informational - first-hand case study and implementation lessons"
-coverAlt: "Why We Rebuilt, Not Redesigned: Website Strategy for More Leads and Sales - practical Web Growth guide visual"
+seoTitle: 'Why We Rebuilt, Not Redesigned | Web Growth'
+primaryKeyword: website rebuild strategy
+searchIntent: Informational - first-hand case study and implementation lessons
+coverAlt: >-
+  Why We Rebuilt, Not Redesigned: Website Strategy for More Leads and Sales -
+  practical Web Growth guide visual
 excerpt: >-
   Part 1 of the J Luxe rebuild series: why a full website rebuild beats a
   surface redesign when you want better SEO, higher conversion rates, and more
@@ -16,26 +18,25 @@ tags:
   - Small Business Website
   - SEO
   - Conversion
-readTime: 15 min read
 cover: /images/blog/jluxe-series-why-rebuild.webp
-updatedAt: '2026-02-18'
-lastReviewedAt: '2026-02-18'
+updatedAt: '2026-07-13'
+lastReviewedAt: '2026-07-13'
 topic: Case Study Series
 difficulty: Intermediate
 isCornerstone: false
 checklistAvailable: false
 author: victor-chinukwue
-reviewedBy: web-growth-editorial
+reviewedBy: victor-chinukwue
 keyTakeaways:
   - >-
-    Priority one is the expensive confusion: website redesign vs website
-    rebuild.
+    A rebuild is justified when structure, content, SEO, and conversion paths
+    all need coordinated change.
   - >-
-    Sustained results depend on the decision framework we used before touching
-    design.
+    Define the business outcome and baseline before choosing design or
+    technology.
   - >-
-    Execution quality improves when you address what we found in the old website
-    (and why it mattered).
+    A visual refresh cannot repair unclear offers, broken journeys, or unsafe
+    URL changes.
 whatYouNeed:
   - Current website URL and business objective.
   - Primary audience and offer clarity notes.
@@ -45,10 +46,10 @@ commonMistakes:
   - Relying on aesthetics without conversion structure.
   - Skipping QA before launch or campaign traffic.
 steps:
-  - 'Apply: The expensive confusion: website redesign vs website rebuild.'
-  - 'Apply: The decision framework we used before touching design.'
-  - 'Apply: What we found in the old website (and why it mattered).'
-  - 'Apply: Why a surface redesign would have failed.'
+  - 'Document the current site, audience, offers, and measurable baseline.'
+  - Separate cosmetic defects from structural problems.
+  - Choose redesign or rebuild based on the systems that must change.
+  - Set migration and QA requirements before implementation.
 relatedGuideSlugs:
   - jluxe-medical-aesthetics-case-study
   - website-redesign-cost-breakdown-nigeria
@@ -62,10 +63,13 @@ faq:
       Use clear scope, measurable goals, and structured QA before and after
       launch.
 ctaVariant: none
-evidenceNote: Updated using observed implementation patterns and recurring project outcomes.
+evidenceNote: >-
+  This article documents the decision criteria used to scope the J Luxe website
+  rebuild; it does not claim a measured revenue or ranking uplift.
 methodologyNote: >-
-  Recommendations follow practical implementation-first workflows with
-  measurable QA checkpoints.
+  The decision framework compares the existing information architecture,
+  content, conversion paths, technical constraints, and migration risk against
+  the desired business outcome.
 ---
 
 # Why We Rebuilt, Not Redesigned (Part 1)

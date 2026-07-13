@@ -13,7 +13,6 @@ tags:
   - Strategy
   - Service Pages
   - Business Websites
-readTime: 14 min read
 cover: /images/blog/service-blueprint.webp
 updatedAt: "2026-04-29"
 lastReviewedAt: "2026-04-29"
@@ -22,7 +21,7 @@ difficulty: Beginner
 isCornerstone: false
 checklistAvailable: false
 author: victor-chinukwue
-reviewedBy: web-growth-editorial
+reviewedBy: victor-chinukwue
 keyTakeaways:
   - A service page should explain the offer, build trust, answer objections, and guide the visitor toward one clear next step.
   - Clear positioning, outcome clarity, trust, process, FAQs, and CTA flow usually matter more than decorative copy.

@@ -36,7 +36,7 @@ const sections = [
   {
     title: "Affiliate and partner context",
     body:
-      "Some future recommendations or resource pages may include affiliate or partner links where relevant. If that happens, the presence of a commission opportunity will not change the standard that the recommendation must still be useful, relevant, and editorially defensible.",
+      "Some recommendations and resource pages include affiliate links. Web Growth may receive a commission if you buy through one of those links, at no additional cost to you. Affiliate relationships do not determine the editorial conclusion: a recommendation must still be useful, relevant, and defensible, and the disclosure is placed near the affected recommendation.",
   },
   {
     title: "Examples and proof",

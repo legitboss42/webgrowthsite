@@ -231,7 +231,7 @@ export default async function ToolPage({
         <section id="tool-workspace" className="tool-workspace-section" aria-labelledby="tool-workspace-title">
           <div className="tools-container">
             <div className="tool-workspace-heading">
-              <div><p className="tools-kicker">Interactive workspace</p><h2 id="tool-workspace-title">Run your {tool.shortTitle.toLowerCase()}.</h2></div>
+              <div><p className="tools-kicker">Interactive workspace</p><h2 id="tool-workspace-title">Use {tool.shortTitle.toLowerCase()} to make a clearer website decision.</h2></div>
               <p>Enter only the information requested below. Review the output as decision support, then verify important changes before publishing.</p>
             </div>
             <div className="tool-workspace-shell"><ToolRenderer slug={tool.slug} /></div>

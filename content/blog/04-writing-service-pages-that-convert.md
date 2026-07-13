@@ -13,7 +13,6 @@ tags:
   - Website Copywriting
   - Conversion
   - Business Websites
-readTime: 14 min read
 cover: /images/blog/jluxe-series-service-pages-cover.webp
 updatedAt: "2026-04-29"
 lastReviewedAt: "2026-04-29"
@@ -22,7 +21,7 @@ difficulty: Beginner
 isCornerstone: false
 checklistAvailable: false
 author: victor-chinukwue
-reviewedBy: web-growth-editorial
+reviewedBy: victor-chinukwue
 keyTakeaways:
   - Service pages should explain the offer, build trust, answer objections, and guide the visitor toward one clear next step.
   - Clear service naming, audience fit, practical outcomes, inclusions, FAQs, and CTA flow usually matter more than broad polished wording.

@@ -4,8 +4,8 @@ const benefits = [
   ["Practical & actionable", "No fluff. Only what works.", CheckIcon, "blue"],
   ["Beginner to advanced", "Step-by-step learning paths.", CapIcon, "purple"],
   ["Free tools", "Powerful tools to grow faster.", WrenchIcon, "green"],
-  ["Proven strategies", "Battle-tested methods that scale.", TargetIcon, "amber"],
-  ["Built for results", "More traffic. More leads. More revenue.", GrowthChartIcon, "blue"],
+  ["Documented process", "Clear decisions, evidence, and practical next steps.", TargetIcon, "amber"],
+  ["Built for progress", "Stronger foundations for traffic, trust, and action.", GrowthChartIcon, "blue"],
 ] as const;
 
 export default function TrustBenefitStrip() {

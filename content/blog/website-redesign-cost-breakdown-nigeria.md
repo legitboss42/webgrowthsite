@@ -12,10 +12,9 @@ category: Strategy
 topic: Pricing
 difficulty: Beginner
 tags: ["Website Redesign", "Nigeria", "Pricing", "Budgeting"]
-readTime: 14 min read
 cover: "/images/blog/redesign-checklist-cover-generated.webp"
 author: victor-chinukwue
-reviewedBy: web-growth-editorial
+reviewedBy: victor-chinukwue
 isCornerstone: false
 checklistAvailable: false
 keyTakeaways:

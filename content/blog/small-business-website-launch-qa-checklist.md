@@ -12,10 +12,9 @@ category: Strategy
 topic: Launch QA
 difficulty: Beginner
 tags: ["Website Launch", "QA Checklist", "Small Business", "Website QA"]
-readTime: 14 min read
 cover: "/images/blog/growth-process.webp"
 author: victor-chinukwue
-reviewedBy: web-growth-editorial
+reviewedBy: victor-chinukwue
 isCornerstone: true
 checklistAvailable: true
 keyTakeaways:

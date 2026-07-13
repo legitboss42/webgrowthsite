@@ -11,7 +11,8 @@ export default function PlatformServicesCTA() {
               All-in-one platform. Expert guidance. Real growth.
             </h2>
             <p className="mt-3 max-w-2xl text-sm leading-7 text-text-muted">
-              Premium websites, proven SEO systems, and monetization strategy
+              Premium websites, documented SEO foundations, and responsible
+              monetization strategy
               working together.
             </p>
           </div>

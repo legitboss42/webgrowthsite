@@ -24,7 +24,7 @@ const categories = [
   },
   {
     title: "SEO Growth",
-    description: "Rank higher and attract qualified traffic.",
+    description: "Strengthen search foundations and attract relevant traffic.",
     accent: <SearchIcon />,
     slugs: [
       "small-business-website-seo-checklist",

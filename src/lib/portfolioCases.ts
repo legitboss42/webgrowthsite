@@ -9,7 +9,7 @@ export type PortfolioCase = {
   purpose: string;
   summary: string;
   whatToNotice: string;
-  results: string[];
+  deliveredImprovements: string[];
   stack: string[];
   tags: string[];
   featured?: boolean;
@@ -33,7 +33,7 @@ export const portfolioCases: PortfolioCase[] = [
       "A polished medical aesthetics website built to explain treatments, create a calmer first impression, and make it easier for visitors to book, call, or ask questions.",
     whatToNotice:
       "Notice the treatment-led structure, premium trust presentation, and the clearer booking path across devices.",
-    results: ["Treatment clarity", "Trust-focused layout", "Consultation path"],
+    deliveredImprovements: ["Treatment clarity", "Trust-focused layout", "Consultation path"],
     stack: [
       "Service and treatment presentation",
       "Trust-building layout and copy flow",
@@ -59,7 +59,7 @@ export const portfolioCases: PortfolioCase[] = [
       "A modern interior design website created to present services, finished spaces, and craftsmanship in a more premium and easier-to-trust way.",
     whatToNotice:
       "Notice the calmer visual hierarchy, service breakdown, and how the work presentation helps the brand feel more established.",
-    results: ["Premium presentation", "Service clarity", "Mobile-ready contact flow"],
+    deliveredImprovements: ["Premium presentation", "Service clarity", "Mobile-ready contact flow"],
     stack: [
       "Homepage built around service positioning",
       "Interior and furniture service structure",
@@ -85,7 +85,7 @@ export const portfolioCases: PortfolioCase[] = [
       "A polished treats website designed to make categories easier to browse, featured products easier to notice, and WhatsApp ordering easier to start.",
     whatToNotice:
       "Notice the category-led layout, product presentation, and the direct order path built into the browsing experience.",
-    results: ["Product visibility", "WhatsApp ordering path", "Cleaner browsing flow"],
+    deliveredImprovements: ["Product visibility", "WhatsApp ordering path", "Cleaner browsing flow"],
     stack: [
       "Menu and category structure",
       "Featured product presentation",
@@ -111,7 +111,7 @@ export const portfolioCases: PortfolioCase[] = [
       "A conversion-focused fitness website built to present locations, membership information, classes, and sign-up intent in a cleaner way.",
     whatToNotice:
       "Notice how the page answers branch, pricing, and joining questions early to reduce hesitation before registration.",
-    results: ["Membership clarity", "Branch-first journey", "Mobile-friendly sign-up flow"],
+    deliveredImprovements: ["Membership clarity", "Branch-first journey", "Mobile-friendly sign-up flow"],
     stack: [
       "Offer and membership structure",
       "Branch and location presentation",
@@ -136,7 +136,7 @@ export const portfolioCases: PortfolioCase[] = [
       "A sleek digital-finance style website focused on product clarity, low-risk framing, and a cleaner path into the vault dashboard.",
     whatToNotice:
       "Notice the simplified product explanation, restrained feature framing, and the strong desktop-to-mobile consistency.",
-    results: ["Product clarity", "Clean MVP framing", "Cross-device consistency"],
+    deliveredImprovements: ["Product clarity", "Clean MVP framing", "Cross-device consistency"],
     stack: [
       "Hero section built around one offer",
       "Product explanation and usage signals",

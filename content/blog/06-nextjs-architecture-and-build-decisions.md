@@ -2,10 +2,12 @@
 title: >-
   Next.js Architecture and Build Decisions: Technical SEO and Website
   Maintainability
-seoTitle: "Next.js Architecture and Build Decisions | Web Growth"
-primaryKeyword: "Next.js architecture for SEO"
-searchIntent: "Informational - first-hand case study and implementation lessons"
-coverAlt: "Next.js Architecture and Build Decisions: Technical SEO and Website Maintainability - practical Web Growth guide visual"
+seoTitle: Next.js Architecture and Build Decisions | Web Growth
+primaryKeyword: Next.js architecture for SEO
+searchIntent: Informational - first-hand case study and implementation lessons
+coverAlt: >-
+  Next.js Architecture and Build Decisions: Technical SEO and Website
+  Maintainability - practical Web Growth guide visual
 excerpt: >-
   Part 6 of the J Luxe rebuild series: the Next.js architecture decisions that
   improved performance, crawlability, publishing speed, and long-term
@@ -19,22 +21,25 @@ tags:
   - Technical SEO
   - Website Performance
   - Maintainability
-readTime: 16 min read
 cover: /images/blog/jluxe-series-nextjs-architecture-cover.webp
-updatedAt: '2026-02-23'
-lastReviewedAt: '2026-02-23'
+updatedAt: '2026-07-13'
+lastReviewedAt: '2026-07-13'
 topic: Case Study Series
 difficulty: Intermediate
 isCornerstone: false
 checklistAvailable: false
 author: victor-chinukwue
-reviewedBy: web-growth-editorial
+reviewedBy: victor-chinukwue
 keyTakeaways:
-  - Priority one is why architecture decisions affect seo and conversion.
-  - Sustained results depend on the architecture principle we used.
   - >-
-    Execution quality improves when you address why we used next.js for this
-    rebuild.
+    Architecture should support crawlable pages, maintainable content, and
+    predictable releases.
+  - >-
+    Framework choice matters less than routing, rendering, metadata, and
+    operational discipline.
+  - >-
+    Reusable components need clear boundaries so consistency does not create
+    duplicate content.
 whatYouNeed:
   - Current website URL and business objective.
   - Primary audience and offer clarity notes.
@@ -44,10 +49,10 @@ commonMistakes:
   - Relying on aesthetics without conversion structure.
   - Skipping QA before launch or campaign traffic.
 steps:
-  - 'Apply: Why architecture decisions affect SEO and conversion.'
-  - 'Apply: The architecture principle we used.'
-  - 'Apply: Why we used Next.js for this rebuild.'
-  - 'Apply: The App Router decision and why it mattered.'
+  - Define route and content ownership before building components.
+  - Choose rendering behavior for each public and private surface.
+  - 'Centralize metadata, redirects, and route governance.'
+  - 'Validate builds, links, schema, and crawl behavior before release.'
 relatedGuideSlugs:
   - jluxe-medical-aesthetics-case-study
   - website-redesign-cost-breakdown-nigeria
@@ -61,10 +66,12 @@ faq:
       Use clear scope, measurable goals, and structured QA before and after
       launch.
 ctaVariant: none
-evidenceNote: Updated using observed implementation patterns and recurring project outcomes.
+evidenceNote: >-
+  This article documents architecture choices made during the J Luxe rebuild and
+  distinguishes implementation decisions from measured business outcomes.
 methodologyNote: >-
-  Recommendations follow practical implementation-first workflows with
-  measurable QA checkpoints.
+  The architecture is evaluated against crawlability, performance, publishing
+  safety, maintainability, and deployment QA rather than framework popularity.
 ---
 
 # Next.js Architecture and Build Decisions (Part 6)

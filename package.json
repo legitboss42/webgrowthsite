@@ -9,6 +9,7 @@
     "start": "next start",
     "lint": "eslint .",
     "seo:validate": "node scripts/validate-seo.mjs",
+    "content:ledger": "node scripts/generate-content-ledger.mjs",
     "seo:audit": "node scripts/seo-audit/index.mjs",
     "seo:audit:webgrowth": "node scripts/seo-audit/index.mjs https://webgrowth.info/",
     "portfolio:generate": "node scripts/generate-portfolio-assets.mjs",

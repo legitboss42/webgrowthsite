@@ -12,10 +12,9 @@ category: Performance
 topic: WordPress
 difficulty: Beginner
 tags: ["WordPress", "Speed Audit", "Performance", "Website Audit"]
-readTime: 14 min read
 cover: "/images/blog/wordpress.webp"
 author: victor-chinukwue
-reviewedBy: web-growth-editorial
+reviewedBy: victor-chinukwue
 isCornerstone: false
 checklistAvailable: true
 keyTakeaways:

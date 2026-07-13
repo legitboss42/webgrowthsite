@@ -38,6 +38,7 @@ export type Post = {
   checklistAvailable?: boolean;
   tags: string[];
   readTime: string;
+  declaredReadTime?: string;
   content: string;
   cover?: string;
   author?: string;
@@ -159,6 +160,20 @@ function toTime(value?: string) {
   return Number.isNaN(time) ? 0 : time;
 }
 
+function calculateReadTime(content: string) {
+  const wordCount = content
+    .replace(/```[\s\S]*?```/g, " ")
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, " ")
+    .replace(/\[([^\]]+)\]\([^)]*\)/g, "$1")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/[#>*_`|~-]/g, " ")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean).length;
+
+  return `${Math.max(1, Math.ceil(wordCount / 220))} min read`;
+}
+
 export function isPublicBlogSlug(slug: string) {
   return APPROVED_BLOG_SLUGS.has(slug);
 }
@@ -197,7 +212,8 @@ export function getPosts(): Post[] {
       isCornerstone: toSafeBool(data.isCornerstone, false),
       checklistAvailable: toSafeBool(data.checklistAvailable, false),
       tags,
-      readTime: toSafeString(data.readTime || data.readingTime, "6 min read"),
+      readTime: calculateReadTime(content),
+      declaredReadTime: toSafeString(data.readTime || data.readingTime) || undefined,
       content,
       cover: toSafeString(data.cover) || undefined,
       author: toSafeString(data.author, DEFAULT_AUTHOR_ID),
@@ -223,7 +239,7 @@ export function getPosts(): Post[] {
     return a.title.localeCompare(b.title);
   });
 
-  warnOnPostQuality(sorted);
+  warnOnPostQuality(sorted.filter((post) => APPROVED_BLOG_SLUGS.has(post.slug)));
 
   postsCache = sorted;
   postsBySlugCache = new Map(sorted.map((post) => [post.slug, post]));

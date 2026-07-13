@@ -25,22 +25,10 @@ const AUTHORS: Record<string, AuthorProfile> = {
     image: "/images/authors/victor-chinukwue-clean.webp",
     profileUrl: "https://webgrowth.info/about",
   },
-  "web-growth-editorial": {
-    id: "web-growth-editorial",
-    name: "Web Growth Editorial",
-    role: "Editorial Review Team",
-    bio: "Editorial quality and implementation standards team ensuring guides stay practical, current, and commercially useful.",
-    expertise: [
-      "Editorial quality control",
-      "Implementation review",
-      "Content update governance",
-    ],
-    profileUrl: "https://webgrowth.info/editorial-policy",
-  },
 };
 
 export const DEFAULT_AUTHOR_ID = "victor-chinukwue";
-export const DEFAULT_REVIEWER_ID = "web-growth-editorial";
+export const DEFAULT_REVIEWER_ID = "victor-chinukwue";
 
 export function getAuthorProfile(authorId?: string | null): AuthorProfile {
   if (authorId && AUTHORS[authorId]) return AUTHORS[authorId];

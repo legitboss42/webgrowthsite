@@ -12,7 +12,6 @@ tags:
   - Conversion
   - Lead Generation
   - Marketing
-readTime: 15 min read
 cover: /images/blog/landing-pages.webp
 updatedAt: "2026-04-29"
 lastReviewedAt: "2026-04-29"
@@ -21,7 +20,7 @@ difficulty: Beginner
 isCornerstone: true
 checklistAvailable: false
 author: victor-chinukwue
-reviewedBy: web-growth-editorial
+reviewedBy: victor-chinukwue
 keyTakeaways:
   - A high-converting landing page stays focused on one offer, one audience, and one main action.
   - Clarity, trust, CTA flow, mobile usability, and speed usually matter more than clever visuals alone.

@@ -21,15 +21,22 @@ const sections = [
   {
     title: "Cookies and analytics",
     body: [
-      "This website may use cookies or similar technologies for analytics, performance measurement, security, and user experience improvements.",
-      "Analytics tools help us understand how people use the site so we can improve content quality, navigation, and conversions.",
+      "This website uses Vercel Analytics and Speed Insights and, when configured, Google Analytics, Microsoft Clarity, and TikTok Pixel to measure visits, performance, and interactions. These providers may use cookies or similar technologies under their own privacy terms.",
+      "Where consent is legally required, optional analytics and advertising technologies should not be enabled until the required choice has been collected. Browser settings and available provider controls can also be used to limit cookies.",
     ],
   },
   {
     title: "Third-party services",
     body: [
-      "Some forms, analytics, or communication workflows may rely on third-party service providers. Those providers process data according to their own terms and privacy policies.",
-      "We use only the services required to operate, measure, or protect the platform.",
+      "Contact and enquiry forms use Cloudflare Turnstile for spam prevention and Brevo to deliver email notifications when those services are configured. Analytics and performance measurement may use the providers named above.",
+      "Those providers process data under their own terms and privacy policies. Web Growth uses them to operate, measure, communicate through, or protect the website.",
+    ],
+  },
+  {
+    title: "Retention and security",
+    body: [
+      "Enquiry information is kept only for as long as it is reasonably needed to respond, deliver requested work, maintain necessary business records, resolve disputes, or meet legal obligations. Provider logs and analytics data follow the retention settings of the relevant provider.",
+      "Reasonable technical and operational safeguards are used, including spam checks and access controls, but no internet transmission or storage system can be guaranteed completely secure.",
     ],
   },
   {

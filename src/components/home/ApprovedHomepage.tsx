@@ -194,7 +194,7 @@ export default function ApprovedHomepage() {
             />
           </div>
           <div className="approved-proof-list" aria-label="Verified project notes" data-home-stagger>
-            {featuredCase.results.map((result) => (
+            {featuredCase.deliveredImprovements.map((result) => (
               <div key={result}>
                 <strong>{result}</strong>
                 <span>{featuredCase.type}</span>
@@ -311,7 +311,7 @@ export default function ApprovedHomepage() {
                 <div>
                   <span>{item.type}</span>
                   <strong>{item.title}</strong>
-                  <small>{item.results.join(" / ")}</small>
+                  <small>{item.deliveredImprovements.join(" / ")}</small>
                 </div>
               </article>
             ))}

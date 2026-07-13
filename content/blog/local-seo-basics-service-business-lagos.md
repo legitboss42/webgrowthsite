@@ -12,10 +12,9 @@ category: SEO
 topic: Local SEO
 difficulty: Beginner
 tags: ["Local SEO", "Lagos", "Service Business", "Google Maps"]
-readTime: 11 min read
 cover: "/images/blog/local-seo.webp"
 author: victor-chinukwue
-reviewedBy: web-growth-editorial
+reviewedBy: victor-chinukwue
 isCornerstone: false
 checklistAvailable: false
 keyTakeaways:

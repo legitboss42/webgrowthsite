@@ -96,9 +96,9 @@ export const NEW_SERVICE_PAGES: Record<string, ServicePageInput> = {
       "email conversion optimization",
     ],
     heroTitle:
-      "Email marketing setup and strategy that turns subscribers into sales conversations",
+      "Email marketing setup and strategy for clearer subscriber follow-up",
     heroDescription:
-      "We build your email marketing system end-to-end: strategy, list segmentation, automations, campaigns, and reporting so email becomes a predictable revenue channel.",
+      "We build your email marketing system end-to-end: strategy, list segmentation, automations, campaigns, and reporting so follow-up is easier to manage and review.",
     heroImage: "/images/services/services-support.webp",
     detailImage: "/images/services/services-business-2.webp",
     highlights: [
@@ -256,7 +256,7 @@ export const NEW_SERVICE_PAGES: Record<string, ServicePageInput> = {
       "Scaling content before fixing crawl and structure basics.",
     ],
     examples: [
-      "A local service brand improved rankings by tightening page intent and internal links.",
+      "Example workflow: tighten page intent and internal links, then measure search changes against a documented baseline.",
       "A founder-led business removed duplicated targeting and improved enquiry quality.",
       "A team restructured service clusters to support local search and conversion together.",
     ],
@@ -270,7 +270,7 @@ export const NEW_SERVICE_PAGES: Record<string, ServicePageInput> = {
     seoDescription:
       "Google Business Profile optimization in Lagos for service businesses that need better Maps visibility, stronger profile trust signals, and more qualified enquiries.",
     metaDescription:
-      "Google Business Profile optimization in Lagos to improve Google Maps visibility, local rankings, profile quality, and enquiry volume for service businesses.",
+      "Google Business Profile optimisation in Lagos to improve profile quality, local relevance, and the clarity of service-area information.",
     keywords: [
       "google my business setup",
       "google business profile optimization",
@@ -284,7 +284,7 @@ export const NEW_SERVICE_PAGES: Record<string, ServicePageInput> = {
       "local business listing optimization",
     ],
     heroTitle:
-      "Google Business Profile optimization in Lagos for more local visibility and enquiries",
+      "Google Business Profile optimisation in Lagos for clearer local relevance and service information",
     heroDescription:
       "If you need Google Business Profile optimization in Lagos, we improve your profile structure, service targeting, trust signals, and conversion setup so more local searches can turn into enquiries.",
     heroImage: "/images/services/services-business.webp",
@@ -412,7 +412,7 @@ export const NEW_SERVICE_PAGES: Record<string, ServicePageInput> = {
       "booking funnel optimization",
     ],
     heroTitle:
-      "Booking platform setup and integration that reduces friction and increases completed appointments",
+      "Booking platform setup and integration that supports a clearer appointment path",
     heroDescription:
       "We set up and integrate your booking system with your website so visitors can move from interest to confirmed appointment with less drop-off.",
     heroImage: "/images/services/services-maintenance.webp",
@@ -879,7 +879,7 @@ export const NEW_SERVICE_PAGES: Record<string, ServicePageInput> = {
       "email lead capture strategy",
     ],
     heroTitle:
-      "Lead magnet strategy and build to capture higher-quality leads before the sales conversation",
+      "Lead magnet strategy and build to organise useful pre-sale information before the sales conversation",
     heroDescription:
       "We design and build lead magnets that match your audience intent and connect to a practical conversion funnel: capture, nurture, and action.",
     heroImage: "/images/services/services-landing.webp",

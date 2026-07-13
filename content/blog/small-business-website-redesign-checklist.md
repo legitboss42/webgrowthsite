@@ -13,7 +13,6 @@ tags:
   - UX
   - SEO
   - Small Business
-readTime: 18 min read
 cover: /images/blog/redesign-checklist-cover-generated.webp
 updatedAt: "2026-04-29"
 lastReviewedAt: "2026-04-29"
@@ -22,7 +21,7 @@ difficulty: Beginner
 isCornerstone: true
 checklistAvailable: true
 author: victor-chinukwue
-reviewedBy: web-growth-editorial
+reviewedBy: victor-chinukwue
 keyTakeaways:
   - A redesign should fix clarity, trust, speed, and enquiry problems, not just make a site look newer.
   - The homepage, service pages, mobile usability, and CTA flow usually matter more than cosmetic changes first.

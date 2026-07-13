@@ -8,10 +8,9 @@ category: Strategy
 topic: "Website Growth"
 difficulty: "Beginner"
 tags: ["Tag 1", "Tag 2", "Tag 3"]
-readTime: 8 min read
 cover: /images/blog/default-cover.webp
 author: victor-chinukwue
-reviewedBy: web-growth-editorial
+reviewedBy: victor-chinukwue
 isCornerstone: false
 checklistAvailable: false
 keyTakeaways:

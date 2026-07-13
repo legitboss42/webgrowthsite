@@ -42,7 +42,7 @@ export default function SelectedWorkSection({ cases }: SelectedWorkSectionProps)
             Selected work
           </p>
           <h2 className="font-display mt-4 max-w-lg text-5xl font-medium leading-[0.95] tracking-[-0.06em] text-text-primary">
-            Results, not renderings.
+            Delivered improvements, not renderings.
           </h2>
           <p className="mt-4 max-w-md text-sm leading-7 text-text-muted">
             A more editorial proof section inspired by the reference, grounded in
@@ -58,7 +58,7 @@ export default function SelectedWorkSection({ cases }: SelectedWorkSectionProps)
             const href = isPortfolioCase ? "/portfolio/" : item.href;
             const imageUrl = isPortfolioCase ? item.imageUrl : "/images/cinematic/case-study-bg.webp";
             const imageAlt = isPortfolioCase ? item.imageAlt : "";
-            const metric = isPortfolioCase ? item.results[0] ?? item.type : item.metric;
+            const metric = isPortfolioCase ? item.deliveredImprovements[0] ?? item.type : item.metric;
 
             return (
               <Link

@@ -17,7 +17,6 @@ tags:
   - Redirects
   - Canonical URLs
   - Website Audit
-readTime: 13 min read
 cover: /images/blog/jluxe-series-seo-migration.webp
 updatedAt: '2026-04-29'
 lastReviewedAt: '2026-04-29'
@@ -26,7 +25,7 @@ difficulty: Intermediate
 isCornerstone: false
 checklistAvailable: true
 author: victor-chinukwue
-reviewedBy: web-growth-editorial
+reviewedBy: victor-chinukwue
 keyTakeaways:
   - Careless redesigns can damage SEO even when the new website looks better.
   - Protecting URLs, redirects, canonicals, metadata, and internal links reduces avoidable SEO risk.

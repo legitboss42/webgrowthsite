@@ -2,166 +2,143 @@
 title: "Google Business Profile Optimization Checklist"
 seoTitle: "Google Business Profile Optimization Checklist | Web Growth"
 primaryKeyword: "Google Business Profile optimization checklist"
-searchIntent: "Informational - improve search visibility with practical steps"
-coverAlt: "Google Business Profile Optimization Checklist - practical Web Growth guide visual"
-excerpt: "A practical Google Business Profile checklist for local businesses that want better Maps visibility and stronger enquiry quality."
+searchIntent: "Informational - audit and improve an existing Google Business Profile"
+coverAlt: "Checklist for auditing a Google Business Profile"
+excerpt: "Audit an existing Google Business Profile for category accuracy, customer information, proof, enquiries, and ongoing maintenance."
 date: 2026-04-03
-updatedAt: 2026-04-03
-lastReviewedAt: 2026-04-03
+updatedAt: 2026-07-13
+lastReviewedAt: 2026-07-13
 category: SEO
 topic: Local SEO
 difficulty: Beginner
 tags: ["Google Business Profile", "Google Maps", "Local SEO", "Checklist"]
-readTime: 11 min read
 cover: "/images/blog/local-seo-hero.webp"
 author: victor-chinukwue
-reviewedBy: web-growth-editorial
+reviewedBy: victor-chinukwue
 isCornerstone: false
 checklistAvailable: true
 keyTakeaways:
-  - "Profile completeness and category accuracy are baseline ranking requirements."
-  - "Photos, services, and Q&A quality influence trust and enquiry conversion."
-  - "Review cadence and profile activity support long-term local visibility."
+  - "Choose categories for services the business actually provides, not every category that could attract a search."
+  - "Contact details, hours, services, photos, and the linked landing page must agree."
+  - "Review performance by enquiry quality as well as calls, clicks, and directions."
 whatYouNeed:
-  - "Verified Google Business Profile access."
-  - "Accurate business service list and service areas."
-  - "Recent photos and customer review process."
+  - "Owner or manager access to the verified profile."
+  - "The current service list, opening hours, service area, and contact details."
+  - "Recent, authentic photos and a lawful process for requesting reviews."
 commonMistakes:
-  - "Selecting broad categories that do not match real services."
-  - "Leaving service descriptions generic and weak."
-  - "Ignoring profile updates for months."
+  - "Adding categories, business names, or locations that do not describe the real business."
+  - "Sending every profile visitor to a generic homepage."
+  - "Publishing updates while basic phone, hours, or website information is wrong."
 steps:
-  - "Set primary and secondary categories correctly."
-  - "Tighten service descriptions and service-area relevance."
-  - "Add media, Q&A answers, and conversion-focused details."
-  - "Maintain review and activity cadence."
+  - "Confirm identity, eligibility, and customer-facing details."
+  - "Set categories, services, and service areas from the real offer."
+  - "Improve the linked page, photos, reviews, and enquiry path."
+  - "Check changes and performance on a repeatable schedule."
 relatedGuideSlugs:
   - "local-seo-for-small-business-google-maps-ranking-guide"
   - "small-business-website-seo-checklist"
 faq:
-  - question: "How quickly can profile optimization improve visibility?"
-    answer: "Early quality improvements can appear fast, but stable gains usually build over weeks and months."
-  - question: "Can profile optimization replace website SEO?"
-    answer: "No. Best results come when profile and website structure support each other."
+  - question: "How soon should I expect results after editing a profile?"
+    answer: "There is no reliable fixed timetable. Confirm that edits are approved, then compare visibility and enquiries over several weeks rather than judging one day."
+  - question: "Can a profile replace a local business website?"
+    answer: "No. The profile supports discovery, while the website gives the business space to explain services, proof, terms, and the next step."
 ctaVariant: service
-evidenceNote: "Built from recurring local-business profile audits and optimization projects."
-methodologyNote: "Checklist prioritizes visibility, trust, and conversion usefulness."
 ---
 
 # Google Business Profile Optimization Checklist
 
-Your profile can rank and still underperform if conversion details are weak.
+Use this checklist to audit an **existing** Google Business Profile. It is not a recipe for forcing rankings. The aim is to help Google and a potential customer understand the same facts: what the business does, where it operates, when it is available, and how someone can contact it.
 
-This Google Business Profile optimization checklist focuses on both visibility and lead quality.
+Make one round of corrections, record the date, and allow edits to be reviewed before changing the same fields again.
 
-## 1) Category and relevance setup
+## 1. Confirm that the profile represents a real, eligible business
 
-- Primary category matches your highest-value service.
-- Secondary categories reflect real service lines.
-- Service areas are accurate and realistic.
+Start with the facts a customer could verify.
 
-Category mismatch creates poor lead quality even when impressions increase.
+- The displayed name matches the name used on the shopfront, website, invoices, and customer communications.
+- The address is customer-facing, or it is hidden for a service-area business that does not receive customers there.
+- There is only one profile for the business at a location unless separate departments genuinely qualify.
+- The phone number reaches the business during the stated hours.
+- Regular and special hours are correct.
 
-## 2) Offer clarity inside the profile
+Do not add services, locations, or keywords to the business name just to capture more searches. A fabricated location or altered name creates a policy and trust problem, not a durable local SEO advantage.
 
-Optimize:
+## 2. Choose categories from the work customers can actually buy
 
-- services list
-- business description
-- FAQ and Q&A responses
+The primary category should describe the main business, not the audience or an aspirational service. For example, a company that installs and repairs air conditioners should select the closest available air-conditioning service category, not a broad category merely because it has more search volume.
 
-Use natural local intent phrases such as your service and location, but avoid keyword stuffing.
+Add a secondary category only when the business actively provides that service. Before adding one, ask:
 
-## 3) Trust and proof assets
+1. Is this service shown on the website?
+2. Can a customer request it today?
+3. Does the team, equipment, licence, or process needed to deliver it exist?
 
-Minimum trust assets:
+If the answers are weak, leave the category out. Irrelevant visibility often produces irrelevant calls.
 
-- recent business photos
-- completed work examples where relevant
-- review collection process
-- active review response cadence
+## 3. Rewrite the description and services for decision-making
 
-Potential clients judge credibility quickly. Outdated profiles lose trust.
+The business description should explain the offer in plain language. Include the customer type, main services, genuine service area, and a useful distinction. Avoid promotions, unsupported superlatives, or a list of place names.
 
-## 4) Conversion readiness checks
+For each service, use the wording customers hear from the business. A useful service entry answers:
 
-Verify every month:
+- What is included?
+- Who is it suitable for?
+- Is the work available on-site, remotely, or at the business location?
+- Is there an important limitation customers should know before calling?
 
-- phone number works
-- website URL is correct
-- hours and holiday schedule are updated
-- booking/contact CTA points to a live page
+Specific language such as “boiler servicing for occupied homes” is more useful than “best heating solutions.”
 
-This is simple, but many profiles fail here.
+## 4. Make the website link continue the same conversation
 
-## 5) Ongoing management cadence
+Open the website link from a phone and check it as a visitor would. The landing page should repeat the relevant service and location, show credible proof, and make the next action obvious.
 
-Weekly:
+Send visitors to the most relevant page when the profile represents a distinct location or service. Do not create near-identical doorway pages for every suburb. One strong local page with real service information is better than dozens of swapped place names.
 
-- respond to new reviews
-- answer profile questions
+Also confirm that call, form, booking, and WhatsApp actions work. Add tracking parameters only if the analytics setup can store and report them correctly.
 
-Monthly:
+## 5. Use authentic photos that answer customer questions
 
-- upload new photos
-- update service details
-- review profile insights (calls, clicks, direction requests)
+Upload clear, recent images that help a customer recognise the business and understand the work. Depending on the business, that may include:
 
-The goal is consistency, not random activity spikes.
+- the exterior and entrance;
+- the customer area;
+- team members at work;
+- equipment or completed work, with permission;
+- accessibility, parking, or collection details.
 
-## 6) Profile and website alignment
+Avoid stock images presented as the premises or team. Before-and-after images need consistent framing and honest labels; do not imply an outcome the pictured job did not achieve.
 
-Your profile and your website should tell the same commercial story:
+## 6. Build a compliant review routine
 
-- same core services
-- same service areas
-- same contact pathways
-- same trust positioning
+Ask real customers for an honest review after a completed transaction. Use the same neutral request regardless of whether the customer seems happy. Do not offer a reward, require a positive rating, review the business yourself, or ask staff and suppliers to pose as customers.
 
-When they conflict, conversion quality usually drops.
+Reply to reviews without exposing private details. For a complaint, acknowledge the concern and move account-specific discussion to a private channel. A defensive public argument rarely helps the next person evaluating the business.
 
-## Related guides and execution support
+Track themes, not just the average rating. Repeated comments about missed calls, delays, or unclear pricing are operational evidence that the profile cannot fix on its own.
 
-- [Local SEO for Small Businesses and Google Maps](/blog/local-seo-for-small-business-google-maps-ranking-guide)
-- [Small Business Website SEO Checklist](/blog/small-business-website-seo-checklist)
-- [Google My Business Setup and Optimisation service](/services/google-my-business-setup-optimisation)
+## 7. Check questions, messages, bookings, and calls
 
-## 30-day Google Business Profile action plan
+Where a feature is available and enabled, assign a person to monitor it. Test the customer journey rather than assuming a button works.
 
-Week 1:
+- Call the listed number from another phone.
+- Submit the website form and confirm its destination.
+- Open the booking link and complete a test up to the confirmation step.
+- Review public questions and answer only with accurate business information.
 
-- fix categories, services, and business description
-- validate contact links and service areas
+Do not seed fake customer questions. Useful FAQs belong on the website, where the business controls accuracy and maintenance.
 
-Week 2:
+## 8. Use a maintenance schedule based on changes
 
-- upload fresh photos
-- seed and answer top customer questions
+Weekly, respond to new reviews and check unanswered enquiries. Monthly, confirm hours, links, services, and recent photos. Before every holiday or temporary closure, update special hours.
 
-Week 3:
+Record significant edits in a simple log: date, field changed, old value, new value, and reason. This makes it possible to diagnose a rejected edit or an unexplained drop without guessing.
 
-- request new reviews from real customers
-- respond to every new and old review
+When reviewing performance, separate discovery from business results. Calls, website clicks, bookings, directions, qualified enquiries, and completed sales answer different questions. A rise in views with no suitable enquiries may mean the categories or offer are too broad.
 
-Week 4:
+## If an edit is rejected or the profile is suspended
 
-- review calls, clicks, and direction data
-- update weak sections and repeat monthly cadence
+Do not repeatedly submit variations. Compare the profile with the real-world business and current Google guidance, gather documents that demonstrate the correct name and location, and use the official appeal route when appropriate. Never create a replacement profile to evade a suspension.
 
-This converts profile optimization from a one-time edit to an operating system.
+For the wider strategy behind this checklist, read [Local SEO for Small Businesses and Google Maps](/blog/local-seo-for-small-business-google-maps-ranking-guide) and the [Small Business Website SEO Checklist](/blog/small-business-website-seo-checklist). Browse all practical guides in the [Web Growth Academy](/blog).
 
-## Keywords placement guidance for profile content
-
-Use your main service plus location naturally in:
-
-- service titles
-- service descriptions
-- selected Q and A entries
-
-Do not repeat the same keyword unnaturally. Prioritize clarity for real users first. Better profile readability usually improves both click quality and conversion quality.
-
-## Final note
-
-Google Business Profile optimization is not one-and-done.
-
-Treat your profile as an active local trust asset tied directly to calls, bookings, and qualified enquiries.
+If the profile facts are correct but the setup still needs hands-on work, the [Google Business Profile setup and optimisation service](/services/google-my-business-setup-optimisation) explains the available support.

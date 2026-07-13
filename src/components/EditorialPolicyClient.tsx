@@ -5,12 +5,16 @@ import { CONTACT_EMAIL, CONTACT_EMAIL_HREF } from "@/lib/site";
 
 const sections = [
   {
+    title: "Accountability",
+    text: "Victor Chinukwue, founder and editor of Web Growth, is accountable for publication and review decisions. The reviewer label on Academy articles refers to this founder-led review, not to a separate or independent editorial team.",
+  },
+  {
     title: "What we publish",
     text: "Web Growth publishes original Academy guides, case studies, service guidance, and implementation-focused website growth resources intended to help business owners make better digital decisions.",
   },
   {
     title: "How content is created",
-    text: "A named author drafts each guide. An editorial reviewer checks scope, clarity, links, claims, and fit with the article's search intent before it is approved for public use.",
+    text: "A named author drafts each guide. Victor's founder-led review checks scope, clarity, links, claims, and fit with the article's search intent before publication.",
   },
   {
     title: "Content standards",
@@ -50,6 +54,7 @@ export default function EditorialPolicyClient() {
             technical SEO, conversion improvement, and digital infrastructure. The editorial process
             is built for usefulness, trust, and accountability.
           </p>
+          <p><strong>Effective date:</strong> 13 July 2026</p>
         </div>
       </section>
 

@@ -13,7 +13,6 @@ tags:
   - Website Audit
   - Website Strategy
   - Small Business
-readTime: 15 min read
 cover: /images/blog/leads.webp
 updatedAt: "2026-04-29"
 lastReviewedAt: "2026-04-29"
@@ -22,7 +21,7 @@ difficulty: Beginner
 isCornerstone: true
 checklistAvailable: false
 author: victor-chinukwue
-reviewedBy: web-growth-editorial
+reviewedBy: victor-chinukwue
 keyTakeaways:
   - A website can look good and still fail if clarity, trust, CTA flow, or mobile usability are weak.
   - Most website conversion problems show up in the homepage message, service-page structure, and enquiry path.

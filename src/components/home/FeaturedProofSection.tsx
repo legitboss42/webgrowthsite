@@ -48,8 +48,8 @@ export default function FeaturedProofSection({ cases }: FeaturedProofSectionProp
               Strategy that compounds.
             </h2>
             <p className="mt-4 max-w-sm text-base leading-8 text-text-muted">
-              We design and grow websites that earn trust, rank higher, and
-              monetize better.
+              We design and grow websites around trust, discoverability, and
+              useful next steps.
             </p>
             <div className="mt-7">
               <Link
@@ -66,18 +66,18 @@ export default function FeaturedProofSection({ cases }: FeaturedProofSectionProp
               Featured case study
             </p>
             <p className="font-display mt-4 text-2xl font-medium tracking-[-0.04em] text-text-primary">
-              From 1K to 220K Monthly Visitors
+              A case study built around clearer decisions
             </p>
             <p className="mt-3 text-sm leading-7 text-text-muted">
-              How a content-led strategy and technical SEO overhaul scaled
-              organic traffic by 220x in 12 months.
+              Review the project context, design decisions, and qualitative
+              outcomes without turning an illustrative dashboard into a claim.
             </p>
 
             <div data-stagger className="mt-6 grid grid-cols-3 gap-3">
               {[
-                ["220K+", "Monthly Visitors"],
-                ["18.7K", "Top 3 Rankings"],
-                ["$21K+", "Monthly Revenue"],
+                ["01", "Project context"],
+                ["02", "Design decisions"],
+                ["03", "Qualitative notes"],
               ].map(([value, label]) => (
                 <div key={label} className="rounded-2xl border border-border-hairline bg-white/[0.035] p-3">
                   <p

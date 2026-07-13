@@ -19,12 +19,10 @@ function escapeXml(value: string) {
 }
 
 export function GET() {
-  const generatedAt = new Date().toISOString();
   const urls: SitemapUrl[] = routeGovernance.routes
     .filter((route) => route.status === "INDEX" && route.sitemap)
     .map((route) => ({
       loc: absoluteUrl(route.path),
-      lastmod: generatedAt,
     }));
 
   const body = [

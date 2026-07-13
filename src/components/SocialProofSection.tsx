@@ -71,7 +71,7 @@ export default function SocialProofSection({
                   eyebrow={item.industry}
                   status={item.status}
                   summary={item.summary}
-                  results={item.results}
+                  results={item.deliveredImprovements}
                   imageUrl={item.imageUrl}
                   imageAlt={item.imageAlt}
                   href="/portfolio"

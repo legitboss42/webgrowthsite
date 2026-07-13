@@ -250,7 +250,7 @@ export default function ServiceDetailTemplateClient({ service }: Props) {
               <div>
                 <span>{featuredCase.type}</span>
                 <strong>{featuredCase.title}</strong>
-                <small>{featuredCase.results.join(" / ")}</small>
+                <small>{featuredCase.deliveredImprovements.join(" / ")}</small>
               </div>
             ) : null}
           </div>

@@ -67,6 +67,7 @@ export default function PortfolioClient() {
               </Link>
             </div>
           </div>
+          <p className="portfolio-note">Portfolio outcomes describe delivered design and implementation improvements. Unless a case study names a baseline, date range, and measurement source, they are not claims of measured traffic, ranking, revenue, or conversion gains.</p>
           <div className="portfolio-hero-image">
             <Image
               src={featuredCase.imageUrl}
@@ -122,7 +123,7 @@ export default function PortfolioClient() {
             <article>
               <span>Qualitative outcomes</span>
               <ul>
-                {featuredCase.results.map((item) => (
+                {featuredCase.deliveredImprovements.map((item) => (
                   <li key={item}>{item}</li>
                 ))}
               </ul>
@@ -162,7 +163,7 @@ export default function PortfolioClient() {
                 <h3>{item.title}</h3>
                 <p>{item.summary}</p>
                 <ul>
-                  {item.results.map((result) => (
+                  {item.deliveredImprovements.map((result) => (
                     <li key={result}>{result}</li>
                   ))}
                 </ul>

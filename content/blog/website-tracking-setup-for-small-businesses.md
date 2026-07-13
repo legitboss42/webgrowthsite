@@ -2,10 +2,12 @@
 title: >-
   Website Tracking Setup for Small Businesses (GA4, Meta Pixel, TikTok Pixel,
   and Clarity)
-seoTitle: "Website Tracking Setup for Small Businesses | Web Growth"
-primaryKeyword: "website tracking setup for small business"
-searchIntent: "Informational - plan and improve a small-business website"
-coverAlt: "Website Tracking Setup for Small Businesses (GA4, Meta Pixel, TikTok Pixel, and Clarity) - practical Web Growth guide visual"
+seoTitle: Website Tracking Setup for Small Businesses | Web Growth
+primaryKeyword: website tracking setup for small business
+searchIntent: Informational - plan and improve a small-business website
+coverAlt: >-
+  Website Tracking Setup for Small Businesses (GA4, Meta Pixel, TikTok Pixel,
+  and Clarity) - practical Web Growth guide visual
 excerpt: >-
   Most small business websites collect visits but not answers. This guide shows
   how to track the pages, buttons, campaigns, and actions that actually generate
@@ -19,22 +21,25 @@ tags:
   - TikTok Pixel
   - Microsoft Clarity
   - Conversion Tracking
-readTime: 14 min read
 cover: /images/blog/analytics-tracking-hero-generated.jpg
-updatedAt: '2026-02-26'
-lastReviewedAt: '2026-02-26'
+updatedAt: '2026-07-13'
+lastReviewedAt: '2026-07-13'
 topic: Website Strategy
 difficulty: Beginner
 isCornerstone: false
 checklistAvailable: false
 author: victor-chinukwue
-reviewedBy: web-growth-editorial
+reviewedBy: victor-chinukwue
 keyTakeaways:
-  - Priority one is what website tracking setup should a small business have?.
-  - Sustained results depend on why most website tracking setups fail.
   - >-
-    Execution quality improves when you address the 5 conversions every service
-    business should track.
+    Tracking should begin with business questions and named conversion events,
+    not every available tag.
+  - >-
+    Consent, duplicate-event prevention, and test traffic controls are part of
+    measurement quality.
+  - >-
+    A documented event dictionary makes reports easier to interpret and
+    maintain.
 whatYouNeed:
   - Current website URL and business objective.
   - Primary audience and offer clarity notes.
@@ -44,10 +49,12 @@ commonMistakes:
   - Relying on aesthetics without conversion structure.
   - Skipping QA before launch or campaign traffic.
 steps:
-  - 'Apply: What website tracking setup should a small business have?.'
-  - 'Apply: Why most website tracking setups fail.'
-  - 'Apply: The 5 conversions every service business should track.'
-  - 'Apply: GA4 vs Meta Pixel vs TikTok Pixel vs Clarity.'
+  - 'Define decisions, conversions, and required dimensions.'
+  - Create an event dictionary with triggers and ownership.
+  - Implement the smallest required analytics and advertising tags.
+  - >-
+    Test consent states, duplicates, referrals, and production events before
+    reporting.
 relatedGuideSlugs:
   - how-to-plan-website-copy-before-hiring-developer
   - website-platform-comparison-small-business
@@ -61,10 +68,12 @@ faq:
       Use clear scope, measurable goals, and structured QA before and after
       launch.
 ctaVariant: consultation
-evidenceNote: Updated using observed implementation patterns and recurring project outcomes.
+evidenceNote: >-
+  This guide describes a measurement design and QA workflow; it does not claim
+  access to a reader's analytics account or guarantee attribution accuracy.
 methodologyNote: >-
-  Recommendations follow practical implementation-first workflows with
-  measurable QA checkpoints.
+  The setup is evaluated from business question to event definition,
+  implementation, consent behavior, debugging, and reporting ownership.
 ---
 
 # Website Tracking Setup for Small Businesses
