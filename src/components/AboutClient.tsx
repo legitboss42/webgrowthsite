@@ -174,6 +174,9 @@ export default function AboutClient() {
               project and keeps the advice grounded in practical website outcomes rather than vague
               marketing language.
             </p>
+            <Link className="about-founder-link" href="/victor-chinukwue/">
+              Meet the Founder
+            </Link>
           </div>
         </div>
       </section>

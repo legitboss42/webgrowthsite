@@ -18,7 +18,7 @@ type PageMetadataOptions = {
   path: string;
   keywords?: string[];
   image?: string;
-  type?: "website" | "article";
+  type?: "website" | "article" | "profile";
   noIndex?: boolean;
 };
 
@@ -195,6 +195,25 @@ export function buildPersonSchema(author: AuthorProfile) {
       "@id": `${SITE_URL}#professional-service`,
     },
     ...(author.sameAs?.length ? { sameAs: author.sameAs } : {}),
+  };
+}
+
+export function buildProfilePageSchema(author: AuthorProfile, description: string) {
+  const profileUrl = absoluteUrl(author.profileUrl || `/victor-chinukwue`);
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "ProfilePage",
+    "@id": `${profileUrl}#profile-page`,
+    name: `${author.name} | Founder of Web Growth`,
+    description,
+    url: profileUrl,
+    isPartOf: {
+      "@id": `${SITE_URL}#website`,
+    },
+    mainEntity: {
+      "@id": `${SITE_URL}#${author.id}`,
+    },
   };
 }
 

@@ -17,7 +17,16 @@ export default function AuthorBio({ author }: AuthorBioProps) {
           </div>
         ) : null}
         <div className="min-w-0 flex-1">
-          <p className="text-lg font-semibold text-slate-950">{author.name}</p>
+          {author.profileUrl ? (
+            <Link
+              href={author.profileUrl}
+              className="text-lg font-semibold text-slate-950 transition hover:text-blue-700"
+            >
+              {author.name}
+            </Link>
+          ) : (
+            <p className="text-lg font-semibold text-slate-950">{author.name}</p>
+          )}
           <p className="text-sm text-blue-700">{author.role}</p>
           <p className="mt-3 text-sm leading-7 text-slate-600">{author.bio}</p>
           {author.expertise.length ? (
@@ -30,12 +39,22 @@ export default function AuthorBio({ author }: AuthorBioProps) {
               ))}
             </ul>
           ) : null}
-          <Link
-            href="/editorial-policy/"
-            className="mt-4 inline-flex text-sm font-medium text-blue-700 transition hover:text-blue-800"
-          >
-            Read our editorial and review standards
-          </Link>
+          <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2">
+            {author.profileUrl ? (
+              <Link
+                href={author.profileUrl}
+                className="inline-flex text-sm font-medium text-blue-700 transition hover:text-blue-800"
+              >
+                View founder profile
+              </Link>
+            ) : null}
+            <Link
+              href="/editorial-policy/"
+              className="inline-flex text-sm font-medium text-blue-700 transition hover:text-blue-800"
+            >
+              Read our editorial and review standards
+            </Link>
+          </div>
         </div>
       </div>
     </section>

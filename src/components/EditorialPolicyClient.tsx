@@ -5,10 +5,6 @@ import { CONTACT_EMAIL, CONTACT_EMAIL_HREF } from "@/lib/site";
 
 const sections = [
   {
-    title: "Accountability",
-    text: "Victor Chinukwue, founder and editor of Web Growth, is accountable for publication and review decisions. The reviewer label on Academy articles refers to this founder-led review, not to a separate or independent editorial team.",
-  },
-  {
     title: "What we publish",
     text: "Web Growth publishes original Academy guides, case studies, service guidance, and implementation-focused website growth resources intended to help business owners make better digital decisions.",
   },
@@ -70,9 +66,21 @@ export default function EditorialPolicyClient() {
           </aside>
 
           <div className="trust-section-list">
+            <article className="trust-section">
+              <span>01</span>
+              <div>
+                <h2>Accountability</h2>
+                <p>
+                  <Link href="/victor-chinukwue/">Victor Chinukwue</Link>, founder and editor of Web
+                  Growth, is accountable for publication and review decisions. The reviewer label on
+                  Academy articles refers to this founder-led review, not to a separate or independent
+                  editorial team.
+                </p>
+              </div>
+            </article>
             {sections.map((section, index) => (
               <article key={section.title} className="trust-section">
-                <span>{String(index + 1).padStart(2, "0")}</span>
+                <span>{String(index + 2).padStart(2, "0")}</span>
                 <div>
                   <h2>{section.title}</h2>
                   <p>{section.text}</p>

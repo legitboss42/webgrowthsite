@@ -23,7 +23,7 @@ const AUTHORS: Record<string, AuthorProfile> = {
       "Service-business growth systems",
     ],
     image: "/images/authors/victor-chinukwue-clean.webp",
-    profileUrl: "https://webgrowth.info/about",
+    profileUrl: "https://webgrowth.info/victor-chinukwue/",
   },
 };
 

@@ -12,6 +12,7 @@
     { "path": "/privacy/", "status": "INDEX", "sitemap": true, "reason": "Privacy and data-use disclosure" },
     { "path": "/services/", "status": "INDEX", "sitemap": true, "reason": "Service hub" },
     { "path": "/terms/", "status": "INDEX", "sitemap": true, "reason": "Public terms of service" },
+    { "path": "/victor-chinukwue/", "status": "INDEX", "sitemap": true, "reason": "Founder profile and first-hand experience page" },
     { "path": "/tools/", "status": "INDEX", "sitemap": true, "reason": "Public tools hub with live and planned utilities" },
     { "path": "/tools/[slug]/", "status": "NOINDEX", "sitemap": false, "reason": "Dynamic tools route template" },
     { "path": "/tools/adsense-readiness-checker/", "status": "INDEX", "sitemap": true, "reason": "Public AdSense readiness utility" },
