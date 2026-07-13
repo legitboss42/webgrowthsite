@@ -16,6 +16,7 @@ This map assigns one primary search intent to each public content cluster. Route
 | website performance optimisation | `/services/performance-optimisation/` | `/blog/how-to-make-your-website-load-fast/`, `/blog/how-to-audit-slow-wordpress-site/` |
 | website launch QA | `/tools/website-launch-checklist/` | `/blog/website-launch-checklist-for-small-businesses/`, `/blog/07-launch-week-checklist-and-first-7-days/` |
 | analytics and tracking setup | `/services/analytics-tracking-setup/` | `/blog/website-tracking-setup-for-small-businesses/`, `/blog/ga4-meta-tiktok-clarity-setup-guide/` |
+| AI search visibility and referral measurement | `/blog/measure-ai-search-visibility-ga4-search-console/` | `/blog/website-tracking-setup-for-small-businesses/`, `/services/analytics-tracking-setup/` |
 
 ## Editorial clusters
 
@@ -23,6 +24,7 @@ This map assigns one primary search intent to each public content cluster. Route
 - Conversion systems: `/blog/high-converting-service-page/`, `/blog/conversion-audit-checklist-service-homepage/`, and `/blog/why-your-website-isnt-getting-leads/`.
 - Hosting and infrastructure: `/blog/best-web-hosting-for-small-business-websites/`, `/blog/namecheap-domain-and-hosting-guide/`, and `/blog/stop-using-cheap-hosting/`.
 - First-hand rebuild evidence: `/blog/01-why-we-rebuilt-not-redesigned/` through `/blog/08-results-mistakes-and-reusable-playbook/`, plus the J Luxe case study.
+- AI search measurement: `/blog/measure-ai-search-visibility-ga4-search-console/` separates Google generative-search impressions from identifiable assistant referrals and verified business outcomes.
 
 ## Editorial rules
 
