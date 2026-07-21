@@ -96,7 +96,7 @@ export default function AboutClient() {
             <p className="about-kicker">About Web Growth</p>
             <h1>Premium websites built with strategy, craft, and commercial discipline.</h1>
             <p>
-              Web Growth is led by Victor Chinukwue for businesses that need a website to do more
+              Web Growth is led by Victorious for businesses that need a website to do more
               than look presentable. The work connects design, SEO, speed, content structure, and
               conversion thinking so the website can support credibility, traffic, enquiries, and
               responsible revenue growth.
@@ -124,7 +124,7 @@ export default function AboutClient() {
             </div>
             <div className="about-founder-caption">
               <span>Founder-led</span>
-              <strong>Victor Chinukwue</strong>
+              <strong>Victorious</strong>
               <small>Website strategy, design, SEO, and growth systems.</small>
             </div>
           </div>

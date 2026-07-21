@@ -11,7 +11,7 @@ export const metadata = buildPageMetadata({
   path: "/about",
   keywords: [
     "about web growth",
-    "victor chinukwue",
+    "victorious",
     "website growth platform",
     "premium website strategy",
     "website growth consultant",

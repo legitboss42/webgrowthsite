@@ -12,7 +12,7 @@ export type AuthorProfile = {
 const AUTHORS: Record<string, AuthorProfile> = {
   "victor-chinukwue": {
     id: "victor-chinukwue",
-    name: "Victor Chinukwue",
+    name: "Victorious",
     role: "Founder, Web Growth",
     bio: "Founder-led strategist and developer focused on high-performance websites, conversion systems, and practical growth execution for service and ecommerce businesses.",
     expertise: [

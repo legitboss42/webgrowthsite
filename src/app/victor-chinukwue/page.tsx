@@ -8,15 +8,15 @@ import {
 } from "@/lib/seo";
 
 const pageDescription =
-  "Meet Victor Chinukwue, founder of Web Growth and a frontend-focused full-stack developer building premium websites, SEO systems, and practical growth infrastructure.";
+  "Meet Victorious, founder of Web Growth and a frontend-focused full-stack developer building premium websites, SEO systems, and practical growth infrastructure.";
 
 export const metadata = buildPageMetadata({
-  title: "Victor Chinukwue | Founder of Web Growth",
+  title: "Victorious | Founder of Web Growth",
   description: pageDescription,
   path: "/victor-chinukwue",
   type: "profile",
   keywords: [
-    "Victor Chinukwue",
+    "Victorious",
     "founder of Web Growth",
     "frontend-focused full-stack developer",
     "website strategist Lagos",
@@ -36,7 +36,7 @@ export default function VictorChinukwuePage() {
           buildProfilePageSchema(founder, pageDescription),
           buildBreadcrumbSchema([
             { name: "Home", path: "/" },
-            { name: "Victor Chinukwue", path: "/victor-chinukwue" },
+            { name: "Victorious", path: "/victor-chinukwue" },
           ]),
         ]}
       />

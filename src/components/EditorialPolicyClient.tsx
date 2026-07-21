@@ -10,7 +10,7 @@ const sections = [
   },
   {
     title: "How content is created",
-    text: "A named author drafts each guide. Victor's founder-led review checks scope, clarity, links, claims, and fit with the article's search intent before publication.",
+    text: "A named author drafts each guide. A founder-led review checks scope, clarity, links, claims, and fit with the article's search intent before publication.",
   },
   {
     title: "Content standards",
@@ -71,7 +71,7 @@ export default function EditorialPolicyClient() {
               <div>
                 <h2>Accountability</h2>
                 <p>
-                  <Link href="/victor-chinukwue/">Victor Chinukwue</Link>, founder and editor of Web
+                  <Link href="/victor-chinukwue/">Victorious</Link>, founder and editor of Web
                   Growth, is accountable for publication and review decisions. The reviewer label on
                   Academy articles refers to this founder-led review, not to a separate or independent
                   editorial team.

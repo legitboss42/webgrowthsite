@@ -58,7 +58,7 @@ export default function FounderProfile() {
         <div className="founder-container founder-hero-grid">
           <div className="founder-hero-copy">
             <p className="founder-kicker">Founder of Web Growth</p>
-            <h1>Victor Chinukwue</h1>
+            <h1>Victorious</h1>
             <p className="founder-positioning">
               Frontend-focused full-stack developer, website strategist, and growth systems builder.
             </p>
@@ -86,7 +86,7 @@ export default function FounderProfile() {
             <div className="founder-portrait-frame">
               <Image
                 src="/images/authors/victor-chinukwue-clean.webp"
-                alt="Illustrated portrait of Victor Chinukwue, founder of Web Growth"
+                alt="Illustrated portrait of Victorious, founder of Web Growth"
                 fill
                 priority
                 sizes="(max-width: 900px) 82vw, 420px"
@@ -164,7 +164,7 @@ export default function FounderProfile() {
 
           <article className="founder-platform-card">
             <div>
-              <p className="founder-kicker">Platform built and led by Victor</p>
+              <p className="founder-kicker">Platform built and led by Victorious</p>
               <h3>Web Growth</h3>
               <p>
                 A Next.js website growth platform connecting premium website services, practical
@@ -260,7 +260,7 @@ export default function FounderProfile() {
             website should explain the offer clearly, earn trust quickly, protect search and
             performance, and make the next action easier.”
           </blockquote>
-          <p>Victor Chinukwue — Founder, Web Growth</p>
+          <p>Victorious — Founder, Web Growth</p>
         </div>
       </section>
 
