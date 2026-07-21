@@ -9,8 +9,8 @@ topic: "Website Growth"
 difficulty: "Beginner"
 tags: ["Tag 1", "Tag 2", "Tag 3"]
 cover: /images/blog/default-cover.webp
-author: victor-chinukwue
-reviewedBy: victor-chinukwue
+author: victorious
+reviewedBy: victorious
 isCornerstone: false
 checklistAvailable: false
 keyTakeaways:

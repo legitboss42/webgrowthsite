@@ -26,8 +26,8 @@ topic: Case Study Series
 difficulty: Intermediate
 isCornerstone: false
 checklistAvailable: false
-author: victor-chinukwue
-reviewedBy: victor-chinukwue
+author: victorious
+reviewedBy: victorious
 keyTakeaways:
   - >-
     A retrospective must separate delivered improvements from outcomes that were

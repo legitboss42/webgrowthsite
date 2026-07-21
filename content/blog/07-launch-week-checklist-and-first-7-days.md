@@ -26,8 +26,8 @@ topic: Case Study Series
 difficulty: Intermediate
 isCornerstone: false
 checklistAvailable: true
-author: victor-chinukwue
-reviewedBy: victor-chinukwue
+author: victorious
+reviewedBy: victorious
 keyTakeaways:
   - >-
     Launch readiness depends on redirects, forms, analytics, crawl signals, and

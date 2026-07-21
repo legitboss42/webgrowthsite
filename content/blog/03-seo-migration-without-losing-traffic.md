@@ -24,8 +24,8 @@ topic: Website Redesign SEO
 difficulty: Intermediate
 isCornerstone: false
 checklistAvailable: true
-author: victor-chinukwue
-reviewedBy: victor-chinukwue
+author: victorious
+reviewedBy: victorious
 keyTakeaways:
   - Careless redesigns can damage SEO even when the new website looks better.
   - Protecting URLs, redirects, canonicals, metadata, and internal links reduces avoidable SEO risk.

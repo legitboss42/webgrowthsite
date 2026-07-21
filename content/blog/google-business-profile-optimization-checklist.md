@@ -13,8 +13,8 @@ topic: Local SEO
 difficulty: Beginner
 tags: ["Google Business Profile", "Google Maps", "Local SEO", "Checklist"]
 cover: "/images/blog/local-seo-hero.webp"
-author: victor-chinukwue
-reviewedBy: victor-chinukwue
+author: victorious
+reviewedBy: victorious
 isCornerstone: false
 checklistAvailable: true
 keyTakeaways:

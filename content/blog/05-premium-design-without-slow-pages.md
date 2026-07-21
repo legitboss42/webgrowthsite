@@ -20,8 +20,8 @@ topic: Case Study Series
 difficulty: Beginner
 isCornerstone: false
 checklistAvailable: false
-author: victor-chinukwue
-reviewedBy: victor-chinukwue
+author: victorious
+reviewedBy: victorious
 keyTakeaways:
   - Premium design should support clarity, trust, and usability instead of making the page heavier or harder to use.
   - Images, videos, animations, scripts, fonts, and mobile layout all affect whether a premium website still feels fast.

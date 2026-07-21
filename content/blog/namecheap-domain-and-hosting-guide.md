@@ -19,8 +19,8 @@ topic: Website Strategy
 difficulty: Beginner
 isCornerstone: false
 checklistAvailable: true
-author: victor-chinukwue
-reviewedBy: victor-chinukwue
+author: victorious
+reviewedBy: victorious
 keyTakeaways:
   - A domain registrar, DNS provider, email provider, and web host can be separate services.
   - The business should own the Namecheap account, recovery method, and renewal responsibility.

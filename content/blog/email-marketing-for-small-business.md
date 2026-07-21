@@ -19,8 +19,8 @@ topic: Email Marketing
 difficulty: Beginner
 isCornerstone: true
 checklistAvailable: true
-author: victor-chinukwue
-reviewedBy: victor-chinukwue
+author: victorious
+reviewedBy: victorious
 keyTakeaways:
   - Ask for email permission with a specific promise and record how consent was obtained.
   - Begin with one audience, one useful resource or update, and a short welcome sequence.

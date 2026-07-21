@@ -19,8 +19,8 @@ topic: Website Performance
 difficulty: Intermediate
 isCornerstone: true
 checklistAvailable: true
-author: victor-chinukwue
-reviewedBy: victor-chinukwue
+author: victorious
+reviewedBy: victorious
 keyTakeaways:
   - Choose hosting after deciding the platform, workload, maintenance owner, and recovery requirements.
   - Test backups by restoring them and test support with a real technical question before a long commitment.

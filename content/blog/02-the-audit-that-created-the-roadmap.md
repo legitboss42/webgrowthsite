@@ -28,8 +28,8 @@ topic: Case Study Series
 difficulty: Intermediate
 isCornerstone: false
 checklistAvailable: false
-author: victor-chinukwue
-reviewedBy: victor-chinukwue
+author: victorious
+reviewedBy: victorious
 keyTakeaways:
   - An audit should convert observations into ranked implementation decisions.
   - >-

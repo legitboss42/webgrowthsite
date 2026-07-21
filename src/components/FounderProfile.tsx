@@ -85,7 +85,7 @@ export default function FounderProfile() {
           <div className="founder-portrait-panel">
             <div className="founder-portrait-frame">
               <Image
-                src="/images/authors/victor-chinukwue-clean.webp"
+                src="/images/authors/victorious-clean.webp"
                 alt="Illustrated portrait of Victorious, founder of Web Growth"
                 fill
                 priority

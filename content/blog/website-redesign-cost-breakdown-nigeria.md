@@ -13,8 +13,8 @@ topic: Pricing
 difficulty: Beginner
 tags: ["Website Redesign", "Nigeria", "Pricing", "Budgeting"]
 cover: "/images/blog/redesign-checklist-cover-generated.webp"
-author: victor-chinukwue
-reviewedBy: victor-chinukwue
+author: victorious
+reviewedBy: victorious
 isCornerstone: false
 checklistAvailable: false
 keyTakeaways:

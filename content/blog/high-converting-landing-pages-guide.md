@@ -19,8 +19,8 @@ topic: Conversion Optimization
 difficulty: Beginner
 isCornerstone: true
 checklistAvailable: false
-author: victor-chinukwue
-reviewedBy: victor-chinukwue
+author: victorious
+reviewedBy: victorious
 keyTakeaways:
   - A high-converting landing page stays focused on one offer, one audience, and one main action.
   - Clarity, trust, CTA flow, mobile usability, and speed usually matter more than clever visuals alone.

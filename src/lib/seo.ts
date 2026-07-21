@@ -199,7 +199,7 @@ export function buildPersonSchema(author: AuthorProfile) {
 }
 
 export function buildProfilePageSchema(author: AuthorProfile, description: string) {
-  const profileUrl = absoluteUrl(author.profileUrl || `/victor-chinukwue`);
+  const profileUrl = absoluteUrl(author.profileUrl || "/victorious");
 
   return {
     "@context": "https://schema.org",

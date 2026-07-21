@@ -13,8 +13,8 @@ topic: Landing Pages
 difficulty: Beginner
 tags: ["Landing Page", "Local Business", "Conversion", "Wireframe"]
 cover: "/images/blog/wireframe-preview.webp"
-author: victor-chinukwue
-reviewedBy: victor-chinukwue
+author: victorious
+reviewedBy: victorious
 isCornerstone: true
 checklistAvailable: false
 keyTakeaways:

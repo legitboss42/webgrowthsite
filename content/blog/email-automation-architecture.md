@@ -25,8 +25,8 @@ topic: Website Strategy
 difficulty: Beginner
 isCornerstone: false
 checklistAvailable: false
-author: victor-chinukwue
-reviewedBy: victor-chinukwue
+author: victorious
+reviewedBy: victorious
 keyTakeaways:
   - >-
     Email automation starts with consent, deliverability, and lifecycle

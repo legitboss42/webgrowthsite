@@ -23,8 +23,8 @@ topic: Website Performance
 difficulty: Intermediate
 isCornerstone: false
 checklistAvailable: false
-author: victor-chinukwue
-reviewedBy: victor-chinukwue
+author: victorious
+reviewedBy: victorious
 keyTakeaways:
   - Hosting should be evaluated against traffic, support, security, and control requirements.
   - A measured baseline is more useful than a generic speed promise.

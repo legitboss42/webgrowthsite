@@ -26,8 +26,8 @@ topic: Website Launch
 difficulty: Beginner
 isCornerstone: true
 checklistAvailable: true
-author: victor-chinukwue
-reviewedBy: victor-chinukwue
+author: victorious
+reviewedBy: victorious
 keyTakeaways:
   - >-
     A launch is complete only when customer journeys, crawl signals, forms, and

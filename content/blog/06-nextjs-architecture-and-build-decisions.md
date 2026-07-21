@@ -28,8 +28,8 @@ topic: Case Study Series
 difficulty: Intermediate
 isCornerstone: false
 checklistAvailable: false
-author: victor-chinukwue
-reviewedBy: victor-chinukwue
+author: victorious
+reviewedBy: victorious
 keyTakeaways:
   - >-
     Architecture should support crawlable pages, maintainable content, and

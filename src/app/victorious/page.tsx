@@ -13,7 +13,7 @@ const pageDescription =
 export const metadata = buildPageMetadata({
   title: "Victorious | Founder of Web Growth",
   description: pageDescription,
-  path: "/victor-chinukwue",
+  path: "/victorious",
   type: "profile",
   keywords: [
     "Victorious",
@@ -23,11 +23,11 @@ export const metadata = buildPageMetadata({
     "Next.js developer Nigeria",
     "technical SEO consultant",
   ],
-  image: "/images/founder/victor-chinukwue-og.webp",
+  image: "/images/founder/victorious-og.webp",
 });
 
-export default function VictorChinukwuePage() {
-  const founder = getAuthorProfile("victor-chinukwue");
+export default function VictoriousPage() {
+  const founder = getAuthorProfile("victorious");
 
   return (
     <>
@@ -36,7 +36,7 @@ export default function VictorChinukwuePage() {
           buildProfilePageSchema(founder, pageDescription),
           buildBreadcrumbSchema([
             { name: "Home", path: "/" },
-            { name: "Victorious", path: "/victor-chinukwue" },
+            { name: "Victorious", path: "/victorious" },
           ]),
         ]}
       />

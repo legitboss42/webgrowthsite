@@ -20,8 +20,8 @@ topic: Lead Generation
 difficulty: Beginner
 isCornerstone: true
 checklistAvailable: false
-author: victor-chinukwue
-reviewedBy: victor-chinukwue
+author: victorious
+reviewedBy: victorious
 keyTakeaways:
   - A website can look good and still fail if clarity, trust, CTA flow, or mobile usability are weak.
   - Most website conversion problems show up in the homepage message, service-page structure, and enquiry path.

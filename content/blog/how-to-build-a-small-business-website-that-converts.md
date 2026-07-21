@@ -20,8 +20,8 @@ topic: Conversion Optimization
 difficulty: Beginner
 isCornerstone: true
 checklistAvailable: false
-author: victor-chinukwue
-reviewedBy: victor-chinukwue
+author: victorious
+reviewedBy: victorious
 keyTakeaways:
   - A small business website should help customers understand the business, trust it, and take action.
   - Clear messaging, visible services, trust signals, mobile usability, and speed usually matter more than visual polish alone.

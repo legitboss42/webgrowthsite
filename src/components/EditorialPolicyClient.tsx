@@ -71,7 +71,7 @@ export default function EditorialPolicyClient() {
               <div>
                 <h2>Accountability</h2>
                 <p>
-                  <Link href="/victor-chinukwue/">Victorious</Link>, founder and editor of Web
+                  <Link href="/victorious/">Victorious</Link>, founder and editor of Web
                   Growth, is accountable for publication and review decisions. The reviewer label on
                   Academy articles refers to this founder-led review, not to a separate or independent
                   editorial team.

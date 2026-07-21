@@ -13,8 +13,8 @@ topic: WordPress
 difficulty: Beginner
 tags: ["WordPress", "Speed Audit", "Performance", "Website Audit"]
 cover: "/images/blog/wordpress.webp"
-author: victor-chinukwue
-reviewedBy: victor-chinukwue
+author: victorious
+reviewedBy: victorious
 isCornerstone: false
 checklistAvailable: true
 keyTakeaways:

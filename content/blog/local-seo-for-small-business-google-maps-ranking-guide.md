@@ -27,8 +27,8 @@ topic: SEO Strategy
 difficulty: Intermediate
 isCornerstone: true
 checklistAvailable: false
-author: victor-chinukwue
-reviewedBy: victor-chinukwue
+author: victorious
+reviewedBy: victorious
 keyTakeaways:
   - >-
     Local visibility depends on relevance, distance, and prominence; no single

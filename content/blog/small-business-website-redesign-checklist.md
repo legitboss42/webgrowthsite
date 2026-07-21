@@ -20,8 +20,8 @@ topic: Website Redesign
 difficulty: Beginner
 isCornerstone: true
 checklistAvailable: true
-author: victor-chinukwue
-reviewedBy: victor-chinukwue
+author: victorious
+reviewedBy: victorious
 keyTakeaways:
   - A redesign should fix clarity, trust, speed, and enquiry problems, not just make a site look newer.
   - The homepage, service pages, mobile usability, and CTA flow usually matter more than cosmetic changes first.

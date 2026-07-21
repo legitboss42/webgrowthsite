@@ -13,8 +13,8 @@ topic: Homepage Conversion
 difficulty: Beginner
 tags: ["Conversion Audit", "Homepage", "Service Pages", "Lead Generation"]
 cover: "/images/blog/conversion-hero.webp"
-author: victor-chinukwue
-reviewedBy: victor-chinukwue
+author: victorious
+reviewedBy: victorious
 isCornerstone: false
 checklistAvailable: true
 keyTakeaways:

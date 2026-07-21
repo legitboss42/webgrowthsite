@@ -13,8 +13,8 @@ topic: Local SEO
 difficulty: Beginner
 tags: ["Local SEO", "Lagos", "Service Business", "Google Maps"]
 cover: "/images/blog/local-seo.webp"
-author: victor-chinukwue
-reviewedBy: victor-chinukwue
+author: victorious
+reviewedBy: victorious
 isCornerstone: false
 checklistAvailable: false
 keyTakeaways:

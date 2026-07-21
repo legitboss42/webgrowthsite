@@ -15,8 +15,8 @@ topic: Website Performance
 difficulty: Intermediate
 isCornerstone: true
 checklistAvailable: false
-author: victor-chinukwue
-reviewedBy: victor-chinukwue
+author: victorious
+reviewedBy: victorious
 keyTakeaways:
   - "Field data and repeatable lab tests answer different performance questions; use both when available."
   - "Find the element or task responsible for a poor metric before choosing an optimization."

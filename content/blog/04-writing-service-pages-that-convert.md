@@ -20,8 +20,8 @@ topic: Case Study Series
 difficulty: Beginner
 isCornerstone: false
 checklistAvailable: false
-author: victor-chinukwue
-reviewedBy: victor-chinukwue
+author: victorious
+reviewedBy: victorious
 keyTakeaways:
   - Service pages should explain the offer, build trust, answer objections, and guide the visitor toward one clear next step.
   - Clear service naming, audience fit, practical outcomes, inclusions, FAQs, and CTA flow usually matter more than broad polished wording.

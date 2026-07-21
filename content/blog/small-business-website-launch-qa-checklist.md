@@ -13,8 +13,8 @@ topic: Launch QA
 difficulty: Beginner
 tags: ["Website Launch", "QA Checklist", "Small Business", "Website QA"]
 cover: "/images/blog/growth-process.webp"
-author: victor-chinukwue
-reviewedBy: victor-chinukwue
+author: victorious
+reviewedBy: victorious
 isCornerstone: true
 checklistAvailable: true
 keyTakeaways:

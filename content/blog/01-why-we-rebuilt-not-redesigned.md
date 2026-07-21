@@ -25,8 +25,8 @@ topic: Case Study Series
 difficulty: Intermediate
 isCornerstone: false
 checklistAvailable: false
-author: victor-chinukwue
-reviewedBy: victor-chinukwue
+author: victorious
+reviewedBy: victorious
 keyTakeaways:
   - >-
     A rebuild is justified when structure, content, SEO, and conversion paths

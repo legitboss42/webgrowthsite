@@ -19,8 +19,8 @@ topic: SEO Strategy
 difficulty: Intermediate
 isCornerstone: true
 checklistAvailable: true
-author: victor-chinukwue
-reviewedBy: victor-chinukwue
+author: victorious
+reviewedBy: victorious
 keyTakeaways:
   - Check whether Google can index the correct URL before changing copy or publishing another post.
   - Give every important page one primary search intent and a useful next action.

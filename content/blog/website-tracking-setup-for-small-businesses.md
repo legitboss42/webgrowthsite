@@ -28,8 +28,8 @@ topic: Website Strategy
 difficulty: Beginner
 isCornerstone: false
 checklistAvailable: false
-author: victor-chinukwue
-reviewedBy: victor-chinukwue
+author: victorious
+reviewedBy: victorious
 keyTakeaways:
   - >-
     Tracking should begin with business questions and named conversion events,

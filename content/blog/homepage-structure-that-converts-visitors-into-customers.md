@@ -19,8 +19,8 @@ topic: Website Strategy
 difficulty: Beginner
 isCornerstone: false
 checklistAvailable: false
-author: victor-chinukwue
-reviewedBy: victor-chinukwue
+author: victorious
+reviewedBy: victorious
 keyTakeaways:
   - A homepage is often the first sales conversation a visitor has with a business.
   - A homepage structure that converts needs clarity, trust, proof, and a clear next step.

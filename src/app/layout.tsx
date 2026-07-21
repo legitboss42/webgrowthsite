@@ -75,7 +75,7 @@ const CLARITY_ID = process.env.NEXT_PUBLIC_CLARITY_ID;
 const IS_PRODUCTION = process.env.NODE_ENV === "production";
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  const founder = getAuthorProfile("victor-chinukwue");
+  const founder = getAuthorProfile("victorious");
   const siteSchemas = [
     buildWebsiteSchema(),
     buildOrganizationSchema(),

@@ -13,8 +13,8 @@ topic: Copy Planning
 difficulty: Beginner
 tags: ["Website Copy", "Planning", "Small Business", "Conversion"]
 cover: "/images/blog/service-blueprint.webp"
-author: victor-chinukwue
-reviewedBy: victor-chinukwue
+author: victorious
+reviewedBy: victorious
 isCornerstone: false
 checklistAvailable: false
 keyTakeaways:

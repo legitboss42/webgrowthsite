@@ -13,8 +13,8 @@ topic: Analytics
 difficulty: Intermediate
 tags: ["GA4", "Meta Pixel", "TikTok Pixel", "Clarity", "Tracking"]
 cover: "/images/blog/analytics-tracking-hero-generated.jpg"
-author: victor-chinukwue
-reviewedBy: victor-chinukwue
+author: victorious
+reviewedBy: victorious
 isCornerstone: true
 checklistAvailable: true
 keyTakeaways:

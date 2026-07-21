@@ -23,8 +23,8 @@ tags:
   - "Analytics"
   - "SEO Measurement"
 cover: /images/blog/ai-search-measurement-search-console-ga4.webp
-author: victor-chinukwue
-reviewedBy: victor-chinukwue
+author: victorious
+reviewedBy: victorious
 isCornerstone: false
 checklistAvailable: true
 keyTakeaways:

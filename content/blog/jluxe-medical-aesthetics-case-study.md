@@ -27,8 +27,8 @@ topic: Case Study
 difficulty: Beginner
 isCornerstone: false
 checklistAvailable: false
-author: victor-chinukwue
-reviewedBy: victor-chinukwue
+author: victorious
+reviewedBy: victorious
 keyTakeaways:
   - >-
     The project replaced structural and publishing constraints, not just visual
