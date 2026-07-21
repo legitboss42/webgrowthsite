@@ -188,7 +188,7 @@ export default async function BlogPostPage({
     tags,
     wordCount: estimateWordCount(post.content),
     authorName: author.name,
-    authorUrl: author.profileUrl || absoluteUrl("/about"),
+    authorUrl: absoluteUrl(author.profileUrl || "/about"),
     reviewedByName:
       reviewer && reviewer.name !== author.name ? reviewer.name : undefined,
   });

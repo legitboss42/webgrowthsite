@@ -23,7 +23,7 @@ const AUTHORS: Record<string, AuthorProfile> = {
       "Service-business growth systems",
     ],
     image: "/images/authors/victorious-clean.webp",
-    profileUrl: "https://webgrowth.info/victorious/",
+    profileUrl: "/victorious/",
   },
 };
 
