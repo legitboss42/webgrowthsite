@@ -26,7 +26,7 @@ export async function sendWhatsAppText(input: SendInput, options: SendOptions = 
   if (!token || !phoneNumberId) return { sent: false, reason: "NOT_CONFIGURED" };
   if (!isFreeformReplyAllowed(input.customerMessageTimestamp, options.now)) return { sent: false, reason: "SERVICE_WINDOW_CLOSED" };
 
-  const apiVersion = env.WHATSAPP_GRAPH_API_VERSION?.trim() || "v23.0";
+  const apiVersion = env.WHATSAPP_GRAPH_API_VERSION?.trim() || "v25.0";
   try {
     const response = await (options.fetch || globalThis.fetch)(
       `https://graph.facebook.com/${apiVersion}/${phoneNumberId}/messages`,
