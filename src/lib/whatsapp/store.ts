@@ -1,3 +1,5 @@
+import { classifyWhatsAppIntent } from "./classify";
+
 export type InboundMessageRecord = {
   messageId: string;
   waId: string;
@@ -50,10 +52,11 @@ export function createSupabaseWhatsAppStore(options: SupabaseStoreOptions): What
   };
 
   const getConversation = async (input: InboundMessageRecord) => {
+    const classification = classifyWhatsAppIntent(input.text || "");
     const contacts = await request<{ id: string }>("whatsapp_contacts?on_conflict=wa_id", {
       method: "POST",
       headers: { Prefer: "resolution=merge-duplicates,return=representation" },
-      body: JSON.stringify({ wa_id: input.waId, phone: input.waId, display_name: input.displayName, updated_at: new Date().toISOString() }),
+      body: JSON.stringify({ wa_id: input.waId, phone: input.waId, display_name: input.displayName, lead_temperature: classification.temperature, updated_at: new Date().toISOString() }),
     });
     const contact = contacts[0];
     if (!contact) throw new Error("Supabase did not return a WhatsApp contact");
@@ -61,7 +64,7 @@ export function createSupabaseWhatsAppStore(options: SupabaseStoreOptions): What
     const conversations = await request<{ id: string }>("whatsapp_conversations?on_conflict=contact_id", {
       method: "POST",
       headers: { Prefer: "resolution=merge-duplicates,return=representation" },
-      body: JSON.stringify({ contact_id: contact.id, first_message_at: timestamp, last_message_at: timestamp, updated_at: new Date().toISOString() }),
+      body: JSON.stringify({ contact_id: contact.id, first_message_at: timestamp, last_message_at: timestamp, intent: classification.intent, human_review_required: classification.humanReviewRequired, updated_at: new Date().toISOString() }),
     });
     const conversation = conversations[0];
     if (!conversation) throw new Error("Supabase did not return a WhatsApp conversation");

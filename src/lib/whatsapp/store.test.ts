@@ -50,4 +50,6 @@ test("records the webhook event before writing CRM records to Supabase", async (
   assert.match(requests[0]?.url || "", /whatsapp_events/);
   assert.match(requests[0]?.body || "", /wamid\.test-1/);
   assert.match(requests[3]?.url || "", /whatsapp_messages/);
+  assert.match(requests[1]?.body || "", /lead_temperature/);
+  assert.match(requests[2]?.body || "", /PORTFOLIO_REQUEST/);
 });
