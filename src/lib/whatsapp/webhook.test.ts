@@ -1,7 +1,12 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { createHmac } from "node:crypto";
-import { isValidMetaSignature, parseWhatsAppWebhook, verifyWebhook } from "./webhook";
+import {
+  isValidMetaSignature,
+  parseWhatsAppWebhook,
+  processWhatsAppWebhook,
+  verifyWebhook,
+} from "./webhook";
 
 test("returns the Meta challenge only for the configured verify token", async () => {
   const response = verifyWebhook(new URL("https://webgrowth.info/api/whatsapp/webhook?hub.mode=subscribe&hub.verify_token=expected&hub.challenge=abc"), "expected");
@@ -33,4 +38,21 @@ test("accepts a correct Meta signature", () => {
   const raw = '{"object":"whatsapp_business_account"}';
   const signature = `sha256=${createHmac("sha256", "secret").update(raw).digest("hex")}`;
   assert.equal(isValidMetaSignature(raw, signature, "secret"), true);
+});
+
+test("processes an inbound message only once and updates delivery status", async () => {
+  const recorded: string[] = [];
+  const payload = {
+    object: "whatsapp_business_account",
+    entry: [{ changes: [{ value: {
+      contacts: [{ wa_id: "2348000000000", profile: { name: "Ada" } }],
+      messages: [{ id: "wamid.inbound", from: "2348000000000", timestamp: "1800000000", type: "text", text: { body: "Portfolio please" } }],
+      statuses: [{ id: "wamid.outbound", status: "delivered", timestamp: "1800000001" }],
+    } }] }],
+  };
+  await processWhatsAppWebhook(payload, {
+    async recordInbound(message) { recorded.push(`in:${message.messageId}`); return { duplicate: false }; },
+    async updateMessageStatus(messageId, status) { recorded.push(`status:${messageId}:${status}`); },
+  });
+  assert.deepEqual(recorded, ["in:wamid.inbound", "status:wamid.outbound:delivered"]);
 });

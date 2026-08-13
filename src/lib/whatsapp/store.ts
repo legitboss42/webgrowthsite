@@ -24,6 +24,81 @@ export type WhatsAppStore = {
   updateMessageStatus(messageId: string, status: string): Promise<void>;
 };
 
+type SupabaseStoreOptions = {
+  url: string;
+  serviceRoleKey: string;
+  fetch?: typeof globalThis.fetch;
+};
+
+type SupabaseRow = { id: string };
+
+export function createSupabaseWhatsAppStore(options: SupabaseStoreOptions): WhatsAppStore {
+  const fetcher = options.fetch || globalThis.fetch;
+  const request = async <T extends SupabaseRow>(path: string, init: RequestInit) => {
+    const response = await fetcher(`${options.url.replace(/\/$/, "")}/rest/v1/${path}`, {
+      ...init,
+      headers: {
+        apikey: options.serviceRoleKey,
+        Authorization: `Bearer ${options.serviceRoleKey}`,
+        "Content-Type": "application/json",
+        Prefer: "return=representation",
+        ...init.headers,
+      },
+    });
+    if (!response.ok) throw new Error(`Supabase WhatsApp store request failed: ${response.status}`);
+    return (await response.json()) as T[];
+  };
+
+  const getConversation = async (input: InboundMessageRecord) => {
+    const contacts = await request<{ id: string }>("whatsapp_contacts?on_conflict=wa_id", {
+      method: "POST",
+      headers: { Prefer: "resolution=merge-duplicates,return=representation" },
+      body: JSON.stringify({ wa_id: input.waId, phone: input.waId, display_name: input.displayName, updated_at: new Date().toISOString() }),
+    });
+    const contact = contacts[0];
+    if (!contact) throw new Error("Supabase did not return a WhatsApp contact");
+    const timestamp = new Date(input.timestamp * 1000).toISOString();
+    const conversations = await request<{ id: string }>("whatsapp_conversations?on_conflict=contact_id", {
+      method: "POST",
+      headers: { Prefer: "resolution=merge-duplicates,return=representation" },
+      body: JSON.stringify({ contact_id: contact.id, first_message_at: timestamp, last_message_at: timestamp, updated_at: new Date().toISOString() }),
+    });
+    const conversation = conversations[0];
+    if (!conversation) throw new Error("Supabase did not return a WhatsApp conversation");
+    return conversation;
+  };
+
+  return {
+    async recordInbound(input) {
+      const eventRows = await request<{ id: string }>("whatsapp_events?on_conflict=meta_event_id", {
+        method: "POST",
+        headers: { Prefer: "resolution=ignore-duplicates,return=representation" },
+        body: JSON.stringify({ meta_event_id: input.messageId, event_type: "incoming_message", payload: { message_id: input.messageId }, processed: false }),
+      });
+      if (!eventRows[0]) return { duplicate: true };
+      const conversation = await getConversation(input);
+      await request<{ id: string }>("whatsapp_messages?on_conflict=whatsapp_message_id", {
+        method: "POST",
+        headers: { Prefer: "resolution=ignore-duplicates,return=representation" },
+        body: JSON.stringify({ conversation_id: conversation.id, whatsapp_message_id: input.messageId, direction: "inbound", message_type: "text", message_text: input.text, message_timestamp: new Date(input.timestamp * 1000).toISOString(), raw_event_reference: eventRows[0].id }),
+      });
+      await request<{ id: string }>(`whatsapp_events?id=eq.${encodeURIComponent(eventRows[0].id)}`, { method: "PATCH", body: JSON.stringify({ processed: true }) });
+      return { duplicate: false };
+    },
+    async recordOutbound(input) {
+      const conversation = await getConversation(input);
+      await request<{ id: string }>("whatsapp_messages?on_conflict=whatsapp_message_id", {
+        method: "POST",
+        headers: { Prefer: "resolution=ignore-duplicates,return=representation" },
+        body: JSON.stringify({ conversation_id: conversation.id, whatsapp_message_id: input.messageId, direction: "outbound", message_type: "text", message_text: input.text, message_timestamp: new Date(input.timestamp * 1000).toISOString() }),
+      });
+    },
+    async updateMessageStatus(messageId, status) {
+      await request<{ id: string }>(`whatsapp_messages?whatsapp_message_id=eq.${encodeURIComponent(messageId)}`, { method: "PATCH", body: JSON.stringify({ delivery_status: status }) });
+    },
+  };
+}
+
 export function createMemoryWhatsAppStore(): WhatsAppStore & {
   events: string[];
   contacts: StoredContact[];

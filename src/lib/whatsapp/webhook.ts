@@ -69,3 +69,15 @@ export function parseWhatsAppWebhook(payload: unknown): { messages: NormalizedIn
   }
   return { messages, statuses };
 }
+
+export type WebhookProcessorStore = {
+  recordInbound(message: NormalizedIncomingMessage): Promise<{ duplicate: boolean }>;
+  updateMessageStatus(messageId: string, status: string): Promise<void>;
+};
+
+export async function processWhatsAppWebhook(payload: unknown, store: WebhookProcessorStore) {
+  const { messages, statuses } = parseWhatsAppWebhook(payload);
+  for (const message of messages) await store.recordInbound(message);
+  for (const status of statuses) await store.updateMessageStatus(status.messageId, status.status);
+  return { messages: messages.length, statuses: statuses.length };
+}
