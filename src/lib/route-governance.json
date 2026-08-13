@@ -49,6 +49,7 @@
     { "path": "/website-build/", "status": "NOINDEX", "sitemap": false, "reason": "Campaign landing page overlapping core service intent" },
     { "path": "/mockup/", "status": "NOINDEX", "sitemap": false, "reason": "Private mockup utility" },
     { "path": "/internal/text-to-speech/", "status": "NOINDEX", "sitemap": false, "reason": "Internal voice generation utility" },
+    { "path": "/admin/whatsapp/", "status": "NOINDEX", "sitemap": false, "reason": "Internal WhatsApp lead dashboard" },
     { "path": "/connect/tiktok/", "status": "NOINDEX", "sitemap": false, "reason": "Internal TikTok authorization utility page" },
     { "path": "/connect/tiktok/callback/", "status": "NOINDEX", "sitemap": false, "reason": "TikTok OAuth callback route" },
     { "path": "/contact/thanks/", "status": "NOINDEX", "sitemap": false, "reason": "Form completion utility" },
