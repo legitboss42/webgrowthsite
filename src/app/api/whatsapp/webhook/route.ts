@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createSupabaseWhatsAppStore } from "@/lib/whatsapp/store";
 import { isValidMetaSignature, processWhatsAppWebhook, verifyWebhook } from "@/lib/whatsapp/webhook";
+import { sendWhatsAppText } from "@/lib/whatsapp/send";
 
 export const runtime = "nodejs";
 
@@ -21,10 +22,7 @@ export async function POST(request: Request) {
       console.error("WhatsApp webhook storage is not configured");
       return NextResponse.json({ error: "Webhook storage is not configured" }, { status: 503 });
     }
-    const result = await processWhatsAppWebhook(
-      JSON.parse(rawBody),
-      createSupabaseWhatsAppStore({ url: supabaseUrl, serviceRoleKey })
-    );
+    const result = await processWhatsAppWebhook(JSON.parse(rawBody), createSupabaseWhatsAppStore({ url: supabaseUrl, serviceRoleKey }), sendWhatsAppText);
     console.info("WhatsApp webhook processed", result);
     return NextResponse.json({ received: true });
   } catch {

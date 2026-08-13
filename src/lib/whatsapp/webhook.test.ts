@@ -56,3 +56,21 @@ test("processes an inbound message only once and updates delivery status", async
   });
   assert.deepEqual(recorded, ["in:wamid.inbound", "status:wamid.outbound:delivered"]);
 });
+
+test("sends one safe portfolio reply and never replies to a duplicate event", async () => {
+  const replies: string[] = [];
+  const payload = {
+    object: "whatsapp_business_account",
+    entry: [{ changes: [{ value: { messages: [{ id: "wamid.portfolio", from: "2348000000000", timestamp: "1800000000", type: "text", text: { body: "Can I see your portfolio?" } }] } }] }],
+  };
+  const store = {
+    async recordInbound() { return { duplicate: replies.length > 0 }; },
+    async updateMessageStatus() {},
+    async recordOutbound() {},
+  };
+  const send = async ({ text }: { text: string }) => { replies.push(text); return { sent: true as const, messageId: "wamid.reply" }; };
+  await processWhatsAppWebhook(payload, store, send);
+  await processWhatsAppWebhook(payload, store, send);
+  assert.equal(replies.length, 1);
+  assert.match(replies[0] || "", /webgrowth\.info\/portfolio/);
+});
