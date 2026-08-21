@@ -6,7 +6,11 @@ export type SchedulerAuthMode = "login" | "publishing";
 type OAuthState = { state: string; returnTo: string; mode: SchedulerAuthMode; expiresAt: number };
 
 export function schedulerRedirectUri() {
-  return process.env.TIKTOK_SCHEDULER_REDIRECT_URI?.trim() || "https://webgrowth.info/api/scheduler/auth/callback/";
+  return (
+    process.env.TIKTOK_SCHEDULER_REDIRECT_URI?.trim() ||
+    process.env.TIKTOK_REDIRECT_URI?.trim() ||
+    "https://webgrowth.info/connect/tiktok/callback/"
+  );
 }
 
 export function normalizeSchedulerReturnPath(value?: string | null) {

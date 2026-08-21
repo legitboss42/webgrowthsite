@@ -68,6 +68,15 @@ const categories = [
   },
 ];
 
+const schedulerTool = {
+  title: "TikTok Scheduler",
+  description:
+    "Create, approve, and schedule TikTok posts from the Web Growth publishing queue.",
+  href: "/scheduler/",
+  category: "Publishing",
+  note: "Private scheduled publishing workflow",
+};
+
 export const metadata = buildPageMetadata({
   title: "Web Growth Tools | Practical Website Growth Utilities",
   description:
@@ -94,7 +103,7 @@ export default function ToolsPage() {
             <p className="tools-kicker">Web Growth utility studio</p>
             <h1 id="tools-title">Practical tools for better website decisions.</h1>
             <p className="tools-hero-copy">
-              Six focused utilities for planning, reviewing, launching and improving a website. Each tool is free to use and built around a specific decision.
+              Six public utilities for planning, reviewing, launching and improving a website, plus the private TikTok scheduler for publishing work.
             </p>
             <div className="tools-actions">
               <a className="tools-button tools-button-primary" href="#tool-library">Explore live tools</a>
@@ -105,7 +114,7 @@ export default function ToolsPage() {
           <aside className="tools-hero-console" aria-label="Live tools inventory">
             <div className="tools-console-top">
               <span>WG / UTILITIES</span>
-              <span className="tools-live"><i /> {PUBLIC_TOOLS.length} live</span>
+              <span className="tools-live"><i /> {PUBLIC_TOOLS.length + 1} live</span>
             </div>
             <div className="tools-console-orbit" aria-hidden="true">
               <div className="tools-console-core">BUILD<br />BETTER</div>
@@ -115,7 +124,7 @@ export default function ToolsPage() {
                 </span>
               ))}
             </div>
-            <p>Useful before a sales conversation. Clear about what each result can and cannot tell you.</p>
+            <p>Useful before a sales conversation, and practical when website work needs publishing support.</p>
           </aside>
         </div>
       </section>
@@ -158,7 +167,7 @@ export default function ToolsPage() {
             <p className="tools-kicker">Live tool library</p>
             <h2 id="tool-library-title">Choose the decision in front of you.</h2>
           </div>
-          <p>Every utility below has a working route and a defined purpose. No placeholder products or unavailable features.</p>
+          <p>Every utility below has a working route and a defined purpose. Public tools stay indexable; private workflows stay protected.</p>
         </div>
 
         <div className="tools-container tools-editorial-list">
@@ -185,6 +194,23 @@ export default function ToolsPage() {
               </TrackedLink>
             );
           })}
+          <TrackedLink
+            href={schedulerTool.href}
+            className="tools-editorial-item"
+            ctaName="open_tiktok_scheduler"
+            ctaLocation="tools_library"
+            destination={schedulerTool.href}
+            pageType="tools_hub"
+          >
+            <span className="tools-item-number">07</span>
+            <span className="tools-item-icon" aria-hidden="true"><GrowthChartIcon /></span>
+            <span className="tools-item-content">
+              <small>{schedulerTool.category} / {schedulerTool.note}</small>
+              <strong>{schedulerTool.title}</strong>
+              <span>{schedulerTool.description}</span>
+            </span>
+            <span className="tools-item-action"><i /> Private <b aria-hidden="true">-&gt;</b></span>
+          </TrackedLink>
         </div>
       </section>
 
