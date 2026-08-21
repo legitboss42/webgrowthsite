@@ -17,6 +17,9 @@ function fakeClient() {
       calls.push({ kind: "update", name: table, input: { id, ...input } });
       return { id, ...input };
     },
+    async remove(table, column, value) {
+      calls.push({ kind: "remove", name: table, input: { column, value } });
+    },
   };
   return { calls, client };
 }
@@ -52,6 +55,20 @@ test("publish IDs are persisted on the existing attempt", async () => {
   });
 });
 
+test("TikTok connections are persisted as encrypted server records", async () => {
+  const { calls, client } = fakeClient();
+  const store = createSchedulerStore(client);
+  await store.saveConnection({
+    userId: "user-1",
+    encryptedTokens: "sealed",
+    scopes: ["user.info.basic", "video.publish"],
+    accessExpiresAt: "2026-08-22T00:00:00.000Z",
+    refreshExpiresAt: "2027-08-22T00:00:00.000Z",
+  });
+  assert.equal(calls[0]?.name, "tiktok_connections");
+  assert.equal((calls[0]?.input as Record<string, unknown>).encrypted_tokens, "sealed");
+});
+
 test("due jobs are claimed only through the atomic database RPC", async () => {
   const { calls, client } = fakeClient();
   const store = createSchedulerStore(client);
@@ -61,4 +78,12 @@ test("due jobs are claimed only through the atomic database RPC", async () => {
     name: "claim_due_tiktok_posts",
     input: { p_now: "2026-08-21T12:00:00.000Z", p_limit: 10 },
   });
+});
+
+test("disconnect removes the user's token record and cancels future jobs", async () => {
+  const { calls, client } = fakeClient();
+  const store = createSchedulerStore(client);
+  await store.disconnectUser("user-1");
+  assert.equal(calls[0]?.kind, "remove");
+  assert.equal(calls[1]?.name, "cancel_tiktok_connection_jobs");
 });

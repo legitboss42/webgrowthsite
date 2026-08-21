@@ -285,10 +285,13 @@ export function maskOpenId(openId: string) {
   return `${openId.slice(0, 4)}...${openId.slice(-4)}`;
 }
 
-export async function exchangeTikTokCode(code: string): Promise<TikTokCallbackResult> {
+export async function exchangeTikTokCode(
+  code: string,
+  redirectUriOverride?: string
+): Promise<TikTokCallbackResult> {
   const clientKey = getTikTokClientKey();
   const clientSecret = getTikTokClientSecret();
-  const redirectUri = getTikTokRedirectUri();
+  const redirectUri = redirectUriOverride || getTikTokRedirectUri();
 
   if (!clientKey || !clientSecret) {
     return {

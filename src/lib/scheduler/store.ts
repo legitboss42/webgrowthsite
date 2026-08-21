@@ -1,6 +1,7 @@
 export type SchedulerDatabaseClient = {
   insert(table: string, input: Record<string, unknown>): Promise<Record<string, unknown>>;
   update(table: string, id: string, input: Record<string, unknown>): Promise<Record<string, unknown>>;
+  remove(table: string, column: string, value: string): Promise<void>;
   rpc(name: string, input: Record<string, unknown>): Promise<unknown>;
 };
 
@@ -8,6 +9,14 @@ export type UpsertSchedulerUserInput = {
   tiktokOpenId: string;
   displayName: string | null;
   avatarUrl: string | null;
+};
+
+export type SaveTikTokConnectionInput = {
+  userId: string;
+  encryptedTokens: string;
+  scopes: string[];
+  accessExpiresAt: string;
+  refreshExpiresAt: string;
 };
 
 export function createSchedulerStore(client: SchedulerDatabaseClient) {
@@ -26,6 +35,16 @@ export function createSchedulerStore(client: SchedulerDatabaseClient) {
         p_limit: Math.max(1, Math.min(25, Math.floor(limit))),
       });
     },
+    saveConnection(input: SaveTikTokConnectionInput) {
+      return client.insert("tiktok_connections", {
+        user_id: input.userId,
+        encrypted_tokens: input.encryptedTokens,
+        scopes: input.scopes,
+        access_expires_at: input.accessExpiresAt,
+        refresh_expires_at: input.refreshExpiresAt,
+        reconnect_required: false,
+      });
+    },
     reserveDailySlot(userId: string, nowIso: string, limit = 3) {
       return client.rpc("reserve_tiktok_daily_slot", {
         p_user_id: userId,
@@ -42,6 +61,10 @@ export function createSchedulerStore(client: SchedulerDatabaseClient) {
         status: "PROCESSING",
       });
     },
+    async disconnectUser(userId: string) {
+      await client.remove("tiktok_connections", "user_id", userId);
+      return client.rpc("cancel_tiktok_connection_jobs", { p_user_id: userId });
+    },
   };
 }
 
@@ -50,8 +73,9 @@ export async function createSupabaseSchedulerStore() {
   const supabase = createSchedulerSupabaseClient();
   const client: SchedulerDatabaseClient = {
     async insert(table, input) {
-      const query = table === "scheduler_users"
-        ? supabase.from(table).upsert(input, { onConflict: "tiktok_open_id" })
+      const conflict = table === "scheduler_users" ? "tiktok_open_id" : table === "tiktok_connections" ? "user_id" : null;
+      const query = conflict
+        ? supabase.from(table).upsert(input, { onConflict: conflict })
         : supabase.from(table).insert(input);
       const { data, error } = await query.select().single();
       if (error) throw new Error(`Scheduler database write failed (${error.code}).`);
@@ -66,6 +90,10 @@ export async function createSupabaseSchedulerStore() {
       const { data, error } = await supabase.from(table).update(input).eq("id", id).select().single();
       if (error) throw new Error(`Scheduler database update failed (${error.code}).`);
       return data as Record<string, unknown>;
+    },
+    async remove(table, column, value) {
+      const { error } = await supabase.from(table).delete().eq(column, value);
+      if (error) throw new Error(`Scheduler database delete failed (${error.code}).`);
     },
   };
   return createSchedulerStore(client);
