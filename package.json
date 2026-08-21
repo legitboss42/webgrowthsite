@@ -7,6 +7,7 @@
     "dev:clean": "node scripts/prepare-dev.mjs && next dev",
     "build": "node scripts/prepare-build.mjs && node scripts/validate-sitemap.mjs && next build",
     "start": "next start",
+    "test:scheduler": "tsx --test src/lib/scheduler/*.test.ts",
     "lint": "eslint .",
     "seo:validate": "node scripts/validate-seo.mjs",
     "content:ledger": "node scripts/generate-content-ledger.mjs",
@@ -20,6 +21,7 @@
   "dependencies": {
     "@next/third-parties": "^16.2.1",
     "@remotion/cli": "^4.0.481",
+    "@supabase/supabase-js": "^2.112.3",
     "@vercel/analytics": "^2.0.1",
     "@vercel/speed-insights": "^2.0.0",
     "edge-tts-universal": "^1.4.0",

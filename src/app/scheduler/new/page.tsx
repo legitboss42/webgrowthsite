@@ -1,0 +1,4 @@
+import { cookies } from "next/headers"; import { redirect } from "next/navigation";
+import { readSchedulerSession,SCHEDULER_SESSION_COOKIE } from "@/lib/scheduler/session"; import { isOwnerOpenId } from "@/lib/scheduler/config"; import NewPostComposer from "@/components/scheduler/NewPostComposer";
+import { getPublicPosts } from "@/lib/posts";
+export default async function NewPostPage(){const jar=await cookies();const session=readSchedulerSession(jar.get(SCHEDULER_SESSION_COOKIE)?.value);if(!session)redirect("/scheduler/sign-in/");const owner=isOwnerOpenId(session.openId);const articles=owner?getPublicPosts().map(({slug,title})=>({slug,title})):[];return <main className="mx-auto max-w-4xl px-5 py-12"><p className="text-xs uppercase tracking-[.25em] text-[#62f5e6]">New post</p><h1 className="mt-3 font-serif text-4xl">Build the final cut.</h1><NewPostComposer owner={owner} articles={articles}/></main>}

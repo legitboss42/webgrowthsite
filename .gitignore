@@ -42,6 +42,7 @@ wgos-runtime/secrets/
 
 # vercel
 .vercel
+.worktrees/
 /supabase/.temp/
 .codex-temp/
 .codex/

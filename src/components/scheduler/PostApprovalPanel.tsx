@@ -1,0 +1,106 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+
+type ApprovalPost = { id: string; approval_id: string | null; scheduled_for: string | null };
+type CreatorInfo = {
+  nickname: string;
+  username: string;
+  avatarUrl: string;
+  privacyLevelOptions: string[];
+  commentDisabled: boolean;
+  duetDisabled: boolean;
+  stitchDisabled: boolean;
+  publicPostingEnabled: boolean;
+};
+
+export default function PostApprovalPanel({ post }: { post: ApprovalPost }) {
+  const router = useRouter();
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [creator, setCreator] = useState<CreatorInfo | null>(null);
+
+  useEffect(() => {
+    if (post.approval_id) return;
+    let active = true;
+    fetch("/api/scheduler/creator/", { cache: "no-store" })
+      .then(async (response) => {
+        const body = await response.json();
+        if (!response.ok) throw new Error(body.error || "Unable to load TikTok creator settings.");
+        if (active) setCreator(body);
+      })
+      .catch((reason: unknown) => active && setError(reason instanceof Error ? reason.message : "Unable to load TikTok creator settings."));
+    return () => { active = false; };
+  }, [post.approval_id]);
+
+  async function approve(data: FormData) {
+    setBusy(true);
+    setError("");
+    if (!creator || data.get("musicUsageConfirmation") !== "on") {
+      setError("Load the TikTok account and confirm Music Usage terms before approving.");
+      setBusy(false);
+      return;
+    }
+    const response = await fetch("/api/scheduler/posts/", {
+      method: "POST", headers: { "content-type": "application/json" },
+      body: JSON.stringify({ action: "approve", postId: post.id, approval: {
+        privacyLevel: String(data.get("privacy")), allowComment: data.get("comments") === "on",
+        allowDuet: data.get("duet") === "on", allowStitch: data.get("stitch") === "on",
+        brandContent: data.get("branded") === "on", brandOrganic: data.get("organic") === "on",
+        declarationVersion: "2026-08",
+      } }),
+    });
+    const body = await response.json();
+    if (!response.ok) { setError(body.error); setBusy(false); return; }
+    router.refresh();
+  }
+
+  async function schedule(data: FormData) {
+    setBusy(true); setError("");
+    const response = await fetch(`/api/scheduler/posts/${post.id}/schedule/`, {
+      method: "POST", headers: { "content-type": "application/json" },
+      body: JSON.stringify({ action: "schedule", scheduledFor: String(data.get("time")), timezone: Intl.DateTimeFormat().resolvedOptions().timeZone }),
+    });
+    const body = await response.json();
+    if (!response.ok) { setError(body.error); setBusy(false); return; }
+    router.refresh();
+  }
+
+  return (
+    <section className="mt-10 rounded-3xl border border-white/10 p-6">
+      <h2 className="font-serif text-2xl">Approval and schedule</h2>
+      {!post.approval_id ? (
+        <form action={approve} className="mt-6 space-y-4">
+          {creator ? (
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+              <p className="text-xs uppercase tracking-[0.18em] text-[#62f5e6]">Posting to TikTok</p>
+              <p className="mt-1 font-semibold">{creator.nickname || creator.username}</p>
+              {!creator.publicPostingEnabled ? <p className="mt-2 text-sm text-white/60">Private beta: posts are limited to Only me until TikTok approves the app audit.</p> : null}
+            </div>
+          ) : <p aria-live="polite" className="text-sm text-white/60">Loading current TikTok publishing choices…</p>}
+          <label className="block">
+            <span className="mb-2 block text-sm">Privacy — choose manually</span>
+            <select name="privacy" required defaultValue="" disabled={!creator} className="w-full rounded-xl bg-[#111617] p-3 disabled:opacity-50">
+              <option value="" disabled>Select privacy</option>
+              {creator?.privacyLevelOptions.map((option) => <option key={option} value={option}>{option === "SELF_ONLY" ? "Only me" : option}</option>)}
+            </select>
+          </label>
+          <label className="flex gap-3"><input type="checkbox" name="comments" disabled={!creator || creator.commentDisabled} />Allow comments</label>
+          <label className="flex gap-3"><input type="checkbox" name="duet" disabled={!creator || creator.duetDisabled} />Allow Duet (video)</label>
+          <label className="flex gap-3"><input type="checkbox" name="stitch" disabled={!creator || creator.stitchDisabled} />Allow Stitch (video)</label>
+          <label className="flex gap-3"><input type="checkbox" name="organic" />This promotes my own brand</label>
+          <label className="flex gap-3"><input type="checkbox" name="branded" />This is paid third-party branded content</label>
+          <label className="flex gap-3 text-sm text-white/75"><input type="checkbox" name="musicUsageConfirmation" required />I agree to TikTok&apos;s Music Usage Confirmation for this post.</label>
+          <button disabled={busy || !creator || creator.privacyLevelOptions.length === 0} className="rounded-full bg-[#62f5e6] px-5 py-3 font-bold text-black disabled:opacity-50">{busy ? "Approving…" : "Approve post"}</button>
+        </form>
+      ) : (
+        <form action={schedule} className="mt-6 space-y-4">
+          <label className="block"><span className="mb-2 block text-sm">Publish time</span><input name="time" type="datetime-local" required className="w-full rounded-xl bg-[#111617] p-3" /></label>
+          <button disabled={busy} className="rounded-full bg-[#ff5269] px-5 py-3 font-bold disabled:opacity-50">{busy ? "Scheduling…" : "Approve and schedule"}</button>
+        </form>
+      )}
+      {error ? <p role="alert" className="mt-4 text-[#ff8b9a]">{error}</p> : null}
+    </section>
+  );
+}

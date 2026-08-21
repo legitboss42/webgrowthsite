@@ -21,6 +21,7 @@ export default function robots(): MetadataRoute.Robots {
           "/contact/thanks",
           "/thank-you/",
           "/mockup",
+          "/scheduler/",
         ],
       },
     ],
