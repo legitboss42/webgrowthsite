@@ -1,6 +1,17 @@
 import { openCookiePayload, sealCookiePayload } from "@/lib/secureCookie";
 
-export type TikTokTokenPayload = { accessToken: string; refreshToken: string };
+export type TikTokTokenPayload = {
+  accessToken: string;
+  refreshToken: string;
+  openId?: string;
+  scope?: string;
+  connectedAt?: string;
+  tokenType?: string;
+  expiresAt?: string;
+  refreshExpiresAt?: string;
+  expiresIn?: number;
+  refreshExpiresIn?: number;
+};
 
 function secret() {
   const value = process.env.TIKTOK_TOKEN_ENCRYPTION_KEY?.trim() || "";
@@ -15,5 +26,6 @@ export function encryptTikTokTokens(tokens: TikTokTokenPayload) {
 export function decryptTikTokTokens(value: string) {
   const payload = openCookiePayload<TikTokTokenPayload & { version: number }>(value, secret());
   if (!payload || payload.version !== 1) return null;
-  return { accessToken: payload.accessToken, refreshToken: payload.refreshToken };
+  const { version: _version, ...tokens } = payload;
+  return tokens;
 }

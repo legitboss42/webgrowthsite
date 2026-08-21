@@ -22,7 +22,7 @@ export async function GET(request: Request) {
   const userId = String(user.id);
   await store.saveConnection({
     userId,
-    encryptedTokens: encryptTikTokTokens({ accessToken: result.record.accessToken, refreshToken: result.record.refreshToken }),
+    encryptedTokens: encryptTikTokTokens(result.record),
     scopes: result.record.scope.split(",").map((scope) => scope.trim()).filter(Boolean),
     accessExpiresAt: result.record.expiresAt,
     refreshExpiresAt: result.record.refreshExpiresAt,
