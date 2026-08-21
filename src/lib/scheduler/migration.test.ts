@@ -48,9 +48,9 @@ test("scheduler cron runs from Supabase instead of Vercel Hobby cron", () => {
   assert.match(sql, /vault\./);
   assert.match(sql, /webgrowth-tiktok-publish-5m/);
   assert.match(sql, /\*\/5 \* \* \* \*/);
-  assert.match(sql, /\/api\/scheduler\/cron\/publish/);
+  assert.match(sql, /\/api\/scheduler\/cron\/publish\//);
   assert.match(sql, /webgrowth-tiktok-cleanup-daily/);
-  assert.match(sql, /\/api\/scheduler\/cron\/cleanup/);
+  assert.match(sql, /\/api\/scheduler\/cron\/cleanup\//);
   assert.match(sql, /authorization/);
   assert.match(sql, /bearer/);
   assert.match(sql, /revoke execute/);
