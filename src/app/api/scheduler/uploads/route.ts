@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { validateMediaMetadata } from "@/lib/scheduler/media";
+import { isSameOriginMutation } from "@/lib/scheduler/policy";
 import { readSchedulerSession, SCHEDULER_SESSION_COOKIE } from "@/lib/scheduler/session";
 import { createSchedulerSupabaseClient } from "@/lib/scheduler/supabase";
 import type { MediaKind } from "@/lib/scheduler/types";
@@ -9,6 +10,9 @@ export async function POST(request: Request) {
   const cookieStore = await cookies();
   const session = readSchedulerSession(cookieStore.get(SCHEDULER_SESSION_COOKIE)?.value);
   if (!session) return NextResponse.json({ error: "Authentication required." }, { status: 401 });
+  if (!isSameOriginMutation(request.headers.get("origin"), request.url)) {
+    return NextResponse.json({ error: "Invalid request origin." }, { status: 403 });
+  }
 
   const body = await request.json().catch(() => null) as Record<string, unknown> | null;
   const supabase = createSchedulerSupabaseClient();
@@ -62,4 +66,3 @@ export async function POST(request: Request) {
 
   return NextResponse.json({ error: "Unsupported upload action." }, { status: 400 });
 }
-
