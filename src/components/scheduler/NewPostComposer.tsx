@@ -1,6 +1,6 @@
 "use client";
 import { createClient } from "@supabase/supabase-js";
-import { useState } from "react";
+import { type FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 
 export default function NewPostComposer({ owner, articles = [] }: { owner: boolean; articles?: Array<{slug:string;title:string}> }) {
@@ -22,7 +22,11 @@ export default function NewPostComposer({ owner, articles = [] }: { owner: boole
     const created=await fetch("/api/scheduler/posts/",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({action:"create",mediaIds:[target.assetId],title:String(formData.get("title")||""),caption:String(formData.get("caption")||"")})});
     const post=await created.json();if(!created.ok)throw new Error(post.error);router.push(`/scheduler/posts/${post.postId}/`);
   }catch(cause){setError(cause instanceof Error?cause.message:"Unable to create post.");setBusy(false)}}
-  return <form action={submit} className="mt-9 space-y-6 rounded-[2rem] border border-white/10 bg-white/[.035] p-6 sm:p-8">
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    void submit(new FormData(event.currentTarget));
+  }
+  return <form onSubmit={handleSubmit} className="mt-9 space-y-6 rounded-[2rem] border border-white/10 bg-white/[.035] p-6 sm:p-8">
     {owner&&articles.length?<label className="block"><span className="mb-2 block text-sm text-white/60">Owner-only article source</span><select name="article" defaultValue="" className="w-full rounded-xl border border-white/15 bg-[#111617] p-3"><option value="">Upload media instead</option>{articles.map(a=><option key={a.slug} value={a.slug}>{a.title}</option>)}</select></label>:null}
     <label className="block"><span className="mb-2 block text-sm text-white/60">Original video or photo</span><input name="media" type="file" accept="video/mp4,video/quicktime,video/webm,image/jpeg,image/png,image/webp" className="w-full rounded-xl border border-dashed border-white/20 p-5" /></label>
     <label className="block"><span className="mb-2 block text-sm text-white/60">Title</span><input name="title" maxLength={90} required className="w-full rounded-xl border border-white/15 bg-[#111617] p-3"/></label>
