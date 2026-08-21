@@ -15,13 +15,20 @@ type CreatorInfo = {
   publicPostingEnabled: boolean;
 };
 
-export default function PostApprovalPanel({ post }: { post: ApprovalPost }) {
+export default function PostApprovalPanel({
+  post,
+  directPostEnabled,
+}: {
+  post: ApprovalPost;
+  directPostEnabled: boolean;
+}) {
   const router = useRouter();
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [creator, setCreator] = useState<CreatorInfo | null>(null);
 
   useEffect(() => {
+    if (!directPostEnabled) return;
     if (post.approval_id) return;
     let active = true;
     fetch("/api/scheduler/creator/", { cache: "no-store" })
@@ -32,7 +39,7 @@ export default function PostApprovalPanel({ post }: { post: ApprovalPost }) {
       })
       .catch((reason: unknown) => active && setError(reason instanceof Error ? reason.message : "Unable to load TikTok creator settings."));
     return () => { active = false; };
-  }, [post.approval_id]);
+  }, [directPostEnabled, post.approval_id]);
 
   async function approve(data: FormData) {
     setBusy(true);
@@ -70,7 +77,22 @@ export default function PostApprovalPanel({ post }: { post: ApprovalPost }) {
   return (
     <section className="mt-10 rounded-3xl border border-white/10 p-6">
       <h2 className="font-serif text-2xl">Approval and schedule</h2>
-      {!post.approval_id ? (
+      {!directPostEnabled ? (
+        <div className="mt-6 rounded-2xl border border-[#62f5e6]/25 bg-[#62f5e6]/[0.06] p-5">
+          <p className="text-sm font-bold text-[#62f5e6]">Direct Post approval needed</p>
+          <p className="mt-2 text-sm leading-6 text-white/65">
+            Your preview is saved, but automatic TikTok publishing cannot be approved from here until TikTok enables
+            Direct Post for this app. You can keep preparing posts now; turn on Direct Post after TikTok approves the
+            Content Posting API scope.
+          </p>
+          <a
+            href="/scheduler/settings/"
+            className="mt-4 inline-flex rounded-full border border-white/15 px-4 py-2 text-sm font-bold text-white"
+          >
+            View connection settings
+          </a>
+        </div>
+      ) : !post.approval_id ? (
         <form action={approve} className="mt-6 space-y-4">
           {creator ? (
             <div className="rounded-2xl border border-white/10 bg-white/5 p-4">

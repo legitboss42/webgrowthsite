@@ -1,2 +1,33 @@
-import { cookies } from "next/headers"; import { notFound,redirect } from "next/navigation"; import { readSchedulerSession,SCHEDULER_SESSION_COOKIE } from "@/lib/scheduler/session"; import { createSchedulerSupabaseClient } from "@/lib/scheduler/supabase"; import PostApprovalPanel from "@/components/scheduler/PostApprovalPanel";
-export default async function PostPage({params}:{params:Promise<{id:string}>}){const jar=await cookies();const session=readSchedulerSession(jar.get(SCHEDULER_SESSION_COOKIE)?.value);if(!session)redirect("/scheduler/sign-in/");const {id}=await params;const db=createSchedulerSupabaseClient();const {data:post}=await db.from("scheduled_posts").select("id,title,caption,status,scheduled_for,timezone,approval_id").eq("id",id).eq("user_id",session.userId).single();if(!post)notFound();return <main className="mx-auto max-w-4xl px-5 py-12"><p className="text-xs uppercase tracking-[.25em] text-[#62f5e6]">{post.status}</p><h1 className="mt-3 font-serif text-4xl">{post.title||"Untitled post"}</h1><p className="mt-5 whitespace-pre-wrap text-white/65">{post.caption}</p><PostApprovalPanel post={post}/></main>}
+import { cookies } from "next/headers";
+import { notFound, redirect } from "next/navigation";
+import PostApprovalPanel from "@/components/scheduler/PostApprovalPanel";
+import { getSchedulerConfig } from "@/lib/scheduler/config";
+import { readSchedulerSession, SCHEDULER_SESSION_COOKIE } from "@/lib/scheduler/session";
+import { createSchedulerSupabaseClient } from "@/lib/scheduler/supabase";
+
+export default async function PostPage({ params }: { params: Promise<{ id: string }> }) {
+  const jar = await cookies();
+  const session = readSchedulerSession(jar.get(SCHEDULER_SESSION_COOKIE)?.value);
+  if (!session) redirect("/scheduler/sign-in/");
+
+  const { id } = await params;
+  const db = createSchedulerSupabaseClient();
+  const { data: post } = await db
+    .from("scheduled_posts")
+    .select("id,title,caption,status,scheduled_for,timezone,approval_id")
+    .eq("id", id)
+    .eq("user_id", session.userId)
+    .single();
+  if (!post) notFound();
+
+  const config = getSchedulerConfig();
+
+  return (
+    <main className="mx-auto max-w-4xl px-5 py-12">
+      <p className="text-xs uppercase tracking-[.25em] text-[#62f5e6]">{post.status}</p>
+      <h1 className="mt-3 font-serif text-4xl">{post.title || "Untitled post"}</h1>
+      <p className="mt-5 whitespace-pre-wrap text-white/65">{post.caption}</p>
+      <PostApprovalPanel post={post} directPostEnabled={config.directPostEnabled} />
+    </main>
+  );
+}
