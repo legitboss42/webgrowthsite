@@ -19,6 +19,7 @@ test("scheduler migration enables isolation and atomic worker safeguards", () =>
     "post_approvals",
     "publish_attempts",
     "scheduler_audit_log",
+    "media_staging_objects",
   ]) {
     assert.match(sql, new RegExp(`alter table public\\.${table} enable row level security`));
   }
@@ -27,6 +28,7 @@ test("scheduler migration enables isolation and atomic worker safeguards", () =>
   assert.match(sql, /reserve_tiktok_daily_slot/);
   assert.match(sql, /cancel_tiktok_connection_jobs/);
   assert.match(sql, /tiktok-scheduler-media/);
+  assert.match(sql, /tiktok-publishing-staging/);
   assert.match(sql, /public[^\n]*false/);
   assert.match(sql, /revoke execute/);
 });

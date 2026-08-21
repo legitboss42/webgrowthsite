@@ -113,6 +113,16 @@ create table public.scheduler_audit_log (
   created_at timestamptz not null default now()
 );
 
+create table public.media_staging_objects (
+  id uuid primary key default gen_random_uuid(),
+  media_id uuid not null references public.media_assets(id) on delete cascade,
+  attempt_id uuid not null references public.publish_attempts(id) on delete cascade,
+  storage_path text not null unique,
+  expires_at timestamptz not null,
+  removed_at timestamptz,
+  created_at timestamptz not null default now()
+);
+
 alter table public.scheduler_users enable row level security;
 alter table public.tiktok_connections enable row level security;
 alter table public.media_assets enable row level security;
@@ -121,10 +131,15 @@ alter table public.post_media enable row level security;
 alter table public.post_approvals enable row level security;
 alter table public.publish_attempts enable row level security;
 alter table public.scheduler_audit_log enable row level security;
+alter table public.media_staging_objects enable row level security;
 
 insert into storage.buckets (id, name, public)
 values ('tiktok-scheduler-media', 'tiktok-scheduler-media', false)
 on conflict (id) do update set public = false;
+
+insert into storage.buckets (id, name, public)
+values ('tiktok-publishing-staging', 'tiktok-publishing-staging', true)
+on conflict (id) do update set public = true;
 
 create or replace function public.claim_due_tiktok_posts(p_now timestamptz, p_limit integer)
 returns setof public.scheduled_posts
@@ -170,4 +185,3 @@ $$;
 revoke execute on function public.claim_due_tiktok_posts(timestamptz, integer) from public, anon, authenticated;
 revoke execute on function public.reserve_tiktok_daily_slot(uuid, timestamptz, integer) from public, anon, authenticated;
 revoke execute on function public.cancel_tiktok_connection_jobs(uuid) from public, anon, authenticated;
-
