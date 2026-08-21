@@ -48,10 +48,23 @@ export async function runPublishingWorker(now = new Date()) {
       } else if (new Date(connection!.access_expires_at).getTime() <= now.getTime() + 10 * 60 * 1000) {
         throw new Error("Reconnect TikTok to upgrade the stored publishing authorization.");
       }
-      const { data: attempt, error: attemptError } = await supabase.from("publish_attempts").upsert({
-        post_id: post.id, approval_id: approval.id, request_fingerprint: approval.fingerprint, status: "SUBMITTING",
-      }, { onConflict: "post_id,approval_id,request_fingerprint", ignoreDuplicates: false }).select().single();
+      const { data: existingAttempt } = await supabase.from("publish_attempts").select()
+        .eq("post_id", post.id).eq("approval_id", approval.id).eq("request_fingerprint", approval.fingerprint).maybeSingle();
+      const attemptWrite = existingAttempt
+        ? { data: existingAttempt, error: null }
+        : await supabase.from("publish_attempts").insert({
+          post_id: post.id, approval_id: approval.id, request_fingerprint: approval.fingerprint, status: "SUBMITTING",
+        }).select().single();
+      const { data: attempt, error: attemptError } = attemptWrite;
       if (attemptError || !attempt) throw new Error("Unable to reserve publishing attempt.");
+      if (attempt.publish_id) {
+        await Promise.all([
+          supabase.from("publish_attempts").update({ status: "PROCESSING" }).eq("id", attempt.id),
+          supabase.from("scheduled_posts").update({ status: "PROCESSING", publish_id: attempt.publish_id }).eq("id", post.id),
+        ]);
+        submitted += 1;
+        continue;
+      }
 
       const storage = await createSupabaseMediaStorage();
       const stagedPaths: string[] = [];
