@@ -4,12 +4,19 @@ export const SCHEDULER_OAUTH_STATE_COOKIE = "wg_scheduler_oauth_state";
 export type SchedulerAuthMode = "login" | "publishing";
 
 type OAuthState = { state: string; returnTo: string; mode: SchedulerAuthMode; expiresAt: number };
+const REGISTERED_TIKTOK_CALLBACK = "https://webgrowth.info/connect/tiktok/callback/";
+const UNREGISTERED_SCHEDULER_CALLBACK = "https://webgrowth.info/api/scheduler/auth/callback/";
+
+function usableRedirectUri(value?: string) {
+  const redirectUri = value?.trim();
+  return redirectUri && redirectUri !== UNREGISTERED_SCHEDULER_CALLBACK ? redirectUri : "";
+}
 
 export function schedulerRedirectUri() {
   return (
-    process.env.TIKTOK_SCHEDULER_REDIRECT_URI?.trim() ||
-    process.env.TIKTOK_REDIRECT_URI?.trim() ||
-    "https://webgrowth.info/connect/tiktok/callback/"
+    usableRedirectUri(process.env.TIKTOK_SCHEDULER_REDIRECT_URI) ||
+    usableRedirectUri(process.env.TIKTOK_REDIRECT_URI) ||
+    REGISTERED_TIKTOK_CALLBACK
   );
 }
 

@@ -22,3 +22,10 @@ test("scheduler defaults to the registered TikTok callback alias", () => {
 
   assert.equal(schedulerRedirectUri(), "https://webgrowth.info/connect/tiktok/callback/");
 });
+
+test("scheduler ignores the unregistered legacy callback override", () => {
+  process.env.TIKTOK_SCHEDULER_REDIRECT_URI = "https://webgrowth.info/api/scheduler/auth/callback/";
+  process.env.TIKTOK_REDIRECT_URI = "https://webgrowth.info/connect/tiktok/callback/";
+
+  assert.equal(schedulerRedirectUri(), "https://webgrowth.info/connect/tiktok/callback/");
+});
