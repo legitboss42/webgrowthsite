@@ -45,7 +45,7 @@ export default function SolutionPageTemplateClient({ page }: Props) {
   }));
 
   return (
-    <main className="bg-[#f7f8fc] text-slate-950">
+    <main className="bg-[#eff1ec] text-slate-950">
       <StructuredData data={schema} />
 
       <PageHero

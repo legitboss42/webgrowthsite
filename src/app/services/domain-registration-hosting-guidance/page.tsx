@@ -13,7 +13,7 @@ export default function Page() {
   return (
     <>
       <ServiceDetailTemplateClient service={service} />
-      <div className="bg-[#f7f8fc] pb-24">
+      <div className="bg-[#eff1ec] pb-24">
         <div className="mx-auto max-w-6xl px-6">
           <HostingSupportBlock
             title="Need help choosing the right hosting and domain setup?"

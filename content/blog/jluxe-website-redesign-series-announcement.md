@@ -326,6 +326,6 @@ If you want this process applied to your business, start with the [website redes
 
 ## Related reads
 
-- [Case Study: How We Engineered J Luxe Aesthetics to Dominate Local Search](/blog/jluxe-medical-aesthetics-case-study)
+- [J Luxe Medical Aesthetics Case Study](/blog/jluxe-medical-aesthetics-case-study)
 - [Small Business Website Redesign Checklist](/blog/small-business-website-redesign-checklist)
 - [Website Launch Checklist for Small Businesses](/blog/website-launch-checklist-for-small-businesses)

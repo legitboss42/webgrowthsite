@@ -13,7 +13,7 @@ export default function FinalCTASection({
   return (
     <section className="bg-white py-16 md:py-20">
       <div className="mx-auto max-w-6xl px-5 sm:px-6">
-        <article className="overflow-hidden rounded-[2rem] border border-slate-200 bg-[linear-gradient(135deg,#eff4ff_0%,#ffffff_42%,#f4efff_100%)] p-8 shadow-[0_24px_60px_rgba(15,23,42,0.10)] md:p-10">
+        <article className="overflow-hidden rounded-[2rem] border border-slate-200 bg-[linear-gradient(135deg,#dbe7de_0%,#ffffff_42%,#ece0c6_100%)] p-8 shadow-[0_24px_60px_rgba(15,23,42,0.10)] md:p-10">
           <div className="grid gap-8 lg:grid-cols-[1.08fr_0.92fr] lg:items-center">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-blue-700">
@@ -34,7 +34,7 @@ export default function FinalCTASection({
             <div className="flex flex-col gap-3">
               <TrackedLink
                 href={finalCtaLinks.primaryHref}
-                className="inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-[linear-gradient(135deg,#4f6bff_0%,#7c5cff_100%)] px-8 py-3 text-sm font-semibold text-white shadow-[0_18px_38px_rgba(79,107,255,0.24)] transition hover:-translate-y-0.5 hover:brightness-105"
+                className="inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-[linear-gradient(135deg,#1c7a54_0%,#124a38_100%)] px-8 py-3 text-sm font-semibold text-white shadow-[0_18px_38px_rgba(18,74,56,0.24)] transition hover:-translate-y-0.5 hover:brightness-105"
                 ctaName="start_your_website"
                 ctaLocation={`${pageType}_primary`}
                 destination={finalCtaLinks.primaryHref}

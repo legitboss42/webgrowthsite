@@ -35,7 +35,7 @@ export default function BrowserFrameMockup({
         </div>
       </div>
 
-      <div className="bg-[linear-gradient(180deg,#ffffff_0%,#f7f8fc_100%)] p-6">
+      <div className="bg-[linear-gradient(180deg,#ffffff_0%,#f7f8f4_100%)] p-6">
         {eyebrow ? (
           <p className="text-xs font-bold uppercase tracking-[0.16em] text-blue-700">{eyebrow}</p>
         ) : null}
@@ -55,7 +55,7 @@ export default function BrowserFrameMockup({
                 key={line}
                 className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700"
               >
-                <span className="h-2 w-2 rounded-full bg-[linear-gradient(135deg,#4f6bff_0%,#7c5cff_100%)]" />
+                <span className="h-2 w-2 rounded-full bg-[linear-gradient(135deg,#1c7a54_0%,#124a38_100%)]" />
                 <span>{line}</span>
               </div>
             ))}

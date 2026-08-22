@@ -41,13 +41,13 @@ keyTakeaways:
     A documented event dictionary makes reports easier to interpret and
     maintain.
 whatYouNeed:
-  - Current website URL and business objective.
-  - Primary audience and offer clarity notes.
-  - 'Baseline performance data (traffic, leads, or sales).'
+  - The business questions your reports need to answer.
+  - A list of the conversions that matter (enquiries, calls, bookings, sales).
+  - Access to your site, tag manager, and analytics and advertising accounts.
 commonMistakes:
-  - Starting execution before strategic clarity.
-  - Relying on aesthetics without conversion structure.
-  - Skipping QA before launch or campaign traffic.
+  - Installing every available tag before defining a single conversion.
+  - Letting test and internal traffic pollute production reports.
+  - Firing duplicate events so conversions are counted more than once.
 steps:
   - 'Define decisions, conversions, and required dimensions.'
   - Create an event dictionary with triggers and ownership.
@@ -59,14 +59,16 @@ relatedGuideSlugs:
   - how-to-plan-website-copy-before-hiring-developer
   - website-platform-comparison-small-business
 faq:
-  - question: What is the first step before making major website changes?
+  - question: Which analytics tags does a small business actually need first?
     answer: >-
-      Define the commercial outcome and baseline metrics, then prioritize the
-      highest-impact fixes first.
-  - question: How do I avoid wasting budget on website updates?
+      Start with one analytics tag (such as GA4) and named conversion events for
+      your key actions. Add advertising pixels only for the channels you are
+      actively running campaigns on.
+  - question: How do I stop test traffic from distorting my reports?
     answer: >-
-      Use clear scope, measurable goals, and structured QA before and after
-      launch.
+      Use internal-traffic filters or a test environment, verify events in a
+      debug or preview mode before publishing, and exclude your own devices from
+      production data.
 ctaVariant: consultation
 evidenceNote: >-
   This guide describes a measurement design and QA workflow; it does not claim

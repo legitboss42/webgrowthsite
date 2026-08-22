@@ -76,6 +76,136 @@ export type ServicePageInput = Omit<
   >;
 
 export const NEW_SERVICE_PAGES: Record<string, ServicePageInput> = {
+  "business-automation": {
+    title: "Business Automation and Workflow Integration",
+    slug: "business-automation",
+    serviceParam: "Business Automation and Workflow Integration",
+    seoTitle: "Business Automation Services | Web Growth",
+    seoDescription:
+      "Business automation and workflow integration that connects the tools you already use and automates lead follow-up, CRM updates, bookings, email, and reporting.",
+    metaDescription:
+      "Automate repetitive business tasks, lead follow-up, CRM updates, bookings, email, reporting and more with custom workflow automation from Web Growth.",
+    keywords: [
+      "business automation services",
+      "workflow automation",
+      "business process automation",
+      "workflow integration",
+      "automate lead follow-up",
+      "crm automation",
+      "custom api integration",
+      "small business automation",
+    ],
+    searchIntent:
+      "Transactional - evaluate and request business automation and workflow integration support",
+    heroTitle: "Automate Repetitive Work and Keep Your Business Moving.",
+    heroDescription:
+      "We connect the tools you already use and automate the repetitive work between them: lead follow-up, CRM updates, bookings, invoicing, email, and reporting. Your team spends less time on manual admin and nothing important slips through.",
+    heroImage: "/images/services/services-business-2.webp",
+    detailImage: "/images/services/services-speed.webp",
+    highlights: [
+      "Workflow automation across the tools you already use",
+      "Lead capture, follow-up, and CRM updates handled automatically",
+      "Custom API integrations when off-the-shelf connectors are not enough",
+    ],
+    deliverables: [
+      "Automation audit that maps the repetitive tasks and handoffs worth automating",
+      "Connected workflows across your forms, CRM, email, calendar, and messaging tools",
+      "Lead capture, routing, and follow-up automation with clear ownership",
+      "Custom API integrations for tools without a ready-made connector",
+      "Monitoring, error handling, and documentation so automations stay reliable",
+    ],
+    process: [
+      {
+        title: "Map the workflow",
+        text: "We document the repetitive tasks, tools, and handoffs you want to automate and pinpoint where manual work causes delays or errors.",
+      },
+      {
+        title: "Build and connect",
+        text: "We build the automations, connect your tools with native integrations or custom APIs, and add error handling so the workflow is dependable.",
+      },
+      {
+        title: "Test and hand over",
+        text: "We test real scenarios end to end, document how each automation behaves, and hand over a system your team can trust and extend.",
+      },
+    ],
+    faqs: [
+      {
+        question: "Which tools can you connect?",
+        answer:
+          "We work with common CRMs, form builders, email and messaging platforms, calendars, spreadsheets, and payment tools. When a tool exposes an API, we can usually connect it even without a ready-made integration.",
+      },
+      {
+        question: "What if two tools do not have a ready-made integration?",
+        answer:
+          "That is where custom API integration comes in. If both tools expose an API, we can build a direct connection so data moves between them automatically instead of being copied by hand.",
+      },
+      {
+        question: "Will automation replace my team?",
+        answer:
+          "No. Automation removes repetitive manual steps so your team can focus on work that needs judgement. The goal is fewer dropped tasks and faster follow-up, not replacing people.",
+      },
+      {
+        question: "How do you keep automations reliable?",
+        answer:
+          "We add error handling, notifications for failed steps, and documentation so problems are visible and fixable. Automations are tested against real scenarios before they go live.",
+      },
+    ],
+    ctaTitle: "Ready to automate the repetitive work?",
+    ctaDescription:
+      "Tell us the tasks and tools eating your team's time. We will map the workflow and show you what can be automated.",
+    targetAudience: [
+      "Teams losing hours to manual data entry, copy-paste between tools, and repetitive follow-up.",
+      "Businesses whose leads or bookings slip through the cracks because follow-up is manual.",
+      "Founders running several disconnected tools that do not talk to each other.",
+    ],
+    notFor: [
+      "Businesses trying to automate a process that has not been defined yet.",
+      "Teams unwilling to grant access to the tools that need connecting.",
+      "Projects expecting automation to fix a broken offer or unclear workflow.",
+    ],
+    commonMistakes: [
+      "Automating a messy process instead of fixing it first.",
+      "Connecting tools with no error handling, so silent failures go unnoticed.",
+      "Copying data between systems by hand when an API connection is possible.",
+      "Building automations nobody documents, so they break when a tool changes.",
+    ],
+    examples: [
+      "A service business routed new form enquiries straight into its CRM with automatic follow-up, so no lead waited on manual entry.",
+      "A clinic connected its booking tool to reminders and CRM updates, cutting the manual admin between systems.",
+      "A founder team automated weekly reporting by pulling numbers from several tools into one scheduled summary.",
+    ],
+    relatedLinks: [
+      {
+        href: "/services/marketing-automation-build-implementation",
+        label: "Marketing automation",
+        title: "Need automated marketing follow-up specifically?",
+        description:
+          "Use the marketing automation service if your priority is lead nurture, lifecycle sequences, and conversion workflows across email and CRM.",
+      },
+      {
+        href: "/services/crm-system-setup-configuration",
+        label: "CRM setup",
+        title: "Need the CRM itself set up first?",
+        description:
+          "Start with CRM setup if your pipeline, stages, and lead routing are not configured yet. Automation works best on top of a clean CRM.",
+      },
+      {
+        href: "/services/email-marketing-setup-strategy",
+        label: "Email marketing",
+        title: "Want automated email flows too?",
+        description:
+          "Use the email marketing service if you want nurture sequences and campaign automation as part of your workflow.",
+      },
+      {
+        href: "/contact?service=Business Automation and Workflow Integration",
+        label: "Contact",
+        title: "Ready to automate your workflow?",
+        description:
+          "Go to contact and tell us which repetitive tasks and tools you want connected.",
+      },
+    ],
+  },
+
   "email-marketing-setup-strategy": {
     title: "Email Marketing Setup and Strategy",
     slug: "email-marketing-setup-strategy",
@@ -259,6 +389,29 @@ export const NEW_SERVICE_PAGES: Record<string, ServicePageInput> = {
       "Example workflow: tighten page intent and internal links, then measure search changes against a documented baseline.",
       "A founder-led business removed duplicated targeting and improved enquiry quality.",
       "A team restructured service clusters to support local search and conversion together.",
+    ],
+    relatedLinks: [
+      {
+        href: "/services/business-automation/",
+        label: "Reporting automation",
+        title: "Automate your SEO and growth reporting",
+        description:
+          "Pull rankings, traffic, and lead data from your tools into one scheduled report instead of rebuilding it by hand each month.",
+      },
+      {
+        href: "/services/analytics-tracking-setup/",
+        label: "Analytics",
+        title: "Measure the traffic properly first",
+        description:
+          "Set up reliable analytics and event tracking so SEO progress is judged on trustworthy data.",
+      },
+      {
+        href: "/services/website-audit/",
+        label: "Audit",
+        title: "Weak pages under the traffic?",
+        description:
+          "Use a review if search visibility is rising but pages are not turning visitors into enquiries.",
+      },
     ],
   },
 
@@ -954,6 +1107,11 @@ export const NEW_SERVICE_PAGES: Record<string, ServicePageInput> = {
 };
 
 const RELATED_GUIDES_BY_SERVICE: Record<string, string[]> = {
+  "business-automation": [
+    "email-automation-architecture",
+    "website-tracking-setup-for-small-businesses",
+    "why-your-website-isnt-getting-leads",
+  ],
   "email-marketing-setup-strategy": [
     "email-marketing-for-small-business",
     "email-automation-architecture",
@@ -1056,6 +1214,7 @@ export const NEW_SERVICES_LIST: ServiceListItem[] = Object.values(
   ALL_SERVICE_PAGES
 ).map((service) => {
   const imageBySlug: Record<string, string> = {
+    "business-automation": "/images/services/services-business-2.webp",
     "email-marketing-setup-strategy": "/images/services/services-support.webp",
     "search-engine-optimisation": "/images/services/services-audit.webp",
     "google-my-business-setup-optimisation": "/images/services/services-business.webp",
@@ -1068,6 +1227,11 @@ export const NEW_SERVICES_LIST: ServiceListItem[] = Object.values(
   };
 
   const bulletsBySlug: Record<string, string[]> = {
+    "business-automation": [
+      "Workflow automation",
+      "Tool & API integration",
+      "Lead & follow-up automation",
+    ],
     "email-marketing-setup-strategy": [
       "Email strategy",
       "Automations",

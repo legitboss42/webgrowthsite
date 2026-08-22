@@ -13,9 +13,9 @@ function buildHeroBackgroundSvg() {
       <stop offset="100%" stop-color="#10b981" stop-opacity="0"/>
     </radialGradient>
     <radialGradient id="shadowGlow" cx="18%" cy="30%" r="52%">
-      <stop offset="0%" stop-color="#ef4444" stop-opacity="0.15"/>
-      <stop offset="75%" stop-color="#ef4444" stop-opacity="0.04"/>
-      <stop offset="100%" stop-color="#ef4444" stop-opacity="0"/>
+      <stop offset="0%" stop-color="#b4802f" stop-opacity="0.15"/>
+      <stop offset="75%" stop-color="#b4802f" stop-opacity="0.04"/>
+      <stop offset="100%" stop-color="#b4802f" stop-opacity="0"/>
     </radialGradient>
     <linearGradient id="splitLine" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0%" stop-color="#10b981" stop-opacity="0.62"/>
@@ -41,13 +41,13 @@ function buildHeroBackgroundSvg() {
   </g>
 
   <g filter="url(#softBlur)">
-    <ellipse cx="360" cy="280" rx="170" ry="100" fill="#ef4444" fill-opacity="0.22"/>
+    <ellipse cx="360" cy="280" rx="170" ry="100" fill="#b4802f" fill-opacity="0.22"/>
     <ellipse cx="1220" cy="260" rx="220" ry="125" fill="#10b981" fill-opacity="0.26"/>
     <ellipse cx="980" cy="620" rx="260" ry="130" fill="#10b981" fill-opacity="0.14"/>
   </g>
 
   <g opacity="0.8">
-    <path d="M260 660 L620 460" stroke="#fca5a5" stroke-opacity="0.16" stroke-width="2"/>
+    <path d="M260 660 L620 460" stroke="#e4c671" stroke-opacity="0.16" stroke-width="2"/>
     <path d="M980 520 L1360 300" stroke="#6ee7b7" stroke-opacity="0.2" stroke-width="2"/>
     <path d="M1030 640 L1420 520" stroke="#6ee7b7" stroke-opacity="0.16" stroke-width="2"/>
   </g>

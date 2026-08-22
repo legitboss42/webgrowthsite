@@ -12,16 +12,16 @@ type IconBadgeProps = {
 };
 
 const toneClasses: Record<NonNullable<IconBadgeProps["tone"]>, string> = {
-  blue: "bg-[linear-gradient(135deg,#eef4ff_0%,#e6f0ff_100%)] text-blue-700 ring-blue-100",
+  blue: "bg-[linear-gradient(135deg,#e9f2ec_0%,#dde9e0_100%)] text-blue-700 ring-blue-100",
   purple:
-    "bg-[linear-gradient(135deg,#f3edff_0%,#efe8ff_100%)] text-violet-700 ring-violet-100",
+    "bg-[linear-gradient(135deg,#f5efdf_0%,#efe6cc_100%)] text-[#755b16] ring-[#ece0c6]",
   green:
     "bg-[linear-gradient(135deg,#ecfdf5_0%,#e6f9ef_100%)] text-emerald-700 ring-emerald-100",
   amber:
     "bg-[linear-gradient(135deg,#fff7ed_0%,#fff2db_100%)] text-amber-700 ring-amber-100",
-  cyan: "bg-[linear-gradient(135deg,#ecfeff_0%,#e3f7ff_100%)] text-cyan-700 ring-cyan-100",
+  cyan: "bg-[linear-gradient(135deg,#e9f2ec_0%,#dde9e0_100%)] text-cyan-700 ring-cyan-100",
   slate:
-    "bg-[linear-gradient(135deg,#f8fafc_0%,#f1f5f9_100%)] text-slate-700 ring-slate-200",
+    "bg-[linear-gradient(135deg,#f6f7f2_0%,#eef1ec_100%)] text-slate-700 ring-slate-200",
 };
 
 const shapeClasses: Record<NonNullable<IconBadgeProps["shape"]>, string> = {

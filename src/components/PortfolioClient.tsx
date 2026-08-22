@@ -18,6 +18,7 @@ const relatedServices = [
   { href: "/services/landing-page-design/", label: "Landing Page Design" },
   { href: "/services/search-engine-optimisation/", label: "SEO Setup" },
   { href: "/services/performance-optimisation/", label: "Performance Optimisation" },
+  { href: "/services/business-automation/", label: "Business Automation" },
 ] as const;
 
 const academySlugs = [
@@ -48,7 +49,7 @@ export default function PortfolioClient() {
   if (!featuredCase) return null;
 
   return (
-    <main className="portfolio-system">
+    <div className="portfolio-system">
       <section className="portfolio-hero" aria-labelledby="portfolio-title">
         <div className="portfolio-container portfolio-hero-grid">
           <div>
@@ -246,6 +247,6 @@ export default function PortfolioClient() {
           </div>
         </div>
       </section>
-    </main>
+    </div>
   );
 }

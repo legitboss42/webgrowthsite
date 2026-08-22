@@ -214,7 +214,7 @@ export default async function BlogPostPage({
     post.faq.length > 0;
 
   return (
-    <article className="academy-article-page bg-[#f4f1eb] text-slate-950">
+    <article className="academy-article-page bg-[#eff1ec] text-slate-950">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -224,8 +224,8 @@ export default async function BlogPostPage({
 
       <section className="academy-article-hero relative overflow-hidden border-b border-border-hairline bg-bg-ink text-text-primary">
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
-          <div className="absolute left-[-10%] top-[-8%] h-72 w-72 rounded-full bg-[radial-gradient(circle,rgba(27,110,99,0.22),transparent_70%)]" />
-          <div className="absolute right-[-12%] top-[4%] h-[28rem] w-[28rem] rounded-full bg-[radial-gradient(circle,rgba(232,163,61,0.12),transparent_72%)]" />
+          <div className="absolute left-[-10%] top-[-8%] h-72 w-72 rounded-full bg-[radial-gradient(circle,rgba(28,122,84,0.22),transparent_70%)]" />
+          <div className="absolute right-[-12%] top-[4%] h-[28rem] w-[28rem] rounded-full bg-[radial-gradient(circle,rgba(180,128,47,0.12),transparent_72%)]" />
         </div>
 
         <div className="academy-article-container relative mx-auto max-w-6xl px-5 py-16 sm:px-6 md:py-20">
@@ -348,7 +348,7 @@ export default async function BlogPostPage({
                   </div>
                 </div>
 
-                <div className="mt-5 rounded-2xl border border-blue-100 bg-[linear-gradient(135deg,rgba(239,244,255,0.95),rgba(247,244,255,0.95))] p-4">
+                <div className="mt-5 rounded-2xl border border-blue-100 bg-[linear-gradient(135deg,rgba(219,231,222,0.95),rgba(247,248,244,0.95))] p-4">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-blue-700">
                     Best next move
                   </p>
@@ -359,7 +359,7 @@ export default async function BlogPostPage({
                     ctaLocation="article_masthead"
                     destination={articleCta.href}
                     pageType="blog_post"
-                    className="mt-4 inline-flex min-h-11 items-center justify-center rounded-xl bg-[linear-gradient(135deg,#3b82f6,#7c5cff)] px-4 py-2 text-sm font-semibold text-white shadow-[0_16px_34px_rgba(79,107,255,0.24)] transition hover:-translate-y-0.5"
+                    className="mt-4 inline-flex min-h-11 items-center justify-center rounded-xl bg-[linear-gradient(135deg,#1c7a54,#124a38)] px-4 py-2 text-sm font-semibold text-white shadow-[0_16px_34px_rgba(18,74,56,0.24)] transition hover:-translate-y-0.5"
                   >
                     {articleCta.label}
                   </TrackedLink>

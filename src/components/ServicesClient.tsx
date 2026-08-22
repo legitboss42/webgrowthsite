@@ -22,6 +22,7 @@ const preferredCoreSlugs = [
   "landing-page-design",
   "website-redesign",
   "ecommerce-website-design",
+  "business-automation",
   "search-engine-optimisation",
   "performance-optimisation",
   "website-maintenance",
@@ -126,7 +127,7 @@ export default function ServicesClient({ services = [] }: Props) {
   const resources = selectResources();
 
   return (
-    <main className="services-system">
+    <div className="services-system">
       <section className="services-hero" aria-labelledby="services-title">
         <div className="services-container services-hero-grid">
           <div>
@@ -190,7 +191,7 @@ export default function ServicesClient({ services = [] }: Props) {
         <div className="services-container services-section-heading">
           <div>
             <p className="services-kicker">Core website services</p>
-            <h2 id="core-services-title">The visible website work that shapes first impressions.</h2>
+            <h2 id="core-services-title">The core services that shape first impressions and keep your business moving.</h2>
           </div>
           <Link href="/contact/" className="services-text-link">
             Discuss your project <Arrow />
@@ -315,6 +316,6 @@ export default function ServicesClient({ services = [] }: Props) {
           </div>
         </div>
       </section>
-    </main>
+    </div>
   );
 }

@@ -1,6 +1,7 @@
+import type { CSSProperties } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { CORE_SERVICE_PAGES } from "@/lib/coreServiceConfigs";
+import { ALL_SERVICE_PAGES } from "@/lib/newServiceConfigs";
 import { portfolioCases } from "@/lib/portfolioCases";
 import { getPublicPosts } from "@/lib/posts";
 import { PUBLIC_TOOLS } from "@/lib/tools";
@@ -33,7 +34,7 @@ const trustItems = [
   ["Practical strategy", "No template theatre. Every section has a business job."],
   ["SEO-aware builds", "Metadata, structure, internal links, and performance stay part of the work."],
   ["Conversion focus", "Offers, proof, forms, and calls to action are designed for real decisions."],
-  ["Premium execution", "Cinematic presentation without hiding core content behind JavaScript."],
+  ["Premium execution", "Considered presentation that never hides core content behind JavaScript."],
 ];
 
 const serviceSlugs = [
@@ -43,9 +44,10 @@ const serviceSlugs = [
   "ecommerce-website-design",
   "search-engine-optimisation",
   "performance-optimisation",
+  "business-automation",
 ];
 
-const serviceTone = ["Design", "Campaigns", "Redesign", "Commerce", "SEO", "Speed"];
+const serviceTone = ["Design", "Campaigns", "Redesign", "Commerce", "SEO", "Speed", "Automation"];
 
 function Arrow() {
   return <span aria-hidden="true">-&gt;</span>;
@@ -54,7 +56,7 @@ function Arrow() {
 function getHomepageServices() {
   return serviceSlugs
     .map((slug, index) => {
-      const service = CORE_SERVICE_PAGES[slug];
+      const service = ALL_SERVICE_PAGES[slug];
       if (!service) return null;
 
       return {
@@ -89,22 +91,18 @@ export default function ApprovedHomepage() {
   const supportingCases = portfolioCases.filter((item) => item.slug !== featuredCase.slug).slice(0, 3);
 
   return (
-    <main className="approved-homepage">
+    <div className="approved-homepage">
       <HomeMotion />
       <section className="approved-hero" aria-labelledby="homepage-hero-title">
         <div className="approved-hero-grid approved-container">
           <div className="approved-hero-copy">
-            <p className="approved-kicker" data-home-hero>The platform for premium website growth</p>
+            <p className="approved-kicker" data-home-hero>Design &middot; Growth &middot; Monetization</p>
             <h1 id="homepage-hero-title" data-home-hero>
-              Build.{" "}
-              <br />
-              Grow.{" "}
-              <br />
-              <span>Monetize.</span>
+              Websites that <span>earn</span>.
             </h1>
             <p className="approved-lede" data-home-hero>
-              Web Growth designs premium websites and growth systems that help businesses build credibility, attract
-              traffic, convert visitors, and scale online.
+              Web Growth builds premium websites and growth systems designed to earn attention, trust, and enquiries
+              &mdash; with real strategy, SEO foundations, and honest conversion paths, never inflated promises.
             </p>
             <div className="approved-actions" aria-label="Homepage actions" data-home-hero>
               <Link className="approved-button approved-button-primary" href="/contact/">
@@ -114,29 +112,32 @@ export default function ApprovedHomepage() {
                 View Case Studies
               </Link>
             </div>
+            <p className="approved-hero-note" data-home-hero>A six-stage growth cycle &middot; build to monetize</p>
           </div>
 
-          <div className="approved-hero-visual" aria-label="The Web Growth cycle">
+          <div className="approved-hero-visual" aria-label="Web Growth's six-stage growth cycle">
             <div className="approved-cycle">
               <span className="approved-cycle-ring" aria-hidden="true" data-cycle-ring />
+              <span className="approved-cycle-needle" aria-hidden="true" />
               <div className="approved-cycle-core" data-cycle-core>
-                <strong>The Website Growth Cycle</strong>
-                <small>Plan, build, optimise, convert, monetize, scale</small>
+                <span className="approved-hub-eyebrow">The method</span>
+                <strong>Growth cycle</strong>
+                <small>Six stages &middot; one system</small>
               </div>
-              {[
-                ["Plan", "Research, strategy and site planning"],
-                ["Build", "Design and develop high-converting websites"],
-                ["Optimise", "SEO, speed and user experience"],
-                ["Attract", "Content, search and marketing"],
-                ["Convert", "Turn visitors into leads and customers"],
-                ["Monetize", "Services, sales and compliant content paths"],
-              ].map(([title, copy], index) => (
-                <div className={`approved-cycle-node approved-cycle-node-${index + 1}`} key={title} data-cycle-node>
-                  <span>{index + 1}</span>
-                  <strong>{title}</strong>
-                  <small>{copy}</small>
-                </div>
-              ))}
+              <div className="approved-cycle-orbit">
+                {["Plan", "Build", "Optimise", "Attract", "Convert", "Monetize"].map((title, index) => (
+                  <div
+                    className={`approved-cycle-node approved-cycle-node-${index + 1}`}
+                    key={title}
+                    style={{ "--i": index } as CSSProperties}
+                  >
+                    <div className="approved-cycle-node-inner" data-cycle-node>
+                      <span>{`0${index + 1}`}</span>
+                      <strong>{title}</strong>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
@@ -238,8 +239,8 @@ export default function ApprovedHomepage() {
           </div>
           <div className="approved-advantage-copy" data-home-reveal>
             <p>
-              The design system combines editorial clarity, cinematic depth, technical SEO, and conversion thinking so
-              the website can support credibility, discovery, enquiries, and revenue paths.
+              The system combines editorial clarity, technical SEO, and conversion thinking, so the website supports
+              credibility, discovery, enquiries, and revenue paths &mdash; not just a strong first impression.
             </p>
             <div>
               <span>Strategy before styling</span>
@@ -336,6 +337,6 @@ export default function ApprovedHomepage() {
           </div>
         </div>
       </section>
-    </main>
+    </div>
   );
 }

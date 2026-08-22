@@ -21,7 +21,10 @@ type FormValues = {
   budgetRange: string;
   timeline: string;
   message: string;
+  automationDetails: string;
 };
+
+const AUTOMATION_HELP_OPTION = "Business automation / workflow integration";
 
 const INITIAL_VALUES: FormValues = {
   name: "",
@@ -34,6 +37,7 @@ const INITIAL_VALUES: FormValues = {
   budgetRange: "Not sure yet",
   timeline: "As soon as possible",
   message: "",
+  automationDetails: "",
 };
 
 const inputClassName = "contact-control";
@@ -86,6 +90,7 @@ export default function ContactClient({ directDeliveryConfigured }: ContactClien
       "Landing page",
       "Online store / ecommerce website",
       "Website speed improvement",
+      AUTOMATION_HELP_OPTION,
       "Not sure yet",
     ],
     []
@@ -152,6 +157,11 @@ export default function ContactClient({ directDeliveryConfigured }: ContactClien
       "speed & mobile optimisation": "Website speed improvement",
       "speed optimization": "Website speed improvement",
       "website speed improvement": "Website speed improvement",
+      "business automation and workflow integration": AUTOMATION_HELP_OPTION,
+      "business automation": AUTOMATION_HELP_OPTION,
+      "workflow automation": AUTOMATION_HELP_OPTION,
+      "workflow integration": AUTOMATION_HELP_OPTION,
+      "automation": AUTOMATION_HELP_OPTION,
     };
 
     const matched =
@@ -177,6 +187,7 @@ export default function ContactClient({ directDeliveryConfigured }: ContactClien
       businessName: values.businessName.trim(),
       websiteUrl: normalizeUrl(values.websiteUrl),
       message: values.message.trim(),
+      automationDetails: values.automationDetails.trim(),
     };
 
     if (!payload.name || !payload.email || !payload.helpNeeded || !payload.mainIssue) {
@@ -221,6 +232,9 @@ export default function ContactClient({ directDeliveryConfigured }: ContactClien
             budget_range: payload.budgetRange,
             timeline: payload.timeline,
             message: payload.message,
+            ...(payload.helpNeeded === AUTOMATION_HELP_OPTION
+              ? { automation_details: payload.automationDetails }
+              : {}),
             page_path: typeof window !== "undefined" ? window.location.pathname : "/contact/",
           },
         }),
@@ -432,6 +446,27 @@ export default function ContactClient({ directDeliveryConfigured }: ContactClien
             </select>
           </div>
         </div>
+
+        {values.helpNeeded === AUTOMATION_HELP_OPTION ? (
+          <div>
+            <label htmlFor="contact-automation-details" className={labelClassName}>
+              What would you like to automate?
+            </label>
+            <p id="contact-automation-help" className="contact-form-muted">
+              Describe the repetitive task, workflow or systems you want connected.
+            </p>
+            <textarea
+              id="contact-automation-details"
+              rows={4}
+              maxLength={1200}
+              value={values.automationDetails}
+              onChange={(event) => updateValue("automationDetails", event.target.value)}
+              className={inputClassName}
+              aria-describedby="contact-automation-help"
+              placeholder="e.g. When a new lead submits the contact form, add them to our CRM and send a follow-up email."
+            />
+          </div>
+        ) : null}
 
         <div className="contact-form-grid">
           <div>

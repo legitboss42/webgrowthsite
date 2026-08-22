@@ -19,8 +19,8 @@ export default function AnswerHighlightsSection({
   items: readonly AnswerItem[];
 }) {
   return (
-    <section className="relative overflow-hidden border-b border-slate-200 bg-[#f4f7ff] py-16">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_14%_18%,rgba(59,130,246,0.08),transparent_34%),radial-gradient(circle_at_80%_70%,rgba(139,92,246,0.08),transparent_28%)]" />
+    <section className="relative overflow-hidden border-b border-slate-200 bg-[#eff1ec] py-16">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_14%_18%,rgba(28,122,84,0.08),transparent_34%),radial-gradient(circle_at_80%_70%,rgba(180,128,47,0.08),transparent_28%)]" />
       <div className="relative mx-auto max-w-6xl px-6">
         <div className="max-w-3xl">
           <p className="inline-flex rounded-full border border-blue-100 bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-blue-700">
@@ -40,7 +40,7 @@ export default function AnswerHighlightsSection({
               key={item.title}
               className="relative flex h-full min-h-0 flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_18px_44px_rgba(15,23,42,0.06)]"
             >
-              <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(135deg,rgba(59,130,246,0.03),transparent_44%,rgba(139,92,246,0.05)_100%)]" />
+              <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(135deg,rgba(28,122,84,0.03),transparent_44%,rgba(180,128,47,0.05)_100%)]" />
               <div className="relative z-10 flex h-full flex-1 flex-col">
                 <h3 className="text-xl font-semibold text-slate-950">{item.title}</h3>
                 <p className="mt-3 text-sm leading-6 text-slate-600">

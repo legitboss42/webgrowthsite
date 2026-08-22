@@ -26,7 +26,7 @@ export default function FaqPage() {
     <>
       <StructuredData data={buildProfessionalServiceSchema("/faq", pageDescription)} />
 
-      <main className="bg-[#f7f8fc] text-slate-950">
+      <main className="bg-[#eff1ec] text-slate-950">
         <PageHero
           eyebrow="FAQ"
           title="Clear answers about pricing, timelines, ownership, and what happens next."

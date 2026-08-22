@@ -84,7 +84,7 @@ export default function ServiceDetailTemplateClient({ service }: Props) {
   ];
 
   return (
-    <main className="service-detail-system">
+    <div className="service-detail-system">
       <StructuredData data={schema} />
 
       <section className="service-detail-hero" aria-labelledby="service-detail-title">
@@ -359,6 +359,6 @@ export default function ServiceDetailTemplateClient({ service }: Props) {
           </div>
         </div>
       </section>
-    </main>
+    </div>
   );
 }

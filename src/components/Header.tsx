@@ -89,8 +89,8 @@ export default function Header() {
         className={[
           "border-b transition-all duration-300",
           scrolled
-            ? "border-white/70 bg-white/88 shadow-[0_14px_38px_rgba(16,21,37,0.08)] backdrop-blur-2xl"
-            : "border-white/45 bg-white/72 backdrop-blur-xl",
+            ? "border-[var(--rule)] bg-[rgba(247,248,244,0.86)] shadow-[0_14px_38px_rgba(20,20,15,0.08)] backdrop-blur-2xl"
+            : "border-transparent bg-[rgba(247,248,244,0.66)] backdrop-blur-xl",
         ].join(" ")}
       >
         <div className="wg-shell-container flex min-h-[4.5rem] items-center justify-between gap-4">
@@ -148,7 +148,7 @@ export default function Header() {
                 </span>
               </button>
               <div className="invisible absolute left-1/2 top-full w-56 -translate-x-1/2 pt-3 opacity-0 transition group-focus-within:visible group-focus-within:opacity-100 group-hover:visible group-hover:opacity-100">
-                <div className="overflow-hidden rounded-xl border border-[var(--border-hairline)] bg-white shadow-[var(--shadow-soft)]">
+                <div className="overflow-hidden rounded-xl border border-[var(--border-hairline)] bg-[var(--paper-raised)] shadow-[var(--shadow-soft)]">
                   {resourceLinks.map((item) => (
                     <Link
                       key={item.href}
@@ -170,7 +170,7 @@ export default function Header() {
               aria-expanded={menuOpen}
               aria-controls="mobile-navigation"
               onClick={() => setMenuOpen((current) => !current)}
-              className="inline-flex h-11 w-11 items-center justify-center rounded-lg border border-[var(--border-hairline)] bg-white text-[var(--text-ink)] transition hover:border-[var(--accent-blue)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--focus-ring)] lg:hidden"
+              className="inline-flex h-11 w-11 items-center justify-center rounded-lg border border-[var(--border-hairline)] bg-[var(--paper-raised)] text-[var(--text-ink)] transition hover:border-[var(--accent-blue)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--focus-ring)] lg:hidden"
             >
               <span className="relative block h-4 w-5">
                 <span
@@ -196,7 +196,7 @@ export default function Header() {
 
             <Link
               href="/contact/"
-              className="hidden min-h-11 items-center justify-center rounded-lg bg-[var(--accent-blue-strong)] px-5 text-sm font-bold text-white shadow-[var(--shadow-blue)] transition hover:-translate-y-0.5 hover:bg-[var(--accent-blue)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--focus-ring)] sm:inline-flex"
+              className="hidden min-h-11 items-center justify-center rounded-md bg-[var(--accent-blue)] px-5 text-sm font-bold text-white shadow-[var(--shadow-blue)] transition hover:-translate-y-0.5 hover:bg-[var(--accent-blue-strong)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--focus-ring)] sm:inline-flex"
             >
               Work With Us <span aria-hidden="true" className="ml-2">-&gt;</span>
             </Link>
@@ -230,7 +230,7 @@ export default function Header() {
             >
               <nav
                 aria-label="Mobile navigation"
-                className="mx-auto max-w-2xl overflow-hidden rounded-2xl border border-white/70 bg-white shadow-[0_26px_64px_rgba(16,21,37,0.18)]"
+                className="mx-auto max-w-2xl overflow-hidden rounded-2xl border border-[var(--rule)] bg-[var(--paper-raised)] shadow-[0_26px_64px_rgba(20,20,15,0.14)]"
               >
                 <div className="grid gap-1 p-3">
                   {mobileLinks.map((item) => {
@@ -260,7 +260,7 @@ export default function Header() {
 
                   <Link
                     href="/contact/"
-                    className="mt-2 inline-flex min-h-12 items-center justify-center rounded-xl bg-[var(--accent-blue-strong)] px-5 py-3 text-sm font-bold text-white shadow-[var(--shadow-blue)] transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]"
+                    className="mt-2 inline-flex min-h-12 items-center justify-center rounded-md bg-[var(--accent-blue)] px-5 py-3 text-sm font-bold text-white shadow-[var(--shadow-blue)] transition hover:bg-[var(--accent-blue-strong)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]"
                   >
                     Work With Us <span aria-hidden="true" className="ml-2">-&gt;</span>
                   </Link>

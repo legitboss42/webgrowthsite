@@ -7,10 +7,10 @@ type PageSectionProps = {
 };
 
 const surfaceStyles = {
-  default: "bg-[#f7f8fc]",
+  default: "bg-[#eff1ec]",
   white: "bg-white",
-  tint: "bg-[linear-gradient(180deg,#f7f8fc_0%,#eef2ff_100%)]",
-  dark: "bg-[#0f172a] text-white",
+  tint: "bg-[linear-gradient(180deg,#f7f8f4_0%,#dbe7de_100%)]",
+  dark: "bg-[#0e1a14] text-white",
 } as const;
 
 const spacingStyles = {

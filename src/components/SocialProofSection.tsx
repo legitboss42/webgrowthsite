@@ -60,8 +60,9 @@ export default function SocialProofSection({
         </div>
 
         <div className="mt-10 grid gap-6 lg:auto-rows-fr lg:grid-cols-3">
-          {cards.map((item) => {
+          {cards.map((item, index) => {
             const isOpen = openCards[item.title];
+            const panelId = `proof-panel-${index}`;
 
             return (
               <div key={item.title} className="flex h-full min-h-0 flex-col gap-4">
@@ -87,6 +88,7 @@ export default function SocialProofSection({
                     onClick={() => toggleCard(item.title)}
                     className="relative z-10 flex w-full items-center justify-between gap-3 px-5 py-4 text-left"
                     aria-expanded={isOpen}
+                    aria-controls={panelId}
                   >
                     <span className="inline-flex rounded-full border border-white/10 bg-black/55 px-3 py-1 text-xs uppercase tracking-[0.12em] text-emerald-200/90">
                       {typeLabels[item.type]}
@@ -98,6 +100,7 @@ export default function SocialProofSection({
                   </button>
 
                   <div
+                    id={panelId}
                     className={[
                       "grid transition-all duration-300 ease-out",
                       isOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-70",

@@ -114,20 +114,19 @@ For the broader before-and-after summary, also see the main [J Luxe Medical Aest
 
 ---
 
-## What results came out of the rebuild?
+## What changed during the rebuild?
 
-Using the outcomes already documented in the J Luxe case study, the clearest changes were:
+These are the improvements we delivered and can describe directly. They are practical, structural changes in the implemented site, not independently measured business outcomes. Where this post refers to results, it means the quality of the delivered build — not verified traffic, ranking, booking, or revenue figures, which depend on the client's own analytics.
 
-- Lighthouse Performance improved from `42` to `100`
-- First Contentful Paint improved from `2.8s` to `0.2s`
-- mobile bounce rate dropped from `65%` to `35%`
-- monthly bookings increased by `25%`
+What changed:
 
-Those numbers matter because they connect technical work to business outcomes.
+- page intent is now explicit on every route, instead of a mix of overlapping templates
+- service and treatment pages follow a consistent, conversion-oriented structure
+- performance was treated as a discipline (lighter assets, stricter budgets) rather than a one-off pass
+- trust and proof signals were moved earlier in the journey
+- launch controls — redirects, canonicals, analytics, QA — were treated as part of the build
 
-This was not a redesign where the only win was "the site looks nicer now."
-
-The rebuild improved:
+The rebuild also improved the perception and clarity of the site across:
 
 - speed
 - trust
@@ -136,8 +135,6 @@ The rebuild improved:
 - launch reliability
 
 That combination is why the project performed better.
-
-![Performance and conversion dashboard showing Lighthouse improvement, faster paint times, lower bounce rate, and stronger booking outcomes](/images/blog/jluxe-series-results-dashboard.webp)
 
 ---
 
@@ -257,7 +254,7 @@ The performance work did not only help scores.
 
 It reduced friction.
 
-That is a major reason bounce rate improved.
+Faster, clearer mobile pages remove one of the most common reasons visitors leave before engaging.
 
 People on mobile do not wait around for a premium brand story to eventually become usable.
 
@@ -391,8 +388,6 @@ are so useful around a commercial site.
 This is the part you can apply to your own project.
 
 If you are rebuilding a small business website, this is the sequence I would reuse.
-
-![Website growth playbook board showing the repeatable sequence from diagnosis and audit to launch, monitoring, and iteration](/images/blog/jluxe-series-reusable-playbook-board.webp)
 
 ### Step 1: Diagnose the real problem
 
@@ -559,7 +554,7 @@ That is how a case study becomes a system.
 The project treated strategy, SEO, conversion, performance, and launch execution as one connected system instead of separate workstreams.
 
 ### Did the rebuild improve only design, or business performance too?
-It improved business-facing outcomes too, including speed, bounce behavior, booking performance, and overall conversion flow clarity.
+It focused on business-facing structure, not just visuals: faster pages, clearer service positioning, and a simpler path from interest to enquiry. Whether those changes translated into measured traffic, booking, or revenue gains depends on the client's own analytics and is not claimed here.
 
 ### What was the most dangerous mistake to avoid?
 Host-level and launch-week mistakes were among the riskiest because they could affect every important URL or conversion path at once.

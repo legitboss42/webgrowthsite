@@ -501,4 +501,4 @@ When the bottleneck is still unclear, a structured [website audit service](/serv
 
 - [Why We Rebuilt, Not Redesigned (Part 1)](/blog/01-why-we-rebuilt-not-redesigned)
 - [J Luxe Website Rebuild Series: 8-Part Announcement](/blog/jluxe-website-redesign-series-announcement)
-- [Case Study: How We Engineered J Luxe Aesthetics to Dominate Local Search](/blog/jluxe-medical-aesthetics-case-study)
+- [J Luxe Medical Aesthetics Case Study](/blog/jluxe-medical-aesthetics-case-study)

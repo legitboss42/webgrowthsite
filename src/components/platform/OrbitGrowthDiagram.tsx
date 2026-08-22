@@ -21,8 +21,8 @@ export default function OrbitGrowthDiagram() {
     <div className="relative mx-auto aspect-square w-full max-w-[40rem]">
       <div className="absolute inset-[14%] rounded-full border border-blue-200/80" />
       <div className="absolute inset-[18%] rounded-full border border-dashed border-slate-200" />
-      <div className="absolute inset-[14%] rounded-full bg-[conic-gradient(from_160deg,#4f6bff_0deg,#7c5cff_120deg,#4f6bff_240deg,#4f6bff_360deg)] opacity-15 blur-xl" />
-      <div className="absolute inset-[23%] rounded-full border border-slate-100 bg-white/80 shadow-[0_20px_60px_rgba(79,107,255,0.12)] backdrop-blur">
+      <div className="absolute inset-[14%] rounded-full bg-[conic-gradient(from_160deg,#1c7a54_0deg,#124a38_120deg,#1c7a54_240deg,#1c7a54_360deg)] opacity-15 blur-xl" />
+      <div className="absolute inset-[23%] rounded-full border border-slate-100 bg-white/80 shadow-[0_20px_60px_rgba(18,74,56,0.12)] backdrop-blur">
         <div className="flex h-full flex-col items-center justify-center px-8 text-center">
           <p className="text-xs font-bold uppercase tracking-[0.18em] text-blue-700">Growth OS</p>
           <h3 className="mt-3 text-3xl font-semibold leading-tight tracking-[-0.04em] text-slate-950 md:text-4xl">

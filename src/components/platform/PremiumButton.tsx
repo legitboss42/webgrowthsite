@@ -14,7 +14,7 @@ type PremiumButtonProps = {
 
 const styles = {
   primary:
-    "inline-flex min-h-12 items-center justify-center rounded-xl bg-[linear-gradient(135deg,#4f6bff_0%,#7c5cff_100%)] px-6 py-3 text-sm font-semibold text-white shadow-[0_18px_38px_rgba(79,107,255,0.28)] transition duration-200 hover:-translate-y-0.5 hover:brightness-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-700",
+    "inline-flex min-h-12 items-center justify-center rounded-xl bg-[linear-gradient(135deg,#1c7a54_0%,#124a38_100%)] px-6 py-3 text-sm font-semibold text-white shadow-[0_18px_38px_rgba(18,74,56,0.28)] transition duration-200 hover:-translate-y-0.5 hover:brightness-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-700",
   secondary:
     "inline-flex min-h-12 items-center justify-center rounded-xl border border-slate-200 bg-white px-6 py-3 text-sm font-semibold text-slate-900 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-blue-200 hover:bg-blue-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-700",
   ghost:

@@ -18,7 +18,7 @@ export default function RelatedGuides({ guides, title = "Related Reads" }: Relat
 
   return (
     <section className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-[0_24px_60px_rgba(15,23,42,0.08)]">
-      <div className="border-b border-slate-200 bg-[linear-gradient(180deg,#ffffff_0%,#f7f9ff_100%)] px-6 py-6 md:px-8">
+      <div className="border-b border-slate-200 bg-[linear-gradient(180deg,#ffffff_0%,#f7f8f4_100%)] px-6 py-6 md:px-8">
         <p className="text-xs uppercase tracking-[0.18em] text-blue-700">{title}</p>
         <h3 className="mt-3 text-2xl font-semibold tracking-[-0.03em] text-slate-950">
           Keep building context, not just page views
@@ -33,7 +33,7 @@ export default function RelatedGuides({ guides, title = "Related Reads" }: Relat
           <Link
             key={guide.slug}
             href={`/blog/${guide.slug}/`}
-            className="group rounded-[1.5rem] border border-slate-200 bg-[linear-gradient(180deg,#ffffff_0%,#f8faff_100%)] p-5 transition hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-[0_18px_45px_rgba(79,107,255,0.10)]"
+            className="group rounded-[1.5rem] border border-slate-200 bg-[linear-gradient(180deg,#ffffff_0%,#f7f8f4_100%)] p-5 transition hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-[0_18px_45px_rgba(18,74,56,0.10)]"
           >
             <div className="flex items-center justify-between gap-4">
               <p className="text-xs uppercase tracking-[0.15em] text-blue-700">{guide.topic || "Guide"}</p>

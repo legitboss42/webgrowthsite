@@ -29,7 +29,7 @@ export default function BlogInlineCTA({
   return (
     <div
       className={[
-        "rounded-[1.5rem] border border-slate-200 bg-[linear-gradient(180deg,#ffffff_0%,#f7f9ff_100%)] shadow-[0_20px_50px_rgba(15,23,42,0.06)]",
+        "rounded-[1.5rem] border border-slate-200 bg-[linear-gradient(180deg,#ffffff_0%,#f7f8f4_100%)] shadow-[0_20px_50px_rgba(15,23,42,0.06)]",
         compact ? "p-5" : "p-6",
       ].join(" ")}
     >

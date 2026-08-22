@@ -27,10 +27,10 @@ export default function CTASection({
 }: CTASectionProps) {
   return (
     <section className={`relative overflow-hidden py-16 sm:py-20 ${className || ""}`}>
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_16%_18%,rgba(59,130,246,0.10),transparent_32%),radial-gradient(circle_at_82%_82%,rgba(139,92,246,0.12),transparent_28%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_16%_18%,rgba(28,122,84,0.10),transparent_32%),radial-gradient(circle_at_82%_82%,rgba(180,128,47,0.12),transparent_28%)]" />
       <div className="relative mx-auto max-w-6xl px-6">
         <SurfaceCard className="relative overflow-hidden rounded-[2rem] border-slate-200/80 bg-white p-6 shadow-[0_30px_90px_rgba(15,23,42,0.10)] sm:p-8">
-          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(120deg,rgba(59,130,246,0.05),transparent_38%,rgba(139,92,246,0.07)_100%)]" />
+          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(120deg,rgba(28,122,84,0.05),transparent_38%,rgba(180,128,47,0.07)_100%)]" />
           <div className="pointer-events-none absolute -right-24 top-0 h-48 w-48 rounded-full bg-purple-100/70 blur-3xl" />
           <div className="pointer-events-none absolute -left-20 bottom-0 h-44 w-44 rounded-full bg-blue-100/70 blur-3xl" />
 

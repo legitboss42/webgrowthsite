@@ -62,7 +62,7 @@ const pricingNotes = [
 
 export default function PricingClient() {
   return (
-    <main className="bg-[#f7f8fc] text-slate-950">
+    <main className="bg-[#eff1ec] text-slate-950">
       <PageHero
         eyebrow="Pricing"
         title="Premium scope guidance, without hiding how Web Growth pricing works."

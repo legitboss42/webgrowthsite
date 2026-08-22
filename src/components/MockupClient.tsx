@@ -128,13 +128,13 @@ function AccentClasses({ accent }: { accent: Theme["accent"] }) {
   return (
     <style>{`
       .accent-bg { background: ${
-        accent === "emerald" ? "rgba(16,185,129,0.18)" : accent === "blue" ? "rgba(59,130,246,0.18)" : "rgba(245,158,11,0.18)"
+        accent === "emerald" ? "rgba(16,185,129,0.18)" : accent === "blue" ? "rgba(28,122,84,0.18)" : "rgba(180,128,47,0.18)"
       }; }
       .accent-text { color: ${
-        accent === "emerald" ? "rgb(110,231,183)" : accent === "blue" ? "rgb(147,197,253)" : "rgb(252,211,77)"
+        accent === "emerald" ? "rgb(110,231,183)" : accent === "blue" ? "rgb(124,198,162)" : "rgb(228,198,113)"
       }; }
       .accent-btn { background: ${
-        accent === "emerald" ? "rgb(5,150,105)" : accent === "blue" ? "rgb(37,99,235)" : "rgb(217,119,6)"
+        accent === "emerald" ? "rgb(5,150,105)" : accent === "blue" ? "rgb(18,74,56)" : "rgb(180,128,47)"
       }; }
       .accent-btn:hover { filter: brightness(1.08); }
     `}</style>

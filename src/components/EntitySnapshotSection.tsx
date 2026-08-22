@@ -25,7 +25,7 @@ export default function EntitySnapshotSection({
   links?: readonly SnapshotLink[];
 }) {
   return (
-    <section className="relative overflow-hidden rounded-[1.75rem] border border-slate-200 bg-[linear-gradient(180deg,#ffffff_0%,#f7f9ff_100%)] py-16 shadow-[0_24px_60px_rgba(15,23,42,0.06)]">
+    <section className="relative overflow-hidden rounded-[1.75rem] border border-slate-200 bg-[linear-gradient(180deg,#ffffff_0%,#f7f8f4_100%)] py-16 shadow-[0_24px_60px_rgba(15,23,42,0.06)]">
       <GeneratedSectionBackground variant="snapshot" />
       <div className="relative mx-auto max-w-6xl px-6">
         <div className="max-w-3xl">
@@ -44,7 +44,7 @@ export default function EntitySnapshotSection({
               key={item.title}
               className="relative flex h-full min-h-0 flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_16px_36px_rgba(15,23,42,0.05)]"
             >
-              <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(115deg,rgba(79,107,255,0.06)_0%,transparent_46%,rgba(124,92,255,0.05)_100%)]" />
+              <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(115deg,rgba(28,122,84,0.06)_0%,transparent_46%,rgba(180,128,47,0.05)_100%)]" />
               <div className="relative z-10 flex h-full flex-1 flex-col">
                 <h3 className="text-xl font-semibold text-slate-950">{item.title}</h3>
                 <p className="mt-3 text-sm leading-6 text-slate-600">

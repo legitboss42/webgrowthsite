@@ -28,6 +28,7 @@
     { "path": "/web-design-for-real-estate-lagos/", "status": "INDEX", "sitemap": true, "reason": "Real-estate industry service page" },
     { "path": "/services/analytics-tracking-setup/", "status": "INDEX", "sitemap": true, "reason": "Active service page" },
     { "path": "/services/booking-platform-setup-integration/", "status": "INDEX", "sitemap": true, "reason": "Active service page" },
+    { "path": "/services/business-automation/", "status": "INDEX", "sitemap": true, "reason": "Primary business automation and workflow integration service page" },
     { "path": "/services/business-website-design/", "status": "INDEX", "sitemap": true, "reason": "Active core service page" },
     { "path": "/services/crm-system-setup-configuration/", "status": "INDEX", "sitemap": true, "reason": "Active service page" },
     { "path": "/services/domain-registration-hosting-guidance/", "status": "INDEX", "sitemap": true, "reason": "Active service page" },

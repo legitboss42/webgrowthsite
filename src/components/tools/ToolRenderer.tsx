@@ -82,9 +82,9 @@ function Card({
 }) {
   const toneClass =
     tone === "dark"
-      ? "border-blue-950/60 bg-[radial-gradient(circle_at_88%_14%,rgba(108,84,255,0.36),transparent_24%),linear-gradient(135deg,#091226_0%,#0c1631_48%,#0b1230_100%)] text-white"
+      ? "border-blue-950/60 bg-[radial-gradient(circle_at_88%_14%,rgba(28,122,84,0.36),transparent_24%),linear-gradient(135deg,#0c3327_0%,#0e1a14_48%,#0c3327_100%)] text-white"
       : tone === "tint"
-        ? "border-blue-100 bg-[linear-gradient(180deg,#ffffff_0%,#f7f9ff_100%)]"
+        ? "border-blue-100 bg-[linear-gradient(180deg,#ffffff_0%,#f7f8f4_100%)]"
         : "border-slate-200 bg-white";
 
   return (

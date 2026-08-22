@@ -1,12 +1,4 @@
 import { NextResponse } from "next/server";
-import { encryptTikTokTokens } from "@/lib/scheduler/crypto";
-import {
-  readSchedulerOAuthState,
-  schedulerRedirectUri,
-  SCHEDULER_OAUTH_STATE_COOKIE,
-} from "@/lib/scheduler/oauth";
-import { createSchedulerSession, SCHEDULER_SESSION_COOKIE } from "@/lib/scheduler/session";
-import { createSupabaseSchedulerStore } from "@/lib/scheduler/store";
 import {
   exchangeTikTokCode,
   getTikTokConnectPath,
@@ -21,88 +13,11 @@ import {
 
 export const runtime = "nodejs";
 
-function readCookieValue(cookieHeader: string, name: string) {
-  return cookieHeader
-    .split(";")
-    .map((part) => part.trim())
-    .find((part) => part.startsWith(`${name}=`))
-    ?.split("=")
-    .slice(1)
-    .join("=");
-}
-
 function buildFailureRedirect(origin: string, message: string) {
   const redirectUrl = new URL(getTikTokConnectPath(), origin);
   redirectUrl.searchParams.set("status", "error");
   redirectUrl.searchParams.set("message", message);
   return redirectUrl;
-}
-
-function buildSchedulerFailureRedirect(origin: string, reason: string) {
-  const redirectUrl = new URL("/scheduler/sign-in/", origin);
-  redirectUrl.searchParams.set("error", reason);
-  return redirectUrl;
-}
-
-async function completeSchedulerCallback(options: {
-  code: string | null;
-  cookieHeader: string;
-  origin: string;
-  secureCookies: boolean;
-  state: string | null;
-}) {
-  const stateCookie = readCookieValue(options.cookieHeader, SCHEDULER_OAUTH_STATE_COOKIE);
-  const parsedState = readSchedulerOAuthState(stateCookie);
-
-  if (!stateCookie) return null;
-
-  if (!parsedState || !options.state || parsedState.state !== options.state || !options.code) {
-    const response = NextResponse.redirect(buildSchedulerFailureRedirect(options.origin, "oauth"), 302);
-    response.cookies.delete(SCHEDULER_OAUTH_STATE_COOKIE);
-    response.headers.set("Cache-Control", "no-store");
-    response.headers.set("X-Robots-Tag", "noindex, nofollow");
-    return response;
-  }
-
-  const exchangeResult = await exchangeTikTokCode(options.code, schedulerRedirectUri());
-
-  if (!exchangeResult.ok) {
-    const response = NextResponse.redirect(buildSchedulerFailureRedirect(options.origin, "exchange"), 302);
-    response.cookies.delete(SCHEDULER_OAUTH_STATE_COOKIE);
-    response.headers.set("Cache-Control", "no-store");
-    response.headers.set("X-Robots-Tag", "noindex, nofollow");
-    return response;
-  }
-
-  const store = await createSupabaseSchedulerStore();
-  const user = await store.upsertUser({
-    tiktokOpenId: exchangeResult.record.openId,
-    displayName: null,
-    avatarUrl: null,
-  });
-  const userId = String(user.id);
-  await store.saveConnection({
-    userId,
-    encryptedTokens: encryptTikTokTokens(exchangeResult.record),
-    scopes: exchangeResult.record.scope.split(",").map((scope) => scope.trim()).filter(Boolean),
-    accessExpiresAt: exchangeResult.record.expiresAt,
-    refreshExpiresAt: exchangeResult.record.refreshExpiresAt,
-  });
-
-  const response = NextResponse.redirect(new URL(parsedState.returnTo, options.origin), 302);
-  response.cookies.delete(SCHEDULER_OAUTH_STATE_COOKIE);
-  response.cookies.set({
-    name: SCHEDULER_SESSION_COOKIE,
-    value: createSchedulerSession(userId, exchangeResult.record.openId),
-    maxAge: 12 * 60 * 60,
-    httpOnly: true,
-    sameSite: "lax",
-    secure: options.secureCookies,
-    path: "/",
-  });
-  response.headers.set("Cache-Control", "no-store");
-  response.headers.set("X-Robots-Tag", "noindex, nofollow");
-  return response;
 }
 
 export async function GET(request: Request) {
@@ -112,29 +27,6 @@ export async function GET(request: Request) {
   const error = requestUrl.searchParams.get("error");
   const errorDescription = requestUrl.searchParams.get("error_description");
   const secureCookies = process.env.NODE_ENV === "production";
-  const cookieStore = request.headers.get("cookie") || "";
-
-  if (cookieStore.includes(`${SCHEDULER_OAUTH_STATE_COOKIE}=`)) {
-    if (error) {
-      const errorResponse = NextResponse.redirect(
-        buildSchedulerFailureRedirect(requestUrl.origin, "oauth"),
-        302
-      );
-      errorResponse.cookies.delete(SCHEDULER_OAUTH_STATE_COOKIE);
-      errorResponse.headers.set("Cache-Control", "no-store");
-      errorResponse.headers.set("X-Robots-Tag", "noindex, nofollow");
-      return errorResponse;
-    }
-
-    const schedulerResponse = await completeSchedulerCallback({
-      code,
-      cookieHeader: cookieStore,
-      origin: requestUrl.origin,
-      secureCookies,
-      state,
-    });
-    if (schedulerResponse) return schedulerResponse;
-  }
 
   if (error) {
     const errorResponse = NextResponse.redirect(
@@ -149,6 +41,7 @@ export async function GET(request: Request) {
     return errorResponse;
   }
 
+  const cookieStore = request.headers.get("cookie") || "";
   const stateCookie = cookieStore
     .split(";")
     .map((part) => part.trim())

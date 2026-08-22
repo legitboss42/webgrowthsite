@@ -58,10 +58,8 @@ export default function HomeMotion() {
           cycleNodes,
           {
             autoAlpha: 1,
-            y: 0,
-            scale: 1,
-            duration: 0.36,
-            stagger: 0.035,
+            duration: 0.4,
+            stagger: 0.045,
           },
           "-=0.22"
         )

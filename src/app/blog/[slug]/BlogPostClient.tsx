@@ -316,7 +316,7 @@ export default function BlogPostClient({
                   href={block.href}
                   target={isExternal ? "_blank" : undefined}
                   rel={isExternal ? "noreferrer noopener sponsored" : undefined}
-                  className="inline-flex w-full items-center justify-center rounded-xl bg-[linear-gradient(135deg,#4f6bff_0%,#7c5cff_100%)] px-5 py-4 text-sm font-semibold text-white shadow-[0_18px_38px_rgba(79,107,255,0.24)] transition hover:-translate-y-0.5 hover:brightness-105"
+                  className="inline-flex w-full items-center justify-center rounded-xl bg-[linear-gradient(135deg,#1c7a54_0%,#124a38_100%)] px-5 py-4 text-sm font-semibold text-white shadow-[0_18px_38px_rgba(18,74,56,0.24)] transition hover:-translate-y-0.5 hover:brightness-105"
                 >
                   {block.label}
                 </a>
@@ -412,7 +412,7 @@ export default function BlogPostClient({
           );
         })}
 
-        <div className="rounded-2xl border border-slate-200 bg-[linear-gradient(180deg,#ffffff_0%,#f8faff_100%)] p-5">
+        <div className="rounded-2xl border border-slate-200 bg-[linear-gradient(180deg,#ffffff_0%,#f7f8f4_100%)] p-5">
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-blue-700">
             Continue learning
           </p>

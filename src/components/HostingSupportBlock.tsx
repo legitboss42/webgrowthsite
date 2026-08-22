@@ -16,11 +16,11 @@ export default function HostingSupportBlock({
   return (
     <section
       className={[
-        "relative overflow-hidden rounded-3xl border border-slate-200 bg-[linear-gradient(180deg,#ffffff_0%,#f6f8ff_100%)] shadow-[0_18px_50px_rgba(15,23,42,0.08)]",
+        "relative overflow-hidden rounded-3xl border border-slate-200 bg-[linear-gradient(180deg,#ffffff_0%,#f7f8f4_100%)] shadow-[0_18px_50px_rgba(15,23,42,0.08)]",
         compact ? "p-6" : "p-8 md:p-10",
       ].join(" ")}
     >
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(115deg,rgba(59,130,246,0.06)_0%,transparent_46%,rgba(139,92,246,0.05)_100%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(115deg,rgba(28,122,84,0.06)_0%,transparent_46%,rgba(180,128,47,0.05)_100%)]" />
       <div className="relative z-10">
         <p className="text-xs uppercase tracking-[0.18em] text-blue-700">
           Hosting Support
@@ -35,7 +35,7 @@ export default function HostingSupportBlock({
         <div className="mt-8 flex flex-col gap-3 sm:flex-row">
           <TrackedLink
             href="/pricing/"
-            className="offer-button inline-flex min-h-12 items-center justify-center rounded-xl bg-blue-700 px-8 py-3 text-base font-semibold text-white shadow-[0_14px_34px_rgba(37,99,235,0.22)] transition-colors hover:bg-blue-800"
+            className="offer-button inline-flex min-h-12 items-center justify-center rounded-xl bg-blue-700 px-8 py-3 text-base font-semibold text-white shadow-[0_14px_34px_rgba(18,74,56,0.22)] transition-colors hover:bg-blue-800"
             ctaName="pricing"
             ctaLocation={`${pageType}_primary`}
             destination="/pricing/"

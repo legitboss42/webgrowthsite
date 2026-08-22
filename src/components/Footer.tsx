@@ -36,6 +36,7 @@ const footerColumns = [
       { href: "/services/website-audit/", label: "Website Audit" },
       { href: "/services/search-engine-optimisation/", label: "SEO Setup" },
       { href: "/services/performance-optimisation/", label: "Speed Optimisation" },
+      { href: "/services/business-automation/", label: "Business Automation" },
       { href: "/portfolio/", label: "Case Studies" },
     ],
   },
@@ -126,7 +127,7 @@ export default function Footer() {
           <nav className="grid gap-8 sm:grid-cols-2 lg:grid-cols-5" aria-label="Footer navigation">
             {footerColumns.map((column) => (
               <div key={column.title}>
-                <p className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--accent-electric)]">
+                <p className="font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-[var(--brass)]">
                   {column.title}
                 </p>
                 <div className="mt-4 grid gap-3 text-sm">
@@ -146,7 +147,7 @@ export default function Footer() {
         </div>
 
         <div className="mt-10 flex flex-col gap-3 border-t border-white/10 pt-6 text-sm text-[var(--text-muted)] md:flex-row md:items-center md:justify-between">
-          <p>(c) {new Date().getFullYear()} Web Growth. All rights reserved.</p>
+          <p className="font-mono text-xs tracking-[0.04em] text-[var(--on-dark-soft)]">(c) {new Date().getFullYear()} Web Growth. All rights reserved.</p>
           <Link
             href="/contact/"
             className="inline-flex font-semibold text-[var(--accent-electric)] transition hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--focus-ring)]"

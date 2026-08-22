@@ -13,7 +13,7 @@ export default function FAQSection({
   description?: string;
 }) {
   return (
-    <section className="bg-[#f7f8fc] py-16 md:py-20">
+    <section className="bg-[#eff1ec] py-16 md:py-20">
       <div className="mx-auto max-w-6xl px-5 sm:px-6">
         <div className="max-w-3xl">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-blue-700">FAQ</p>

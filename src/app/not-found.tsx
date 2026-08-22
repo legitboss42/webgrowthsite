@@ -11,7 +11,7 @@ export const metadata = buildPageMetadata({
 
 export default function NotFound() {
   return (
-    <main className="bg-[#f7f8fc] text-slate-950">
+    <main className="bg-[#eff1ec] text-slate-950">
       <section className="mx-auto flex min-h-[70vh] max-w-6xl flex-col items-start justify-center px-5 py-20 sm:px-6">
         <p className="inline-flex rounded-full border border-blue-100 bg-white px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] text-blue-700 shadow-sm">
           404
@@ -26,7 +26,7 @@ export default function NotFound() {
         <div className="mt-8 flex flex-col gap-3 sm:flex-row">
           <Link
             href="/"
-            className="inline-flex min-h-12 items-center justify-center rounded-xl bg-blue-700 px-6 text-sm font-semibold text-white shadow-[0_16px_34px_rgba(79,107,255,0.28)] transition hover:bg-blue-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-700"
+            className="inline-flex min-h-12 items-center justify-center rounded-xl bg-blue-700 px-6 text-sm font-semibold text-white shadow-[0_16px_34px_rgba(18,74,56,0.28)] transition hover:bg-blue-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-700"
           >
             Return Home
           </Link>

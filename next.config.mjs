@@ -80,16 +80,6 @@ const nextConfig = {
       },
     ];
   },
-  async rewrites() {
-    const supabaseUrl = process.env.SUPABASE_URL?.replace(/\/$/, "");
-    if (!supabaseUrl) return [];
-    return [
-      {
-        source: "/tiktok-media/:path*",
-        destination: `${supabaseUrl}/storage/v1/object/public/tiktok-publishing-staging/:path*`,
-      },
-    ];
-  },
 };
 
 export default nextConfig;

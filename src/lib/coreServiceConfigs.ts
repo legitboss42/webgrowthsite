@@ -110,6 +110,29 @@ export const CORE_SERVICE_PAGES: Record<string, ServicePageInput> = {
       "Bulk template deployments for unrelated niches",
       "Copy-paste multi-location doorway page packs",
     ],
+    relatedLinks: [
+      {
+        href: "/services/business-automation/",
+        label: "Automation",
+        title: "Automate the work behind the website",
+        description:
+          "Once the site brings in enquiries, connect it to your CRM, follow-up, and reporting so leads are handled without manual admin.",
+      },
+      {
+        href: "/services/search-engine-optimisation/",
+        label: "SEO",
+        title: "Help the right visitors find it",
+        description:
+          "Pair the build with search foundations so the new website can attract qualified traffic over time.",
+      },
+      {
+        href: "/services/website-audit/",
+        label: "Audit",
+        title: "Not sure where to start?",
+        description:
+          "Use a website review when the bottleneck is unclear and the right implementation path matters.",
+      },
+    ],
   },
   "landing-page-design": {
     title: "Landing Page Design",
@@ -212,6 +235,29 @@ export const CORE_SERVICE_PAGES: Record<string, ServicePageInput> = {
       "high-converting-landing-pages-guide",
       "why-your-website-isnt-getting-leads",
       "high-converting-service-page",
+    ],
+    relatedLinks: [
+      {
+        href: "/services/business-automation/",
+        label: "Lead automation",
+        title: "Automate what happens after the submit",
+        description:
+          "Connect landing page enquiries to instant follow-up, CRM entry, and lead routing so no campaign lead goes cold.",
+      },
+      {
+        href: "/services/search-engine-optimisation/",
+        label: "SEO",
+        title: "Reduce reliance on paid clicks",
+        description:
+          "Add search foundations so more of your traffic can arrive without paying for every visit.",
+      },
+      {
+        href: "/services/website-audit/",
+        label: "Audit",
+        title: "Page not converting yet?",
+        description:
+          "Use a review to find the message-match, trust, or speed gaps holding the page back.",
+      },
     ],
   },
   "website-redesign": {
@@ -415,6 +461,29 @@ export const CORE_SERVICE_PAGES: Record<string, ServicePageInput> = {
       "website-platform-comparison-small-business",
       "high-converting-landing-pages-guide",
       "how-to-make-your-website-load-fast",
+    ],
+    relatedLinks: [
+      {
+        href: "/services/business-automation/",
+        label: "eCommerce automation",
+        title: "Automate orders, stock, and follow-up",
+        description:
+          "Connect the store to order notifications, inventory updates, and post-purchase email so operations scale without extra manual work.",
+      },
+      {
+        href: "/services/performance-optimisation/",
+        label: "Speed",
+        title: "Protect checkout performance",
+        description:
+          "Keep product and checkout pages fast so speed does not quietly cost you sales.",
+      },
+      {
+        href: "/services/website-audit/",
+        label: "Audit",
+        title: "Store underperforming?",
+        description:
+          "Use a review to find where product discovery, trust, or checkout flow is leaking revenue.",
+      },
     ],
   },
   "website-maintenance": {
