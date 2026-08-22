@@ -50,3 +50,23 @@ export function readSchedulerOAuthState(value: string | undefined, now = Date.no
   const payload = openCookiePayload<OAuthState>(value, secret);
   return payload && now < payload.expiresAt ? payload : null;
 }
+
+export function getSchedulerCallbackRelay(requestUrl: URL, cookieHeader: string) {
+  const cookieValue = cookieHeader
+    .split(";")
+    .map((part) => part.trim())
+    .find((part) => part.startsWith(`${SCHEDULER_OAUTH_STATE_COOKIE}=`))
+    ?.split("=")
+    .slice(1)
+    .join("=");
+  const schedulerState = readSchedulerOAuthState(cookieValue);
+  const returnedState = requestUrl.searchParams.get("state");
+  if (!schedulerState || !returnedState || schedulerState.state !== returnedState) return null;
+
+  const relayUrl = new URL(UNREGISTERED_SCHEDULER_CALLBACK, requestUrl.origin);
+  for (const key of ["code", "state", "error", "error_description"]) {
+    const value = requestUrl.searchParams.get(key);
+    if (value) relayUrl.searchParams.set(key, value);
+  }
+  return relayUrl;
+}

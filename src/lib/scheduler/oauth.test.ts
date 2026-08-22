@@ -1,6 +1,13 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { buildSchedulerAuthorizeUrl, normalizeSchedulerReturnPath, schedulerRedirectUri } from "./oauth";
+import {
+  buildSchedulerAuthorizeUrl,
+  createSchedulerOAuthState,
+  getSchedulerCallbackRelay,
+  normalizeSchedulerReturnPath,
+  schedulerRedirectUri,
+  SCHEDULER_OAUTH_STATE_COOKIE,
+} from "./oauth";
 
 test("scheduler publishing authorization requests Direct Post scope", () => {
   process.env.TIKTOK_CLIENT_KEY = "client";
@@ -28,4 +35,22 @@ test("scheduler ignores the unregistered legacy callback override", () => {
   process.env.TIKTOK_REDIRECT_URI = "https://webgrowth.info/connect/tiktok/callback/";
 
   assert.equal(schedulerRedirectUri(), "https://webgrowth.info/connect/tiktok/callback/");
+});
+
+test("registered TikTok callback relays matching scheduler OAuth state", () => {
+  process.env.SCHEDULER_SESSION_SECRET = "scheduler-test-secret-at-least-32-characters";
+  const { payload, cookie } = createSchedulerOAuthState("/scheduler/settings/", "publishing");
+  const callbackUrl = new URL("https://webgrowth.info/connect/tiktok/callback/");
+  callbackUrl.searchParams.set("code", "sandbox-code");
+  callbackUrl.searchParams.set("state", payload.state);
+
+  const relay = getSchedulerCallbackRelay(
+    callbackUrl,
+    `${SCHEDULER_OAUTH_STATE_COOKIE}=${cookie}`,
+  );
+
+  assert.equal(
+    relay?.toString(),
+    `https://webgrowth.info/api/scheduler/auth/callback/?code=sandbox-code&state=${payload.state}`,
+  );
 });

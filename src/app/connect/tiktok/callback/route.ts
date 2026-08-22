@@ -10,6 +10,7 @@ import {
   serializeTikTokConnectionCookie,
   serializeTikTokTokenCookie,
 } from "@/lib/tiktok";
+import { getSchedulerCallbackRelay } from "@/lib/scheduler/oauth";
 
 export const runtime = "nodejs";
 
@@ -22,6 +23,13 @@ function buildFailureRedirect(origin: string, message: string) {
 
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
+  const schedulerRelay = getSchedulerCallbackRelay(requestUrl, request.headers.get("cookie") || "");
+  if (schedulerRelay) {
+    const relayResponse = NextResponse.redirect(schedulerRelay, 302);
+    relayResponse.headers.set("Cache-Control", "no-store");
+    relayResponse.headers.set("X-Robots-Tag", "noindex, nofollow");
+    return relayResponse;
+  }
   const code = requestUrl.searchParams.get("code");
   const state = requestUrl.searchParams.get("state");
   const error = requestUrl.searchParams.get("error");
