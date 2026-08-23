@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { createSchedulerStore, type SchedulerDatabaseClient } from "./store";
 
-function fakeClient() {
+function fakeClient(activeConnectionResult = true) {
   const calls: Array<{ kind: string; name: string; input: unknown }> = [];
   const client: SchedulerDatabaseClient = {
     async insert(table, input) {
@@ -15,7 +15,7 @@ function fakeClient() {
     },
     async rpc(name, input) {
       calls.push({ kind: "rpc", name, input });
-      return name === "save_active_tiktok_connection";
+      return name === "save_active_tiktok_connection" ? activeConnectionResult : [];
     },
     async update(table, id, input) {
       calls.push({ kind: "update", name: table, input: { id, ...input } });
@@ -116,6 +116,24 @@ test("TikTok connections are persisted only by the active-user database RPC", as
       p_refresh_expires_at: "2027-08-22T00:00:00.000Z",
     },
   });
+});
+
+test("inactive active-user RPC result never falls back to a direct token table write", async () => {
+  const { calls, client } = fakeClient(false);
+  const store = createSchedulerStore(client);
+  const saved = await store.saveActiveConnection({
+    userId: "suspended-user",
+    tiktokOpenId: "suspended-open-id",
+    encryptedTokens: "sealed",
+    scopes: ["user.info.basic"],
+    accessExpiresAt: "2026-08-22T00:00:00.000Z",
+    refreshExpiresAt: "2027-08-22T00:00:00.000Z",
+  });
+  assert.equal(saved, false);
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0]?.kind, "rpc");
+  assert.equal(calls[0]?.name, "save_active_tiktok_connection");
+  assert.equal(calls.some((call) => call.kind === "insert" && call.name === "tiktok_connections"), false);
 });
 
 test("due jobs are claimed only through the atomic database RPC", async () => {
