@@ -1,7 +1,10 @@
+import { getSchedulerLaunchState } from "./launch";
+
 export function getSchedulerConfig() {
+  const launch = getSchedulerLaunchState();
   return {
-    directPostEnabled: process.env.TIKTOK_DIRECT_POST_ENABLED === "true",
-    publicPostingEnabled: process.env.TIKTOK_PUBLIC_POSTING_ENABLED === "true",
+    directPostEnabled: launch.directPost,
+    publicPostingEnabled: launch.publicPosting,
     creatorDailyLimit: 3,
   } as const;
 }

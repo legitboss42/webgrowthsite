@@ -7,7 +7,7 @@ import { createSchedulerSession, readSchedulerSession } from "./session";
 test("publishing gates fail closed and owner IDs are exact", () => {
   process.env.OWNER_TIKTOK_OPEN_IDS = "owner-1, owner-2";
   delete process.env.TIKTOK_DIRECT_POST_ENABLED;
-  delete process.env.TIKTOK_PUBLIC_POSTING_ENABLED;
+  process.env.TIKTOK_PUBLIC_POSTING_ENABLED = "true";
   const config = getSchedulerConfig();
   assert.equal(config.directPostEnabled, false);
   assert.equal(config.publicPostingEnabled, false);
