@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { type FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { runMediaPostComposer } from "@/lib/scheduler/composerFlow";
+import { createSchedulerMediaUploadAdapter } from "@/lib/scheduler/composerUploadAdapter";
 
 export default function NewPostComposer({ owner, articles = [] }: { owner: boolean; articles?: Array<{slug:string;title:string}> }) {
   const router = useRouter();
@@ -30,39 +31,24 @@ export default function NewPostComposer({ owner, articles = [] }: { owner: boole
       const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
       const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
       let supabase: ReturnType<typeof createClient> | null = null;
+      const uploadFile = createSchedulerMediaUploadAdapter({
+        request: fetch,
+        async uploadSigned({ path, token, file, contentType }) {
+          if (!url || !key) throw new Error("Upload service is not configured.");
+          supabase ||= createClient(url, key);
+          return supabase.storage.from("tiktok-scheduler-media")
+            .uploadToSignedUrl(path, token, file as File, { contentType });
+        },
+        async sha256(source) {
+          return new Uint8Array(await crypto.subtle.digest("SHA-256", source));
+        },
+      });
       const post = await runMediaPostComposer({
         files,
         title: String(formData.get("title") || ""),
         caption: String(formData.get("caption") || ""),
       }, {
-        async uploadFile(file) {
-          if (!url || !key) throw new Error("Upload service is not configured.");
-          supabase ||= createClient(url, key);
-          const kind = file.type.startsWith("video/") ? "VIDEO" : "PHOTO";
-          const create = await fetch("/api/scheduler/uploads/", {
-            method: "POST",
-            headers: { "content-type": "application/json" },
-            body: JSON.stringify({ action: "create", kind, filename: file.name, mimeType: file.type, byteSize: file.size }),
-          });
-          const target = await create.json();
-          if (!create.ok) throw new Error(target.error || "Unable to reserve the media file.");
-
-          const uploaded = await supabase.storage
-            .from("tiktok-scheduler-media")
-            .uploadToSignedUrl(target.path, target.token, file, { contentType: file.type });
-          if (uploaded.error) throw new Error(uploaded.error.message || "Storage upload failed.");
-
-          const digest = await crypto.subtle.digest("SHA-256", await file.arrayBuffer());
-          const checksum = Array.from(new Uint8Array(digest)).map((value) => value.toString(16).padStart(2, "0")).join("");
-          const finalized = await fetch("/api/scheduler/uploads/", {
-            method: "POST",
-            headers: { "content-type": "application/json" },
-            body: JSON.stringify({ action: "finalize", assetId: target.assetId, checksum }),
-          });
-          const final = await finalized.json();
-          if (!finalized.ok) throw new Error(final.error || "Media validation failed.");
-          return target.assetId as string;
-        },
+        uploadFile,
         async createPost(input) {
           const created = await fetch("/api/scheduler/posts/", {
             method: "POST",

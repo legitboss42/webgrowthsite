@@ -102,20 +102,22 @@ export async function POST(request: Request) {
       },
       validatePhoto: validateTikTokPhotoSource,
       async markInvalid(input) {
-        const { error } = await supabase.from("media_assets").update({ validation_status: "INVALID" })
-          .eq("id", input.assetId).eq("user_id", input.userId);
-        return { error: !!error };
+        const { data, error } = await supabase.from("media_assets").update({ validation_status: "INVALID" })
+          .eq("id", input.assetId).eq("user_id", input.userId)
+          .eq("validation_status", input.expectedValidationStatus).select("id");
+        return { error: !!error, updatedCount: data?.length ?? 0 };
       },
       async markValid(input) {
-        const { error } = await supabase.from("media_assets").update({
+        const { data, error } = await supabase.from("media_assets").update({
           checksum: input.checksum,
           mime_type: input.mimeType,
           byte_size: input.byteSize,
           width: input.width,
           height: input.height,
           validation_status: "VALID",
-        }).eq("id", input.assetId).eq("user_id", input.userId);
-        return { error: !!error };
+        }).eq("id", input.assetId).eq("user_id", input.userId)
+          .eq("validation_status", input.expectedValidationStatus).select("id");
+        return { error: !!error, updatedCount: data?.length ?? 0 };
       },
     });
     if (!result.ok) return NextResponse.json({ error: result.error }, { status: result.status });

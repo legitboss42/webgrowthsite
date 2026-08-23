@@ -3,7 +3,7 @@ import type { TikTokPhotoSourceValidationResult } from "./mediaDelivery";
 import type { MediaKind } from "./types";
 
 type AdapterReadResult<T> = { data: T | null; error: boolean };
-type AdapterWriteResult = { error: boolean };
+type AdapterWriteResult = { error: boolean; updatedCount: number };
 
 export type UploadFinalizationAsset = {
   id: string;
@@ -18,7 +18,7 @@ export type UploadFinalizationAdapter = {
   inspectObject(input: { storagePath: string }): Promise<AdapterReadResult<{ byteSize: number; mimeType: string }>>;
   downloadObject(input: { storagePath: string }): Promise<AdapterReadResult<ArrayBuffer | Uint8Array>>;
   validatePhoto(source: ArrayBuffer | Uint8Array, mimeType: string, byteSize: number): Promise<TikTokPhotoSourceValidationResult>;
-  markInvalid(input: { userId: string; assetId: string }): Promise<AdapterWriteResult>;
+  markInvalid(input: { userId: string; assetId: string; expectedValidationStatus: "PENDING" }): Promise<AdapterWriteResult>;
   markValid(input: {
     userId: string;
     assetId: string;
@@ -27,6 +27,7 @@ export type UploadFinalizationAdapter = {
     byteSize: number;
     width?: number;
     height?: number;
+    expectedValidationStatus: "PENDING";
   }): Promise<AdapterWriteResult>;
 };
 
@@ -34,8 +35,8 @@ async function invalidMedia(
   adapter: UploadFinalizationAdapter,
   input: { userId: string; assetId: string },
 ) {
-  const invalidated = await adapter.markInvalid(input);
-  if (invalidated.error) return { ok: false as const, status: 502, error: "Unable to record invalid media." };
+  const invalidated = await adapter.markInvalid({ ...input, expectedValidationStatus: "PENDING" });
+  if (invalidated.error || invalidated.updatedCount !== 1) return { ok: false as const, status: 502, error: "Unable to record invalid media." };
   return { ok: false as const, status: 400, error: "Stored media did not pass validation." };
 }
 
@@ -82,8 +83,9 @@ export async function finalizeSchedulerUpload(
       byteSize: stored.byteSize,
       width: photoMetadata.width,
       height: photoMetadata.height,
+      expectedValidationStatus: "PENDING",
     });
-    if (updated.error) return { ok: false as const, status: 502, error: "Unable to finalize media asset." };
+    if (updated.error || updated.updatedCount !== 1) return { ok: false as const, status: 502, error: "Unable to finalize media asset." };
     return { ok: true as const, status: 200, assetId: input.assetId, validationStatus: "VALID" as const };
   } catch {
     return { ok: false as const, status: 502, error: "Unable to finalize media asset." };

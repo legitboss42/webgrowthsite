@@ -35,11 +35,11 @@ function fakeAdapter(overrides: Partial<UploadFinalizationAdapter> = {}) {
     },
     async markInvalid(input) {
       calls.push({ name: "markInvalid", input });
-      return { error: false };
+      return { error: false, updatedCount: 1 };
     },
     async markValid(input) {
       calls.push({ name: "markValid", input });
-      return { error: false };
+      return { error: false, updatedCount: 1 };
     },
     ...overrides,
   };
@@ -108,12 +108,23 @@ test("upload finalization returns retryable 502 without invalidation on download
 test("upload finalization checks invalidation-update errors", async () => {
   const { adapter, calls } = fakeAdapter({
     inspectObject: async () => ({ data: { byteSize: 4, mimeType: "image/jpeg" }, error: false }),
-    markInvalid: async () => ({ error: true }),
+    markInvalid: async () => ({ error: true, updatedCount: 0 }),
   });
   assert.deepEqual(await finalizeSchedulerUpload(input, adapter), {
     ok: false, status: 502, error: "Unable to record invalid media.",
   });
   assert.equal(calls.some((call) => call.name === "downloadObject"), false);
+});
+
+// Mutation target: treating a successful zero-row INVALID update as persisted must return a definitive 400.
+test("upload finalization treats a zero-row invalidation as retryable", async () => {
+  const { adapter } = fakeAdapter({
+    inspectObject: async () => ({ data: { byteSize: 4, mimeType: "image/jpeg" }, error: false }),
+    markInvalid: async () => ({ error: false, updatedCount: 0 }),
+  });
+  assert.deepEqual(await finalizeSchedulerUpload(input, adapter), {
+    ok: false, status: 502, error: "Unable to record invalid media.",
+  });
 });
 
 // Mutation target: proven byte/MIME/decode failures must not stay PENDING or become VALID.
@@ -130,7 +141,15 @@ test("upload finalization marks only proven media failures invalid", async () =>
 
 // Mutation target: ignoring the final VALID update error must return success for a still-pending asset.
 test("upload finalization returns 502 when the valid-state update fails", async () => {
-  const { adapter } = fakeAdapter({ markValid: async () => ({ error: true }) });
+  const { adapter } = fakeAdapter({ markValid: async () => ({ error: true, updatedCount: 0 }) });
+  assert.deepEqual(await finalizeSchedulerUpload(input, adapter), {
+    ok: false, status: 502, error: "Unable to finalize media asset.",
+  });
+});
+
+// Mutation target: treating a stale-state zero-row VALID update as success must produce a false finalized response.
+test("upload finalization treats a zero-row valid update as retryable", async () => {
+  const { adapter } = fakeAdapter({ markValid: async () => ({ error: false, updatedCount: 0 }) });
   assert.deepEqual(await finalizeSchedulerUpload(input, adapter), {
     ok: false, status: 502, error: "Unable to finalize media asset.",
   });
@@ -150,5 +169,6 @@ test("upload finalization stores validated photo metadata after all checks", asy
     byteSize: 3,
     width: 20,
     height: 10,
+    expectedValidationStatus: "PENDING",
   } });
 });

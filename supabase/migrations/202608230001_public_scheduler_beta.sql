@@ -259,6 +259,7 @@ declare
   v_owned_count integer;
   v_single_kind boolean;
   v_video_count integer;
+  v_locked_asset_id uuid;
 begin
   if p_user_id is null or p_media_ids is null or p_title is null or p_caption is null then
     return jsonb_build_object('ok', false, 'code', 'INVALID_MEDIA');
@@ -290,6 +291,16 @@ begin
   if v_distinct_count <> cardinality(p_media_ids) then
     return jsonb_build_object('ok', false, 'code', 'INVALID_MEDIA');
   end if;
+
+  for v_locked_asset_id in
+    select asset.id
+    from public.media_assets asset
+    where asset.id = any(p_media_ids)
+    order by asset.id
+    for update of asset
+  loop
+    null;
+  end loop;
 
   select
     count(*),
@@ -342,6 +353,8 @@ declare
   v_snapshot_match_count integer;
   v_approval_id uuid;
   v_updated_post_id uuid;
+  v_locked_media_id uuid;
+  v_locked_asset_id uuid;
 begin
   if p_user_id is null
     or p_post_id is null
@@ -385,6 +398,27 @@ begin
     or p_snapshot ->> 'caption' <> v_post.caption then
     return jsonb_build_object('ok', false, 'code', 'POST_CHANGED');
   end if;
+
+  for v_locked_media_id in
+    select post_media.media_id
+    from public.post_media post_media
+    where post_media.post_id = p_post_id
+    order by post_media.position
+    for update of post_media
+  loop
+    null;
+  end loop;
+
+  for v_locked_asset_id in
+    select asset.id
+    from public.media_assets asset
+    join public.post_media post_media on post_media.media_id = asset.id
+    where post_media.post_id = p_post_id
+    order by asset.id
+    for update of asset
+  loop
+    null;
+  end loop;
 
   select count(*)
   into v_total_media_count

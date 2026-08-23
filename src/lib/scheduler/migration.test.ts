@@ -173,6 +173,9 @@ test("public scheduler beta migration creates posts and ordered media atomically
   assert.match(fn, /count\(distinct requested_id\)[\s\S]*cardinality\(p_media_ids\)/);
   assert.match(fn, /asset\.user_id = p_user_id/);
   assert.match(fn, /asset\.validation_status = 'valid'/);
+  // Mutation target: removing the deterministic media row lock must reopen finalize/invalidate TOCTOU.
+  assert.match(fn, /for v_locked_asset_id in[\s\S]*order by asset\.id[\s\S]*for update of asset[\s\S]*loop/);
+  assert.ok(fn.indexOf("for v_locked_asset_id in") < fn.indexOf("count(distinct asset.kind)"));
   assert.match(fn, /count\(distinct asset\.kind\) = 1/);
   assert.match(fn, /asset\.kind = 'video'[\s\S]*cardinality\(p_media_ids\) <> 1/);
   assert.match(fn, /insert into public\.scheduled_posts/);
@@ -204,6 +207,10 @@ test("public scheduler beta migration approves an owned immutable snapshot atomi
   assert.match(fn, /p_snapshot ->> 'title'[\s\S]*post\.title/);
   assert.match(fn, /p_snapshot ->> 'caption'[\s\S]*post\.caption/);
   assert.match(fn, /jsonb_array_length\(p_snapshot -> 'media'\)/);
+  // Mutation target: removing either exact snapshot lock must allow attachments/checksums to change after validation.
+  assert.match(fn, /for v_locked_media_id in[\s\S]*order by post_media\.position[\s\S]*for update of post_media[\s\S]*loop/);
+  assert.match(fn, /for v_locked_asset_id in[\s\S]*order by asset\.id[\s\S]*for update of asset[\s\S]*loop/);
+  assert.ok(fn.indexOf("for v_locked_media_id in") < fn.indexOf("select count(*)\n  into v_total_media_count"));
   assert.match(fn, /v_total_media_count <> v_media_count/);
   assert.match(fn, /asset\.checksum/);
   assert.match(fn, /count\(distinct post_media\.position\)/);

@@ -26,4 +26,5 @@ test("composer delegates multiple media behavior to the tested flow orchestrator
   const source = readFileSync(composerPath, "utf8");
 
   assert.match(source, /runMediaPostComposer/);
+  assert.match(source, /createSchedulerMediaUploadAdapter/);
 });
