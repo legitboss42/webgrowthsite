@@ -13,3 +13,12 @@ export function getTikTokMediaHeaders(contentType: string, contentLength: number
     "Content-Type": contentType || "application/octet-stream",
   };
 }
+
+export async function normalizeTikTokPhoto(source: ArrayBuffer | Uint8Array) {
+  return sharp(source)
+    .rotate()
+    .resize({ width: 1080, height: 1080, fit: "inside", withoutEnlargement: true })
+    .jpeg({ quality: 90, mozjpeg: true })
+    .toBuffer();
+}
+import sharp from "sharp";
