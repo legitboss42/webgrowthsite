@@ -5,6 +5,7 @@ import test from "node:test";
 const schedulerPage = new URL("../../app/scheduler/page.tsx", import.meta.url);
 const signInPage = new URL("../../app/scheduler/sign-in/page.tsx", import.meta.url);
 const termsPage = new URL("../../app/scheduler/terms/page.tsx", import.meta.url);
+const schedulerLayout = new URL("../../app/scheduler/layout.tsx", import.meta.url);
 const routeGovernance = new URL("../route-governance.json", import.meta.url);
 
 function balancedBlock(source: string, openAt: number, open: string, close: string) {
@@ -48,6 +49,22 @@ function assertPublicMetadata(source: string, canonical: string) {
   assert.match(metadata, /robots:\s*\{\s*index:\s*true,\s*follow:\s*true\s*\}/);
 }
 
+function declarationArray(source: string, name: string) {
+  const marker = `const ${name} = `;
+  const start = source.indexOf(marker);
+  assert.notEqual(start, -1, `${name} declaration is missing`);
+  const openAt = source.indexOf("[", start + marker.length);
+  return balancedBlock(source, openAt, "[", "]");
+}
+
+function renderedMap(source: string, collection: string) {
+  const marker = `{${collection}.map(`;
+  const start = source.indexOf(marker);
+  assert.notEqual(start, -1, `${collection} is not rendered with map`);
+  const openAt = source.indexOf("(", start + marker.length - 1);
+  return balancedBlock(source, openAt, "(", ")");
+}
+
 test("closed sign-in branch explains approval and cannot initiate TikTok OAuth", async () => {
   const source = await readFile(signInPage, "utf8");
   const { falsy: closed } = ternaryBranches(source, "launch.publicEnrollment");
@@ -63,6 +80,18 @@ test("open sign-in branch links the exact TikTok CTA to scheduler authorization"
 
   assert.match(open, /href="\/api\/scheduler\/auth\/authorize\/\?mode=login&returnTo=\/scheduler\/dashboard\/"/);
   assert.match(open, />\s*Continue with TikTok\s*</);
+});
+
+test("landing enrollment CTA switches from terms to sign-in across launch branches", async () => {
+  const source = await readFile(schedulerPage, "utf8");
+  const { truthy: open, falsy: closed } = ternaryBranches(source, "launch.publicEnrollment");
+
+  assert.match(closed, /href="\/scheduler\/terms\/"/);
+  assert.match(closed, />\s*TikTok access opening after approval\s*</);
+  assert.doesNotMatch(closed, /\/scheduler\/sign-in\/|Continue with TikTok/);
+  assert.match(open, /href="\/scheduler\/sign-in\/"/);
+  assert.match(open, />\s*Continue with TikTok\s*</);
+  assert.doesNotMatch(open, /TikTok access opening after approval/);
 });
 
 test("landing separates public visibility from Direct Post availability", async () => {
@@ -114,14 +143,30 @@ test("scheduler governance classifies public, sign-in, and terms routes exactly"
   });
 });
 
-test("scheduler terms retain creator, retention, account-control, and provider disclosures", async () => {
-  const source = await readFile(termsPage, "utf8");
+test("scheduler layout renders the public Terms link in its navigation", async () => {
+  const source = await readFile(schedulerLayout, "utf8");
+  const navStart = source.indexOf('<nav aria-label="Scheduler"');
+  assert.notEqual(navStart, -1, "scheduler navigation is missing");
+  const nav = source.slice(navStart, source.indexOf("</nav>", navStart) + "</nav>".length);
 
-  assert.match(source, /TikTok-only authentication/);
-  assert.match(source, /seven days after publication, cancellation, or terminal failure/i);
-  assert.match(source, /You remain responsible for captions, disclosures, rights, audience choices/i);
-  assert.match(source, /not endorsed by TikTok or Google/i);
-  assert.match(source, /account controls or support/i);
+  assert.match(nav, /<Link[^>]*href="\/scheduler\/terms\/"[^>]*>Terms<\/Link>/);
+});
+
+test("scheduler terms render creator, retention, account-control, and provider disclosures", async () => {
+  const source = await readFile(termsPage, "utf8");
+  const disclosures = declarationArray(source, "sections");
+  const renderedDisclosures = renderedMap(source, "sections");
+  const returnStart = source.indexOf("return (");
+  assert.notEqual(returnStart, -1, "terms return markup is missing");
+  const renderedTerms = source.slice(returnStart);
+
+  assert.match(disclosures, /TikTok-only authentication/);
+  assert.match(disclosures, /seven days after publication, cancellation, or terminal failure/i);
+  assert.match(disclosures, /You remain responsible for captions, disclosures, rights, audience choices/i);
+  assert.match(disclosures, /not endorsed by TikTok or Google/i);
+  assert.match(disclosures, /account controls or support/i);
+  assert.match(renderedDisclosures, /section\.body/);
+  assert.match(renderedTerms, /Terms version\s*\{CURRENT_SCHEDULER_TERMS_VERSION\}\s*·\s*Privacy version\s*\{CURRENT_SCHEDULER_PRIVACY_VERSION\}/);
   assert.match(source, /CURRENT_SCHEDULER_TERMS_VERSION/);
   assert.match(source, /CURRENT_SCHEDULER_PRIVACY_VERSION/);
 });
