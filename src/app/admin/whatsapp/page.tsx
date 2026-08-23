@@ -2,10 +2,9 @@ import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import InternalUtilityUnlockForm from "@/components/internal/InternalUtilityUnlockForm";
 import {
-  getInternalUtilityCookieName,
   getInternalUtilityLocalPassphrase,
-  readInternalUtilityCookie,
 } from "@/lib/internalUtilityAuth";
+import { hasWhatsAppAdminAccess } from "./auth";
 import { filterWhatsAppLeads, type WhatsAppLeadFilter, type WhatsAppLeadRow } from "./dashboard";
 
 export const metadata: Metadata = {
@@ -32,7 +31,7 @@ async function getLeads(): Promise<WhatsAppLeadRow[]> {
 
 export default async function WhatsAppAdminPage({ searchParams }: { searchParams: Promise<{ filter?: string }> }) {
   const cookieStore = await cookies();
-  const unlocked = Boolean(readInternalUtilityCookie(cookieStore.get(getInternalUtilityCookieName())?.value));
+  const unlocked = hasWhatsAppAdminAccess(cookieStore);
   if (!unlocked) return <main className="min-h-screen bg-[#050806] px-6 py-16 text-white"><div className="mx-auto max-w-4xl"><InternalUtilityUnlockForm localHint={getInternalUtilityLocalPassphrase() || undefined} /></div></main>;
   const params = await searchParams;
   const filter = filters.includes(params.filter as WhatsAppLeadFilter) ? params.filter as WhatsAppLeadFilter : "ALL";
