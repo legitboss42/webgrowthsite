@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { encryptTikTokTokens } from "@/lib/scheduler/crypto";
+import { isActiveSchedulerUser } from "@/lib/scheduler/legal";
 import { readSchedulerOAuthState, schedulerRedirectUri, SCHEDULER_OAUTH_STATE_COOKIE } from "@/lib/scheduler/oauth";
 import { createSchedulerSession, SCHEDULER_SESSION_COOKIE } from "@/lib/scheduler/session";
 import { createSupabaseSchedulerStore } from "@/lib/scheduler/store";
@@ -20,13 +21,20 @@ export async function GET(request: Request) {
   const store = await createSupabaseSchedulerStore();
   const user = await store.upsertUser({ tiktokOpenId: result.record.openId, displayName: null, avatarUrl: null });
   const userId = String(user.id);
-  await store.saveConnection({
-    userId,
-    encryptedTokens: encryptTikTokTokens(result.record),
-    scopes: result.record.scope.split(",").map((scope) => scope.trim()).filter(Boolean),
-    accessExpiresAt: result.record.expiresAt,
-    refreshExpiresAt: result.record.refreshExpiresAt,
+  const active = isActiveSchedulerUser({
+    status: typeof user.status === "string" ? user.status : "ACTIVE",
+    suspendedAt: typeof user.suspended_at === "string" ? user.suspended_at : null,
+    deletionRequestedAt: typeof user.deletion_requested_at === "string" ? user.deletion_requested_at : null,
   });
+  if (active) {
+    await store.saveConnection({
+      userId,
+      encryptedTokens: encryptTikTokTokens(result.record),
+      scopes: result.record.scope.split(",").map((scope) => scope.trim()).filter(Boolean),
+      accessExpiresAt: result.record.expiresAt,
+      refreshExpiresAt: result.record.refreshExpiresAt,
+    });
+  }
   const response = NextResponse.redirect(new URL(state.returnTo, url.origin));
   response.cookies.delete(SCHEDULER_OAUTH_STATE_COOKIE);
   response.cookies.set(SCHEDULER_SESSION_COOKIE, createSchedulerSession(userId, result.record.openId), {

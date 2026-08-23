@@ -9,6 +9,10 @@ function fakeClient() {
       calls.push({ kind: "insert", name: table, input });
       return { id: "row-1", ...input };
     },
+    async find(table, column, value) {
+      calls.push({ kind: "find", name: table, input: { column, value } });
+      return null;
+    },
     async rpc(name, input) {
       calls.push({ kind: "rpc", name, input });
       return [];
@@ -40,6 +44,39 @@ test("user writes preserve the authenticated TikTok identity", async () => {
       display_name: "Creator",
       avatar_url: null,
       last_login_at: calls[0]?.input && (calls[0].input as Record<string, unknown>).last_login_at,
+    },
+  });
+});
+
+test("callback user writes do not overwrite suspension state", async () => {
+  const { calls, client } = fakeClient();
+  const store = createSchedulerStore(client);
+  await store.upsertUser({
+    tiktokOpenId: "suspended-open-id",
+    displayName: "Suspended creator",
+    avatarUrl: null,
+  });
+  const input = calls[0]?.input as Record<string, unknown>;
+  assert.equal("status" in input, false);
+  assert.equal("suspended_at" in input, false);
+});
+
+test("legal acceptance writes only the current authenticated user record", async () => {
+  const { calls, client } = fakeClient();
+  const store = createSchedulerStore(client);
+  await store.acceptLegalAcceptance("user-1", {
+    termsVersion: "2026-08-23",
+    privacyVersion: "2026-08-23",
+  });
+  assert.deepEqual(calls[0], {
+    kind: "update",
+    name: "scheduler_users",
+    input: {
+      id: "user-1",
+      terms_version: "2026-08-23",
+      privacy_version: "2026-08-23",
+      terms_accepted_at: (calls[0]?.input as Record<string, unknown>).terms_accepted_at,
+      privacy_accepted_at: (calls[0]?.input as Record<string, unknown>).privacy_accepted_at,
     },
   });
 });

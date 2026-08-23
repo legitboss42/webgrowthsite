@@ -1,5 +1,6 @@
 export type SchedulerDatabaseClient = {
   insert(table: string, input: Record<string, unknown>): Promise<Record<string, unknown>>;
+  find(table: string, column: string, value: string): Promise<Record<string, unknown> | null>;
   update(table: string, id: string, input: Record<string, unknown>): Promise<Record<string, unknown>>;
   remove(table: string, column: string, value: string): Promise<void>;
   rpc(name: string, input: Record<string, unknown>): Promise<unknown>;
@@ -19,6 +20,11 @@ export type SaveTikTokConnectionInput = {
   refreshExpiresAt: string;
 };
 
+export type SchedulerLegalAcceptanceInput = {
+  termsVersion: string;
+  privacyVersion: string;
+};
+
 export function createSchedulerStore(client: SchedulerDatabaseClient) {
   return {
     upsertUser(input: UpsertSchedulerUserInput) {
@@ -27,6 +33,18 @@ export function createSchedulerStore(client: SchedulerDatabaseClient) {
         display_name: input.displayName,
         avatar_url: input.avatarUrl,
         last_login_at: new Date().toISOString(),
+      });
+    },
+    getUser(userId: string) {
+      return client.find("scheduler_users", "id", userId);
+    },
+    acceptLegalAcceptance(userId: string, input: SchedulerLegalAcceptanceInput) {
+      const acceptedAt = new Date().toISOString();
+      return client.update("scheduler_users", userId, {
+        terms_version: input.termsVersion,
+        privacy_version: input.privacyVersion,
+        terms_accepted_at: acceptedAt,
+        privacy_accepted_at: acceptedAt,
       });
     },
     claimDuePosts(nowIso: string, limit: number) {
@@ -80,6 +98,11 @@ export async function createSupabaseSchedulerStore() {
       const { data, error } = await query.select().single();
       if (error) throw new Error(`Scheduler database write failed (${error.code}).`);
       return data as Record<string, unknown>;
+    },
+    async find(table, column, value) {
+      const { data, error } = await supabase.from(table).select().eq(column, value).maybeSingle();
+      if (error) throw new Error(`Scheduler database read failed (${error.code}).`);
+      return data as Record<string, unknown> | null;
     },
     async rpc(name, input) {
       const { data, error } = await supabase.rpc(name, input);

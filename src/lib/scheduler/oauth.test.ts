@@ -8,6 +8,7 @@ import {
   schedulerRedirectUri,
   SCHEDULER_OAUTH_STATE_COOKIE,
 } from "./oauth";
+import { canStartSchedulerOAuth } from "./legal";
 
 test("scheduler publishing authorization requests Direct Post scope", () => {
   process.env.TIKTOK_CLIENT_KEY = "client";
@@ -53,4 +54,23 @@ test("registered TikTok callback relays matching scheduler OAuth state", () => {
     relay?.toString(),
     `https://webgrowth.info/api/scheduler/auth/callback/?code=sandbox-code&state=${payload.state}`,
   );
+});
+
+test("disabled public enrollment denies unauthenticated OAuth before state is created", () => {
+  assert.equal(canStartSchedulerOAuth({ publicEnrollment: false }, null), false);
+});
+
+test("configured Sandbox targets retain an explicit server-side OAuth allowance", () => {
+  process.env.SCHEDULER_SANDBOX_TIKTOK_OPEN_IDS = "sandbox-owner,sandbox-target";
+  assert.equal(canStartSchedulerOAuth({ publicEnrollment: false }, "sandbox-target"), true);
+  assert.equal(canStartSchedulerOAuth({ publicEnrollment: false }, "sandbox"), false);
+});
+
+test("authorize route returns 503 before creating OAuth state when enrollment is unavailable", async () => {
+  const source = await import("node:fs/promises").then(({ readFile }) =>
+    readFile(new URL("../../app/api/scheduler/auth/authorize/route.ts", import.meta.url), "utf8"),
+  );
+  assert.match(source, /canStartSchedulerOAuth/);
+  assert.match(source, /status:\s*503/);
+  assert.ok(source.indexOf("canStartSchedulerOAuth") < source.indexOf("createSchedulerOAuthState"));
 });
