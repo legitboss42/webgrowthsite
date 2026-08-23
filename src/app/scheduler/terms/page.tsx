@@ -19,7 +19,7 @@ const sections = [
   },
   {
     title: "TikTok-only authentication",
-    body: "TikTok-only authentication means that TikTok Login Kit is the only sign-in method for this scheduler. Web Growth does not collect or store a TikTok password. A TikTok connection or any available publishing permission can be disconnected through the scheduler controls when offered to your account.",
+    body: "TikTok-only authentication means that TikTok Login Kit is the only sign-in method for this scheduler. Web Growth does not collect or store a TikTok password. A TikTok connection or any available publishing permission can be disconnected through the scheduler controls when offered to your account. For account controls or support, use the scheduler controls available to your account.",
   },
   {
     title: "Media retention",
