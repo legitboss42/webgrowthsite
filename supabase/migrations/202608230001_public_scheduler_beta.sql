@@ -568,10 +568,65 @@ begin
 end;
 $$;
 
+create or replace function public.refresh_active_tiktok_connection(
+  p_user_id uuid,
+  p_expected_encrypted_tokens text,
+  p_encrypted_tokens text,
+  p_scopes text[],
+  p_access_expires_at timestamptz,
+  p_refresh_expires_at timestamptz
+)
+returns boolean
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_updated_count integer := 0;
+begin
+  if p_user_id is null
+    or p_expected_encrypted_tokens is null
+    or p_encrypted_tokens is null
+    or p_scopes is null
+    or p_access_expires_at is null
+    or p_refresh_expires_at is null then
+    return false;
+  end if;
+
+  perform 1
+  from public.scheduler_users user_record
+  where user_record.id = p_user_id
+    and user_record.status = 'ACTIVE'
+    and user_record.suspended_at is null
+    and user_record.deletion_requested_at is null
+  for update;
+
+  if not found then
+    return false;
+  end if;
+
+  update public.tiktok_connections connection_record
+  set
+    encrypted_tokens = p_encrypted_tokens,
+    scopes = p_scopes,
+    access_expires_at = p_access_expires_at,
+    refresh_expires_at = p_refresh_expires_at,
+    reconnect_required = false,
+    updated_at = now()
+  where connection_record.user_id = p_user_id
+    and connection_record.encrypted_tokens = p_expected_encrypted_tokens;
+
+  get diagnostics v_updated_count = row_count;
+  return v_updated_count = 1;
+end;
+$$;
+
 revoke execute on function public.reserve_public_scheduler_slot(uuid, uuid, timestamptz, timestamptz) from public, anon, authenticated;
 revoke execute on function public.create_safe_publish_retry(uuid, uuid) from public, anon, authenticated;
 revoke execute on function public.create_public_scheduler_post(uuid, uuid[], text, text) from public, anon, authenticated;
 revoke execute on function public.approve_public_scheduler_post(uuid, uuid, text, jsonb) from public, anon, authenticated;
 revoke execute on function public.save_active_tiktok_connection(uuid, text, text, text[], timestamptz, timestamptz) from public, anon, authenticated;
+revoke execute on function public.refresh_active_tiktok_connection(uuid, text, text, text[], timestamptz, timestamptz) from public, anon, authenticated;
+grant execute on function public.refresh_active_tiktok_connection(uuid, text, text, text[], timestamptz, timestamptz) to service_role;
 
 commit;

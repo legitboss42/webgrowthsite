@@ -110,6 +110,33 @@ test("public scheduler beta migration saves connection tokens only for the exact
   assert.match(sql, /revoke execute on function public\.save_active_tiktok_connection\(uuid, text, text, text\[\], timestamptz, timestamptz\) from public, anon, authenticated/);
 });
 
+test("public scheduler beta migration refreshes credentials through a revoked secret-safe CAS RPC", () => {
+  const sql = readFileSync(publicSchedulerBetaMigrationPath, "utf8").toLowerCase();
+  const start = sql.indexOf("create or replace function public.refresh_active_tiktok_connection");
+  const end = sql.indexOf("revoke execute", start);
+  assert.notEqual(start, -1);
+  const refreshFunction = sql.slice(start, end);
+  assert.match(refreshFunction, /p_user_id uuid/);
+  assert.match(refreshFunction, /p_expected_encrypted_tokens text/);
+  assert.match(refreshFunction, /p_encrypted_tokens text/);
+  assert.match(refreshFunction, /p_scopes text\[\]/);
+  assert.match(refreshFunction, /p_access_expires_at timestamptz/);
+  assert.match(refreshFunction, /p_refresh_expires_at timestamptz/);
+  assert.match(refreshFunction, /returns boolean/);
+  assert.match(refreshFunction, /security definer/);
+  assert.match(refreshFunction, /set search_path = public/);
+  assert.match(refreshFunction, /user_record\.id = p_user_id/);
+  assert.match(refreshFunction, /user_record\.status = 'active'/);
+  assert.match(refreshFunction, /user_record\.suspended_at is null/);
+  assert.match(refreshFunction, /user_record\.deletion_requested_at is null/);
+  assert.match(refreshFunction, /for update/);
+  assert.match(refreshFunction, /update public\.tiktok_connections connection_record[\s\S]*connection_record\.user_id = p_user_id[\s\S]*connection_record\.encrypted_tokens = p_expected_encrypted_tokens/);
+  assert.match(refreshFunction, /get diagnostics v_updated_count = row_count/);
+  assert.match(refreshFunction, /return v_updated_count = 1/);
+  assert.match(sql, /revoke execute on function public\.refresh_active_tiktok_connection\(uuid, text, text, text\[\], timestamptz, timestamptz\) from public, anon, authenticated/);
+  assert.match(sql, /grant execute on function public\.refresh_active_tiktok_connection\(uuid, text, text, text\[\], timestamptz, timestamptz\) to service_role/);
+});
+
 test("public scheduler beta migration reserves a fixed quota by scheduling the owned post atomically", () => {
   const sql = readFileSync(publicSchedulerBetaMigrationPath, "utf8").toLowerCase();
   const reserveStart = sql.indexOf("create or replace function public.reserve_public_scheduler_slot");

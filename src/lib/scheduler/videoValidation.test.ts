@@ -50,7 +50,8 @@ function ebmlDocType(docType: string, trailing = Buffer.alloc(0)) {
 test("stored byte signatures structurally distinguish approved MP4, MOV, and WebM", () => {
   assert.deepEqual(parseVideoContainerSignature(isoBmff("isom", ["iso2", "mp41"])), evidence.MP4);
   assert.deepEqual(parseVideoContainerSignature(isoBmff("mp42", ["isom", "avc1"])), { ...evidence.MP4, majorBrand: "mp42" });
-  assert.deepEqual(parseVideoContainerSignature(isoBmff("qt  ")), evidence.MOV);
+  assert.deepEqual(parseVideoContainerSignature(isoBmff("mp42", ["qt  "])), { ...evidence.MP4, majorBrand: "mp42" });
+  assert.deepEqual(parseVideoContainerSignature(isoBmff("qt  ", ["mp42"])), evidence.MOV);
   assert.deepEqual(parseVideoContainerSignature(ebmlDocType("webm")), evidence.WEBM);
 });
 
@@ -61,6 +62,17 @@ test("crafted incidental container strings and unknown ISO-BMFF brands fail clos
   assert.throws(() => parseVideoContainerSignature(ebmlDocType("matroska", Buffer.from("webm"))), /Video container must be MP4, MOV, or WebM\./);
   assert.throws(() => parseVideoContainerSignature(Buffer.concat([Buffer.from([0x1a, 0x45, 0xdf, 0xa3, 0x84]), Buffer.from("webm")])), /Video container must be MP4, MOV, or WebM\./);
   assert.throws(() => parseVideoContainerSignature(Buffer.from("not-media")), /Video container must be MP4, MOV, or WebM\./);
+});
+
+test("EBML element IDs wider than four bytes are rejected before a later WebM DocType", () => {
+  const invalidFiveByteId = Buffer.from([0x08, 0x00, 0x00, 0x00, 0x01, 0x80]);
+  const documentType = Buffer.concat([Buffer.from([0x42, 0x82, 0x84]), Buffer.from("webm")]);
+  const content = Buffer.concat([invalidFiveByteId, documentType]);
+  const crafted = Buffer.concat([
+    Buffer.from([0x1a, 0x45, 0xdf, 0xa3, 0x80 | content.length]),
+    content,
+  ]);
+  assert.throws(() => parseVideoContainerSignature(crafted), /Video container must be MP4, MOV, or WebM\./);
 });
 
 test("raw parser handles NTSC rational frame rate", () => {

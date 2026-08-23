@@ -160,7 +160,7 @@ export function parseVideoContainerSignature(source: Uint8Array): VideoContainer
     if (brands.some((brand) => brand !== "qt  " && !APPROVED_MP4_BRANDS.has(brand))) {
       throw new VideoProbeMediaError("Video container must be MP4, MOV, or WebM.");
     }
-    return brands.includes("qt  ")
+    return majorBrand === "qt  "
       ? { container: "MOV", mimeType: "video/quicktime", majorBrand }
       : { container: "MP4", mimeType: "video/mp4", majorBrand };
   }
@@ -170,7 +170,7 @@ export function parseVideoContainerSignature(source: Uint8Array): VideoContainer
   throw new VideoProbeMediaError("Video container must be MP4, MOV, or WebM.");
 }
 
-function readEbmlVint(source: Uint8Array, offset: number, preserveMarker: boolean) {
+function readEbmlVint(source: Uint8Array, offset: number, preserveMarker: boolean, maximumWidth: number) {
   const first = source[offset];
   if (first === undefined || first === 0) return null;
   let width = 1;
@@ -179,7 +179,7 @@ function readEbmlVint(source: Uint8Array, offset: number, preserveMarker: boolea
     width += 1;
     marker >>= 1;
   }
-  if (width > 8 || offset + width > source.length) return null;
+  if (width > maximumWidth || offset + width > source.length) return null;
   let value = preserveMarker ? first : first & (marker - 1);
   for (let index = 1; index < width; index += 1) value = value * 256 + source[offset + index]!;
   const unknownSize = !preserveMarker && value === (2 ** (7 * width)) - 1;
@@ -188,16 +188,16 @@ function readEbmlVint(source: Uint8Array, offset: number, preserveMarker: boolea
 
 function hasWebmDocumentType(header: Uint8Array): boolean {
   if (header.length < 5 || Buffer.from(header.subarray(0, 4)).toString("hex") !== "1a45dfa3") return false;
-  const headerSize = readEbmlVint(header, 4, false);
+  const headerSize = readEbmlVint(header, 4, false, 8);
   if (!headerSize) return false;
   let offset = 4 + headerSize.width;
   const end = offset + headerSize.value;
   if (end > header.length) return false;
   while (offset < end) {
-    const id = readEbmlVint(header, offset, true);
+    const id = readEbmlVint(header, offset, true, 4);
     if (!id) return false;
     offset += id.width;
-    const size = readEbmlVint(header, offset, false);
+    const size = readEbmlVint(header, offset, false, 8);
     if (!size) return false;
     offset += size.width;
     const valueEnd = offset + size.value;
