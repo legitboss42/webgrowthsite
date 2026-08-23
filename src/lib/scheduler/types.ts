@@ -27,6 +27,11 @@ export type SchedulerUser = {
   displayName: string | null;
   avatarUrl: string | null;
   status: SchedulerUserStatus;
+  privacyVersion: string | null;
+  privacyAcceptedAt: string | null;
+  suspendedAt: string | null;
+  suspensionReason: string | null;
+  deletionRequestedAt: string | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -67,6 +72,10 @@ export type ScheduledPost = {
   scheduledFor: string | null;
   timezone: string | null;
   publishId: string | null;
+  terminalAt: string | null;
+  retryEligible: boolean;
+  nextRetryAt: string | null;
+  userFailureCode: string | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -86,9 +95,18 @@ export type PublishAttempt = {
   postId: string;
   approvalId: string;
   requestFingerprint: string;
+  attemptNumber: number;
   publishId: string | null;
   status: string;
   errorCode: string | null;
   createdAt: string;
+  updatedAt: string;
+};
+
+export type SchedulerWorkerHealth = {
+  workerName: string;
+  lastStartedAt: string | null;
+  lastSucceededAt: string | null;
+  lastErrorCode: string | null;
   updatedAt: string;
 };

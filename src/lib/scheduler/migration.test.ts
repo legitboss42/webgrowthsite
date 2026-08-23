@@ -10,6 +10,10 @@ const supabaseCronMigrationPath = new URL(
   "../../../supabase/migrations/202608210002_supabase_scheduler_cron.sql",
   import.meta.url
 );
+const publicSchedulerBetaMigrationPath = new URL(
+  "../../../supabase/migrations/202608230001_public_scheduler_beta.sql",
+  import.meta.url
+);
 const vercelConfigPath = new URL("../../../vercel.json", import.meta.url);
 
 test("scheduler migration enables isolation and atomic worker safeguards", () => {
@@ -54,4 +58,22 @@ test("scheduler cron runs from Supabase instead of Vercel Hobby cron", () => {
   assert.match(sql, /authorization/);
   assert.match(sql, /bearer/);
   assert.match(sql, /revoke execute/);
+});
+
+test("public scheduler beta migration defines legal, retry, and worker contracts", () => {
+  const sql = readFileSync(publicSchedulerBetaMigrationPath, "utf8").toLowerCase();
+
+  for (const expected of [
+    "privacy_version",
+    "privacy_accepted_at",
+    "suspended_at",
+    "deletion_requested_at",
+    "terminal_at",
+    "attempt_number",
+    "retry_eligible",
+    "next_retry_at",
+    "reserve_public_scheduler_slot",
+    "create_safe_publish_retry",
+    "scheduler_worker_health",
+  ]) assert.match(sql, new RegExp(expected));
 });
