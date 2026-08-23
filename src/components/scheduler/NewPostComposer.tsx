@@ -2,6 +2,7 @@
 import { createClient } from "@supabase/supabase-js";
 import { type FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
+import { runMediaPostComposer } from "@/lib/scheduler/composerFlow";
 
 export default function NewPostComposer({ owner, articles = [] }: { owner: boolean; articles?: Array<{slug:string;title:string}> }) {
   const router = useRouter();
@@ -25,22 +26,18 @@ export default function NewPostComposer({ owner, articles = [] }: { owner: boole
         return;
       }
 
-      const files = formData.getAll("media").filter((entry): entry is File => entry instanceof File && entry.size > 0);
-      if (!files.length) throw new Error("Choose a video or one or more photos.");
-      if (files.length > 10) throw new Error("Select no more than 10 media files.");
-      const kinds = new Set(files.map((file) => file.type.startsWith("video/") ? "VIDEO" : "PHOTO"));
-      if (kinds.size > 1 || (kinds.has("VIDEO") && files.length !== 1)) {
-        throw new Error("Choose either one video or up to 10 photos.");
-      }
-
+      const files = formData.getAll("media").filter((entry): entry is File => entry instanceof File);
       const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
       const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-      if (!url || !key) throw new Error("Upload service is not configured.");
-      const supabase = createClient(url, key);
-      const mediaIds: string[] = [];
-
-      for (const file of files) {
-        try {
+      let supabase: ReturnType<typeof createClient> | null = null;
+      const post = await runMediaPostComposer({
+        files,
+        title: String(formData.get("title") || ""),
+        caption: String(formData.get("caption") || ""),
+      }, {
+        async uploadFile(file) {
+          if (!url || !key) throw new Error("Upload service is not configured.");
+          supabase ||= createClient(url, key);
           const kind = file.type.startsWith("video/") ? "VIDEO" : "PHOTO";
           const create = await fetch("/api/scheduler/uploads/", {
             method: "POST",
@@ -64,25 +61,19 @@ export default function NewPostComposer({ owner, articles = [] }: { owner: boole
           });
           const final = await finalized.json();
           if (!finalized.ok) throw new Error(final.error || "Media validation failed.");
-          mediaIds.push(target.assetId);
-        } catch (cause) {
-          const reason = cause instanceof Error ? cause.message : "Upload failed.";
-          throw new Error(`Unable to upload ${file.name}: ${reason}`);
-        }
-      }
-
-      const created = await fetch("/api/scheduler/posts/", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          action: "create",
-          mediaIds,
-          title: String(formData.get("title") || ""),
-          caption: String(formData.get("caption") || ""),
-        }),
+          return target.assetId as string;
+        },
+        async createPost(input) {
+          const created = await fetch("/api/scheduler/posts/", {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ action: "create", ...input }),
+          });
+          const createdPost = await created.json();
+          if (!created.ok) throw new Error(createdPost.error || "Unable to create post.");
+          return { postId: String(createdPost.postId) };
+        },
       });
-      const post = await created.json();
-      if (!created.ok) throw new Error(post.error);
       router.push(`/scheduler/posts/${post.postId}/`);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Unable to create post.");

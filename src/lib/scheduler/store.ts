@@ -26,6 +26,20 @@ export type SchedulerLegalAcceptanceInput = {
   privacyVersion: string;
 };
 
+export type CreateSchedulerPostInput = {
+  userId: string;
+  mediaIds: string[];
+  title: string;
+  caption: string;
+};
+
+export type ApproveSchedulerPostInput = {
+  userId: string;
+  postId: string;
+  fingerprint: string;
+  snapshot: Record<string, unknown>;
+};
+
 export function createSchedulerStore(client: SchedulerDatabaseClient) {
   return {
     upsertUser(input: UpsertSchedulerUserInput) {
@@ -46,6 +60,22 @@ export function createSchedulerStore(client: SchedulerDatabaseClient) {
         privacy_version: input.privacyVersion,
         terms_accepted_at: acceptedAt,
         privacy_accepted_at: acceptedAt,
+      });
+    },
+    createPost(input: CreateSchedulerPostInput) {
+      return client.rpc("create_public_scheduler_post", {
+        p_user_id: input.userId,
+        p_media_ids: input.mediaIds,
+        p_title: input.title,
+        p_caption: input.caption,
+      });
+    },
+    approvePost(input: ApproveSchedulerPostInput) {
+      return client.rpc("approve_public_scheduler_post", {
+        p_user_id: input.userId,
+        p_post_id: input.postId,
+        p_fingerprint: input.fingerprint,
+        p_snapshot: input.snapshot,
       });
     },
     claimDuePosts(nowIso: string, limit: number) {

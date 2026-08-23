@@ -6,6 +6,7 @@ import { isSameOriginMutation } from "@/lib/scheduler/policy";
 import { readSchedulerSession, SCHEDULER_SESSION_COOKIE } from "@/lib/scheduler/session";
 import { createSchedulerSupabaseClient } from "@/lib/scheduler/supabase";
 import type { MediaKind } from "@/lib/scheduler/types";
+import { finalizeSchedulerUpload } from "@/lib/scheduler/uploadFinalization";
 
 export async function POST(request: Request) {
   const cookieStore = await cookies();
@@ -21,7 +22,10 @@ export async function POST(request: Request) {
     const { data: user, error: userError } = await supabase.from("scheduler_users")
       .select("status,suspended_at,deletion_requested_at,terms_version,privacy_version")
       .eq("id", session.userId)
-      .single();
+      .maybeSingle();
+    if (userError) {
+      return NextResponse.json({ error: "Unable to verify scheduler access." }, { status: 502 });
+    }
     const canMutate = !userError && !!user && canMutateSchedulerContent({
       status: typeof user.status === "string" ? user.status : null,
       suspendedAt: typeof user.suspended_at === "string" ? user.suspended_at : null,
@@ -59,46 +63,63 @@ export async function POST(request: Request) {
   if (body?.action === "finalize") {
     const assetId = String(body.assetId || "");
     const checksum = String(body.checksum || "");
-    const { data: asset } = await supabase.from("media_assets")
-      .select("id,storage_path,kind,mime_type,byte_size").eq("id", assetId)
-      .eq("user_id", session.userId).single();
-    if (!asset || !checksum) return NextResponse.json({ error: "Media asset not found." }, { status: 404 });
-    const parts = asset.storage_path.split("/");
-    const filename = parts.pop()!;
-    const { data: objects } = await supabase.storage.from("tiktok-scheduler-media")
-      .list(parts.join("/"), { search: filename, limit: 1 });
-    const object = objects?.find((item) => item.name === filename);
-    const storedSize = Number(object?.metadata?.size);
-    const storedMime = String(object?.metadata?.mimetype || asset.mime_type);
-    let validation = validateMediaMetadata({ kind: asset.kind as MediaKind, mimeType: storedMime, byteSize: storedSize });
-    let photoMetadata: { width?: number; height?: number; mimeType?: string } = {};
-    if (object && validation.ok && storedSize === Number(asset.byte_size) && asset.kind === "PHOTO") {
-      const { data: storedPhoto, error: downloadError } = await supabase.storage
-        .from("tiktok-scheduler-media")
-        .download(asset.storage_path);
-      if (downloadError || !storedPhoto) {
-        validation = { ok: false, error: "Photo could not be decoded." };
-      } else {
-        const photoValidation = await validateTikTokPhotoSource(await storedPhoto.arrayBuffer(), storedMime, storedSize);
-        validation = photoValidation;
-        if (photoValidation.ok) photoMetadata = photoValidation;
-      }
-    }
-    if (!object || !validation.ok || storedSize !== Number(asset.byte_size)) {
-      await supabase.from("media_assets").update({ validation_status: "INVALID" })
-        .eq("id", assetId).eq("user_id", session.userId);
-      return NextResponse.json({ error: "Stored media did not pass validation." }, { status: 400 });
-    }
-    const { error: updateError } = await supabase.from("media_assets").update({
-      checksum,
-      mime_type: photoMetadata.mimeType || storedMime,
-      byte_size: storedSize,
-      width: photoMetadata.width,
-      height: photoMetadata.height,
-      validation_status: "VALID",
-    }).eq("id", assetId).eq("user_id", session.userId);
-    if (updateError) return NextResponse.json({ error: "Unable to finalize media asset." }, { status: 502 });
-    return NextResponse.json({ assetId, status: "VALID" });
+    const result = await finalizeSchedulerUpload({ userId: session.userId, assetId, checksum }, {
+      async findOwnedAsset(input) {
+        const { data, error } = await supabase.from("media_assets")
+          .select("id,storage_path,kind,mime_type,byte_size")
+          .eq("id", input.assetId)
+          .eq("user_id", input.userId)
+          .maybeSingle();
+        return {
+          error: !!error,
+          data: data ? {
+            id: String(data.id),
+            storagePath: String(data.storage_path),
+            kind: data.kind as MediaKind,
+            mimeType: String(data.mime_type),
+            byteSize: Number(data.byte_size),
+          } : null,
+        };
+      },
+      async inspectObject(input) {
+        const parts = input.storagePath.split("/");
+        const filename = parts.pop();
+        if (!filename) return { data: null, error: false };
+        const { data, error } = await supabase.storage.from("tiktok-scheduler-media")
+          .list(parts.join("/"), { search: filename, limit: 1 });
+        const object = data?.find((item) => item.name === filename);
+        return {
+          error: !!error,
+          data: object ? {
+            byteSize: Number(object.metadata?.size),
+            mimeType: String(object.metadata?.mimetype || ""),
+          } : null,
+        };
+      },
+      async downloadObject(input) {
+        const { data, error } = await supabase.storage.from("tiktok-scheduler-media").download(input.storagePath);
+        return { error: !!error, data: data ? await data.arrayBuffer() : null };
+      },
+      validatePhoto: validateTikTokPhotoSource,
+      async markInvalid(input) {
+        const { error } = await supabase.from("media_assets").update({ validation_status: "INVALID" })
+          .eq("id", input.assetId).eq("user_id", input.userId);
+        return { error: !!error };
+      },
+      async markValid(input) {
+        const { error } = await supabase.from("media_assets").update({
+          checksum: input.checksum,
+          mime_type: input.mimeType,
+          byte_size: input.byteSize,
+          width: input.width,
+          height: input.height,
+          validation_status: "VALID",
+        }).eq("id", input.assetId).eq("user_id", input.userId);
+        return { error: !!error };
+      },
+    });
+    if (!result.ok) return NextResponse.json({ error: result.error }, { status: result.status });
+    return NextResponse.json({ assetId: result.assetId, status: result.validationStatus });
   }
 
   return NextResponse.json({ error: "Unsupported upload action." }, { status: 400 });

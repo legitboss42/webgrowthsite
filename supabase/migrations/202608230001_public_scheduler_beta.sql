@@ -240,6 +240,229 @@ begin
 end;
 $$;
 
+create or replace function public.create_public_scheduler_post(
+  p_user_id uuid,
+  p_media_ids uuid[],
+  p_title text,
+  p_caption text
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_post_id uuid;
+  v_kind text;
+  v_requested_count integer;
+  v_distinct_count integer;
+  v_owned_count integer;
+  v_single_kind boolean;
+  v_video_count integer;
+begin
+  if p_user_id is null or p_media_ids is null or p_title is null or p_caption is null then
+    return jsonb_build_object('ok', false, 'code', 'INVALID_MEDIA');
+  end if;
+
+  perform 1
+  from public.scheduler_users user_record
+  where user_record.id = p_user_id
+    and user_record.status = 'ACTIVE'
+    and user_record.suspended_at is null
+    and user_record.deletion_requested_at is null
+    and user_record.terms_version = '2026-08-23'
+    and user_record.privacy_version = '2026-08-23'
+  for update;
+
+  if not found then
+    return jsonb_build_object('ok', false, 'code', 'ACCESS_DENIED');
+  end if;
+
+  v_requested_count := cardinality(p_media_ids);
+  if not (cardinality(p_media_ids) between 1 and 10) then
+    return jsonb_build_object('ok', false, 'code', 'INVALID_MEDIA');
+  end if;
+
+  select count(distinct requested_id)
+  into v_distinct_count
+  from unnest(p_media_ids) requested(requested_id);
+
+  if v_distinct_count <> cardinality(p_media_ids) then
+    return jsonb_build_object('ok', false, 'code', 'INVALID_MEDIA');
+  end if;
+
+  select
+    count(*),
+    count(distinct asset.kind) = 1,
+    count(*) filter (where asset.kind = 'VIDEO'),
+    min(asset.kind)
+  into v_owned_count, v_single_kind, v_video_count, v_kind
+  from unnest(p_media_ids) requested(requested_id)
+  join public.media_assets asset
+    on asset.id = requested.requested_id
+    and asset.user_id = p_user_id
+    and asset.validation_status = 'VALID';
+
+  if v_owned_count <> v_requested_count then
+    return jsonb_build_object('ok', false, 'code', 'MEDIA_OWNERSHIP');
+  end if;
+
+  if not v_single_kind or (v_video_count > 0 and cardinality(p_media_ids) <> 1) then
+    return jsonb_build_object('ok', false, 'code', 'INVALID_MEDIA');
+  end if;
+
+  insert into public.scheduled_posts (user_id, kind, title, caption, status)
+  values (p_user_id, v_kind, p_title, p_caption, 'NEEDS_APPROVAL')
+  returning id into v_post_id;
+
+  insert into public.post_media (post_id, media_id, position)
+  select v_post_id, requested_id, (ordinality - 1)::integer
+  from unnest(p_media_ids) with ordinality requested(requested_id, ordinality);
+
+  return jsonb_build_object('ok', true, 'postId', v_post_id::text);
+end;
+$$;
+
+create or replace function public.approve_public_scheduler_post(
+  p_user_id uuid,
+  p_post_id uuid,
+  p_fingerprint text,
+  p_snapshot jsonb
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_user_open_id text;
+  v_post public.scheduled_posts%rowtype;
+  v_total_media_count integer;
+  v_media_count integer;
+  v_snapshot_match_count integer;
+  v_approval_id uuid;
+  v_updated_post_id uuid;
+begin
+  if p_user_id is null
+    or p_post_id is null
+    or p_fingerprint is null
+    or p_fingerprint !~ '^[0-9a-f]{64}$'
+    or p_snapshot is null then
+    return jsonb_build_object('ok', false, 'code', 'POST_CHANGED');
+  end if;
+
+  select user_record.tiktok_open_id
+  into v_user_open_id
+  from public.scheduler_users user_record
+  where user_record.id = p_user_id
+    and user_record.status = 'ACTIVE'
+    and user_record.suspended_at is null
+    and user_record.deletion_requested_at is null
+    and user_record.terms_version = '2026-08-23'
+    and user_record.privacy_version = '2026-08-23'
+  for update;
+
+  if not found then
+    return jsonb_build_object('ok', false, 'code', 'ACCESS_DENIED');
+  end if;
+
+  select post.*
+  into v_post
+  from public.scheduled_posts post
+  where post.id = p_post_id
+    and post.user_id = p_user_id
+    and post.status in ('DRAFT', 'NEEDS_CONNECTION', 'NEEDS_APPROVAL')
+  for update;
+
+  if not found then
+    return jsonb_build_object('ok', false, 'code', 'POST_NOT_FOUND');
+  end if;
+
+  if jsonb_typeof(p_snapshot) <> 'object'
+    or jsonb_typeof(p_snapshot -> 'media') <> 'array'
+    or p_snapshot ->> 'creatorOpenId' <> v_user_open_id
+    or p_snapshot ->> 'title' <> v_post.title
+    or p_snapshot ->> 'caption' <> v_post.caption then
+    return jsonb_build_object('ok', false, 'code', 'POST_CHANGED');
+  end if;
+
+  select count(*)
+  into v_total_media_count
+  from public.post_media post_media
+  where post_media.post_id = p_post_id;
+
+  select count(*)
+  into v_media_count
+  from public.post_media post_media
+  join public.media_assets asset
+    on asset.id = post_media.media_id
+    and asset.user_id = p_user_id
+    and asset.validation_status = 'VALID'
+  where post_media.post_id = p_post_id;
+
+  if v_total_media_count <> v_media_count
+    or jsonb_array_length(p_snapshot -> 'media') <> v_media_count then
+    return jsonb_build_object('ok', false, 'code', 'POST_CHANGED');
+  end if;
+
+  select count(distinct post_media.position)
+  into v_snapshot_match_count
+  from public.post_media post_media
+  join public.media_assets asset
+    on asset.id = post_media.media_id
+    and asset.user_id = p_user_id
+    and asset.validation_status = 'VALID'
+  join lateral jsonb_array_elements(p_snapshot -> 'media') media_item
+    on media_item ->> 'id' = asset.id::text
+    and media_item ->> 'checksum' = asset.checksum
+    and media_item ->> 'position' = post_media.position::text
+  where post_media.post_id = p_post_id;
+
+  if v_snapshot_match_count <> v_media_count then
+    return jsonb_build_object('ok', false, 'code', 'POST_CHANGED');
+  end if;
+
+  insert into public.post_approvals (post_id, user_id, fingerprint, snapshot)
+  values (p_post_id, p_user_id, p_fingerprint, p_snapshot)
+  on conflict (post_id, fingerprint) do nothing
+  returning id into v_approval_id;
+
+  if v_approval_id is null then
+    select approval.id
+    into v_approval_id
+    from public.post_approvals approval
+    where approval.post_id = p_post_id
+      and approval.user_id = p_user_id
+      and approval.fingerprint = p_fingerprint
+      and approval.snapshot = p_snapshot
+      and approval.invalidated_at is null;
+  end if;
+
+  if v_approval_id is null then
+    return jsonb_build_object('ok', false, 'code', 'POST_CHANGED');
+  end if;
+
+  update public.scheduled_posts post
+  set
+    approval_id = v_approval_id,
+    status = 'NEEDS_APPROVAL',
+    updated_at = now()
+  where post.id = p_post_id
+    and post.user_id = p_user_id
+  returning post.id into v_updated_post_id;
+
+  if v_updated_post_id is null then
+    raise exception 'Atomic approval post update failed.' using errcode = 'P0001';
+  end if;
+
+  return jsonb_build_object(
+    'ok', true,
+    'postId', p_post_id::text,
+    'approvalId', v_approval_id::text
+  );
+end;
+$$;
+
 create or replace function public.save_active_tiktok_connection(
   p_user_id uuid,
   p_tiktok_open_id text,
@@ -307,6 +530,8 @@ $$;
 
 revoke execute on function public.reserve_public_scheduler_slot(uuid, uuid, timestamptz, timestamptz) from public, anon, authenticated;
 revoke execute on function public.create_safe_publish_retry(uuid, uuid) from public, anon, authenticated;
+revoke execute on function public.create_public_scheduler_post(uuid, uuid[], text, text) from public, anon, authenticated;
+revoke execute on function public.approve_public_scheduler_post(uuid, uuid, text, jsonb) from public, anon, authenticated;
 revoke execute on function public.save_active_tiktok_connection(uuid, text, text, text[], timestamptz, timestamptz) from public, anon, authenticated;
 
 commit;

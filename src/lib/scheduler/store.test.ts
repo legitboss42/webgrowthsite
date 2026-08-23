@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { createSchedulerStore, type SchedulerDatabaseClient } from "./store";
 
-function fakeClient(activeConnectionResult = true) {
+function fakeClient(activeConnectionResult = true, rpcResults: Record<string, unknown> = {}) {
   const calls: Array<{ kind: string; name: string; input: unknown }> = [];
   const client: SchedulerDatabaseClient = {
     async insert(table, input) {
@@ -15,6 +15,7 @@ function fakeClient(activeConnectionResult = true) {
     },
     async rpc(name, input) {
       calls.push({ kind: "rpc", name, input });
+      if (Object.prototype.hasOwnProperty.call(rpcResults, name)) return rpcResults[name];
       return name === "save_active_tiktok_connection" ? activeConnectionResult : [];
     },
     async update(table, id, input) {
@@ -27,6 +28,55 @@ function fakeClient(activeConnectionResult = true) {
   };
   return { calls, client };
 }
+
+// Mutation target: replacing the atomic RPC with separate scheduled_posts/post_media writes must add non-RPC calls.
+test("post creation uses one atomic database RPC with submitted media order", async () => {
+  const result = { ok: true, postId: "post-1" };
+  const { calls, client } = fakeClient(true, { create_public_scheduler_post: result });
+  const store = createSchedulerStore(client);
+
+  assert.deepEqual(await store.createPost({
+    userId: "user-1",
+    mediaIds: ["media-2", "media-1"],
+    title: "Title",
+    caption: "Caption",
+  }), result);
+  assert.deepEqual(calls, [{
+    kind: "rpc",
+    name: "create_public_scheduler_post",
+    input: {
+      p_user_id: "user-1",
+      p_media_ids: ["media-2", "media-1"],
+      p_title: "Title",
+      p_caption: "Caption",
+    },
+  }]);
+});
+
+// Mutation target: inserting approval then updating the post separately must add non-RPC calls or report success after a partial write.
+test("post approval uses one atomic database RPC with immutable fingerprint input", async () => {
+  const result = { ok: true, postId: "post-1", approvalId: "approval-1" };
+  const { calls, client } = fakeClient(true, { approve_public_scheduler_post: result });
+  const store = createSchedulerStore(client);
+  const snapshot = { version: 1, media: [{ id: "media-1", checksum: "abc", position: 0 }] };
+
+  assert.deepEqual(await store.approvePost({
+    userId: "user-1",
+    postId: "post-1",
+    fingerprint: "a".repeat(64),
+    snapshot,
+  }), result);
+  assert.deepEqual(calls, [{
+    kind: "rpc",
+    name: "approve_public_scheduler_post",
+    input: {
+      p_user_id: "user-1",
+      p_post_id: "post-1",
+      p_fingerprint: "a".repeat(64),
+      p_snapshot: snapshot,
+    },
+  }]);
+});
 
 test("user writes preserve the authenticated TikTok identity", async () => {
   const { calls, client } = fakeClient();

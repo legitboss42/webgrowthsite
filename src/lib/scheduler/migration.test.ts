@@ -150,3 +150,67 @@ test("public scheduler beta migration reserves a fixed quota by scheduling the o
   assert.match(retryFunction, /attempt\.publish_id is not null/);
   assert.match(retryFunction, /retry_eligible = false/);
 });
+
+// Mutation target: moving either insert outside the function must permit a zero-media partial post.
+test("public scheduler beta migration creates posts and ordered media atomically", () => {
+  const sql = readFileSync(publicSchedulerBetaMigrationPath, "utf8").toLowerCase();
+  const start = sql.indexOf("create or replace function public.create_public_scheduler_post");
+  const end = sql.indexOf("create or replace function public.approve_public_scheduler_post", start);
+  assert.notEqual(start, -1);
+  assert.notEqual(end, -1);
+  const fn = sql.slice(start, end);
+
+  assert.match(fn, /returns jsonb/);
+  assert.match(fn, /security definer/);
+  assert.match(fn, /set search_path = public/);
+  assert.match(fn, /user_record\.id = p_user_id/);
+  assert.match(fn, /user_record\.status = 'active'/);
+  assert.match(fn, /user_record\.suspended_at is null/);
+  assert.match(fn, /user_record\.deletion_requested_at is null/);
+  assert.match(fn, /user_record\.terms_version = '2026-08-23'/);
+  assert.match(fn, /user_record\.privacy_version = '2026-08-23'/);
+  assert.match(fn, /cardinality\(p_media_ids\) between 1 and 10/);
+  assert.match(fn, /count\(distinct requested_id\)[\s\S]*cardinality\(p_media_ids\)/);
+  assert.match(fn, /asset\.user_id = p_user_id/);
+  assert.match(fn, /asset\.validation_status = 'valid'/);
+  assert.match(fn, /count\(distinct asset\.kind\) = 1/);
+  assert.match(fn, /asset\.kind = 'video'[\s\S]*cardinality\(p_media_ids\) <> 1/);
+  assert.match(fn, /insert into public\.scheduled_posts/);
+  assert.match(fn, /insert into public\.post_media/);
+  assert.match(fn, /unnest\(p_media_ids\) with ordinality/);
+  assert.match(fn, /ordinality - 1/);
+  assert.match(sql, /revoke execute on function public\.create_public_scheduler_post\(uuid, uuid\[\], text, text\) from public, anon, authenticated/);
+});
+
+// Mutation target: a separate approval insert/update or mutable upsert must allow partial or rewritten approval state.
+test("public scheduler beta migration approves an owned immutable snapshot atomically", () => {
+  const sql = readFileSync(publicSchedulerBetaMigrationPath, "utf8").toLowerCase();
+  const start = sql.indexOf("create or replace function public.approve_public_scheduler_post");
+  const end = sql.indexOf("revoke execute", start);
+  assert.notEqual(start, -1);
+  const fn = sql.slice(start, end);
+
+  assert.match(fn, /returns jsonb/);
+  assert.match(fn, /security definer/);
+  assert.match(fn, /set search_path = public/);
+  assert.match(fn, /user_record\.id = p_user_id/);
+  assert.match(fn, /user_record\.status = 'active'/);
+  assert.match(fn, /user_record\.terms_version = '2026-08-23'/);
+  assert.match(fn, /user_record\.privacy_version = '2026-08-23'/);
+  assert.match(fn, /post\.id = p_post_id/);
+  assert.match(fn, /post\.user_id = p_user_id/);
+  assert.match(fn, /for update/);
+  assert.match(fn, /p_snapshot ->> 'creatoropenid'[\s\S]*user_record\.tiktok_open_id/);
+  assert.match(fn, /p_snapshot ->> 'title'[\s\S]*post\.title/);
+  assert.match(fn, /p_snapshot ->> 'caption'[\s\S]*post\.caption/);
+  assert.match(fn, /jsonb_array_length\(p_snapshot -> 'media'\)/);
+  assert.match(fn, /v_total_media_count <> v_media_count/);
+  assert.match(fn, /asset\.checksum/);
+  assert.match(fn, /count\(distinct post_media\.position\)/);
+  assert.match(fn, /media_item ->> 'position'/);
+  assert.match(fn, /insert into public\.post_approvals/);
+  assert.match(fn, /on conflict \(post_id, fingerprint\) do nothing/);
+  assert.match(fn, /approval\.snapshot = p_snapshot/);
+  assert.match(fn, /update public\.scheduled_posts post[\s\S]*approval_id = v_approval_id[\s\S]*status = 'needs_approval'/);
+  assert.match(sql, /revoke execute on function public\.approve_public_scheduler_post\(uuid, uuid, text, jsonb\) from public, anon, authenticated/);
+});

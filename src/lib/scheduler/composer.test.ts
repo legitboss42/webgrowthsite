@@ -21,11 +21,9 @@ test("composer accepts and reads multiple media files", () => {
   assert.match(source, /formData\.getAll\("media"\)/);
 });
 
-// Mutation target: replacing the serial loop with unbounded Promise.all must allow unlimited concurrent uploads.
-test("composer uploads selected files serially with per-file error context", () => {
+// UI-only contract: executable ordering/error behavior lives in composerFlow.test.ts.
+test("composer delegates multiple media behavior to the tested flow orchestrator", () => {
   const source = readFileSync(composerPath, "utf8");
 
-  assert.match(source, /for \(const file of files\)/);
-  assert.doesNotMatch(source, /Promise\.all\([^)]*files/);
-  assert.match(source, /`Unable to upload \$\{file\.name\}: \$\{reason\}`/);
+  assert.match(source, /runMediaPostComposer/);
 });
