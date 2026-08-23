@@ -58,6 +58,10 @@ export type MediaAsset = {
   width: number | null;
   height: number | null;
   durationSeconds: number | null;
+  videoCodec: string | null;
+  frameRate: number | null;
+  validationVersion: string | null;
+  probeMetadata: Record<string, unknown> | null;
   createdAt: string;
 };
 

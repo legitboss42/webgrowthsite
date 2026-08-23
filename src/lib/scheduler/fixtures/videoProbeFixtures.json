@@ -1,0 +1,37 @@
+{
+  "passingMp4": {
+    "formatName": "mov,mp4,m4a,3gp,3g2,mj2",
+    "codecName": "h264",
+    "width": 1080,
+    "height": 1920,
+    "frameRate": 30,
+    "durationSeconds": 60
+  },
+  "cases": [
+    {
+      "name": "22 FPS",
+      "override": { "frameRate": 22 },
+      "error": "Video frame rate must be between 23 and 60 FPS."
+    },
+    {
+      "name": "61 FPS",
+      "override": { "frameRate": 61 },
+      "error": "Video frame rate must be between 23 and 60 FPS."
+    },
+    {
+      "name": "359-pixel dimension",
+      "override": { "width": 359 },
+      "error": "Video dimensions must be between 360 and 4096 pixels."
+    },
+    {
+      "name": "4097-pixel dimension",
+      "override": { "height": 4097 },
+      "error": "Video dimensions must be between 360 and 4096 pixels."
+    },
+    {
+      "name": "unsupported codec",
+      "override": { "codecName": "hevc" },
+      "error": "Video codec must be H.264."
+    }
+  ]
+}

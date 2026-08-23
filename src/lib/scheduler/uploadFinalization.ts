@@ -1,6 +1,7 @@
 import { validateMediaMetadata } from "./media";
 import type { TikTokPhotoSourceValidationResult } from "./mediaDelivery";
 import type { MediaKind } from "./types";
+import type { VideoProbe } from "./videoValidation";
 
 type AdapterReadResult<T> = { data: T | null; error: boolean };
 type AdapterWriteResult = { error: boolean; updatedCount: number };
@@ -18,6 +19,10 @@ export type UploadFinalizationAdapter = {
   inspectObject(input: { storagePath: string }): Promise<AdapterReadResult<{ byteSize: number; mimeType: string }>>;
   downloadObject(input: { storagePath: string }): Promise<AdapterReadResult<ArrayBuffer | Uint8Array>>;
   validatePhoto(source: ArrayBuffer | Uint8Array, mimeType: string, byteSize: number): Promise<TikTokPhotoSourceValidationResult>;
+  validateVideo?: (source: ArrayBuffer | Uint8Array, byteSize: number) => Promise<
+    | { ok: true; probe: VideoProbe; validationVersion: string }
+    | { ok: false; error: string; infrastructureError?: boolean }
+  >;
   markInvalid(input: { userId: string; assetId: string; expectedValidationStatus: "PENDING" }): Promise<AdapterWriteResult>;
   markValid(input: {
     userId: string;
@@ -27,6 +32,11 @@ export type UploadFinalizationAdapter = {
     byteSize: number;
     width?: number;
     height?: number;
+    durationSeconds?: number;
+    videoCodec?: string;
+    frameRate?: number;
+    validationVersion?: string;
+    probeMetadata?: VideoProbe;
     expectedValidationStatus: "PENDING";
   }): Promise<AdapterWriteResult>;
 };
@@ -64,7 +74,16 @@ export async function finalizeSchedulerUpload(
       return invalidMedia(adapter, { userId: input.userId, assetId: input.assetId });
     }
 
-    let photoMetadata: { width?: number; height?: number; mimeType?: string } = {};
+    let validatedMetadata: {
+      width?: number;
+      height?: number;
+      mimeType?: string;
+      durationSeconds?: number;
+      videoCodec?: string;
+      frameRate?: number;
+      validationVersion?: string;
+      probeMetadata?: VideoProbe;
+    } = {};
     if (asset.kind === "PHOTO") {
       const downloadResult = await adapter.downloadObject({ storagePath: asset.storagePath });
       if (downloadResult.error || !downloadResult.data) {
@@ -72,17 +91,45 @@ export async function finalizeSchedulerUpload(
       }
       const photoValidation = await adapter.validatePhoto(downloadResult.data, stored.mimeType, stored.byteSize);
       if (!photoValidation.ok) return invalidMedia(adapter, { userId: input.userId, assetId: input.assetId });
-      photoMetadata = photoValidation;
+      validatedMetadata = {
+        width: photoValidation.width,
+        height: photoValidation.height,
+        mimeType: photoValidation.mimeType,
+      };
+    } else {
+      const downloadResult = await adapter.downloadObject({ storagePath: asset.storagePath });
+      if (downloadResult.error || !downloadResult.data) {
+        return { ok: false as const, status: 502, error: "Unable to download stored media for validation." };
+      }
+      if (!adapter.validateVideo) {
+        return { ok: false as const, status: 502, error: "Unable to probe stored video." };
+      }
+      const videoValidation = await adapter.validateVideo(downloadResult.data, stored.byteSize);
+      if (!videoValidation.ok) {
+        if (videoValidation.infrastructureError) {
+          return { ok: false as const, status: 502, error: "Unable to probe stored video." };
+        }
+        return invalidMedia(adapter, { userId: input.userId, assetId: input.assetId });
+      }
+      validatedMetadata = {
+        mimeType: "video/mp4",
+        width: videoValidation.probe.width,
+        height: videoValidation.probe.height,
+        durationSeconds: videoValidation.probe.durationSeconds,
+        videoCodec: videoValidation.probe.codecName,
+        frameRate: videoValidation.probe.frameRate,
+        validationVersion: videoValidation.validationVersion,
+        probeMetadata: videoValidation.probe,
+      };
     }
 
     const updated = await adapter.markValid({
       userId: input.userId,
       assetId: input.assetId,
       checksum: input.checksum,
-      mimeType: photoMetadata.mimeType || stored.mimeType,
+      mimeType: validatedMetadata.mimeType || stored.mimeType,
       byteSize: stored.byteSize,
-      width: photoMetadata.width,
-      height: photoMetadata.height,
+      ...validatedMetadata,
       expectedValidationStatus: "PENDING",
     });
     if (updated.error || updated.updatedCount !== 1) return { ok: false as const, status: 502, error: "Unable to finalize media asset." };

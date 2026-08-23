@@ -22,3 +22,7 @@ export function getSchedulerLaunchState(): SchedulerLaunchState {
 export function assertPublicEnrollmentEnabled(state: SchedulerLaunchState): void {
   if (!state.publicEnrollment) throw new Error("Public scheduler enrollment is disabled.");
 }
+
+export function assertVideoUploadEnabled(kind: "PHOTO" | "VIDEO", state: SchedulerLaunchState): void {
+  if (kind === "VIDEO" && !state.video) throw new Error("Video uploads are unavailable.");
+}

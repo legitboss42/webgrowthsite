@@ -2,11 +2,20 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { canMutateSchedulerContent, validateMediaMetadata } from "@/lib/scheduler/media";
 import { validateTikTokPhotoSource } from "@/lib/scheduler/mediaDelivery";
+import { assertVideoUploadEnabled, getSchedulerLaunchState } from "@/lib/scheduler/launch";
 import { isSameOriginMutation } from "@/lib/scheduler/policy";
 import { readSchedulerSession, SCHEDULER_SESSION_COOKIE } from "@/lib/scheduler/session";
 import { createSchedulerSupabaseClient } from "@/lib/scheduler/supabase";
 import type { MediaKind } from "@/lib/scheduler/types";
 import { finalizeSchedulerUpload } from "@/lib/scheduler/uploadFinalization";
+import {
+  probeStoredVideo,
+  validateTikTokVideo,
+  VideoProbeMediaError,
+  VIDEO_VALIDATION_VERSION,
+} from "@/lib/scheduler/videoValidation";
+
+export const runtime = "nodejs";
 
 export async function POST(request: Request) {
   const cookieStore = await cookies();
@@ -40,6 +49,11 @@ export async function POST(request: Request) {
 
   if (body?.action === "create") {
     const kind: MediaKind = body.kind === "VIDEO" ? "VIDEO" : "PHOTO";
+    try {
+      assertVideoUploadEnabled(kind, getSchedulerLaunchState());
+    } catch {
+      return NextResponse.json({ error: "Video uploads are unavailable." }, { status: 503 });
+    }
     const mimeType = String(body.mimeType || "");
     const byteSize = Number(body.byteSize);
     const validation = validateMediaMetadata({ kind, mimeType, byteSize });
@@ -101,6 +115,23 @@ export async function POST(request: Request) {
         return { error: !!error, data: data ? await data.arrayBuffer() : null };
       },
       validatePhoto: validateTikTokPhotoSource,
+      async validateVideo(source, byteSize) {
+        try {
+          const probe = await probeStoredVideo(source);
+          const validation = validateTikTokVideo(probe, byteSize);
+          if (!validation.ok) return validation;
+          return { ok: true, probe, validationVersion: VIDEO_VALIDATION_VERSION };
+        } catch (error) {
+          if (error instanceof VideoProbeMediaError) {
+            return { ok: false, error: "Stored video could not be decoded." };
+          }
+          return {
+            ok: false,
+            infrastructureError: true,
+            error: "Video validation infrastructure is unavailable.",
+          };
+        }
+      },
       async markInvalid(input) {
         const { data, error } = await supabase.from("media_assets").update({ validation_status: "INVALID" })
           .eq("id", input.assetId).eq("user_id", input.userId)
@@ -114,6 +145,11 @@ export async function POST(request: Request) {
           byte_size: input.byteSize,
           width: input.width,
           height: input.height,
+          duration_seconds: input.durationSeconds,
+          video_codec: input.videoCodec,
+          frame_rate: input.frameRate,
+          validation_version: input.validationVersion,
+          probe_metadata: input.probeMetadata,
           validation_status: "VALID",
         }).eq("id", input.assetId).eq("user_id", input.userId)
           .eq("validation_status", input.expectedValidationStatus).select("id");

@@ -113,7 +113,7 @@ export default function SchedulerLanding() {
           ))}
         </ol>
         <p className="mt-7 max-w-3xl text-sm leading-7 text-white/55">
-          Access to TikTok features, including any publishing capability, depends on TikTok's current requirements and the connected account. Read the <Link className="text-white underline decoration-[#62f5e6]/60 underline-offset-4 hover:text-[#d6fffa]" href="/scheduler/terms/">Scheduler Terms and Privacy summary</Link> before you continue.
+          Access to TikTok features, including any publishing capability, depends on TikTok&apos;s current requirements and the connected account. Read the <Link className="text-white underline decoration-[#62f5e6]/60 underline-offset-4 hover:text-[#d6fffa]" href="/scheduler/terms/">Scheduler Terms and Privacy summary</Link> before you continue.
         </p>
       </section>
     </section>

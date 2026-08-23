@@ -7,6 +7,12 @@ alter table public.scheduler_users
   add column if not exists suspension_reason text,
   add column if not exists deletion_requested_at timestamptz;
 
+alter table public.media_assets
+  add column if not exists video_codec text,
+  add column if not exists frame_rate numeric,
+  add column if not exists validation_version text,
+  add column if not exists probe_metadata jsonb;
+
 alter table public.scheduled_posts
   add column if not exists terminal_at timestamptz,
   add column if not exists retry_eligible boolean not null default false,

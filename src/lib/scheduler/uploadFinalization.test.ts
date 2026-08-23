@@ -47,6 +47,20 @@ function fakeAdapter(overrides: Partial<UploadFinalizationAdapter> = {}) {
 }
 
 const input = { userId: "user-1", assetId: "11111111-1111-4111-8111-111111111111", checksum: "checksum-1" };
+const videoAsset: UploadFinalizationAsset = {
+  ...asset,
+  storagePath: "user-1/11111111-1111-4111-8111-111111111111/upload.mp4",
+  kind: "VIDEO",
+  mimeType: "video/mp4",
+};
+const videoProbe = {
+  formatName: "mov,mp4,m4a,3gp,3g2,mj2",
+  codecName: "h264",
+  width: 1080,
+  height: 1920,
+  frameRate: 30,
+  durationSeconds: 60,
+};
 
 // Mutation target: sending malformed IDs to the database must turn caller input into a false infrastructure outage.
 test("upload finalization rejects malformed asset IDs before the adapter", async () => {
@@ -171,4 +185,70 @@ test("upload finalization stores validated photo metadata after all checks", asy
     height: 10,
     expectedValidationStatus: "PENDING",
   } });
+});
+
+// Mutation target: trusting stored browser metadata must mark a video VALID without downloading and probing its bytes.
+test("upload finalization stores probe metadata only after stored-video validation succeeds", async () => {
+  const { adapter, calls } = fakeAdapter({
+    findOwnedAsset: async () => ({ data: videoAsset, error: false }),
+    inspectObject: async () => ({ data: { byteSize: 3, mimeType: "video/quicktime" }, error: false }),
+    async validateVideo() {
+      calls.push({ name: "validateVideo" });
+      return { ok: true, probe: videoProbe, validationVersion: "tiktok-video-beta-v1" };
+    },
+  });
+
+  assert.equal((await finalizeSchedulerUpload(input, adapter)).ok, true);
+  assert.deepEqual(calls.map((call) => call.name), [
+    "downloadObject", "validateVideo", "markValid",
+  ]);
+  assert.deepEqual(calls.at(-1), { name: "markValid", input: {
+    userId: "user-1",
+    assetId: input.assetId,
+    checksum: "checksum-1",
+    mimeType: "video/mp4",
+    byteSize: 3,
+    width: 1080,
+    height: 1920,
+    durationSeconds: 60,
+    videoCodec: "h264",
+    frameRate: 30,
+    validationVersion: "tiktok-video-beta-v1",
+    probeMetadata: videoProbe,
+    expectedValidationStatus: "PENDING",
+  } });
+});
+
+// Mutation target: classifying a temp-file or probe-infrastructure failure as bad media must persist INVALID.
+test("upload finalization leaves video PENDING on probe infrastructure failure", async () => {
+  const { adapter, calls } = fakeAdapter({
+    findOwnedAsset: async () => ({ data: videoAsset, error: false }),
+    inspectObject: async () => ({ data: { byteSize: 3, mimeType: "video/mp4" }, error: false }),
+    async validateVideo() {
+      return { ok: false, infrastructureError: true, error: "Video validation infrastructure is unavailable." };
+    },
+  });
+
+  assert.deepEqual(await finalizeSchedulerUpload(input, adapter), {
+    ok: false, status: 502, error: "Unable to probe stored video.",
+  });
+  assert.equal(calls.some((call) => call.name === "markInvalid"), false);
+  assert.equal(calls.some((call) => call.name === "markValid"), false);
+});
+
+// Mutation target: a proven unsupported stored codec must stay PENDING or be marked VALID if the video branch is bypassed.
+test("upload finalization marks proven stored-video policy failures invalid", async () => {
+  const { adapter, calls } = fakeAdapter({
+    findOwnedAsset: async () => ({ data: videoAsset, error: false }),
+    inspectObject: async () => ({ data: { byteSize: 3, mimeType: "video/mp4" }, error: false }),
+    async validateVideo() {
+      return { ok: false, error: "Video codec must be H.264." };
+    },
+  });
+
+  assert.deepEqual(await finalizeSchedulerUpload(input, adapter), {
+    ok: false, status: 400, error: "Stored media did not pass validation.",
+  });
+  assert.equal(calls.filter((call) => call.name === "markInvalid").length, 1);
+  assert.equal(calls.some((call) => call.name === "markValid"), false);
 });

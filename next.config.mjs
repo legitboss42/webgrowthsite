@@ -50,7 +50,10 @@ const securityHeaders = [
 const nextConfig = {
   reactStrictMode: true,
   trailingSlash: true,
-  serverExternalPackages: ["edge-tts-universal", "ws", "bufferutil", "utf-8-validate"],
+  serverExternalPackages: ["edge-tts-universal", "ffprobe-static", "ws", "bufferutil", "utf-8-validate"],
+  outputFileTracingIncludes: {
+    "/api/scheduler/uploads": ["./node_modules/ffprobe-static/bin/linux/x64/ffprobe"],
+  },
   // Use the default `.next` output. Cleaning is handled explicitly through `dev:clean`.
   distDir: ".next",
   images: {
