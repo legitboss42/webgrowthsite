@@ -9,6 +9,7 @@ import {
   SCHEDULER_OAUTH_STATE_COOKIE,
 } from "@/lib/scheduler/oauth";
 import { readSchedulerSession, SCHEDULER_SESSION_COOKIE } from "@/lib/scheduler/session";
+import { createSupabaseSchedulerStore } from "@/lib/scheduler/store";
 
 export const dynamic = "force-dynamic";
 
@@ -21,7 +22,23 @@ export async function GET(request: Request) {
   } catch {
     session = null;
   }
-  if (!canStartSchedulerOAuth(getSchedulerLaunchState(), session?.openId || null)) {
+  let account = null;
+  if (session) {
+    try {
+      const store = await createSupabaseSchedulerStore();
+      const user = await store.getUser(session.userId);
+      if (user) {
+        account = {
+          status: typeof user.status === "string" ? user.status : null,
+          suspendedAt: typeof user.suspended_at === "string" ? user.suspended_at : null,
+          deletionRequestedAt: typeof user.deletion_requested_at === "string" ? user.deletion_requested_at : null,
+        };
+      }
+    } catch {
+      account = null;
+    }
+  }
+  if (!canStartSchedulerOAuth(getSchedulerLaunchState(), session?.openId || null, account)) {
     const response = NextResponse.json({ error: "Scheduler enrollment is not available yet." }, { status: 503 });
     response.headers.set("Cache-Control", "no-store");
     return response;

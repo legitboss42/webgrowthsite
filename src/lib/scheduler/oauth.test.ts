@@ -56,14 +56,26 @@ test("registered TikTok callback relays matching scheduler OAuth state", () => {
   );
 });
 
+const activeAccount = { status: "ACTIVE", suspendedAt: null, deletionRequestedAt: null } as const;
+
 test("disabled public enrollment denies unauthenticated OAuth before state is created", () => {
-  assert.equal(canStartSchedulerOAuth({ publicEnrollment: false }, null), false);
+  assert.equal(canStartSchedulerOAuth({ publicEnrollment: false }, null, null), false);
 });
 
 test("configured Sandbox targets retain an explicit server-side OAuth allowance", () => {
   process.env.SCHEDULER_SANDBOX_TIKTOK_OPEN_IDS = "sandbox-owner,sandbox-target";
-  assert.equal(canStartSchedulerOAuth({ publicEnrollment: false }, "sandbox-target"), true);
-  assert.equal(canStartSchedulerOAuth({ publicEnrollment: false }, "sandbox"), false);
+  assert.equal(canStartSchedulerOAuth({ publicEnrollment: false }, "sandbox-target", activeAccount), true);
+  assert.equal(canStartSchedulerOAuth({ publicEnrollment: false }, "sandbox", activeAccount), false);
+});
+
+test("public enrollment permits a genuinely new creator without a scheduler session", () => {
+  assert.equal(canStartSchedulerOAuth({ publicEnrollment: true }, null, null), true);
+});
+
+test("suspended and deletion-requested signed sessions cannot start OAuth", () => {
+  assert.equal(canStartSchedulerOAuth({ publicEnrollment: true }, "creator-1", { status: "SUSPENDED", suspendedAt: null, deletionRequestedAt: null }), false);
+  assert.equal(canStartSchedulerOAuth({ publicEnrollment: true }, "creator-1", { status: "ACTIVE", suspendedAt: null, deletionRequestedAt: "2026-08-23T00:00:00.000Z" }), false);
+  assert.equal(canStartSchedulerOAuth({ publicEnrollment: false }, "sandbox-target", { status: "ACTIVE", suspendedAt: "2026-08-23T00:00:00.000Z", deletionRequestedAt: null }), false);
 });
 
 test("authorize route returns 503 before creating OAuth state when enrollment is unavailable", async () => {
@@ -71,6 +83,7 @@ test("authorize route returns 503 before creating OAuth state when enrollment is
     readFile(new URL("../../app/api/scheduler/auth/authorize/route.ts", import.meta.url), "utf8"),
   );
   assert.match(source, /canStartSchedulerOAuth/);
+  assert.match(source, /getUser\(session\.userId\)/);
   assert.match(source, /status:\s*503/);
   assert.ok(source.indexOf("canStartSchedulerOAuth") < source.indexOf("createSchedulerOAuthState"));
 });

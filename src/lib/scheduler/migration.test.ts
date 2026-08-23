@@ -74,8 +74,31 @@ test("public scheduler beta migration defines legal, retry, and worker contracts
     "next_retry_at",
     "reserve_public_scheduler_slot",
     "create_safe_publish_retry",
+    "save_active_tiktok_connection",
     "scheduler_worker_health",
   ]) assert.match(sql, new RegExp(expected));
+});
+
+test("public scheduler beta migration saves connection tokens only for the exact active user", () => {
+  const sql = readFileSync(publicSchedulerBetaMigrationPath, "utf8").toLowerCase();
+  const start = sql.indexOf("create or replace function public.save_active_tiktok_connection");
+  const end = sql.indexOf("revoke execute", start);
+  assert.notEqual(start, -1);
+  const connectionFunction = sql.slice(start, end);
+  assert.match(connectionFunction, /p_user_id uuid/);
+  assert.match(connectionFunction, /p_tiktok_open_id text/);
+  assert.match(connectionFunction, /returns boolean/);
+  assert.match(connectionFunction, /security definer/);
+  assert.match(connectionFunction, /set search_path = public/);
+  assert.match(connectionFunction, /user_record\.id = p_user_id/);
+  assert.match(connectionFunction, /user_record\.tiktok_open_id = p_tiktok_open_id/);
+  assert.match(connectionFunction, /user_record\.status = 'active'/);
+  assert.match(connectionFunction, /user_record\.suspended_at is null/);
+  assert.match(connectionFunction, /user_record\.deletion_requested_at is null/);
+  assert.match(connectionFunction, /for update/);
+  assert.match(connectionFunction, /insert into public\.tiktok_connections/);
+  assert.match(connectionFunction, /on conflict \(user_id\) do update/);
+  assert.match(sql, /revoke execute on function public\.save_active_tiktok_connection\(uuid, text, text, text\[\], timestamptz, timestamptz\) from public, anon, authenticated/);
 });
 
 test("public scheduler beta migration reserves a fixed quota by scheduling the owned post atomically", () => {

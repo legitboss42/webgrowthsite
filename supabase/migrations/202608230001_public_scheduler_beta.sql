@@ -240,7 +240,73 @@ begin
 end;
 $$;
 
+create or replace function public.save_active_tiktok_connection(
+  p_user_id uuid,
+  p_tiktok_open_id text,
+  p_encrypted_tokens text,
+  p_scopes text[],
+  p_access_expires_at timestamptz,
+  p_refresh_expires_at timestamptz
+)
+returns boolean
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if p_user_id is null
+    or p_tiktok_open_id is null
+    or p_encrypted_tokens is null
+    or p_scopes is null
+    or p_access_expires_at is null
+    or p_refresh_expires_at is null then
+    return false;
+  end if;
+
+  perform 1
+  from public.scheduler_users user_record
+  where user_record.id = p_user_id
+    and user_record.tiktok_open_id = p_tiktok_open_id
+    and user_record.status = 'ACTIVE'
+    and user_record.suspended_at is null
+    and user_record.deletion_requested_at is null
+  for update;
+
+  if not found then
+    return false;
+  end if;
+
+  insert into public.tiktok_connections (
+    user_id,
+    encrypted_tokens,
+    scopes,
+    access_expires_at,
+    refresh_expires_at,
+    reconnect_required
+  )
+  values (
+    p_user_id,
+    p_encrypted_tokens,
+    p_scopes,
+    p_access_expires_at,
+    p_refresh_expires_at,
+    false
+  )
+  on conflict (user_id) do update
+  set
+    encrypted_tokens = excluded.encrypted_tokens,
+    scopes = excluded.scopes,
+    access_expires_at = excluded.access_expires_at,
+    refresh_expires_at = excluded.refresh_expires_at,
+    reconnect_required = false,
+    updated_at = now();
+
+  return true;
+end;
+$$;
+
 revoke execute on function public.reserve_public_scheduler_slot(uuid, uuid, timestamptz, timestamptz) from public, anon, authenticated;
 revoke execute on function public.create_safe_publish_retry(uuid, uuid) from public, anon, authenticated;
+revoke execute on function public.save_active_tiktok_connection(uuid, text, text, text[], timestamptz, timestamptz) from public, anon, authenticated;
 
 commit;

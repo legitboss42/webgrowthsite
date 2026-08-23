@@ -2,9 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-
-const TERMS_VERSION = "2026-08-23";
-const PRIVACY_VERSION = "2026-08-23";
+import { CURRENT_SCHEDULER_PRIVACY_VERSION, CURRENT_SCHEDULER_TERMS_VERSION } from "@/lib/scheduler/legalVersions";
 
 export default function TermsAcceptance() {
   const router = useRouter();
@@ -24,8 +22,8 @@ export default function TermsAcceptance() {
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
           action: "accept",
-          termsVersion: TERMS_VERSION,
-          privacyVersion: PRIVACY_VERSION,
+          termsVersion: CURRENT_SCHEDULER_TERMS_VERSION,
+          privacyVersion: CURRENT_SCHEDULER_PRIVACY_VERSION,
           retentionAcknowledged: true,
           contentResponsibilityAcknowledged: true,
         }),

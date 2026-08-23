@@ -6,6 +6,7 @@ import {
   CURRENT_SCHEDULER_TERMS_VERSION,
   hasCurrentLegalAcceptance,
   isActiveSchedulerUser,
+  shouldPersistSchedulerConnection,
 } from "./legal";
 
 test("current scheduler legal acceptance requires both current versions", () => {
@@ -21,6 +22,12 @@ test("suspended and deletion-requested users cannot enter the active scheduler d
   assert.equal(isActiveSchedulerUser({ status: "SUSPENDED", suspendedAt: null, deletionRequestedAt: null }), false);
   assert.equal(isActiveSchedulerUser({ status: "ACTIVE", suspendedAt: "2026-08-23T00:00:00.000Z", deletionRequestedAt: null }), false);
   assert.equal(isActiveSchedulerUser({ status: "ACTIVE", suspendedAt: null, deletionRequestedAt: "2026-08-23T00:00:00.000Z" }), false);
+});
+
+test("unknown callback user status fails closed before token persistence", () => {
+  assert.equal(shouldPersistSchedulerConnection({ status: null, suspendedAt: null, deletionRequestedAt: null }), false);
+  assert.equal(shouldPersistSchedulerConnection({ status: "UNKNOWN", suspendedAt: null, deletionRequestedAt: null }), false);
+  assert.equal(shouldPersistSchedulerConnection({ status: "ACTIVE", suspendedAt: null, deletionRequestedAt: null }), true);
 });
 
 test("dashboard renders legal acceptance before creator actions", async () => {

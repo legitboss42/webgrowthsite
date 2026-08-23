@@ -14,6 +14,7 @@ export type UpsertSchedulerUserInput = {
 
 export type SaveTikTokConnectionInput = {
   userId: string;
+  tiktokOpenId: string;
   encryptedTokens: string;
   scopes: string[];
   accessExpiresAt: string;
@@ -53,15 +54,15 @@ export function createSchedulerStore(client: SchedulerDatabaseClient) {
         p_limit: Math.max(1, Math.min(25, Math.floor(limit))),
       });
     },
-    saveConnection(input: SaveTikTokConnectionInput) {
-      return client.insert("tiktok_connections", {
-        user_id: input.userId,
-        encrypted_tokens: input.encryptedTokens,
-        scopes: input.scopes,
-        access_expires_at: input.accessExpiresAt,
-        refresh_expires_at: input.refreshExpiresAt,
-        reconnect_required: false,
-      });
+    async saveActiveConnection(input: SaveTikTokConnectionInput) {
+      return (await client.rpc("save_active_tiktok_connection", {
+        p_user_id: input.userId,
+        p_tiktok_open_id: input.tiktokOpenId,
+        p_encrypted_tokens: input.encryptedTokens,
+        p_scopes: input.scopes,
+        p_access_expires_at: input.accessExpiresAt,
+        p_refresh_expires_at: input.refreshExpiresAt,
+      })) === true;
     },
     reserveDailySlot(userId: string, nowIso: string, limit = 3) {
       return client.rpc("reserve_tiktok_daily_slot", {

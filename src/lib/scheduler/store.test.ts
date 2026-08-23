@@ -15,7 +15,7 @@ function fakeClient() {
     },
     async rpc(name, input) {
       calls.push({ kind: "rpc", name, input });
-      return [];
+      return name === "save_active_tiktok_connection";
     },
     async update(table, id, input) {
       calls.push({ kind: "update", name: table, input: { id, ...input } });
@@ -92,18 +92,30 @@ test("publish IDs are persisted on the existing attempt", async () => {
   });
 });
 
-test("TikTok connections are persisted as encrypted server records", async () => {
+test("TikTok connections are persisted only by the active-user database RPC", async () => {
   const { calls, client } = fakeClient();
   const store = createSchedulerStore(client);
-  await store.saveConnection({
+  const saved = await store.saveActiveConnection({
     userId: "user-1",
+    tiktokOpenId: "open-1",
     encryptedTokens: "sealed",
     scopes: ["user.info.basic", "video.publish"],
     accessExpiresAt: "2026-08-22T00:00:00.000Z",
     refreshExpiresAt: "2027-08-22T00:00:00.000Z",
   });
-  assert.equal(calls[0]?.name, "tiktok_connections");
-  assert.equal((calls[0]?.input as Record<string, unknown>).encrypted_tokens, "sealed");
+  assert.equal(saved, true);
+  assert.deepEqual(calls[0], {
+    kind: "rpc",
+    name: "save_active_tiktok_connection",
+    input: {
+      p_user_id: "user-1",
+      p_tiktok_open_id: "open-1",
+      p_encrypted_tokens: "sealed",
+      p_scopes: ["user.info.basic", "video.publish"],
+      p_access_expires_at: "2026-08-22T00:00:00.000Z",
+      p_refresh_expires_at: "2027-08-22T00:00:00.000Z",
+    },
+  });
 });
 
 test("due jobs are claimed only through the atomic database RPC", async () => {
