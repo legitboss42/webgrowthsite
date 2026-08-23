@@ -65,6 +65,14 @@ function renderedMap(source: string, collection: string) {
   return balancedBlock(source, openAt, "(", ")");
 }
 
+function assertLinkElement(source: string, href: string, label: string) {
+  const escape = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  assert.match(
+    source,
+    new RegExp(`<Link\\b[^>]*href="${escape(href)}"[^>]*>\\s*${escape(label)}\\s*<\\/Link>`),
+  );
+}
+
 test("closed sign-in branch explains approval and cannot initiate TikTok OAuth", async () => {
   const source = await readFile(signInPage, "utf8");
   const { falsy: closed } = ternaryBranches(source, "launch.publicEnrollment");
@@ -86,11 +94,9 @@ test("landing enrollment CTA switches from terms to sign-in across launch branch
   const source = await readFile(schedulerPage, "utf8");
   const { truthy: open, falsy: closed } = ternaryBranches(source, "launch.publicEnrollment");
 
-  assert.match(closed, /href="\/scheduler\/terms\/"/);
-  assert.match(closed, />\s*TikTok access opening after approval\s*</);
+  assertLinkElement(closed, "/scheduler/terms/", "TikTok access opening after approval");
   assert.doesNotMatch(closed, /\/scheduler\/sign-in\/|Continue with TikTok/);
-  assert.match(open, /href="\/scheduler\/sign-in\/"/);
-  assert.match(open, />\s*Continue with TikTok\s*</);
+  assertLinkElement(open, "/scheduler/sign-in/", "Continue with TikTok");
   assert.doesNotMatch(open, /TikTok access opening after approval/);
 });
 
