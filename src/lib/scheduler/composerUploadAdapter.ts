@@ -17,11 +17,14 @@ function record(value: unknown): Record<string, unknown> {
   return value !== null && typeof value === "object" ? value as Record<string, unknown> : {};
 }
 
-function safeReason(payload: unknown, fallback: string) {
-  const reason = record(payload).error;
+function safeStringReason(reason: unknown, fallback: string) {
   if (typeof reason !== "string") return fallback;
   const clean = reason.replace(/[\u0000-\u001f\u007f]/g, " ").trim();
   return clean && clean.length <= 240 ? clean : fallback;
+}
+
+function safeReason(payload: unknown, fallback: string) {
+  return safeStringReason(record(payload).error, fallback);
 }
 
 export function createSchedulerMediaUploadAdapter(dependencies: Dependencies) {
@@ -49,10 +52,15 @@ export function createSchedulerMediaUploadAdapter(dependencies: Dependencies) {
       file,
       contentType: file.type,
     });
-    if (uploaded.error) throw new Error(uploaded.error.message || "Storage upload failed.");
+    if (uploaded.error) throw new Error(safeStringReason(uploaded.error.message, "Storage upload failed."));
 
-    const digest = await dependencies.sha256(await file.arrayBuffer());
-    const checksum = Array.from(digest, (value) => value.toString(16).padStart(2, "0")).join("");
+    let checksum: string;
+    try {
+      const digest = await dependencies.sha256(await file.arrayBuffer());
+      checksum = Array.from(digest, (value) => value.toString(16).padStart(2, "0")).join("");
+    } catch {
+      throw new Error("Unable to checksum the media file.");
+    }
     const finalizeResponse = await dependencies.request("/api/scheduler/uploads/", {
       method: "POST",
       headers: { "content-type": "application/json" },

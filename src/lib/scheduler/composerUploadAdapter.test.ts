@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { createSchedulerMediaUploadAdapter } from "./composerUploadAdapter";
+import { runMediaPostComposer } from "./composerFlow";
 
 const file = {
   name: "launch.jpg",
@@ -61,6 +62,33 @@ test("media upload adapter stops on storage failure", async () => {
   assert.deepEqual(calls.map((call) => call.name), ["request", "uploadSigned"]);
 });
 
+// Mutation target: throwing a raw provider message must leak oversized or sensitive-looking storage details.
+test("media upload adapter bounds storage-provider error strings", async () => {
+  const sensitiveMessage = `storage-secret=service-role-key ${"x".repeat(300)}`;
+  const { uploadFile } = harness({
+    uploadSigned: async () => ({ error: { message: sensitiveMessage } }),
+  });
+  await assert.rejects(() => uploadFile(file), /^Error: Storage upload failed\.$/);
+});
+
+// Mutation target: allowing arrayBuffer/checksum throws to escape must leak internals, and continuing must finalize/create a post.
+test("media upload adapter sanitizes checksum-stage failures and stops before finalize or post creation", async () => {
+  const brokenFile = {
+    ...file,
+    async arrayBuffer(): Promise<ArrayBuffer> { throw new Error(`local-path=C:\\private\\token ${"y".repeat(300)}`); },
+  };
+  const { uploadFile, calls } = harness();
+  let postCalls = 0;
+  await assert.rejects(() => runMediaPostComposer({
+    files: [brokenFile], title: "Launch", caption: "Ready",
+  }, {
+    uploadFile,
+    async createPost() { postCalls += 1; return { postId: "post-1" }; },
+  }), /^Error: Unable to upload launch\.jpg: Unable to checksum the media file\.$/);
+  assert.deepEqual(calls.map((call) => call.name), ["request", "uploadSigned"]);
+  assert.equal(postCalls, 0);
+});
+
 // Mutation target: accepting failed finalization must return an asset ID that is not VALID.
 test("media upload adapter rejects finalize failure without leaking non-string details", async () => {
   const { uploadFile } = harness({
@@ -73,4 +101,3 @@ test("media upload adapter rejects finalize failure without leaking non-string d
   });
   await assert.rejects(() => uploadFile(file), /^Error: Media validation failed\.$/);
 });
-
