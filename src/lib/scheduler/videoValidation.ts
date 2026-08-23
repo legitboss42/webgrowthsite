@@ -13,9 +13,10 @@ const MAX_VIDEO_FPS = 60;
 const MAX_VIDEO_DURATION_SECONDS = 600;
 const FFPROBE_OUTPUT_LIMIT = 5 * 1024 * 1024;
 const FFPROBE_TIMEOUT_MS = 30_000;
-const NON_MP4_ISO_BMFF_BRANDS = new Set([
-  "avif", "avis", "heic", "heix", "hevc", "hevx", "heim", "heis", "hevm", "hevs",
-  "mif1", "msf1", "miaf", "mihb", "miha", "mif2", "msf2", "mjp2", "mj2s",
+const APPROVED_MP4_BRANDS = new Set([
+  "isom", "iso2", "iso3", "iso4", "iso5", "iso6", "iso7", "iso8", "iso9",
+  "mp41", "mp42", "avc1", "hvc1", "hev1", "M4V ", "M4VH", "M4VP",
+  "F4V ", "F4P ", "MSNV",
 ]);
 const PROVEN_DECODE_ERRORS = [
   "invalid data found when processing input",
@@ -146,23 +147,67 @@ export function parseFFprobeOutput(raw: unknown, evidence: VideoContainerEvidenc
 
 export function parseVideoContainerSignature(source: Uint8Array): VideoContainerEvidence {
   const header = Buffer.from(source.buffer, source.byteOffset, source.byteLength);
-  if (header.length >= 12 && header.subarray(4, 8).toString("ascii") === "ftyp") {
-    const majorBrand = header.subarray(8, 12).toString("ascii");
-    if (majorBrand === "qt  ") return { container: "MOV", mimeType: "video/quicktime", majorBrand };
-    const normalizedBrand = majorBrand.toLowerCase();
-    if (!normalizedBrand.startsWith("3gp") && !normalizedBrand.startsWith("3g2") && !NON_MP4_ISO_BMFF_BRANDS.has(normalizedBrand)) {
-      return { container: "MP4", mimeType: "video/mp4", majorBrand };
+  if (header.length >= 16 && header.subarray(4, 8).toString("ascii") === "ftyp") {
+    const boxSize = header.readUInt32BE(0);
+    if (boxSize < 16 || boxSize > header.length || (boxSize - 16) % 4 !== 0) {
+      throw new VideoProbeMediaError("Video container must be MP4, MOV, or WebM.");
     }
-    throw new VideoProbeMediaError("Video container must be MP4, MOV, or WebM.");
+    const majorBrand = header.subarray(8, 12).toString("ascii");
+    const brands = [majorBrand];
+    for (let offset = 16; offset < boxSize; offset += 4) {
+      brands.push(header.subarray(offset, offset + 4).toString("ascii"));
+    }
+    if (brands.some((brand) => brand !== "qt  " && !APPROVED_MP4_BRANDS.has(brand))) {
+      throw new VideoProbeMediaError("Video container must be MP4, MOV, or WebM.");
+    }
+    return brands.includes("qt  ")
+      ? { container: "MOV", mimeType: "video/quicktime", majorBrand }
+      : { container: "MP4", mimeType: "video/mp4", majorBrand };
   }
-  if (
-    header.length >= 4
-    && header[0] === 0x1a && header[1] === 0x45 && header[2] === 0xdf && header[3] === 0xa3
-    && header.toString("latin1").toLowerCase().includes("webm")
-  ) {
+  if (hasWebmDocumentType(header)) {
     return { container: "WEBM", mimeType: "video/webm", majorBrand: null };
   }
   throw new VideoProbeMediaError("Video container must be MP4, MOV, or WebM.");
+}
+
+function readEbmlVint(source: Uint8Array, offset: number, preserveMarker: boolean) {
+  const first = source[offset];
+  if (first === undefined || first === 0) return null;
+  let width = 1;
+  let marker = 0x80;
+  while (width <= 8 && (first & marker) === 0) {
+    width += 1;
+    marker >>= 1;
+  }
+  if (width > 8 || offset + width > source.length) return null;
+  let value = preserveMarker ? first : first & (marker - 1);
+  for (let index = 1; index < width; index += 1) value = value * 256 + source[offset + index]!;
+  const unknownSize = !preserveMarker && value === (2 ** (7 * width)) - 1;
+  return unknownSize ? null : { width, value };
+}
+
+function hasWebmDocumentType(header: Uint8Array): boolean {
+  if (header.length < 5 || Buffer.from(header.subarray(0, 4)).toString("hex") !== "1a45dfa3") return false;
+  const headerSize = readEbmlVint(header, 4, false);
+  if (!headerSize) return false;
+  let offset = 4 + headerSize.width;
+  const end = offset + headerSize.value;
+  if (end > header.length) return false;
+  while (offset < end) {
+    const id = readEbmlVint(header, offset, true);
+    if (!id) return false;
+    offset += id.width;
+    const size = readEbmlVint(header, offset, false);
+    if (!size) return false;
+    offset += size.width;
+    const valueEnd = offset + size.value;
+    if (valueEnd > end) return false;
+    if (id.value === 0x4282) {
+      return Buffer.from(header.subarray(offset, valueEnd)).toString("ascii") === "webm";
+    }
+    offset = valueEnd;
+  }
+  return false;
 }
 
 export async function detectVideoContainer(path: string): Promise<VideoContainerEvidence> {
@@ -225,18 +270,33 @@ export async function probeVideo(
 }
 
 export async function probeStoredVideoStream(
-  source: AsyncIterable<Uint8Array>,
+  source: ReadableStream<Uint8Array>,
   expectedByteSize: number,
   dependencies: { probe?: (path: string) => Promise<VideoProbe>; maximumBytes?: number } = {},
 ): Promise<VideoProbe> {
   const maximumBytes = dependencies.maximumBytes ?? MAX_VIDEO_BYTES;
-  const directory = await mkdtemp(join(tmpdir(), "scheduler-video-validation-"));
-  const temporaryPath = join(directory, `${crypto.randomUUID()}.media`);
+  let directory: string | null = null;
+  let reader: ReadableStreamDefaultReader<Uint8Array> | null = null;
   let handle: Awaited<ReturnType<typeof open>> | null = null;
+  let streamComplete = false;
   try {
+    reader = source.getReader();
+    directory = await mkdtemp(join(tmpdir(), "scheduler-video-validation-"));
+    const temporaryPath = join(directory, `${crypto.randomUUID()}.media`);
     handle = await open(temporaryPath, "wx");
     let byteSize = 0;
-    for await (const chunk of source) {
+    while (true) {
+      let result: ReadableStreamReadResult<Uint8Array>;
+      try {
+        result = await reader.read();
+      } catch {
+        throw new VideoProbeInfrastructureError();
+      }
+      if (result.done) {
+        streamComplete = true;
+        break;
+      }
+      const chunk = result.value;
       if (!(chunk instanceof Uint8Array)) throw new VideoProbeInfrastructureError();
       byteSize += chunk.byteLength;
       if (byteSize > maximumBytes) throw new VideoProbeMediaError("Video size must not exceed 500 MB.");
@@ -248,9 +308,14 @@ export async function probeStoredVideoStream(
       throw new VideoProbeMediaError("Stored video byte size does not match the reserved upload.");
     }
     return await (dependencies.probe || probeVideo)(temporaryPath);
+  } catch (error) {
+    if (error instanceof VideoProbeMediaError || error instanceof VideoProbeInfrastructureError) throw error;
+    throw new VideoProbeInfrastructureError();
   } finally {
+    if (reader && !streamComplete) await reader.cancel().catch(() => undefined);
+    reader?.releaseLock();
     await handle?.close().catch(() => undefined);
-    await rm(directory, { recursive: true, force: true });
+    if (directory) await rm(directory, { recursive: true, force: true });
   }
 }
 

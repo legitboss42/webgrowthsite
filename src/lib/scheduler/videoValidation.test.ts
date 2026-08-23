@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
+import { tmpdir } from "node:os";
 import test from "node:test";
 import {
   parseFFprobeOutput,
@@ -29,16 +30,36 @@ const passingProbe: VideoProbe = {
   codecName: "h264", width: 1080, height: 1920, frameRate: 30, durationSeconds: 60,
 };
 
-test("stored byte signatures distinguish MP4, MOV, and WebM without a filename or browser MIME", () => {
-  const iso = (brand: string) => Buffer.concat([Buffer.from([0, 0, 0, 20]), Buffer.from("ftyp"), Buffer.from(brand), Buffer.alloc(8)]);
-  assert.deepEqual(parseVideoContainerSignature(iso("isom")), evidence.MP4);
-  assert.deepEqual(parseVideoContainerSignature(iso("XMP4")), { ...evidence.MP4, majorBrand: "XMP4" });
-  assert.deepEqual(parseVideoContainerSignature(iso("qt  ")), evidence.MOV);
-  assert.deepEqual(parseVideoContainerSignature(Buffer.concat([
-    Buffer.from([0x1a, 0x45, 0xdf, 0xa3, 0x01, 0x02]),
-    Buffer.from("webm"),
-  ])), evidence.WEBM);
-  assert.throws(() => parseVideoContainerSignature(iso("3gp5")), /Video container must be MP4, MOV, or WebM\./);
+function isoBmff(majorBrand: string, compatibleBrands: string[] = []) {
+  const size = 16 + compatibleBrands.length * 4;
+  const header = Buffer.alloc(size);
+  header.writeUInt32BE(size, 0);
+  header.write("ftyp", 4, "ascii");
+  header.write(majorBrand, 8, "ascii");
+  for (let index = 0; index < compatibleBrands.length; index += 1) {
+    header.write(compatibleBrands[index]!, 16 + index * 4, "ascii");
+  }
+  return header;
+}
+
+function ebmlDocType(docType: string, trailing = Buffer.alloc(0)) {
+  const documentType = Buffer.concat([Buffer.from([0x42, 0x82, 0x80 | docType.length]), Buffer.from(docType, "ascii")]);
+  return Buffer.concat([Buffer.from([0x1a, 0x45, 0xdf, 0xa3, 0x80 | documentType.length]), documentType, trailing]);
+}
+
+test("stored byte signatures structurally distinguish approved MP4, MOV, and WebM", () => {
+  assert.deepEqual(parseVideoContainerSignature(isoBmff("isom", ["iso2", "mp41"])), evidence.MP4);
+  assert.deepEqual(parseVideoContainerSignature(isoBmff("mp42", ["isom", "avc1"])), { ...evidence.MP4, majorBrand: "mp42" });
+  assert.deepEqual(parseVideoContainerSignature(isoBmff("qt  ")), evidence.MOV);
+  assert.deepEqual(parseVideoContainerSignature(ebmlDocType("webm")), evidence.WEBM);
+});
+
+test("crafted incidental container strings and unknown ISO-BMFF brands fail closed", () => {
+  assert.throws(() => parseVideoContainerSignature(isoBmff("XMP4", ["isom"])), /Video container must be MP4, MOV, or WebM\./);
+  assert.throws(() => parseVideoContainerSignature(isoBmff("isom", ["XMP4"])), /Video container must be MP4, MOV, or WebM\./);
+  assert.throws(() => parseVideoContainerSignature(isoBmff("3gp5", ["isom"])), /Video container must be MP4, MOV, or WebM\./);
+  assert.throws(() => parseVideoContainerSignature(ebmlDocType("matroska", Buffer.from("webm"))), /Video container must be MP4, MOV, or WebM\./);
+  assert.throws(() => parseVideoContainerSignature(Buffer.concat([Buffer.from([0x1a, 0x45, 0xdf, 0xa3, 0x84]), Buffer.from("webm")])), /Video container must be MP4, MOV, or WebM\./);
   assert.throws(() => parseVideoContainerSignature(Buffer.from("not-media")), /Video container must be MP4, MOV, or WebM\./);
 });
 
@@ -132,7 +153,14 @@ test("video size accepts exactly 500 MiB and rejects one byte more", () => {
   assert.deepEqual(validateTikTokVideo(passingProbe, 500 * 1024 * 1024 + 1, 60), { ok: false, error: "Video size must not exceed 500 MB." });
 });
 
-async function* chunks(...values: number[][]) { for (const value of values) yield new Uint8Array(value); }
+function chunks(...values: number[][]) {
+  return new ReadableStream<Uint8Array>({
+    start(controller) {
+      for (const value of values) controller.enqueue(new Uint8Array(value));
+      controller.close();
+    },
+  });
+}
 
 test("streamed stored video counts bytes, uses a neutral suffix, and cleans up after probe", async () => {
   let temporaryPath = "";
@@ -152,6 +180,26 @@ test("streamed stored video rejects byte mismatch and bounded overflow before pr
   await assert.rejects(probeStoredVideoStream(chunks([1, 2]), 3, dependencies), /Stored video byte size does not match the reserved upload\./);
   await assert.rejects(probeStoredVideoStream(chunks([1, 2], [3, 4]), 4, dependencies), /Video size must not exceed 500 MB\./);
   assert.equal(probes, 0);
+});
+
+test("stored video stream read errors are retryable and still clean temporary state", async () => {
+  const source = new ReadableStream<Uint8Array>({
+    start(controller) {
+      controller.enqueue(new Uint8Array([1]));
+      controller.error(new Error("storage transport /secret"));
+    },
+  });
+  await assert.rejects(probeStoredVideoStream(source, 1), VideoProbeInfrastructureError);
+});
+
+test("locked stream acquisition is retryable and does not leak a temp directory", async () => {
+  const source = chunks([1]);
+  const lock = source.getReader();
+  const schedulerDirectories = () => readdirSync(tmpdir()).filter((name) => name.startsWith("scheduler-video-validation-")).sort();
+  const before = schedulerDirectories();
+  await assert.rejects(probeStoredVideoStream(source, 1), VideoProbeInfrastructureError);
+  assert.deepEqual(schedulerDirectories(), before);
+  lock.releaseLock();
 });
 
 test("probe process uses fixed no-shell arguments and classifies timeout as infrastructure", async () => {

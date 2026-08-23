@@ -31,7 +31,12 @@ function fakeAdapter(overrides: Partial<UploadFinalizationAdapter> = {}) {
     },
     async downloadVideo(input) {
       calls.push({ name: "downloadVideo", input });
-      return { data: (async function* () { yield new Uint8Array([1, 2, 3]); })(), error: false };
+      return { data: new ReadableStream<Uint8Array>({
+        start(controller) {
+          controller.enqueue(new Uint8Array([1, 2, 3]));
+          controller.close();
+        },
+      }), error: false };
     },
     async getCreatorMaxDuration(input) {
       calls.push({ name: "getCreatorMaxDuration", input });

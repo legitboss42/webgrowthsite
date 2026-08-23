@@ -18,13 +18,13 @@ export type UploadFinalizationAdapter = {
   findOwnedAsset(input: { userId: string; assetId: string }): Promise<AdapterReadResult<UploadFinalizationAsset>>;
   inspectObject(input: { storagePath: string }): Promise<AdapterReadResult<{ byteSize: number; mimeType: string }>>;
   downloadPhoto(input: { storagePath: string }): Promise<AdapterReadResult<ArrayBuffer | Uint8Array>>;
-  downloadVideo(input: { storagePath: string }): Promise<AdapterReadResult<AsyncIterable<Uint8Array>>>;
+  downloadVideo(input: { storagePath: string }): Promise<AdapterReadResult<ReadableStream<Uint8Array>>>;
   getCreatorMaxDuration(input: { userId: string }): Promise<
     | { ok: true; maxDurationSeconds: number }
     | { ok: false; error: string }
   >;
   validatePhoto(source: ArrayBuffer | Uint8Array, mimeType: string, byteSize: number): Promise<TikTokPhotoSourceValidationResult>;
-  validateVideo: (source: AsyncIterable<Uint8Array>, byteSize: number, creatorMaxDuration: number) => Promise<
+  validateVideo: (source: ReadableStream<Uint8Array>, byteSize: number, creatorMaxDuration: number) => Promise<
     | { ok: true; probe: VideoProbe; validationVersion: string }
     | { ok: false; error: string; infrastructureError?: boolean }
   >;

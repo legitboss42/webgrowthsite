@@ -16,7 +16,7 @@ function fixture(overrides: Partial<CreatorVideoLimitAdapter> = {}) {
   const calls: string[] = [];
   const adapter: CreatorVideoLimitAdapter = {
     async readConnection() { calls.push("readConnection"); return { error: false, data: { encryptedTokens: "sealed", scopes: ["video.publish"], accessExpiresAt: currentRecord.expiresAt } }; },
-    async saveRefreshedConnection() { calls.push("saveRefreshedConnection"); return { error: false }; },
+    async saveRefreshedConnection() { calls.push("saveRefreshedConnection"); return { error: false, updatedCount: 1 }; },
     ...overrides,
   };
   return { adapter, calls };
@@ -51,7 +51,14 @@ test("missing connection, scope, invalid token, provider failure, and nonpositiv
 });
 
 test("expiring tokens refresh and persist before querying creator info", async () => {
-  const { adapter, calls } = fixture();
+  let persisted: unknown;
+  const { adapter, calls } = fixture({
+    async saveRefreshedConnection(input) {
+      calls.push("saveRefreshedConnection");
+      persisted = input;
+      return { error: false, updatedCount: 1 };
+    },
+  });
   const dependencyCalls: string[] = [];
   const result = await getCurrentCreatorVideoLimit("user-1", adapter, {
     ...dependencies, isExpiringSoon: () => true,
@@ -61,13 +68,22 @@ test("expiring tokens refresh and persist before querying creator info", async (
   assert.deepEqual(result, { ok: true, maxDurationSeconds: 300 });
   assert.deepEqual(calls, ["readConnection", "saveRefreshedConnection"]);
   assert.deepEqual(dependencyCalls, ["refresh", "query:new-access"]);
+  assert.deepEqual(persisted, {
+    userId: "user-1",
+    expectedEncryptedTokens: "sealed",
+    encryptedTokens: "refreshed-sealed",
+    accessExpiresAt: currentRecord.expiresAt,
+    refreshExpiresAt: currentRecord.refreshExpiresAt,
+    scopes: ["user.info.basic", "video.publish"],
+  });
 });
 
-test("refresh or refreshed-token persistence failure is retryable and skips creator query", async () => {
+test("refresh failure, persistence failure, or stale refresh CAS miss is retryable and skips creator query", async () => {
   let queried = 0;
   for (const [refresh, saveRefreshedConnection] of [
-    [async () => ({ ok: false as const, message: "secret" }), async () => ({ error: false })],
-    [async () => ({ ok: true as const, record: currentRecord }), async () => ({ error: true })],
+    [async () => ({ ok: false as const, message: "secret" }), async () => ({ error: false, updatedCount: 1 })],
+    [async () => ({ ok: true as const, record: currentRecord }), async () => ({ error: true, updatedCount: 0 })],
+    [async () => ({ ok: true as const, record: currentRecord }), async () => ({ error: false, updatedCount: 0 })],
   ] as const) {
     const { adapter } = fixture({ saveRefreshedConnection });
     const result = await getCurrentCreatorVideoLimit("user-1", adapter, {

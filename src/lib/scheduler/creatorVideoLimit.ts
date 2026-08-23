@@ -16,11 +16,12 @@ export type CreatorVideoLimitAdapter = {
   readConnection(userId: string): Promise<{ error: boolean; data: ConnectionData | null }>;
   saveRefreshedConnection(input: {
     userId: string;
+    expectedEncryptedTokens: string;
     encryptedTokens: string;
     accessExpiresAt: string;
     refreshExpiresAt: string;
     scopes: string[];
-  }): Promise<{ error: boolean }>;
+  }): Promise<{ error: boolean; updatedCount: number }>;
 };
 
 export type CreatorVideoLimitDependencies = {
@@ -76,12 +77,13 @@ export async function getCurrentCreatorVideoLimit(
       if (!refreshed.ok) return unavailable();
       const saved = await adapter.saveRefreshedConnection({
         userId,
+        expectedEncryptedTokens: connection.data.encryptedTokens,
         encryptedTokens: dependencies.encrypt(refreshed.record),
         accessExpiresAt: refreshed.record.expiresAt,
         refreshExpiresAt: refreshed.record.refreshExpiresAt,
         scopes: refreshed.record.scope.split(",").map((scope) => scope.trim()).filter(Boolean),
       });
-      if (saved.error) return unavailable();
+      if (saved.error || saved.updatedCount !== 1) return unavailable();
       active = refreshed.record;
     }
 

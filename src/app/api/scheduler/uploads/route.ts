@@ -6,6 +6,8 @@ import { getCurrentCreatorVideoLimit } from "@/lib/scheduler/creatorVideoLimit";
 import { assertVideoUploadEnabled, getSchedulerLaunchState } from "@/lib/scheduler/launch";
 import { isSameOriginMutation } from "@/lib/scheduler/policy";
 import { readSchedulerSession, SCHEDULER_SESSION_COOKIE } from "@/lib/scheduler/session";
+import { saveRefreshedCreatorConnection } from "@/lib/scheduler/creatorVideoLimitStore";
+import { downloadStoredVideoStream } from "@/lib/scheduler/storageVideoDownload";
 import { createSchedulerSupabaseClient } from "@/lib/scheduler/supabase";
 import type { MediaKind } from "@/lib/scheduler/types";
 import { finalizeSchedulerUpload } from "@/lib/scheduler/uploadFinalization";
@@ -117,11 +119,7 @@ export async function POST(request: Request) {
         return { error: !!error, data: data ? await data.arrayBuffer() : null };
       },
       async downloadVideo(input) {
-        const { data, error } = await supabase.storage.from("tiktok-scheduler-media").download(input.storagePath);
-        return {
-          error: !!error,
-          data: data ? data.stream() as unknown as AsyncIterable<Uint8Array> : null,
-        };
+        return downloadStoredVideoStream(supabase.storage.from("tiktok-scheduler-media"), input.storagePath);
       },
       async getCreatorMaxDuration(input) {
         return getCurrentCreatorVideoLimit(input.userId, {
@@ -140,13 +138,7 @@ export async function POST(request: Request) {
             };
           },
           async saveRefreshedConnection(refreshed) {
-            const { data, error } = await supabase.from("tiktok_connections").update({
-              encrypted_tokens: refreshed.encryptedTokens,
-              access_expires_at: refreshed.accessExpiresAt,
-              refresh_expires_at: refreshed.refreshExpiresAt,
-              scopes: refreshed.scopes,
-            }).eq("user_id", refreshed.userId).select("user_id");
-            return { error: !!error || data?.length !== 1 };
+            return saveRefreshedCreatorConnection(supabase, refreshed);
           },
         });
       },
