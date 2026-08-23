@@ -25,9 +25,20 @@ function fakeAdapter(overrides: Partial<UploadFinalizationAdapter> = {}) {
       calls.push({ name: "inspectObject", input });
       return { data: { byteSize: 3, mimeType: "image/jpeg" }, error: false };
     },
-    async downloadObject(input) {
-      calls.push({ name: "downloadObject", input });
+    async downloadPhoto(input) {
+      calls.push({ name: "downloadPhoto", input });
       return { data: new Uint8Array([1, 2, 3]), error: false };
+    },
+    async downloadVideo(input) {
+      calls.push({ name: "downloadVideo", input });
+      return { data: (async function* () { yield new Uint8Array([1, 2, 3]); })(), error: false };
+    },
+    async getCreatorMaxDuration(input) {
+      calls.push({ name: "getCreatorMaxDuration", input });
+      return { ok: true, maxDurationSeconds: 180 };
+    },
+    async validateVideo() {
+      return { ok: false, infrastructureError: true, error: "Video validation infrastructure is unavailable." };
     },
     async validatePhoto() {
       calls.push({ name: "validatePhoto" });
@@ -54,7 +65,10 @@ const videoAsset: UploadFinalizationAsset = {
   mimeType: "video/mp4",
 };
 const videoProbe = {
+  container: "MOV" as const,
+  mimeType: "video/quicktime",
   formatName: "mov,mp4,m4a,3gp,3g2,mj2",
+  majorBrand: "qt  ",
   codecName: "h264",
   width: 1080,
   height: 1920,
@@ -111,7 +125,7 @@ test("upload finalization returns retryable 502 without invalidation on object-i
 
 // Mutation target: treating storage-download outages as corrupt photos must set INVALID or return 400.
 test("upload finalization returns retryable 502 without invalidation on download errors", async () => {
-  const { adapter, calls } = fakeAdapter({ downloadObject: async () => ({ data: null, error: true }) });
+  const { adapter, calls } = fakeAdapter({ downloadPhoto: async () => ({ data: null, error: true }) });
   assert.deepEqual(await finalizeSchedulerUpload(input, adapter), {
     ok: false, status: 502, error: "Unable to download stored media for validation.",
   });
@@ -127,7 +141,7 @@ test("upload finalization checks invalidation-update errors", async () => {
   assert.deepEqual(await finalizeSchedulerUpload(input, adapter), {
     ok: false, status: 502, error: "Unable to record invalid media.",
   });
-  assert.equal(calls.some((call) => call.name === "downloadObject"), false);
+  assert.equal(calls.some((call) => call.name === "downloadPhoto"), false);
 });
 
 // Mutation target: treating a successful zero-row INVALID update as persisted must return a definitive 400.
@@ -191,22 +205,24 @@ test("upload finalization stores validated photo metadata after all checks", asy
 test("upload finalization stores probe metadata only after stored-video validation succeeds", async () => {
   const { adapter, calls } = fakeAdapter({
     findOwnedAsset: async () => ({ data: videoAsset, error: false }),
-    inspectObject: async () => ({ data: { byteSize: 3, mimeType: "video/quicktime" }, error: false }),
-    async validateVideo() {
+    inspectObject: async () => ({ data: { byteSize: 3, mimeType: "application/octet-stream" }, error: false }),
+    async validateVideo(_source, byteSize, creatorMaxDuration) {
       calls.push({ name: "validateVideo" });
+      assert.equal(byteSize, 3);
+      assert.equal(creatorMaxDuration, 180);
       return { ok: true, probe: videoProbe, validationVersion: "tiktok-video-beta-v1" };
     },
   });
 
   assert.equal((await finalizeSchedulerUpload(input, adapter)).ok, true);
   assert.deepEqual(calls.map((call) => call.name), [
-    "downloadObject", "validateVideo", "markValid",
+    "getCreatorMaxDuration", "downloadVideo", "validateVideo", "markValid",
   ]);
   assert.deepEqual(calls.at(-1), { name: "markValid", input: {
     userId: "user-1",
     assetId: input.assetId,
     checksum: "checksum-1",
-    mimeType: "video/mp4",
+    mimeType: "video/quicktime",
     byteSize: 3,
     width: 1080,
     height: 1920,
@@ -242,13 +258,58 @@ test("upload finalization marks proven stored-video policy failures invalid", as
     findOwnedAsset: async () => ({ data: videoAsset, error: false }),
     inspectObject: async () => ({ data: { byteSize: 3, mimeType: "video/mp4" }, error: false }),
     async validateVideo() {
-      return { ok: false, error: "Video codec must be H.264." };
+      return { ok: false, error: "Video codec must be H.264, H.265, VP8, or VP9." };
     },
   });
 
   assert.deepEqual(await finalizeSchedulerUpload(input, adapter), {
-    ok: false, status: 400, error: "Stored media did not pass validation.",
+    ok: false, status: 400, error: "Video codec must be H.264, H.265, VP8, or VP9.",
   });
   assert.equal(calls.filter((call) => call.name === "markInvalid").length, 1);
   assert.equal(calls.some((call) => call.name === "markValid"), false);
+});
+
+// Mutation target: falling back to a global duration ceiling must mark VALID without current creator info.
+test("upload finalization requires current creator duration before downloading video", async () => {
+  const { adapter, calls } = fakeAdapter({
+    findOwnedAsset: async () => ({ data: videoAsset, error: false }),
+    inspectObject: async () => ({ data: { byteSize: 3, mimeType: "video/mp4" }, error: false }),
+    async getCreatorMaxDuration() {
+      return { ok: false, error: "Current TikTok video duration limit is unavailable." };
+    },
+  });
+  assert.deepEqual(await finalizeSchedulerUpload(input, adapter), {
+    ok: false, status: 502, error: "Current TikTok video duration limit is unavailable.",
+  });
+  assert.equal(calls.some((call) => call.name === "downloadVideo"), false);
+  assert.equal(calls.some((call) => call.name === "markInvalid"), false);
+  assert.equal(calls.some((call) => call.name === "markValid"), false);
+});
+
+// Mutation target: returning a generic post-invalidation message must hide the actionable allowlisted property error.
+test("upload finalization returns the exact allowlisted range message only after INVALID persists", async () => {
+  const { adapter } = fakeAdapter({
+    findOwnedAsset: async () => ({ data: videoAsset, error: false }),
+    inspectObject: async () => ({ data: { byteSize: 3, mimeType: "video/mp4" }, error: false }),
+    async validateVideo() {
+      return { ok: false, error: "Video frame rate must be between 23 and 60 FPS." };
+    },
+  });
+  assert.deepEqual(await finalizeSchedulerUpload(input, adapter), {
+    ok: false, status: 400, error: "Video frame rate must be between 23 and 60 FPS.",
+  });
+});
+
+// Mutation target: surfacing arbitrary validator strings after invalidation must leak native/provider detail.
+test("upload finalization never returns a non-allowlisted validator error", async () => {
+  const { adapter } = fakeAdapter({
+    findOwnedAsset: async () => ({ data: videoAsset, error: false }),
+    inspectObject: async () => ({ data: { byteSize: 3, mimeType: "video/mp4" }, error: false }),
+    async validateVideo() {
+      return { ok: false, error: "ffprobe stderr /secret/path" };
+    },
+  });
+  assert.deepEqual(await finalizeSchedulerUpload(input, adapter), {
+    ok: false, status: 400, error: "Stored media did not pass validation.",
+  });
 });

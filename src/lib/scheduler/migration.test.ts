@@ -82,9 +82,10 @@ test("public scheduler beta migration defines legal, retry, and worker contracts
 // Mutation target: omitting any server-probed field must force video finalization to mark VALID without durable evidence.
 test("public scheduler beta migration adds durable stored-video validation evidence", () => {
   const sql = readFileSync(publicSchedulerBetaMigrationPath, "utf8").toLowerCase();
-  for (const expected of ["video_codec", "frame_rate", "validation_version", "probe_metadata"]) {
-    assert.match(sql, new RegExp(`add column if not exists ${expected}`));
-  }
+  assert.match(sql, /add column if not exists video_codec text/);
+  assert.match(sql, /add column if not exists frame_rate numeric/);
+  assert.match(sql, /add column if not exists validation_version text/);
+  assert.match(sql, /add column if not exists probe_metadata jsonb/);
 });
 
 test("public scheduler beta migration saves connection tokens only for the exact active user", () => {

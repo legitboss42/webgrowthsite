@@ -17,9 +17,14 @@ export type UploadFinalizationAsset = {
 export type UploadFinalizationAdapter = {
   findOwnedAsset(input: { userId: string; assetId: string }): Promise<AdapterReadResult<UploadFinalizationAsset>>;
   inspectObject(input: { storagePath: string }): Promise<AdapterReadResult<{ byteSize: number; mimeType: string }>>;
-  downloadObject(input: { storagePath: string }): Promise<AdapterReadResult<ArrayBuffer | Uint8Array>>;
+  downloadPhoto(input: { storagePath: string }): Promise<AdapterReadResult<ArrayBuffer | Uint8Array>>;
+  downloadVideo(input: { storagePath: string }): Promise<AdapterReadResult<AsyncIterable<Uint8Array>>>;
+  getCreatorMaxDuration(input: { userId: string }): Promise<
+    | { ok: true; maxDurationSeconds: number }
+    | { ok: false; error: string }
+  >;
   validatePhoto(source: ArrayBuffer | Uint8Array, mimeType: string, byteSize: number): Promise<TikTokPhotoSourceValidationResult>;
-  validateVideo?: (source: ArrayBuffer | Uint8Array, byteSize: number) => Promise<
+  validateVideo: (source: AsyncIterable<Uint8Array>, byteSize: number, creatorMaxDuration: number) => Promise<
     | { ok: true; probe: VideoProbe; validationVersion: string }
     | { ok: false; error: string; infrastructureError?: boolean }
   >;
@@ -44,10 +49,28 @@ export type UploadFinalizationAdapter = {
 async function invalidMedia(
   adapter: UploadFinalizationAdapter,
   input: { userId: string; assetId: string },
+  validationError?: string,
 ) {
   const invalidated = await adapter.markInvalid({ ...input, expectedValidationStatus: "PENDING" });
   if (invalidated.error || invalidated.updatedCount !== 1) return { ok: false as const, status: 502, error: "Unable to record invalid media." };
-  return { ok: false as const, status: 400, error: "Stored media did not pass validation." };
+  const allowed = new Set([
+    "Video size must not exceed 500 MB.",
+    "Stored video byte size does not match the reserved upload.",
+    "Video container must be MP4, MOV, or WebM.",
+    "Video codec must be H.264, H.265, VP8, or VP9.",
+    "Video dimensions must be between 360 and 4096 pixels.",
+    "Video frame rate must be between 23 and 60 FPS.",
+    "Video duration is outside the allowed range.",
+    "Video duration exceeds the current TikTok creator limit.",
+    "Stored video could not be decoded.",
+  ]);
+  return {
+    ok: false as const,
+    status: 400,
+    error: validationError && allowed.has(validationError)
+      ? validationError
+      : "Stored media did not pass validation.",
+  };
 }
 
 export async function finalizeSchedulerUpload(
@@ -69,9 +92,18 @@ export async function finalizeSchedulerUpload(
     if (!objectResult.data) return { ok: false as const, status: 404, error: "Stored media was not found." };
     const stored = objectResult.data;
 
-    const metadataValidation = validateMediaMetadata({ kind: asset.kind, mimeType: stored.mimeType, byteSize: stored.byteSize });
-    if (!metadataValidation.ok || stored.byteSize !== asset.byteSize) {
-      return invalidMedia(adapter, { userId: input.userId, assetId: input.assetId });
+    if (asset.kind === "PHOTO") {
+      const metadataValidation = validateMediaMetadata({ kind: asset.kind, mimeType: stored.mimeType, byteSize: stored.byteSize });
+      if (!metadataValidation.ok || stored.byteSize !== asset.byteSize) {
+        return invalidMedia(adapter, { userId: input.userId, assetId: input.assetId });
+      }
+    } else {
+      if (!Number.isSafeInteger(stored.byteSize) || stored.byteSize <= 0 || stored.byteSize > 500 * 1024 * 1024) {
+        return invalidMedia(adapter, { userId: input.userId, assetId: input.assetId }, "Video size must not exceed 500 MB.");
+      }
+      if (stored.byteSize !== asset.byteSize) {
+        return invalidMedia(adapter, { userId: input.userId, assetId: input.assetId }, "Stored video byte size does not match the reserved upload.");
+      }
     }
 
     let validatedMetadata: {
@@ -85,7 +117,7 @@ export async function finalizeSchedulerUpload(
       probeMetadata?: VideoProbe;
     } = {};
     if (asset.kind === "PHOTO") {
-      const downloadResult = await adapter.downloadObject({ storagePath: asset.storagePath });
+      const downloadResult = await adapter.downloadPhoto({ storagePath: asset.storagePath });
       if (downloadResult.error || !downloadResult.data) {
         return { ok: false as const, status: 502, error: "Unable to download stored media for validation." };
       }
@@ -97,22 +129,27 @@ export async function finalizeSchedulerUpload(
         mimeType: photoValidation.mimeType,
       };
     } else {
-      const downloadResult = await adapter.downloadObject({ storagePath: asset.storagePath });
+      const creatorLimit = await adapter.getCreatorMaxDuration({ userId: input.userId });
+      if (!creatorLimit.ok || !Number.isFinite(creatorLimit.maxDurationSeconds) || creatorLimit.maxDurationSeconds <= 0) {
+        return { ok: false as const, status: 502, error: "Current TikTok video duration limit is unavailable." };
+      }
+      const downloadResult = await adapter.downloadVideo({ storagePath: asset.storagePath });
       if (downloadResult.error || !downloadResult.data) {
         return { ok: false as const, status: 502, error: "Unable to download stored media for validation." };
       }
-      if (!adapter.validateVideo) {
-        return { ok: false as const, status: 502, error: "Unable to probe stored video." };
-      }
-      const videoValidation = await adapter.validateVideo(downloadResult.data, stored.byteSize);
+      const videoValidation = await adapter.validateVideo(
+        downloadResult.data,
+        stored.byteSize,
+        creatorLimit.maxDurationSeconds,
+      );
       if (!videoValidation.ok) {
         if (videoValidation.infrastructureError) {
           return { ok: false as const, status: 502, error: "Unable to probe stored video." };
         }
-        return invalidMedia(adapter, { userId: input.userId, assetId: input.assetId });
+        return invalidMedia(adapter, { userId: input.userId, assetId: input.assetId }, videoValidation.error);
       }
       validatedMetadata = {
-        mimeType: "video/mp4",
+        mimeType: videoValidation.probe.mimeType,
         width: videoValidation.probe.width,
         height: videoValidation.probe.height,
         durationSeconds: videoValidation.probe.durationSeconds,

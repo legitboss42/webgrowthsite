@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { canMutateSchedulerContent, validateMediaMetadata } from "@/lib/scheduler/media";
 import { validateTikTokPhotoSource } from "@/lib/scheduler/mediaDelivery";
+import { getCurrentCreatorVideoLimit } from "@/lib/scheduler/creatorVideoLimit";
 import { assertVideoUploadEnabled, getSchedulerLaunchState } from "@/lib/scheduler/launch";
 import { isSameOriginMutation } from "@/lib/scheduler/policy";
 import { readSchedulerSession, SCHEDULER_SESSION_COOKIE } from "@/lib/scheduler/session";
@@ -9,8 +10,9 @@ import { createSchedulerSupabaseClient } from "@/lib/scheduler/supabase";
 import type { MediaKind } from "@/lib/scheduler/types";
 import { finalizeSchedulerUpload } from "@/lib/scheduler/uploadFinalization";
 import {
-  probeStoredVideo,
+  probeStoredVideoStream,
   validateTikTokVideo,
+  VideoProbeInfrastructureError,
   VideoProbeMediaError,
   VIDEO_VALIDATION_VERSION,
 } from "@/lib/scheduler/videoValidation";
@@ -110,25 +112,61 @@ export async function POST(request: Request) {
           } : null,
         };
       },
-      async downloadObject(input) {
+      async downloadPhoto(input) {
         const { data, error } = await supabase.storage.from("tiktok-scheduler-media").download(input.storagePath);
         return { error: !!error, data: data ? await data.arrayBuffer() : null };
       },
+      async downloadVideo(input) {
+        const { data, error } = await supabase.storage.from("tiktok-scheduler-media").download(input.storagePath);
+        return {
+          error: !!error,
+          data: data ? data.stream() as unknown as AsyncIterable<Uint8Array> : null,
+        };
+      },
+      async getCreatorMaxDuration(input) {
+        return getCurrentCreatorVideoLimit(input.userId, {
+          async readConnection(userId) {
+            const { data, error } = await supabase.from("tiktok_connections")
+              .select("encrypted_tokens,scopes,access_expires_at")
+              .eq("user_id", userId)
+              .maybeSingle();
+            return {
+              error: !!error,
+              data: data ? {
+                encryptedTokens: String(data.encrypted_tokens),
+                scopes: Array.isArray(data.scopes) ? data.scopes.map(String) : [],
+                accessExpiresAt: String(data.access_expires_at),
+              } : null,
+            };
+          },
+          async saveRefreshedConnection(refreshed) {
+            const { data, error } = await supabase.from("tiktok_connections").update({
+              encrypted_tokens: refreshed.encryptedTokens,
+              access_expires_at: refreshed.accessExpiresAt,
+              refresh_expires_at: refreshed.refreshExpiresAt,
+              scopes: refreshed.scopes,
+            }).eq("user_id", refreshed.userId).select("user_id");
+            return { error: !!error || data?.length !== 1 };
+          },
+        });
+      },
       validatePhoto: validateTikTokPhotoSource,
-      async validateVideo(source, byteSize) {
+      async validateVideo(source, byteSize, creatorMaxDuration) {
         try {
-          const probe = await probeStoredVideo(source);
-          const validation = validateTikTokVideo(probe, byteSize);
+          const probe = await probeStoredVideoStream(source, byteSize);
+          const validation = validateTikTokVideo(probe, byteSize, creatorMaxDuration);
           if (!validation.ok) return validation;
           return { ok: true, probe, validationVersion: VIDEO_VALIDATION_VERSION };
         } catch (error) {
           if (error instanceof VideoProbeMediaError) {
-            return { ok: false, error: "Stored video could not be decoded." };
+            return { ok: false, error: error.publicMessage };
           }
           return {
             ok: false,
             infrastructureError: true,
-            error: "Video validation infrastructure is unavailable.",
+            error: error instanceof VideoProbeInfrastructureError
+              ? error.message
+              : "Video validation infrastructure is unavailable.",
           };
         }
       },
