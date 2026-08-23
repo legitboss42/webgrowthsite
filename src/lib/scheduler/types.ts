@@ -76,6 +76,7 @@ export type ScheduledPost = {
   retryEligible: boolean;
   nextRetryAt: string | null;
   userFailureCode: string | null;
+  scheduledAt: string | null;
   createdAt: string;
   updatedAt: string;
 };

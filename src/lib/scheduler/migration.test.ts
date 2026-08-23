@@ -77,3 +77,53 @@ test("public scheduler beta migration defines legal, retry, and worker contracts
     "scheduler_worker_health",
   ]) assert.match(sql, new RegExp(expected));
 });
+
+test("public scheduler beta migration reserves a fixed quota by scheduling the owned post atomically", () => {
+  const sql = readFileSync(publicSchedulerBetaMigrationPath, "utf8").toLowerCase();
+  const reserveStart = sql.indexOf("create or replace function public.reserve_public_scheduler_slot");
+  const retryStart = sql.indexOf("create or replace function public.create_safe_publish_retry");
+  assert.notEqual(reserveStart, -1);
+  assert.notEqual(retryStart, -1);
+  const reserveFunction = sql.slice(reserveStart, retryStart);
+  const retryFunction = sql.slice(retryStart, sql.indexOf("revoke execute", retryStart));
+
+  assert.match(reserveFunction, /p_post_id uuid/);
+  assert.match(reserveFunction, /p_user_id uuid/);
+  assert.match(reserveFunction, /p_scheduled_for timestamptz/);
+  assert.match(reserveFunction, /p_now timestamptz/);
+  assert.doesNotMatch(reserveFunction, /p_daily_limit|p_active_limit/);
+  assert.match(reserveFunction, /security definer/);
+  assert.match(reserveFunction, /set search_path = public/);
+  assert.match(sql, /add column if not exists scheduled_at timestamptz/);
+  assert.match(reserveFunction, /pg_advisory_xact_lock/);
+  assert.match(reserveFunction, /post\.id = p_post_id/);
+  assert.match(reserveFunction, /post\.user_id = p_user_id/);
+  assert.match(reserveFunction, /approval\.post_id = post\.id/);
+  assert.match(reserveFunction, /approval\.user_id = post\.user_id/);
+  assert.match(reserveFunction, /approval\.invalidated_at is null/);
+  assert.match(reserveFunction, /post\.scheduled_at >= p_now - interval '24 hours'/);
+  assert.doesNotMatch(reserveFunction, /post\.created_at/);
+  assert.match(reserveFunction, /post\.scheduled_for > p_now/);
+  assert.match(reserveFunction, /v_daily_used >= 3/);
+  assert.match(reserveFunction, /v_active_used >= 20/);
+  assert.match(reserveFunction, /update public\.scheduled_posts post[\s\S]*status = 'scheduled'[\s\S]*scheduled_for = p_scheduled_for[\s\S]*scheduled_at = p_now/);
+  assert.match(reserveFunction, /for update/);
+  assert.match(sql, /on public\.scheduled_posts\(user_id, scheduled_for\)/);
+  assert.ok(
+    sql.indexOf("create unique index if not exists publish_attempts_number_idx")
+      < sql.indexOf("drop constraint if exists publish_attempts_post_id_approval_id_request_fingerprint_key"),
+    "numbered unique index must precede removal of the legacy constraint"
+  );
+  assert.match(sql, /alter table public\.scheduler_worker_health enable row level security/);
+  assert.match(sql, /revoke execute on function public\.reserve_public_scheduler_slot\(uuid, uuid, timestamptz, timestamptz\) from public, anon, authenticated/);
+  assert.match(sql, /revoke execute on function public\.create_safe_publish_retry\(uuid, uuid\) from public, anon, authenticated/);
+  assert.match(retryFunction, /security definer/);
+  assert.match(retryFunction, /set search_path = public/);
+  assert.match(retryFunction, /post\.user_id = p_user_id/);
+  assert.match(retryFunction, /approval\.post_id = post\.id/);
+  assert.match(retryFunction, /approval\.user_id = post\.user_id/);
+  assert.match(retryFunction, /post\.retry_eligible = true/);
+  assert.match(retryFunction, /post\.terminal_at is null/);
+  assert.match(retryFunction, /attempt\.publish_id is not null/);
+  assert.match(retryFunction, /retry_eligible = false/);
+});
