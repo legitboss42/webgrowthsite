@@ -1,7 +1,10 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { canTransitionPost, isSameOriginMutation } from "@/lib/scheduler/policy";
+import { getSchedulerLaunchState } from "@/lib/scheduler/launch";
+import { schedulePublicPostAtBoundary } from "@/lib/scheduler/quotas";
 import { readSchedulerSession, SCHEDULER_SESSION_COOKIE } from "@/lib/scheduler/session";
+import { createSupabaseSchedulerStore } from "@/lib/scheduler/store";
 import { createSchedulerSupabaseClient } from "@/lib/scheduler/supabase";
 import type { PostStatus } from "@/lib/scheduler/types";
 
@@ -15,11 +18,12 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
   const { id } = await context.params;
   const body = await request.json().catch(() => null) as Record<string, unknown> | null;
   const supabase = createSchedulerSupabaseClient();
-  const { data: post } = await supabase.from("scheduled_posts").select("id,status,approval_id")
-    .eq("id", id).eq("user_id", session.userId).single();
-  if (!post) return NextResponse.json({ error: "Post not found." }, { status: 404 });
 
   if (body?.action === "cancel") {
+    const { data: post, error: postError } = await supabase.from("scheduled_posts").select("id,status")
+      .eq("id", id).eq("user_id", session.userId).maybeSingle();
+    if (postError) return NextResponse.json({ error: "Unable to read post." }, { status: 502 });
+    if (!post) return NextResponse.json({ error: "Post not found." }, { status: 404 });
     if (!canTransitionPost(post.status as PostStatus, "CANCELLED")) {
       return NextResponse.json({ error: "This post can no longer be cancelled." }, { status: 409 });
     }
@@ -28,7 +32,6 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
   }
 
   if (body?.action === "schedule") {
-    if (!post.approval_id) return NextResponse.json({ error: "Approval is required." }, { status: 409 });
     const scheduledFor = new Date(String(body.scheduledFor || ""));
     const timezone = String(body.timezone || "");
     if (Number.isNaN(scheduledFor.getTime()) || scheduledFor.getTime() <= Date.now() || !timezone) {
@@ -37,14 +40,29 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
     try { new Intl.DateTimeFormat("en", { timeZone: timezone }); } catch {
       return NextResponse.json({ error: "Timezone is invalid." }, { status: 400 });
     }
-    const { data: allowed } = await supabase.rpc("reserve_tiktok_daily_slot", {
-      p_user_id: session.userId, p_now: new Date().toISOString(), p_limit: 3,
+    const { data: user, error: userError } = await supabase.from("scheduler_users")
+      .select("status,suspended_at,deletion_requested_at,terms_version,privacy_version")
+      .eq("id", session.userId).maybeSingle();
+    if (userError) return NextResponse.json({ error: "Unable to verify scheduler access." }, { status: 502 });
+    const scheduledForIso = scheduledFor.toISOString();
+    const result = await schedulePublicPostAtBoundary(await createSupabaseSchedulerStore(), {
+      launch: getSchedulerLaunchState(),
+      user: {
+        status: typeof user?.status === "string" ? user.status : null,
+        suspendedAt: typeof user?.suspended_at === "string" ? user.suspended_at : null,
+        deletionRequestedAt: typeof user?.deletion_requested_at === "string" ? user.deletion_requested_at : null,
+        termsVersion: typeof user?.terms_version === "string" ? user.terms_version : null,
+        privacyVersion: typeof user?.privacy_version === "string" ? user.privacy_version : null,
+      },
+      reservation: {
+        userId: session.userId,
+        postId: id,
+        scheduledForIso,
+        nowIso: new Date().toISOString(),
+      },
     });
-    if (!allowed) return NextResponse.json({ error: "Daily beta scheduling limit reached." }, { status: 429 });
-    await supabase.from("scheduled_posts").update({
-      status: "SCHEDULED", scheduled_for: scheduledFor.toISOString(), timezone,
-    }).eq("id", id).eq("user_id", session.userId);
-    return NextResponse.json({ postId: id, status: "SCHEDULED", scheduledFor: scheduledFor.toISOString() });
+    if (!result.ok) return NextResponse.json({ error: result.error }, { status: result.status });
+    return NextResponse.json({ postId: id, status: "SCHEDULED", scheduledFor: result.scheduledFor });
   }
 
   return NextResponse.json({ error: "Unsupported schedule action." }, { status: 400 });

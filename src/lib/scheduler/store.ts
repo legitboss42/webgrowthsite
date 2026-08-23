@@ -40,6 +40,13 @@ export type ApproveSchedulerPostInput = {
   snapshot: Record<string, unknown>;
 };
 
+export type ReservePublicSchedulerSlotInput = {
+  userId: string;
+  postId: string;
+  scheduledForIso: string;
+  nowIso: string;
+};
+
 export function createSchedulerStore(client: SchedulerDatabaseClient) {
   return {
     upsertUser(input: UpsertSchedulerUserInput) {
@@ -77,6 +84,16 @@ export function createSchedulerStore(client: SchedulerDatabaseClient) {
         p_fingerprint: input.fingerprint,
         p_snapshot: input.snapshot,
       });
+    },
+    async reservePublicSchedulerSlot(input: ReservePublicSchedulerSlotInput) {
+      const result = await client.rpc("reserve_public_scheduler_slot", {
+        p_post_id: input.postId,
+        p_user_id: input.userId,
+        p_scheduled_for: input.scheduledForIso,
+        p_now: input.nowIso,
+      });
+      if (typeof result !== "boolean") throw new Error("Scheduler reservation returned an invalid result.");
+      return result;
     },
     claimDuePosts(nowIso: string, limit: number) {
       return client.rpc("claim_due_tiktok_posts", {

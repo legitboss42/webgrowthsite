@@ -78,6 +78,30 @@ test("post approval uses one atomic database RPC with immutable fingerprint inpu
   }]);
 });
 
+// Mutation target: restoring the old quota-only RPC or passing caller-controlled
+// limits means the database can no longer atomically reserve this exact post.
+test("public schedule reservation passes only the owned post and exact schedule instants to one RPC", async () => {
+  const { calls, client } = fakeClient(true, { reserve_public_scheduler_slot: true });
+  const store = createSchedulerStore(client);
+
+  assert.equal(await store.reservePublicSchedulerSlot({
+    userId: "user-1",
+    postId: "post-1",
+    scheduledForIso: "2026-08-24T13:00:00.000Z",
+    nowIso: "2026-08-24T12:00:00.000Z",
+  }), true);
+  assert.deepEqual(calls, [{
+    kind: "rpc",
+    name: "reserve_public_scheduler_slot",
+    input: {
+      p_post_id: "post-1",
+      p_user_id: "user-1",
+      p_scheduled_for: "2026-08-24T13:00:00.000Z",
+      p_now: "2026-08-24T12:00:00.000Z",
+    },
+  }]);
+});
+
 test("user writes preserve the authenticated TikTok identity", async () => {
   const { calls, client } = fakeClient();
   const store = createSchedulerStore(client);
