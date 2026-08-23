@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { validateMediaMetadata } from "@/lib/scheduler/media";
+import { canMutateSchedulerContent, validateMediaMetadata } from "@/lib/scheduler/media";
+import { validateTikTokPhotoSource } from "@/lib/scheduler/mediaDelivery";
 import { isSameOriginMutation } from "@/lib/scheduler/policy";
 import { readSchedulerSession, SCHEDULER_SESSION_COOKIE } from "@/lib/scheduler/session";
 import { createSchedulerSupabaseClient } from "@/lib/scheduler/supabase";
@@ -16,6 +17,22 @@ export async function POST(request: Request) {
 
   const body = await request.json().catch(() => null) as Record<string, unknown> | null;
   const supabase = createSchedulerSupabaseClient();
+  if (body?.action === "create" || body?.action === "finalize") {
+    const { data: user, error: userError } = await supabase.from("scheduler_users")
+      .select("status,suspended_at,deletion_requested_at,terms_version,privacy_version")
+      .eq("id", session.userId)
+      .single();
+    const canMutate = !userError && !!user && canMutateSchedulerContent({
+      status: typeof user.status === "string" ? user.status : null,
+      suspendedAt: typeof user.suspended_at === "string" ? user.suspended_at : null,
+      deletionRequestedAt: typeof user.deletion_requested_at === "string" ? user.deletion_requested_at : null,
+      termsVersion: typeof user.terms_version === "string" ? user.terms_version : null,
+      privacyVersion: typeof user.privacy_version === "string" ? user.privacy_version : null,
+    });
+    if (!canMutate) {
+      return NextResponse.json({ error: "Active scheduler access and current legal acceptance are required." }, { status: 403 });
+    }
+  }
 
   if (body?.action === "create") {
     const kind: MediaKind = body.kind === "VIDEO" ? "VIDEO" : "PHOTO";
@@ -53,14 +70,34 @@ export async function POST(request: Request) {
     const object = objects?.find((item) => item.name === filename);
     const storedSize = Number(object?.metadata?.size);
     const storedMime = String(object?.metadata?.mimetype || asset.mime_type);
-    const validation = validateMediaMetadata({ kind: asset.kind as MediaKind, mimeType: storedMime, byteSize: storedSize });
+    let validation = validateMediaMetadata({ kind: asset.kind as MediaKind, mimeType: storedMime, byteSize: storedSize });
+    let photoMetadata: { width?: number; height?: number; mimeType?: string } = {};
+    if (object && validation.ok && storedSize === Number(asset.byte_size) && asset.kind === "PHOTO") {
+      const { data: storedPhoto, error: downloadError } = await supabase.storage
+        .from("tiktok-scheduler-media")
+        .download(asset.storage_path);
+      if (downloadError || !storedPhoto) {
+        validation = { ok: false, error: "Photo could not be decoded." };
+      } else {
+        const photoValidation = await validateTikTokPhotoSource(await storedPhoto.arrayBuffer(), storedMime, storedSize);
+        validation = photoValidation;
+        if (photoValidation.ok) photoMetadata = photoValidation;
+      }
+    }
     if (!object || !validation.ok || storedSize !== Number(asset.byte_size)) {
-      await supabase.from("media_assets").update({ validation_status: "INVALID" }).eq("id", assetId);
+      await supabase.from("media_assets").update({ validation_status: "INVALID" })
+        .eq("id", assetId).eq("user_id", session.userId);
       return NextResponse.json({ error: "Stored media did not pass validation." }, { status: 400 });
     }
-    await supabase.from("media_assets").update({
-      checksum, mime_type: storedMime, byte_size: storedSize, validation_status: "VALID",
+    const { error: updateError } = await supabase.from("media_assets").update({
+      checksum,
+      mime_type: photoMetadata.mimeType || storedMime,
+      byte_size: storedSize,
+      width: photoMetadata.width,
+      height: photoMetadata.height,
+      validation_status: "VALID",
     }).eq("id", assetId).eq("user_id", session.userId);
+    if (updateError) return NextResponse.json({ error: "Unable to finalize media asset." }, { status: 502 });
     return NextResponse.json({ assetId, status: "VALID" });
   }
 
