@@ -72,7 +72,7 @@ async function getConversationMessages(conversationId: string | undefined): Prom
 
   try {
     const rows = await readJson<Array<Record<string, unknown>>>(
-      `${url.replace(/\/$/, "")}/rest/v1/whatsapp_messages?conversation_id=eq.${encodeURIComponent(conversationId)}&select=id,whatsapp_message_id,conversation_id,direction,message_text,message_timestamp,delivery_status&order=message_timestamp.asc`,
+      `${url.replace(/\/$/, "")}/rest/v1/whatsapp_messages?conversation_id=eq.${encodeURIComponent(conversationId)}&select=id,whatsapp_message_id,conversation_id,direction,message_type,message_text,message_timestamp,delivery_status,media_id,media_mime_type,media_voice,media_filename&order=message_timestamp.asc`,
       key,
     );
 
@@ -81,9 +81,14 @@ async function getConversationMessages(conversationId: string | undefined): Prom
       whatsapp_message_id: typeof row.whatsapp_message_id === "string" ? row.whatsapp_message_id : undefined,
       conversation_id: String(row.conversation_id || conversationId),
       direction: row.direction === "outbound" ? "outbound" : "inbound",
+      message_type: typeof row.message_type === "string" ? row.message_type : undefined,
       message_text: typeof row.message_text === "string" ? row.message_text : undefined,
       message_timestamp: typeof row.message_timestamp === "string" ? row.message_timestamp : undefined,
       delivery_status: typeof row.delivery_status === "string" ? row.delivery_status : undefined,
+      media_id: typeof row.media_id === "string" ? row.media_id : undefined,
+      media_mime_type: typeof row.media_mime_type === "string" ? row.media_mime_type : undefined,
+      media_voice: row.media_voice === true,
+      media_filename: typeof row.media_filename === "string" ? row.media_filename : undefined,
     }));
   } catch (error) {
     console.error("Unable to load WhatsApp conversation messages", error);
@@ -106,6 +111,11 @@ function getReviewClasses(needsReview: boolean) {
   return needsReview
     ? "bg-rose-500/15 text-rose-100 ring-1 ring-rose-400/30"
     : "bg-emerald-500/15 text-emerald-100 ring-1 ring-emerald-400/30";
+}
+
+function getMessageFallbackText(message: WhatsAppLeadMessage) {
+  if (message.message_type === "audio") return message.media_voice ? "Voice note" : "Audio message";
+  return "No text content stored.";
 }
 
 function getFilterHref(filter: WhatsAppLeadFilter, selectedLeadId?: string) {
@@ -342,7 +352,30 @@ export default async function WhatsAppAdminPage({
                             <span>{message.direction === "outbound" ? "Outbound" : "Inbound"}</span>
                             <span>{formatDateTime(message.message_timestamp)}</span>
                           </div>
-                          <p className="mt-2 whitespace-pre-wrap text-sm leading-6">{message.message_text || "No text content stored."}</p>
+                          {message.message_type === "audio" && message.media_id ? (
+                            <div className="mt-3 rounded-2xl border border-white/10 bg-black/15 p-3">
+                              <p className="mb-2 text-xs font-medium uppercase tracking-[.14em] text-white/55">
+                                {message.media_voice ? "Voice note" : "Audio message"}
+                              </p>
+                              <audio
+                                controls
+                                preload="none"
+                                src={`/api/admin/whatsapp/media/${encodeURIComponent(message.media_id)}`}
+                                className="w-full"
+                              >
+                                Your browser cannot play this WhatsApp audio message.
+                              </audio>
+                              {message.media_filename || message.media_mime_type ? (
+                                <p className="mt-2 text-xs text-white/45">
+                                  {[message.media_filename, message.media_mime_type].filter(Boolean).join(" · ")}
+                                </p>
+                              ) : null}
+                            </div>
+                          ) : (
+                            <p className="mt-2 whitespace-pre-wrap text-sm leading-6">
+                              {message.message_text || getMessageFallbackText(message)}
+                            </p>
+                          )}
                           {message.delivery_status ? (
                             <p className="mt-2 text-xs text-white/45">Delivery status: {message.delivery_status}</p>
                           ) : null}

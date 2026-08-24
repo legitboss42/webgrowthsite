@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { createMemoryWhatsAppStore } from "./store";
-import { sendInboxWhatsAppReply } from "./inboxReply";
+import { sendInboxWhatsAppAudioReply, sendInboxWhatsAppReply } from "./inboxReply";
 
 const baseInput = {
   conversationId: "conversation-1",
@@ -62,4 +62,32 @@ test("trims reply text before sending the message", async () => {
 
   assert.deepEqual(result, { ok: true, messageId: "wamid.outbound-2" });
   assert.equal(sentText, "Hello there");
+});
+
+test("stores an outbound inbox audio reply after Meta accepts the message", async () => {
+  const store = createMemoryWhatsAppStore();
+  const audio = new Blob(["voice-data"], { type: "audio/ogg; codecs=opus" });
+
+  const result = await sendInboxWhatsAppAudioReply(
+    {
+      conversationId: baseInput.conversationId,
+      waId: baseInput.waId,
+      audio,
+      filename: "reply.ogg",
+      mimeType: "audio/ogg; codecs=opus",
+      customerMessageTimestamp: baseInput.customerMessageTimestamp,
+      replyToMessageId: baseInput.replyToMessageId,
+    },
+    {
+      store,
+      now: baseInput.customerMessageTimestamp + 60,
+      send: async () => ({ sent: true, messageId: "wamid.audio-1", mediaId: "media-audio-1" }),
+    },
+  );
+
+  assert.deepEqual(result, { ok: true, messageId: "wamid.audio-1", mediaId: "media-audio-1" });
+  assert.equal(store.messages[0]?.messageId, "wamid.audio-1");
+  assert.equal(store.messages[0]?.messageType, "audio");
+  assert.equal(store.messages[0]?.mediaId, "media-audio-1");
+  assert.equal(store.messages[0]?.mediaVoice, true);
 });

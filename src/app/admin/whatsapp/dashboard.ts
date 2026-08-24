@@ -19,9 +19,14 @@ export type WhatsAppLeadMessage = {
   whatsapp_message_id?: string;
   conversation_id: string;
   direction: "inbound" | "outbound";
+  message_type?: string;
   message_text?: string;
   message_timestamp?: string;
   delivery_status?: string;
+  media_id?: string;
+  media_mime_type?: string;
+  media_voice?: boolean;
+  media_filename?: string;
 };
 
 export type WhatsAppDashboardModel = {

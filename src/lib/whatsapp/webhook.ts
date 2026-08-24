@@ -8,6 +8,10 @@ export type NormalizedIncomingMessage = {
   text?: string;
   timestamp: number;
   type: string;
+  mediaId?: string;
+  mediaMimeType?: string;
+  mediaSha256?: string;
+  mediaVoice?: boolean;
 };
 
 export type NormalizedStatus = {
@@ -57,9 +61,20 @@ export function parseWhatsAppWebhook(payload: unknown): { messages: NormalizedIn
         if (typeof item?.wa_id === "string" && typeof profile?.name === "string") names.set(item.wa_id, profile.name);
       }
       if (Array.isArray(value.messages)) for (const message of value.messages) {
-        const item = asRecord(message); const text = asRecord(item?.text);
+        const item = asRecord(message); const text = asRecord(item?.text); const audio = asRecord(item?.audio);
         if (typeof item?.id !== "string" || typeof item?.from !== "string" || typeof item?.timestamp !== "string" || typeof item?.type !== "string") continue;
-        messages.push({ messageId: item.id, waId: item.from, displayName: names.get(item.from), text: typeof text?.body === "string" ? text.body : undefined, timestamp: Number(item.timestamp), type: item.type });
+        messages.push({
+          messageId: item.id,
+          waId: item.from,
+          displayName: names.get(item.from),
+          text: typeof text?.body === "string" ? text.body : undefined,
+          timestamp: Number(item.timestamp),
+          type: item.type,
+          mediaId: typeof audio?.id === "string" ? audio.id : undefined,
+          mediaMimeType: typeof audio?.mime_type === "string" ? audio.mime_type : undefined,
+          mediaSha256: typeof audio?.sha256 === "string" ? audio.sha256 : undefined,
+          mediaVoice: audio?.voice === true,
+        });
       }
       if (Array.isArray(value.statuses)) for (const status of value.statuses) {
         const item = asRecord(status);

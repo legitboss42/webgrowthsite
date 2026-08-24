@@ -54,6 +54,39 @@ test("records the webhook event before writing CRM records to Supabase", async (
   assert.match(requests[2]?.body || "", /PORTFOLIO_REQUEST/);
 });
 
+test("stores inbound WhatsApp audio metadata in Supabase", async () => {
+  const requests: Array<{ url: string; method: string; body?: string }> = [];
+  const store = createSupabaseWhatsAppStore({
+    url: "https://example.supabase.co",
+    serviceRoleKey: "test-key",
+    fetch: async (url, init) => {
+      requests.push({ url: String(url), method: init?.method || "GET", body: String(init?.body || "") });
+      if (String(url).includes("whatsapp_events")) return new Response(JSON.stringify([{ id: "event-1" }]), { status: 201 });
+      if (String(url).includes("whatsapp_contacts")) return new Response(JSON.stringify([{ id: "contact-1" }]), { status: 201 });
+      if (String(url).includes("whatsapp_conversations")) return new Response(JSON.stringify([{ id: "conversation-1" }]), { status: 201 });
+      return new Response(JSON.stringify([{ id: "message-1" }]), { status: 201 });
+    },
+  });
+
+  await store.recordInbound({
+    messageId: "wamid.voice-1",
+    waId: "2348000000000",
+    timestamp: 1_800_000_000,
+    type: "audio",
+    mediaId: "media-1",
+    mediaMimeType: "audio/ogg; codecs=opus",
+    mediaSha256: "sha-1",
+    mediaVoice: true,
+  });
+
+  const messageRequest = requests.find((request) => request.url.includes("whatsapp_messages"));
+  assert.match(messageRequest?.body || "", /"message_type":"audio"/);
+  assert.match(messageRequest?.body || "", /"media_id":"media-1"/);
+  assert.match(messageRequest?.body || "", new RegExp('"media_mime_type":"audio/ogg; codecs=opus"'));
+  assert.match(messageRequest?.body || "", /"media_sha256":"sha-1"/);
+  assert.match(messageRequest?.body || "", /"media_voice":true/);
+});
+
 test("loads an active conversation's latest inbound Meta message before inbox replies", async () => {
   const context = await getSupabaseWhatsAppReplyContext(
     {
@@ -104,6 +137,34 @@ test("records an inbox outbound reply on the selected conversation without recla
   assert.doesNotMatch(requests[0]?.body || "", /intent|human_review_required|lead_temperature/);
   assert.match(requests[1]?.url || "", /whatsapp_messages\?on_conflict=whatsapp_message_id/);
   assert.match(requests[1]?.body || "", /"conversation_id":"conversation-1"/);
+});
+
+test("records outbound audio on the selected conversation", async () => {
+  const requests: Array<{ url: string; method: string; body?: string }> = [];
+  const store = createSupabaseWhatsAppStore({
+    url: "https://example.supabase.co",
+    serviceRoleKey: "test-key",
+    fetch: async (url, init) => {
+      requests.push({ url: String(url), method: init?.method || "GET", body: String(init?.body || "") });
+      return new Response(JSON.stringify([{ id: "message-1" }]), { status: 201 });
+    },
+  });
+
+  await store.recordOutbound({
+    conversationId: "conversation-1",
+    messageId: "wamid.audio-outbound-1",
+    waId: "2348012345678",
+    timestamp: 1_800_000_000,
+    type: "audio",
+    mediaId: "media-outbound-1",
+    mediaMimeType: "audio/ogg; codecs=opus",
+    mediaVoice: true,
+  });
+
+  const messageRequest = requests.find((request) => request.url.includes("whatsapp_messages"));
+  assert.match(messageRequest?.body || "", /"message_type":"audio"/);
+  assert.match(messageRequest?.body || "", /"media_id":"media-outbound-1"/);
+  assert.match(messageRequest?.body || "", /"media_voice":true/);
 });
 
 test("fails closed when the requested reply conversation is inactive or belongs to another contact", async () => {

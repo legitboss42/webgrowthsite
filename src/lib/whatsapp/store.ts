@@ -7,6 +7,12 @@ export type InboundMessageRecord = {
   displayName?: string;
   text?: string;
   timestamp: number;
+  type?: string;
+  mediaId?: string;
+  mediaMimeType?: string;
+  mediaSha256?: string;
+  mediaVoice?: boolean;
+  mediaFilename?: string;
 };
 
 export type OutboundMessageRecord = Omit<InboundMessageRecord, "displayName"> & {
@@ -20,9 +26,15 @@ export type StoredMessage = {
   messageId: string;
   conversationId: string;
   direction: "inbound" | "outbound";
+  messageType?: string;
   text?: string;
   timestamp: number;
   deliveryStatus?: string;
+  mediaId?: string;
+  mediaMimeType?: string;
+  mediaSha256?: string;
+  mediaVoice?: boolean;
+  mediaFilename?: string;
 };
 
 export type WhatsAppStore = {
@@ -135,7 +147,20 @@ export function createSupabaseWhatsAppStore(options: SupabaseStoreOptions): What
       await request<{ id: string }>("whatsapp_messages?on_conflict=whatsapp_message_id", {
         method: "POST",
         headers: { Prefer: "resolution=ignore-duplicates,return=representation" },
-        body: JSON.stringify({ conversation_id: conversation.id, whatsapp_message_id: input.messageId, direction: "inbound", message_type: "text", message_text: input.text, message_timestamp: new Date(input.timestamp * 1000).toISOString(), raw_event_reference: eventRows[0].id }),
+        body: JSON.stringify({
+          conversation_id: conversation.id,
+          whatsapp_message_id: input.messageId,
+          direction: "inbound",
+          message_type: input.type || "text",
+          message_text: input.text,
+          message_timestamp: new Date(input.timestamp * 1000).toISOString(),
+          raw_event_reference: eventRows[0].id,
+          media_id: input.mediaId,
+          media_mime_type: input.mediaMimeType,
+          media_sha256: input.mediaSha256,
+          media_voice: input.mediaVoice === true,
+          media_filename: input.mediaFilename,
+        }),
       });
       await request<{ id: string }>(`whatsapp_events?id=eq.${encodeURIComponent(eventRows[0].id)}`, { method: "PATCH", body: JSON.stringify({ processed: true }) });
       return { duplicate: false };
@@ -154,7 +179,19 @@ export function createSupabaseWhatsAppStore(options: SupabaseStoreOptions): What
       await request<{ id: string }>("whatsapp_messages?on_conflict=whatsapp_message_id", {
         method: "POST",
         headers: { Prefer: "resolution=ignore-duplicates,return=representation" },
-        body: JSON.stringify({ conversation_id: conversation.id, whatsapp_message_id: input.messageId, direction: "outbound", message_type: "text", message_text: input.text, message_timestamp: timestamp }),
+        body: JSON.stringify({
+          conversation_id: conversation.id,
+          whatsapp_message_id: input.messageId,
+          direction: "outbound",
+          message_type: input.type || "text",
+          message_text: input.text,
+          message_timestamp: timestamp,
+          media_id: input.mediaId,
+          media_mime_type: input.mediaMimeType,
+          media_sha256: input.mediaSha256,
+          media_voice: input.mediaVoice === true,
+          media_filename: input.mediaFilename,
+        }),
       });
     },
     async updateMessageStatus(messageId, status) {
@@ -198,7 +235,20 @@ export function createMemoryWhatsAppStore(): WhatsAppStore & {
       if (events.includes(input.messageId)) return { duplicate: true };
       events.push(input.messageId);
       const conversation = getConversation(input.waId, input.timestamp, input.displayName);
-      messages.push({ id: `message-${messages.length + 1}`, messageId: input.messageId, conversationId: conversation.id, direction: "inbound", text: input.text, timestamp: input.timestamp });
+      messages.push({
+        id: `message-${messages.length + 1}`,
+        messageId: input.messageId,
+        conversationId: conversation.id,
+        direction: "inbound",
+        messageType: input.type || "text",
+        text: input.text,
+        timestamp: input.timestamp,
+        mediaId: input.mediaId,
+        mediaMimeType: input.mediaMimeType,
+        mediaSha256: input.mediaSha256,
+        mediaVoice: input.mediaVoice === true,
+        mediaFilename: input.mediaFilename,
+      });
       return { duplicate: false };
     },
     async recordOutbound(input) {
@@ -207,7 +257,20 @@ export function createMemoryWhatsAppStore(): WhatsAppStore & {
         ? conversations.find((item) => item.id === input.conversationId) || getConversation(input.waId, input.timestamp)
         : getConversation(input.waId, input.timestamp);
       conversation.lastMessageAt = Math.max(conversation.lastMessageAt, input.timestamp);
-      messages.push({ id: `message-${messages.length + 1}`, messageId: input.messageId, conversationId: conversation.id, direction: "outbound", text: input.text, timestamp: input.timestamp });
+      messages.push({
+        id: `message-${messages.length + 1}`,
+        messageId: input.messageId,
+        conversationId: conversation.id,
+        direction: "outbound",
+        messageType: input.type || "text",
+        text: input.text,
+        timestamp: input.timestamp,
+        mediaId: input.mediaId,
+        mediaMimeType: input.mediaMimeType,
+        mediaSha256: input.mediaSha256,
+        mediaVoice: input.mediaVoice === true,
+        mediaFilename: input.mediaFilename,
+      });
     },
     async updateMessageStatus(messageId, status) {
       const message = messages.find((item) => item.messageId === messageId);

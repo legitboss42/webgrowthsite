@@ -15,14 +15,24 @@ type SendInput = {
   replyToMessageId?: string;
 };
 
+type AudioSendInput = {
+  to: string;
+  audio: Blob;
+  filename: string;
+  mimeType: string;
+  customerMessageTimestamp: number;
+  replyToMessageId?: string;
+};
+
 export type SendResult =
-  | { sent: true; messageId: string }
+  | { sent: true; messageId: string; mediaId?: string }
   | {
       sent: false;
       reason:
         | "NOT_CONFIGURED"
         | "SERVICE_WINDOW_CLOSED"
         | "INVALID_RECIPIENT"
+        | "UNSUPPORTED_MEDIA_TYPE"
         | "TOKEN_EXPIRED"
         | "PERMISSION_DENIED"
         | "META_SERVICE_ERROR"
@@ -36,6 +46,20 @@ export function normalizeWhatsAppRecipient(value: string): string | null {
   if (/^\+234[789]\d{9}$/.test(compact)) return compact.slice(1);
   if (/^234[789]\d{9}$/.test(compact)) return compact;
   return null;
+}
+
+const supportedAudioMimeTypes = new Set([
+  "audio/aac",
+  "audio/mp4",
+  "audio/mpeg",
+  "audio/amr",
+  "audio/ogg",
+  "audio/ogg; codecs=opus",
+  "audio/ogg;codecs=opus",
+]);
+
+function isSupportedAudioMimeType(value: string) {
+  return supportedAudioMimeTypes.has(value.trim().toLowerCase());
 }
 
 function classifyMetaFailure(status: number, payload: unknown): Extract<SendResult, { sent: false }> {
@@ -94,6 +118,72 @@ export async function sendWhatsAppText(input: SendInput, options: SendOptions = 
     return { sent: true, messageId };
   } catch {
     console.error("WhatsApp Cloud API send request failed");
+    return { sent: false, reason: "API_ERROR" };
+  }
+}
+
+export async function sendWhatsAppAudio(input: AudioSendInput, options: SendOptions = {}): Promise<SendResult> {
+  const env = options.env || process.env;
+  const token = env.WHATSAPP_ACCESS_TOKEN?.trim();
+  const phoneNumberId = env.WHATSAPP_PHONE_NUMBER_ID?.trim();
+  if (!token || !phoneNumberId) return { sent: false, reason: "NOT_CONFIGURED" };
+  if (!isFreeformReplyAllowed(input.customerMessageTimestamp, options.now)) return { sent: false, reason: "SERVICE_WINDOW_CLOSED" };
+  const recipient = normalizeWhatsAppRecipient(input.to);
+  if (!recipient) return { sent: false, reason: "INVALID_RECIPIENT" };
+  if (!isSupportedAudioMimeType(input.mimeType)) return { sent: false, reason: "UNSUPPORTED_MEDIA_TYPE" };
+
+  const apiVersion = env.WHATSAPP_API_VERSION?.trim() || env.WHATSAPP_GRAPH_API_VERSION?.trim() || "v26.0";
+  const fetcher = options.fetch || globalThis.fetch;
+
+  try {
+    const formData = new FormData();
+    formData.set("messaging_product", "whatsapp");
+    formData.set("type", input.mimeType);
+    formData.set("file", input.audio, input.filename);
+
+    const uploadResponse = await fetcher(`https://graph.facebook.com/${apiVersion}/${phoneNumberId}/media`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+      body: formData,
+    });
+
+    if (!uploadResponse.ok) {
+      const payload: unknown = await uploadResponse.json().catch(() => undefined);
+      const failure = classifyMetaFailure(uploadResponse.status, payload);
+      console.error("WhatsApp Cloud API media upload failed", failure.diagnostic);
+      return failure;
+    }
+
+    const uploadBody = (await uploadResponse.json()) as { id?: string };
+    const mediaId = uploadBody.id;
+    if (!mediaId) return { sent: false, reason: "API_ERROR" };
+
+    const sendResponse = await fetcher(`https://graph.facebook.com/${apiVersion}/${phoneNumberId}/messages`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        messaging_product: "whatsapp",
+        recipient_type: "individual",
+        to: recipient,
+        type: "audio",
+        audio: { id: mediaId },
+        ...(input.replyToMessageId ? { context: { message_id: input.replyToMessageId } } : {}),
+      }),
+    });
+
+    if (!sendResponse.ok) {
+      const payload: unknown = await sendResponse.json().catch(() => undefined);
+      const failure = classifyMetaFailure(sendResponse.status, payload);
+      console.error("WhatsApp Cloud API audio send failed", failure.diagnostic);
+      return failure;
+    }
+
+    const sendBody = (await sendResponse.json()) as { messages?: Array<{ id?: string }> };
+    const messageId = sendBody.messages?.[0]?.id;
+    if (!messageId) return { sent: false, reason: "API_ERROR" };
+    return { sent: true, messageId, mediaId };
+  } catch {
+    console.error("WhatsApp Cloud API audio request failed");
     return { sent: false, reason: "API_ERROR" };
   }
 }

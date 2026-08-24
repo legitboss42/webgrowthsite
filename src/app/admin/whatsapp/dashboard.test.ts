@@ -17,6 +17,7 @@ const messages = [
   { id: "m3", whatsapp_message_id: "wamid.inbound-warm", conversation_id: "warm", direction: "inbound" as const, message_text: "Can I see your portfolio?", message_timestamp: "2026-08-23T22:45:00.000Z" },
 ];
 const pagePath = new URL("./page.tsx", import.meta.url);
+const replyComposerPath = new URL("./ReplyComposer.tsx", import.meta.url);
 
 test("returns only hot WhatsApp leads for the HOT filter", () => {
   assert.deepEqual(filterWhatsAppLeads(leads, "HOT").map((lead) => lead.id), ["hot"]);
@@ -69,6 +70,26 @@ test("enables the reply composer when sender credentials exist and the customer 
   assert.equal(state.replyToMessageId, "wamid.inbound-hot");
 });
 
+test("uses inbound audio messages to keep the free-form reply window open", () => {
+  const state = buildWhatsAppReplyComposerState({
+    selectedLead: leads[0],
+    selectedMessages: [{
+      id: "audio-1",
+      whatsapp_message_id: "wamid.audio",
+      conversation_id: "hot",
+      direction: "inbound",
+      message_type: "audio",
+      media_id: "media-1",
+      message_timestamp: "2026-08-23T22:54:00.000Z",
+    }],
+    senderConfigured: true,
+    now: Date.parse("2026-08-23T23:10:00.000Z") / 1000,
+  });
+
+  assert.equal(state.enabled, true);
+  assert.equal(state.replyToMessageId, "wamid.audio");
+});
+
 test("disables the reply composer when sender credentials are missing", () => {
   const state = buildWhatsAppReplyComposerState({
     selectedLead: leads[1],
@@ -98,6 +119,22 @@ test("WhatsApp admin page allows the existing owner scheduler session as an inte
 
   assert.match(source, /hasWhatsAppAdminAccess/);
   assert.match(source, /ReplyComposer/);
+});
+
+test("WhatsApp admin page loads and renders protected audio messages", () => {
+  const source = readFileSync(pagePath, "utf8");
+
+  assert.match(source, /message_type,message_text,message_timestamp,delivery_status,media_id,media_mime_type,media_voice,media_filename/);
+  assert.match(source, /\/api\/admin\/whatsapp\/media\//);
+  assert.match(source, /<audio/);
+});
+
+test("WhatsApp reply composer can post recorded audio through the protected audio reply route", () => {
+  const source = readFileSync(replyComposerPath, "utf8");
+
+  assert.match(source, /MediaRecorder/);
+  assert.match(source, /navigator\.mediaDevices\.getUserMedia/);
+  assert.match(source, /\/api\/admin\/whatsapp\/reply\/audio/);
 });
 
 test("WhatsApp admin access accepts the internal utility cookie", () => {

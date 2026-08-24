@@ -15,8 +15,9 @@ No WhatsApp Web session, QR automation, browser messaging, or unofficial WhatsAp
 Keep the following values in Vercel server-side environment variables, not in source control:
 
 - Meta App ID: `1402137781802305`
-- WhatsApp Business Account ID: obtain from Meta when the test/production number is provisioned.
-- Phone Number ID: obtain from Meta when the test/production number is provisioned.
+- WhatsApp Business Account ID: `987693860957754`
+- Phone Number ID: `1192139290658384`
+- WhatsApp number: `+234 806 670 6336`
 
 The production number must not be registered, migrated, or unregistered unless the owner explicitly approves the exact Meta onboarding flow.
 
@@ -35,7 +36,8 @@ For isolated Preview testing, use the feature branch Preview URL plus `/api/what
 | `WHATSAPP_ACCESS_TOKEN` | Server-side Meta system-user token for sending messages. |
 | `WHATSAPP_PHONE_NUMBER_ID` | Meta Cloud API sender ID. |
 | `WHATSAPP_BUSINESS_ACCOUNT_ID` | Reference for the WhatsApp Business Account. |
-| `WHATSAPP_GRAPH_API_VERSION` | Graph version, currently `v25.0`. |
+| `WHATSAPP_API_VERSION` | Graph version, currently `v26.0`. |
+| `WHATSAPP_GRAPH_API_VERSION` | Legacy fallback Graph version. Prefer `WHATSAPP_API_VERSION`. |
 | `SUPABASE_URL` | Project URL, server side only. |
 | `SUPABASE_SERVICE_ROLE_KEY` | Server-side database writer. Never prefix with `NEXT_PUBLIC_`. |
 
@@ -50,7 +52,40 @@ Migration `202608130001_whatsapp_crm.sql` creates:
 - `whatsapp_messages` — inbound/outbound messages, unique on Meta message ID.
 - `whatsapp_events` — raw webhook event record for idempotency and audit.
 
+Migration `202608240001_whatsapp_audio_messages.sql` adds audio metadata columns to `whatsapp_messages`:
+
+- `media_id`
+- `media_mime_type`
+- `media_sha256`
+- `media_voice`
+- `media_filename`
+
 The schema uses RLS, unique constraints, and indexes for contact lookup, conversations, events, and messages. Do not add a public policy for these tables. The service-role key is used only in the server-side webhook and dashboard server component.
+
+## Admin inbox, notifications, and voice notes
+
+The internal inbox is available at:
+
+`https://webgrowth.info/admin/whatsapp/`
+
+It is protected by the existing internal utility/session access checks. The browser polls for new inbound messages, refreshes the inbox automatically, and can show browser notifications after the owner clicks **Enable WhatsApp alerts** and grants browser notification permission.
+
+Inbound WhatsApp audio messages are stored as media references and played through the protected server route:
+
+`/api/admin/whatsapp/media/[mediaId]`
+
+The media proxy fetches the Meta media URL and bytes server-side with the configured access token. The access token is never returned to the browser.
+
+Manual voice-note replies are sent through:
+
+`/api/admin/whatsapp/reply/audio`
+
+The reply composer uses the browser's `MediaRecorder` when the browser supports a Meta-compatible audio format. Voice-note replies are subject to the same controls as text replies:
+
+- sender credentials must be configured server-side;
+- the selected conversation must be open;
+- the latest inbound customer message must still be inside the 24-hour customer-service window;
+- commercial commitments still require human judgment.
 
 ## Classification and responses
 
