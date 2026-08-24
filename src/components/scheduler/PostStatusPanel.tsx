@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getStatusPresentation, shouldPollPostStatus } from "@/lib/scheduler/statusPresentation";
 import { createStatusPollingController, type StatusPollingSnapshot } from "@/lib/scheduler/statusPolling";
+import { createManualStatusRetryRunner } from "@/lib/scheduler/statusRetry";
 import { parsePublicStatusSnapshot, type PublicStatusSnapshot } from "@/lib/scheduler/statusSnapshot";
 
 type StatusPanelProps = {
@@ -35,6 +36,7 @@ export default function PostStatusPanel({ postId, initialSnapshot, scheduledFor,
   const [retryAnnouncement, setRetryAnnouncement] = useState("");
   const headingRef = useRef<HTMLHeadingElement>(null);
   const controllerRef = useRef<ReturnType<typeof createStatusPollingController> | null>(null);
+  const retryRunnerRef = useRef<ReturnType<typeof createManualStatusRetryRunner> | null>(null);
 
   useEffect(() => {
     const controller = createStatusPollingController({
@@ -70,6 +72,21 @@ export default function PostStatusPanel({ postId, initialSnapshot, scheduledFor,
     controllerRef.current?.update(initialSnapshot);
   }, [initialSnapshot]);
 
+  useEffect(() => {
+    retryRunnerRef.current = createManualStatusRetryRunner({
+      async requestRetry() {
+        const response = await fetch(`/api/scheduler/posts/${postId}/retry/`, { method: "POST" });
+        return response.ok;
+      },
+      onPending(value) { setRetrying(value); },
+      onSuccess() { setSnapshot((current) => ({ ...current, status: "SCHEDULED", retryEligible: false, nextRetryAt: null, nextPollAfterMs: null })); },
+      onAnnounce(message) { setRetryAnnouncement(message); },
+      focusStatus() { requestAnimationFrame(() => headingRef.current?.focus()); },
+      refresh() { router.refresh(); },
+      onFailure(message) { setPollingMessage(message); },
+    });
+  }, [postId, router]);
+
   const presentation = getStatusPresentation(snapshot.status, snapshot.failureCode, { retryEligible: snapshot.retryEligible, nextRetryAt: snapshot.nextRetryAt });
   const scheduledTime = formatTime(scheduledFor, timezone);
   const publishedTime = formatTime(snapshot.publishedAt, timezone);
@@ -79,23 +96,8 @@ export default function PostStatusPanel({ postId, initialSnapshot, scheduledFor,
   const toneClass = presentation.tone === "success" ? "border-[#62f5e6]/35 bg-[#62f5e6]/[0.07]" : presentation.tone === "attention" ? "border-[#ffb454]/35 bg-[#ffb454]/[0.07]" : "border-white/12 bg-white/[0.035]";
 
   async function retry() {
-    setRetrying(true);
     setRetryAnnouncement("");
-    try {
-      const response = await fetch(`/api/scheduler/posts/${postId}/retry/`, { method: "POST" });
-      if (!response.ok) {
-        setPollingMessage("This post is no longer eligible for retry. Refresh the page to see its latest status.");
-        return;
-      }
-      setSnapshot((current) => ({ ...current, status: "SCHEDULED", retryEligible: false, nextRetryAt: null, nextPollAfterMs: null }));
-      setRetryAnnouncement("Retry requested. This post has returned to the publishing queue.");
-      requestAnimationFrame(() => headingRef.current?.focus());
-      router.refresh();
-    } catch {
-      setPollingMessage("Unable to request a retry right now. Please try again shortly.");
-    } finally {
-      setRetrying(false);
-    }
+    await retryRunnerRef.current?.run();
   }
 
   return (

@@ -8,6 +8,7 @@ class FakePollingEnvironment {
   nextTimerId = 1;
   timers = new Map<number, { at: number; callback: () => void }>();
   listeners = new Set<() => void>();
+  unsubscribeCount = 0;
   requests: Array<{ signal: AbortSignal; resolve: (value: StatusPollingSnapshot) => void; reject: (reason: unknown) => void }> = [];
 
   now = () => this.nowValue;
@@ -18,7 +19,10 @@ class FakePollingEnvironment {
     return id;
   };
   clearTimeout = (id: number) => { this.timers.delete(id); };
-  onVisibilityChange = (listener: () => void) => { this.listeners.add(listener); return () => this.listeners.delete(listener); };
+  onVisibilityChange = (listener: () => void) => {
+    this.listeners.add(listener);
+    return () => { this.unsubscribeCount += 1; this.listeners.delete(listener); };
+  };
   fetchStatus = (signal: AbortSignal) => new Promise<StatusPollingSnapshot>((resolve, reject) => {
     this.requests.push({ signal, resolve, reject });
     signal.addEventListener("abort", () => reject(Object.assign(new Error("aborted"), { name: "AbortError" })), { once: true });
@@ -91,5 +95,11 @@ test("terminal status stops polling after one changed-status notification", asyn
   await settle();
   assert.equal(changes, 1);
   assert.equal(env.timers.size, 0);
+  assert.equal(env.listeners.size, 0);
+  assert.equal(env.unsubscribeCount, 1, "terminal completion releases the visibility handle immediately");
+  env.setVisible(false);
+  env.setVisible(true);
+  assert.equal(env.timers.size, 0, "terminal completion cannot resume polling");
   controller.stop();
+  assert.equal(env.unsubscribeCount, 1, "stop remains idempotent after terminal completion");
 });

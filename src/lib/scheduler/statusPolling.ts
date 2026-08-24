@@ -37,6 +37,18 @@ export function createStatusPollingController(environment: StatusPollingEnvironm
     if (timer !== null) environment.clearTimeout(timer);
     timer = null;
   };
+  const finish = () => {
+    if (stopped && !unsubscribe && timer === null && !request) return;
+    stopped = true;
+    resumeRequested = false;
+    clearTimer();
+    request?.abort();
+    request = null;
+    inFlight = false;
+    const removeVisibilityListener = unsubscribe;
+    unsubscribe = null;
+    removeVisibilityListener?.();
+  };
   const canPoll = () => !stopped && shouldPollPostStatus(snapshot.status) && environment.now() < deadline;
   const schedule = (delay: number) => {
     clearTimer();
@@ -58,6 +70,7 @@ export function createStatusPollingController(environment: StatusPollingEnvironm
         options.onSnapshot(next);
         if (changed) options.onChangedStatus(next);
         if (shouldPollPostStatus(next.status)) nextDelay = POLL_INTERVAL_MS;
+        else finish();
       })
       .catch((error: unknown) => {
         if (stopped || request?.signal.aborted || (error instanceof Error && error.name === "AbortError")) return;
@@ -86,6 +99,7 @@ export function createStatusPollingController(environment: StatusPollingEnvironm
   return {
     start() {
       if (!stopped) return;
+      if (!shouldPollPostStatus(snapshot.status)) return;
       stopped = false;
       deadline = environment.now() + MAX_LIFETIME_MS;
       unsubscribe = environment.onVisibilityChange(onVisibilityChange);
@@ -94,19 +108,13 @@ export function createStatusPollingController(environment: StatusPollingEnvironm
     update(next: StatusPollingSnapshot) {
       snapshot = next;
       if (!shouldPollPostStatus(next.status)) {
-        clearTimer();
-        request?.abort();
+        finish();
       } else if (!inFlight) {
         schedule(POLL_INTERVAL_MS);
       }
     },
     stop() {
-      stopped = true;
-      clearTimer();
-      request?.abort();
-      request = null;
-      unsubscribe?.();
-      unsubscribe = null;
+      finish();
     },
   };
 }

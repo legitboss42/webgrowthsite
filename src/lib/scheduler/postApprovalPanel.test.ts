@@ -41,10 +41,14 @@ test("live status is a separate, user-scoped panel with bounded polling", () => 
   assert.match(statusPanelSource, /\/api\/scheduler\/posts\/\$\{postId\}\/status\//);
   assert.match(statusPanelSource, /shouldPollPostStatus/);
   assert.match(statusPanelSource, /createStatusPollingController/);
+  assert.match(statusPanelSource, /createManualStatusRetryRunner/);
+  assert.match(statusPanelSource, /retryRunnerRef\.current\?\.run\(\)/);
   assert.match(statusPanelSource, /document\.visibilityState/);
   assert.match(statusPanelSource, /router\.refresh\(\)/);
   assert.match(statusPanelSource, /headingRef\.current\?\.focus\(\)/);
-  assert.match(postPageSource, /createPublicStatusSnapshot/);
+  assert.match(postPageSource, /createPostPageClientProps/);
+  assert.match(postPageSource, /PostApprovalPanel post=\{clientProps\.approvalPost\}/);
+  assert.match(postPageSource, /PostStatusPanel \{\.\.\.clientProps\.statusPanel\}/);
   assert.doesNotMatch(statusPanelSource, /user_failure_code|scheduled_posts/);
   assert.match(statusRouteSource, /readOwnedPostStatus\(db[\s\S]*?, id, session\.userId\)/);
   assert.match(statusRouteSource, /createPublicStatusSnapshot/);

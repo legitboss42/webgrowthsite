@@ -1,14 +1,15 @@
 import type { PostStatus } from "./types";
 
-export type PostWorkflowStage = "DRAFT" | "NEEDS_CONNECTION" | "NEEDS_APPROVAL" | "SCHEDULED" | "STATUS";
+export type PostWorkflowStage = "DRAFT" | "NEEDS_CONNECTION" | "APPROVE" | "SCHEDULE" | "SCHEDULED" | "STATUS";
 
 export function getPostWorkflowStage(post: {
   status: PostStatus;
+  approvalId: string | null;
 }): PostWorkflowStage {
   switch (post.status) {
     case "DRAFT": return "DRAFT";
     case "NEEDS_CONNECTION": return "NEEDS_CONNECTION";
-    case "NEEDS_APPROVAL": return "NEEDS_APPROVAL";
+    case "NEEDS_APPROVAL": return post.approvalId ? "SCHEDULE" : "APPROVE";
     case "SCHEDULED": return "SCHEDULED";
     case "CLAIMED":
     case "SUBMITTING":
