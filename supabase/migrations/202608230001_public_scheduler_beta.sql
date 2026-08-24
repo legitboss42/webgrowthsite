@@ -195,12 +195,11 @@ as $$
 begin
   if coalesce(btrim(p_worker_name), '') = '' or p_started_at is null then return false; end if;
   insert into public.scheduler_worker_health as health (
-    worker_name, last_started_at, last_error_code, updated_at
+    worker_name, last_started_at, updated_at
   ) values (
-    left(btrim(p_worker_name), 80), p_started_at, null, p_started_at
+    left(btrim(p_worker_name), 80), p_started_at, p_started_at
   ) on conflict (worker_name) do update set
     last_started_at = excluded.last_started_at,
-    last_error_code = null,
     updated_at = excluded.updated_at;
   return true;
 end;
@@ -241,7 +240,11 @@ set search_path = public
 as $$
 declare
   v_error_code text := case
-    when upper(btrim(coalesce(p_error_code, ''))) ~ '^[A-Z0-9_]{1,80}$'
+    when upper(btrim(coalesce(p_error_code, ''))) = any (array[
+      'WORKER_FAILURE',
+      'PRE_ACCEPTANCE_INFRASTRUCTURE',
+      'POST_ACCEPTANCE_AMBIGUOUS'
+    ]::text[])
       then upper(btrim(p_error_code))
     else 'WORKER_FAILURE'
   end;
@@ -278,12 +281,12 @@ begin
   return jsonb_build_object(
     'users', (select jsonb_build_object(
       'total', count(*),
-      'active', count(*) filter (where status = 'ACTIVE' and suspended_at is null),
+      'active', count(*) filter (where status = 'ACTIVE' and suspended_at is null and deletion_requested_at is null and terms_version = '2026-08-23' and privacy_version = '2026-08-23'),
       'suspended', count(*) filter (where status = 'SUSPENDED' or suspended_at is not null)
     ) from public.scheduler_users),
     'workflow', (select jsonb_build_object(
       'scheduled', count(*) filter (where status = 'SCHEDULED'),
-      'overdue', count(*) filter (where status in ('SCHEDULED', 'FAILED_RETRYABLE') and scheduled_for < now()),
+      'overdue', count(*) filter (where (status = 'SCHEDULED' and scheduled_for < now()) or (status = 'FAILED_RETRYABLE' and next_retry_at <= now())),
       'submitting', count(*) filter (where status in ('CLAIMED', 'SUBMITTING')),
       'processing', count(*) filter (where status = 'PROCESSING'),
       'published', count(*) filter (where status = 'PUBLISHED'),
@@ -291,14 +294,73 @@ begin
       'cancelled', count(*) filter (where status = 'CANCELLED')
     ) from public.scheduled_posts),
     'heartbeat', coalesce(v_heartbeat, jsonb_build_object('lastStartedAt', null, 'lastSucceededAt', null, 'lastErrorCode', null)),
-    'cleanup', (select jsonb_build_object(
-      'pending', count(*) filter (where cleanup_state in ('PENDING', 'RUNNING', 'NEEDS_ATTENTION')),
-      'overdue', count(*) filter (where cleanup_state in ('PENDING', 'RUNNING', 'NEEDS_ATTENTION') and created_at <= now() - interval '7 days')
-    ) from public.media_assets where storage_deleted_at is null),
+    'cleanup', (
+      select jsonb_build_object(
+        'pending', count(*),
+        'overdue', count(*) filter (
+          where cleanup_state = 'NEEDS_ATTENTION'
+            or (cleanup_state = 'RUNNING' and cleanup_started_at <= now() - interval '15 minutes')
+        )
+      ) from (
+        select asset.cleanup_state, asset.cleanup_started_at
+        from public.media_assets asset
+        join public.scheduler_users user_record on user_record.id = asset.user_id
+        where asset.storage_deleted_at is null
+          and user_record.deletion_requested_at is null
+          and (
+            asset.cleanup_state in ('PENDING', 'NEEDS_ATTENTION')
+            or (asset.cleanup_state = 'RUNNING' and asset.cleanup_started_at <= now() - interval '15 minutes')
+          )
+          and not exists (
+            select 1
+            from public.post_media post_media
+            join public.scheduled_posts post on post.id = post_media.post_id
+            left join public.publish_attempts attempt on attempt.post_id = post.id
+            where post_media.media_id = asset.id
+              and (
+                post.status in ('SCHEDULED', 'CLAIMED', 'SUBMITTING', 'PROCESSING', 'FAILED_RETRYABLE')
+                or attempt.status in ('SCHEDULED', 'SUBMITTING', 'PROCESSING')
+                or attempt.error_code = 'POST_ACCEPTANCE_AMBIGUOUS'
+                or (attempt.publish_id is not null and attempt.completed_at is null)
+              )
+          )
+          and (
+            (asset.created_at <= now() - interval '24 hours' and not exists (
+              select 1 from public.post_media post_media where post_media.media_id = asset.id
+            ))
+            or (exists (select 1 from public.post_media post_media where post_media.media_id = asset.id) and not exists (
+              select 1
+              from public.post_media post_media
+              join public.scheduled_posts post on post.id = post_media.post_id
+              where post_media.media_id = asset.id
+                and (post.status not in ('PUBLISHED', 'CANCELLED', 'NEEDS_ATTENTION') or post.terminal_at is null or post.terminal_at > now() - interval '7 days')
+            ))
+          )
+        union all
+        select staging.cleanup_state, staging.cleanup_started_at
+        from public.media_staging_objects staging
+        join public.publish_attempts attempt on attempt.id = staging.attempt_id
+        join public.scheduled_posts post on post.id = attempt.post_id
+        where staging.removed_at is null
+          and (
+            staging.cleanup_state in ('PENDING', 'NEEDS_ATTENTION')
+            or (staging.cleanup_state = 'RUNNING' and staging.cleanup_started_at <= now() - interval '15 minutes')
+          )
+          and (
+            (post.terminal_at is not null and post.status in ('PUBLISHED', 'CANCELLED', 'NEEDS_ATTENTION') and not exists (
+              select 1 from public.publish_attempts unresolved
+              where unresolved.post_id = post.id
+                and (unresolved.status in ('SCHEDULED', 'SUBMITTING', 'PROCESSING') or unresolved.error_code = 'POST_ACCEPTANCE_AMBIGUOUS' or (unresolved.publish_id is not null and unresolved.completed_at is null))
+            ))
+            or (staging.expires_at <= now() and attempt.status not in ('SCHEDULED', 'SUBMITTING', 'PROCESSING') and coalesce(attempt.error_code, '') <> 'POST_ACCEPTANCE_AMBIGUOUS' and not (attempt.publish_id is not null and attempt.completed_at is null))
+          )
+      ) cleanup_candidates
+    ),
     'reconnectRequired', (select count(*) from public.scheduler_users user_record
       left join public.tiktok_connections connection_record on connection_record.user_id = user_record.id
-      where user_record.status = 'ACTIVE' and user_record.suspended_at is null
-        and (connection_record.id is null or connection_record.access_expires_at <= now())),
+      where user_record.status = 'ACTIVE' and user_record.suspended_at is null and user_record.deletion_requested_at is null
+        and user_record.terms_version = '2026-08-23' and user_record.privacy_version = '2026-08-23'
+        and (connection_record.id is null or connection_record.reconnect_required or connection_record.refresh_expires_at <= now() or not (connection_record.scopes @> array['video.publish']::text[]))),
     'failureCategories', (select coalesce(jsonb_object_agg(category, total), '{}'::jsonb) from (
       select user_failure_code as category, count(*)::integer as total
       from public.scheduled_posts

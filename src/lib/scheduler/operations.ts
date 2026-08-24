@@ -1,4 +1,14 @@
 export const TIKTOK_PUBLISHING_WORKER = "tiktok-publishing";
+const SAFE_WORKER_HEALTH_CODES = new Set([
+  "WORKER_FAILURE",
+  "PRE_ACCEPTANCE_INFRASTRUCTURE",
+  "POST_ACCEPTANCE_AMBIGUOUS",
+]);
+const SAFE_FAILURE_CATEGORIES = new Set([
+  "PUBLISH_RETRY_SCHEDULED",
+  "PUBLISH_RECONCILIATION_REQUIRED",
+  "PUBLISH_BLOCKED",
+]);
 
 export type SchedulerOperationsClient = {
   rpc(name: string, input: Record<string, unknown>): Promise<unknown>;
@@ -34,7 +44,7 @@ function counts(value: unknown, keys: readonly string[]) {
 
 export function sanitizeWorkerHealthCode(value: unknown) {
   const normalized = typeof value === "string" ? value.trim().toUpperCase() : "";
-  return /^[A-Z0-9_]{1,80}$/.test(normalized) ? normalized : "WORKER_FAILURE";
+  return SAFE_WORKER_HEALTH_CODES.has(normalized) ? normalized : "WORKER_FAILURE";
 }
 
 export function formatWorkerHeartbeatAge(lastSucceededAt: string | null, now = new Date()) {
@@ -50,7 +60,7 @@ function sanitizeFailureCategories(value: unknown) {
   if (!record) return {};
   return Object.fromEntries(
     Object.entries(record)
-      .filter(([key, total]) => sanitizeWorkerHealthCode(key) === key && count(total) > 0)
+      .filter(([key, total]) => SAFE_FAILURE_CATEGORIES.has(key) && count(total) > 0)
       .map(([key, total]) => [key, count(total)]),
   );
 }

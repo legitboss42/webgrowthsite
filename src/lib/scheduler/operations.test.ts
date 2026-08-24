@@ -43,7 +43,8 @@ test("worker health records only sanitized failure codes", async () => {
       input: { p_worker_name: "tiktok-publishing", p_error_code: "WORKER_FAILURE", p_failed_at: "2026-08-24T12:02:00.000Z" },
     },
   ]);
-  assert.equal(sanitizeWorkerHealthCode("tiktok_rate_limited"), "TIKTOK_RATE_LIMITED");
+  assert.equal(sanitizeWorkerHealthCode("TIKTOK_RATE_LIMITED"), "WORKER_FAILURE");
+  assert.equal(sanitizeWorkerHealthCode("POST_ACCEPTANCE_AMBIGUOUS"), "POST_ACCEPTANCE_AMBIGUOUS");
 });
 
 // Mutation target: returning the raw aggregate RPC payload exposes token/media fields when the database view changes.
@@ -55,7 +56,7 @@ test("owner operations projection excludes encrypted tokens and media content", 
       heartbeat: { lastStartedAt: "2026-08-24T12:00:00.000Z", lastSucceededAt: "2026-08-24T12:01:00.000Z", lastErrorCode: null },
       cleanup: { pending: 3, overdue: 1 },
       reconnectRequired: 2,
-      failureCategories: { TIKTOK_RATE_LIMITED: 1 },
+      failureCategories: { PUBLISH_BLOCKED: 1 },
       encrypted_tokens: "must-never-leave-the-database",
       media_content: "must-never-leave-the-database",
     },
@@ -69,7 +70,7 @@ test("owner operations projection excludes encrypted tokens and media content", 
     heartbeat: { lastStartedAt: "2026-08-24T12:00:00.000Z", lastSucceededAt: "2026-08-24T12:01:00.000Z", lastErrorCode: null },
     cleanup: { pending: 3, overdue: 1 },
     reconnectRequired: 2,
-    failureCategories: { TIKTOK_RATE_LIMITED: 1 },
+    failureCategories: { PUBLISH_BLOCKED: 1 },
   });
   assert.equal("encrypted_tokens" in overview, false);
   assert.equal("media_content" in overview, false);
@@ -90,4 +91,23 @@ test("due-job claim ranks each creator and caps a batch at two posts per creator
 test("admin heartbeat reports an absent or stale successful cycle without exposing raw errors", () => {
   assert.equal(formatWorkerHeartbeatAge(null, new Date("2026-08-24T12:10:00.000Z")), "No successful cycle recorded");
   assert.equal(formatWorkerHeartbeatAge("2026-08-24T11:04:00.000Z", new Date("2026-08-24T12:10:00.000Z")), "66 minutes ago");
+});
+
+test("owner aggregate matches retry, active-account, token-readiness, and cleanup claim boundaries", () => {
+  const migration = readFileSync(new URL("../../../supabase/migrations/202608230001_public_scheduler_beta.sql", import.meta.url), "utf8").toLowerCase();
+  const start = migration.indexOf("create or replace function public.get_scheduler_owner_operations");
+  const end = migration.indexOf("create or replace function public.suspend_scheduler_user", start);
+  const overview = migration.slice(start, end);
+
+  assert.match(overview, /status = 'failed_retryable' and next_retry_at <= now\(\)/);
+  assert.doesNotMatch(overview, /status in \('scheduled', 'failed_retryable'\) and scheduled_for < now\(\)/);
+  assert.match(overview, /user_record\.deletion_requested_at is null/);
+  assert.match(overview, /connection_record\.refresh_expires_at <= now\(\)/);
+  assert.match(overview, /connection_record\.reconnect_required/);
+  assert.match(overview, /connection_record\.scopes @> array\['video\.publish'\]::text\[\]/);
+  assert.match(overview, /public\.media_staging_objects staging/);
+  assert.match(overview, /asset\.created_at <= now\(\) - interval '24 hours'/);
+  assert.match(overview, /post\.terminal_at > now\(\) - interval '7 days'/);
+  assert.match(overview, /staging\.expires_at <= now\(\)/);
+  assert.doesNotMatch(overview, /asset\.created_at <= now\(\) - interval '7 days'/);
 });
