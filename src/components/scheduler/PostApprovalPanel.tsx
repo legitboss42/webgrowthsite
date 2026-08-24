@@ -33,7 +33,6 @@ export default function PostApprovalPanel({
     approvalId: post.approval_id,
     scheduledFor: post.scheduled_for,
   }));
-  const [scheduledFor, setScheduledFor] = useState(post.scheduled_for);
 
   useEffect(() => {
     setStage(getPostWorkflowStage({
@@ -41,7 +40,6 @@ export default function PostApprovalPanel({
       approvalId: post.approval_id,
       scheduledFor: post.scheduled_for,
     }));
-    setScheduledFor(post.scheduled_for);
   }, [post.status, post.approval_id, post.scheduled_for]);
 
   useEffect(() => {
@@ -94,11 +92,12 @@ export default function PostApprovalPanel({
     });
     const body = await response.json();
     if (!response.ok) { setError(body.error); setBusy(false); return; }
-    setScheduledFor(body.scheduledFor);
-    setStage("SCHEDULED");
+    setStage("STATUS");
     setBusy(false);
     router.refresh();
   }
+
+  if (stage === "STATUS") return null;
 
   return (
     <section className="mt-10 rounded-3xl border border-white/10 p-6">
@@ -147,17 +146,7 @@ export default function PostApprovalPanel({
           <label className="block"><span className="mb-2 block text-sm">Publish time</span><input name="time" type="datetime-local" required className="w-full rounded-xl bg-[#111617] p-3" /></label>
           <button disabled={busy} className="rounded-full bg-[#ff5269] px-5 py-3 font-bold disabled:opacity-50">{busy ? "Scheduling…" : "Approve and schedule"}</button>
         </form>
-      ) : (
-        <div role="status" className="mt-6 rounded-2xl border border-[#62f5e6]/25 bg-[#62f5e6]/[0.06] p-5">
-          <p className="font-bold text-[#62f5e6]">Post scheduled successfully</p>
-          <p className="mt-2 text-sm text-white/70">
-            {scheduledFor ? `Publishing ${new Date(scheduledFor).toLocaleString()}.` : "The post is in the publishing queue."}
-          </p>
-          <a href="/scheduler/dashboard/" className="mt-4 inline-flex rounded-full border border-white/15 px-4 py-2 text-sm font-bold">
-            Back to publishing queue
-          </a>
-        </div>
-      )}
+      ) : null}
       {error ? <p role="alert" className="mt-4 text-[#ff8b9a]">{error}</p> : null}
     </section>
   );
