@@ -3,6 +3,8 @@ import test from "node:test";
 import {
   processClaimedPost,
   processPostsIndependently,
+  runGatedPublishingCycle,
+  runWorkerCycle,
   type PublishingContext,
 } from "./worker";
 import { classifyPublishFailure } from "./retry";
@@ -178,4 +180,32 @@ test("worker isolation survives a failure-recording outage", async () => {
   }, async () => { throw new Error("audit database failed"); });
   assert.deepEqual(processed, ["post-1", "post-2", "post-3"]);
   assert.deepEqual(result, ["post-1", null, "post-3"]);
+});
+
+// Mutation target: recording success before the cycle settles reports a healthy worker after a failed batch.
+test("worker heartbeat succeeds only after the full cycle completes", async () => {
+  const events: string[] = [];
+  const health = {
+    recordWorkerStarted: async () => { events.push("started"); },
+    recordWorkerSucceeded: async () => { events.push("succeeded"); },
+    recordWorkerFailure: async () => { events.push("failed"); },
+  };
+
+  await assert.rejects(() => runWorkerCycle(health, async () => {
+    events.push("cycle");
+    throw new Error("worker failed");
+  }), /worker failed/);
+
+  assert.deepEqual(events, ["started", "cycle", "failed"]);
+});
+
+test("a disabled publishing gate does not invoke the TikTok work cycle", async () => {
+  let tiktokCalls = 0;
+  const result = await runGatedPublishingCycle(false, async () => {
+    tiktokCalls += 1;
+    return { claimed: 1, submitted: 1, failed: 0, disabled: false };
+  });
+
+  assert.equal(tiktokCalls, 0);
+  assert.deepEqual(result, { claimed: 0, submitted: 0, failed: 0, disabled: true });
 });

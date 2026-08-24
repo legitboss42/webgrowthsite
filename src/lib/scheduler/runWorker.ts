@@ -3,6 +3,7 @@ import { isTikTokTokenExpiringSoon, refreshTikTokTokens, type TikTokConnectionRe
 import { getSchedulerConfig } from "./config";
 import { decryptTikTokTokens, encryptTikTokTokens } from "./crypto";
 import { canMutateSchedulerContent } from "./media";
+import { createSupabaseSchedulerOperations } from "./operations";
 import {
   assessPublishReadiness,
   buildWorkerFailureState,
@@ -18,7 +19,7 @@ import { createSupabaseMediaStorage } from "./storage";
 import { createSchedulerSupabaseClient } from "./supabase";
 import { createTikTokSchedulerClient, type TikTokPrivacyLevel } from "./tiktokClient";
 import { VIDEO_VALIDATION_VERSION } from "./videoValidation";
-import { processClaimedPost, processPostsIndependently, type PublishingContext } from "./worker";
+import { processClaimedPost, processPostsIndependently, runGatedPublishingCycle, runWorkerCycle, type PublishingContext } from "./worker";
 
 type ClaimedPost = {
   id: string;
@@ -65,7 +66,7 @@ function toRetryAttempt(row: AttemptRow): RetryAttempt {
   };
 }
 
-export async function runPublishingWorker(now = new Date()) {
+async function executePublishingWorker(now = new Date()) {
   const config = getSchedulerConfig();
   if (!config.directPostEnabled) return { claimed: 0, submitted: 0, failed: 0, disabled: true };
   const supabase = createSchedulerSupabaseClient();
@@ -357,4 +358,11 @@ export async function runPublishingWorker(now = new Date()) {
   });
 
   return { claimed: posts.length, submitted, failed, disabled: false };
+}
+
+export async function runPublishingWorker(now = new Date()) {
+  return runGatedPublishingCycle(getSchedulerConfig().directPostEnabled, async () => {
+    const operations = await createSupabaseSchedulerOperations();
+    return runWorkerCycle(operations, () => executePublishingWorker(now), now);
+  });
 }

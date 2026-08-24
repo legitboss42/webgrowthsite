@@ -135,8 +135,14 @@ set search_path = public
 as $$
 begin
   return query
-  with due as (
-    select post.id
+  with ranked_due as (
+    select
+      post.id,
+      post.scheduled_for,
+      row_number() over (
+        partition by post.user_id
+        order by post.scheduled_for, post.id
+      ) as user_rank
     from public.scheduled_posts post
     join public.scheduler_users user_record
       on user_record.id = post.user_id
@@ -156,7 +162,12 @@ begin
           and post.next_retry_at <= p_now
         )
       )
-    order by post.scheduled_for, post.id
+  ), due as (
+    select post.id
+    from public.scheduled_posts post
+    join ranked_due ranked on ranked.id = post.id
+    where ranked.user_rank <= 2
+    order by ranked.scheduled_for, post.id
     for update of post skip locked
     limit greatest(1, least(p_limit, 25))
   )
@@ -169,6 +180,160 @@ begin
   from due
   where post.id = due.id
   returning post.*;
+end;
+$$;
+
+create or replace function public.record_scheduler_worker_started(
+  p_worker_name text,
+  p_started_at timestamptz
+)
+returns boolean
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if coalesce(btrim(p_worker_name), '') = '' or p_started_at is null then return false; end if;
+  insert into public.scheduler_worker_health as health (
+    worker_name, last_started_at, last_error_code, updated_at
+  ) values (
+    left(btrim(p_worker_name), 80), p_started_at, null, p_started_at
+  ) on conflict (worker_name) do update set
+    last_started_at = excluded.last_started_at,
+    last_error_code = null,
+    updated_at = excluded.updated_at;
+  return true;
+end;
+$$;
+
+create or replace function public.record_scheduler_worker_succeeded(
+  p_worker_name text,
+  p_succeeded_at timestamptz
+)
+returns boolean
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if coalesce(btrim(p_worker_name), '') = '' or p_succeeded_at is null then return false; end if;
+  insert into public.scheduler_worker_health as health (
+    worker_name, last_succeeded_at, last_error_code, updated_at
+  ) values (
+    left(btrim(p_worker_name), 80), p_succeeded_at, null, p_succeeded_at
+  ) on conflict (worker_name) do update set
+    last_succeeded_at = excluded.last_succeeded_at,
+    last_error_code = null,
+    updated_at = excluded.updated_at;
+  return true;
+end;
+$$;
+
+create or replace function public.record_scheduler_worker_failure(
+  p_worker_name text,
+  p_error_code text,
+  p_failed_at timestamptz
+)
+returns boolean
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_error_code text := case
+    when upper(btrim(coalesce(p_error_code, ''))) ~ '^[A-Z0-9_]{1,80}$'
+      then upper(btrim(p_error_code))
+    else 'WORKER_FAILURE'
+  end;
+begin
+  if coalesce(btrim(p_worker_name), '') = '' or p_failed_at is null then return false; end if;
+  insert into public.scheduler_worker_health as health (
+    worker_name, last_error_code, updated_at
+  ) values (
+    left(btrim(p_worker_name), 80), v_error_code, p_failed_at
+  ) on conflict (worker_name) do update set
+    last_error_code = excluded.last_error_code,
+    updated_at = excluded.updated_at;
+  return true;
+end;
+$$;
+
+create or replace function public.get_scheduler_owner_operations()
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_heartbeat jsonb;
+begin
+  select jsonb_build_object(
+    'lastStartedAt', health.last_started_at,
+    'lastSucceededAt', health.last_succeeded_at,
+    'lastErrorCode', health.last_error_code
+  ) into v_heartbeat
+  from public.scheduler_worker_health health
+  where health.worker_name = 'tiktok-publishing';
+
+  return jsonb_build_object(
+    'users', (select jsonb_build_object(
+      'total', count(*),
+      'active', count(*) filter (where status = 'ACTIVE' and suspended_at is null),
+      'suspended', count(*) filter (where status = 'SUSPENDED' or suspended_at is not null)
+    ) from public.scheduler_users),
+    'workflow', (select jsonb_build_object(
+      'scheduled', count(*) filter (where status = 'SCHEDULED'),
+      'overdue', count(*) filter (where status in ('SCHEDULED', 'FAILED_RETRYABLE') and scheduled_for < now()),
+      'submitting', count(*) filter (where status in ('CLAIMED', 'SUBMITTING')),
+      'processing', count(*) filter (where status = 'PROCESSING'),
+      'published', count(*) filter (where status = 'PUBLISHED'),
+      'failed', count(*) filter (where status in ('FAILED_RETRYABLE', 'NEEDS_ATTENTION')),
+      'cancelled', count(*) filter (where status = 'CANCELLED')
+    ) from public.scheduled_posts),
+    'heartbeat', coalesce(v_heartbeat, jsonb_build_object('lastStartedAt', null, 'lastSucceededAt', null, 'lastErrorCode', null)),
+    'cleanup', (select jsonb_build_object(
+      'pending', count(*) filter (where cleanup_state in ('PENDING', 'RUNNING', 'NEEDS_ATTENTION')),
+      'overdue', count(*) filter (where cleanup_state in ('PENDING', 'RUNNING', 'NEEDS_ATTENTION') and created_at <= now() - interval '7 days')
+    ) from public.media_assets where storage_deleted_at is null),
+    'reconnectRequired', (select count(*) from public.scheduler_users user_record
+      left join public.tiktok_connections connection_record on connection_record.user_id = user_record.id
+      where user_record.status = 'ACTIVE' and user_record.suspended_at is null
+        and (connection_record.id is null or connection_record.access_expires_at <= now())),
+    'failureCategories', (select coalesce(jsonb_object_agg(category, total), '{}'::jsonb) from (
+      select user_failure_code as category, count(*)::integer as total
+      from public.scheduled_posts
+      where user_failure_code ~ '^[A-Z0-9_]{1,80}$'
+      group by user_failure_code
+    ) failures)
+  );
+end;
+$$;
+
+create or replace function public.suspend_scheduler_user(p_user_id uuid, p_reason text)
+returns boolean
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  update public.scheduler_users
+  set status = 'SUSPENDED', suspended_at = now(), suspension_reason = left(btrim(coalesce(p_reason, '')), 240)
+  where id = p_user_id and deletion_requested_at is null;
+  return found;
+end;
+$$;
+
+create or replace function public.restore_scheduler_user(p_user_id uuid)
+returns boolean
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  update public.scheduler_users
+  set status = 'ACTIVE', suspended_at = null, suspension_reason = null
+  where id = p_user_id and deletion_requested_at is null;
+  return found;
 end;
 $$;
 
@@ -2250,6 +2415,18 @@ revoke execute on function public.reserve_public_scheduler_slot(uuid, uuid, time
 grant execute on function public.reserve_public_scheduler_slot(uuid, uuid, timestamptz, text, timestamptz) to service_role;
 revoke execute on function public.claim_due_tiktok_posts(timestamptz, integer) from public, anon, authenticated;
 grant execute on function public.claim_due_tiktok_posts(timestamptz, integer) to service_role;
+revoke execute on function public.record_scheduler_worker_started(text, timestamptz) from public, anon, authenticated;
+grant execute on function public.record_scheduler_worker_started(text, timestamptz) to service_role;
+revoke execute on function public.record_scheduler_worker_succeeded(text, timestamptz) from public, anon, authenticated;
+grant execute on function public.record_scheduler_worker_succeeded(text, timestamptz) to service_role;
+revoke execute on function public.record_scheduler_worker_failure(text, text, timestamptz) from public, anon, authenticated;
+grant execute on function public.record_scheduler_worker_failure(text, text, timestamptz) to service_role;
+revoke execute on function public.get_scheduler_owner_operations() from public, anon, authenticated;
+grant execute on function public.get_scheduler_owner_operations() to service_role;
+revoke execute on function public.suspend_scheduler_user(uuid, text) from public, anon, authenticated;
+grant execute on function public.suspend_scheduler_user(uuid, text) to service_role;
+revoke execute on function public.restore_scheduler_user(uuid) from public, anon, authenticated;
+grant execute on function public.restore_scheduler_user(uuid) to service_role;
 revoke execute on function public.create_safe_publish_retry(uuid, uuid) from public, anon, authenticated;
 grant execute on function public.create_safe_publish_retry(uuid, uuid) to service_role;
 revoke execute on function public.begin_tiktok_publish_submission(uuid, uuid, uuid, uuid, integer, uuid, text, text) from public, anon, authenticated;

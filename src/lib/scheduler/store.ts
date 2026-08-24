@@ -1,3 +1,5 @@
+import { sanitizeWorkerHealthCode, TIKTOK_PUBLISHING_WORKER } from "./operations";
+
 export type SchedulerDatabaseClient = {
   insert(table: string, input: Record<string, unknown>): Promise<Record<string, unknown>>;
   find(table: string, column: string, value: string): Promise<Record<string, unknown> | null>;
@@ -146,6 +148,25 @@ export function createSchedulerStore(client: SchedulerDatabaseClient) {
         throw new Error("Scheduler disconnect returned an invalid result.");
       }
       return { ok: true as const, cancelledJobs: Number(result.cancelledJobs) };
+    },
+    recordWorkerStarted(startedAt: string) {
+      return client.rpc("record_scheduler_worker_started", {
+        p_worker_name: TIKTOK_PUBLISHING_WORKER,
+        p_started_at: startedAt,
+      });
+    },
+    recordWorkerSucceeded(succeededAt: string) {
+      return client.rpc("record_scheduler_worker_succeeded", {
+        p_worker_name: TIKTOK_PUBLISHING_WORKER,
+        p_succeeded_at: succeededAt,
+      });
+    },
+    recordWorkerFailure(errorCode: string, failedAt: string) {
+      return client.rpc("record_scheduler_worker_failure", {
+        p_worker_name: TIKTOK_PUBLISHING_WORKER,
+        p_error_code: sanitizeWorkerHealthCode(errorCode),
+        p_failed_at: failedAt,
+      });
     },
     async requestAccountDeletion(userId: string) {
       const result = asRecord(await client.rpc("request_scheduler_account_deletion", { p_user_id: userId }));

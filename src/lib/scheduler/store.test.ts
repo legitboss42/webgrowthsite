@@ -253,3 +253,18 @@ test("disconnect atomically removes the user's token record and cancels only saf
     input: { p_user_id: "user-1" },
   }]);
 });
+
+test("worker heartbeat is persisted through the dedicated sanitized RPCs", async () => {
+  const { calls, client } = fakeClient();
+  const store = createSchedulerStore(client);
+
+  await store.recordWorkerStarted("2026-08-24T12:00:00.000Z");
+  await store.recordWorkerSucceeded("2026-08-24T12:01:00.000Z");
+  await store.recordWorkerFailure("provider token=private-value", "2026-08-24T12:02:00.000Z");
+
+  assert.deepEqual(calls, [
+    { kind: "rpc", name: "record_scheduler_worker_started", input: { p_worker_name: "tiktok-publishing", p_started_at: "2026-08-24T12:00:00.000Z" } },
+    { kind: "rpc", name: "record_scheduler_worker_succeeded", input: { p_worker_name: "tiktok-publishing", p_succeeded_at: "2026-08-24T12:01:00.000Z" } },
+    { kind: "rpc", name: "record_scheduler_worker_failure", input: { p_worker_name: "tiktok-publishing", p_error_code: "WORKER_FAILURE", p_failed_at: "2026-08-24T12:02:00.000Z" } },
+  ]);
+});

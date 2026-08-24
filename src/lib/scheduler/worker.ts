@@ -1,4 +1,31 @@
 import type { TikTokPrivacyLevel } from "./tiktokClient";
+
+export type WorkerHealthRecorder = {
+  recordWorkerStarted(startedAt: string): Promise<void>;
+  recordWorkerSucceeded(succeededAt: string): Promise<void>;
+  recordWorkerFailure(errorCode: string, failedAt: string): Promise<void>;
+};
+
+export async function runWorkerCycle<T>(health: WorkerHealthRecorder, cycle: () => Promise<T>, now = new Date()) {
+  const cycleStartedAt = now.toISOString();
+  await health.recordWorkerStarted(cycleStartedAt);
+  try {
+    const result = await cycle();
+    await health.recordWorkerSucceeded(new Date().toISOString());
+    return result;
+  } catch (error) {
+    await health.recordWorkerFailure("WORKER_FAILURE", new Date().toISOString());
+    throw error;
+  }
+}
+
+export async function runGatedPublishingCycle<T extends { claimed: number; submitted: number; failed: number; disabled: boolean }>(
+  directPostEnabled: boolean,
+  cycle: () => Promise<T>,
+): Promise<T> {
+  if (!directPostEnabled) return { claimed: 0, submitted: 0, failed: 0, disabled: true } as T;
+  return cycle();
+}
 import {
   ambiguousPublishError,
   nonRetryablePublishError,
