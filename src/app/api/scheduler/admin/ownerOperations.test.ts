@@ -1,11 +1,19 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import test from "node:test";
 import { createSchedulerSession, SCHEDULER_SESSION_COOKIE } from "@/lib/scheduler/session";
-import { createRestoreUserHandler } from "./restore-user/route";
-import { createSuspendUserHandler } from "./suspend-user/route";
+import { createRestoreUserHandler, createSuspendUserHandler } from "./ownerOperationHandlers";
 
 const USER_ID = "11111111-1111-4111-8111-111111111111";
 const ROOT_URL = "https://webgrowth.info/api/scheduler/admin";
+
+test("admin route modules export only HTTP handlers and keep test factories outside route files", () => {
+  for (const route of ["suspend-user/route.ts", "restore-user/route.ts"]) {
+    const source = readFileSync(new URL(`./${route}`, import.meta.url), "utf8");
+    assert.doesNotMatch(source, /export\s+(?:function|const)\s+create(?:Suspend|Restore)UserHandler/);
+    assert.match(source, /export const POST/);
+  }
+});
 
 function formRequest(path: string, values: Record<string, string>, origin: string | null = "https://webgrowth.info") {
   const form = new FormData();
