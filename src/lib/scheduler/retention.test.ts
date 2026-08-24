@@ -92,6 +92,47 @@ test("active post or attempt references always protect original media", () => {
   }), NOW), null);
 });
 
+// Mutation target: treating a no-publish-id ambiguity as inactive allows storage removal before provider reconciliation.
+test("original cleanup does not remove a terminal asset with an unresolved provider reference", async () => {
+  const repo = repository();
+  const mediaStorage = storage();
+  repo.state.media.push(asset({
+    id: "asset-ambiguous",
+    terminalAt: "2026-08-01T00:00:00.000Z",
+    terminalStatus: "NEEDS_ATTENTION",
+    attachedToPost: true,
+    approvedForPost: true,
+    hasActiveReference: true,
+  }));
+
+  assert.deepEqual(await cleanupOriginalMedia(repo.value, mediaStorage.value, NOW), {
+    checked: 1,
+    removed: 0,
+    failed: 1,
+  });
+  assert.deepEqual(mediaStorage.removals, []);
+  assert.deepEqual(repo.state.completedMedia, []);
+  assert.deepEqual(repo.state.failures, [{
+    target: "asset-ambiguous",
+    errorCode: "RETENTION_REVALIDATION_FAILED",
+  }]);
+});
+
+// Mutation target: predicate keyed to publish_id misses incomplete provider work whose acceptance is unresolved.
+test("original media claim and completion protect every unresolved attached attempt", () => {
+  for (const name of [
+    "claim_scheduler_media_cleanup",
+    "complete_scheduler_media_cleanup",
+  ]) {
+    const fn = schedulerSqlFunction(name);
+    assert.match(fn, /attempt\.id is not null and attempt\.completed_at is null/);
+    assert.doesNotMatch(fn, /attempt\.publish_id is not null and attempt\.completed_at is null/);
+  }
+
+  const claim = schedulerSqlFunction("claim_scheduler_media_cleanup");
+  assert.match(claim, /coalesce\(bool_or\([\s\S]*attempt\.id is not null and attempt\.completed_at is null/);
+});
+
 // Mutation target: prefix-only checks permit traversal, encoded separators, and similarly named tenant namespaces.
 test("destructive storage paths require an exact normalized authoritative namespace", () => {
   assert.equal(isValidRetentionStoragePath("user-1/asset-1/upload.mp4", "user-1", "ORIGINAL"), true);

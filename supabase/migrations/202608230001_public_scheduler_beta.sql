@@ -1522,7 +1522,7 @@ begin
           and (
             post.status in ('SCHEDULED', 'CLAIMED', 'SUBMITTING', 'PROCESSING', 'FAILED_RETRYABLE')
             or attempt.status in ('SCHEDULED', 'SUBMITTING', 'PROCESSING')
-            or (attempt.publish_id is not null and attempt.completed_at is null)
+            or (attempt.id is not null and attempt.completed_at is null)
           )
       )
       and (
@@ -1589,7 +1589,7 @@ begin
       coalesce(bool_or(
         post.status in ('SCHEDULED', 'CLAIMED', 'SUBMITTING', 'PROCESSING', 'FAILED_RETRYABLE')
         or attempt.status in ('SCHEDULED', 'SUBMITTING', 'PROCESSING')
-        or (attempt.publish_id is not null and attempt.completed_at is null)
+        or (attempt.id is not null and attempt.completed_at is null)
       ), false) as has_active_reference
     from public.post_media post_media
     join public.scheduled_posts post on post.id = post_media.post_id
@@ -1649,7 +1649,7 @@ begin
         and (
           post.status in ('SCHEDULED', 'CLAIMED', 'SUBMITTING', 'PROCESSING', 'FAILED_RETRYABLE')
           or attempt.status in ('SCHEDULED', 'SUBMITTING', 'PROCESSING')
-          or (attempt.publish_id is not null and attempt.completed_at is null)
+          or (attempt.id is not null and attempt.completed_at is null)
         )
     );
 
