@@ -85,11 +85,12 @@ export default function PostApprovalPanel({
   async function schedule(data: FormData) {
     setBusy(true); setError("");
     const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    const instant = toScheduleInstantInTimezone(String(data.get("time") || ""), timezone);
+    const localTime = String(data.get("time") || "");
+    const instant = toScheduleInstantInTimezone(localTime, timezone);
     if (!instant.ok) { setError(instant.error); setBusy(false); return; }
     const response = await fetch(`/api/scheduler/posts/${post.id}/schedule/`, {
       method: "POST", headers: { "content-type": "application/json" },
-      body: JSON.stringify({ action: "schedule", scheduledFor: instant.scheduledForIso, timezone }),
+      body: JSON.stringify({ action: "schedule", scheduledFor: instant.scheduledForIso, localTime, timezone }),
     });
     const body = await response.json();
     if (!response.ok) { setError(body.error); setBusy(false); return; }

@@ -54,35 +54,54 @@ function equalLocalParts(left: LocalDateTimeParts, right: LocalDateTimeParts): b
     && left.minute === right.minute && left.second === right.second;
 }
 
+function timezoneOffsetAt(instantMs: number, timezone: string): number {
+  const roundedInstant = instantMs - (instantMs % 1_000);
+  const local = partsInTimezone(roundedInstant, timezone);
+  return Date.UTC(local.year, local.month - 1, local.day, local.hour, local.minute, local.second) - roundedInstant;
+}
+
+function plausibleTimezoneOffsets(localAsUtc: number, timezone: string): number[] {
+  const offsets = new Set<number>();
+  // Sample either side of the local date so both sides of nearby DST changes
+  // are candidate offsets. Candidates are always round-tripped below.
+  for (let hours = -72; hours <= 72; hours += 6) {
+    offsets.add(timezoneOffsetAt(localAsUtc + hours * 60 * 60 * 1_000, timezone));
+  }
+  return [...offsets];
+}
+
 export function toScheduleInstantInTimezone(localDateTime: string, timezone: string) {
   if (!isValidTimezone(timezone)) return { ok: false as const, error: "Timezone is invalid." };
   const local = parseLocalDateTime(localDateTime);
   if (!local) return { ok: false as const, error: "Choose a valid local time in your timezone." };
 
   const localAsUtc = Date.UTC(local.year, local.month - 1, local.day, local.hour, local.minute, local.second, local.millisecond);
-  const observedAtLocalAsUtc = partsInTimezone(localAsUtc, timezone);
-  const observedAsUtc = Date.UTC(
-    observedAtLocalAsUtc.year, observedAtLocalAsUtc.month - 1, observedAtLocalAsUtc.day,
-    observedAtLocalAsUtc.hour, observedAtLocalAsUtc.minute, observedAtLocalAsUtc.second,
-  );
-  const instantMs = localAsUtc - (observedAsUtc - localAsUtc);
-  if (!equalLocalParts(partsInTimezone(instantMs, timezone), local)) {
-    return { ok: false as const, error: "Choose a valid local time in your timezone." };
+  const candidates = plausibleTimezoneOffsets(localAsUtc, timezone)
+    .map((offset) => localAsUtc - offset)
+    .filter((instantMs) => equalLocalParts(partsInTimezone(instantMs, timezone), local));
+  if (candidates.length === 0) return { ok: false as const, error: "Choose a valid local time in your timezone." };
+  if (candidates.length > 1) {
+    return { ok: false as const, error: "Choose a different local time because this time occurs twice in your timezone." };
   }
-  return { ok: true as const, scheduledForIso: new Date(instantMs).toISOString() };
+  return { ok: true as const, scheduledForIso: new Date(candidates[0]).toISOString() };
 }
 
-export function parseOffsetScheduleInstant(input: { scheduledFor: unknown; timezone: unknown; nowIso: string }) {
+export function parseOffsetScheduleInstant(input: { scheduledFor: unknown; localTime: unknown; timezone: unknown; nowIso: string }) {
   const timezone = typeof input.timezone === "string" ? input.timezone : "";
   const scheduledFor = typeof input.scheduledFor === "string" ? input.scheduledFor : "";
   if (!scheduledFor || !/(?:Z|[+-]\d{2}:\d{2})$/i.test(scheduledFor)) {
     return { ok: false as const, status: 400, error: "Choose a future time and timezone." };
   }
-  if (!timezone || !isValidTimezone(timezone)) return { ok: false as const, status: 400, error: "Timezone is invalid." };
+  const expected = toScheduleInstantInTimezone(typeof input.localTime === "string" ? input.localTime : "", timezone);
+  if (!expected.ok) return { ok: false as const, status: 400, error: expected.error };
   const instantMs = Date.parse(scheduledFor);
   const nowMs = Date.parse(input.nowIso);
-  if (!Number.isFinite(instantMs) || !Number.isFinite(nowMs) || instantMs <= nowMs) {
+  if (!Number.isFinite(instantMs) || !Number.isFinite(nowMs)) {
     return { ok: false as const, status: 400, error: "Choose a future time and timezone." };
   }
-  return { ok: true as const, scheduledForIso: new Date(instantMs).toISOString(), timezone };
+  if (new Date(instantMs).toISOString() !== expected.scheduledForIso) {
+    return { ok: false as const, status: 400, error: "Scheduled time does not match the selected timezone." };
+  }
+  if (instantMs <= nowMs) return { ok: false as const, status: 400, error: "Choose a future time and timezone." };
+  return { ok: true as const, scheduledForIso: expected.scheduledForIso, timezone };
 }

@@ -33,7 +33,7 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
   }
 
   if (body?.action === "schedule") {
-    const schedule = parseOffsetScheduleInstant({ scheduledFor: body.scheduledFor, timezone: body.timezone, nowIso: new Date().toISOString() });
+    const schedule = parseOffsetScheduleInstant({ scheduledFor: body.scheduledFor, localTime: body.localTime, timezone: body.timezone, nowIso: new Date().toISOString() });
     if (!schedule.ok) return NextResponse.json({ error: schedule.error }, { status: schedule.status });
     const { data: user, error: userError } = await supabase.from("scheduler_users")
       .select("status,suspended_at,deletion_requested_at,terms_version,privacy_version")

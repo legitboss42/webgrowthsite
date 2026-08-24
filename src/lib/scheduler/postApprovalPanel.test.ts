@@ -16,3 +16,15 @@ test("post approval UI is gated behind Direct Post enablement", () => {
   assert.match(panelSource, /Direct Post approval needed/);
   assert.doesNotMatch(panelSource, /Connect TikTok Direct Post first\./);
 });
+
+// Mutation target: sending the raw datetime-local field lets the server parse
+// it in another timezone or removes the local/instant integrity evidence.
+test("schedule form submits a resolved instant with its original local time and zone", () => {
+  const panelSource = readFileSync(panelPath, "utf8");
+
+  assert.match(panelSource, /toScheduleInstantInTimezone/);
+  assert.match(panelSource, /scheduledFor:\s*instant\.scheduledForIso/);
+  assert.match(panelSource, /const localTime = String\(data\.get\("time"\)/);
+  assert.match(panelSource, /localTime, timezone/);
+  assert.match(panelSource, /timezone/);
+});

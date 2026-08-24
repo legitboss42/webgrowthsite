@@ -179,6 +179,12 @@ test("public scheduler beta migration reserves a fixed quota by scheduling the o
   );
   assert.match(sql, /alter table public\.scheduler_worker_health enable row level security/);
   assert.match(sql, /revoke execute on function public\.reserve_public_scheduler_slot\(uuid, uuid, timestamptz, text, timestamptz\) from public, anon, authenticated/);
+  assert.match(sql, /grant execute on function public\.reserve_public_scheduler_slot\(uuid, uuid, timestamptz, text, timestamptz\) to service_role/);
+  assert.ok(
+    sql.indexOf("revoke execute on function public.reserve_public_scheduler_slot(uuid, uuid, timestamptz, text, timestamptz)")
+      < sql.indexOf("grant execute on function public.reserve_public_scheduler_slot(uuid, uuid, timestamptz, text, timestamptz) to service_role"),
+    "service role grant must follow the exact reservation RPC revoke",
+  );
   assert.match(sql, /revoke execute on function public\.create_safe_publish_retry\(uuid, uuid\) from public, anon, authenticated/);
   assert.match(retryFunction, /security definer/);
   assert.match(retryFunction, /set search_path = public/);
