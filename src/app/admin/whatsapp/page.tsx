@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import InternalUtilityUnlockForm from "@/components/internal/InternalUtilityUnlockForm";
 import { getInternalUtilityLocalPassphrase } from "@/lib/internalUtilityAuth";
 import { hasWhatsAppAdminAccess } from "./auth";
+import WhatsAppInboxAutoRefresh from "./AutoRefresh";
 import ReplyComposer from "./ReplyComposer";
 import {
   buildWhatsAppDashboardModel,
@@ -169,6 +170,7 @@ export default async function WhatsAppAdminPage({
 
   return (
     <main className="min-h-screen bg-[#050806] px-6 py-12 text-white">
+      <WhatsAppInboxAutoRefresh />
       <div className="mx-auto max-w-7xl">
         <p className="text-xs uppercase tracking-[.2em] text-emerald-300">Internal lead queue</p>
         <div className="mt-3 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
