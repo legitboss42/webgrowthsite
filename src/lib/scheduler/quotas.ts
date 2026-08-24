@@ -1,3 +1,6 @@
+import type { SchedulerLaunchState } from "./launch";
+import { canMutateSchedulerContent } from "./media";
+
 export const PUBLIC_DAILY_SCHEDULE_LIMIT = 3;
 export const PUBLIC_ACTIVE_POST_LIMIT = 20;
 
@@ -5,6 +8,7 @@ export type PublicScheduleReservationInput = {
   userId: string;
   postId: string;
   scheduledForIso: string;
+  timezone: string;
   nowIso: string;
 };
 
@@ -71,5 +75,3 @@ export async function schedulePublicPostAtBoundary(
   }
   return reservePublicScheduleAtBoundary(store, input.reservation);
 }
-import type { SchedulerLaunchState } from "./launch";
-import { canMutateSchedulerContent } from "./media";

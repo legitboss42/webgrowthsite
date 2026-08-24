@@ -149,12 +149,16 @@ test("public scheduler beta migration reserves a fixed quota by scheduling the o
   assert.match(reserveFunction, /p_post_id uuid/);
   assert.match(reserveFunction, /p_user_id uuid/);
   assert.match(reserveFunction, /p_scheduled_for timestamptz/);
+  assert.match(reserveFunction, /p_timezone text/);
   assert.match(reserveFunction, /p_now timestamptz/);
   assert.doesNotMatch(reserveFunction, /p_daily_limit|p_active_limit/);
   assert.match(reserveFunction, /security definer/);
   assert.match(reserveFunction, /set search_path = public/);
   assert.match(sql, /add column if not exists scheduled_at timestamptz/);
   assert.match(reserveFunction, /pg_advisory_xact_lock/);
+  assert.match(reserveFunction, /from public\.scheduler_users user_record[\s\S]*user_record\.id = p_user_id[\s\S]*user_record\.status = 'active'[\s\S]*user_record\.suspended_at is null[\s\S]*user_record\.deletion_requested_at is null[\s\S]*user_record\.terms_version = '2026-08-23'[\s\S]*user_record\.privacy_version = '2026-08-23'[\s\S]*for update/);
+  assert.ok(reserveFunction.indexOf("pg_advisory_xact_lock") < reserveFunction.indexOf("from public.scheduler_users user_record"));
+  assert.ok(reserveFunction.indexOf("from public.scheduler_users user_record") < reserveFunction.indexOf("from public.scheduled_posts post"));
   assert.match(reserveFunction, /post\.id = p_post_id/);
   assert.match(reserveFunction, /post\.user_id = p_user_id/);
   assert.match(reserveFunction, /approval\.post_id = post\.id/);
@@ -165,7 +169,7 @@ test("public scheduler beta migration reserves a fixed quota by scheduling the o
   assert.match(reserveFunction, /post\.scheduled_for > p_now/);
   assert.match(reserveFunction, /v_daily_used >= 3/);
   assert.match(reserveFunction, /v_active_used >= 20/);
-  assert.match(reserveFunction, /update public\.scheduled_posts post[\s\S]*status = 'scheduled'[\s\S]*scheduled_for = p_scheduled_for[\s\S]*scheduled_at = p_now/);
+  assert.match(reserveFunction, /update public\.scheduled_posts post[\s\S]*status = 'scheduled'[\s\S]*scheduled_for = p_scheduled_for[\s\S]*timezone = p_timezone[\s\S]*scheduled_at = p_now/);
   assert.match(reserveFunction, /for update/);
   assert.match(sql, /on public\.scheduled_posts\(user_id, scheduled_for\)/);
   assert.ok(
@@ -174,7 +178,7 @@ test("public scheduler beta migration reserves a fixed quota by scheduling the o
     "numbered unique index must precede removal of the legacy constraint"
   );
   assert.match(sql, /alter table public\.scheduler_worker_health enable row level security/);
-  assert.match(sql, /revoke execute on function public\.reserve_public_scheduler_slot\(uuid, uuid, timestamptz, timestamptz\) from public, anon, authenticated/);
+  assert.match(sql, /revoke execute on function public\.reserve_public_scheduler_slot\(uuid, uuid, timestamptz, text, timestamptz\) from public, anon, authenticated/);
   assert.match(sql, /revoke execute on function public\.create_safe_publish_retry\(uuid, uuid\) from public, anon, authenticated/);
   assert.match(retryFunction, /security definer/);
   assert.match(retryFunction, /set search_path = public/);

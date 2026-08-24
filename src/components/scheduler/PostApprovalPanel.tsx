@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getPostWorkflowStage, type PostWorkflowStage } from "@/lib/scheduler/postWorkflow";
+import { toScheduleInstantInTimezone } from "@/lib/scheduler/scheduleTime";
 
 type ApprovalPost = { id: string; status: string; approval_id: string | null; scheduled_for: string | null };
 type CreatorInfo = {
@@ -83,9 +84,12 @@ export default function PostApprovalPanel({
 
   async function schedule(data: FormData) {
     setBusy(true); setError("");
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const instant = toScheduleInstantInTimezone(String(data.get("time") || ""), timezone);
+    if (!instant.ok) { setError(instant.error); setBusy(false); return; }
     const response = await fetch(`/api/scheduler/posts/${post.id}/schedule/`, {
       method: "POST", headers: { "content-type": "application/json" },
-      body: JSON.stringify({ action: "schedule", scheduledFor: String(data.get("time")), timezone: Intl.DateTimeFormat().resolvedOptions().timeZone }),
+      body: JSON.stringify({ action: "schedule", scheduledFor: instant.scheduledForIso, timezone }),
     });
     const body = await response.json();
     if (!response.ok) { setError(body.error); setBusy(false); return; }

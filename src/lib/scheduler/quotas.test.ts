@@ -68,6 +68,7 @@ function reserve(store: AtomicScheduleReservationStore, postId = "post-1") {
     userId: "creator-1",
     postId,
     scheduledForIso: SCHEDULED_FOR,
+    timezone: "Africa/Lagos",
     nowIso: NOW,
   });
 }
@@ -110,6 +111,7 @@ test("an owner-shaped user ID has no quota bypass or caller-configured limit", a
     userId: "owner-user",
     postId: "post-owner",
     scheduledForIso: SCHEDULED_FOR,
+    timezone: "Africa/Lagos",
     nowIso: NOW,
   });
 
@@ -122,9 +124,9 @@ test("an owner-shaped user ID has no quota bypass or caller-configured limit", a
   assert.equal(PUBLIC_ACTIVE_POST_LIMIT, 20);
 });
 
-// Mutation target: bypassing the independent emergency gate invokes the RPC
-// while new scheduling has explicitly been stopped.
-test("a disabled new-scheduling gate refuses before the reservation RPC", async () => {
+// Mutation target: checking account state before the independent emergency gate
+// leaks a different policy branch while new scheduling is explicitly stopped.
+test("a disabled new-scheduling gate wins before account policy or the reservation RPC", async () => {
   let calls = 0;
   const store: AtomicScheduleReservationStore = {
     async reservePublicSchedulerSlot() { calls += 1; return true; },
@@ -133,13 +135,13 @@ test("a disabled new-scheduling gate refuses before the reservation RPC", async 
   assert.deepEqual(await schedulePublicPostAtBoundary(store, {
     launch: { newScheduling: false },
     user: {
-      status: "ACTIVE",
-      suspendedAt: null,
+      status: "SUSPENDED",
+      suspendedAt: "2026-08-24T10:00:00.000Z",
       deletionRequestedAt: null,
       termsVersion: "2026-08-23",
       privacyVersion: "2026-08-23",
     },
-    reservation: { userId: "creator-1", postId: "post-1", scheduledForIso: SCHEDULED_FOR, nowIso: NOW },
+    reservation: { userId: "creator-1", postId: "post-1", scheduledForIso: SCHEDULED_FOR, timezone: "Africa/Lagos", nowIso: NOW },
   }), { ok: false, status: 503, error: "New scheduling is temporarily unavailable." });
   assert.equal(calls, 0);
 });
@@ -153,7 +155,7 @@ test("suspended or stale-legal accounts cannot reserve a public schedule", async
   };
   const base = {
     launch: { newScheduling: true },
-    reservation: { userId: "creator-1", postId: "post-1", scheduledForIso: SCHEDULED_FOR, nowIso: NOW },
+    reservation: { userId: "creator-1", postId: "post-1", scheduledForIso: SCHEDULED_FOR, timezone: "Africa/Lagos", nowIso: NOW },
   };
 
   for (const user of [
@@ -167,6 +169,19 @@ test("suspended or stale-legal accounts cannot reserve a public schedule", async
     });
   }
   assert.equal(calls, 0);
+});
+
+// Mutation target: converting an RPC outage or malformed adapter result into a
+// quota conflict hides retryable infrastructure failure from the creator.
+test("reservation RPC errors are sanitized as retryable infrastructure failures", async () => {
+  const store: AtomicScheduleReservationStore = {
+    async reservePublicSchedulerSlot() { throw new Error("Scheduler database operation failed (PGRST202)."); },
+  };
+  assert.deepEqual(await reserve(store), {
+    ok: false,
+    status: 502,
+    error: "Scheduler database operation failed (PGRST202).",
+  });
 });
 
 // Mutation target: replacing the single reservation RPC with independent count

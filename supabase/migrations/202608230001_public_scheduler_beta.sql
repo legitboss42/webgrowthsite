@@ -75,6 +75,7 @@ create or replace function public.reserve_public_scheduler_slot(
   p_post_id uuid,
   p_user_id uuid,
   p_scheduled_for timestamptz,
+  p_timezone text,
   p_now timestamptz
 )
 returns boolean
@@ -89,23 +90,28 @@ begin
   if p_post_id is null
     or p_user_id is null
     or p_scheduled_for is null
+    or p_timezone is null
+    or btrim(p_timezone) = ''
     or p_now is null
     or p_scheduled_for <= p_now then
     return false;
   end if;
+
+  perform pg_advisory_xact_lock(hashtextextended(p_user_id::text, 0));
 
   perform 1
   from public.scheduler_users user_record
   where user_record.id = p_user_id
     and user_record.status = 'ACTIVE'
     and user_record.suspended_at is null
-    and user_record.deletion_requested_at is null;
+    and user_record.deletion_requested_at is null
+    and user_record.terms_version = '2026-08-23'
+    and user_record.privacy_version = '2026-08-23'
+  for update;
 
   if not found then
     return false;
   end if;
-
-  perform pg_advisory_xact_lock(hashtextextended(p_user_id::text, 0));
 
   perform 1
   from public.scheduled_posts post
@@ -144,6 +150,7 @@ begin
   set
     status = 'SCHEDULED',
     scheduled_for = p_scheduled_for,
+    timezone = p_timezone,
     scheduled_at = p_now,
     updated_at = p_now
   where post.id = p_post_id
@@ -621,7 +628,7 @@ begin
 end;
 $$;
 
-revoke execute on function public.reserve_public_scheduler_slot(uuid, uuid, timestamptz, timestamptz) from public, anon, authenticated;
+revoke execute on function public.reserve_public_scheduler_slot(uuid, uuid, timestamptz, text, timestamptz) from public, anon, authenticated;
 revoke execute on function public.create_safe_publish_retry(uuid, uuid) from public, anon, authenticated;
 revoke execute on function public.create_public_scheduler_post(uuid, uuid[], text, text) from public, anon, authenticated;
 revoke execute on function public.approve_public_scheduler_post(uuid, uuid, text, jsonb) from public, anon, authenticated;

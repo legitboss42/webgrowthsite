@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { canTransitionPost, isSameOriginMutation } from "@/lib/scheduler/policy";
 import { getSchedulerLaunchState } from "@/lib/scheduler/launch";
 import { schedulePublicPostAtBoundary } from "@/lib/scheduler/quotas";
+import { parseOffsetScheduleInstant } from "@/lib/scheduler/scheduleTime";
 import { readSchedulerSession, SCHEDULER_SESSION_COOKIE } from "@/lib/scheduler/session";
 import { createSupabaseSchedulerStore } from "@/lib/scheduler/store";
 import { createSchedulerSupabaseClient } from "@/lib/scheduler/supabase";
@@ -32,19 +33,12 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
   }
 
   if (body?.action === "schedule") {
-    const scheduledFor = new Date(String(body.scheduledFor || ""));
-    const timezone = String(body.timezone || "");
-    if (Number.isNaN(scheduledFor.getTime()) || scheduledFor.getTime() <= Date.now() || !timezone) {
-      return NextResponse.json({ error: "Choose a future time and timezone." }, { status: 400 });
-    }
-    try { new Intl.DateTimeFormat("en", { timeZone: timezone }); } catch {
-      return NextResponse.json({ error: "Timezone is invalid." }, { status: 400 });
-    }
+    const schedule = parseOffsetScheduleInstant({ scheduledFor: body.scheduledFor, timezone: body.timezone, nowIso: new Date().toISOString() });
+    if (!schedule.ok) return NextResponse.json({ error: schedule.error }, { status: schedule.status });
     const { data: user, error: userError } = await supabase.from("scheduler_users")
       .select("status,suspended_at,deletion_requested_at,terms_version,privacy_version")
       .eq("id", session.userId).maybeSingle();
     if (userError) return NextResponse.json({ error: "Unable to verify scheduler access." }, { status: 502 });
-    const scheduledForIso = scheduledFor.toISOString();
     const result = await schedulePublicPostAtBoundary(await createSupabaseSchedulerStore(), {
       launch: getSchedulerLaunchState(),
       user: {
@@ -57,7 +51,8 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
       reservation: {
         userId: session.userId,
         postId: id,
-        scheduledForIso,
+        scheduledForIso: schedule.scheduledForIso,
+        timezone: schedule.timezone,
         nowIso: new Date().toISOString(),
       },
     });

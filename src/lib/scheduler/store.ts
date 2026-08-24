@@ -44,6 +44,7 @@ export type ReservePublicSchedulerSlotInput = {
   userId: string;
   postId: string;
   scheduledForIso: string;
+  timezone: string;
   nowIso: string;
 };
 
@@ -90,6 +91,7 @@ export function createSchedulerStore(client: SchedulerDatabaseClient) {
         p_post_id: input.postId,
         p_user_id: input.userId,
         p_scheduled_for: input.scheduledForIso,
+        p_timezone: input.timezone,
         p_now: input.nowIso,
       });
       if (typeof result !== "boolean") throw new Error("Scheduler reservation returned an invalid result.");

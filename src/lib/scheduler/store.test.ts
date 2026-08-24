@@ -15,7 +15,11 @@ function fakeClient(activeConnectionResult = true, rpcResults: Record<string, un
     },
     async rpc(name, input) {
       calls.push({ kind: "rpc", name, input });
-      if (Object.prototype.hasOwnProperty.call(rpcResults, name)) return rpcResults[name];
+      if (Object.prototype.hasOwnProperty.call(rpcResults, name)) {
+        const result = rpcResults[name];
+        if (result instanceof Error) throw result;
+        return result;
+      }
       return name === "save_active_tiktok_connection" ? activeConnectionResult : [];
     },
     async update(table, id, input) {
@@ -88,6 +92,7 @@ test("public schedule reservation passes only the owned post and exact schedule 
     userId: "user-1",
     postId: "post-1",
     scheduledForIso: "2026-08-24T13:00:00.000Z",
+    timezone: "Africa/Lagos",
     nowIso: "2026-08-24T12:00:00.000Z",
   }), true);
   assert.deepEqual(calls, [{
@@ -97,9 +102,25 @@ test("public schedule reservation passes only the owned post and exact schedule 
       p_post_id: "post-1",
       p_user_id: "user-1",
       p_scheduled_for: "2026-08-24T13:00:00.000Z",
+      p_timezone: "Africa/Lagos",
       p_now: "2026-08-24T12:00:00.000Z",
     },
   }]);
+});
+
+// Mutation target: treating malformed RPC payloads as false hides database/API
+// contract failures as a benign quota conflict.
+test("public schedule reservation fails closed on malformed or thrown RPC results", async () => {
+  const malformed = createSchedulerStore(fakeClient(true, { reserve_public_scheduler_slot: { ok: true } }).client);
+  await assert.rejects(
+    malformed.reservePublicSchedulerSlot({ userId: "user-1", postId: "post-1", scheduledForIso: "2026-08-24T13:00:00.000Z", timezone: "Africa/Lagos", nowIso: "2026-08-24T12:00:00.000Z" }),
+    /invalid result/,
+  );
+  const failed = createSchedulerStore(fakeClient(true, { reserve_public_scheduler_slot: new Error("database offline") }).client);
+  await assert.rejects(
+    failed.reservePublicSchedulerSlot({ userId: "user-1", postId: "post-1", scheduledForIso: "2026-08-24T13:00:00.000Z", timezone: "Africa/Lagos", nowIso: "2026-08-24T12:00:00.000Z" }),
+    /database offline/,
+  );
 });
 
 test("user writes preserve the authenticated TikTok identity", async () => {
