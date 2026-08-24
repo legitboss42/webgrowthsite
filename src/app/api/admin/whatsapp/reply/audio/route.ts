@@ -2,29 +2,16 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { hasWhatsAppAdminAccess } from "@/app/admin/whatsapp/auth";
 import { isSameOriginMutation } from "@/lib/scheduler/policy";
+import { isSupportedWhatsAppAudioMimeType } from "@/lib/whatsapp/audio";
 import { sendInboxWhatsAppAudioReply } from "@/lib/whatsapp/inboxReply";
 import { createSupabaseWhatsAppStore, getSupabaseWhatsAppReplyContext } from "@/lib/whatsapp/store";
 
 export const runtime = "nodejs";
 
 const maxAudioBytes = 16 * 1024 * 1024;
-const supportedAudioMimeTypes = new Set([
-  "audio/aac",
-  "audio/mp4",
-  "audio/mpeg",
-  "audio/amr",
-  "audio/ogg",
-  "audio/ogg; codecs=opus",
-  "audio/ogg;codecs=opus",
-]);
-
 function getStringField(formData: FormData, name: string) {
   const value = formData.get(name);
   return typeof value === "string" ? value.trim() : "";
-}
-
-function isSupportedAudio(value: string) {
-  return supportedAudioMimeTypes.has(value.trim().toLowerCase());
 }
 
 export async function POST(request: Request) {
@@ -52,8 +39,10 @@ export async function POST(request: Request) {
   }
 
   const mimeType = audio.type || "audio/ogg";
-  if (!isSupportedAudio(mimeType)) {
-    return NextResponse.json({ error: "Unsupported audio format. Please use OGG, MP3, MP4, AAC, or AMR audio." }, { status: 400 });
+  if (!isSupportedWhatsAppAudioMimeType(mimeType)) {
+    return NextResponse.json({
+      error: `Unsupported audio format (${mimeType || "unknown"}). Upload OGG, MP3, MP4/M4A, AAC, or AMR audio.`,
+    }, { status: 400 });
   }
 
   if (audio.size <= 0 || audio.size > maxAudioBytes) {

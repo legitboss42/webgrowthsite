@@ -1,4 +1,5 @@
 import { isFreeformReplyAllowed } from "./classify";
+import { isSupportedWhatsAppAudioMimeType } from "./audio";
 
 type WhatsAppEnvironment = Record<string, string | undefined>;
 
@@ -46,20 +47,6 @@ export function normalizeWhatsAppRecipient(value: string): string | null {
   if (/^\+234[789]\d{9}$/.test(compact)) return compact.slice(1);
   if (/^234[789]\d{9}$/.test(compact)) return compact;
   return null;
-}
-
-const supportedAudioMimeTypes = new Set([
-  "audio/aac",
-  "audio/mp4",
-  "audio/mpeg",
-  "audio/amr",
-  "audio/ogg",
-  "audio/ogg; codecs=opus",
-  "audio/ogg;codecs=opus",
-]);
-
-function isSupportedAudioMimeType(value: string) {
-  return supportedAudioMimeTypes.has(value.trim().toLowerCase());
 }
 
 function classifyMetaFailure(status: number, payload: unknown): Extract<SendResult, { sent: false }> {
@@ -130,7 +117,7 @@ export async function sendWhatsAppAudio(input: AudioSendInput, options: SendOpti
   if (!isFreeformReplyAllowed(input.customerMessageTimestamp, options.now)) return { sent: false, reason: "SERVICE_WINDOW_CLOSED" };
   const recipient = normalizeWhatsAppRecipient(input.to);
   if (!recipient) return { sent: false, reason: "INVALID_RECIPIENT" };
-  if (!isSupportedAudioMimeType(input.mimeType)) return { sent: false, reason: "UNSUPPORTED_MEDIA_TYPE" };
+  if (!isSupportedWhatsAppAudioMimeType(input.mimeType)) return { sent: false, reason: "UNSUPPORTED_MEDIA_TYPE" };
 
   const apiVersion = env.WHATSAPP_API_VERSION?.trim() || env.WHATSAPP_GRAPH_API_VERSION?.trim() || "v26.0";
   const fetcher = options.fetch || globalThis.fetch;

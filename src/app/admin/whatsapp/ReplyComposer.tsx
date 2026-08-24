@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState, useTransition, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import { chooseWhatsAppRecordingMimeType, getWhatsAppAudioFilename, isSupportedWhatsAppAudioMimeType } from "@/lib/whatsapp/audio";
 import type { WhatsAppReplyComposerState } from "./dashboard";
 
 type ReplyComposerProps = {
@@ -17,18 +18,9 @@ const reasonCopy: Partial<Record<NonNullable<WhatsAppReplyComposerState["reason"
   SERVICE_WINDOW_CLOSED: "The active customer service window has closed, so a template would be required instead.",
 };
 
-const preferredAudioTypes = [
-  "audio/ogg;codecs=opus",
-  "audio/ogg",
-  "audio/mp4",
-  "audio/mpeg",
-  "audio/aac",
-  "audio/amr",
-];
-
 function getSupportedRecordingType() {
   if (typeof window === "undefined" || typeof MediaRecorder === "undefined") return null;
-  return preferredAudioTypes.find((type) => MediaRecorder.isTypeSupported(type)) || null;
+  return chooseWhatsAppRecordingMimeType((type) => MediaRecorder.isTypeSupported(type));
 }
 
 export default function ReplyComposer({ conversationId, waId, initialText = "", composerState }: ReplyComposerProps) {
@@ -163,7 +155,7 @@ export default function ReplyComposer({ conversationId, waId, initialText = "", 
         const formData = new FormData();
         formData.set("conversationId", conversationId);
         formData.set("waId", waId);
-        formData.set("audio", recordedAudio, recordingMimeType.includes("ogg") ? "webgrowth-voice-note.ogg" : "webgrowth-voice-note.audio");
+        formData.set("audio", recordedAudio, getWhatsAppAudioFilename(recordingMimeType));
 
         const response = await fetch("/api/admin/whatsapp/reply/audio", {
           method: "POST",
@@ -182,6 +174,20 @@ export default function ReplyComposer({ conversationId, waId, initialText = "", 
         setFeedback("Unable to send the voice note right now. Please try again in a moment.");
       }
     });
+  }
+
+  function handleAudioFileSelected(file: File | null) {
+    setFeedback(null);
+    if (!file) return;
+    if (!isSupportedWhatsAppAudioMimeType(file.type)) {
+      setFeedback(`Unsupported audio format (${file.type || "unknown"}). Use OGG, MP3, MP4/M4A, AAC, or AMR audio.`);
+      return;
+    }
+    if (recordedAudioUrl) URL.revokeObjectURL(recordedAudioUrl);
+    setRecordedAudio(file);
+    setRecordingMimeType(file.type);
+    setRecordedAudioUrl(URL.createObjectURL(file));
+    setRecordingState("ready");
   }
 
   return (
@@ -259,9 +265,20 @@ export default function ReplyComposer({ conversationId, waId, initialText = "", 
         </div>
         {recordingState === "unsupported" ? (
           <p className="mt-3 text-xs text-amber-100">
-            Voice recording is not supported by this browser in a Meta-compatible audio format.
+            In-browser recording is not supported by this browser in a Meta-compatible audio format. Use the audio upload fallback below.
           </p>
         ) : null}
+        <label className="mt-3 block rounded-2xl border border-dashed border-white/15 bg-black/10 p-3 text-xs text-white/65">
+          <span className="block font-semibold text-white/75">Mobile fallback: upload a recorded audio file</span>
+          <span className="mt-1 block">Accepted: OGG, MP3, MP4/M4A, AAC, or AMR. This is useful when your phone browser cannot record a Meta-compatible voice note directly.</span>
+          <input
+            type="file"
+            accept="audio/ogg,audio/mpeg,audio/mp4,audio/aac,audio/amr,.ogg,.mp3,.m4a,.mp4,.aac,.amr"
+            disabled={!composerState.enabled || isPending}
+            onChange={(event) => handleAudioFileSelected(event.target.files?.[0] || null)}
+            className="mt-3 block w-full text-xs text-white/70 file:mr-3 file:rounded-full file:border-0 file:bg-white file:px-3 file:py-2 file:text-xs file:font-semibold file:text-black disabled:cursor-not-allowed disabled:opacity-60"
+          />
+        </label>
         {recordedAudioUrl ? (
           <audio controls preload="none" src={recordedAudioUrl} className="mt-3 w-full">
             Your browser cannot preview this voice note.
