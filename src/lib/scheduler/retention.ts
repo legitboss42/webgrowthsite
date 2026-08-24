@@ -16,11 +16,23 @@ export type RetentionAsset = {
   hasActiveReference: boolean;
 };
 
-export type TerminalStagingObject = {
+export type TerminalStagingObject = StagingRetentionState & {
   id: string;
   userId: string;
+  attemptId: string;
   storagePath: string;
   terminalReconciled: boolean;
+};
+
+export type StagingRetentionState = {
+  expiresAt: string;
+  postStatus: string;
+  postTerminalAt: string | null;
+  attemptStatus: string;
+  attemptPublishId: string | null;
+  attemptCompletedAt: string | null;
+  attemptErrorCode: string | null;
+  hasUnresolvedPublication: boolean;
 };
 
 export type AccountDeletionState = "REQUESTED" | "RUNNING" | "COMPLETE" | "NEEDS_ATTENTION";
@@ -35,7 +47,7 @@ export type AccountDeletionManifest = {
   ready: boolean;
   userId: string;
   originalPaths: string[];
-  stagingPaths: string[];
+  stagingObjects: Array<{ attemptId: string; storagePath: string }>;
   recordedPublishIds: string[];
 };
 
@@ -55,7 +67,11 @@ export type RetentionRepository = {
 };
 
 export type RetentionStorage = {
-  remove(bucket: "tiktok-scheduler-media" | "tiktok-publishing-staging", path: string): Promise<void>;
+  remove(
+    bucket: "tiktok-scheduler-media" | "tiktok-publishing-staging",
+    path: string,
+    namespaceId: string,
+  ): Promise<void>;
 };
 
 export type AccountDeletionRequester = {
@@ -81,6 +97,25 @@ function timestamp(value: string | null) {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
+export function isValidRetentionStoragePath(
+  path: string,
+  namespaceId: string,
+  kind: "ORIGINAL" | "STAGING",
+) {
+  if (!path || !namespaceId || path.length > 1024 || path !== path.trim()) return false;
+  if (kind === "ORIGINAL" && path.toLowerCase().startsWith("article:")) return false;
+  if (path.startsWith("/") || path.includes("\\") || path.includes("\0") || path.includes("%")) return false;
+  if (namespaceId.includes("/") || namespaceId.includes("\\") || namespaceId === "." || namespaceId === "..") return false;
+
+  const segments = path.split("/");
+  if (segments.length < 2 || segments[0] !== namespaceId) return false;
+  return segments.every((segment) => segment.length > 0
+    && segment !== "."
+    && segment !== ".."
+    && segment === segment.trim()
+    && !/[\u0000-\u001f\u007f]/.test(segment));
+}
+
 export function getDeletionEligibility(asset: RetentionAsset, now: Date): DeletionEligibility | null {
   const nowMs = now.getTime();
   if (!Number.isFinite(nowMs) || asset.hasActiveReference) return null;
@@ -96,6 +131,27 @@ export function getDeletionEligibility(asset: RetentionAsset, now: Date): Deleti
     && !asset.approvedForPost
     && nowMs - createdAt >= ABANDONED_UPLOAD_MS) return "ABANDONED";
 
+  return null;
+}
+
+export function getStagingDeletionEligibility(
+  state: StagingRetentionState,
+  now: Date,
+): "TERMINAL" | "EXPIRED" | null {
+  const nowMs = now.getTime();
+  if (!Number.isFinite(nowMs)) return null;
+
+  const attemptNeedsReconciliation = ["SCHEDULED", "SUBMITTING", "PROCESSING"].includes(state.attemptStatus)
+    || state.attemptErrorCode === "POST_ACCEPTANCE_AMBIGUOUS"
+    || (state.attemptPublishId !== null && state.attemptCompletedAt === null);
+  if (attemptNeedsReconciliation) return null;
+
+  if (timestamp(state.postTerminalAt) !== null
+    && TERMINAL_POST_STATUSES.has(state.postStatus)
+    && !state.hasUnresolvedPublication) return "TERMINAL";
+
+  const expiresAt = timestamp(state.expiresAt);
+  if (expiresAt !== null && nowMs >= expiresAt) return "EXPIRED";
   return null;
 }
 
@@ -127,8 +183,17 @@ export async function cleanupOriginalMedia(
       }));
       continue;
     }
+    if (!isValidRetentionStoragePath(candidate.storagePath, candidate.userId, "ORIGINAL")) {
+      failed += 1;
+      await bestEffortFailure(() => repository.recordMediaFailure({
+        assetId: candidate.id,
+        userId: candidate.userId,
+        errorCode: "INVALID_STORAGE_PATH",
+      }));
+      continue;
+    }
     try {
-      await storage.remove("tiktok-scheduler-media", candidate.storagePath);
+      await storage.remove("tiktok-scheduler-media", candidate.storagePath, candidate.userId);
     } catch {
       failed += 1;
       await bestEffortFailure(() => repository.recordMediaFailure({
@@ -184,8 +249,26 @@ export async function cleanupTerminalStaging(
       }));
       continue;
     }
+    if (!getStagingDeletionEligibility(candidate, now)) {
+      failed += 1;
+      await bestEffortFailure(() => repository.recordStagingFailure({
+        objectId: candidate.id,
+        userId: candidate.userId,
+        errorCode: "STAGING_RETENTION_REVALIDATION_FAILED",
+      }));
+      continue;
+    }
+    if (!isValidRetentionStoragePath(candidate.storagePath, candidate.attemptId, "STAGING")) {
+      failed += 1;
+      await bestEffortFailure(() => repository.recordStagingFailure({
+        objectId: candidate.id,
+        userId: candidate.userId,
+        errorCode: "INVALID_STORAGE_PATH",
+      }));
+      continue;
+    }
     try {
-      await storage.remove("tiktok-publishing-staging", candidate.storagePath);
+      await storage.remove("tiktok-publishing-staging", candidate.storagePath, candidate.attemptId);
     } catch {
       failed += 1;
       await bestEffortFailure(() => repository.recordStagingFailure({
@@ -264,19 +347,34 @@ export async function cleanupAccountDeletionJobs(
       continue;
     }
 
+    const invalidPath = manifest.originalPaths.some((path) => (
+      !isValidRetentionStoragePath(path, job.userId, "ORIGINAL")
+    )) || manifest.stagingObjects.some((object) => (
+      !isValidRetentionStoragePath(object.storagePath, object.attemptId, "STAGING")
+    ));
+    if (invalidPath) {
+      needsAttention += 1;
+      await bestEffortFailure(() => repository.markAccountDeletionAttention({
+        requestId: job.requestId,
+        userId: job.userId,
+        errorCode: "INVALID_STORAGE_PATH",
+      }));
+      continue;
+    }
+
     let storageFailed = false;
     for (const path of manifest.originalPaths) {
       try {
-        await storage.remove("tiktok-scheduler-media", path);
+        await storage.remove("tiktok-scheduler-media", path, job.userId);
       } catch {
         storageFailed = true;
         break;
       }
     }
     if (!storageFailed) {
-      for (const path of manifest.stagingPaths) {
+      for (const object of manifest.stagingObjects) {
         try {
-          await storage.remove("tiktok-publishing-staging", path);
+          await storage.remove("tiktok-publishing-staging", object.storagePath, object.attemptId);
         } catch {
           storageFailed = true;
           break;
@@ -361,6 +459,19 @@ function stringArray(value: unknown) {
     : null;
 }
 
+function stagingObjectArray(value: unknown) {
+  if (!Array.isArray(value)) return null;
+  const objects: Array<{ attemptId: string; storagePath: string }> = [];
+  for (const item of value) {
+    const record = objectRecord(item);
+    const attemptId = record && requiredString(record, "attemptId");
+    const storagePath = record && requiredString(record, "storagePath");
+    if (!record || !attemptId || !storagePath) return null;
+    objects.push({ attemptId, storagePath });
+  }
+  return objects;
+}
+
 export function createRetentionRepository(client: RetentionRpcClient): RetentionRepository {
   async function rpc(name: string, input: Record<string, unknown>) {
     const result = await client.rpc(name, input);
@@ -429,11 +540,39 @@ export function createRetentionRepository(client: RetentionRpcClient): Retention
         const row = objectRecord(value);
         const id = row && requiredString(row, "id");
         const userId = row && requiredString(row, "user_id");
+        const attemptId = row && requiredString(row, "attempt_id");
         const storagePath = row && requiredString(row, "storage_path");
-        if (!row || !id || !userId || !storagePath || typeof row.terminal_reconciled !== "boolean") {
+        const expiresAt = row && requiredString(row, "expires_at");
+        const postStatus = row && requiredString(row, "post_status");
+        const postTerminalAt = row && nullableString(row, "post_terminal_at");
+        const attemptStatus = row && requiredString(row, "attempt_status");
+        const attemptPublishId = row && nullableString(row, "attempt_publish_id");
+        const attemptCompletedAt = row && nullableString(row, "attempt_completed_at");
+        const attemptErrorCode = row && nullableString(row, "attempt_error_code");
+        if (!row || !id || !userId || !attemptId || !storagePath || !expiresAt || !postStatus || !attemptStatus
+          || typeof row.terminal_reconciled !== "boolean"
+          || typeof row.has_unresolved_publication !== "boolean"
+          || (row.post_terminal_at !== null && !postTerminalAt)
+          || (row.attempt_publish_id !== null && !attemptPublishId)
+          || (row.attempt_completed_at !== null && !attemptCompletedAt)
+          || (row.attempt_error_code !== null && !attemptErrorCode)) {
           throw new Error("Scheduler staging cleanup claim returned an invalid row.");
         }
-        return { id, userId, storagePath, terminalReconciled: row.terminal_reconciled };
+        return {
+          id,
+          userId,
+          attemptId,
+          storagePath,
+          terminalReconciled: row.terminal_reconciled,
+          expiresAt,
+          postStatus,
+          postTerminalAt,
+          attemptStatus,
+          attemptPublishId,
+          attemptCompletedAt,
+          attemptErrorCode,
+          hasUnresolvedPublication: row.has_unresolved_publication,
+        };
       });
     },
     completeStagingDeletion(input) {
@@ -471,13 +610,13 @@ export function createRetentionRepository(client: RetentionRpcClient): Retention
       }));
       const userId = data && requiredString(data, "userId");
       const originalPaths = data && stringArray(data.originalPaths);
-      const stagingPaths = data && stringArray(data.stagingPaths);
+      const stagingObjects = data && stagingObjectArray(data.stagingObjects);
       const recordedPublishIds = data && stringArray(data.recordedPublishIds);
       if (!data || typeof data.ready !== "boolean" || !userId
-        || !originalPaths || !stagingPaths || !recordedPublishIds) {
+        || !originalPaths || !stagingObjects || !recordedPublishIds) {
         throw new Error("Scheduler account deletion manifest returned an invalid result.");
       }
-      return { ready: data.ready, userId, originalPaths, stagingPaths, recordedPublishIds };
+      return { ready: data.ready, userId, originalPaths, stagingObjects, recordedPublishIds };
     },
     completeAccountDeletion(input) {
       return booleanRpc("complete_scheduler_account_deletion", {
@@ -498,7 +637,11 @@ export function createRetentionRepository(client: RetentionRpcClient): Retention
 
 export function createRetentionStorage(client: RetentionStorageClient): RetentionStorage {
   return {
-    async remove(bucket, path) {
+    async remove(bucket, path, namespaceId) {
+      const kind = bucket === "tiktok-scheduler-media" ? "ORIGINAL" : "STAGING";
+      if (!isValidRetentionStoragePath(path, namespaceId, kind)) {
+        throw new Error("Scheduler retention storage received an invalid storage path.");
+      }
       const { data, error } = await client.from(bucket).remove([path]);
       if (error) throw new Error(`Scheduler retention storage removal failed (${error.name || "UNKNOWN"}).`);
       if (!Array.isArray(data)) throw new Error("Scheduler retention storage removal returned an invalid result.");

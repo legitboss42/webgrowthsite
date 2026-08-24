@@ -961,7 +961,9 @@ begin
   join public.media_assets asset
     on asset.id = requested.requested_id
     and asset.user_id = p_user_id
-    and asset.validation_status = 'VALID';
+    and asset.validation_status = 'VALID'
+    and asset.storage_deleted_at is null
+    and asset.cleanup_state = 'PENDING';
 
   if v_owned_count <> v_requested_count then
     return jsonb_build_object('ok', false, 'code', 'MEDIA_OWNERSHIP');
@@ -1081,6 +1083,8 @@ begin
     on asset.id = post_media.media_id
     and asset.user_id = p_user_id
     and asset.validation_status = 'VALID'
+    and asset.storage_deleted_at is null
+    and asset.cleanup_state = 'PENDING'
   where post_media.post_id = p_post_id;
 
   if v_total_media_count <> v_media_count
@@ -1095,6 +1099,8 @@ begin
     on asset.id = post_media.media_id
     and asset.user_id = p_user_id
     and asset.validation_status = 'VALID'
+    and asset.storage_deleted_at is null
+    and asset.cleanup_state = 'PENDING'
   join lateral jsonb_array_elements(p_snapshot -> 'media') media_item
     on media_item ->> 'id' = asset.id::text
     and media_item ->> 'checksum' = asset.checksum
@@ -1712,8 +1718,17 @@ create or replace function public.claim_terminal_staging_cleanup(p_now timestamp
 returns table (
   id uuid,
   user_id uuid,
+  attempt_id uuid,
   storage_path text,
-  terminal_reconciled boolean
+  terminal_reconciled boolean,
+  expires_at timestamptz,
+  post_status text,
+  post_terminal_at timestamptz,
+  attempt_status text,
+  attempt_publish_id text,
+  attempt_completed_at timestamptz,
+  attempt_error_code text,
+  has_unresolved_publication boolean
 )
 language plpgsql
 security definer
@@ -1727,8 +1742,6 @@ begin
     join public.publish_attempts attempt on attempt.id = staging.attempt_id
     join public.scheduled_posts post on post.id = attempt.post_id
     where staging.removed_at is null
-      and attempt.completed_at is not null
-      and attempt.status in ('PUBLISHED', 'NEEDS_ATTENTION')
       and (
         staging.cleanup_state in ('PENDING', 'NEEDS_ATTENTION')
         or (
@@ -1736,8 +1749,30 @@ begin
           and staging.cleanup_started_at <= p_now - interval '15 minutes'
         )
       )
-    order by attempt.completed_at, staging.id
-    for update of staging skip locked
+      and (
+        (
+          post.terminal_at is not null
+          and post.status in ('PUBLISHED', 'CANCELLED', 'NEEDS_ATTENTION')
+          and not exists (
+            select 1
+            from public.publish_attempts unresolved
+            where unresolved.post_id = post.id
+              and (
+                unresolved.status in ('SCHEDULED', 'SUBMITTING', 'PROCESSING')
+                or unresolved.error_code = 'POST_ACCEPTANCE_AMBIGUOUS'
+                or (unresolved.publish_id is not null and unresolved.completed_at is null)
+              )
+          )
+        )
+        or (
+          staging.expires_at <= p_now
+          and attempt.status not in ('SCHEDULED', 'SUBMITTING', 'PROCESSING')
+          and coalesce(attempt.error_code, '') <> 'POST_ACCEPTANCE_AMBIGUOUS'
+          and not (attempt.publish_id is not null and attempt.completed_at is null)
+        )
+      )
+    order by coalesce(post.terminal_at, staging.expires_at), staging.id
+    for update of staging, attempt, post skip locked
     limit greatest(1, least(coalesce(p_limit, 100), 100))
   ), claimed as (
     update public.media_staging_objects staging
@@ -1753,8 +1788,26 @@ begin
   select
     claimed.id,
     post.user_id,
+    claimed.attempt_id,
     claimed.storage_path,
-    (attempt.completed_at is not null and attempt.status in ('PUBLISHED', 'NEEDS_ATTENTION'))
+    true,
+    claimed.expires_at,
+    post.status,
+    post.terminal_at,
+    attempt.status,
+    attempt.publish_id,
+    attempt.completed_at,
+    attempt.error_code,
+    exists (
+      select 1
+      from public.publish_attempts unresolved
+      where unresolved.post_id = post.id
+        and (
+          unresolved.status in ('SCHEDULED', 'SUBMITTING', 'PROCESSING')
+          or unresolved.error_code = 'POST_ACCEPTANCE_AMBIGUOUS'
+          or (unresolved.publish_id is not null and unresolved.completed_at is null)
+        )
+    )
   from claimed
   join public.publish_attempts attempt on attempt.id = claimed.attempt_id
   join public.scheduled_posts post on post.id = attempt.post_id;
@@ -1799,8 +1852,28 @@ begin
     and post.user_id = p_user_id
     and staging.cleanup_state = 'RUNNING'
     and staging.removed_at is null
-    and attempt.completed_at is not null
-    and attempt.status in ('PUBLISHED', 'NEEDS_ATTENTION')
+    and (
+      (
+        post.terminal_at is not null
+        and post.status in ('PUBLISHED', 'CANCELLED', 'NEEDS_ATTENTION')
+        and not exists (
+          select 1
+          from public.publish_attempts unresolved
+          where unresolved.post_id = post.id
+            and (
+              unresolved.status in ('SCHEDULED', 'SUBMITTING', 'PROCESSING')
+              or unresolved.error_code = 'POST_ACCEPTANCE_AMBIGUOUS'
+              or (unresolved.publish_id is not null and unresolved.completed_at is null)
+            )
+        )
+      )
+      or (
+        staging.expires_at <= p_removed_at
+        and attempt.status not in ('SCHEDULED', 'SUBMITTING', 'PROCESSING')
+        and coalesce(attempt.error_code, '') <> 'POST_ACCEPTANCE_AMBIGUOUS'
+        and not (attempt.publish_id is not null and attempt.completed_at is null)
+      )
+    )
     and not exists (
       select 1
       from storage.objects object_record
@@ -1903,7 +1976,7 @@ as $$
 declare
   v_ready boolean := false;
   v_original_paths jsonb := '[]'::jsonb;
-  v_staging_paths jsonb := '[]'::jsonb;
+  v_staging_objects jsonb := '[]'::jsonb;
   v_publish_ids jsonb := '[]'::jsonb;
 begin
   perform 1
@@ -1925,7 +1998,8 @@ begin
       and (
         post.status in ('CLAIMED', 'SUBMITTING', 'PROCESSING')
         or attempt.status in ('SCHEDULED', 'SUBMITTING', 'PROCESSING')
-        or (attempt.publish_id is not null and attempt.completed_at is null)
+        or (attempt.id is not null and attempt.completed_at is null)
+        or attempt.error_code = 'POST_ACCEPTANCE_AMBIGUOUS'
       )
   );
 
@@ -1933,10 +2007,16 @@ begin
   into v_original_paths
   from public.media_assets asset
   where asset.user_id = p_user_id
-    and asset.storage_deleted_at is null;
+    and asset.storage_deleted_at is null
+    and asset.article_slug is null;
 
-  select coalesce(jsonb_agg(staging.storage_path order by staging.storage_path), '[]'::jsonb)
-  into v_staging_paths
+  select coalesce(jsonb_agg(
+    jsonb_build_object(
+      'attemptId', attempt.id::text,
+      'storagePath', staging.storage_path
+    ) order by staging.storage_path
+  ), '[]'::jsonb)
+  into v_staging_objects
   from public.media_staging_objects staging
   join public.publish_attempts attempt on attempt.id = staging.attempt_id
   join public.scheduled_posts post on post.id = attempt.post_id
@@ -1960,7 +2040,7 @@ begin
     'ready', v_ready,
     'userId', p_user_id::text,
     'originalPaths', v_original_paths,
-    'stagingPaths', v_staging_paths,
+    'stagingObjects', v_staging_objects,
     'recordedPublishIds', v_publish_ids
   );
 end;
@@ -2007,7 +2087,8 @@ begin
       and (
         post.status in ('CLAIMED', 'SUBMITTING', 'PROCESSING')
         or attempt.status in ('SCHEDULED', 'SUBMITTING', 'PROCESSING')
-        or (attempt.publish_id is not null and attempt.completed_at is null)
+        or (attempt.id is not null and attempt.completed_at is null)
+        or attempt.error_code = 'POST_ACCEPTANCE_AMBIGUOUS'
       )
   ) then
     return false;

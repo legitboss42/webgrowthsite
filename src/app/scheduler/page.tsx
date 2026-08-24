@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { getAccountDeletionRequestNotice } from "@/lib/scheduler/accountActionPresentation";
 import { getSchedulerLaunchState } from "@/lib/scheduler/launch";
 
 export const dynamic = "force-dynamic";
@@ -30,7 +31,13 @@ const steps = [
   },
 ];
 
-export default function SchedulerLanding() {
+type SchedulerLandingProps = {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+};
+
+export default async function SchedulerLanding({ searchParams }: SchedulerLandingProps) {
+  const resolvedSearchParams = searchParams ? await searchParams : {};
+  const accountNotice = getAccountDeletionRequestNotice(resolvedSearchParams["account-deletion"]);
   const launch = getSchedulerLaunchState();
   const publicPostingNote = launch.publicPosting
     ? "Public visibility options are shown only when the current provider access and your account settings allow them."
@@ -42,6 +49,17 @@ export default function SchedulerLanding() {
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_12%_10%,rgba(98,245,230,.12),transparent_25%),radial-gradient(circle_at_88%_25%,rgba(255,82,105,.1),transparent_28%)]"
       />
+      {accountNotice ? (
+        <div
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+          className="mx-auto mb-8 max-w-7xl border-l-2 border-[#62f5e6] bg-[#62f5e6]/[0.07] px-5 py-4"
+        >
+          <p className="font-bold text-[#d6fffa]">{accountNotice.title}</p>
+          <p className="mt-1 max-w-3xl text-sm leading-6 text-white/70">{accountNotice.detail}</p>
+        </div>
+      ) : null}
       <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[minmax(0,1.2fr)_minmax(18rem,.8fr)] lg:items-end">
         <div className="max-w-3xl">
           <p className="text-xs font-bold uppercase tracking-[.26em] text-[#62f5e6]">Creator publishing utility</p>

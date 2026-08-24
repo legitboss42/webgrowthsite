@@ -8,6 +8,8 @@ import {
   createRetentionRepository,
   createRetentionStorage,
   getDeletionEligibility,
+  getStagingDeletionEligibility,
+  isValidRetentionStoragePath,
   readAccountDeletionConfirmation,
   requestAccountDeletionAtBoundary,
   runRetentionCleanup,
@@ -17,9 +19,25 @@ import {
   type RetentionStorage,
   type TerminalStagingObject,
 } from "./retention";
+import {
+  getAccountDeletionRequestNotice,
+  getDisconnectNotice,
+} from "./accountActionPresentation";
 import { createSchedulerStore, type SchedulerDatabaseClient } from "./store";
 
 const NOW = new Date("2026-08-24T12:00:00.000Z");
+const SCHEDULER_SQL = readFileSync(
+  new URL("../../../supabase/migrations/202608230001_public_scheduler_beta.sql", import.meta.url),
+  "utf8",
+).toLowerCase();
+
+function schedulerSqlFunction(name: string) {
+  const start = SCHEDULER_SQL.indexOf(`create or replace function public.${name}`);
+  assert.notEqual(start, -1, `${name} must exist`);
+  const end = SCHEDULER_SQL.indexOf("$$;", start);
+  assert.notEqual(end, -1, `${name} must have a complete body`);
+  return SCHEDULER_SQL.slice(start, end);
+}
 
 function asset(overrides: Partial<RetentionAsset> = {}): RetentionAsset {
   return {
@@ -72,6 +90,190 @@ test("active post or attempt references always protect original media", () => {
     approvedForPost: true,
     hasActiveReference: true,
   }), NOW), null);
+});
+
+// Mutation target: prefix-only checks permit traversal, encoded separators, and similarly named tenant namespaces.
+test("destructive storage paths require an exact normalized authoritative namespace", () => {
+  assert.equal(isValidRetentionStoragePath("user-1/asset-1/upload.mp4", "user-1", "ORIGINAL"), true);
+  assert.equal(isValidRetentionStoragePath("attempt-1/object.mp4", "attempt-1", "STAGING"), true);
+
+  for (const path of [
+    "",
+    "article:owner-only:0",
+    "/user-1/asset.mp4",
+    "user-1",
+    "user-1/",
+    "user-1//asset.mp4",
+    "user-1/./asset.mp4",
+    "user-1/../user-2/asset.mp4",
+    "user-1/%2e%2e/user-2/asset.mp4",
+    "user-1/%252e%252e/user-2/asset.mp4",
+    "user-1%2fasset.mp4",
+    "user-1\\asset.mp4",
+    "user-2/asset.mp4",
+    "user-10/asset.mp4",
+    "https://storage.example/user-1/asset.mp4",
+    " user-1/asset.mp4",
+  ]) {
+    assert.equal(isValidRetentionStoragePath(path, "user-1", "ORIGINAL"), false, path);
+  }
+
+  assert.equal(isValidRetentionStoragePath("attempt-2/object.mp4", "attempt-1", "STAGING"), false);
+});
+
+// Mutation target: omitting either post-lock cleanup check lets a concurrent cleanup claim win and storage be removed.
+test("post creation and approval serialize on exact media rows and reject cleanup-claimed or deleted assets", () => {
+  const cleanupClaim = schedulerSqlFunction("claim_scheduler_media_cleanup");
+  const createPost = schedulerSqlFunction("create_public_scheduler_post");
+  const approvePost = schedulerSqlFunction("approve_public_scheduler_post");
+
+  assert.match(cleanupClaim, /for update of asset skip locked/);
+
+  const createLock = createPost.indexOf("for update of asset");
+  const createCheck = createPost.indexOf("asset.storage_deleted_at is null", createLock);
+  const createInsert = createPost.indexOf("insert into public.post_media", createLock);
+  assert.ok(createLock >= 0 && createCheck > createLock && createInsert > createCheck);
+  assert.match(createPost.slice(createLock, createInsert), /asset.cleanup_state = 'pending'/);
+  assert.doesNotMatch(createPost.slice(createLock, createInsert), /asset.cleanup_state in \([^)]*'needs_attention'/);
+
+  const approvalLock = approvePost.indexOf("for update of asset");
+  const approvalCheck = approvePost.indexOf("asset.storage_deleted_at is null", approvalLock);
+  const approvalInsert = approvePost.indexOf("insert into public.post_approvals", approvalLock);
+  assert.ok(approvalLock >= 0 && approvalCheck > approvalLock && approvalInsert > approvalCheck);
+  assert.match(approvePost.slice(approvalLock, approvalInsert), /asset.cleanup_state = 'pending'/);
+  assert.doesNotMatch(approvePost.slice(approvalLock, approvalInsert), /asset.cleanup_state in \([^)]*'needs_attention'/);
+});
+
+// Mutation target: keying incomplete work only to publish_id misses ambiguity records where acceptance is unknown.
+test("account deletion manifest and completion block every attempt without completed_at", () => {
+  for (const name of [
+    "get_scheduler_account_deletion_manifest",
+    "complete_scheduler_account_deletion",
+  ]) {
+    const fn = schedulerSqlFunction(name);
+    assert.match(fn, /attempt.id is not null and attempt.completed_at is null/);
+    assert.match(fn, /attempt.error_code = 'post_acceptance_ambiguous'/);
+    assert.doesNotMatch(fn, /attempt.publish_id is not null and attempt.completed_at is null/);
+  }
+
+  const request = schedulerSqlFunction("request_scheduler_account_deletion");
+  assert.match(request, /attempt.status = 'scheduled'[\s\S]*attempt.publish_id is null/);
+  assert.doesNotMatch(request, /attempt.status in \([^)]*'needs_attention'/);
+});
+
+test("account deletion manifest supplies authoritative storage namespaces and skips virtual article media", () => {
+  const manifest = schedulerSqlFunction("get_scheduler_account_deletion_manifest");
+  assert.match(manifest, /asset.article_slug is null/);
+  assert.match(
+    manifest,
+    /jsonb_build_object\(\s*'attemptid', attempt.id::text,\s*'storagepath', staging.storage_path/,
+  );
+  assert.match(manifest, /'stagingobjects', v_staging_objects/);
+  assert.doesNotMatch(manifest, /'stagingpaths'/);
+});
+
+function stagingState(overrides: Record<string, unknown> = {}) {
+  return {
+    expiresAt: "2026-08-24T12:00:00.000Z",
+    postStatus: "FAILED_RETRYABLE",
+    postTerminalAt: null,
+    attemptStatus: "FAILED_RETRYABLE",
+    attemptPublishId: null,
+    attemptCompletedAt: null,
+    attemptErrorCode: "PRE_ACCEPTANCE_INFRASTRUCTURE",
+    hasUnresolvedPublication: false,
+    ...overrides,
+  };
+}
+
+function stagingObject(overrides: Record<string, unknown> = {}): TerminalStagingObject {
+  return {
+    id: "staging-1",
+    userId: "user-1",
+    attemptId: "attempt-1",
+    storagePath: "attempt-1/video.mp4",
+    terminalReconciled: true,
+    expiresAt: "2026-08-25T12:00:00.000Z",
+    postStatus: "PUBLISHED",
+    postTerminalAt: "2026-08-24T12:00:00.000Z",
+    attemptStatus: "FAILED_RETRYABLE",
+    attemptPublishId: null,
+    attemptCompletedAt: null,
+    attemptErrorCode: "PRE_ACCEPTANCE_INFRASTRUCTURE",
+    hasUnresolvedPublication: false,
+    ...overrides,
+  } as TerminalStagingObject;
+}
+
+// Mutation target: attempt-only terminal checks strand retry-chain staging and strict expiry checks miss the boundary.
+test("staging eligibility covers terminal retry chains and exact safe expiry while protecting ambiguity", () => {
+  assert.equal(getStagingDeletionEligibility(stagingState({
+    expiresAt: "2026-08-25T12:00:00.000Z",
+    postStatus: "PUBLISHED",
+    postTerminalAt: "2026-08-24T12:00:00.000Z",
+  }), NOW), "TERMINAL");
+  assert.equal(getStagingDeletionEligibility(stagingState({ expiresAt: "2026-08-24T12:00:00.001Z" }), NOW), null);
+  assert.equal(getStagingDeletionEligibility(stagingState(), NOW), "EXPIRED");
+  assert.equal(getStagingDeletionEligibility(stagingState({ hasUnresolvedPublication: true }), NOW), "EXPIRED");
+
+  for (const protectedState of [
+    { attemptStatus: "SCHEDULED" },
+    { attemptStatus: "SUBMITTING" },
+    { attemptStatus: "PROCESSING" },
+    { attemptStatus: "NEEDS_ATTENTION", attemptErrorCode: "POST_ACCEPTANCE_AMBIGUOUS" },
+    { attemptStatus: "NEEDS_ATTENTION", attemptPublishId: "publish-1", attemptCompletedAt: null },
+    {
+      expiresAt: "2026-08-25T12:00:00.000Z",
+      postStatus: "PUBLISHED",
+      postTerminalAt: "2026-08-24T12:00:00.000Z",
+      hasUnresolvedPublication: true,
+    },
+  ]) {
+    assert.equal(getStagingDeletionEligibility(stagingState(protectedState), NOW), null);
+  }
+});
+
+test("staging cleanup revalidates claim policy before storage removal", async () => {
+  const repo = repository();
+  const mediaStorage = storage();
+  repo.state.staging.push(stagingObject({
+    id: "staging-not-eligible",
+    postStatus: "FAILED_RETRYABLE",
+    postTerminalAt: null,
+    expiresAt: "2026-08-24T12:00:00.001Z",
+  }));
+
+  assert.deepEqual(await cleanupTerminalStaging(repo.value, mediaStorage.value, NOW), {
+    checked: 1,
+    removed: 0,
+    failed: 1,
+  });
+  assert.deepEqual(mediaStorage.removals, []);
+  assert.deepEqual(repo.state.failures, [{
+    target: "staging-not-eligible",
+    errorCode: "STAGING_RETENTION_REVALIDATION_FAILED",
+  }]);
+});
+
+test("staging SQL locks publication rows and covers terminal retry chains plus exact expiry", () => {
+  const claim = schedulerSqlFunction("claim_terminal_staging_cleanup");
+  const complete = schedulerSqlFunction("complete_terminal_staging_cleanup");
+
+  assert.match(claim, /staging.expires_at <= p_now/);
+  assert.match(claim, /post.terminal_at is not null/);
+  assert.match(claim, /unresolved.error_code = 'post_acceptance_ambiguous'/);
+  assert.match(claim, /unresolved.status in \('scheduled', 'submitting', 'processing'\)/);
+  assert.match(
+    claim,
+    /post.terminal_at is not null[\s\S]*and not exists \([\s\S]*unresolved[\s\S]*\)[\s\S]*or \(\s*staging.expires_at <= p_now/,
+  );
+  assert.match(claim, /for update of staging, attempt, post skip locked/);
+  assert.match(claim, /claimed.attempt_id/);
+  assert.match(claim, /claimed.expires_at/);
+
+  assert.match(complete, /staging.expires_at <= p_removed_at/);
+  assert.match(complete, /post.terminal_at is not null/);
+  assert.match(complete, /unresolved.error_code = 'post_acceptance_ambiguous'/);
 });
 
 type RepositoryState = {
@@ -129,7 +331,10 @@ function repository(overrides: Partial<RetentionRepository> = {}) {
         ready: true,
         userId: job.userId,
         originalPaths: [`${job.userId}/original.mp4`],
-        stagingPaths: [`${job.requestId}/staged.mp4`],
+        stagingObjects: [{
+          attemptId: `attempt-${job.requestId}`,
+          storagePath: `attempt-${job.requestId}/staged.mp4`,
+        }],
         recordedPublishIds: ["existing-tiktok-publish-id"],
       };
     },
@@ -181,12 +386,38 @@ test("storage and database partial failures stay retryable and never claim media
   assert.deepEqual(databaseFailureRepo.state.failures, [{ target: "asset-db", errorCode: "DATABASE_CONFIRMATION_FAILED" }]);
 });
 
+// Mutation target: passing an unvalidated row key to the storage client can delete another tenant's object.
+test("invalid original and staging paths are audited without calling storage", async () => {
+  const repo = repository();
+  const mediaStorage = storage();
+  repo.state.media.push(asset({ id: "asset-invalid", storagePath: "user-2/cross-user.mp4" }));
+  repo.state.staging.push(stagingObject({
+    id: "staging-invalid",
+    storagePath: "attempt-2/cross-attempt.mp4",
+  }));
+
+  assert.deepEqual(await cleanupOriginalMedia(repo.value, mediaStorage.value, NOW), { checked: 1, removed: 0, failed: 1 });
+  assert.deepEqual(await cleanupTerminalStaging(repo.value, mediaStorage.value, NOW), { checked: 1, removed: 0, failed: 1 });
+  assert.deepEqual(mediaStorage.removals, []);
+  assert.deepEqual(repo.state.failures, [
+    { target: "asset-invalid", errorCode: "INVALID_STORAGE_PATH" },
+    { target: "staging-invalid", errorCode: "INVALID_STORAGE_PATH" },
+  ]);
+});
+
 test("terminal staging is removed immediately only after terminal reconciliation", async () => {
   const repo = repository();
   const mediaStorage = storage();
   repo.state.staging.push(
-    { id: "staging-terminal", userId: "user-1", storagePath: "attempt-1/video.mp4", terminalReconciled: true },
-    { id: "staging-active", userId: "user-1", storagePath: "attempt-2/video.mp4", terminalReconciled: false },
+    stagingObject({ id: "staging-terminal" }),
+    stagingObject({
+      id: "staging-active",
+      attemptId: "attempt-2",
+      storagePath: "attempt-2/video.mp4",
+      terminalReconciled: false,
+      attemptStatus: "PROCESSING",
+      hasUnresolvedPublication: true,
+    }),
   );
 
   assert.deepEqual(await cleanupTerminalStaging(repo.value, mediaStorage.value, NOW), { checked: 2, removed: 1, failed: 1 });
@@ -231,7 +462,7 @@ test("account cleanup is idempotent, user-scoped, and never deletes a recorded p
   assert.deepEqual(repo.state.completedJobs, [{ requestId: "request-a", userId: "user-a" }]);
   assert.deepEqual(mediaStorage.removals, [
     { bucket: "tiktok-scheduler-media", path: "user-a/original.mp4" },
-    { bucket: "tiktok-publishing-staging", path: "request-a/staged.mp4" },
+    { bucket: "tiktok-publishing-staging", path: "attempt-request-a/staged.mp4" },
   ]);
   assert.deepEqual(await cleanupAccountDeletionJobs(repo.value, mediaStorage.value, NOW), { checked: 0, completed: 0, needsAttention: 0 });
 });
@@ -239,7 +470,7 @@ test("account cleanup is idempotent, user-scoped, and never deletes a recorded p
 test("active references and partial deletion failures move account requests to retryable attention", async () => {
   const activeRepo = repository({
     async loadAccountDeletionManifest(job) {
-      return { ready: false, userId: job.userId, originalPaths: [], stagingPaths: [], recordedPublishIds: ["publish-active"] };
+      return { ready: false, userId: job.userId, originalPaths: [], stagingObjects: [], recordedPublishIds: ["publish-active"] };
     },
   });
   activeRepo.state.jobs.push({ requestId: "request-active", userId: "user-1", state: "RUNNING" });
@@ -253,6 +484,30 @@ test("active references and partial deletion failures move account requests to r
   assert.deepEqual(databaseRepo.state.failures, [{ target: "request-db", errorCode: "DATABASE_CONFIRMATION_FAILED" }]);
 });
 
+test("account deletion validates its entire manifest before removing any storage", async () => {
+  const scopedRepo = repository({
+    async loadAccountDeletionManifest(job) {
+      return {
+        ready: true,
+        userId: job.userId,
+        originalPaths: [`${job.userId}/valid.mp4`],
+        stagingObjects: [{ attemptId: "attempt-1", storagePath: "attempt-2/cross-attempt.mp4" }],
+        recordedPublishIds: [],
+      };
+    },
+  });
+  const mediaStorage = storage();
+  scopedRepo.state.jobs.push({ requestId: "request-invalid", userId: "user-1", state: "RUNNING" });
+
+  assert.deepEqual(await cleanupAccountDeletionJobs(scopedRepo.value, mediaStorage.value, NOW), {
+    checked: 1,
+    completed: 0,
+    needsAttention: 1,
+  });
+  assert.deepEqual(mediaStorage.removals, []);
+  assert.deepEqual(scopedRepo.state.failures, [{ target: "request-invalid", errorCode: "INVALID_STORAGE_PATH" }]);
+});
+
 test("the retention repository maps checked RPC results and preserves exact user scope", async () => {
   const calls: Array<{ name: string; input: Record<string, unknown> }> = [];
   const rpcData: Record<string, unknown> = {
@@ -264,14 +519,19 @@ test("the retention repository maps checked RPC results and preserves exact user
     complete_scheduler_media_cleanup: true,
     record_scheduler_media_cleanup_failure: true,
     claim_terminal_staging_cleanup: [{
-      id: "staging-1", user_id: "user-1", storage_path: "attempt-1/video.mp4", terminal_reconciled: true,
+      id: "staging-1", user_id: "user-1", attempt_id: "attempt-1", storage_path: "attempt-1/video.mp4",
+      terminal_reconciled: true, expires_at: "2026-08-25T12:00:00.000Z", post_status: "PUBLISHED",
+      post_terminal_at: "2026-08-24T12:00:00.000Z", attempt_status: "FAILED_RETRYABLE",
+      attempt_publish_id: null, attempt_completed_at: null, attempt_error_code: "PRE_ACCEPTANCE_INFRASTRUCTURE",
+      has_unresolved_publication: false,
     }],
     complete_terminal_staging_cleanup: true,
     record_terminal_staging_cleanup_failure: true,
     claim_scheduler_account_deletions: [{ request_id: "request-1", user_id: "user-1", state: "RUNNING" }],
     get_scheduler_account_deletion_manifest: {
       ready: true, userId: "user-1", originalPaths: ["user-1/video.mp4"],
-      stagingPaths: ["attempt-1/video.mp4"], recordedPublishIds: ["publish-1"],
+      stagingObjects: [{ attemptId: "attempt-1", storagePath: "attempt-1/video.mp4" }],
+      recordedPublishIds: ["publish-1"],
     },
     complete_scheduler_account_deletion: true,
     mark_scheduler_account_deletion_attention: true,
@@ -286,7 +546,7 @@ test("the retention repository maps checked RPC results and preserves exact user
   assert.deepEqual(await repository.claimMediaCandidates(NOW.toISOString(), 50), [asset({ storagePath: "user-1/video.mp4" })]);
   assert.equal(await repository.completeMediaDeletion({ assetId: "asset-1", userId: "user-1", deletedAt: NOW.toISOString() }), true);
   await repository.recordMediaFailure({ assetId: "asset-1", userId: "user-1", errorCode: "STORAGE_REMOVE_FAILED" });
-  assert.deepEqual(await repository.claimTerminalStaging(NOW.toISOString(), 50), [{ id: "staging-1", userId: "user-1", storagePath: "attempt-1/video.mp4", terminalReconciled: true }]);
+  assert.deepEqual(await repository.claimTerminalStaging(NOW.toISOString(), 50), [stagingObject()]);
   assert.equal(await repository.completeStagingDeletion({ objectId: "staging-1", userId: "user-1", removedAt: NOW.toISOString() }), true);
   await repository.recordStagingFailure({ objectId: "staging-1", userId: "user-1", errorCode: "STORAGE_REMOVE_FAILED" });
   const jobs = await repository.claimAccountDeletionJobs(NOW.toISOString(), 5);
@@ -315,25 +575,30 @@ test("the retention storage adapter checks both storage errors and response shap
       };
     },
   });
-  await checked.remove("tiktok-scheduler-media", "user-1/video.mp4");
+  await checked.remove("tiktok-scheduler-media", "user-1/video.mp4", "user-1");
+  assert.deepEqual(removals, [{ bucket: "tiktok-scheduler-media", paths: ["user-1/video.mp4"] }]);
+  await assert.rejects(
+    checked.remove("tiktok-scheduler-media", "user-2/cross-user.mp4", "user-1"),
+    /invalid storage path/i,
+  );
   assert.deepEqual(removals, [{ bucket: "tiktok-scheduler-media", paths: ["user-1/video.mp4"] }]);
 
   const failed = createRetentionStorage({
     from() { return { async remove() { return { data: null, error: { name: "StorageApiError" } }; } }; },
   });
-  await assert.rejects(failed.remove("tiktok-scheduler-media", "user-1/video.mp4"), /storage removal failed/i);
+  await assert.rejects(failed.remove("tiktok-scheduler-media", "user-1/video.mp4", "user-1"), /storage removal failed/i);
 
   const malformed = createRetentionStorage({
     from() { return { async remove() { return { data: null, error: null }; } }; },
   });
-  await assert.rejects(malformed.remove("tiktok-scheduler-media", "user-1/video.mp4"), /invalid result/i);
+  await assert.rejects(malformed.remove("tiktok-scheduler-media", "user-1/video.mp4", "user-1"), /invalid result/i);
 });
 
 test("one cleanup run processes deletion jobs, terminal staging, and eligible originals", async () => {
   const repo = repository();
   const mediaStorage = storage();
   repo.state.jobs.push({ requestId: "request-1", userId: "user-delete", state: "RUNNING" });
-  repo.state.staging.push({ id: "staging-1", userId: "user-1", storagePath: "attempt-1/video.mp4", terminalReconciled: true });
+  repo.state.staging.push(stagingObject());
   repo.state.media.push(asset());
 
   assert.deepEqual(await runRetentionCleanup(repo.value, mediaStorage.value, NOW), {
@@ -353,6 +618,35 @@ test("settings distinguishes disconnect from destructive deletion with an access
   assert.match(source, /aria-describedby="account-deletion-help"/);
   assert.match(source, /action="\/api\/scheduler\/account\/delete\/"/);
   assert.match(source, /required/);
+});
+
+// Mutation target: treating the redirect as completion gives a destructive operation a false success message.
+test("account action notices describe queued deletion and completed disconnect truthfully", () => {
+  assert.deepEqual(getAccountDeletionRequestNotice("requested"), {
+    title: "Account deletion is queued",
+    detail: "Your deletion request was recorded and your session ended. Deletion has not completed yet; cleanup will continue safely in the background.",
+  });
+  assert.deepEqual(getDisconnectNotice("1"), {
+    title: "TikTok publishing connection removed",
+    detail: "Safe future schedules that had not been submitted were cancelled. Your scheduler account and publishing history were preserved.",
+  });
+  assert.equal(getAccountDeletionRequestNotice(["requested"]), null);
+  assert.equal(getAccountDeletionRequestNotice("complete"), null);
+  assert.equal(getDisconnectNotice("0"), null);
+});
+
+test("scheduler pages wire action notices to polite status announcements", () => {
+  const landing = readFileSync(new URL("../../app/scheduler/page.tsx", import.meta.url), "utf8");
+  const settings = readFileSync(new URL("../../app/scheduler/settings/page.tsx", import.meta.url), "utf8");
+
+  assert.match(landing, /getAccountDeletionRequestNotice/);
+  assert.match(landing, /searchParams/);
+  assert.match(landing, /role="status"/);
+  assert.match(landing, /aria-live="polite"/);
+  assert.match(settings, /getDisconnectNotice/);
+  assert.match(settings, /searchParams/);
+  assert.match(settings, /role="status"/);
+  assert.match(settings, /aria-live="polite"/);
 });
 
 test("disconnect uses one atomic user-scoped RPC and never targets submitted work directly", async () => {

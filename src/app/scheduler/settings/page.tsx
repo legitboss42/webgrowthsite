@@ -1,9 +1,16 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { getDisconnectNotice } from "@/lib/scheduler/accountActionPresentation";
 import { getSchedulerConfig } from "@/lib/scheduler/config";
 import { readSchedulerSession, SCHEDULER_SESSION_COOKIE } from "@/lib/scheduler/session";
 
-export default async function SettingsPage() {
+type SettingsPageProps = {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+};
+
+export default async function SettingsPage({ searchParams }: SettingsPageProps) {
+  const resolvedSearchParams = searchParams ? await searchParams : {};
+  const disconnectNotice = getDisconnectNotice(resolvedSearchParams.disconnected);
   const jar = await cookies();
   const session = readSchedulerSession(jar.get(SCHEDULER_SESSION_COOKIE)?.value);
   if (!session) redirect("/scheduler/sign-in/");
@@ -18,6 +25,18 @@ export default async function SettingsPage() {
         Manage TikTok access separately from your Web Growth scheduler account. Disconnecting is reversible; deleting
         the account is not.
       </p>
+
+      {disconnectNotice ? (
+        <div
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+          className="mt-7 border-l-2 border-[#62f5e6] bg-[#62f5e6]/[0.07] px-5 py-4"
+        >
+          <p className="font-bold text-[#d6fffa]">{disconnectNotice.title}</p>
+          <p className="mt-1 text-sm leading-6 text-white/70">{disconnectNotice.detail}</p>
+        </div>
+      ) : null}
 
       <section
         aria-labelledby="publishing-connection-heading"
