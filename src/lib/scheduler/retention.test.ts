@@ -118,19 +118,34 @@ test("original cleanup does not remove a terminal asset with an unresolved provi
   }]);
 });
 
-// Mutation target: predicate keyed to publish_id misses incomplete provider work whose acceptance is unresolved.
-test("original media claim and completion protect every unresolved attached attempt", () => {
+// Mutation target: treating every uncompleted historical attempt as active leaks original media after a safe retry succeeds.
+test("original media cleanup releases safe retry history after a later terminal post while protecting provider ambiguity", () => {
+  const failure = schedulerSqlFunction("record_tiktok_publish_failure");
+  assert.match(
+    failure,
+    /v_publish_id is null[\s\S]*v_failure_kind = 'safe'[\s\S]*v_error_code = 'pre_acceptance_infrastructure'[\s\S]*v_attempt_status := 'failed_retryable'/,
+  );
+  assert.doesNotMatch(failure, /completed_at\s*=/);
+
+  const retry = schedulerSqlFunction("create_safe_publish_retry");
+  assert.match(
+    retry,
+    /v_current_attempt_status = 'failed_retryable'[\s\S]*v_current_publish_id is null[\s\S]*pre_acceptance_infrastructure/,
+  );
+
   for (const name of [
     "claim_scheduler_media_cleanup",
     "complete_scheduler_media_cleanup",
   ]) {
     const fn = schedulerSqlFunction(name);
-    assert.match(fn, /attempt\.id is not null and attempt\.completed_at is null/);
-    assert.doesNotMatch(fn, /attempt\.publish_id is not null and attempt\.completed_at is null/);
+    assert.match(fn, /attempt\.status in \('scheduled', 'submitting', 'processing'\)/);
+    assert.match(fn, /attempt\.error_code = 'post_acceptance_ambiguous'/);
+    assert.match(fn, /attempt\.publish_id is not null and attempt\.completed_at is null/);
+    assert.doesNotMatch(fn, /attempt\.id is not null and attempt\.completed_at is null/);
   }
 
   const claim = schedulerSqlFunction("claim_scheduler_media_cleanup");
-  assert.match(claim, /coalesce\(bool_or\([\s\S]*attempt\.id is not null and attempt\.completed_at is null/);
+  assert.match(claim, /coalesce\(bool_or\([\s\S]*attempt\.error_code = 'post_acceptance_ambiguous'/);
 });
 
 // Mutation target: prefix-only checks permit traversal, encoded separators, and similarly named tenant namespaces.
