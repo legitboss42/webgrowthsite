@@ -7,6 +7,8 @@ import {
   buildWorkerFailureState,
   classifyPublishFailure,
   classifyRetryEligibility,
+  createPublishingRpcStore,
+  createRetryClientAtBoundary,
   createRetryRpcStore,
   nextAttemptNumber,
   planCurrentAttempt,
@@ -73,12 +75,27 @@ test("safe pre-acceptance infrastructure failures are automatic retry candidates
   });
 });
 
+test("only the implemented pre-acceptance infrastructure class is automatically retryable", () => {
+  assert.equal(classifyRetryEligibility(attempt({ errorCode: "pre_acceptance_infrastructure" })), "AUTOMATIC");
+  assert.equal(classifyRetryEligibility(attempt({ errorCode: "PRE_ACCEPTANCE_NETWORK" })), "NONE");
+});
+
 // Mutation target: requiring publish_id to be null for every retry would prevent a creator retry after a proven terminal rejection.
 test("a proven TikTok terminal media failure requires an explicit creator retry", () => {
   assert.equal(classifyRetryEligibility(attempt({
     status: "NEEDS_ATTENTION",
     publishId: "publish-old",
     errorCode: "FILE_FORMAT_CHECK_FAILED",
+  })), "USER");
+  assert.equal(classifyRetryEligibility(attempt({
+    status: "NEEDS_ATTENTION",
+    publishId: "publish-frame-rate",
+    errorCode: "frame_rate_check_failed",
+  })), "USER");
+  assert.equal(classifyRetryEligibility(attempt({
+    status: "NEEDS_ATTENTION",
+    publishId: "publish-picture-size",
+    errorCode: "PICTURE_SIZE_CHECK_FAILED",
   })), "USER");
 });
 
@@ -236,6 +253,204 @@ test("retry RPC store sends only the exact owned post arguments", async () => {
   }]);
 });
 
+const submissionInput = {
+  postId: "post-1",
+  userId: "user-1",
+  claimToken: "claim-1",
+  attemptId: "attempt-3",
+  attemptNumber: 3,
+  approvalId: "approval-1",
+  requestFingerprint: "fingerprint-1",
+  validationVersion: "tiktok-video-beta-v2",
+};
+
+test("publishing persistence RPCs send exact locked state arguments", async () => {
+  const calls: Array<{ name: string; input: Record<string, unknown> }> = [];
+  const store = createPublishingRpcStore({
+    async rpc(name, input) {
+      calls.push({ name, input });
+      return { data: true, error: null };
+    },
+  });
+  assert.equal(await store.beginSubmission(submissionInput), true);
+  await store.recordPublishId({
+    postId: "post-1",
+    userId: "user-1",
+    claimToken: "claim-1",
+    attemptId: "attempt-3",
+    attemptNumber: 3,
+    publishId: "publish-3",
+    submittedAt: "2026-08-24T12:00:00.000Z",
+  });
+  assert.equal(await store.recordFailure({
+    postId: "post-1",
+    userId: "user-1",
+    claimToken: "claim-1",
+    attemptId: "attempt-3",
+    attemptNumber: 3,
+    failureKind: "AMBIGUOUS",
+    errorCode: "POST_ACCEPTANCE_AMBIGUOUS",
+    failedAt: "2026-08-24T12:00:01.000Z",
+    publishId: "publish-3",
+  }), true);
+  assert.deepEqual(calls, [
+    {
+      name: "begin_tiktok_publish_submission",
+      input: {
+        p_post_id: "post-1",
+        p_user_id: "user-1",
+        p_claim_token: "claim-1",
+        p_attempt_id: "attempt-3",
+        p_attempt_number: 3,
+        p_approval_id: "approval-1",
+        p_request_fingerprint: "fingerprint-1",
+        p_validation_version: "tiktok-video-beta-v2",
+      },
+    },
+    {
+      name: "record_tiktok_publish_id",
+      input: {
+        p_post_id: "post-1",
+        p_user_id: "user-1",
+        p_claim_token: "claim-1",
+        p_attempt_id: "attempt-3",
+        p_attempt_number: 3,
+        p_publish_id: "publish-3",
+        p_submitted_at: "2026-08-24T12:00:00.000Z",
+      },
+    },
+    {
+      name: "record_tiktok_publish_failure",
+      input: {
+        p_post_id: "post-1",
+        p_user_id: "user-1",
+        p_claim_token: "claim-1",
+        p_attempt_id: "attempt-3",
+        p_attempt_number: 3,
+        p_failure_kind: "AMBIGUOUS",
+        p_error_code: "POST_ACCEPTANCE_AMBIGUOUS",
+        p_failed_at: "2026-08-24T12:00:01.000Z",
+        p_publish_id: "publish-3",
+      },
+    },
+  ]);
+});
+
+test("publishing RPC adapters distinguish infrastructure errors, refusals, and known-ID recovery", async () => {
+  const databaseError = createPublishingRpcStore({
+    async rpc() { return { data: null, error: { code: "XX000", message: "database secret" } }; },
+  });
+  await assert.rejects(() => databaseError.beginSubmission(submissionInput), (error: unknown) => {
+    assert.equal(classifyPublishFailure(error).kind, "SAFE");
+    assert.doesNotMatch(String((error as Error).message), /secret|xx000/i);
+    return true;
+  });
+  await assert.rejects(() => databaseError.recordPublishId({
+    postId: "post-1",
+    userId: "user-1",
+    claimToken: "claim-1",
+    attemptId: "attempt-3",
+    attemptNumber: 3,
+    publishId: "publish-db-error",
+    submittedAt: "2026-08-24T12:00:00.000Z",
+  }), (error: unknown) => {
+    assert.equal(classifyPublishFailure(error).kind, "AMBIGUOUS");
+    assert.equal((error as { publishId?: string }).publishId, "publish-db-error");
+    assert.doesNotMatch(String((error as Error).message), /secret|xx000/i);
+    return true;
+  });
+  await assert.rejects(() => databaseError.recordFailure({
+    postId: "post-1",
+    userId: "user-1",
+    claimToken: "claim-1",
+    attemptId: "attempt-3",
+    attemptNumber: 3,
+    failureKind: "NONE",
+    errorCode: "APPROVAL_CHANGED",
+    failedAt: "2026-08-24T12:00:00.000Z",
+    publishId: null,
+  }), (error: unknown) => {
+    assert.doesNotMatch(String((error as Error).message), /secret|xx000/i);
+    return true;
+  });
+
+  const refused = createPublishingRpcStore({
+    async rpc() { return { data: false, error: null }; },
+  });
+  assert.equal(await refused.beginSubmission(submissionInput), false);
+  await assert.rejects(() => refused.recordPublishId({
+    postId: "post-1",
+    userId: "user-1",
+    claimToken: "claim-1",
+    attemptId: "attempt-3",
+    attemptNumber: 3,
+    publishId: "publish-known",
+    submittedAt: "2026-08-24T12:00:00.000Z",
+  }), (error: unknown) => {
+    assert.equal(classifyPublishFailure(error).kind, "AMBIGUOUS");
+    assert.equal((error as { publishId?: string }).publishId, "publish-known");
+    return true;
+  });
+  assert.equal(await refused.recordFailure({
+    postId: "post-1",
+    userId: "user-1",
+    claimToken: "claim-1",
+    attemptId: "attempt-3",
+    attemptNumber: 3,
+    failureKind: "SAFE",
+    errorCode: "PRE_ACCEPTANCE_INFRASTRUCTURE",
+    failedAt: "2026-08-24T12:00:00.000Z",
+    publishId: null,
+  }), false);
+});
+
+test("a claimed post without a reserved attempt uses the same exact failure transaction", async () => {
+  const calls: Array<{ name: string; input: Record<string, unknown> }> = [];
+  const store = createPublishingRpcStore({
+    async rpc(name, input) {
+      calls.push({ name, input });
+      return { data: true, error: null };
+    },
+  });
+  assert.equal(await store.recordFailure({
+    postId: "post-early",
+    userId: "user-1",
+    claimToken: "claim-early",
+    attemptId: null,
+    attemptNumber: null,
+    failureKind: "NONE",
+    errorCode: "APPROVAL_CHANGED",
+    failedAt: "2026-08-24T12:00:00.000Z",
+    publishId: null,
+  }), true);
+  assert.deepEqual(calls, [{
+    name: "record_tiktok_publish_failure",
+    input: {
+      p_post_id: "post-early",
+      p_user_id: "user-1",
+      p_claim_token: "claim-early",
+      p_attempt_id: null,
+      p_attempt_number: null,
+      p_failure_kind: "NONE",
+      p_error_code: "APPROVAL_CHANGED",
+      p_failed_at: "2026-08-24T12:00:00.000Z",
+      p_publish_id: null,
+    },
+  }]);
+});
+
+test("retry client construction failures are converted to a sanitized infrastructure response", () => {
+  const result = createRetryClientAtBoundary(() => {
+    throw new Error("service_role=secret missing URL");
+  });
+  assert.deepEqual(result, {
+    ok: false,
+    status: 502,
+    error: "Unable to verify retry eligibility.",
+  });
+  assert.doesNotMatch(JSON.stringify(result), /secret|service_role|missing url/i);
+});
+
 // Mutation target: accepting stale approval identity/fingerprint could publish content the creator did not approve.
 test("changed approval is refused before the retry RPC", async () => {
   let calls = 0;
@@ -314,7 +529,7 @@ test("numbered retry SQL locks current policy and appends without clearing histo
   assert.match(retrySql, /max\(attempt\.attempt_number\)/);
   assert.match(retrySql, /v_last_attempt_number >= 5/);
   assert.match(retrySql, /attempt\.status in \('scheduled', 'submitting', 'processing'\)/);
-  assert.match(retrySql, /v_current_error_code in \([\s\S]*'file_format_check_failed'/);
+  assert.match(retrySql, /upper\(btrim\(v_current_error_code\)\) in \([\s\S]*'file_format_check_failed'/);
   assert.doesNotMatch(retrySql, /set[\s\S]*publish_id\s*=\s*null/);
   assert.match(retrySql, /claim_token = null/);
   assert.match(retrySql, /claimed_at = null/);

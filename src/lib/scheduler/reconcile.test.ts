@@ -30,6 +30,15 @@ test("TikTok terminal media failure enables only an explicit creator retry", () 
   assert.equal("publish_id" in result.attempt, false, "terminal reconciliation must not clear the historical publish ID");
 });
 
+test("documented frame-rate and picture-size terminal codes are normalized for creator retry", () => {
+  for (const failReason of ["frame_rate_check_failed", " picture_size_check_failed "]) {
+    const result = buildTerminalReconciliation({ status: "FAILED", fail_reason: failReason }, "2026-08-24T12:00:00.000Z");
+    assert.equal(result.post.status, "FAILED_RETRYABLE");
+    assert.equal(result.post.retry_eligible, true);
+    assert.equal(result.post.next_retry_at, null);
+  }
+});
+
 test("unknown TikTok terminal errors go to attention with a sanitized code", () => {
   const result = buildTerminalReconciliation({
     status: "FAILED",
@@ -51,6 +60,16 @@ test("successful reconciliation marks terminal completion without making a retry
 });
 
 test("reconciliation remains pending when either durable state write fails", () => {
-  assert.equal(reconciliationWritesSucceeded([{ error: null }, { error: null }]), true);
-  assert.equal(reconciliationWritesSucceeded([{ error: null }, { error: { code: "XX000" } }]), false);
+  assert.equal(reconciliationWritesSucceeded([
+    { data: [{ id: "post-1" }], error: null },
+    { data: [{ id: "attempt-1" }], error: null },
+  ]), true);
+  assert.equal(reconciliationWritesSucceeded([
+    { data: [{ id: "post-1" }], error: null },
+    { data: [], error: null },
+  ]), false);
+  assert.equal(reconciliationWritesSucceeded([
+    { data: [{ id: "post-1" }], error: null },
+    { data: [{ id: "attempt-1" }], error: { code: "XX000" } },
+  ]), false);
 });

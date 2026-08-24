@@ -320,14 +320,16 @@ begin
       (
         v_current_attempt_status = 'FAILED_RETRYABLE'
         and v_current_publish_id is null
-        and v_current_error_code in ('PRE_ACCEPTANCE_INFRASTRUCTURE', 'PRE_ACCEPTANCE_NETWORK')
+        and upper(btrim(v_current_error_code)) in ('PRE_ACCEPTANCE_INFRASTRUCTURE')
       )
       or (
         v_current_attempt_status = 'NEEDS_ATTENTION'
         and v_current_publish_id is not null
-        and v_current_error_code in (
+        and upper(btrim(v_current_error_code)) in (
           'DURATION_CHECK_FAILED',
           'FILE_FORMAT_CHECK_FAILED',
+          'FRAME_RATE_CHECK_FAILED',
+          'PICTURE_SIZE_CHECK_FAILED',
           'PHOTO_PROCESS_FAILED',
           'PHOTO_PULL_FAILED',
           'VIDEO_PROCESS_FAILED',
@@ -368,6 +370,466 @@ begin
     and post.user_id = p_user_id;
 
   return v_next_attempt_number;
+end;
+$$;
+
+create or replace function public.begin_tiktok_publish_submission(
+  p_post_id uuid,
+  p_user_id uuid,
+  p_claim_token uuid,
+  p_attempt_id uuid,
+  p_attempt_number integer,
+  p_approval_id uuid,
+  p_request_fingerprint text,
+  p_validation_version text
+)
+returns boolean
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_post_kind text;
+  v_total_media_count integer := 0;
+  v_valid_media_count integer := 0;
+  v_locked_media_id uuid;
+  v_locked_asset_id uuid;
+  v_attempt_count integer := 0;
+  v_post_count integer := 0;
+begin
+  if p_post_id is null
+    or p_user_id is null
+    or p_claim_token is null
+    or p_attempt_id is null
+    or p_attempt_number is null
+    or p_attempt_number < 1
+    or p_approval_id is null
+    or p_request_fingerprint is null
+    or btrim(p_request_fingerprint) = ''
+    or p_validation_version is null
+    or btrim(p_validation_version) = '' then
+    return false;
+  end if;
+
+  perform 1
+  from public.scheduler_users user_record
+  where user_record.id = p_user_id
+    and user_record.status = 'ACTIVE'
+    and user_record.suspended_at is null
+    and user_record.deletion_requested_at is null
+    and user_record.terms_version = '2026-08-23'
+    and user_record.privacy_version = '2026-08-23'
+  for update of user_record;
+
+  if not found then
+    return false;
+  end if;
+
+  select post.kind
+  into v_post_kind
+  from public.scheduled_posts post
+  join public.post_approvals approval
+    on approval.id = post.approval_id
+    and approval.post_id = post.id
+    and approval.user_id = post.user_id
+  join public.publish_attempts attempt
+    on attempt.id = p_attempt_id
+    and attempt.post_id = post.id
+    and attempt.approval_id = approval.id
+    and attempt.request_fingerprint = approval.fingerprint
+  where post.id = p_post_id
+    and post.user_id = p_user_id
+    and post.claim_token = p_claim_token
+    and post.status = 'CLAIMED'
+    and post.terminal_at is null
+    and approval.id = p_approval_id
+    and approval.fingerprint = p_request_fingerprint
+    and approval.invalidated_at is null
+    and attempt.attempt_number = p_attempt_number
+    and attempt.attempt_number = (
+      select max(current_attempt.attempt_number)
+      from public.publish_attempts current_attempt
+      where current_attempt.post_id = post.id
+        and current_attempt.approval_id = approval.id
+    )
+    and attempt.status = 'SCHEDULED'
+    and attempt.publish_id is null
+  for update of post, approval, attempt;
+
+  if not found then
+    return false;
+  end if;
+
+  for v_locked_media_id in
+    select post_media.media_id
+    from public.post_media post_media
+    where post_media.post_id = p_post_id
+    order by post_media.position
+    for update of post_media
+  loop
+    null;
+  end loop;
+
+  for v_locked_asset_id in
+    select asset.id
+    from public.media_assets asset
+    join public.post_media post_media on post_media.media_id = asset.id
+    where post_media.post_id = p_post_id
+    order by asset.id
+    for update of asset
+  loop
+    null;
+  end loop;
+
+  select
+    count(*),
+    count(*) filter (
+      where asset.user_id = p_user_id
+        and asset.kind = v_post_kind
+        and asset.validation_status = 'VALID'
+        and (
+          v_post_kind <> 'VIDEO'
+          or asset.validation_version = p_validation_version
+        )
+    )
+  into v_total_media_count, v_valid_media_count
+  from public.post_media post_media
+  join public.media_assets asset on asset.id = post_media.media_id
+  where post_media.post_id = p_post_id;
+
+  if v_total_media_count < 1
+    or v_total_media_count > 10
+    or v_total_media_count <> v_valid_media_count
+    or (v_post_kind = 'VIDEO' and v_total_media_count <> 1) then
+    return false;
+  end if;
+
+  update public.publish_attempts attempt
+  set
+    status = 'SUBMITTING',
+    error_code = null,
+    error_message = null,
+    updated_at = now()
+  where attempt.id = p_attempt_id
+    and attempt.post_id = p_post_id
+    and attempt.approval_id = p_approval_id
+    and attempt.attempt_number = p_attempt_number
+    and attempt.status = 'SCHEDULED'
+    and attempt.publish_id is null;
+  get diagnostics v_attempt_count = row_count;
+
+  update public.scheduled_posts post
+  set
+    status = 'SUBMITTING',
+    retry_eligible = false,
+    next_retry_at = null,
+    updated_at = now()
+  where post.id = p_post_id
+    and post.user_id = p_user_id
+    and post.claim_token = p_claim_token
+    and post.status = 'CLAIMED';
+  get diagnostics v_post_count = row_count;
+
+  if v_attempt_count <> 1 or v_post_count <> 1 then
+    raise exception 'TikTok submission state transition was not exact' using errcode = 'P0001';
+  end if;
+
+  return true;
+end;
+$$;
+
+create or replace function public.record_tiktok_publish_id(
+  p_post_id uuid,
+  p_user_id uuid,
+  p_claim_token uuid,
+  p_attempt_id uuid,
+  p_attempt_number integer,
+  p_publish_id text,
+  p_submitted_at timestamptz
+)
+returns boolean
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_attempt_count integer := 0;
+  v_post_count integer := 0;
+begin
+  if p_post_id is null
+    or p_user_id is null
+    or p_claim_token is null
+    or p_attempt_id is null
+    or p_attempt_number is null
+    or p_attempt_number < 1
+    or p_publish_id is null
+    or btrim(p_publish_id) = ''
+    or p_submitted_at is null then
+    return false;
+  end if;
+
+  perform 1
+  from public.scheduled_posts post
+  join public.publish_attempts attempt
+    on attempt.id = p_attempt_id
+    and attempt.post_id = post.id
+    and attempt.approval_id = post.approval_id
+  where post.id = p_post_id
+    and post.user_id = p_user_id
+    and post.claim_token = p_claim_token
+    and post.status in ('SUBMITTING', 'PROCESSING', 'CLAIMED')
+    and (post.publish_id is null or post.publish_id = p_publish_id)
+    and attempt.attempt_number = p_attempt_number
+    and attempt.attempt_number = (
+      select max(current_attempt.attempt_number)
+      from public.publish_attempts current_attempt
+      where current_attempt.post_id = post.id
+        and current_attempt.approval_id = attempt.approval_id
+    )
+    and attempt.status in ('SUBMITTING', 'PROCESSING')
+    and (attempt.publish_id is null or attempt.publish_id = p_publish_id)
+  for update of post, attempt;
+
+  if not found then
+    return false;
+  end if;
+
+  update public.publish_attempts attempt
+  set
+    publish_id = p_publish_id,
+    status = 'PROCESSING',
+    submitted_at = coalesce(attempt.submitted_at, p_submitted_at),
+    error_code = null,
+    error_message = null,
+    updated_at = now()
+  where attempt.id = p_attempt_id
+    and attempt.post_id = p_post_id
+    and attempt.attempt_number = p_attempt_number
+    and (attempt.publish_id is null or attempt.publish_id = p_publish_id);
+  get diagnostics v_attempt_count = row_count;
+
+  update public.scheduled_posts post
+  set
+    publish_id = p_publish_id,
+    status = 'PROCESSING',
+    retry_eligible = false,
+    next_retry_at = null,
+    terminal_at = null,
+    updated_at = now()
+  where post.id = p_post_id
+    and post.user_id = p_user_id
+    and post.claim_token = p_claim_token
+    and (post.publish_id is null or post.publish_id = p_publish_id);
+  get diagnostics v_post_count = row_count;
+
+  if v_attempt_count <> 1 or v_post_count <> 1 then
+    raise exception 'TikTok publish ID persistence was not exact' using errcode = 'P0001';
+  end if;
+
+  return true;
+end;
+$$;
+
+create or replace function public.record_tiktok_publish_failure(
+  p_post_id uuid,
+  p_user_id uuid,
+  p_claim_token uuid,
+  p_attempt_id uuid,
+  p_attempt_number integer,
+  p_failure_kind text,
+  p_error_code text,
+  p_failed_at timestamptz,
+  p_publish_id text
+)
+returns boolean
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_effective_attempt_id uuid;
+  v_effective_attempt_number integer;
+  v_existing_attempt_publish_id text;
+  v_existing_post_publish_id text;
+  v_publish_id text;
+  v_failure_kind text;
+  v_error_code text;
+  v_attempt_status text;
+  v_post_status text;
+  v_user_failure_code text;
+  v_next_retry_at timestamptz;
+  v_terminal_at timestamptz;
+  v_attempt_count integer := 0;
+  v_post_count integer := 0;
+begin
+  if p_post_id is null
+    or p_user_id is null
+    or p_claim_token is null
+    or ((p_attempt_id is null) <> (p_attempt_number is null))
+    or (p_attempt_number is not null and p_attempt_number < 1)
+    or p_failure_kind is null
+    or p_error_code is null
+    or p_failed_at is null then
+    return false;
+  end if;
+
+  if p_attempt_id is null and p_attempt_number is null then
+    perform 1
+    from public.scheduled_posts post
+    where post.id = p_post_id
+      and post.user_id = p_user_id
+      and post.claim_token = p_claim_token
+      and post.status = 'CLAIMED'
+    for update of post;
+
+    if not found then
+      return false;
+    end if;
+
+    select attempt.id, attempt.attempt_number, attempt.publish_id, post.publish_id
+    into v_effective_attempt_id, v_effective_attempt_number, v_existing_attempt_publish_id, v_existing_post_publish_id
+    from public.scheduled_posts post
+    join public.publish_attempts attempt
+      on attempt.post_id = post.id
+      and attempt.approval_id = post.approval_id
+    where post.id = p_post_id
+      and post.user_id = p_user_id
+      and post.claim_token = p_claim_token
+      and post.status = 'CLAIMED'
+      and attempt.status in ('SCHEDULED', 'SUBMITTING', 'PROCESSING')
+      and attempt.attempt_number = (
+        select max(current_attempt.attempt_number)
+        from public.publish_attempts current_attempt
+        where current_attempt.post_id = post.id
+          and current_attempt.approval_id = attempt.approval_id
+      )
+    order by attempt.attempt_number desc
+    limit 1
+    for update of attempt;
+
+    if found then
+      null;
+    else
+      update public.scheduled_posts post
+      set
+        status = 'NEEDS_ATTENTION',
+        retry_eligible = false,
+        next_retry_at = null,
+        user_failure_code = 'PUBLISH_BLOCKED',
+        terminal_at = p_failed_at,
+        updated_at = now()
+      where post.id = p_post_id
+        and post.user_id = p_user_id
+        and post.claim_token = p_claim_token
+        and post.status = 'CLAIMED';
+      get diagnostics v_post_count = row_count;
+
+      if v_post_count <> 1 then
+        raise exception 'TikTok claim failure persistence was not exact' using errcode = 'P0001';
+      end if;
+
+      return true;
+    end if;
+  else
+    v_effective_attempt_id := p_attempt_id;
+    v_effective_attempt_number := p_attempt_number;
+
+    select attempt.publish_id, post.publish_id
+    into v_existing_attempt_publish_id, v_existing_post_publish_id
+    from public.scheduled_posts post
+    join public.publish_attempts attempt
+      on attempt.id = p_attempt_id
+      and attempt.post_id = post.id
+      and attempt.approval_id = post.approval_id
+    where post.id = p_post_id
+      and post.user_id = p_user_id
+      and post.claim_token = p_claim_token
+      and post.status in ('CLAIMED', 'SUBMITTING', 'PROCESSING')
+      and attempt.attempt_number = p_attempt_number
+      and attempt.attempt_number = (
+        select max(current_attempt.attempt_number)
+        from public.publish_attempts current_attempt
+        where current_attempt.post_id = post.id
+          and current_attempt.approval_id = attempt.approval_id
+      )
+      and attempt.status in ('SCHEDULED', 'SUBMITTING', 'PROCESSING')
+    for update of post, attempt;
+
+    if not found then
+      return false;
+    end if;
+  end if;
+
+  if (v_existing_attempt_publish_id is not null and p_publish_id is not null and v_existing_attempt_publish_id <> p_publish_id)
+    or (v_existing_post_publish_id is not null and p_publish_id is not null and v_existing_post_publish_id <> p_publish_id)
+    or (v_existing_attempt_publish_id is not null and v_existing_post_publish_id is not null and v_existing_attempt_publish_id <> v_existing_post_publish_id) then
+    return false;
+  end if;
+
+  v_publish_id := coalesce(v_existing_attempt_publish_id, v_existing_post_publish_id, p_publish_id);
+  v_failure_kind := upper(btrim(p_failure_kind));
+  v_error_code := upper(btrim(p_error_code));
+
+  if v_publish_id is null
+    and v_failure_kind = 'SAFE'
+    and v_error_code = 'PRE_ACCEPTANCE_INFRASTRUCTURE'
+    and v_effective_attempt_number < 5 then
+    v_attempt_status := 'FAILED_RETRYABLE';
+    v_post_status := 'FAILED_RETRYABLE';
+    v_user_failure_code := 'PUBLISH_RETRY_SCHEDULED';
+    v_next_retry_at := p_failed_at + least(
+      interval '15 minutes',
+      interval '1 minute' * power(2::numeric, greatest(0, least(30, v_effective_attempt_number - 1)))::double precision
+    );
+    v_terminal_at := null;
+  else
+    v_attempt_status := 'NEEDS_ATTENTION';
+    v_post_status := 'NEEDS_ATTENTION';
+    v_next_retry_at := null;
+    v_terminal_at := p_failed_at;
+    if v_publish_id is not null or v_failure_kind = 'AMBIGUOUS' then
+      v_error_code := 'POST_ACCEPTANCE_AMBIGUOUS';
+      v_user_failure_code := 'PUBLISH_RECONCILIATION_REQUIRED';
+    else
+      v_user_failure_code := 'PUBLISH_BLOCKED';
+    end if;
+  end if;
+
+  update public.publish_attempts attempt
+  set
+    status = v_attempt_status,
+    publish_id = v_publish_id,
+    submitted_at = case
+      when v_publish_id is not null then coalesce(attempt.submitted_at, p_failed_at)
+      else attempt.submitted_at
+    end,
+    error_code = v_error_code,
+    error_message = null,
+    updated_at = now()
+  where attempt.id = v_effective_attempt_id
+    and attempt.post_id = p_post_id
+    and attempt.attempt_number = v_effective_attempt_number;
+  get diagnostics v_attempt_count = row_count;
+
+  update public.scheduled_posts post
+  set
+    status = v_post_status,
+    publish_id = v_publish_id,
+    retry_eligible = v_post_status = 'FAILED_RETRYABLE',
+    next_retry_at = v_next_retry_at,
+    user_failure_code = v_user_failure_code,
+    terminal_at = v_terminal_at,
+    updated_at = now()
+  where post.id = p_post_id
+    and post.user_id = p_user_id
+    and post.claim_token = p_claim_token;
+  get diagnostics v_post_count = row_count;
+
+  if v_attempt_count <> 1 or v_post_count <> 1 then
+    raise exception 'TikTok publish failure persistence was not exact' using errcode = 'P0001';
+  end if;
+
+  return true;
 end;
 $$;
 
@@ -752,6 +1214,12 @@ revoke execute on function public.claim_due_tiktok_posts(timestamptz, integer) f
 grant execute on function public.claim_due_tiktok_posts(timestamptz, integer) to service_role;
 revoke execute on function public.create_safe_publish_retry(uuid, uuid) from public, anon, authenticated;
 grant execute on function public.create_safe_publish_retry(uuid, uuid) to service_role;
+revoke execute on function public.begin_tiktok_publish_submission(uuid, uuid, uuid, uuid, integer, uuid, text, text) from public, anon, authenticated;
+grant execute on function public.begin_tiktok_publish_submission(uuid, uuid, uuid, uuid, integer, uuid, text, text) to service_role;
+revoke execute on function public.record_tiktok_publish_id(uuid, uuid, uuid, uuid, integer, text, timestamptz) from public, anon, authenticated;
+grant execute on function public.record_tiktok_publish_id(uuid, uuid, uuid, uuid, integer, text, timestamptz) to service_role;
+revoke execute on function public.record_tiktok_publish_failure(uuid, uuid, uuid, uuid, integer, text, text, timestamptz, text) from public, anon, authenticated;
+grant execute on function public.record_tiktok_publish_failure(uuid, uuid, uuid, uuid, integer, text, text, timestamptz, text) to service_role;
 revoke execute on function public.create_public_scheduler_post(uuid, uuid[], text, text) from public, anon, authenticated;
 revoke execute on function public.approve_public_scheduler_post(uuid, uuid, text, jsonb) from public, anon, authenticated;
 revoke execute on function public.save_active_tiktok_connection(uuid, text, text, text[], timestamptz, timestamptz) from public, anon, authenticated;

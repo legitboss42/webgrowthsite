@@ -8,12 +8,13 @@ const RETRY_MAX_DELAY_MS = 15 * 60_000;
 
 const SAFE_PRE_ACCEPTANCE_CODES = new Set([
   "PRE_ACCEPTANCE_INFRASTRUCTURE",
-  "PRE_ACCEPTANCE_NETWORK",
 ]);
 
 const TERMINAL_MEDIA_CODES = new Set([
   "DURATION_CHECK_FAILED",
   "FILE_FORMAT_CHECK_FAILED",
+  "FRAME_RATE_CHECK_FAILED",
+  "PICTURE_SIZE_CHECK_FAILED",
   "PHOTO_PROCESS_FAILED",
   "PHOTO_PULL_FAILED",
   "VIDEO_PROCESS_FAILED",
@@ -34,6 +35,10 @@ export type RetryAttempt = {
 
 export type RetryEligibility = "AUTOMATIC" | "USER" | "NONE";
 
+function normalizeKnownErrorCode(value: string | null) {
+  return typeof value === "string" ? value.trim().toUpperCase() : "";
+}
+
 export function classifyRetryEligibility(attempt: RetryAttempt): RetryEligibility {
   if (!Number.isSafeInteger(attempt.attemptNumber)
     || attempt.attemptNumber < 1
@@ -41,11 +46,11 @@ export function classifyRetryEligibility(attempt: RetryAttempt): RetryEligibilit
   if (attempt.status === "FAILED_RETRYABLE"
     && !attempt.publishId
     && !!attempt.errorCode
-    && SAFE_PRE_ACCEPTANCE_CODES.has(attempt.errorCode)) return "AUTOMATIC";
+    && SAFE_PRE_ACCEPTANCE_CODES.has(normalizeKnownErrorCode(attempt.errorCode))) return "AUTOMATIC";
   if (attempt.status === "NEEDS_ATTENTION"
     && !!attempt.publishId
     && !!attempt.errorCode
-    && TERMINAL_MEDIA_CODES.has(attempt.errorCode)) return "USER";
+    && TERMINAL_MEDIA_CODES.has(normalizeKnownErrorCode(attempt.errorCode))) return "USER";
   return "NONE";
 }
 
@@ -269,8 +274,126 @@ export function buildTerminalReconciliation(
   };
 }
 
-export function reconciliationWritesSucceeded(results: Array<{ error: unknown }>) {
-  return results.length > 0 && results.every((result) => !result.error);
+export function reconciliationWritesSucceeded(results: Array<{ data: unknown; error: unknown }>) {
+  return results.length > 0 && results.every((result) => (
+    !result.error && Array.isArray(result.data) && result.data.length === 1
+  ));
+}
+
+export type SubmissionBoundaryInput = {
+  postId: string;
+  userId: string;
+  claimToken: string;
+  attemptId: string;
+  attemptNumber: number;
+  approvalId: string;
+  requestFingerprint: string;
+  validationVersion: string;
+};
+
+export type PublishIdPersistenceInput = {
+  postId: string;
+  userId: string;
+  claimToken: string;
+  attemptId: string;
+  attemptNumber: number;
+  publishId: string;
+  submittedAt: string;
+};
+
+export type PublishFailurePersistenceInput = {
+  postId: string;
+  userId: string;
+  claimToken: string;
+  attemptId: string | null;
+  attemptNumber: number | null;
+  failureKind: PublishFailureKind;
+  errorCode: string;
+  failedAt: string;
+  publishId: string | null;
+};
+
+export type PublishingRpcClient = {
+  rpc(
+    name: "begin_tiktok_publish_submission" | "record_tiktok_publish_id" | "record_tiktok_publish_failure",
+    input: Record<string, unknown>,
+  ): PromiseLike<{ data: unknown; error: { code?: string; message?: string } | null }>;
+};
+
+export type PublishingRpcStore = {
+  beginSubmission(input: SubmissionBoundaryInput): Promise<boolean>;
+  recordPublishId(input: PublishIdPersistenceInput): Promise<void>;
+  recordFailure(input: PublishFailurePersistenceInput): Promise<boolean>;
+};
+
+export function createPublishingRpcStore(client: PublishingRpcClient): PublishingRpcStore {
+  async function exactBooleanRpc(
+    name: Parameters<PublishingRpcClient["rpc"]>[0],
+    input: Record<string, unknown>,
+  ) {
+    const { data, error } = await client.rpc(name, input);
+    if (error || typeof data !== "boolean") {
+      throw new Error("Scheduler publishing database operation failed.");
+    }
+    return data;
+  }
+
+  return {
+    beginSubmission(input) {
+      return exactBooleanRpc("begin_tiktok_publish_submission", {
+        p_post_id: input.postId,
+        p_user_id: input.userId,
+        p_claim_token: input.claimToken,
+        p_attempt_id: input.attemptId,
+        p_attempt_number: input.attemptNumber,
+        p_approval_id: input.approvalId,
+        p_request_fingerprint: input.requestFingerprint,
+        p_validation_version: input.validationVersion,
+      });
+    },
+    async recordPublishId(input) {
+      try {
+        const recorded = await exactBooleanRpc("record_tiktok_publish_id", {
+          p_post_id: input.postId,
+          p_user_id: input.userId,
+          p_claim_token: input.claimToken,
+          p_attempt_id: input.attemptId,
+          p_attempt_number: input.attemptNumber,
+          p_publish_id: input.publishId,
+          p_submitted_at: input.submittedAt,
+        });
+        if (!recorded) throw ambiguousPublishError(input.publishId);
+      } catch (error) {
+        if (error instanceof SchedulerPublishError) throw error;
+        throw ambiguousPublishError(input.publishId);
+      }
+    },
+    recordFailure(input) {
+      return exactBooleanRpc("record_tiktok_publish_failure", {
+        p_post_id: input.postId,
+        p_user_id: input.userId,
+        p_claim_token: input.claimToken,
+        p_attempt_id: input.attemptId,
+        p_attempt_number: input.attemptNumber,
+        p_failure_kind: input.failureKind,
+        p_error_code: input.errorCode,
+        p_failed_at: input.failedAt,
+        p_publish_id: input.publishId,
+      });
+    },
+  };
+}
+
+export function createRetryClientAtBoundary<T>(factory: () => T) {
+  try {
+    return { ok: true as const, client: factory() };
+  } catch {
+    return {
+      ok: false as const,
+      status: 502 as const,
+      error: "Unable to verify retry eligibility.",
+    };
+  }
 }
 
 export type RetryRpcClient = {

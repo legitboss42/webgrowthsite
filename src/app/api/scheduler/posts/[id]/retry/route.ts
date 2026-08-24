@@ -4,6 +4,7 @@ import { getSchedulerLaunchState } from "@/lib/scheduler/launch";
 import { isSameOriginMutation } from "@/lib/scheduler/policy";
 import {
   createRetryRpcStore,
+  createRetryClientAtBoundary,
   retryPostAtBoundary,
   type RetryAttempt,
   type RetryRpcClient,
@@ -20,7 +21,11 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
   }
 
   const { id } = await context.params;
-  const supabase = createSchedulerSupabaseClient();
+  const clientBoundary = createRetryClientAtBoundary(createSchedulerSupabaseClient);
+  if (!clientBoundary.ok) {
+    return NextResponse.json({ error: clientBoundary.error }, { status: clientBoundary.status });
+  }
+  const supabase = clientBoundary.client;
   const { data: post, error: postError } = await supabase.from("scheduled_posts")
     .select("id,user_id,status,approval_id,retry_eligible,terminal_at")
     .eq("id", id)

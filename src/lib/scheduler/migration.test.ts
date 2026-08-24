@@ -197,6 +197,92 @@ test("public scheduler beta migration reserves a fixed quota by scheduling the o
   assert.match(retryFunction, /retry_eligible = false/);
 });
 
+test("final TikTok submission RPC locks and rechecks every mutable publishing boundary", () => {
+  const sql = readFileSync(publicSchedulerBetaMigrationPath, "utf8").toLowerCase();
+  const start = sql.indexOf("create or replace function public.begin_tiktok_publish_submission");
+  const end = sql.indexOf("create or replace function public.record_tiktok_publish_id", start);
+  assert.notEqual(start, -1);
+  assert.notEqual(end, -1);
+  const fn = sql.slice(start, end);
+  for (const parameter of [
+    "p_post_id uuid", "p_user_id uuid", "p_claim_token uuid", "p_attempt_id uuid",
+    "p_attempt_number integer", "p_approval_id uuid", "p_request_fingerprint text",
+    "p_validation_version text",
+  ]) assert.match(fn, new RegExp(parameter));
+  assert.match(fn, /security definer/);
+  assert.match(fn, /set search_path = public/);
+  assert.match(fn, /user_record\.status = 'active'/);
+  assert.match(fn, /user_record\.suspended_at is null/);
+  assert.match(fn, /user_record\.deletion_requested_at is null/);
+  assert.match(fn, /user_record\.terms_version = '2026-08-23'/);
+  assert.match(fn, /user_record\.privacy_version = '2026-08-23'/);
+  assert.match(fn, /post\.user_id = p_user_id/);
+  assert.match(fn, /post\.claim_token = p_claim_token/);
+  assert.match(fn, /post\.status = 'claimed'/);
+  assert.match(fn, /approval\.invalidated_at is null/);
+  assert.match(fn, /approval\.fingerprint = p_request_fingerprint/);
+  assert.match(fn, /attempt\.attempt_number = p_attempt_number/);
+  assert.match(fn, /attempt\.status = 'scheduled'/);
+  assert.match(fn, /max\(current_attempt\.attempt_number\)/);
+  assert.match(fn, /for update of user_record/);
+  assert.match(fn, /for update of post, approval, attempt/);
+  assert.match(fn, /for update of post_media/);
+  assert.match(fn, /for update of asset/);
+  assert.match(fn, /asset\.validation_status = 'valid'/);
+  assert.match(fn, /asset\.validation_version = p_validation_version/);
+  assert.match(fn, /update public\.publish_attempts attempt[\s\S]*status = 'submitting'/);
+  assert.match(fn, /update public\.scheduled_posts post[\s\S]*status = 'submitting'/);
+  assert.match(fn, /get diagnostics v_attempt_count = row_count/);
+  assert.match(fn, /get diagnostics v_post_count = row_count/);
+  assert.match(sql, /revoke execute on function public\.begin_tiktok_publish_submission\(uuid, uuid, uuid, uuid, integer, uuid, text, text\) from public, anon, authenticated/);
+  assert.match(sql, /grant execute on function public\.begin_tiktok_publish_submission\(uuid, uuid, uuid, uuid, integer, uuid, text, text\) to service_role/);
+});
+
+test("publish-ID and failure RPCs persist both attempt and post atomically without clearing IDs", () => {
+  const sql = readFileSync(publicSchedulerBetaMigrationPath, "utf8").toLowerCase();
+  const publishStart = sql.indexOf("create or replace function public.record_tiktok_publish_id");
+  const failureStart = sql.indexOf("create or replace function public.record_tiktok_publish_failure", publishStart);
+  const failureEnd = sql.indexOf("create or replace function public.create_public_scheduler_post", failureStart);
+  assert.notEqual(publishStart, -1);
+  assert.notEqual(failureStart, -1);
+  assert.notEqual(failureEnd, -1);
+  const publishFn = sql.slice(publishStart, failureStart);
+  const failureFn = sql.slice(failureStart, failureEnd);
+  assert.match(publishFn, /for update of post, attempt/);
+  assert.match(publishFn, /attempt\.publish_id is null or attempt\.publish_id = p_publish_id/);
+  assert.match(publishFn, /post\.publish_id is null or post\.publish_id = p_publish_id/);
+  assert.match(publishFn, /update public\.publish_attempts attempt[\s\S]*publish_id = p_publish_id[\s\S]*status = 'processing'/);
+  assert.match(publishFn, /update public\.scheduled_posts post[\s\S]*publish_id = p_publish_id[\s\S]*status = 'processing'/);
+  assert.match(publishFn, /get diagnostics v_attempt_count = row_count/);
+  assert.match(publishFn, /get diagnostics v_post_count = row_count/);
+  assert.match(failureFn, /for update of post, attempt/);
+  assert.match(failureFn, /p_attempt_id is null and p_attempt_number is null/);
+  assert.match(failureFn, /select attempt\.id, attempt\.attempt_number[\s\S]*into v_effective_attempt_id, v_effective_attempt_number[\s\S]*order by attempt\.attempt_number desc[\s\S]*limit 1[\s\S]*for update of attempt/);
+  assert.match(failureFn, /attempt\.id = v_effective_attempt_id/);
+  assert.match(failureFn, /post\.status = 'claimed'/);
+  assert.match(failureFn, /publish_id = v_publish_id/);
+  assert.match(failureFn, /pre_acceptance_infrastructure/);
+  assert.doesNotMatch(failureFn, /pre_acceptance_network/);
+  assert.match(failureFn, /least\(\s*interval '15 minutes'/);
+  assert.match(failureFn, /update public\.publish_attempts attempt/);
+  assert.match(failureFn, /update public\.scheduled_posts post/);
+  assert.match(sql, /revoke execute on function public\.record_tiktok_publish_id\(uuid, uuid, uuid, uuid, integer, text, timestamptz\) from public, anon, authenticated/);
+  assert.match(sql, /grant execute on function public\.record_tiktok_publish_id\(uuid, uuid, uuid, uuid, integer, text, timestamptz\) to service_role/);
+  assert.match(sql, /revoke execute on function public\.record_tiktok_publish_failure\(uuid, uuid, uuid, uuid, integer, text, text, timestamptz, text\) from public, anon, authenticated/);
+  assert.match(sql, /grant execute on function public\.record_tiktok_publish_failure\(uuid, uuid, uuid, uuid, integer, text, text, timestamptz, text\) to service_role/);
+});
+
+test("retry SQL normalizes the complete documented terminal media allowlist", () => {
+  const sql = readFileSync(publicSchedulerBetaMigrationPath, "utf8").toLowerCase();
+  const retryStart = sql.indexOf("create or replace function public.create_safe_publish_retry");
+  const retryEnd = sql.indexOf("create or replace function public.begin_tiktok_publish_submission", retryStart);
+  const retryFn = sql.slice(retryStart, retryEnd);
+  assert.match(retryFn, /upper\(btrim\(v_current_error_code\)\)/);
+  assert.match(retryFn, /'frame_rate_check_failed'/);
+  assert.match(retryFn, /'picture_size_check_failed'/);
+  assert.doesNotMatch(retryFn, /pre_acceptance_network/);
+});
+
 // Mutation target: moving either insert outside the function must permit a zero-media partial post.
 test("public scheduler beta migration creates posts and ordered media atomically", () => {
   const sql = readFileSync(publicSchedulerBetaMigrationPath, "utf8").toLowerCase();

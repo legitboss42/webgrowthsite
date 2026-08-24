@@ -7,9 +7,11 @@ import {
   assessPublishReadiness,
   buildWorkerFailureState,
   classifyPublishFailure,
+  createPublishingRpcStore,
   nonRetryablePublishError,
   planCurrentAttempt,
   SchedulerPublishError,
+  type PublishingRpcClient,
   type RetryAttempt,
 } from "./retry";
 import { createSupabaseMediaStorage } from "./storage";
@@ -25,6 +27,7 @@ type ClaimedPost = {
   title: string;
   caption: string;
   approval_id: string;
+  claim_token: string;
 };
 
 type AttemptRow = {
@@ -66,6 +69,7 @@ export async function runPublishingWorker(now = new Date()) {
   const config = getSchedulerConfig();
   if (!config.directPostEnabled) return { claimed: 0, submitted: 0, failed: 0, disabled: true };
   const supabase = createSchedulerSupabaseClient();
+  const persistence = createPublishingRpcStore(supabase as unknown as PublishingRpcClient);
   const { data: claimed, error } = await supabase.rpc("claim_due_tiktok_posts", {
     p_now: now.toISOString(),
     p_limit: 10,
@@ -166,18 +170,15 @@ export async function runPublishingWorker(now = new Date()) {
     currentAttempts.set(post.id, attempt);
 
     if (plan.action === "RECONCILE") {
-      const { error: attemptReconcileError } = await supabase.from("publish_attempts")
-        .update({ status: "PROCESSING" })
-        .eq("id", attempt.id);
-      const { error: postReconcileError } = await supabase.from("scheduled_posts").update({
-        status: "PROCESSING",
-        publish_id: attempt.publishId,
-        retry_eligible: false,
-        next_retry_at: null,
-      }).eq("id", post.id).eq("user_id", post.user_id);
-      if (attemptReconcileError || postReconcileError) {
-        throw new Error("Unable to queue the recorded publish ID for reconciliation.");
-      }
+      await persistence.recordPublishId({
+        postId: post.id,
+        userId: post.user_id,
+        claimToken: post.claim_token,
+        attemptId: attempt.id,
+        attemptNumber: attempt.attemptNumber,
+        publishId: attempt.publishId!,
+        submittedAt: now.toISOString(),
+      });
       submitted += 1;
       return "RECONCILE" as const;
     }
@@ -270,7 +271,12 @@ export async function runPublishingWorker(now = new Date()) {
 
     const result = await processClaimedPost({
       postId: post.id,
+      userId: post.user_id,
+      claimToken: post.claim_token,
       attemptId: attempt.id,
+      approvalId: approval.id,
+      requestFingerprint: approval.fingerprint,
+      validationVersion: VIDEO_VALIDATION_VERSION,
       attemptNumber: attempt.attemptNumber,
       kind: post.kind,
       title: post.title,
@@ -281,16 +287,8 @@ export async function runPublishingWorker(now = new Date()) {
       publishId: attempt.publishId,
     }, {
       publicPostingEnabled: submissionConfig.publicPostingEnabled,
-      async beginSubmission(attemptId, postId, attemptNumber) {
-        const { data, error: beginError } = await supabase.from("publish_attempts")
-          .update({ status: "SUBMITTING", error_code: null, error_message: null })
-          .eq("id", attemptId)
-          .eq("post_id", postId)
-          .eq("attempt_number", attemptNumber)
-          .eq("status", "SCHEDULED")
-          .select("id");
-        if (beginError) throw new Error("Unable to begin the publishing attempt.");
-        return data?.length === 1;
+      beginSubmission(input) {
+        return persistence.beginSubmission(input);
       },
       async directPost(input) {
         const privacy = input.privacyLevel as TikTokPrivacyLevel;
@@ -320,19 +318,8 @@ export async function runPublishingWorker(now = new Date()) {
         });
         return response.publishId;
       },
-      async recordPublishId(attemptId, postId, publishId) {
-        const { data, error: recordError } = await supabase.from("publish_attempts").update({
-          publish_id: publishId,
-          status: "PROCESSING",
-          submitted_at: new Date().toISOString(),
-        }).eq("id", attemptId).eq("status", "SUBMITTING").select("id");
-        if (recordError || data?.length !== 1) throw new Error("Unable to record TikTok publish ID.");
-        await supabase.from("scheduled_posts").update({
-          publish_id: publishId,
-          status: "PROCESSING",
-          retry_eligible: false,
-          next_retry_at: null,
-        }).eq("id", postId);
+      recordPublishId(input) {
+        return persistence.recordPublishId(input);
       },
     });
     if (result.status === "PROCESSING") submitted += 1;
@@ -343,29 +330,30 @@ export async function runPublishingWorker(now = new Date()) {
     const knownPublishId = workerError instanceof SchedulerPublishError ? workerError.publishId : null;
     const failureAttempt = attempt && knownPublishId ? { ...attempt, publishId: knownPublishId } : attempt;
     const failure = failureAttempt ? buildWorkerFailureState(failureAttempt, workerError, now) : null;
-    if (attempt && failure) {
-      await supabase.from("publish_attempts").update({
-        ...failure.attempt,
-        ...(knownPublishId ? { publish_id: knownPublishId, submitted_at: now.toISOString() } : {}),
-      }).eq("id", attempt.id);
-      await supabase.from("scheduled_posts").update(failure.post).eq("id", post.id).eq("user_id", post.user_id);
-    } else {
-      await supabase.from("scheduled_posts").update({
-        status: "NEEDS_ATTENTION",
-        retry_eligible: false,
-        next_retry_at: null,
-        user_failure_code: "PUBLISH_BLOCKED",
-        terminal_at: now.toISOString(),
-      }).eq("id", post.id).eq("user_id", post.user_id);
-    }
-    const errorCode = failure?.errorCode || classifyPublishFailure(workerError).errorCode;
-    await supabase.from("scheduler_audit_log").insert({
+    const classification = knownPublishId
+      ? { kind: "AMBIGUOUS" as const, errorCode: "POST_ACCEPTANCE_AMBIGUOUS" }
+      : classifyPublishFailure(workerError);
+    const errorCode = failure?.errorCode || classification.errorCode;
+    const failureRecorded = await persistence.recordFailure({
+      postId: post.id,
+      userId: post.user_id,
+      claimToken: post.claim_token,
+      attemptId: attempt?.id || null,
+      attemptNumber: attempt?.attemptNumber || null,
+      failureKind: classification.kind,
+      errorCode,
+      failedAt: now.toISOString(),
+      publishId: knownPublishId,
+    });
+    if (!failureRecorded) throw new Error("Publishing failure state changed before it could be recorded.");
+    const { error: auditError } = await supabase.from("scheduler_audit_log").insert({
       actor_user_id: post.user_id,
       target_type: "scheduled_post",
       target_id: post.id,
       event_type: "PUBLISH_FAILED",
       metadata: { errorCode },
     });
+    if (auditError) throw new Error("Unable to record the publishing audit event.");
   });
 
   return { claimed: posts.length, submitted, failed, disabled: false };

@@ -1,9 +1,19 @@
 import type { TikTokPrivacyLevel } from "./tiktokClient";
-import { ambiguousPublishError, nonRetryablePublishError } from "./retry";
+import {
+  ambiguousPublishError,
+  nonRetryablePublishError,
+  type PublishIdPersistenceInput,
+  type SubmissionBoundaryInput,
+} from "./retry";
 
 export type PublishingContext = {
   postId: string;
+  userId: string;
+  claimToken: string;
   attemptId: string;
+  approvalId: string;
+  requestFingerprint: string;
+  validationVersion: string;
   kind: "PHOTO" | "VIDEO";
   title: string;
   caption: string;
@@ -23,14 +33,23 @@ export type PublishingContext = {
 
 export type WorkerDependencies = {
   publicPostingEnabled: boolean;
-  beginSubmission(attemptId: string, postId: string, attemptNumber: number): Promise<boolean>;
+  beginSubmission(input: SubmissionBoundaryInput): Promise<boolean>;
   directPost(input: PublishingContext["approval"] & PublishingContext): Promise<string>;
-  recordPublishId(attemptId: string, postId: string, publishId: string): Promise<void>;
+  recordPublishId(input: PublishIdPersistenceInput): Promise<void>;
 };
 
 export async function processClaimedPost(context: PublishingContext, dependencies: WorkerDependencies) {
   if (context.publishId) return { status: "RECONCILE" as const, publishId: context.publishId };
-  const began = await dependencies.beginSubmission(context.attemptId, context.postId, context.attemptNumber);
+  const began = await dependencies.beginSubmission({
+    postId: context.postId,
+    userId: context.userId,
+    claimToken: context.claimToken,
+    attemptId: context.attemptId,
+    attemptNumber: context.attemptNumber,
+    approvalId: context.approvalId,
+    requestFingerprint: context.requestFingerprint,
+    validationVersion: context.validationVersion,
+  });
   if (!began) {
     throw nonRetryablePublishError("ATTEMPT_CONFLICT", "Publishing attempt is no longer safe to start.");
   }
@@ -46,7 +65,15 @@ export async function processClaimedPost(context: PublishingContext, dependencie
     throw ambiguousPublishError();
   }
   try {
-    await dependencies.recordPublishId(context.attemptId, context.postId, publishId);
+    await dependencies.recordPublishId({
+      postId: context.postId,
+      userId: context.userId,
+      claimToken: context.claimToken,
+      attemptId: context.attemptId,
+      attemptNumber: context.attemptNumber,
+      publishId,
+      submittedAt: new Date().toISOString(),
+    });
   } catch {
     throw ambiguousPublishError(publishId);
   }

@@ -10,7 +10,12 @@ import { classifyPublishFailure } from "./retry";
 function context(overrides: Partial<PublishingContext> = {}): PublishingContext {
   return {
     postId: "post-1",
+    userId: "user-1",
+    claimToken: "claim-1",
     attemptId: "attempt-1",
+    approvalId: "approval-1",
+    requestFingerprint: "fingerprint-1",
+    validationVersion: "tiktok-video-beta-v2",
     kind: "PHOTO",
     title: "Title",
     caption: "Caption",
@@ -57,20 +62,32 @@ test("a retry with a publish ID never submits a duplicate", async () => {
 // Mutation target: moving the durable-attempt CAS after Direct Post permits an untracked provider mutation.
 test("the durable numbered attempt begins before TikTok mutation", async () => {
   const events: string[] = [];
+  let beginInput: Record<string, unknown> | null = null;
   await processClaimedPost(context({ attemptId: "attempt-4", attemptNumber: 4 }), {
     publicPostingEnabled: false,
-    beginSubmission: async (attemptId, postId, attemptNumber) => {
-      events.push(`begin:${attemptId}:${postId}:${attemptNumber}`);
+    beginSubmission: async (input) => {
+      beginInput = input;
+      events.push("begin");
       return true;
     },
     directPost: async () => { events.push("direct-post"); return "publish-4"; },
     recordPublishId: async () => { events.push("record-publish-id"); },
   });
   assert.deepEqual(events, [
-    "begin:attempt-4:post-1:4",
+    "begin",
     "direct-post",
     "record-publish-id",
   ]);
+  assert.deepEqual(beginInput, {
+    postId: "post-1",
+    userId: "user-1",
+    claimToken: "claim-1",
+    attemptId: "attempt-4",
+    attemptNumber: 4,
+    approvalId: "approval-1",
+    requestFingerprint: "fingerprint-1",
+    validationVersion: "tiktok-video-beta-v2",
+  });
 });
 
 test("a concurrent attempt-begin refusal never reaches TikTok", async () => {

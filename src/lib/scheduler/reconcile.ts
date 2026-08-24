@@ -29,9 +29,9 @@ export async function reconcilePublishingAttempts() {
       if (nextStatus === "PROCESSING") continue;
       const completion = new Date().toISOString();
       const terminal = buildTerminalReconciliation(statusPayload, completion);
-      const postWrite = await supabase.from("scheduled_posts").update(terminal.post).eq("id", attempt.post_id);
+      const postWrite = await supabase.from("scheduled_posts").update(terminal.post).eq("id", attempt.post_id).select("id");
       if (!reconciliationWritesSucceeded([postWrite])) continue;
-      const attemptWrite = await supabase.from("publish_attempts").update(terminal.attempt).eq("id", attempt.id);
+      const attemptWrite = await supabase.from("publish_attempts").update(terminal.attempt).eq("id", attempt.id).select("id");
       if (!reconciliationWritesSucceeded([attemptWrite])) continue;
       const { data: staged } = await supabase.from("media_staging_objects").select("id,storage_path").eq("attempt_id", attempt.id).is("removed_at", null);
       if (staged?.length) {
