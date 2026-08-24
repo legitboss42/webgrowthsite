@@ -1,11 +1,21 @@
-export type PostWorkflowStage = "NEEDS_APPROVAL" | "READY_TO_SCHEDULE" | "STATUS";
+import type { PostStatus } from "./types";
+
+export type PostWorkflowStage = "DRAFT" | "NEEDS_CONNECTION" | "NEEDS_APPROVAL" | "SCHEDULED" | "STATUS";
 
 export function getPostWorkflowStage(post: {
-  status: string;
-  approvalId: string | null;
-  scheduledFor: string | null;
+  status: PostStatus;
 }): PostWorkflowStage {
-  if (post.scheduledFor || ["SCHEDULED", "CLAIMED", "SUBMITTING", "PROCESSING", "PUBLISHED", "FAILED_RETRYABLE", "NEEDS_ATTENTION", "CANCELLED"].includes(post.status)) return "STATUS";
-  if (post.approvalId) return "READY_TO_SCHEDULE";
-  return "NEEDS_APPROVAL";
+  switch (post.status) {
+    case "DRAFT": return "DRAFT";
+    case "NEEDS_CONNECTION": return "NEEDS_CONNECTION";
+    case "NEEDS_APPROVAL": return "NEEDS_APPROVAL";
+    case "SCHEDULED": return "SCHEDULED";
+    case "CLAIMED":
+    case "SUBMITTING":
+    case "PROCESSING":
+    case "PUBLISHED":
+    case "FAILED_RETRYABLE":
+    case "NEEDS_ATTENTION":
+    case "CANCELLED": return "STATUS";
+  }
 }

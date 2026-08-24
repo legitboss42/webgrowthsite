@@ -2,29 +2,8 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { readSchedulerSession, SCHEDULER_SESSION_COOKIE } from "@/lib/scheduler/session";
 import { createSchedulerSupabaseClient } from "@/lib/scheduler/supabase";
-import { isPostStatus } from "@/lib/scheduler/types";
-
-const SAFE_FAILURE_CODES = new Set([
-  "TIKTOK_RECONNECT_REQUIRED",
-  "TIKTOK_MEDIA_REJECTED",
-  "MEDIA_VALIDATION_STALE",
-  "UNSUPPORTED_MEDIA",
-  "CREATOR_SETTINGS_CHANGED",
-  "PRIVACY_MISMATCH",
-  "TIKTOK_QUOTA_EXCEEDED",
-  "DAILY_POST_LIMIT_REACHED",
-  "PUBLISH_RETRY_SCHEDULED",
-  "PUBLISH_RECONCILIATION_REQUIRED",
-  "TIKTOK_PUBLISH_FAILED",
-]);
-
-function sanitizeFailureCode(value: unknown) {
-  return typeof value === "string" && SAFE_FAILURE_CODES.has(value) ? value : null;
-}
-
-function nextPollAfterMs(status: string) {
-  return ["CLAIMED", "SUBMITTING", "PROCESSING"].includes(status) ? 5_000 : null;
-}
+import { readOwnedPostStatus } from "@/lib/scheduler/statusAccess";
+import { createPublicStatusSnapshot } from "@/lib/scheduler/statusSnapshot";
 
 export async function GET(_request: Request, context: { params: Promise<{ id: string }> }) {
   const cookieStore = await cookies();
@@ -38,21 +17,9 @@ export async function GET(_request: Request, context: { params: Promise<{ id: st
   } catch {
     return NextResponse.json({ error: "Unable to load publishing status." }, { status: 502 });
   }
-  const { data: post, error } = await db
-    .from("scheduled_posts")
-    .select("status,terminal_at,user_failure_code,retry_eligible")
-    .eq("id", id)
-    .eq("user_id", session.userId)
-    .maybeSingle();
+  const { data: post, error } = await readOwnedPostStatus(db as unknown as import("@/lib/scheduler/statusAccess").OwnedStatusClient, id, session.userId);
   if (error) return NextResponse.json({ error: "Unable to load publishing status." }, { status: 502 });
-  if (!post || !isPostStatus(post.status)) return NextResponse.json({ error: "Post not found." }, { status: 404 });
-
-  const failureCode = sanitizeFailureCode(post.user_failure_code);
-  return NextResponse.json({
-    status: post.status,
-    publishedAt: post.status === "PUBLISHED" && typeof post.terminal_at === "string" ? post.terminal_at : null,
-    failureCode,
-    retryEligible: post.retry_eligible === true,
-    nextPollAfterMs: nextPollAfterMs(post.status),
-  });
+  const snapshot = post ? createPublicStatusSnapshot(post) : null;
+  if (!snapshot) return NextResponse.json({ error: "Post not found." }, { status: 404 });
+  return NextResponse.json(snapshot);
 }

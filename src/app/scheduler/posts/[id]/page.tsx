@@ -4,6 +4,7 @@ import PostApprovalPanel from "@/components/scheduler/PostApprovalPanel";
 import PostStatusPanel from "@/components/scheduler/PostStatusPanel";
 import { getSchedulerConfig } from "@/lib/scheduler/config";
 import { readSchedulerSession, SCHEDULER_SESSION_COOKIE } from "@/lib/scheduler/session";
+import { createPublicStatusSnapshot } from "@/lib/scheduler/statusSnapshot";
 import { createSchedulerSupabaseClient } from "@/lib/scheduler/supabase";
 
 export default async function PostPage({ params }: { params: Promise<{ id: string }> }) {
@@ -15,11 +16,13 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
   const db = createSchedulerSupabaseClient();
   const { data: post } = await db
     .from("scheduled_posts")
-    .select("id,title,caption,status,scheduled_for,timezone,approval_id,terminal_at,user_failure_code,retry_eligible")
+    .select("id,title,caption,status,scheduled_for,timezone,approval_id,terminal_at,user_failure_code,retry_eligible,next_retry_at")
     .eq("id", id)
     .eq("user_id", session.userId)
     .single();
   if (!post) notFound();
+  const initialStatusSnapshot = createPublicStatusSnapshot(post);
+  if (!initialStatusSnapshot) notFound();
 
   const config = getSchedulerConfig();
 
@@ -29,7 +32,7 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
       <h1 className="mt-3 font-serif text-4xl">{post.title || "Untitled post"}</h1>
       <p className="mt-5 whitespace-pre-wrap text-white/65">{post.caption}</p>
       <PostApprovalPanel post={post} directPostEnabled={config.directPostEnabled} />
-      <PostStatusPanel post={post} />
+      <PostStatusPanel postId={post.id} initialSnapshot={initialStatusSnapshot} scheduledFor={post.scheduled_for} timezone={post.timezone} />
     </main>
   );
 }

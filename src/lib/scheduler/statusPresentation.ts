@@ -7,13 +7,15 @@ export type StatusPresentation = {
   canRetry: boolean;
 };
 
+type RetryPresentationState = { retryEligible: boolean; nextRetryAt: string | null };
+
 const ACTIVE_POLLING_STATUSES = new Set<PostStatus>(["CLAIMED", "SUBMITTING", "PROCESSING"]);
 
 export function shouldPollPostStatus(status: string): status is "CLAIMED" | "SUBMITTING" | "PROCESSING" {
   return ACTIVE_POLLING_STATUSES.has(status as PostStatus);
 }
 
-export function getStatusPresentation(status: string, failureCode: string | null): StatusPresentation {
+export function getStatusPresentation(status: string, failureCode: string | null, retry: RetryPresentationState = { retryEligible: false, nextRetryAt: null }): StatusPresentation {
   if (status === "PUBLISHED") {
     return {
       tone: "success",
@@ -46,7 +48,7 @@ export function getStatusPresentation(status: string, failureCode: string | null
       canRetry: false,
     };
   }
-  if (status === "FAILED_RETRYABLE") {
+  if (status === "FAILED_RETRYABLE" && retry.nextRetryAt) {
     return {
       tone: "progress",
       title: "We will retry this post automatically",
@@ -54,6 +56,15 @@ export function getStatusPresentation(status: string, failureCode: string | null
       canRetry: false,
     };
   }
+  if (status === "FAILED_RETRYABLE" && retry.retryEligible) {
+    return {
+      tone: "attention",
+      title: "This post is ready for your retry",
+      detail: "TikTok rejected the media. Review it, then choose Retry publishing when you are ready.",
+      canRetry: true,
+    };
+  }
+  if (status === "FAILED_RETRYABLE") return { tone: "attention", title: "Publishing retry unavailable", detail: "This post cannot be retried until its publishing state changes.", canRetry: false };
   if (status === "NEEDS_ATTENTION") return needsAttentionPresentation(failureCode);
   if (status === "SCHEDULED") {
     return {
@@ -63,12 +74,11 @@ export function getStatusPresentation(status: string, failureCode: string | null
       canRetry: false,
     };
   }
-  return {
-    tone: "neutral",
-    title: "Publishing status unavailable",
-    detail: "This post is not currently in the publishing queue.",
-    canRetry: false,
-  };
+  if (status === "DRAFT") return { tone: "neutral", title: "Post draft", detail: "Finish preparing this post before requesting TikTok approval.", canRetry: false };
+  if (status === "NEEDS_CONNECTION") return { tone: "attention", title: "TikTok connection required", detail: "Connect TikTok before this post can be approved for publishing.", canRetry: false };
+  if (status === "NEEDS_APPROVAL") return { tone: "neutral", title: "Approval required", detail: "Review the TikTok posting choices before scheduling this post.", canRetry: false };
+  if (status === "CANCELLED") return { tone: "neutral", title: "Post cancelled", detail: "This post is no longer in the publishing queue.", canRetry: false };
+  return { tone: "neutral", title: "Publishing status unavailable", detail: "This post is not currently in the publishing queue.", canRetry: false };
 }
 
 function needsAttentionPresentation(failureCode: string | null): StatusPresentation {
@@ -87,7 +97,7 @@ function needsAttentionPresentation(failureCode: string | null): StatusPresentat
         tone: "attention",
         title: "Your media needs attention",
         detail: "TikTok could not accept this media. Review the file, then retry when it is ready.",
-        canRetry: true,
+        canRetry: false,
       };
     case "CREATOR_SETTINGS_CHANGED":
     case "PRIVACY_MISMATCH":

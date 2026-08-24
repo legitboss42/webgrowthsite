@@ -4,8 +4,9 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getPostWorkflowStage, type PostWorkflowStage } from "@/lib/scheduler/postWorkflow";
 import { toScheduleInstantInTimezone } from "@/lib/scheduler/scheduleTime";
+import type { PostStatus } from "@/lib/scheduler/types";
 
-type ApprovalPost = { id: string; status: string; approval_id: string | null; scheduled_for: string | null };
+type ApprovalPost = { id: string; status: PostStatus; approval_id: string | null; scheduled_for: string | null };
 type CreatorInfo = {
   nickname: string;
   username: string;
@@ -28,23 +29,17 @@ export default function PostApprovalPanel({
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [creator, setCreator] = useState<CreatorInfo | null>(null);
-  const [stage, setStage] = useState<PostWorkflowStage>(() => getPostWorkflowStage({
-    status: post.status,
-    approvalId: post.approval_id,
-    scheduledFor: post.scheduled_for,
-  }));
+  const [stage, setStage] = useState<PostWorkflowStage>(() => getPostWorkflowStage({ status: post.status }));
+  const [scheduleReady, setScheduleReady] = useState(false);
 
   useEffect(() => {
-    setStage(getPostWorkflowStage({
-      status: post.status,
-      approvalId: post.approval_id,
-      scheduledFor: post.scheduled_for,
-    }));
-  }, [post.status, post.approval_id, post.scheduled_for]);
+    setStage(getPostWorkflowStage({ status: post.status }));
+    setScheduleReady(false);
+  }, [post.status]);
 
   useEffect(() => {
     if (!directPostEnabled) return;
-    if (post.approval_id) return;
+    if (stage !== "NEEDS_APPROVAL" || scheduleReady) return;
     let active = true;
     fetch("/api/scheduler/creator/", { cache: "no-store" })
       .then(async (response) => {
@@ -54,7 +49,7 @@ export default function PostApprovalPanel({
       })
       .catch((reason: unknown) => active && setError(reason instanceof Error ? reason.message : "Unable to load TikTok creator settings."));
     return () => { active = false; };
-  }, [directPostEnabled, post.approval_id]);
+  }, [directPostEnabled, stage, scheduleReady]);
 
   async function approve(data: FormData) {
     setBusy(true);
@@ -75,7 +70,7 @@ export default function PostApprovalPanel({
     });
     const body = await response.json();
     if (!response.ok) { setError(body.error); setBusy(false); return; }
-    setStage("READY_TO_SCHEDULE");
+    setScheduleReady(true);
     setBusy(false);
     router.refresh();
   }
@@ -92,12 +87,12 @@ export default function PostApprovalPanel({
     });
     const body = await response.json();
     if (!response.ok) { setError(body.error); setBusy(false); return; }
-    setStage("STATUS");
+    setStage("SCHEDULED");
     setBusy(false);
     router.refresh();
   }
 
-  if (stage === "STATUS") return null;
+  if (stage === "STATUS" || stage === "SCHEDULED" || stage === "DRAFT") return null;
 
   return (
     <section className="mt-10 rounded-3xl border border-white/10 p-6">
@@ -117,7 +112,12 @@ export default function PostApprovalPanel({
             View connection settings
           </a>
         </div>
-      ) : stage === "NEEDS_APPROVAL" ? (
+      ) : stage === "NEEDS_CONNECTION" ? (
+        <div className="mt-6 rounded-2xl border border-[#ffb454]/25 bg-[#ffb454]/[0.06] p-5">
+          <p className="text-sm font-bold text-[#ffb454]">Connect TikTok before approval</p>
+          <a href="/scheduler/settings/" className="mt-4 inline-flex rounded-full border border-white/15 px-4 py-2 text-sm font-bold">Open connection settings</a>
+        </div>
+      ) : stage === "NEEDS_APPROVAL" && !scheduleReady ? (
         <form action={approve} className="mt-6 space-y-4">
           {creator ? (
             <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
@@ -141,7 +141,7 @@ export default function PostApprovalPanel({
           <label className="flex gap-3 text-sm text-white/75"><input type="checkbox" name="musicUsageConfirmation" required />I agree to TikTok&apos;s Music Usage Confirmation for this post.</label>
           <button disabled={busy || !creator || creator.privacyLevelOptions.length === 0} className="rounded-full bg-[#62f5e6] px-5 py-3 font-bold text-black disabled:opacity-50">{busy ? "Approving…" : "Approve post"}</button>
         </form>
-      ) : stage === "READY_TO_SCHEDULE" ? (
+      ) : scheduleReady ? (
         <form action={schedule} className="mt-6 space-y-4">
           <label className="block"><span className="mb-2 block text-sm">Publish time</span><input name="time" type="datetime-local" required className="w-full rounded-xl bg-[#111617] p-3" /></label>
           <button disabled={busy} className="rounded-full bg-[#ff5269] px-5 py-3 font-bold disabled:opacity-50">{busy ? "Scheduling…" : "Approve and schedule"}</button>

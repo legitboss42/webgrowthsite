@@ -35,7 +35,7 @@ test("needs-attention failure codes give corrective, sanitized guidance", () => 
     tone: "attention",
     title: "Your media needs attention",
     detail: "TikTok could not accept this media. Review the file, then retry when it is ready.",
-    canRetry: true,
+    canRetry: false,
   });
   assert.deepEqual(getStatusPresentation("NEEDS_ATTENTION", "CREATOR_SETTINGS_CHANGED"), {
     tone: "attention",
@@ -57,13 +57,37 @@ test("needs-attention failure codes give corrective, sanitized guidance", () => 
   });
 });
 
-test("retryable failures accurately describe automatic retry state", () => {
-  assert.deepEqual(getStatusPresentation("FAILED_RETRYABLE", "PUBLISH_RETRY_SCHEDULED"), {
+test("retry presentation matches automatic and explicit creator retry policy", () => {
+  assert.deepEqual(getStatusPresentation("FAILED_RETRYABLE", "PUBLISH_RETRY_SCHEDULED", {
+    retryEligible: true,
+    nextRetryAt: "2026-08-24T12:15:00.000Z",
+  }), {
     tone: "progress",
     title: "We will retry this post automatically",
     detail: "A temporary publishing problem occurred. The scheduler will retry when it is safe to do so.",
     canRetry: false,
   });
+  assert.deepEqual(getStatusPresentation("FAILED_RETRYABLE", "TIKTOK_MEDIA_REJECTED", {
+    retryEligible: true,
+    nextRetryAt: null,
+  }), {
+    tone: "attention",
+    title: "This post is ready for your retry",
+    detail: "TikTok rejected the media. Review it, then choose Retry publishing when you are ready.",
+    canRetry: true,
+  });
+  assert.equal(getStatusPresentation("NEEDS_ATTENTION", "TIKTOK_MEDIA_REJECTED", {
+    retryEligible: true,
+    nextRetryAt: null,
+  }).canRetry, false);
+});
+
+test("every durable status has explicit copy", () => {
+  const statuses = ["DRAFT", "NEEDS_CONNECTION", "NEEDS_APPROVAL", "SCHEDULED", "CLAIMED", "SUBMITTING", "PROCESSING", "PUBLISHED", "FAILED_RETRYABLE", "NEEDS_ATTENTION", "CANCELLED"];
+  for (const status of statuses) {
+    const presentation = getStatusPresentation(status, null, { retryEligible: false, nextRetryAt: null });
+    assert.notEqual(presentation.title, "Publishing status unavailable", `${status} needs explicit status copy`);
+  }
 });
 
 test("only active durable states are polled", () => {

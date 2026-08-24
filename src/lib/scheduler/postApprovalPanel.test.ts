@@ -38,15 +38,16 @@ test("live status is a separate, user-scoped panel with bounded polling", () => 
   const approvalPanelSource = readFileSync(panelPath, "utf8");
 
   assert.match(postPageSource, /PostStatusPanel/);
-  assert.match(statusPanelSource, /\/api\/scheduler\/posts\/\$\{post\.id\}\/status\//);
+  assert.match(statusPanelSource, /\/api\/scheduler\/posts\/\$\{postId\}\/status\//);
   assert.match(statusPanelSource, /shouldPollPostStatus/);
-  assert.match(statusPanelSource, /15 \* 60_000/);
-  assert.match(statusPanelSource, /Math\.min\(DEFAULT_POLL_INTERVAL_MS \* 2 \*\* consecutiveFailures, 60_000\)/);
+  assert.match(statusPanelSource, /createStatusPollingController/);
   assert.match(statusPanelSource, /document\.visibilityState/);
   assert.match(statusPanelSource, /router\.refresh\(\)/);
-  assert.match(statusRouteSource, /\.eq\("user_id", session\.userId\)/);
-  assert.match(statusRouteSource, /publishedAt/);
-  assert.match(statusRouteSource, /nextPollAfterMs/);
+  assert.match(statusPanelSource, /headingRef\.current\?\.focus\(\)/);
+  assert.match(postPageSource, /createPublicStatusSnapshot/);
+  assert.doesNotMatch(statusPanelSource, /user_failure_code|scheduled_posts/);
+  assert.match(statusRouteSource, /readOwnedPostStatus\(db[\s\S]*?, id, session\.userId\)/);
+  assert.match(statusRouteSource, /createPublicStatusSnapshot/);
   assert.doesNotMatch(statusRouteSource, /publish_id|encrypted_tokens|access_token|refresh_token/i);
   assert.doesNotMatch(approvalPanelSource, /Post scheduled successfully/);
 });

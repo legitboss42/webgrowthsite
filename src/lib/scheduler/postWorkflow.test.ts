@@ -1,19 +1,25 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { getPostWorkflowStage } from "./postWorkflow";
+import { getPostWorkflowStage, type PostWorkflowStage } from "./postWorkflow";
+import type { PostStatus } from "./types";
 
-test("durable publishing states are handed to the live status panel, not the approval panel", () => {
-  assert.equal(
-    getPostWorkflowStage({ status: "SCHEDULED", approvalId: "approval-1", scheduledFor: "2026-08-22T17:00:00.000Z" }),
-    "STATUS",
-  );
-  assert.equal(getPostWorkflowStage({ status: "PUBLISHED", approvalId: "approval-1", scheduledFor: "2026-08-22T17:00:00.000Z" }), "STATUS");
-  assert.equal(getPostWorkflowStage({ status: "NEEDS_ATTENTION", approvalId: "approval-1", scheduledFor: "2026-08-22T17:00:00.000Z" }), "STATUS");
-});
+test("workflow routing is exhaustive and never infers stage from approval or schedule fields", () => {
+  const expected = {
+    DRAFT: "DRAFT",
+    NEEDS_CONNECTION: "NEEDS_CONNECTION",
+    NEEDS_APPROVAL: "NEEDS_APPROVAL",
+    SCHEDULED: "SCHEDULED",
+    CLAIMED: "STATUS",
+    SUBMITTING: "STATUS",
+    PROCESSING: "STATUS",
+    PUBLISHED: "STATUS",
+    FAILED_RETRYABLE: "STATUS",
+    NEEDS_ATTENTION: "STATUS",
+    CANCELLED: "STATUS",
+  } as const;
 
-test("an approved unscheduled post remains ready for scheduling", () => {
-  assert.equal(
-    getPostWorkflowStage({ status: "NEEDS_APPROVAL", approvalId: "approval-1", scheduledFor: null }),
-    "READY_TO_SCHEDULE",
-  );
+  for (const [status, stage] of Object.entries(expected) as Array<[PostStatus, PostWorkflowStage]>) {
+    assert.equal(getPostWorkflowStage({ status }), stage);
+    assert.equal(getPostWorkflowStage({ status }), stage);
+  }
 });
