@@ -48,6 +48,14 @@ export type ReservePublicSchedulerSlotInput = {
   nowIso: string;
 };
 
+const ACCOUNT_DELETION_STATES = new Set(["REQUESTED", "RUNNING", "COMPLETE", "NEEDS_ATTENTION"]);
+
+function asRecord(value: unknown): Record<string, unknown> | null {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? value as Record<string, unknown>
+    : null;
+}
+
 export function createSchedulerStore(client: SchedulerDatabaseClient) {
   return {
     upsertUser(input: UpsertSchedulerUserInput) {
@@ -130,8 +138,26 @@ export function createSchedulerStore(client: SchedulerDatabaseClient) {
       });
     },
     async disconnectUser(userId: string) {
-      await client.remove("tiktok_connections", "user_id", userId);
-      return client.rpc("cancel_tiktok_connection_jobs", { p_user_id: userId });
+      const result = asRecord(await client.rpc("disconnect_tiktok_scheduler_user", { p_user_id: userId }));
+      if (!result
+        || result.ok !== true
+        || !Number.isSafeInteger(result.cancelledJobs)
+        || Number(result.cancelledJobs) < 0) {
+        throw new Error("Scheduler disconnect returned an invalid result.");
+      }
+      return { ok: true as const, cancelledJobs: Number(result.cancelledJobs) };
+    },
+    async requestAccountDeletion(userId: string) {
+      const result = asRecord(await client.rpc("request_scheduler_account_deletion", { p_user_id: userId }));
+      if (!result
+        || typeof result.requestId !== "string"
+        || !ACCOUNT_DELETION_STATES.has(String(result.state || ""))) {
+        throw new Error("Scheduler account deletion returned an invalid result.");
+      }
+      return {
+        requestId: result.requestId,
+        state: String(result.state) as "REQUESTED" | "RUNNING" | "COMPLETE" | "NEEDS_ATTENTION",
+      };
     },
   };
 }

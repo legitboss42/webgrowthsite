@@ -11,7 +11,32 @@ alter table public.media_assets
   add column if not exists video_codec text,
   add column if not exists frame_rate numeric,
   add column if not exists validation_version text,
-  add column if not exists probe_metadata jsonb;
+  add column if not exists probe_metadata jsonb,
+  add column if not exists storage_deleted_at timestamptz,
+  add column if not exists cleanup_state text not null default 'PENDING',
+  add column if not exists cleanup_started_at timestamptz,
+  add column if not exists cleanup_attempts integer not null default 0,
+  add column if not exists cleanup_last_error_code text;
+
+alter table public.media_assets
+  drop constraint if exists media_assets_cleanup_state_check;
+
+alter table public.media_assets
+  add constraint media_assets_cleanup_state_check
+  check (cleanup_state in ('PENDING', 'RUNNING', 'COMPLETE', 'NEEDS_ATTENTION'));
+
+alter table public.media_staging_objects
+  add column if not exists cleanup_state text not null default 'PENDING',
+  add column if not exists cleanup_started_at timestamptz,
+  add column if not exists cleanup_attempts integer not null default 0,
+  add column if not exists cleanup_last_error_code text;
+
+alter table public.media_staging_objects
+  drop constraint if exists media_staging_objects_cleanup_state_check;
+
+alter table public.media_staging_objects
+  add constraint media_staging_objects_cleanup_state_check
+  check (cleanup_state in ('PENDING', 'RUNNING', 'COMPLETE', 'NEEDS_ATTENTION'));
 
 alter table public.scheduled_posts
   add column if not exists terminal_at timestamptz,
@@ -60,6 +85,37 @@ create index if not exists scheduler_users_deletion_cleanup_idx
 create index if not exists scheduled_posts_terminal_cleanup_idx
   on public.scheduled_posts(terminal_at)
   where terminal_at is not null;
+
+create index if not exists media_assets_storage_cleanup_idx
+  on public.media_assets(cleanup_state, created_at)
+  where storage_deleted_at is null;
+
+create index if not exists media_staging_terminal_cleanup_idx
+  on public.media_staging_objects(cleanup_state, created_at)
+  where removed_at is null;
+
+create table if not exists public.scheduler_account_deletion_requests (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid unique references public.scheduler_users(id) on delete set null,
+  user_reference_hash text not null,
+  status text not null default 'REQUESTED'
+    check (status in ('REQUESTED', 'RUNNING', 'COMPLETE', 'NEEDS_ATTENTION')),
+  requested_at timestamptz not null default now(),
+  started_at timestamptz,
+  completed_at timestamptz,
+  attempt_count integer not null default 0,
+  last_error_code text,
+  updated_at timestamptz not null default now()
+);
+
+comment on table public.scheduler_account_deletion_requests is
+  'Minimal deletion receipt retained after account removal: state, timestamps, attempts, sanitized errors, and a one-way internal user reference only.';
+
+alter table public.scheduler_account_deletion_requests enable row level security;
+
+create index if not exists scheduler_account_deletion_work_idx
+  on public.scheduler_account_deletion_requests(status, updated_at)
+  where status in ('REQUESTED', 'RUNNING', 'NEEDS_ATTENTION');
 
 create table if not exists public.scheduler_worker_health (
   worker_name text primary key,
@@ -1207,6 +1263,904 @@ begin
   return v_updated_count = 1;
 end;
 $$;
+
+create or replace function public.disconnect_tiktok_scheduler_user(p_user_id uuid)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_cancelled integer := 0;
+begin
+  if p_user_id is null then
+    return null;
+  end if;
+
+  perform 1
+  from public.scheduler_users user_record
+  where user_record.id = p_user_id
+    and user_record.deletion_requested_at is null
+  for update;
+
+  if not found then
+    return null;
+  end if;
+
+  delete from public.tiktok_connections connection_record
+  where connection_record.user_id = p_user_id;
+
+  update public.publish_attempts attempt
+  set
+    status = 'CANCELLED',
+    completed_at = coalesce(attempt.completed_at, now()),
+    error_code = 'CONNECTION_DISCONNECTED',
+    updated_at = now()
+  from public.scheduled_posts post
+  where attempt.post_id = post.id
+    and post.user_id = p_user_id
+    and post.status in ('SCHEDULED', 'FAILED_RETRYABLE')
+    and post.publish_id is null
+    and attempt.status = 'SCHEDULED'
+    and attempt.publish_id is null
+    and not exists (
+      select 1
+      from public.publish_attempts active_attempt
+      where active_attempt.post_id = post.id
+        and (
+          active_attempt.publish_id is not null
+          or active_attempt.status in ('SUBMITTING', 'PROCESSING')
+        )
+    );
+
+  update public.scheduled_posts post
+  set
+    status = 'CANCELLED',
+    terminal_at = coalesce(post.terminal_at, now()),
+    retry_eligible = false,
+    next_retry_at = null,
+    user_failure_code = 'CONNECTION_DISCONNECTED',
+    updated_at = now()
+  where post.user_id = p_user_id
+    and post.status in ('SCHEDULED', 'FAILED_RETRYABLE')
+    and post.publish_id is null
+    and not exists (
+      select 1
+      from public.publish_attempts attempt
+      where attempt.post_id = post.id
+        and (
+          attempt.publish_id is not null
+          or attempt.status in ('SUBMITTING', 'PROCESSING')
+        )
+    );
+
+  get diagnostics v_cancelled = row_count;
+
+  insert into public.scheduler_audit_log (
+    actor_user_id,
+    target_type,
+    target_id,
+    event_type,
+    metadata
+  ) values (
+    p_user_id,
+    'scheduler_user',
+    p_user_id,
+    'TIKTOK_CONNECTION_DISCONNECTED',
+    jsonb_build_object('cancelledJobs', v_cancelled)
+  );
+
+  return jsonb_build_object('ok', true, 'cancelledJobs', v_cancelled);
+end;
+$$;
+
+create or replace function public.request_scheduler_account_deletion(p_user_id uuid)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_request_id uuid;
+  v_state text;
+  v_created boolean := false;
+  v_requested_at timestamptz := now();
+begin
+  if p_user_id is null then
+    return null;
+  end if;
+
+  perform 1
+  from public.scheduler_users user_record
+  where user_record.id = p_user_id
+  for update;
+
+  if not found then
+    return null;
+  end if;
+
+  select request.id, request.status
+  into v_request_id, v_state
+  from public.scheduler_account_deletion_requests request
+  where request.user_id = p_user_id
+  for update;
+
+  if v_request_id is null then
+    insert into public.scheduler_account_deletion_requests (
+      user_id,
+      user_reference_hash,
+      status,
+      requested_at,
+      updated_at
+    ) values (
+      p_user_id,
+      encode(digest(p_user_id::text, 'sha256'), 'hex'),
+      'REQUESTED',
+      v_requested_at,
+      v_requested_at
+    )
+    returning id, status into v_request_id, v_state;
+    v_created := true;
+  end if;
+
+  update public.scheduler_users user_record
+  set
+    deletion_requested_at = coalesce(user_record.deletion_requested_at, v_requested_at),
+    updated_at = v_requested_at
+  where user_record.id = p_user_id;
+
+  delete from public.tiktok_connections connection_record
+  where connection_record.user_id = p_user_id;
+
+  update public.publish_attempts attempt
+  set
+    status = 'CANCELLED',
+    completed_at = coalesce(attempt.completed_at, v_requested_at),
+    error_code = 'ACCOUNT_DELETION_REQUESTED',
+    updated_at = v_requested_at
+  from public.scheduled_posts post
+  where attempt.post_id = post.id
+    and post.user_id = p_user_id
+    and post.status in ('SCHEDULED', 'FAILED_RETRYABLE')
+    and post.publish_id is null
+    and attempt.status = 'SCHEDULED'
+    and attempt.publish_id is null
+    and not exists (
+      select 1
+      from public.publish_attempts active_attempt
+      where active_attempt.post_id = post.id
+        and (
+          active_attempt.publish_id is not null
+          or active_attempt.status in ('SUBMITTING', 'PROCESSING')
+        )
+    );
+
+  update public.scheduled_posts post
+  set
+    status = 'CANCELLED',
+    terminal_at = coalesce(post.terminal_at, v_requested_at),
+    retry_eligible = false,
+    next_retry_at = null,
+    user_failure_code = 'ACCOUNT_DELETION_REQUESTED',
+    updated_at = v_requested_at
+  where post.user_id = p_user_id
+    and post.status in ('SCHEDULED', 'FAILED_RETRYABLE')
+    and post.publish_id is null
+    and not exists (
+      select 1
+      from public.publish_attempts attempt
+      where attempt.post_id = post.id
+        and (
+          attempt.publish_id is not null
+          or attempt.status in ('SUBMITTING', 'PROCESSING')
+        )
+    );
+
+  if v_created then
+    insert into public.scheduler_audit_log (
+      actor_user_id,
+      target_type,
+      target_id,
+      event_type,
+      metadata
+    ) values (
+      p_user_id,
+      'account_deletion_request',
+      v_request_id,
+      'ACCOUNT_DELETION_REQUESTED',
+      '{}'::jsonb
+    );
+  end if;
+
+  return jsonb_build_object('requestId', v_request_id::text, 'state', v_state);
+end;
+$$;
+
+create or replace function public.claim_scheduler_media_cleanup(p_now timestamptz, p_limit integer)
+returns table (
+  id uuid,
+  user_id uuid,
+  storage_path text,
+  created_at timestamptz,
+  terminal_at timestamptz,
+  terminal_status text,
+  attached_to_post boolean,
+  approved_for_post boolean,
+  has_active_reference boolean
+)
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  return query
+  with candidates as (
+    select asset.id
+    from public.media_assets asset
+    join public.scheduler_users user_record on user_record.id = asset.user_id
+    where asset.storage_deleted_at is null
+      and user_record.deletion_requested_at is null
+      and (
+        asset.cleanup_state in ('PENDING', 'NEEDS_ATTENTION')
+        or (
+          asset.cleanup_state = 'RUNNING'
+          and asset.cleanup_started_at <= p_now - interval '15 minutes'
+        )
+      )
+      and not exists (
+        select 1
+        from public.post_media post_media
+        join public.scheduled_posts post on post.id = post_media.post_id
+        left join public.publish_attempts attempt on attempt.post_id = post.id
+        where post_media.media_id = asset.id
+          and (
+            post.status in ('SCHEDULED', 'CLAIMED', 'SUBMITTING', 'PROCESSING', 'FAILED_RETRYABLE')
+            or attempt.status in ('SCHEDULED', 'SUBMITTING', 'PROCESSING')
+            or (attempt.publish_id is not null and attempt.completed_at is null)
+          )
+      )
+      and (
+        (
+          asset.created_at <= p_now - interval '24 hours'
+          and not exists (
+            select 1 from public.post_media post_media where post_media.media_id = asset.id
+          )
+        )
+        or (
+          exists (
+            select 1 from public.post_media post_media where post_media.media_id = asset.id
+          )
+          and not exists (
+            select 1
+            from public.post_media post_media
+            join public.scheduled_posts post on post.id = post_media.post_id
+            where post_media.media_id = asset.id
+              and (
+                post.status not in ('PUBLISHED', 'CANCELLED', 'NEEDS_ATTENTION')
+                or post.terminal_at is null
+                or post.terminal_at > p_now - interval '7 days'
+              )
+          )
+        )
+      )
+    order by asset.created_at, asset.id
+    for update of asset skip locked
+    limit greatest(1, least(coalesce(p_limit, 100), 100))
+  ), claimed as (
+    update public.media_assets asset
+    set
+      cleanup_state = 'RUNNING',
+      cleanup_started_at = p_now,
+      cleanup_attempts = asset.cleanup_attempts + 1,
+      cleanup_last_error_code = null,
+      updated_at = p_now
+    from candidates
+    where asset.id = candidates.id
+    returning asset.*
+  )
+  select
+    claimed.id,
+    claimed.user_id,
+    claimed.storage_path,
+    claimed.created_at,
+    stats.terminal_at,
+    stats.terminal_status,
+    stats.attached_to_post,
+    stats.approved_for_post,
+    stats.has_active_reference
+  from claimed
+  cross join lateral (
+    select
+      max(post.terminal_at) as terminal_at,
+      case
+        when count(post.id) > 0
+          and bool_and(post.status in ('PUBLISHED', 'CANCELLED', 'NEEDS_ATTENTION'))
+        then max(post.status)
+        else null
+      end as terminal_status,
+      count(post.id) > 0 as attached_to_post,
+      count(approval.id) > 0 as approved_for_post,
+      coalesce(bool_or(
+        post.status in ('SCHEDULED', 'CLAIMED', 'SUBMITTING', 'PROCESSING', 'FAILED_RETRYABLE')
+        or attempt.status in ('SCHEDULED', 'SUBMITTING', 'PROCESSING')
+        or (attempt.publish_id is not null and attempt.completed_at is null)
+      ), false) as has_active_reference
+    from public.post_media post_media
+    join public.scheduled_posts post on post.id = post_media.post_id
+    left join public.post_approvals approval on approval.post_id = post.id
+    left join public.publish_attempts attempt on attempt.post_id = post.id
+    where post_media.media_id = claimed.id
+  ) stats;
+end;
+$$;
+
+create or replace function public.complete_scheduler_media_cleanup(
+  p_asset_id uuid,
+  p_user_id uuid,
+  p_deleted_at timestamptz
+)
+returns boolean
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_updated integer := 0;
+begin
+  if exists (
+    select 1
+    from public.media_assets asset
+    where asset.id = p_asset_id
+      and asset.user_id = p_user_id
+      and asset.storage_deleted_at is not null
+  ) then
+    return true;
+  end if;
+
+  update public.media_assets asset
+  set
+    storage_deleted_at = p_deleted_at,
+    cleanup_state = 'COMPLETE',
+    cleanup_started_at = null,
+    cleanup_last_error_code = null,
+    updated_at = p_deleted_at
+  where asset.id = p_asset_id
+    and asset.user_id = p_user_id
+    and asset.cleanup_state = 'RUNNING'
+    and asset.storage_deleted_at is null
+    and not exists (
+      select 1
+      from storage.objects object_record
+      where object_record.bucket_id = 'tiktok-scheduler-media'
+        and object_record.name = asset.storage_path
+    )
+    and not exists (
+      select 1
+      from public.post_media post_media
+      join public.scheduled_posts post on post.id = post_media.post_id
+      left join public.publish_attempts attempt on attempt.post_id = post.id
+      where post_media.media_id = asset.id
+        and (
+          post.status in ('SCHEDULED', 'CLAIMED', 'SUBMITTING', 'PROCESSING', 'FAILED_RETRYABLE')
+          or attempt.status in ('SCHEDULED', 'SUBMITTING', 'PROCESSING')
+          or (attempt.publish_id is not null and attempt.completed_at is null)
+        )
+    );
+
+  get diagnostics v_updated = row_count;
+  if v_updated = 1 then
+    insert into public.scheduler_audit_log (
+      actor_user_id,
+      target_type,
+      target_id,
+      event_type,
+      metadata
+    ) values (
+      p_user_id,
+      'media_asset',
+      p_asset_id,
+      'MEDIA_STORAGE_DELETED',
+      '{}'::jsonb
+    );
+  end if;
+  return v_updated = 1;
+end;
+$$;
+
+create or replace function public.record_scheduler_media_cleanup_failure(
+  p_asset_id uuid,
+  p_user_id uuid,
+  p_error_code text
+)
+returns boolean
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_error_code text := case
+    when upper(btrim(coalesce(p_error_code, ''))) ~ '^[A-Z0-9_]{1,80}$'
+      then upper(btrim(p_error_code))
+    else 'MEDIA_CLEANUP_FAILED'
+  end;
+  v_updated integer := 0;
+begin
+  update public.media_assets asset
+  set
+    cleanup_state = 'NEEDS_ATTENTION',
+    cleanup_started_at = null,
+    cleanup_last_error_code = v_error_code,
+    updated_at = now()
+  where asset.id = p_asset_id
+    and asset.user_id = p_user_id
+    and asset.storage_deleted_at is null;
+  get diagnostics v_updated = row_count;
+
+  if v_updated = 1 then
+    insert into public.scheduler_audit_log (
+      actor_user_id, target_type, target_id, event_type, metadata
+    ) values (
+      p_user_id, 'media_asset', p_asset_id, 'MEDIA_CLEANUP_NEEDS_ATTENTION',
+      jsonb_build_object('errorCode', v_error_code)
+    );
+  end if;
+  return v_updated = 1;
+end;
+$$;
+
+create or replace function public.claim_terminal_staging_cleanup(p_now timestamptz, p_limit integer)
+returns table (
+  id uuid,
+  user_id uuid,
+  storage_path text,
+  terminal_reconciled boolean
+)
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  return query
+  with candidates as (
+    select staging.id
+    from public.media_staging_objects staging
+    join public.publish_attempts attempt on attempt.id = staging.attempt_id
+    join public.scheduled_posts post on post.id = attempt.post_id
+    where staging.removed_at is null
+      and attempt.completed_at is not null
+      and attempt.status in ('PUBLISHED', 'NEEDS_ATTENTION')
+      and (
+        staging.cleanup_state in ('PENDING', 'NEEDS_ATTENTION')
+        or (
+          staging.cleanup_state = 'RUNNING'
+          and staging.cleanup_started_at <= p_now - interval '15 minutes'
+        )
+      )
+    order by attempt.completed_at, staging.id
+    for update of staging skip locked
+    limit greatest(1, least(coalesce(p_limit, 100), 100))
+  ), claimed as (
+    update public.media_staging_objects staging
+    set
+      cleanup_state = 'RUNNING',
+      cleanup_started_at = p_now,
+      cleanup_attempts = staging.cleanup_attempts + 1,
+      cleanup_last_error_code = null
+    from candidates
+    where staging.id = candidates.id
+    returning staging.*
+  )
+  select
+    claimed.id,
+    post.user_id,
+    claimed.storage_path,
+    (attempt.completed_at is not null and attempt.status in ('PUBLISHED', 'NEEDS_ATTENTION'))
+  from claimed
+  join public.publish_attempts attempt on attempt.id = claimed.attempt_id
+  join public.scheduled_posts post on post.id = attempt.post_id;
+end;
+$$;
+
+create or replace function public.complete_terminal_staging_cleanup(
+  p_object_id uuid,
+  p_user_id uuid,
+  p_removed_at timestamptz
+)
+returns boolean
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_updated integer := 0;
+begin
+  if exists (
+    select 1
+    from public.media_staging_objects staging
+    join public.publish_attempts attempt on attempt.id = staging.attempt_id
+    join public.scheduled_posts post on post.id = attempt.post_id
+    where staging.id = p_object_id
+      and post.user_id = p_user_id
+      and staging.removed_at is not null
+  ) then
+    return true;
+  end if;
+
+  update public.media_staging_objects staging
+  set
+    removed_at = p_removed_at,
+    cleanup_state = 'COMPLETE',
+    cleanup_started_at = null,
+    cleanup_last_error_code = null
+  from public.publish_attempts attempt, public.scheduled_posts post
+  where staging.id = p_object_id
+    and staging.attempt_id = attempt.id
+    and attempt.post_id = post.id
+    and post.user_id = p_user_id
+    and staging.cleanup_state = 'RUNNING'
+    and staging.removed_at is null
+    and attempt.completed_at is not null
+    and attempt.status in ('PUBLISHED', 'NEEDS_ATTENTION')
+    and not exists (
+      select 1
+      from storage.objects object_record
+      where object_record.bucket_id = 'tiktok-publishing-staging'
+        and object_record.name = staging.storage_path
+    );
+  get diagnostics v_updated = row_count;
+  return v_updated = 1;
+end;
+$$;
+
+create or replace function public.record_terminal_staging_cleanup_failure(
+  p_object_id uuid,
+  p_user_id uuid,
+  p_error_code text
+)
+returns boolean
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_error_code text := case
+    when upper(btrim(coalesce(p_error_code, ''))) ~ '^[A-Z0-9_]{1,80}$'
+      then upper(btrim(p_error_code))
+    else 'STAGING_CLEANUP_FAILED'
+  end;
+  v_updated integer := 0;
+begin
+  update public.media_staging_objects staging
+  set
+    cleanup_state = 'NEEDS_ATTENTION',
+    cleanup_started_at = null,
+    cleanup_last_error_code = v_error_code
+  from public.publish_attempts attempt, public.scheduled_posts post
+  where staging.id = p_object_id
+    and staging.attempt_id = attempt.id
+    and attempt.post_id = post.id
+    and post.user_id = p_user_id
+    and staging.removed_at is null;
+  get diagnostics v_updated = row_count;
+
+  if v_updated = 1 then
+    insert into public.scheduler_audit_log (
+      actor_user_id, target_type, target_id, event_type, metadata
+    ) values (
+      p_user_id, 'media_staging_object', p_object_id, 'STAGING_CLEANUP_NEEDS_ATTENTION',
+      jsonb_build_object('errorCode', v_error_code)
+    );
+  end if;
+  return v_updated = 1;
+end;
+$$;
+
+create or replace function public.claim_scheduler_account_deletions(p_now timestamptz, p_limit integer)
+returns table (request_id uuid, user_id uuid, state text)
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  return query
+  with candidates as (
+    select request.id
+    from public.scheduler_account_deletion_requests request
+    where request.user_id is not null
+      and (
+        request.status in ('REQUESTED', 'NEEDS_ATTENTION')
+        or (
+          request.status = 'RUNNING'
+          and request.started_at <= p_now - interval '15 minutes'
+        )
+      )
+    order by request.requested_at, request.id
+    for update of request skip locked
+    limit greatest(1, least(coalesce(p_limit, 10), 10))
+  )
+  update public.scheduler_account_deletion_requests request
+  set
+    status = 'RUNNING',
+    started_at = p_now,
+    attempt_count = request.attempt_count + 1,
+    last_error_code = null,
+    updated_at = p_now
+  from candidates
+  where request.id = candidates.id
+  returning request.id, request.user_id, 'RUNNING'::text;
+end;
+$$;
+
+create or replace function public.get_scheduler_account_deletion_manifest(
+  p_request_id uuid,
+  p_user_id uuid
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_ready boolean := false;
+  v_original_paths jsonb := '[]'::jsonb;
+  v_staging_paths jsonb := '[]'::jsonb;
+  v_publish_ids jsonb := '[]'::jsonb;
+begin
+  perform 1
+  from public.scheduler_account_deletion_requests request
+  where request.id = p_request_id
+    and request.user_id = p_user_id
+    and request.status = 'RUNNING'
+  for update;
+
+  if not found then
+    return null;
+  end if;
+
+  v_ready := not exists (
+    select 1
+    from public.scheduled_posts post
+    left join public.publish_attempts attempt on attempt.post_id = post.id
+    where post.user_id = p_user_id
+      and (
+        post.status in ('CLAIMED', 'SUBMITTING', 'PROCESSING')
+        or attempt.status in ('SCHEDULED', 'SUBMITTING', 'PROCESSING')
+        or (attempt.publish_id is not null and attempt.completed_at is null)
+      )
+  );
+
+  select coalesce(jsonb_agg(asset.storage_path order by asset.storage_path), '[]'::jsonb)
+  into v_original_paths
+  from public.media_assets asset
+  where asset.user_id = p_user_id
+    and asset.storage_deleted_at is null;
+
+  select coalesce(jsonb_agg(staging.storage_path order by staging.storage_path), '[]'::jsonb)
+  into v_staging_paths
+  from public.media_staging_objects staging
+  join public.publish_attempts attempt on attempt.id = staging.attempt_id
+  join public.scheduled_posts post on post.id = attempt.post_id
+  where post.user_id = p_user_id
+    and staging.removed_at is null;
+
+  select coalesce(jsonb_agg(identifier order by identifier), '[]'::jsonb)
+  into v_publish_ids
+  from (
+    select distinct post.publish_id as identifier
+    from public.scheduled_posts post
+    where post.user_id = p_user_id and post.publish_id is not null
+    union
+    select distinct attempt.publish_id as identifier
+    from public.publish_attempts attempt
+    join public.scheduled_posts post on post.id = attempt.post_id
+    where post.user_id = p_user_id and attempt.publish_id is not null
+  ) identifiers;
+
+  return jsonb_build_object(
+    'ready', v_ready,
+    'userId', p_user_id::text,
+    'originalPaths', v_original_paths,
+    'stagingPaths', v_staging_paths,
+    'recordedPublishIds', v_publish_ids
+  );
+end;
+$$;
+
+create or replace function public.complete_scheduler_account_deletion(
+  p_request_id uuid,
+  p_user_id uuid
+)
+returns boolean
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_deleted_user integer := 0;
+begin
+  if exists (
+    select 1
+    from public.scheduler_account_deletion_requests request
+    where request.id = p_request_id
+      and request.status = 'COMPLETE'
+      and request.user_id is null
+      and request.user_reference_hash = encode(digest(p_user_id::text, 'sha256'), 'hex')
+  ) then
+    return true;
+  end if;
+
+  perform 1
+  from public.scheduler_account_deletion_requests request
+  where request.id = p_request_id
+    and request.user_id = p_user_id
+    and request.status = 'RUNNING'
+  for update;
+  if not found then
+    return false;
+  end if;
+
+  if exists (
+    select 1
+    from public.scheduled_posts post
+    left join public.publish_attempts attempt on attempt.post_id = post.id
+    where post.user_id = p_user_id
+      and (
+        post.status in ('CLAIMED', 'SUBMITTING', 'PROCESSING')
+        or attempt.status in ('SCHEDULED', 'SUBMITTING', 'PROCESSING')
+        or (attempt.publish_id is not null and attempt.completed_at is null)
+      )
+  ) then
+    return false;
+  end if;
+
+  if exists (
+    select 1
+    from storage.objects object_record
+    join public.media_assets asset
+      on object_record.bucket_id = 'tiktok-scheduler-media'
+      and object_record.name = asset.storage_path
+    where asset.user_id = p_user_id
+  ) or exists (
+    select 1
+    from storage.objects object_record
+    join public.media_staging_objects staging
+      on object_record.bucket_id = 'tiktok-publishing-staging'
+      and object_record.name = staging.storage_path
+    join public.publish_attempts attempt on attempt.id = staging.attempt_id
+    join public.scheduled_posts post on post.id = attempt.post_id
+    where post.user_id = p_user_id
+  ) then
+    return false;
+  end if;
+
+  delete from public.media_staging_objects staging
+  using public.publish_attempts attempt, public.scheduled_posts post
+  where staging.attempt_id = attempt.id
+    and attempt.post_id = post.id
+    and post.user_id = p_user_id;
+
+  delete from public.publish_attempts attempt
+  using public.scheduled_posts post
+  where attempt.post_id = post.id
+    and post.user_id = p_user_id;
+
+  update public.scheduled_posts post
+  set approval_id = null
+  where post.user_id = p_user_id;
+
+  delete from public.post_approvals approval
+  where approval.user_id = p_user_id;
+
+  delete from public.post_media post_media
+  using public.scheduled_posts post
+  where post_media.post_id = post.id
+    and post.user_id = p_user_id;
+
+  delete from public.scheduled_posts post
+  where post.user_id = p_user_id;
+
+  delete from public.media_assets asset
+  where asset.user_id = p_user_id;
+
+  delete from public.tiktok_connections connection_record
+  where connection_record.user_id = p_user_id;
+
+  delete from public.scheduler_users user_record
+  where user_record.id = p_user_id;
+  get diagnostics v_deleted_user = row_count;
+
+  if v_deleted_user <> 1 then
+    raise exception 'Scheduler account deletion lost the user row.' using errcode = 'P0001';
+  end if;
+
+  update public.scheduler_account_deletion_requests request
+  set
+    status = 'COMPLETE',
+    completed_at = now(),
+    last_error_code = null,
+    updated_at = now()
+  where request.id = p_request_id
+    and request.user_id is null;
+
+  if not found then
+    raise exception 'Scheduler account deletion receipt was not preserved.' using errcode = 'P0001';
+  end if;
+
+  insert into public.scheduler_audit_log (
+    actor_user_id, target_type, target_id, event_type, metadata
+  ) values (
+    null, 'account_deletion_request', p_request_id, 'ACCOUNT_DELETION_COMPLETE', '{}'::jsonb
+  );
+
+  return true;
+end;
+$$;
+
+create or replace function public.mark_scheduler_account_deletion_attention(
+  p_request_id uuid,
+  p_user_id uuid,
+  p_error_code text
+)
+returns boolean
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_error_code text := case
+    when upper(btrim(coalesce(p_error_code, ''))) ~ '^[A-Z0-9_]{1,80}$'
+      then upper(btrim(p_error_code))
+    else 'ACCOUNT_DELETION_FAILED'
+  end;
+  v_updated integer := 0;
+begin
+  update public.scheduler_account_deletion_requests request
+  set
+    status = 'NEEDS_ATTENTION',
+    started_at = null,
+    last_error_code = v_error_code,
+    updated_at = now()
+  where request.id = p_request_id
+    and request.user_id = p_user_id
+    and request.status in ('RUNNING', 'NEEDS_ATTENTION');
+  get diagnostics v_updated = row_count;
+
+  if v_updated = 1 then
+    insert into public.scheduler_audit_log (
+      actor_user_id, target_type, target_id, event_type, metadata
+    ) values (
+      p_user_id, 'account_deletion_request', p_request_id, 'ACCOUNT_DELETION_NEEDS_ATTENTION',
+      jsonb_build_object('errorCode', v_error_code)
+    );
+  end if;
+  return v_updated = 1;
+end;
+$$;
+
+revoke execute on function public.disconnect_tiktok_scheduler_user(uuid) from public, anon, authenticated;
+grant execute on function public.disconnect_tiktok_scheduler_user(uuid) to service_role;
+revoke execute on function public.request_scheduler_account_deletion(uuid) from public, anon, authenticated;
+grant execute on function public.request_scheduler_account_deletion(uuid) to service_role;
+revoke execute on function public.claim_scheduler_media_cleanup(timestamptz, integer) from public, anon, authenticated;
+grant execute on function public.claim_scheduler_media_cleanup(timestamptz, integer) to service_role;
+revoke execute on function public.complete_scheduler_media_cleanup(uuid, uuid, timestamptz) from public, anon, authenticated;
+grant execute on function public.complete_scheduler_media_cleanup(uuid, uuid, timestamptz) to service_role;
+revoke execute on function public.record_scheduler_media_cleanup_failure(uuid, uuid, text) from public, anon, authenticated;
+grant execute on function public.record_scheduler_media_cleanup_failure(uuid, uuid, text) to service_role;
+revoke execute on function public.claim_terminal_staging_cleanup(timestamptz, integer) from public, anon, authenticated;
+grant execute on function public.claim_terminal_staging_cleanup(timestamptz, integer) to service_role;
+revoke execute on function public.complete_terminal_staging_cleanup(uuid, uuid, timestamptz) from public, anon, authenticated;
+grant execute on function public.complete_terminal_staging_cleanup(uuid, uuid, timestamptz) to service_role;
+revoke execute on function public.record_terminal_staging_cleanup_failure(uuid, uuid, text) from public, anon, authenticated;
+grant execute on function public.record_terminal_staging_cleanup_failure(uuid, uuid, text) to service_role;
+revoke execute on function public.claim_scheduler_account_deletions(timestamptz, integer) from public, anon, authenticated;
+grant execute on function public.claim_scheduler_account_deletions(timestamptz, integer) to service_role;
+revoke execute on function public.get_scheduler_account_deletion_manifest(uuid, uuid) from public, anon, authenticated;
+grant execute on function public.get_scheduler_account_deletion_manifest(uuid, uuid) to service_role;
+revoke execute on function public.complete_scheduler_account_deletion(uuid, uuid) from public, anon, authenticated;
+grant execute on function public.complete_scheduler_account_deletion(uuid, uuid) to service_role;
+revoke execute on function public.mark_scheduler_account_deletion_attention(uuid, uuid, text) from public, anon, authenticated;
+grant execute on function public.mark_scheduler_account_deletion_attention(uuid, uuid, text) to service_role;
 
 revoke execute on function public.reserve_public_scheduler_slot(uuid, uuid, timestamptz, text, timestamptz) from public, anon, authenticated;
 grant execute on function public.reserve_public_scheduler_slot(uuid, uuid, timestamptz, text, timestamptz) to service_role;

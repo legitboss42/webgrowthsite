@@ -11,6 +11,10 @@ export async function POST(request: Request) {
   if (!isSameOriginMutation(request.headers.get("origin"), request.url)) {
     return NextResponse.json({ error: "Invalid request origin." }, { status: 403 });
   }
-  await (await createSupabaseSchedulerStore()).disconnectUser(session.userId);
-  return NextResponse.redirect(new URL("/scheduler/settings/?disconnected=1", request.url), 303);
+  try {
+    await (await createSupabaseSchedulerStore()).disconnectUser(session.userId);
+    return NextResponse.redirect(new URL("/scheduler/settings/?disconnected=1", request.url), 303);
+  } catch {
+    return NextResponse.json({ error: "Unable to disconnect TikTok publishing safely." }, { status: 502 });
+  }
 }

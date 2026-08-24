@@ -242,10 +242,14 @@ test("due jobs are claimed only through the atomic database RPC", async () => {
   });
 });
 
-test("disconnect removes the user's token record and cancels future jobs", async () => {
-  const { calls, client } = fakeClient();
+test("disconnect atomically removes the user's token record and cancels only safe jobs", async () => {
+  const result = { ok: true, cancelledJobs: 2 };
+  const { calls, client } = fakeClient(true, { disconnect_tiktok_scheduler_user: result });
   const store = createSchedulerStore(client);
-  await store.disconnectUser("user-1");
-  assert.equal(calls[0]?.kind, "remove");
-  assert.equal(calls[1]?.name, "cancel_tiktok_connection_jobs");
+  assert.deepEqual(await store.disconnectUser("user-1"), result);
+  assert.deepEqual(calls, [{
+    kind: "rpc",
+    name: "disconnect_tiktok_scheduler_user",
+    input: { p_user_id: "user-1" },
+  }]);
 });

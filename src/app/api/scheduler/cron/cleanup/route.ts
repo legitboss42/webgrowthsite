@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { cleanupExpiredStaging } from "@/lib/scheduler/reconcile";
+import { runSupabaseRetentionCleanup } from "@/lib/scheduler/retention";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -9,5 +9,5 @@ export async function GET(request: Request) {
   if (!expected || request.headers.get("authorization") !== `Bearer ${expected}`) {
     return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
   }
-  return NextResponse.json(await cleanupExpiredStaging());
+  return NextResponse.json(await runSupabaseRetentionCleanup());
 }
