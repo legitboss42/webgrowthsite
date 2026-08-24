@@ -3,12 +3,16 @@ import { createSupabaseMediaStorage } from "./storage";
 import { createSchedulerSupabaseClient } from "./supabase";
 import { createTikTokSchedulerClient } from "./tiktokClient";
 import { mapTikTokPublishStatus } from "./publishStatus";
+import { buildTerminalReconciliation, reconciliationWritesSucceeded } from "./retry";
 
 export async function reconcilePublishingAttempts() {
   const supabase = createSchedulerSupabaseClient();
   const storage = await createSupabaseMediaStorage();
   const { data: attempts, error } = await supabase.from("publish_attempts")
-    .select("id,post_id,publish_id,scheduled_posts!inner(user_id)").eq("status", "PROCESSING").not("publish_id", "is", null).limit(25);
+    .select("id,post_id,publish_id,scheduled_posts!inner(user_id)")
+    .or("status.eq.PROCESSING,and(status.eq.NEEDS_ATTENTION,error_code.eq.POST_ACCEPTANCE_AMBIGUOUS)")
+    .not("publish_id", "is", null)
+    .limit(25);
   if (error) throw new Error(`Unable to load TikTok publish attempts (${error.code}).`);
   let completed = 0;
   let failed = 0;
@@ -24,19 +28,17 @@ export async function reconcilePublishingAttempts() {
       const nextStatus = mapTikTokPublishStatus(apiStatus);
       if (nextStatus === "PROCESSING") continue;
       const completion = new Date().toISOString();
-      await Promise.all([
-        supabase.from("publish_attempts").update({
-          status: nextStatus, completed_at: completion,
-          error_code: nextStatus === "NEEDS_ATTENTION" ? String(statusPayload.fail_reason || "TIKTOK_FAILED") : null,
-        }).eq("id", attempt.id),
-        supabase.from("scheduled_posts").update({ status: nextStatus }).eq("id", attempt.post_id),
-      ]);
+      const terminal = buildTerminalReconciliation(statusPayload, completion);
+      const postWrite = await supabase.from("scheduled_posts").update(terminal.post).eq("id", attempt.post_id);
+      if (!reconciliationWritesSucceeded([postWrite])) continue;
+      const attemptWrite = await supabase.from("publish_attempts").update(terminal.attempt).eq("id", attempt.id);
+      if (!reconciliationWritesSucceeded([attemptWrite])) continue;
       const { data: staged } = await supabase.from("media_staging_objects").select("id,storage_path").eq("attempt_id", attempt.id).is("removed_at", null);
       if (staged?.length) {
         await storage.removeStaged(staged.map((item) => item.storage_path));
         await supabase.from("media_staging_objects").update({ removed_at: completion }).in("id", staged.map((item) => item.id));
       }
-      if (nextStatus === "PUBLISHED") completed += 1; else failed += 1;
+      if (terminal.outcome === "PUBLISHED") completed += 1; else failed += 1;
     } catch {
       // A transient status-read failure is retried on the next cron tick.
     }

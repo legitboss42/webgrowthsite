@@ -71,6 +71,51 @@ create table if not exists public.scheduler_worker_health (
 
 alter table public.scheduler_worker_health enable row level security;
 
+create or replace function public.claim_due_tiktok_posts(p_now timestamptz, p_limit integer)
+returns setof public.scheduled_posts
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  return query
+  with due as (
+    select post.id
+    from public.scheduled_posts post
+    join public.scheduler_users user_record
+      on user_record.id = post.user_id
+      and user_record.status = 'ACTIVE'
+      and user_record.suspended_at is null
+      and user_record.deletion_requested_at is null
+      and user_record.terms_version = '2026-08-23'
+      and user_record.privacy_version = '2026-08-23'
+    where post.terminal_at is null
+      and post.scheduled_for <= p_now
+      and (
+        post.status = 'SCHEDULED'
+        or (
+          post.status = 'FAILED_RETRYABLE'
+          and post.retry_eligible = true
+          and post.next_retry_at is not null
+          and post.next_retry_at <= p_now
+        )
+      )
+    order by post.scheduled_for, post.id
+    for update of post skip locked
+    limit greatest(1, least(p_limit, 25))
+  )
+  update public.scheduled_posts post
+  set
+    status = 'CLAIMED',
+    claim_token = gen_random_uuid(),
+    claimed_at = p_now,
+    updated_at = p_now
+  from due
+  where post.id = due.id
+  returning post.*;
+end;
+$$;
+
 create or replace function public.reserve_public_scheduler_slot(
   p_post_id uuid,
   p_user_id uuid,
@@ -171,16 +216,33 @@ set search_path = public
 as $$
 declare
   v_approval_id uuid;
-  v_request_fingerprint text;
+  v_approval_fingerprint text;
   v_last_attempt_number integer;
   v_next_attempt_number integer;
+  v_current_attempt_status text;
+  v_current_error_code text;
+  v_current_publish_id text;
 begin
   if p_post_id is null or p_user_id is null then
     return null;
   end if;
 
-  select post.approval_id
-  into v_approval_id
+  perform 1
+  from public.scheduler_users user_record
+  where user_record.id = p_user_id
+    and user_record.status = 'ACTIVE'
+    and user_record.suspended_at is null
+    and user_record.deletion_requested_at is null
+    and user_record.terms_version = '2026-08-23'
+    and user_record.privacy_version = '2026-08-23'
+  for update;
+
+  if not found then
+    return null;
+  end if;
+
+  select post.approval_id, approval.fingerprint
+  into v_approval_id, v_approval_fingerprint
   from public.scheduled_posts post
   join public.post_approvals approval
     on approval.id = post.approval_id
@@ -192,9 +254,41 @@ begin
     and post.retry_eligible = true
     and post.terminal_at is null
     and (post.next_retry_at is null or post.next_retry_at <= now())
-  for update;
+    and approval.invalidated_at is null
+  for update of post, approval;
 
   if not found or v_approval_id is null then
+    return null;
+  end if;
+
+  perform 1
+  from public.publish_attempts attempt
+  where attempt.post_id = p_post_id
+    and attempt.approval_id = v_approval_id
+  order by attempt.attempt_number
+  for update;
+
+  if not found then
+    return null;
+  end if;
+
+  select max(attempt.attempt_number)
+  into v_last_attempt_number
+  from public.publish_attempts attempt
+  where attempt.post_id = p_post_id
+    and attempt.approval_id = v_approval_id;
+
+  if v_last_attempt_number is null or v_last_attempt_number >= 5 then
+    return null;
+  end if;
+
+  if exists (
+    select 1
+    from public.publish_attempts attempt
+    where attempt.post_id = p_post_id
+      and attempt.approval_id = v_approval_id
+      and attempt.status in ('SCHEDULED', 'SUBMITTING', 'PROCESSING')
+  ) then
     return null;
   end if;
 
@@ -204,21 +298,43 @@ begin
     where attempt.post_id = p_post_id
       and attempt.approval_id = v_approval_id
       and attempt.publish_id is not null
+      and attempt.status <> 'NEEDS_ATTENTION'
   ) then
     return null;
   end if;
 
-  select attempt.request_fingerprint, attempt.attempt_number
-  into v_request_fingerprint, v_last_attempt_number
+  select attempt.status, attempt.error_code, attempt.publish_id
+  into v_current_attempt_status, v_current_error_code, v_current_publish_id
   from public.publish_attempts attempt
+  join public.post_approvals approval
+    on approval.id = attempt.approval_id
+    and approval.fingerprint = attempt.request_fingerprint
   where attempt.post_id = p_post_id
     and attempt.approval_id = v_approval_id
-    and attempt.publish_id is null
-  order by attempt.attempt_number desc
-  limit 1
-  for update;
+    and attempt.attempt_number = v_last_attempt_number
+    and attempt.request_fingerprint = v_approval_fingerprint;
 
-  if not found then
+  if not found
+    or v_current_attempt_status in ('SCHEDULED', 'SUBMITTING', 'PROCESSING')
+    or not (
+      (
+        v_current_attempt_status = 'FAILED_RETRYABLE'
+        and v_current_publish_id is null
+        and v_current_error_code in ('PRE_ACCEPTANCE_INFRASTRUCTURE', 'PRE_ACCEPTANCE_NETWORK')
+      )
+      or (
+        v_current_attempt_status = 'NEEDS_ATTENTION'
+        and v_current_publish_id is not null
+        and v_current_error_code in (
+          'DURATION_CHECK_FAILED',
+          'FILE_FORMAT_CHECK_FAILED',
+          'PHOTO_PROCESS_FAILED',
+          'PHOTO_PULL_FAILED',
+          'VIDEO_PROCESS_FAILED',
+          'VIDEO_PULL_FAILED'
+        )
+      )
+    ) then
     return null;
   end if;
 
@@ -234,7 +350,7 @@ begin
   values (
     p_post_id,
     v_approval_id,
-    v_request_fingerprint,
+    v_approval_fingerprint,
     v_next_attempt_number,
     'SCHEDULED'
   );
@@ -245,6 +361,8 @@ begin
     retry_eligible = false,
     next_retry_at = null,
     user_failure_code = null,
+    claim_token = null,
+    claimed_at = null,
     updated_at = now()
   where post.id = p_post_id
     and post.user_id = p_user_id;
@@ -630,7 +748,10 @@ $$;
 
 revoke execute on function public.reserve_public_scheduler_slot(uuid, uuid, timestamptz, text, timestamptz) from public, anon, authenticated;
 grant execute on function public.reserve_public_scheduler_slot(uuid, uuid, timestamptz, text, timestamptz) to service_role;
+revoke execute on function public.claim_due_tiktok_posts(timestamptz, integer) from public, anon, authenticated;
+grant execute on function public.claim_due_tiktok_posts(timestamptz, integer) to service_role;
 revoke execute on function public.create_safe_publish_retry(uuid, uuid) from public, anon, authenticated;
+grant execute on function public.create_safe_publish_retry(uuid, uuid) to service_role;
 revoke execute on function public.create_public_scheduler_post(uuid, uuid[], text, text) from public, anon, authenticated;
 revoke execute on function public.approve_public_scheduler_post(uuid, uuid, text, jsonb) from public, anon, authenticated;
 revoke execute on function public.save_active_tiktok_connection(uuid, text, text, text[], timestamptz, timestamptz) from public, anon, authenticated;
