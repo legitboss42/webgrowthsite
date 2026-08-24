@@ -14,6 +14,10 @@ const publicSchedulerBetaMigrationPath = new URL(
   "../../../supabase/migrations/202608230001_public_scheduler_beta.sql",
   import.meta.url
 );
+const publicSchedulerPgcryptoCorrectionPath = new URL(
+  "../../../supabase/migrations/202608240002_public_scheduler_pgcrypto_search_path.sql",
+  import.meta.url
+);
 const vercelConfigPath = new URL("../../../vercel.json", import.meta.url);
 
 test("scheduler migration enables isolation and atomic worker safeguards", () => {
@@ -352,4 +356,35 @@ test("public scheduler beta migration approves an owned immutable snapshot atomi
   assert.match(fn, /approval\.snapshot = p_snapshot/);
   assert.match(fn, /update public\.scheduled_posts post[\s\S]*approval_id = v_approval_id[\s\S]*status = 'needs_approval'/);
   assert.match(sql, /revoke execute on function public\.approve_public_scheduler_post\(uuid, uuid, text, jsonb\) from public, anon, authenticated/);
+});
+
+// Mutation target: an unqualified digest call is unresolved when SECURITY DEFINER pins search_path to public.
+test("forward scheduler correction schema-qualifies deletion hashes without widening search_path", () => {
+  assert.equal(
+    existsSync(publicSchedulerPgcryptoCorrectionPath),
+    true,
+    "the applied scheduler migration requires a forward pgcrypto correction",
+  );
+
+  const sql = readFileSync(publicSchedulerPgcryptoCorrectionPath, "utf8").toLowerCase();
+  for (const functionName of [
+    "request_scheduler_account_deletion",
+    "complete_scheduler_account_deletion",
+  ]) {
+    const start = sql.indexOf(`create or replace function public.${functionName}`);
+    const nextFunction = sql.indexOf("create or replace function public.", start + 1);
+    const end = nextFunction === -1 ? sql.indexOf("revoke execute", start) : nextFunction;
+    assert.notEqual(start, -1, `${functionName} must be recreated forward`);
+    const fn = sql.slice(start, end);
+    assert.match(fn, /security definer/);
+    assert.match(fn, /set search_path = public/);
+    assert.match(fn, /extensions\.digest\([^)]*'sha256'\)/);
+    assert.doesNotMatch(fn, /(?<![.\w])digest\(/);
+  }
+
+  assert.doesNotMatch(sql, /set search_path\s*=\s*[^;\n]*extensions/);
+  assert.match(sql, /revoke execute on function public\.request_scheduler_account_deletion\(uuid\) from public, anon, authenticated/);
+  assert.match(sql, /grant execute on function public\.request_scheduler_account_deletion\(uuid\) to service_role/);
+  assert.match(sql, /revoke execute on function public\.complete_scheduler_account_deletion\(uuid, uuid\) from public, anon, authenticated/);
+  assert.match(sql, /grant execute on function public\.complete_scheduler_account_deletion\(uuid, uuid\) to service_role/);
 });
