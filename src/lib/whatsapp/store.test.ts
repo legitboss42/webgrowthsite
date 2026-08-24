@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { createMemoryWhatsAppStore, createSupabaseWhatsAppStore } from "./store";
+import { createMemoryWhatsAppStore, createSupabaseWhatsAppStore, getSupabaseWhatsAppReplyContext } from "./store";
 
 const inbound = {
   messageId: "wamid.test-1",
@@ -52,4 +52,69 @@ test("records the webhook event before writing CRM records to Supabase", async (
   assert.match(requests[3]?.url || "", /whatsapp_messages/);
   assert.match(requests[1]?.body || "", /lead_temperature/);
   assert.match(requests[2]?.body || "", /PORTFOLIO_REQUEST/);
+});
+
+test("loads an active conversation's latest inbound Meta message before inbox replies", async () => {
+  const context = await getSupabaseWhatsAppReplyContext(
+    {
+      url: "https://example.supabase.co",
+      serviceRoleKey: "test-key",
+      fetch: async (url) => {
+        const target = String(url);
+        if (target.includes("whatsapp_conversations")) {
+          return new Response(JSON.stringify([{ id: "conversation-1", status: "open", whatsapp_contacts: { wa_id: "2348012345678" } }]));
+        }
+        return new Response(JSON.stringify([{ whatsapp_message_id: "wamid.inbound-1", message_timestamp: "2026-08-24T07:00:00.000Z" }]));
+      },
+    },
+    "conversation-1",
+    "08012345678",
+  );
+
+  assert.deepEqual(context, {
+    conversationId: "conversation-1",
+    waId: "2348012345678",
+    replyToMessageId: "wamid.inbound-1",
+    customerMessageTimestamp: Date.parse("2026-08-24T07:00:00.000Z") / 1000,
+  });
+});
+
+test("records an inbox outbound reply on the selected conversation without reclassifying the lead", async () => {
+  const requests: Array<{ url: string; method: string; body?: string }> = [];
+  const store = createSupabaseWhatsAppStore({
+    url: "https://example.supabase.co",
+    serviceRoleKey: "test-key",
+    fetch: async (url, init) => {
+      requests.push({ url: String(url), method: init?.method || "GET", body: String(init?.body || "") });
+      return new Response(JSON.stringify([{ id: "message-1" }]), { status: 201 });
+    },
+  });
+
+  await store.recordOutbound({
+    conversationId: "conversation-1",
+    messageId: "wamid.outbound-1",
+    waId: "2348012345678",
+    text: "Test reply from Web Growth. WhatsApp integration is working.",
+    timestamp: 1_800_000_000,
+  });
+
+  assert.equal(requests.length, 2);
+  assert.match(requests[0]?.url || "", /whatsapp_conversations\?id=eq\.conversation-1/);
+  assert.equal(requests[0]?.method, "PATCH");
+  assert.doesNotMatch(requests[0]?.body || "", /intent|human_review_required|lead_temperature/);
+  assert.match(requests[1]?.url || "", /whatsapp_messages\?on_conflict=whatsapp_message_id/);
+  assert.match(requests[1]?.body || "", /"conversation_id":"conversation-1"/);
+});
+
+test("fails closed when the requested reply conversation is inactive or belongs to another contact", async () => {
+  const context = await getSupabaseWhatsAppReplyContext(
+    {
+      url: "https://example.supabase.co",
+      serviceRoleKey: "test-key",
+      fetch: async () => new Response(JSON.stringify([{ id: "conversation-1", status: "closed", whatsapp_contacts: { wa_id: "2348012345678" } }])),
+    },
+    "conversation-1",
+    "2348099999999",
+  );
+  assert.equal(context, null);
 });
