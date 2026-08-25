@@ -6,10 +6,58 @@
 
 ## Current phase
 
-**Increment 6 (Templates) — COMPLETE and verified. The first milestone is DONE:**
-Overview, Conversations, Contacts, Templates, Quick Replies, all inside the app shell.
-Next up: Campaigns / Automations / Analytics / Phone Numbers / Settings — none started.
+**Increment 7 (Phone Numbers) — COMPLETE and verified.** Six console pages live.
+Remaining: Campaigns, Automations, Analytics, Settings — none started.
 Nothing is in progress mid-edit.
+
+## BLOCKED: the quick-replies migration cannot be run from here
+
+Investigated thoroughly on 2026-08-25. **Vercel is not a route to these secrets.**
+
+What IS available:
+- Vercel CLI **is** installed (59.3.0) and authenticated as `legitboss42`; the main
+  checkout is linked (`.vercel/project.json`). Supabase CLI 2.113.0 installed. `psql` is not.
+- `vercel env pull .env.vercel.prod --environment=production` works and confirms every
+  expected variable **name** exists in production — including
+  **`WHATSAPP_BUSINESS_ACCOUNT_ID` (so Templates will work in production)**.
+
+Why it still does not help:
+1. **Vercel redacts "Sensitive" variables.** `vercel env pull` writes the literal string
+   `[SENSITIVE]` for them — they are write-only by design. `SUPABASE_SERVICE_ROLE_KEY` and
+   `INTERNAL_TOOL_SESSION_SECRET` both come back redacted, so they **cannot** be recovered
+   from Vercel by any CLI call. (An earlier attempt appended those placeholders into
+   `.env.local`; they were detected and removed. If you ever see a var whose value is
+   literally `[SENSITIVE]`, that is the cause.)
+2. **`DATABASE_URL` / `POSTGRES_URL` / `PGHOST` point at `neon.tech`, NOT Supabase.**
+   The Supabase project ref does not appear in them, and `NEON_PROJECT_ID` is set. There
+   are two databases in this project. **Running the migration against `DATABASE_URL` would
+   create the table in the wrong database** and the page would still fail. The WhatsApp
+   tables are in Supabase (`supabase.co`), reached via PostgREST with the service-role key.
+3. PostgREST cannot execute DDL, so the service-role key alone would not run a migration
+   even if it were readable.
+
+`SUPABASE_URL` **is** now in the worktree `.env.local` (it is not sensitive, so it pulled
+fine). Local Supabase reads still fail with 401 until a real service-role key is added.
+
+**Do NOT run `supabase db push`.** `supabase/migrations/` holds four TikTok scheduler
+migrations (`202608210001`, `202608210002` — which creates cron jobs — `202608210003`,
+`202608230001`). The remote has no CLI migration history, so a push would try to apply
+those too, crossing the do-not-touch boundary.
+
+### What the user must provide (one of)
+1. **Run `202608250001_whatsapp_quick_replies.sql` in the Supabase SQL editor.** No secrets
+   shared, ~30 seconds. Recommended.
+2. The **Supabase** Postgres connection string (Supabase dashboard → Project Settings →
+   Database → Connection string, "Direct connection"). Then run only that one file against
+   it — e.g. copy it into a temp dir as the sole migration and `supabase db push --db-url`,
+   so the scheduler migrations stay out of scope.
+3. A Supabase **personal access token** + project ref, to use the Management API.
+
+Separately, to make local Supabase-backed pages (Overview metrics, Conversations, Contacts)
+show real data instead of "—", add `SUPABASE_SERVICE_ROLE_KEY` to the worktree `.env.local`
+(Supabase dashboard → Project Settings → API). Templates and Phone Numbers already show
+live data because they use the Meta token, which is present.
+
 
 ## Env vars: check `.env.local`, not just `src/`
 
@@ -178,8 +226,37 @@ Growth Ledger, light/paper identity. Tailwind v4 `@theme` in `src/app/globals.cs
   live from Meta's Graph API server-side and renders each template as a phone-style
   preview (header, body, footer, buttons) with category, language, and placeholders.
   Read-only by design.
-- **Later** — Campaigns, Automations, deep Analytics, Phone Numbers, Settings
+- **Increment 7 — Phone Numbers. ✅ COMPLETE (verified).** `/admin/whatsapp/phone-numbers`
+  reads the account's numbers live from Meta: quality rating, messaging limit, verification,
+  account mode, display-name status, platform, throughput, webhook URL, and phone number ID.
+  The deployment's configured sender is badged. **This also closed the two gaps deliberately
+  left earlier** — the Overview's integration card now shows the real sender number, quality
+  rating, and messaging limit, and the shell sidebar shows the real display number.
+- **Later** — Campaigns, Automations, deep Analytics, Settings
   (each its own increment, additive migrations only, honest empty states until wired).
+
+## Increment 7 notes
+
+- **Field list verified live before coding.** A throwaway probe (written, run, deleted)
+  confirmed all twelve fields — including `webhook_configuration` — are returned together
+  by `GET /{business-account-id}/phone_numbers?fields=…`. Requesting an unsupported field
+  400s the whole call, so **probe before adding one**.
+- Live values on the connected account as of 2026-08-25: quality `GREEN`, tier `TIER_250`,
+  `code_verification_status: VERIFIED`, `account_mode: LIVE`, `platform_type: CLOUD_API`,
+  `throughput.level: STANDARD`, `is_official_business_account: false`, webhook pointing at
+  `https://webgrowth.info/api/whatsapp/webhook/`.
+- **Graph calls are cached where they repeat.** `fetchWhatsAppPhoneNumbers` takes
+  `revalidateSeconds`; the Overview uses 300s and the **layout uses 600s** because the
+  layout renders on every console page and must not cost a Meta round trip per navigation.
+  Omitting the option gives `cache: "no-store"` (the Phone Numbers page itself).
+- The layout's Graph call is wrapped so a failure only omits the sidebar number — it can
+  never block a page from rendering.
+- `describeWhatsAppMessagingTier` falls back to the raw tier string, so a tier Meta adds
+  later is displayed rather than silently hidden. Same principle as template statuses.
+- Watch out: `src/app/admin/whatsapp/page.tsx` already had a local `sender` from
+  `getWhatsAppSenderConfig()`; the phone-number lookup is named `senderNumber` to avoid
+  shadowing it.
+
 
 ## Increment 6 notes
 

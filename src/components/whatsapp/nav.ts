@@ -109,7 +109,7 @@ export const WHATSAPP_NAV_SECTIONS: WhatsAppNavSection[] = [
         href: `${WHATSAPP_CONSOLE_ROOT}/phone-numbers`,
         icon: "phoneNumbers",
         description: "Connected senders, quality rating, and limits.",
-        status: "soon",
+        status: "live",
       },
       {
         label: "Settings",
