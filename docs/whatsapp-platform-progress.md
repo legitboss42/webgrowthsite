@@ -6,9 +6,25 @@
 
 ## Current phase
 
-**Increment 5 (Quick Replies) — COMPLETE and verified.** The first milestone is now
-done except Templates. Next up: Templates (blocked on an env var — see "Next exact task").
+**Increment 6 (Templates) — COMPLETE and verified. The first milestone is DONE:**
+Overview, Conversations, Contacts, Templates, Quick Replies, all inside the app shell.
+Next up: Campaigns / Automations / Analytics / Phone Numbers / Settings — none started.
 Nothing is in progress mid-edit.
+
+## Env vars: check `.env.local`, not just `src/`
+
+`WHATSAPP_BUSINESS_ACCOUNT_ID` **is configured** in `.env.local`. An earlier pass
+grepped only `src/` for it, found no references, and wrongly reported Templates as
+blocked on a missing variable — it was set all along, just not yet used by any code.
+**"Not referenced in code" ≠ "not configured."** Check `.env.local` (names only —
+never print values) before declaring an integration blocked.
+
+Confirmed live against Meta on 2026-08-25 (probe script written, run, then deleted):
+- Business account resolves: **"Web Growth Digital Services"**, id matches config.
+- Templates endpoint returns **1** template: `hello_world` · APPROVED · UTILITY · en_US.
+- Full WhatsApp/Meta vars present in `.env.local`: `WHATSAPP_ACCESS_TOKEN`,
+  `WHATSAPP_API_VERSION`, `WHATSAPP_BUSINESS_ACCOUNT_ID`, `WHATSAPP_PHONE_NUMBER_ID`.
+  (`META_APP_SECRET` is read by the webhook — verify separately before relying on it.)
 
 ## Migrations must also be applied to Supabase by hand
 
@@ -158,9 +174,33 @@ Growth Ledger, light/paper identity. Tailwind v4 `@theme` in `src/app/globals.cs
 - **Increment 5 — Quick Replies. ✅ COMPLETE (verified).** New `whatsapp_quick_replies`
   table, a manage page with create/edit/delete, and insert-into-composer buttons in the
   inbox. First admin write path beyond replies.
-- **Increment 6 — Templates. ← NEXT.** See "Next exact task"; needs a Meta env var.
+- **Increment 6 — Templates. ✅ COMPLETE (verified).** `/admin/whatsapp/templates` reads
+  live from Meta's Graph API server-side and renders each template as a phone-style
+  preview (header, body, footer, buttons) with category, language, and placeholders.
+  Read-only by design.
 - **Later** — Campaigns, Automations, deep Analytics, Phone Numbers, Settings
   (each its own increment, additive migrations only, honest empty states until wired).
+
+## Increment 6 notes
+
+- **Lives in `src/lib/whatsapp/templates.ts`**, beside `send.ts`, because it calls Meta
+  rather than Supabase. It follows `send.ts`'s injectable `env`/`fetch` shape, so all 11
+  tests run with no network.
+- **The token goes in the Authorization header, never the query string** — there is an
+  explicit test asserting the token does not appear in the request URL.
+- **Never import this into a client component.** The browser must not hold Meta
+  credentials; the page is a server component and passes only rendered output down.
+- **Four honest states** instead of one blank page: `NOT_CONFIGURED` (names the two env
+  vars), `PERMISSION_DENIED` (token rejected or missing scope), `API_ERROR` (Meta
+  unreachable), and an approved-but-empty list. Graph error bodies are logged
+  server-side and never shown to the browser.
+- **Unknown values degrade rather than throw** — a new template status or component type
+  (e.g. `CAROUSEL`) normalizes to `"UNKNOWN"` and still renders, so a Meta change cannot
+  500 the page. Tested.
+- Approved templates sort first, then alphabetically, so the usable ones lead.
+- Template *sending* is deliberately absent: that is Campaigns' job, and it needs the
+  outbound-template send path plus rate/consent thinking. The page says so.
+
 
 ## Increment 5 notes
 
@@ -278,6 +318,9 @@ Growth Ledger, light/paper identity. Tailwind v4 `@theme` in `src/app/globals.cs
 - `src/app/admin/whatsapp/quick-replies/page.tsx` — the quick-replies page
 - `src/app/api/admin/whatsapp/quick-replies/route.ts` — POST/PATCH/DELETE, auth + CSRF
 - `supabase/migrations/202608250001_whatsapp_quick_replies.sql` — the new table
+- `src/lib/whatsapp/templates.ts` — Graph API template reads + pure helpers
+- `src/lib/whatsapp/templates.test.ts` — 11 tests, no network required
+- `src/app/admin/whatsapp/templates/page.tsx` — the template list
 
 ## Files modified (this redesign)
 
@@ -301,23 +344,31 @@ Growth Ledger, light/paper identity. Tailwind v4 `@theme` in `src/app/globals.cs
 - `src/lib/route-governance.json` — added `/admin/whatsapp/conversations/` (NOINDEX) and
   retitled the root entry. Scheduler entries untouched.
 
-## Verification (Increments 1–5, all green)
+## Verification (Increments 1–6, all green)
 
-- `npx tsx --test src/app/admin/whatsapp/*.test.ts src/components/whatsapp/nav.test.ts src/lib/whatsapp/*.test.ts` → **98/98 pass**
+- `npx tsx --test src/app/admin/whatsapp/*.test.ts src/components/whatsapp/nav.test.ts src/lib/whatsapp/*.test.ts` → **109/109 pass**
 - `npx tsc --noEmit` → **clean**
-- `npx eslint src/components/whatsapp src/components/SiteChrome.tsx src/app/admin/whatsapp src/app/api/admin/whatsapp src/app/layout.tsx` → **0 problems**
+- `npx eslint src/components/whatsapp src/components/SiteChrome.tsx src/app/admin/whatsapp src/app/api/admin/whatsapp src/lib/whatsapp src/app/layout.tsx` → **0 problems**
   (do NOT judge by bare `npm run lint`: it walks `.codex-temp/` and reports ~814 pre-existing findings)
 - `npm run build` → **✓ Compiled successfully**; "Sitemap validation passed / Governed
-  routes: 88"; all 4 console pages (`/admin/whatsapp`, `/conversations`, `/contacts`,
-  `/quick-replies`) and all 5 admin API routes + the webhook present; public pages still
-  prerendered static. (A cold build after `rm -rf .next` takes ~3.5–4.5 min.)
-- Dev smoke test on a clean `.next`: quick-replies page 200, contacts 200 (incl.
-  `?temp=HOT&q=…` and deliberately hostile `temp`/`q`), inbox 200, overview 200, `/` 200.
+  routes: 89"; all 5 console pages (`/admin/whatsapp`, `/conversations`, `/contacts`,
+  `/templates`, `/quick-replies`) and all 5 admin API routes + the webhook present; public
+  pages still prerendered static.
+- Dev smoke test on a clean `.next`: templates 200, quick-replies 200, contacts 200 (incl.
+  `?temp=HOT&q=…` and hostile `temp`/`q`), inbox 200, overview 200, `/` 200.
 - **Runtime auth check:** unauthenticated `POST`/`DELETE` to
-  `/api/admin/whatsapp/quick-replies/` → **401**. Unauthenticated page requests render the
+  `/api/admin/whatsapp/quick-replies/` → **401**; unauthenticated page requests render the
   unlock form.
 - `git status` → only WhatsApp-redesign files. No TikTok/scheduler file, no
   `package-lock.json`, no `.codex-temp` change.
+
+## Dev-server first compiles are slow on this machine
+
+First-hit route compiles have taken 5–62s, and once the dev bundler hung for 7+ minutes on
+a route it later compiled in 62s from a clean `.next`. **A slow or hung dev compile is not
+evidence of a code fault** — confirm with `npm run build` (authoritative), then
+`rm -rf .next` and restart dev. Use `curl --max-time` so a probe cannot hang indefinitely.
+
 
 ## Trailing slashes on API fetches
 
@@ -369,22 +420,30 @@ WhatsApp-redesign files by explicit path. Never `git add -A` / `commit -am`.
 
 ## Next exact task
 
-Increment 6 — Templates (read-only first):
+The first milestone is complete. Nothing is half-finished. Two things the user must do
+outside the code, then pick the next increment with them:
 
-**Blocker to resolve first:** fetching approved templates needs the WhatsApp Business
-Account ID, and **there is no `WHATSAPP_BUSINESS_ACCOUNT_ID` env var in this codebase**
-(only `WHATSAPP_ACCESS_TOKEN`, `WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_API_VERSION` /
-`WHATSAPP_GRAPH_API_VERSION`, `WHATSAPP_WEBHOOK_VERIFY_TOKEN` / `WHATSAPP_VERIFY_TOKEN`,
-`META_APP_SECRET`). Ask the user to add it, or ship the page with an honest
-"not configured" state — do not invent template data either way.
+**Outstanding user actions**
+1. **Run the quick-replies migration against Supabase** —
+   `supabase/migrations/202608250001_whatsapp_quick_replies.sql`. Nothing in the build or
+   deploy applies migrations. Until it runs, `/admin/whatsapp/quick-replies` lists nothing
+   and saving errors.
+2. **Confirm the production env** has `WHATSAPP_BUSINESS_ACCOUNT_ID` (it is in `.env.local`;
+   Vercel needs it too, or Templates shows its "not configured" state in production).
 
-1. Server-side fetch `https://graph.facebook.com/{version}/{businessAccountId}/message_templates`
-   using the existing token. Never call Meta from the browser.
-2. `/admin/whatsapp/templates` lists name, language, category, status, and the body text.
-3. **Register `/admin/whatsapp/templates/` in `src/lib/route-governance.json`** or the
-   build fails; flip Templates to `"live"` in `nav.ts` and update the live-routes
-   assertion in `nav.test.ts`.
-4. Re-run the full verification list above (stop dev before building), update this doc,
-   checkpoint-commit.
+**Candidate next increments** (ask which; do not assume):
+- **Phone Numbers** — real quality rating, messaging limits, and the sender's display
+  number from `GET /{WHATSAPP_BUSINESS_ACCOUNT_ID}/phone_numbers`. This also fills the
+  gaps deliberately left on the Overview and in the shell's `senderNumber` prop.
+- **Analytics** — response times and volumes from stored messages, extending `overview.ts`.
+- **Campaigns** — sends approved templates outbound. Heaviest and highest-risk: needs a
+  new send path, recipient selection, rate limiting, and opt-out/consent thinking. Do not
+  start it casually.
+- **Automations** — auto-replies and routing rules.
+
+For any of them: register the route in `src/lib/route-governance.json`, flip `status` to
+`"live"` in `nav.ts`, update the live-routes assertion in `nav.test.ts`, run the full
+verification list above (stop dev before building), update this doc, checkpoint-commit.
+
 
 

@@ -64,7 +64,7 @@ export const WHATSAPP_NAV_SECTIONS: WhatsAppNavSection[] = [
         href: `${WHATSAPP_CONSOLE_ROOT}/templates`,
         icon: "templates",
         description: "Approved Meta message templates.",
-        status: "soon",
+        status: "live",
       },
       {
         label: "Quick Replies",
