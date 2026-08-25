@@ -116,7 +116,7 @@ For the broader before-and-after summary, also see the main [J Luxe Medical Aest
 
 ## What changed during the rebuild?
 
-These are the improvements we delivered and can describe directly. They are practical, structural changes in the implemented site, not independently measured business outcomes. Where this post refers to results, it means the quality of the delivered build — not verified traffic, ranking, booking, or revenue figures, which depend on the client's own analytics.
+These are the improvements we delivered and can describe directly. They are practical, structural changes in the implemented site, not independently measured business outcomes. Where this post refers to results, it means the quality of the delivered build, not verified traffic, ranking, booking, or revenue figures, which depend on the client's own analytics.
 
 What changed:
 
@@ -124,7 +124,7 @@ What changed:
 - service and treatment pages follow a consistent, conversion-oriented structure
 - performance was treated as a discipline (lighter assets, stricter budgets) rather than a one-off pass
 - trust and proof signals were moved earlier in the journey
-- launch controls — redirects, canonicals, analytics, QA — were treated as part of the build
+- launch controls (redirects, canonicals, analytics, QA) were treated as part of the build
 
 The rebuild also improved the perception and clarity of the site across:
 

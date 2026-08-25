@@ -37,6 +37,7 @@ const footerColumns = [
       { href: "/services/search-engine-optimisation/", label: "SEO Setup" },
       { href: "/services/performance-optimisation/", label: "Speed Optimisation" },
       { href: "/services/business-automation/", label: "Business Automation" },
+      { href: "/automation/", label: "Automation Platform (Coming Soon)" },
       { href: "/portfolio/", label: "Case Studies" },
     ],
   },

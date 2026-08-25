@@ -125,7 +125,7 @@ export default function PostApprovalPanel({
             </div>
           ) : <p aria-live="polite" className="text-sm text-white/60">Loading current TikTok publishing choices…</p>}
           <label className="block">
-            <span className="mb-2 block text-sm">Privacy — choose manually</span>
+            <span className="mb-2 block text-sm">Privacy: choose manually</span>
             <select name="privacy" required defaultValue="" disabled={!creator} className="w-full rounded-xl bg-[#111617] p-3 disabled:opacity-50">
               <option value="" disabled>Select privacy</option>
               {creator?.privacyLevelOptions.map((option) => <option key={option} value={option}>{option === "SELF_ONLY" ? "Only me" : option}</option>)}

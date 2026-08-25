@@ -48,7 +48,7 @@ export default function ThankYouPage() {
             Request received
           </p>
           <h1 className="mt-4 text-balance text-4xl font-semibold tracking-[-0.03em] md:text-5xl">
-            Thank You — Your Request Has Been Received
+            Thank You: Your Request Has Been Received
           </h1>
           <p className="mt-5 max-w-3xl text-lg leading-8 text-white/72">
             We&apos;ll review your details and respond with the next step. If your

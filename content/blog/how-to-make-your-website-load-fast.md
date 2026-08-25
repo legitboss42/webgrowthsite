@@ -130,7 +130,7 @@ Reserve space for images, embeds, cookie controls, banners, and future ad slots.
 
 For fonts, choose fallbacks with compatible metrics and verify the swap. For client-loaded content, render a stable skeleton or minimum-height container that matches the likely final block instead of a tiny spinner.
 
-CLS may occur after scrolling or interacting, so test menus, accordions, validation errors, cookie choices, and late embeds—not only initial load.
+CLS may occur after scrolling or interacting, so test menus, accordions, validation errors, cookie choices, and late embeds, not only initial load.
 
 ## 8. Cache static assets with versioned URLs
 

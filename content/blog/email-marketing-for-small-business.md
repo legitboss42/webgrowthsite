@@ -24,7 +24,7 @@ reviewedBy: victorious
 keyTakeaways:
   - Ask for email permission with a specific promise and record how consent was obtained.
   - Begin with one audience, one useful resource or update, and a short welcome sequence.
-  - Measure replies, qualified enquiries, bookings, and sales—not opens alone.
+  - Measure replies, qualified enquiries, bookings, and sales, not opens alone.
 whatYouNeed:
   - A defined audience and one customer decision the emails will support.
   - An email service that can manage consent, unsubscribes, and automation.

@@ -72,7 +72,7 @@ export default function BlogClient({ posts }: Props) {
           <div className="academy-hero-copy">
             <p className="academy-kicker">Web Growth Academy</p>
             <h1>Learn how better websites <em>build better businesses.</em></h1>
-            <p className="academy-lede">Practical field notes on web design, SEO, performance, conversion, and responsible monetization—written to help you make stronger decisions before you spend.</p>
+            <p className="academy-lede">Practical field notes on web design, SEO, performance, conversion, and responsible monetization, written to help you make stronger decisions before you spend.</p>
             <div className="academy-actions">
               {featured ? <Link className="academy-button academy-button-primary" href={`/blog/${featured.slug}/`}>Start with the featured guide <span aria-hidden="true">→</span></Link> : null}
               <Link className="academy-button academy-button-secondary" href="#academy-library">Browse the library</Link>
@@ -137,7 +137,7 @@ export default function BlogClient({ posts }: Props) {
 
       <section className="academy-paths">
         <div className="academy-container academy-paths-grid">
-          <header><p className="academy-kicker">Learning paths</p><h2>Follow the website growth journey.</h2><p>Move through the Academy by business stage—from building credibility to attracting traffic, converting visitors, and scaling what works.</p></header>
+          <header><p className="academy-kicker">Learning paths</p><h2>Follow the website growth journey.</h2><p>Move through the Academy by business stage: from building credibility to attracting traffic, converting visitors, and scaling what works.</p></header>
           <div className="academy-path-list">
             {paths.map((path) => (
               <Link key={path.title} href={path.href}>

@@ -8,6 +8,11 @@ type TurnstileWidgetProps = {
   onTokenChange: (token: string) => void;
   resetKey?: number;
   theme?: "auto" | "light" | "dark";
+  /**
+   * Styling for the wrapper around the challenge. Defaults to the dark treatment
+   * the existing forms use; light-background pages can pass their own.
+   */
+  containerClassName?: string;
 };
 
 type TurnstileRenderOptions = {
@@ -40,6 +45,7 @@ export default function TurnstileWidget({
   onTokenChange,
   resetKey = 0,
   theme = "dark",
+  containerClassName = "overflow-hidden rounded-xl border border-white/10 bg-black/25 p-3",
 }: TurnstileWidgetProps) {
   const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "";
   const containerId = useId().replace(/:/g, "");
@@ -100,7 +106,7 @@ export default function TurnstileWidget({
         strategy="afterInteractive"
         onReady={() => setScriptReady(true)}
       />
-      <div className="overflow-hidden rounded-xl border border-white/10 bg-black/25 p-3">
+      <div className={containerClassName}>
         <div id={containerId} />
       </div>
     </>

@@ -114,7 +114,7 @@ Way easier.
 
 Because you’re not competing with the whole internet.
 
-You’re competing with 10–20 businesses in your area.
+You’re competing with 10 to 20 businesses in your area.
 
 That’s a tiny battlefield.
 
@@ -579,9 +579,9 @@ Typical:
 Week 1 → setup  
 Week 2 → citations  
 Week 3 → reviews  
-Week 4–6 → rankings improve  
+Week 4-6 → rankings improve  
 
-Within 1–2 months you often see calls increasing.
+Within 1 to 2 months you often see calls increasing.
 
 Not magic.
 

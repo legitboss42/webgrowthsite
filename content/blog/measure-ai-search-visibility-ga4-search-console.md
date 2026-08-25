@@ -9,7 +9,7 @@ supportingKeywords:
   - "GA4 AI assistants channel"
 searchIntent: "Informational - measure AI search visibility and identifiable assistant referrals without overstating attribution"
 coverAlt: "Two-path measurement workflow separating Google AI search visibility in Search Console from AI assistant referral traffic in GA4"
-excerpt: "Learn what Google Search Console and GA4 can—and cannot—tell you about AI search visibility, assistant referrals, engagement, and enquiries."
+excerpt: "Learn what Google Search Console and GA4 can (and cannot) tell you about AI search visibility, assistant referrals, engagement, and enquiries."
 date: "2026-07-13"
 updatedAt: "2026-07-13"
 lastReviewedAt: "2026-07-13"

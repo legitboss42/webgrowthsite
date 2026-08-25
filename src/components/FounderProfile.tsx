@@ -260,7 +260,7 @@ export default function FounderProfile() {
             website should explain the offer clearly, earn trust quickly, protect search and
             performance, and make the next action easier.”
           </blockquote>
-          <p>Victorious — Founder, Web Growth</p>
+          <p>Victorious &middot; Founder, Web Growth</p>
         </div>
       </section>
 

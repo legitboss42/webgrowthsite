@@ -101,8 +101,8 @@ export default function ApprovedHomepage() {
               Websites that <span>earn</span>.
             </h1>
             <p className="approved-lede" data-home-hero>
-              Web Growth builds premium websites and growth systems designed to earn attention, trust, and enquiries
-              &mdash; with real strategy, SEO foundations, and honest conversion paths, never inflated promises.
+              Web Growth builds premium websites and growth systems designed to earn attention, trust, and enquiries,
+              built on real strategy, SEO foundations, and honest conversion paths, never inflated promises.
             </p>
             <div className="approved-actions" aria-label="Homepage actions" data-home-hero>
               <Link className="approved-button approved-button-primary" href="/contact/">
@@ -240,7 +240,7 @@ export default function ApprovedHomepage() {
           <div className="approved-advantage-copy" data-home-reveal>
             <p>
               The system combines editorial clarity, technical SEO, and conversion thinking, so the website supports
-              credibility, discovery, enquiries, and revenue paths &mdash; not just a strong first impression.
+              credibility, discovery, enquiries, and revenue paths, not just a strong first impression.
             </p>
             <div>
               <span>Strategy before styling</span>

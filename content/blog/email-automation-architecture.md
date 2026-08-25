@@ -30,7 +30,7 @@ reviewedBy: victorious
 keyTakeaways:
   - >-
     Email automation starts with consent, deliverability, and lifecycle
-    ownership—not a long sequence of messages.
+    ownership, not a long sequence of messages.
   - >-
     Each trigger needs a clear entry condition, exit condition, and suppression
     rule.
@@ -119,7 +119,7 @@ If you are sending proposals from agencyname@gmail.com, stop. You look like an a
 You must own your domain and authenticate it.
 
 1. Buy a Professional Domain: Do not use your main website domain for heavy email marketing (protect your root IP). Buy a variation (e.g., get-webgrowth.com). I use Namecheap because they allow advanced DNS manipulation without the headache.
-[Get your dedicated email domain here](https://namecheap.pxf.io/c/6943664/672007/5618) _(affiliate link — Web Growth may earn a commission at no extra cost to you)_
+[Get your dedicated email domain here](https://namecheap.pxf.io/c/6943664/672007/5618) _(affiliate link: Web Growth may earn a commission at no extra cost to you)_
 
 If you want help with the setup side before the automations, use the [domain registration and hosting guidance service](/services/domain-registration-hosting-guidance).
 

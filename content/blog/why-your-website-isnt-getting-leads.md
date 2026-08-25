@@ -1,9 +1,9 @@
 ---
-title: "Why Your Website Is Not Getting Leads — and What to Fix First"
+title: "Why Your Website Is Not Getting Leads, and What to Fix First"
 seoTitle: "Why Your Website Is Not Getting Leads and What to Fix | Web Growth"
 primaryKeyword: "why a website is not getting leads"
 searchIntent: "Informational - improve website conversion and lead quality"
-coverAlt: "Why Your Website Is Not Getting Leads — and What to Fix First - practical Web Growth guide visual"
+coverAlt: "Why Your Website Is Not Getting Leads, and What to Fix First - practical Web Growth guide visual"
 excerpt: "Find out why your website is not getting leads and which trust, clarity, speed, CTA, mobile, or enquiry-flow issues to fix first."
 date: 2026-02-05T00:00:00.000Z
 category: Conversion
@@ -56,7 +56,7 @@ evidenceNote: "Based on recurring conversion issues identified during business w
 methodologyNote: "This article prioritizes the checks that usually affect trust and enquiries first, before deeper redesign decisions."
 ---
 
-# Why Your Website Is Not Getting Leads — and What to Fix First
+# Why Your Website Is Not Getting Leads, and What to Fix First
 
 A website can look polished and still fail commercially.
 

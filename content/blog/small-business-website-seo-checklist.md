@@ -90,7 +90,7 @@ If two pages serve the same task, strengthen the better page and give the other 
 
 The title should identify the subject and, where useful, the audience or location. Avoid repeating the same title formula across the site. The description should set an honest expectation rather than promise a guaranteed result.
 
-Compare the rendered search result with the page. If the title promises a checklist, the page should contain a usable checklist—not a sales introduction followed by a contact form.
+Compare the rendered search result with the page. If the title promises a checklist, the page should contain a usable checklist, not a sales introduction followed by a contact form.
 
 ## 5. Answer the decision questions on service pages
 
