@@ -1,136 +1,757 @@
 {
   "routes": [
-    { "path": "/", "status": "INDEX", "sitemap": true, "reason": "Primary business homepage" },
-    { "path": "/about/", "status": "INDEX", "sitemap": true, "reason": "Ownership and trust page" },
-    { "path": "/blog/", "status": "INDEX", "sitemap": true, "reason": "Editorial resource hub" },
-    { "path": "/contact/", "status": "INDEX", "sitemap": true, "reason": "Public contact and website review page" },
-    { "path": "/disclaimer/", "status": "INDEX", "sitemap": true, "reason": "Public disclaimer and trust page" },
-    { "path": "/editorial-policy/", "status": "INDEX", "sitemap": true, "reason": "Editorial accountability page" },
-    { "path": "/faq/", "status": "INDEX", "sitemap": true, "reason": "Public service questions" },
-    { "path": "/portfolio/", "status": "INDEX", "sitemap": true, "reason": "First-hand project evidence" },
-    { "path": "/pricing/", "status": "INDEX", "sitemap": true, "reason": "Commercial scope and pricing context" },
-    { "path": "/privacy/", "status": "INDEX", "sitemap": true, "reason": "Privacy and data-use disclosure" },
-    { "path": "/services/", "status": "INDEX", "sitemap": true, "reason": "Service hub" },
-    { "path": "/terms/", "status": "INDEX", "sitemap": true, "reason": "Public terms of service" },
-    { "path": "/victorious/", "status": "INDEX", "sitemap": true, "reason": "Founder profile and first-hand experience page" },
-    { "path": "/tools/", "status": "INDEX", "sitemap": true, "reason": "Public tools hub with live and planned utilities" },
-    { "path": "/tools/[slug]/", "status": "NOINDEX", "sitemap": false, "reason": "Dynamic tools route template" },
-    { "path": "/tools/adsense-readiness-checker/", "status": "INDEX", "sitemap": true, "reason": "Public AdSense readiness utility" },
-    { "path": "/tools/website-cost-calculator/", "status": "INDEX", "sitemap": true, "reason": "Public website planning utility" },
-    { "path": "/tools/homepage-checklist/", "status": "INDEX", "sitemap": true, "reason": "Public homepage quality utility" },
-    { "path": "/tools/meta-description-generator/", "status": "INDEX", "sitemap": true, "reason": "Public SEO writing utility" },
-    { "path": "/tools/sitemap-validator/", "status": "INDEX", "sitemap": true, "reason": "Public sitemap validation utility" },
-    { "path": "/tools/website-launch-checklist/", "status": "INDEX", "sitemap": true, "reason": "Public launch QA utility" },
-    { "path": "/automation/", "status": "INDEX", "sitemap": true, "reason": "Web Growth Automation early-access waitlist page for the WhatsApp and TikTok products" },
-    { "path": "/local-business/", "status": "INDEX", "sitemap": true, "reason": "Small local-business solution page" },
-    { "path": "/ecommerce/", "status": "INDEX", "sitemap": true, "reason": "Small-business ecommerce solution page" },
-    { "path": "/website-design-lagos/", "status": "INDEX", "sitemap": true, "reason": "Lagos local-intent service page" },
-    { "path": "/website-design-united-kingdom/", "status": "INDEX", "sitemap": true, "reason": "UK remote-service page supported by client work" },
-    { "path": "/web-design-for-real-estate-lagos/", "status": "INDEX", "sitemap": true, "reason": "Real-estate industry service page" },
-    { "path": "/services/analytics-tracking-setup/", "status": "INDEX", "sitemap": true, "reason": "Active service page" },
-    { "path": "/services/booking-platform-setup-integration/", "status": "INDEX", "sitemap": true, "reason": "Active service page" },
-    { "path": "/services/business-automation/", "status": "INDEX", "sitemap": true, "reason": "Primary business automation and workflow integration service page" },
-    { "path": "/services/business-website-design/", "status": "INDEX", "sitemap": true, "reason": "Active core service page" },
-    { "path": "/services/crm-system-setup-configuration/", "status": "INDEX", "sitemap": true, "reason": "Active service page" },
-    { "path": "/services/domain-registration-hosting-guidance/", "status": "INDEX", "sitemap": true, "reason": "Active service page" },
-    { "path": "/services/ecommerce-website-design/", "status": "INDEX", "sitemap": true, "reason": "Active core service page" },
-    { "path": "/services/email-marketing-setup-strategy/", "status": "INDEX", "sitemap": true, "reason": "Active service page" },
-    { "path": "/services/google-my-business-setup-optimisation/", "status": "INDEX", "sitemap": true, "reason": "Active local visibility service" },
-    { "path": "/services/landing-page-design/", "status": "INDEX", "sitemap": true, "reason": "Active core service page" },
-    { "path": "/services/lead-magnet-strategy-build/", "status": "INDEX", "sitemap": true, "reason": "Active service page" },
-    { "path": "/services/marketing-automation-build-implementation/", "status": "INDEX", "sitemap": true, "reason": "Active service page" },
-    { "path": "/services/performance-optimisation/", "status": "INDEX", "sitemap": true, "reason": "Active core service page" },
-    { "path": "/services/search-engine-optimisation/", "status": "INDEX", "sitemap": true, "reason": "Active SEO service page" },
-    { "path": "/services/website-audit/", "status": "INDEX", "sitemap": true, "reason": "Active core service page" },
-    { "path": "/services/website-maintenance/", "status": "INDEX", "sitemap": true, "reason": "Active service page" },
-    { "path": "/services/website-redesign/", "status": "INDEX", "sitemap": true, "reason": "Active core service page" },
-
-    { "path": "/get-started/", "status": "NOINDEX", "sitemap": false, "reason": "Lead-intake utility page" },
-    { "path": "/hosting-offer/", "status": "NOINDEX", "sitemap": false, "reason": "Promotional offer page" },
-    { "path": "/launch/", "status": "NOINDEX", "sitemap": false, "reason": "Campaign landing page" },
-    { "path": "/website-build/", "status": "NOINDEX", "sitemap": false, "reason": "Campaign landing page overlapping core service intent" },
-    { "path": "/mockup/", "status": "NOINDEX", "sitemap": false, "reason": "Private mockup utility" },
-    { "path": "/internal/text-to-speech/", "status": "NOINDEX", "sitemap": false, "reason": "Internal voice generation utility" },
-    { "path": "/admin/whatsapp/", "status": "NOINDEX", "sitemap": false, "reason": "Internal WhatsApp console overview" },
-    { "path": "/admin/whatsapp/conversations/", "status": "NOINDEX", "sitemap": false, "reason": "Internal WhatsApp lead inbox" },
-    { "path": "/admin/whatsapp/contacts/", "status": "NOINDEX", "sitemap": false, "reason": "Internal WhatsApp contact directory" },
-    { "path": "/admin/whatsapp/quick-replies/", "status": "NOINDEX", "sitemap": false, "reason": "Internal WhatsApp saved reply snippets" },
-    { "path": "/admin/whatsapp/templates/", "status": "NOINDEX", "sitemap": false, "reason": "Internal WhatsApp message template list" },
-    { "path": "/admin/whatsapp/phone-numbers/", "status": "NOINDEX", "sitemap": false, "reason": "Internal WhatsApp sender status and limits" },
-    { "path": "/connect/tiktok/", "status": "NOINDEX", "sitemap": false, "reason": "Internal TikTok authorization utility page" },
-    { "path": "/connect/tiktok/callback/", "status": "NOINDEX", "sitemap": false, "reason": "TikTok OAuth callback route" },
-    { "path": "/scheduler/", "status": "INDEX", "sitemap": true, "reason": "Public TikTok scheduler product and rollout page" },
-    { "path": "/scheduler/admin/", "status": "NOINDEX", "sitemap": false, "reason": "Owner-only TikTok scheduler administration" },
-    { "path": "/scheduler/dashboard/", "status": "NOINDEX", "sitemap": false, "reason": "Authenticated TikTok scheduler dashboard" },
-    { "path": "/scheduler/new/", "status": "NOINDEX", "sitemap": false, "reason": "Authenticated TikTok post composer" },
-    { "path": "/scheduler/posts/[id]/", "status": "NOINDEX", "sitemap": false, "reason": "Authenticated TikTok post workflow" },
-    { "path": "/scheduler/settings/", "status": "NOINDEX", "sitemap": false, "reason": "Authenticated TikTok scheduler settings" },
-    { "path": "/scheduler/sign-in/", "status": "NOINDEX", "sitemap": false, "reason": "TikTok scheduler sign-in" },
-    { "path": "/scheduler/terms/", "status": "INDEX", "sitemap": true, "reason": "Public TikTok scheduler terms and privacy summary" },
-    { "path": "/contact/thanks/", "status": "NOINDEX", "sitemap": false, "reason": "Form completion utility" },
-    { "path": "/thank-you/", "status": "NOINDEX", "sitemap": false, "reason": "Form completion utility" },
-    { "path": "/thank-you/[slug]/", "status": "NOINDEX", "sitemap": false, "reason": "Dynamic form completion utility" },
-    { "path": "/api/ai", "status": "NOINDEX", "sitemap": false, "reason": "API endpoint" },
-    { "path": "/api/contact", "status": "NOINDEX", "sitemap": false, "reason": "API endpoint" },
-    { "path": "/api/forms/notify", "status": "NOINDEX", "sitemap": false, "reason": "API endpoint" },
-    { "path": "/api/get-started", "status": "NOINDEX", "sitemap": false, "reason": "API endpoint" },
-    { "path": "/api/internal/session", "status": "NOINDEX", "sitemap": false, "reason": "Internal utility session endpoint" },
-    { "path": "/api/internal/text-to-speech", "status": "NOINDEX", "sitemap": false, "reason": "Internal text-to-speech API endpoint" },
-    { "path": "/api/tiktok/authorize", "status": "NOINDEX", "sitemap": false, "reason": "TikTok OAuth start endpoint" },
-    { "path": "/api/tiktok/slides/[slug]", "status": "NOINDEX", "sitemap": false, "reason": "Internal TikTok draft slide image endpoint" },
-    { "path": "/api/tools/page-audit", "status": "NOINDEX", "sitemap": false, "reason": "Public tools API endpoint" },
-    { "path": "/api/tools/sitemap-validator", "status": "NOINDEX", "sitemap": false, "reason": "Public tools API endpoint" },
-    { "path": "/api/health/db", "status": "NOINDEX", "sitemap": false, "reason": "Health-check endpoint" },
-
-    { "path": "/home", "status": "REDIRECT", "sitemap": false, "destination": "/", "reason": "Legacy homepage alias" },
-    { "path": "/sitemap.xml", "status": "REDIRECT", "sitemap": false, "destination": "/sitemap-index.xml", "reason": "Legacy sitemap alias" },
-    { "path": "/domain-offer/", "status": "REDIRECT", "sitemap": false, "destination": "/hosting-offer/", "reason": "Legacy offer alias" },
-    { "path": "/google-business-profile-optimization-lagos/", "status": "REDIRECT", "sitemap": false, "destination": "/services/google-my-business-setup-optimisation/", "reason": "Legacy service alias" },
-    { "path": "/landing-page-design-lagos/", "status": "REDIRECT", "sitemap": false, "destination": "/services/landing-page-design/", "reason": "Legacy service alias" },
-    { "path": "/website-redesign-lagos/", "status": "REDIRECT", "sitemap": false, "destination": "/services/website-redesign/", "reason": "Legacy service alias" },
-    { "path": "/website-speed-optimization-nigeria/", "status": "REDIRECT", "sitemap": false, "destination": "/services/performance-optimisation/", "reason": "Legacy service alias" },
-    { "path": "/services/website-maintenance-and-support/", "status": "REDIRECT", "sitemap": false, "destination": "/services/website-maintenance/", "reason": "Legacy service slug" },
-    { "path": "/services/speed-and-performance-optimization/", "status": "REDIRECT", "sitemap": false, "destination": "/services/performance-optimisation/", "reason": "Legacy service slug" },
-    { "path": "/services/website-audit-and-consultation/", "status": "REDIRECT", "sitemap": false, "destination": "/services/website-audit/", "reason": "Legacy service slug" },
-    { "path": "/blog/07-launch-week-checklist-and-first-7-days-image-prompts/", "status": "REDIRECT", "sitemap": false, "destination": "/blog/07-launch-week-checklist-and-first-7-days/", "reason": "Obsolete internal image-prompt URL" }
+    {
+      "path": "/",
+      "status": "INDEX",
+      "sitemap": true,
+      "reason": "Primary business homepage"
+    },
+    {
+      "path": "/about/",
+      "status": "INDEX",
+      "sitemap": true,
+      "reason": "Ownership and trust page"
+    },
+    {
+      "path": "/blog/",
+      "status": "INDEX",
+      "sitemap": true,
+      "reason": "Editorial resource hub"
+    },
+    {
+      "path": "/contact/",
+      "status": "INDEX",
+      "sitemap": true,
+      "reason": "Public contact and website review page"
+    },
+    {
+      "path": "/disclaimer/",
+      "status": "INDEX",
+      "sitemap": true,
+      "reason": "Public disclaimer and trust page"
+    },
+    {
+      "path": "/editorial-policy/",
+      "status": "INDEX",
+      "sitemap": true,
+      "reason": "Editorial accountability page"
+    },
+    {
+      "path": "/faq/",
+      "status": "INDEX",
+      "sitemap": true,
+      "reason": "Public service questions"
+    },
+    {
+      "path": "/portfolio/",
+      "status": "INDEX",
+      "sitemap": true,
+      "reason": "First-hand project evidence"
+    },
+    {
+      "path": "/pricing/",
+      "status": "INDEX",
+      "sitemap": true,
+      "reason": "Commercial scope and pricing context"
+    },
+    {
+      "path": "/privacy/",
+      "status": "INDEX",
+      "sitemap": true,
+      "reason": "Privacy and data-use disclosure"
+    },
+    {
+      "path": "/services/",
+      "status": "INDEX",
+      "sitemap": true,
+      "reason": "Service hub"
+    },
+    {
+      "path": "/terms/",
+      "status": "INDEX",
+      "sitemap": true,
+      "reason": "Public terms of service"
+    },
+    {
+      "path": "/victorious/",
+      "status": "INDEX",
+      "sitemap": true,
+      "reason": "Founder profile and first-hand experience page"
+    },
+    {
+      "path": "/tools/",
+      "status": "INDEX",
+      "sitemap": true,
+      "reason": "Public tools hub with live and planned utilities"
+    },
+    {
+      "path": "/tools/[slug]/",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Dynamic tools route template"
+    },
+    {
+      "path": "/tools/adsense-readiness-checker/",
+      "status": "INDEX",
+      "sitemap": true,
+      "reason": "Public AdSense readiness utility"
+    },
+    {
+      "path": "/tools/website-cost-calculator/",
+      "status": "INDEX",
+      "sitemap": true,
+      "reason": "Public website planning utility"
+    },
+    {
+      "path": "/tools/homepage-checklist/",
+      "status": "INDEX",
+      "sitemap": true,
+      "reason": "Public homepage quality utility"
+    },
+    {
+      "path": "/tools/meta-description-generator/",
+      "status": "INDEX",
+      "sitemap": true,
+      "reason": "Public SEO writing utility"
+    },
+    {
+      "path": "/tools/sitemap-validator/",
+      "status": "INDEX",
+      "sitemap": true,
+      "reason": "Public sitemap validation utility"
+    },
+    {
+      "path": "/tools/website-launch-checklist/",
+      "status": "INDEX",
+      "sitemap": true,
+      "reason": "Public launch QA utility"
+    },
+    {
+      "path": "/automation/",
+      "status": "INDEX",
+      "sitemap": true,
+      "reason": "Web Growth Automation early-access waitlist page for the WhatsApp and TikTok products"
+    },
+    {
+      "path": "/local-business/",
+      "status": "INDEX",
+      "sitemap": true,
+      "reason": "Small local-business solution page"
+    },
+    {
+      "path": "/ecommerce/",
+      "status": "INDEX",
+      "sitemap": true,
+      "reason": "Small-business ecommerce solution page"
+    },
+    {
+      "path": "/website-design-lagos/",
+      "status": "INDEX",
+      "sitemap": true,
+      "reason": "Lagos local-intent service page"
+    },
+    {
+      "path": "/website-design-united-kingdom/",
+      "status": "INDEX",
+      "sitemap": true,
+      "reason": "UK remote-service page supported by client work"
+    },
+    {
+      "path": "/web-design-for-real-estate-lagos/",
+      "status": "INDEX",
+      "sitemap": true,
+      "reason": "Real-estate industry service page"
+    },
+    {
+      "path": "/services/analytics-tracking-setup/",
+      "status": "INDEX",
+      "sitemap": true,
+      "reason": "Active service page"
+    },
+    {
+      "path": "/services/booking-platform-setup-integration/",
+      "status": "INDEX",
+      "sitemap": true,
+      "reason": "Active service page"
+    },
+    {
+      "path": "/services/business-automation/",
+      "status": "INDEX",
+      "sitemap": true,
+      "reason": "Primary business automation and workflow integration service page"
+    },
+    {
+      "path": "/services/business-website-design/",
+      "status": "INDEX",
+      "sitemap": true,
+      "reason": "Active core service page"
+    },
+    {
+      "path": "/services/crm-system-setup-configuration/",
+      "status": "INDEX",
+      "sitemap": true,
+      "reason": "Active service page"
+    },
+    {
+      "path": "/services/domain-registration-hosting-guidance/",
+      "status": "INDEX",
+      "sitemap": true,
+      "reason": "Active service page"
+    },
+    {
+      "path": "/services/ecommerce-website-design/",
+      "status": "INDEX",
+      "sitemap": true,
+      "reason": "Active core service page"
+    },
+    {
+      "path": "/services/email-marketing-setup-strategy/",
+      "status": "INDEX",
+      "sitemap": true,
+      "reason": "Active service page"
+    },
+    {
+      "path": "/services/google-my-business-setup-optimisation/",
+      "status": "INDEX",
+      "sitemap": true,
+      "reason": "Active local visibility service"
+    },
+    {
+      "path": "/services/landing-page-design/",
+      "status": "INDEX",
+      "sitemap": true,
+      "reason": "Active core service page"
+    },
+    {
+      "path": "/services/lead-magnet-strategy-build/",
+      "status": "INDEX",
+      "sitemap": true,
+      "reason": "Active service page"
+    },
+    {
+      "path": "/services/marketing-automation-build-implementation/",
+      "status": "INDEX",
+      "sitemap": true,
+      "reason": "Active service page"
+    },
+    {
+      "path": "/services/performance-optimisation/",
+      "status": "INDEX",
+      "sitemap": true,
+      "reason": "Active core service page"
+    },
+    {
+      "path": "/services/search-engine-optimisation/",
+      "status": "INDEX",
+      "sitemap": true,
+      "reason": "Active SEO service page"
+    },
+    {
+      "path": "/services/website-audit/",
+      "status": "INDEX",
+      "sitemap": true,
+      "reason": "Active core service page"
+    },
+    {
+      "path": "/services/website-maintenance/",
+      "status": "INDEX",
+      "sitemap": true,
+      "reason": "Active service page"
+    },
+    {
+      "path": "/services/website-redesign/",
+      "status": "INDEX",
+      "sitemap": true,
+      "reason": "Active core service page"
+    },
+    {
+      "path": "/get-started/",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Lead-intake utility page"
+    },
+    {
+      "path": "/hosting-offer/",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Promotional offer page"
+    },
+    {
+      "path": "/launch/",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Campaign landing page"
+    },
+    {
+      "path": "/website-build/",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Campaign landing page overlapping core service intent"
+    },
+    {
+      "path": "/mockup/",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private mockup utility"
+    },
+    {
+      "path": "/internal/text-to-speech/",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Internal voice generation utility"
+    },
+    {
+      "path": "/admin/waitlist/",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Internal automation waitlist administration"
+    },
+    {
+      "path": "/admin/whatsapp/",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Internal WhatsApp console overview"
+    },
+    {
+      "path": "/admin/whatsapp/conversations/",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Internal WhatsApp lead inbox"
+    },
+    {
+      "path": "/admin/whatsapp/contacts/",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Internal WhatsApp contact directory"
+    },
+    {
+      "path": "/admin/whatsapp/quick-replies/",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Internal WhatsApp saved reply snippets"
+    },
+    {
+      "path": "/admin/whatsapp/templates/",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Internal WhatsApp message template list"
+    },
+    {
+      "path": "/admin/whatsapp/phone-numbers/",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Internal WhatsApp sender status and limits"
+    },
+    {
+      "path": "/connect/tiktok/",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Internal TikTok authorization utility page"
+    },
+    {
+      "path": "/connect/tiktok/callback/",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "TikTok OAuth callback route"
+    },
+    {
+      "path": "/scheduler/",
+      "status": "INDEX",
+      "sitemap": true,
+      "reason": "Public TikTok scheduler product and rollout page"
+    },
+    {
+      "path": "/scheduler/admin/",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Owner-only TikTok scheduler administration"
+    },
+    {
+      "path": "/scheduler/dashboard/",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Authenticated TikTok scheduler dashboard"
+    },
+    {
+      "path": "/scheduler/new/",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Authenticated TikTok post composer"
+    },
+    {
+      "path": "/scheduler/posts/[id]/",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Authenticated TikTok post workflow"
+    },
+    {
+      "path": "/scheduler/settings/",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Authenticated TikTok scheduler settings"
+    },
+    {
+      "path": "/scheduler/sign-in/",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "TikTok scheduler sign-in"
+    },
+    {
+      "path": "/scheduler/terms/",
+      "status": "INDEX",
+      "sitemap": true,
+      "reason": "Public TikTok scheduler terms and privacy summary"
+    },
+    {
+      "path": "/contact/thanks/",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Form completion utility"
+    },
+    {
+      "path": "/thank-you/",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Form completion utility"
+    },
+    {
+      "path": "/thank-you/[slug]/",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Dynamic form completion utility"
+    },
+    {
+      "path": "/api/ai",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "API endpoint"
+    },
+    {
+      "path": "/api/contact",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "API endpoint"
+    },
+    {
+      "path": "/api/forms/notify",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "API endpoint"
+    },
+    {
+      "path": "/api/get-started",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "API endpoint"
+    },
+    {
+      "path": "/api/internal/session",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Internal utility session endpoint"
+    },
+    {
+      "path": "/api/internal/text-to-speech",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Internal text-to-speech API endpoint"
+    },
+    {
+      "path": "/api/tiktok/authorize",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "TikTok OAuth start endpoint"
+    },
+    {
+      "path": "/api/tiktok/slides/[slug]",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Internal TikTok draft slide image endpoint"
+    },
+    {
+      "path": "/api/tools/page-audit",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Public tools API endpoint"
+    },
+    {
+      "path": "/api/tools/sitemap-validator",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Public tools API endpoint"
+    },
+    {
+      "path": "/api/health/db",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Health-check endpoint"
+    },
+    {
+      "path": "/home",
+      "status": "REDIRECT",
+      "sitemap": false,
+      "destination": "/",
+      "reason": "Legacy homepage alias"
+    },
+    {
+      "path": "/sitemap.xml",
+      "status": "REDIRECT",
+      "sitemap": false,
+      "destination": "/sitemap-index.xml",
+      "reason": "Legacy sitemap alias"
+    },
+    {
+      "path": "/domain-offer/",
+      "status": "REDIRECT",
+      "sitemap": false,
+      "destination": "/hosting-offer/",
+      "reason": "Legacy offer alias"
+    },
+    {
+      "path": "/google-business-profile-optimization-lagos/",
+      "status": "REDIRECT",
+      "sitemap": false,
+      "destination": "/services/google-my-business-setup-optimisation/",
+      "reason": "Legacy service alias"
+    },
+    {
+      "path": "/landing-page-design-lagos/",
+      "status": "REDIRECT",
+      "sitemap": false,
+      "destination": "/services/landing-page-design/",
+      "reason": "Legacy service alias"
+    },
+    {
+      "path": "/website-redesign-lagos/",
+      "status": "REDIRECT",
+      "sitemap": false,
+      "destination": "/services/website-redesign/",
+      "reason": "Legacy service alias"
+    },
+    {
+      "path": "/website-speed-optimization-nigeria/",
+      "status": "REDIRECT",
+      "sitemap": false,
+      "destination": "/services/performance-optimisation/",
+      "reason": "Legacy service alias"
+    },
+    {
+      "path": "/services/website-maintenance-and-support/",
+      "status": "REDIRECT",
+      "sitemap": false,
+      "destination": "/services/website-maintenance/",
+      "reason": "Legacy service slug"
+    },
+    {
+      "path": "/services/speed-and-performance-optimization/",
+      "status": "REDIRECT",
+      "sitemap": false,
+      "destination": "/services/performance-optimisation/",
+      "reason": "Legacy service slug"
+    },
+    {
+      "path": "/services/website-audit-and-consultation/",
+      "status": "REDIRECT",
+      "sitemap": false,
+      "destination": "/services/website-audit/",
+      "reason": "Legacy service slug"
+    },
+    {
+      "path": "/blog/07-launch-week-checklist-and-first-7-days-image-prompts/",
+      "status": "REDIRECT",
+      "sitemap": false,
+      "destination": "/blog/07-launch-week-checklist-and-first-7-days/",
+      "reason": "Obsolete internal image-prompt URL"
+    }
   ],
   "articles": [
-    { "slug": "01-why-we-rebuilt-not-redesigned", "status": "INDEX", "sitemap": true },
-    { "slug": "02-the-audit-that-created-the-roadmap", "status": "INDEX", "sitemap": true },
-    { "slug": "03-seo-migration-without-losing-traffic", "status": "INDEX", "sitemap": true },
-    { "slug": "04-writing-service-pages-that-convert", "status": "INDEX", "sitemap": true },
-    { "slug": "05-premium-design-without-slow-pages", "status": "INDEX", "sitemap": true },
-    { "slug": "06-nextjs-architecture-and-build-decisions", "status": "INDEX", "sitemap": true },
-    { "slug": "07-launch-week-checklist-and-first-7-days", "status": "INDEX", "sitemap": true },
-    { "slug": "08-results-mistakes-and-reusable-playbook", "status": "INDEX", "sitemap": true },
-    { "slug": "best-web-hosting-for-small-business-websites", "status": "INDEX", "sitemap": true },
-    { "slug": "conversion-audit-checklist-service-homepage", "status": "INDEX", "sitemap": true },
-    { "slug": "email-automation-architecture", "status": "INDEX", "sitemap": true },
-    { "slug": "email-marketing-for-small-business", "status": "INDEX", "sitemap": true },
-    { "slug": "google-business-profile-optimization-checklist", "status": "INDEX", "sitemap": true },
-    { "slug": "high-converting-landing-pages-guide", "status": "INDEX", "sitemap": true },
-    { "slug": "high-converting-service-page", "status": "INDEX", "sitemap": true },
-    { "slug": "homepage-structure-that-converts-visitors-into-customers", "status": "INDEX", "sitemap": true },
-    { "slug": "how-to-audit-slow-wordpress-site", "status": "INDEX", "sitemap": true },
-    { "slug": "how-to-build-a-small-business-website-that-converts", "status": "INDEX", "sitemap": true },
-    { "slug": "how-to-make-your-website-load-fast", "status": "INDEX", "sitemap": true },
-    { "slug": "how-to-plan-website-copy-before-hiring-developer", "status": "INDEX", "sitemap": true },
-    { "slug": "jluxe-medical-aesthetics-case-study", "status": "INDEX", "sitemap": true },
-    { "slug": "jluxe-website-redesign-series-announcement", "status": "INDEX", "sitemap": true },
-    { "slug": "landing-page-wireframe-local-service-business", "status": "INDEX", "sitemap": true },
-    { "slug": "local-seo-for-small-business-google-maps-ranking-guide", "status": "INDEX", "sitemap": true },
-    { "slug": "measure-ai-search-visibility-ga4-search-console", "status": "INDEX", "sitemap": true },
-    { "slug": "namecheap-domain-and-hosting-guide", "status": "INDEX", "sitemap": true },
-    { "slug": "small-business-website-redesign-checklist", "status": "INDEX", "sitemap": true },
-    { "slug": "small-business-website-seo-checklist", "status": "INDEX", "sitemap": true },
-    { "slug": "stop-using-cheap-hosting", "status": "INDEX", "sitemap": true },
-    { "slug": "website-launch-checklist-for-small-businesses", "status": "INDEX", "sitemap": true },
-    { "slug": "website-platform-comparison-small-business", "status": "INDEX", "sitemap": true },
-    { "slug": "website-redesign-cost-breakdown-nigeria", "status": "INDEX", "sitemap": true },
-    { "slug": "website-tracking-setup-for-small-businesses", "status": "INDEX", "sitemap": true },
-    { "slug": "why-your-website-isnt-getting-leads", "status": "INDEX", "sitemap": true },
-    { "slug": "ga4-meta-tiktok-clarity-setup-guide", "status": "REDIRECT", "sitemap": false, "destination": "/blog/website-tracking-setup-for-small-businesses/" },
-    { "slug": "local-seo-basics-service-business-lagos", "status": "REDIRECT", "sitemap": false, "destination": "/blog/local-seo-for-small-business-google-maps-ranking-guide/" },
-    { "slug": "small-business-website-launch-qa-checklist", "status": "REDIRECT", "sitemap": false, "destination": "/blog/website-launch-checklist-for-small-businesses/" }
+    {
+      "slug": "01-why-we-rebuilt-not-redesigned",
+      "status": "INDEX",
+      "sitemap": true
+    },
+    {
+      "slug": "02-the-audit-that-created-the-roadmap",
+      "status": "INDEX",
+      "sitemap": true
+    },
+    {
+      "slug": "03-seo-migration-without-losing-traffic",
+      "status": "INDEX",
+      "sitemap": true
+    },
+    {
+      "slug": "04-writing-service-pages-that-convert",
+      "status": "INDEX",
+      "sitemap": true
+    },
+    {
+      "slug": "05-premium-design-without-slow-pages",
+      "status": "INDEX",
+      "sitemap": true
+    },
+    {
+      "slug": "06-nextjs-architecture-and-build-decisions",
+      "status": "INDEX",
+      "sitemap": true
+    },
+    {
+      "slug": "07-launch-week-checklist-and-first-7-days",
+      "status": "INDEX",
+      "sitemap": true
+    },
+    {
+      "slug": "08-results-mistakes-and-reusable-playbook",
+      "status": "INDEX",
+      "sitemap": true
+    },
+    {
+      "slug": "best-web-hosting-for-small-business-websites",
+      "status": "INDEX",
+      "sitemap": true
+    },
+    {
+      "slug": "conversion-audit-checklist-service-homepage",
+      "status": "INDEX",
+      "sitemap": true
+    },
+    {
+      "slug": "email-automation-architecture",
+      "status": "INDEX",
+      "sitemap": true
+    },
+    {
+      "slug": "email-marketing-for-small-business",
+      "status": "INDEX",
+      "sitemap": true
+    },
+    {
+      "slug": "google-business-profile-optimization-checklist",
+      "status": "INDEX",
+      "sitemap": true
+    },
+    {
+      "slug": "high-converting-landing-pages-guide",
+      "status": "INDEX",
+      "sitemap": true
+    },
+    {
+      "slug": "high-converting-service-page",
+      "status": "INDEX",
+      "sitemap": true
+    },
+    {
+      "slug": "homepage-structure-that-converts-visitors-into-customers",
+      "status": "INDEX",
+      "sitemap": true
+    },
+    {
+      "slug": "how-to-audit-slow-wordpress-site",
+      "status": "INDEX",
+      "sitemap": true
+    },
+    {
+      "slug": "how-to-build-a-small-business-website-that-converts",
+      "status": "INDEX",
+      "sitemap": true
+    },
+    {
+      "slug": "how-to-make-your-website-load-fast",
+      "status": "INDEX",
+      "sitemap": true
+    },
+    {
+      "slug": "how-to-plan-website-copy-before-hiring-developer",
+      "status": "INDEX",
+      "sitemap": true
+    },
+    {
+      "slug": "jluxe-medical-aesthetics-case-study",
+      "status": "INDEX",
+      "sitemap": true
+    },
+    {
+      "slug": "jluxe-website-redesign-series-announcement",
+      "status": "INDEX",
+      "sitemap": true
+    },
+    {
+      "slug": "landing-page-wireframe-local-service-business",
+      "status": "INDEX",
+      "sitemap": true
+    },
+    {
+      "slug": "local-seo-for-small-business-google-maps-ranking-guide",
+      "status": "INDEX",
+      "sitemap": true
+    },
+    {
+      "slug": "measure-ai-search-visibility-ga4-search-console",
+      "status": "INDEX",
+      "sitemap": true
+    },
+    {
+      "slug": "namecheap-domain-and-hosting-guide",
+      "status": "INDEX",
+      "sitemap": true
+    },
+    {
+      "slug": "small-business-website-redesign-checklist",
+      "status": "INDEX",
+      "sitemap": true
+    },
+    {
+      "slug": "small-business-website-seo-checklist",
+      "status": "INDEX",
+      "sitemap": true
+    },
+    {
+      "slug": "stop-using-cheap-hosting",
+      "status": "INDEX",
+      "sitemap": true
+    },
+    {
+      "slug": "website-launch-checklist-for-small-businesses",
+      "status": "INDEX",
+      "sitemap": true
+    },
+    {
+      "slug": "website-platform-comparison-small-business",
+      "status": "INDEX",
+      "sitemap": true
+    },
+    {
+      "slug": "website-redesign-cost-breakdown-nigeria",
+      "status": "INDEX",
+      "sitemap": true
+    },
+    {
+      "slug": "website-tracking-setup-for-small-businesses",
+      "status": "INDEX",
+      "sitemap": true
+    },
+    {
+      "slug": "why-your-website-isnt-getting-leads",
+      "status": "INDEX",
+      "sitemap": true
+    },
+    {
+      "slug": "ga4-meta-tiktok-clarity-setup-guide",
+      "status": "REDIRECT",
+      "sitemap": false,
+      "destination": "/blog/website-tracking-setup-for-small-businesses/"
+    },
+    {
+      "slug": "local-seo-basics-service-business-lagos",
+      "status": "REDIRECT",
+      "sitemap": false,
+      "destination": "/blog/local-seo-for-small-business-google-maps-ranking-guide/"
+    },
+    {
+      "slug": "small-business-website-launch-qa-checklist",
+      "status": "REDIRECT",
+      "sitemap": false,
+      "destination": "/blog/website-launch-checklist-for-small-businesses/"
+    }
   ]
 }
