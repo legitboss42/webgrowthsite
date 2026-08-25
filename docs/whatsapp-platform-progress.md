@@ -6,9 +6,17 @@
 
 ## Current phase
 
-**Increment 4 (Contacts) — COMPLETE and verified.** This closes the first milestone
-except Templates and Quick Replies. Next up: Increment 5 (Templates or Quick Replies).
+**Increment 5 (Quick Replies) — COMPLETE and verified.** The first milestone is now
+done except Templates. Next up: Templates (blocked on an env var — see "Next exact task").
 Nothing is in progress mid-edit.
+
+## Migrations must also be applied to Supabase by hand
+
+Increment 5 added `supabase/migrations/202608250001_whatsapp_quick_replies.sql`. There is
+no migration runner wired into the build or deploy, so **the SQL file alone does not create
+the table** — it has to be run against the Supabase project (SQL editor or CLI). Until it
+is, `/admin/whatsapp/quick-replies` reads an empty list and saving returns an error.
+Record every new migration in `docs/WHATSAPP-INTEGRATION.md` under "Database" as well.
 
 ## NEVER run `npm run build` while `npm run dev` is running
 
@@ -147,9 +155,34 @@ Growth Ledger, light/paper identity. Tailwind v4 `@theme` in `src/app/globals.cs
   `whatsapp_contacts` with real columns only, temperature filter chips with counts, a
   no-JavaScript search, desktop table + mobile cards, and a link into each contact's
   conversation where one exists.
-- **Increment 5 — Templates or Quick Replies. ← NEXT.** See "Next exact task".
+- **Increment 5 — Quick Replies. ✅ COMPLETE (verified).** New `whatsapp_quick_replies`
+  table, a manage page with create/edit/delete, and insert-into-composer buttons in the
+  inbox. First admin write path beyond replies.
+- **Increment 6 — Templates. ← NEXT.** See "Next exact task"; needs a Meta env var.
 - **Later** — Campaigns, Automations, deep Analytics, Phone Numbers, Settings
   (each its own increment, additive migrations only, honest empty states until wired).
+
+## Increment 5 notes
+
+- **Migration** `202608250001_whatsapp_quick_replies.sql`: one new table, `if not exists`
+  throughout, RLS enabled with **no policies** (service-role only), CHECK constraints on
+  shortcut format and title/body length. Additive and reversible — it creates nothing that
+  existed and alters no existing table. **It still has to be run against Supabase by hand.**
+- **Validation is duplicated on purpose.** `quickRepliesModel.ts` mirrors the SQL CHECK
+  constraints so the user sees "Keep the title under 80 characters" instead of a Postgres
+  error. If you change the constraint, change the model (and its tests) in the same commit.
+- **Write path** is `/api/admin/whatsapp/quick-replies` (POST/PATCH/DELETE), following the
+  reply route exactly: `hasWhatsAppAdminAccess` → 401, then `isSameOriginMutation` → 403
+  for CSRF. **Copy that pair into every future mutation route.**
+- **Postgres error text never reaches the browser.** `mutateWhatsAppRest` logs the real
+  code/message server-side and returns a generic "The change could not be saved.", except
+  unique violations (`23505`) which map to a clear duplicate-shortcut message.
+- **Quick replies only fill the textarea.** `insertQuickReply` appends to the composer's
+  local state; sending still goes through the existing reply route, the 24-hour window, and
+  the sender-configured check. No new send path was created.
+- `ReplyComposer`'s `quickReplies` prop is optional and defaults to `[]`, so the component
+  works anywhere it is mounted without one.
+
 
 ## Increment 4 notes
 
@@ -239,6 +272,12 @@ Growth Ledger, light/paper identity. Tailwind v4 `@theme` in `src/app/globals.cs
 - `src/app/admin/whatsapp/contactsModel.ts` — contact model + injection-safe search helpers
 - `src/app/admin/whatsapp/contactsModel.test.ts` — 12 tests incl. a search-injection test
 - `src/app/admin/whatsapp/contacts/page.tsx` — the contact directory
+- `src/app/admin/whatsapp/quickRepliesModel.ts` — quick-reply model + validation
+- `src/app/admin/whatsapp/quickRepliesModel.test.ts` — 9 tests for slug/validation rules
+- `src/app/admin/whatsapp/QuickReplyManager.tsx` — create/edit/delete UI (client)
+- `src/app/admin/whatsapp/quick-replies/page.tsx` — the quick-replies page
+- `src/app/api/admin/whatsapp/quick-replies/route.ts` — POST/PATCH/DELETE, auth + CSRF
+- `supabase/migrations/202608250001_whatsapp_quick_replies.sql` — the new table
 
 ## Files modified (this redesign)
 
@@ -262,21 +301,32 @@ Growth Ledger, light/paper identity. Tailwind v4 `@theme` in `src/app/globals.cs
 - `src/lib/route-governance.json` — added `/admin/whatsapp/conversations/` (NOINDEX) and
   retitled the root entry. Scheduler entries untouched.
 
-## Verification (Increments 1–4, all green)
+## Verification (Increments 1–5, all green)
 
-- `npx tsx --test src/app/admin/whatsapp/*.test.ts src/components/whatsapp/nav.test.ts src/lib/whatsapp/*.test.ts` → **89/89 pass**
+- `npx tsx --test src/app/admin/whatsapp/*.test.ts src/components/whatsapp/nav.test.ts src/lib/whatsapp/*.test.ts` → **98/98 pass**
 - `npx tsc --noEmit` → **clean**
-- `npx eslint src/components/whatsapp src/components/SiteChrome.tsx src/app/admin/whatsapp src/app/layout.tsx` → **0 problems**
+- `npx eslint src/components/whatsapp src/components/SiteChrome.tsx src/app/admin/whatsapp src/app/api/admin/whatsapp src/app/layout.tsx` → **0 problems**
   (do NOT judge by bare `npm run lint`: it walks `.codex-temp/` and reports ~814 pre-existing findings)
 - `npm run build` → **✓ Compiled successfully**; "Sitemap validation passed / Governed
-  routes: 87"; `/admin/whatsapp`, `/admin/whatsapp/conversations`,
-  `/admin/whatsapp/contacts`, all 4 admin API routes and the webhook present; public pages
-  still prerendered static. (A cold build after `rm -rf .next` takes ~4.5 min.)
-- Dev smoke test on a clean `.next`: contacts 200, contacts with `?temp=HOT&q=…` 200,
-  contacts with deliberately hostile `temp`/`q` values 200 (filters neutralised, no 500),
-  inbox 200, overview 200, `/` 200. Unauthenticated requests render the unlock form.
+  routes: 88"; all 4 console pages (`/admin/whatsapp`, `/conversations`, `/contacts`,
+  `/quick-replies`) and all 5 admin API routes + the webhook present; public pages still
+  prerendered static. (A cold build after `rm -rf .next` takes ~3.5–4.5 min.)
+- Dev smoke test on a clean `.next`: quick-replies page 200, contacts 200 (incl.
+  `?temp=HOT&q=…` and deliberately hostile `temp`/`q`), inbox 200, overview 200, `/` 200.
+- **Runtime auth check:** unauthenticated `POST`/`DELETE` to
+  `/api/admin/whatsapp/quick-replies/` → **401**. Unauthenticated page requests render the
+  unlock form.
 - `git status` → only WhatsApp-redesign files. No TikTok/scheduler file, no
   `package-lock.json`, no `.codex-temp` change.
+
+## Trailing slashes on API fetches
+
+`next.config` sets **`trailingSlash: true`**, so `/api/admin/whatsapp/foo` 308-redirects to
+`/api/admin/whatsapp/foo/`. A 308 preserves method and body and `fetch` follows it, which is
+why the existing `ReplyComposer` calls work without the slash — but it wastes a round trip.
+**New client fetches should include the trailing slash.** The existing reply/audio fetch
+strings were deliberately left unchanged: they work, and `dashboard.test.ts` asserts on them.
+
 
 ## Known issues / watch-outs
 
@@ -319,26 +369,22 @@ WhatsApp-redesign files by explicit path. Never `git add -A` / `commit -am`.
 
 ## Next exact task
 
-Increment 5 — Templates and Quick Replies (pick one; Quick Replies is the smaller win):
+Increment 6 — Templates (read-only first):
 
-**Quick Replies** (no Meta dependency, so it can ship first):
-1. New additive migration `supabase/migrations/<timestamp>_whatsapp_quick_replies.sql`:
-   `whatsapp_quick_replies` (id, shortcut text unique, body text, created_at, updated_at),
-   `enable row level security` and NO policies, matching the existing tables.
-2. `/admin/whatsapp/quick-replies` page: list, create, edit, delete via a server action or
-   an `/api/admin/whatsapp/quick-replies` route — reuse `hasWhatsAppAdminAccess`.
-3. Surface them in `ReplyComposer` as insert-into-textarea buttons (client-side only, no
-   change to how sending works).
+**Blocker to resolve first:** fetching approved templates needs the WhatsApp Business
+Account ID, and **there is no `WHATSAPP_BUSINESS_ACCOUNT_ID` env var in this codebase**
+(only `WHATSAPP_ACCESS_TOKEN`, `WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_API_VERSION` /
+`WHATSAPP_GRAPH_API_VERSION`, `WHATSAPP_WEBHOOK_VERIFY_TOKEN` / `WHATSAPP_VERIFY_TOKEN`,
+`META_APP_SECRET`). Ask the user to add it, or ship the page with an honest
+"not configured" state — do not invent template data either way.
 
-**Templates** (read-only first): fetch approved templates from the Graph API
-`/{WHATSAPP_BUSINESS_ACCOUNT_ID}/message_templates` server-side. NOTE: there is currently
-no `WHATSAPP_BUSINESS_ACCOUNT_ID` env var — confirm it exists before promising the page,
-and show an honest "not configured" state if it is missing.
+1. Server-side fetch `https://graph.facebook.com/{version}/{businessAccountId}/message_templates`
+   using the existing token. Never call Meta from the browser.
+2. `/admin/whatsapp/templates` lists name, language, category, status, and the body text.
+3. **Register `/admin/whatsapp/templates/` in `src/lib/route-governance.json`** or the
+   build fails; flip Templates to `"live"` in `nav.ts` and update the live-routes
+   assertion in `nav.test.ts`.
+4. Re-run the full verification list above (stop dev before building), update this doc,
+   checkpoint-commit.
 
-For either one, remember:
-- **Register the new route in `src/lib/route-governance.json`** or the build fails.
-- Flip its `status` to `"live"` in `nav.ts` and update the "only routes that exist today
-  are marked live" assertion in `nav.test.ts`.
-- Re-run the full verification list above (stop dev before building), update this doc,
-  checkpoint-commit.
 

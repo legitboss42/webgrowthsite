@@ -4,12 +4,14 @@ import { useEffect, useMemo, useRef, useState, useTransition, type FormEvent } f
 import { useRouter } from "next/navigation";
 import { chooseWhatsAppRecordingMimeType, getWhatsAppAudioFilename, isSupportedWhatsAppAudioMimeType } from "@/lib/whatsapp/audio";
 import type { WhatsAppReplyComposerState } from "./dashboard";
+import type { WhatsAppQuickReply } from "./quickRepliesModel";
 
 type ReplyComposerProps = {
   conversationId: string;
   waId: string;
   initialText?: string;
   composerState: WhatsAppReplyComposerState;
+  quickReplies?: WhatsAppQuickReply[];
 };
 
 const reasonCopy: Partial<Record<NonNullable<WhatsAppReplyComposerState["reason"]>, string>> = {
@@ -23,7 +25,13 @@ function getSupportedRecordingType() {
   return chooseWhatsAppRecordingMimeType((type) => MediaRecorder.isTypeSupported(type));
 }
 
-export default function ReplyComposer({ conversationId, waId, initialText = "", composerState }: ReplyComposerProps) {
+export default function ReplyComposer({
+  conversationId,
+  waId,
+  initialText = "",
+  composerState,
+  quickReplies = [],
+}: ReplyComposerProps) {
   const router = useRouter();
   const [message, setMessage] = useState(initialText);
   const [feedback, setFeedback] = useState<string | null>(null);
@@ -190,6 +198,15 @@ export default function ReplyComposer({ conversationId, waId, initialText = "", 
     setRecordingState("ready");
   }
 
+  /** Quick replies only fill the textarea — sending stays the normal reply flow. */
+  function insertQuickReply(body: string) {
+    setFeedback(null);
+    setMessage((current) => {
+      const trimmed = current.trimEnd();
+      return trimmed ? `${trimmed}\n\n${body}` : body;
+    });
+  }
+
   return (
     <form onSubmit={handleSubmit} className="p-3 sm:p-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -216,6 +233,29 @@ export default function ReplyComposer({ conversationId, waId, initialText = "", 
         className="mt-3 w-full rounded-lg border border-rule bg-paper px-3.5 py-2.5 text-sm text-ink outline-none transition placeholder:text-ink-faint/70 focus:border-ledger-bright focus:ring-2 focus:ring-ledger-bright/20 disabled:cursor-not-allowed disabled:bg-paper-sunk disabled:opacity-70"
         placeholder="Type a careful reply. Avoid pricing, scope, timeline, or contract commitments unless you are intentionally handling them yourself."
       />
+
+      {quickReplies.length ? (
+        <div className="mt-3">
+          <p className="text-[0.65rem] font-semibold uppercase tracking-[.14em] text-ink-faint">
+            Quick replies
+          </p>
+          <div className="mt-1.5 flex flex-wrap gap-1.5">
+            {quickReplies.map((reply) => (
+              <button
+                key={reply.id}
+                type="button"
+                onClick={() => insertQuickReply(reply.body)}
+                disabled={!composerState.enabled || isPending}
+                title={reply.body}
+                className="inline-flex items-center gap-1.5 rounded-full border border-rule bg-paper-raised px-2.5 py-1 text-xs text-ink-soft transition hover:border-ledger hover:text-ledger disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                <span className="font-mono text-[0.65rem] text-ink-faint">/{reply.shortcut}</span>
+                <span className="max-w-[10rem] truncate">{reply.title}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      ) : null}
 
       <div className="mt-3 rounded-lg border border-rule bg-paper p-3">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">

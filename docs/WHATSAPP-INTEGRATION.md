@@ -60,6 +60,14 @@ Migration `202608240001_whatsapp_audio_messages.sql` adds audio metadata columns
 - `media_voice`
 - `media_filename`
 
+Migration `202608250001_whatsapp_quick_replies.sql` creates `whatsapp_quick_replies` — saved snippets the team inserts into an inbox reply:
+
+- `shortcut` — unique slug, constrained to `^[a-z0-9][a-z0-9-]{0,31}$`
+- `title` — 1–80 characters
+- `body` — 1–1024 characters
+
+The table is additive and touches nothing that already existed. Its CHECK constraints are mirrored in `src/app/admin/whatsapp/quickRepliesModel.ts`, so the UI rejects bad input with a readable message; change both together.
+
 The schema uses RLS, unique constraints, and indexes for contact lookup, conversations, events, and messages. Do not add a public policy for these tables. The service-role key is used only in the server-side webhook and dashboard server component.
 
 ## Admin inbox, notifications, and voice notes

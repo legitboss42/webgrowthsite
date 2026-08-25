@@ -71,7 +71,7 @@ export const WHATSAPP_NAV_SECTIONS: WhatsAppNavSection[] = [
         href: `${WHATSAPP_CONSOLE_ROOT}/quick-replies`,
         icon: "quickReplies",
         description: "Saved snippets for fast, consistent answers.",
-        status: "soon",
+        status: "live",
       },
     ],
   },

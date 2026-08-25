@@ -53,6 +53,7 @@
     { "path": "/admin/whatsapp/", "status": "NOINDEX", "sitemap": false, "reason": "Internal WhatsApp console overview" },
     { "path": "/admin/whatsapp/conversations/", "status": "NOINDEX", "sitemap": false, "reason": "Internal WhatsApp lead inbox" },
     { "path": "/admin/whatsapp/contacts/", "status": "NOINDEX", "sitemap": false, "reason": "Internal WhatsApp contact directory" },
+    { "path": "/admin/whatsapp/quick-replies/", "status": "NOINDEX", "sitemap": false, "reason": "Internal WhatsApp saved reply snippets" },
     { "path": "/connect/tiktok/", "status": "NOINDEX", "sitemap": false, "reason": "Internal TikTok authorization utility page" },
     { "path": "/connect/tiktok/callback/", "status": "NOINDEX", "sitemap": false, "reason": "TikTok OAuth callback route" },
     { "path": "/scheduler/", "status": "INDEX", "sitemap": true, "reason": "Public TikTok scheduler product and rollout page" },

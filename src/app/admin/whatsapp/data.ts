@@ -65,6 +65,67 @@ export function parseWhatsAppContentRangeTotal(value: string | null | undefined)
   return Number.isFinite(parsed) ? parsed : null;
 }
 
+export type WhatsAppMutationResult =
+  | { ok: true; rows: Array<Record<string, unknown>> }
+  | { ok: false; status: number; code?: string; message: string };
+
+/**
+ * Service-role write against PostgREST. Callers are responsible for having already
+ * checked admin access and request origin.
+ */
+export async function mutateWhatsAppRest(input: {
+  method: "POST" | "PATCH" | "DELETE";
+  pathAndQuery: string;
+  body?: unknown;
+}): Promise<WhatsAppMutationResult> {
+  const config = getWhatsAppSupabaseConfig();
+  if (!config) {
+    return { ok: false, status: 503, message: "WhatsApp storage is not configured." };
+  }
+
+  try {
+    const response = await fetch(`${config.url}/rest/v1/${input.pathAndQuery}`, {
+      method: input.method,
+      headers: {
+        apikey: config.key,
+        Authorization: `Bearer ${config.key}`,
+        "Content-Type": "application/json",
+        Prefer: "return=representation",
+      },
+      body: input.body === undefined ? undefined : JSON.stringify(input.body),
+      cache: "no-store",
+    });
+
+    const payload = (await response.json().catch(() => null)) as unknown;
+
+    if (!response.ok) {
+      const error = (payload || {}) as { code?: string; message?: string };
+      console.error("WhatsApp write rejected", {
+        status: response.status,
+        code: error.code,
+        message: error.message,
+      });
+      return {
+        ok: false,
+        status: response.status,
+        code: typeof error.code === "string" ? error.code : undefined,
+        // Postgres error text can name columns and constraints, so it is logged
+        // rather than returned to the browser.
+        message: "The change could not be saved.",
+      };
+    }
+
+    return { ok: true, rows: Array.isArray(payload) ? (payload as Array<Record<string, unknown>>) : [] };
+  } catch (error) {
+    console.error("Unable to write WhatsApp rows", error);
+    return { ok: false, status: 502, message: "The change could not be saved." };
+  }
+}
+
+/** Postgres unique-violation code, used to report duplicate shortcuts clearly. */
+export const POSTGRES_UNIQUE_VIOLATION = "23505";
+
+
 export function getWhatsAppSenderConfig() {
   const env = process.env;
   return {

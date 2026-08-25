@@ -15,6 +15,11 @@ import {
   type WhatsAppLeadMessage,
   type WhatsAppLeadRow,
 } from "../dashboard";
+import {
+  normalizeWhatsAppQuickReplyRow,
+  sortWhatsAppQuickReplies,
+  type WhatsAppQuickReply,
+} from "../quickRepliesModel";
 
 export const metadata: Metadata = {
   title: "WhatsApp Conversations | Web Growth",
@@ -84,6 +89,14 @@ async function getConversationMessages(conversationId: string | undefined): Prom
 function formatDateTime(value: string | undefined) {
   if (!value) return "—";
   return new Date(value).toLocaleString();
+}
+
+async function getQuickReplies(): Promise<WhatsAppQuickReply[]> {
+  const rows = await readWhatsAppRows<Record<string, unknown>>(
+    "whatsapp_quick_replies?select=id,shortcut,title,body&order=shortcut.asc",
+  );
+  if (!rows) return [];
+  return sortWhatsAppQuickReplies(rows.map(normalizeWhatsAppQuickReplyRow));
 }
 
 function formatTime(value: string | undefined) {
@@ -178,6 +191,7 @@ export default async function WhatsAppConversationsPage({
     : "ALL";
 
   const leadRows = await getLeads();
+  const quickReplies = await getQuickReplies();
   const initialModel = buildWhatsAppDashboardModel({
     leads: leadRows,
     messages: [],
@@ -445,6 +459,7 @@ export default async function WhatsAppConversationsPage({
                 conversationId={lead.id}
                 waId={lead.wa_id}
                 composerState={composerState}
+                quickReplies={quickReplies}
               />
             </div>
           </>
