@@ -30,14 +30,14 @@ export const WHATSAPP_NAV_SECTIONS: WhatsAppNavSection[] = [
     items: [
       {
         label: "Overview",
-        href: `${WHATSAPP_CONSOLE_ROOT}/overview`,
+        href: `${WHATSAPP_CONSOLE_ROOT}`,
         icon: "overview",
         description: "Connection health and message activity at a glance.",
-        status: "soon",
+        status: "live",
       },
       {
         label: "Conversations",
-        href: `${WHATSAPP_CONSOLE_ROOT}`,
+        href: `${WHATSAPP_CONSOLE_ROOT}/conversations`,
         icon: "conversations",
         description: "Inbound WhatsApp leads, full threads, and replies.",
         status: "live",

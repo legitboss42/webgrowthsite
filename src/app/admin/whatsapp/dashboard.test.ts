@@ -16,7 +16,8 @@ const messages = [
   { id: "m2", conversation_id: "hot", direction: "outbound" as const, message_text: "Thanks, I’ve got the details. I’m reviewing the scope so I can give you an accurate answer rather than guessing.", message_timestamp: "2026-08-23T22:55:00.000Z" },
   { id: "m3", whatsapp_message_id: "wamid.inbound-warm", conversation_id: "warm", direction: "inbound" as const, message_text: "Can I see your portfolio?", message_timestamp: "2026-08-23T22:45:00.000Z" },
 ];
-const pagePath = new URL("./page.tsx", import.meta.url);
+const pagePath = new URL("./conversations/page.tsx", import.meta.url);
+const overviewPagePath = new URL("./page.tsx", import.meta.url);
 const replyComposerPath = new URL("./ReplyComposer.tsx", import.meta.url);
 
 test("returns only hot WhatsApp leads for the HOT filter", () => {
@@ -119,6 +120,10 @@ test("WhatsApp admin page allows the existing owner scheduler session as an inte
 
   assert.match(source, /hasWhatsAppAdminAccess/);
   assert.match(source, /ReplyComposer/);
+});
+
+test("every WhatsApp console page is gated behind the same admin access check", () => {
+  assert.match(readFileSync(overviewPagePath, "utf8"), /hasWhatsAppAdminAccess/);
 });
 
 test("WhatsApp admin page loads and renders protected audio messages", () => {

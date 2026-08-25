@@ -38,9 +38,14 @@ test("child routes stay active for their own section", () => {
 });
 
 test("the inbox route resolves to the Conversations nav entry", () => {
-  const item = findWhatsAppNavItem("/admin/whatsapp/?filter=HOT&lead=1");
+  const item = findWhatsAppNavItem("/admin/whatsapp/conversations/?filter=HOT&lead=1");
   assert.equal(item?.label, "Conversations");
-  assert.equal(getWhatsAppPageMeta("/admin/whatsapp/").title, "Conversations");
+  assert.equal(getWhatsAppPageMeta("/admin/whatsapp/conversations/").title, "Conversations");
+});
+
+test("the console root resolves to Overview, not Conversations", () => {
+  assert.equal(getWhatsAppPageMeta("/admin/whatsapp").title, "Overview");
+  assert.equal(getWhatsAppPageMeta("/admin/whatsapp/").title, "Overview");
 });
 
 test("unknown console routes fall back to a neutral page title", () => {
@@ -49,7 +54,7 @@ test("unknown console routes fall back to a neutral page title", () => {
 
 test("only routes that exist today are marked live", () => {
   const live = WHATSAPP_NAV_ITEMS.filter((item) => item.status === "live").map((item) => item.href);
-  assert.deepEqual(live, ["/admin/whatsapp"]);
+  assert.deepEqual(live, ["/admin/whatsapp", "/admin/whatsapp/conversations"]);
 });
 
 test("sender status text reflects real configuration only", () => {

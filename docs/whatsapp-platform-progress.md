@@ -6,8 +6,19 @@
 
 ## Current phase
 
-**Increment 1 (foundation shell + restyled inbox) — COMPLETE and verified.**
-Next up: Increment 2 (Overview dashboard). Nothing is in progress mid-edit.
+**Increment 2 (Overview dashboard + route split) — COMPLETE and verified.**
+Next up: Increment 3 (Conversations polish — 3-column desktop / one-panel mobile).
+Nothing is in progress mid-edit.
+
+## CRITICAL build rule — register every new page
+
+`scripts/validate-sitemap.mjs` runs inside `npm run build` and walks every
+`src/app/**/page.tsx`. Line ~156: **`if (!governedPageRoutes.has(route)) fail("Ungoverned
+App Router page")`**. So **every new page you add MUST get an entry in
+`src/lib/route-governance.json`** or the build fails. Console pages use:
+`{ "path": "/admin/whatsapp/<name>/", "status": "NOINDEX", "sitemap": false, "reason": "..." }`.
+Adding WhatsApp entries there is safe — `publicPages.test.ts` only asserts the
+scheduler entries, which must not be touched.
 
 ## Where this work lives (IMPORTANT for resume)
 
@@ -113,15 +124,38 @@ Growth Ledger, light/paper identity. Tailwind v4 `@theme` in `src/app/globals.cs
   close-on-navigate); inbox restyled dark→light Growth Ledger; new mobile card list for
   leads (the 980px table now only loads at `lg+`); marketing chrome suppressed on
   `/admin`. Zero behaviour change.
-- **Increment 2 — Overview dashboard.** Real metric cards + hand-rolled SVG activity
-  chart + recent conversations + phone-number card (real fields only) + quick actions.
-  Route reshuffle: `/admin/whatsapp` = overview, inbox → `/admin/whatsapp/conversations`
-  (update `nav.ts` hrefs/status, `getFilterHref`, `getLeadHref` together).
-- **Increment 3 — Conversations polish.** 3-column desktop / one-panel-at-a-time mobile
-  using the already-working thread + composer + auto-refresh.
+- **Increment 2 — Overview dashboard. ✅ COMPLETE (verified).** Inbox moved to
+  `/admin/whatsapp/conversations`; the root is now the Overview. Real metric cards,
+  a hand-rolled inline-SVG sent-vs-received chart (14 UTC days), integration status
+  from server config, recent conversations, quick actions into filtered inbox views,
+  and an honest "not built yet" campaigns card. Counts that cannot be read render as
+  "—", never a fabricated 0.
+- **Increment 3 — Conversations polish. ← NEXT.** 3-column desktop / one-panel-at-a-time
+  mobile using the already-working thread + composer + auto-refresh.
 - **Increment 4 — Contacts** (real data).
 - **Later** — Templates, Quick Replies, Campaigns, Automations, deep Analytics
   (each its own increment, additive migrations only, honest empty states until wired).
+
+## Increment 2 notes
+
+- **Data layer:** `src/app/admin/whatsapp/data.ts` centralises service-role PostgREST
+  reads. `countWhatsAppRows` uses `Prefer: count=exact` + `Range: 0-0` and reads the
+  total from `Content-Range`. Read failures return **`null`, not 0**, so the UI can
+  distinguish "unavailable" from a real zero — `formatWhatsAppMetric` renders `null` as "—".
+- **Chart:** `overview.ts` holds pure geometry (`buildWhatsAppActivitySeries`,
+  `buildWhatsAppChartGeometry`) with 11 tests, including the all-zero series (no divide
+  by zero), single-point, and empty cases. Bucketing is by **UTC day** — matching the
+  `timestamptz` columns and keeping tests deterministic regardless of machine timezone.
+- **Env name gotcha:** the webhook signature secret is **`META_APP_SECRET`**, not
+  `WHATSAPP_APP_SECRET`. Verify a name against its consumer before reporting on it.
+- **Phone-number facts intentionally absent.** Quality rating, messaging limits, and the
+  sender's display number are Graph API data; the Overview shows only what is verifiable
+  from config (credentials present, verify token, app secret, API version, last activity).
+- **Dev-server flake:** right after moving a route file, Next's dev bundler can throw
+  `Could not find the module ... segment-explorer-node.js#SegmentViewNode` and 500 once.
+  It self-heals on the next request (verified 200 after). The production build is the
+  authoritative check.
+
 
 ## Files created (this redesign)
 
@@ -132,44 +166,68 @@ Growth Ledger, light/paper identity. Tailwind v4 `@theme` in `src/app/globals.cs
 - `src/components/whatsapp/WhatsAppShell.tsx` — the responsive console shell (client)
 - `src/components/SiteChrome.tsx` — `isConsoleRoute`, `PublicChromeOnly`, `SiteMain`
 - `src/app/admin/whatsapp/layout.tsx` — auth-aware console layout
+- `src/app/admin/whatsapp/data.ts` — service-role PostgREST reads + exact-count helper
+- `src/app/admin/whatsapp/overview.ts` — pure overview model + hand-rolled SVG geometry
+- `src/app/admin/whatsapp/overview.test.ts` — 11 tests for the model and chart maths
+- `src/app/admin/whatsapp/conversations/page.tsx` — the inbox (moved from the root, via `git mv`)
 
 ## Files modified (this redesign)
 
-- `src/app/admin/whatsapp/page.tsx` — restyled to light theme + mobile card list.
-  All data fetching, filters, model building, and composer wiring are byte-for-byte
-  the same logic as before.
+- `src/app/admin/whatsapp/page.tsx` — **now the Overview dashboard** (was the inbox).
+- `src/app/admin/whatsapp/conversations/page.tsx` — restyled to light theme + mobile card
+  list; imports moved to `../`; `getFilterHref`/`getLeadHref` now point at
+  `/admin/whatsapp/conversations/`; the two fetches now call `readWhatsAppRows` from
+  `data.ts` (same throw→log→empty-array behaviour). Filters, model building, and composer
+  wiring are otherwise unchanged.
 - `src/app/admin/whatsapp/ReplyComposer.tsx` — **className strings only.**
 - `src/app/admin/whatsapp/AutoRefresh.tsx` — **className strings only** (the two
   returned JSX blocks). No exported function or string was altered, so its tests hold.
+- `src/app/admin/whatsapp/dashboard.test.ts` — the source-reading assertions were
+  repointed from `./page.tsx` to `./conversations/page.tsx` (every assertion kept), plus a
+  new test asserting the Overview page is gated by `hasWhatsAppAdminAccess` too.
+- `src/components/whatsapp/nav.ts` + `nav.test.ts` — Overview is live at the console root,
+  Conversations is live at `/conversations`.
 - `src/app/layout.tsx` — two surgical edits: one import line, and wrapping
   `Header`/`Footer`/`main`. The TikTok pixel, GTM, Clarity, and analytics blocks were
   not touched.
+- `src/lib/route-governance.json` — added `/admin/whatsapp/conversations/` (NOINDEX) and
+  retitled the root entry. Scheduler entries untouched.
 
-## Verification (Increment 1, all green)
+## Verification (Increments 1–2, all green)
 
-- `npx tsx --test src/app/admin/whatsapp/dashboard.test.ts src/app/admin/whatsapp/AutoRefresh.test.ts src/components/whatsapp/nav.test.ts` → **26/26 pass**
-- `npx tsx --test src/lib/whatsapp/*.test.ts` → **37/37 pass**
+- `npx tsx --test src/app/admin/whatsapp/*.test.ts src/components/whatsapp/nav.test.ts src/lib/whatsapp/*.test.ts` → **76/76 pass**
 - `npx tsc --noEmit` → **clean**
 - `npx eslint src/components/whatsapp src/components/SiteChrome.tsx src/app/admin/whatsapp src/app/layout.tsx` → **0 problems**
   (do NOT judge by bare `npm run lint`: it walks `.codex-temp/` and reports ~814 pre-existing findings)
-- `npm run build` → **✓ Compiled successfully**; `/admin/whatsapp` + all 4 admin API
-  routes + the webhook all present; public pages still prerendered static.
-- `git status` → only the 11 files listed above. No TikTok/scheduler file, no
+- `npm run build` → **✓ Compiled successfully**; "Sitemap validation passed / Governed
+  routes: 86"; `/admin/whatsapp`, `/admin/whatsapp/conversations`, all 4 admin API routes
+  and the webhook present; public pages still prerendered static.
+- Dev smoke test: `/admin/whatsapp/` 200, `/admin/whatsapp/conversations/` 200, `/` 200;
+  unauthenticated requests correctly render the unlock form on console routes.
+- `git status` → only WhatsApp-redesign files. No TikTok/scheduler file, no
   `package-lock.json`, no `.codex-temp` change.
 
 ## Known issues / watch-outs
 
-- Test invariant: `dashboard.test.ts` reads `page.tsx` source and asserts it matches
-  `/hasWhatsAppAdminAccess/`. Keep that reference in `page.tsx`.
+- Test invariant: `dashboard.test.ts` reads **`./conversations/page.tsx`** and asserts it
+  contains `hasWhatsAppAdminAccess`, `ReplyComposer`, the full `media_*` select string,
+  `/api/admin/whatsapp/media/`, and `<audio`. Keep those inline in that page — moving the
+  select string into `data.ts` would break the test.
 - `AutoRefresh.test.ts` tests pure helpers, not JSX — safe to restyle the component,
   but do not change the strings returned by `getWhatsAppNotificationStatusText`.
-- Not yet reviewed in a real browser (Increment 1 was verified by build/tests/lint).
-  Dev server: `npm run dev`, then `/admin/whatsapp`. Worth eyeballing the mobile drawer
-  and the lead card list on a narrow viewport.
+- **Old inbox bookmarks** (`/admin/whatsapp/?filter=HOT&lead=…`) now land on the Overview
+  and the params are ignored. Deliberate: the brief lists both routes. Add a redirect only
+  if that becomes annoying in practice.
+- **Cosmetic, pre-existing:** the locked screen says "Unlock the voice tool" because
+  `InternalUtilityUnlockForm` is shared with the text-to-speech utility. Not a regression.
+  Fixing it properly means a per-utility copy prop on that shared component — ask first.
+- Not yet reviewed in a real browser. Dev server: `npm run dev`, then `/admin/whatsapp`.
+  Worth eyeballing the mobile drawer, the lead card list, and the chart on a narrow viewport.
 - No `typecheck` npm script → use `npx tsc --noEmit`.
 - Tooling note: Claude Code's auto permission mode classifies each Bash command with a
-  model; when that model 503s, Bash is blocked. Allow-listed commands (e.g.
-  `Bash(git rev-list *)`, `Bash(npm i *)` in `~/.claude/settings.json`) bypass it.
+  model; when that model 503s, Bash is blocked. Allow-listed commands in
+  `~/.claude/settings.json` bypass it (the verify commands were added there on 2026-08-25).
+
 
 ## DO NOT TOUCH (Codex / TikTok scheduler)
 
@@ -190,12 +248,12 @@ WhatsApp-redesign files by explicit path. Never `git add -A` / `commit -am`.
 
 ## Next exact task
 
-Increment 2 — the Overview dashboard:
-1. Create `src/app/admin/whatsapp/conversations/page.tsx` by moving the current inbox
-   there; update `getFilterHref`/`getLeadHref` to `/admin/whatsapp/conversations/`.
-2. Make `/admin/whatsapp/page.tsx` the Overview (real metrics from
-   `whatsapp_conversations` / `whatsapp_messages` / `whatsapp_contacts`; honest empty
-   states; hand-rolled inline SVG chart; no fabricated Meta metrics).
-3. Update `nav.ts`: Overview → `live` at the root, Conversations → `/conversations`,
-   and update `nav.test.ts`'s "only routes that exist today are marked live" assertion.
-4. Re-run the full verification list above, then update this doc and checkpoint-commit.
+Increment 3 — Conversations polish:
+1. Rework `/admin/whatsapp/conversations` into the mockup's 3-column desktop layout
+   (list | thread | contact details) and one-panel-at-a-time on mobile.
+2. Keep every existing behaviour: 7 filters, `?filter=`/`?lead=` params, message thread,
+   audio playback, `ReplyComposer` (text + voice), `AutoRefresh` polling and alerts.
+3. Chat-bubble thread styling; the contact panel uses only real columns
+   (`website`, `source`, `intent`, `status`, `assigned_to`, `lead_temperature`).
+   Notes/labels need an additive migration — defer to their own increment, do not fake them.
+4. Re-run the full verification list above, update this doc, checkpoint-commit.
