@@ -9,12 +9,21 @@ import type { WhatsAppIconName } from "./icons";
  */
 export type WhatsAppNavStatus = "live" | "soon";
 
+/**
+ * "scroll" pages flow down the page normally. "fill" pages own the viewport and
+ * scroll inside their own columns — the inbox needs that so its list, thread, and
+ * contact panel scroll independently.
+ */
+export type WhatsAppLayoutMode = "scroll" | "fill";
+
 export type WhatsAppNavItem = {
   label: string;
   href: string;
   icon: WhatsAppIconName;
   description: string;
   status: WhatsAppNavStatus;
+  /** Defaults to "scroll" when omitted. */
+  layout?: WhatsAppLayoutMode;
 };
 
 export type WhatsAppNavSection = {
@@ -41,6 +50,7 @@ export const WHATSAPP_NAV_SECTIONS: WhatsAppNavSection[] = [
         icon: "conversations",
         description: "Inbound WhatsApp leads, full threads, and replies.",
         status: "live",
+        layout: "fill",
       },
       {
         label: "Contacts",
@@ -146,6 +156,10 @@ export function getWhatsAppPageMeta(pathname: string | null | undefined) {
     title: item?.label || "WhatsApp",
     description: item?.description || "Web Growth WhatsApp business console.",
   };
+}
+
+export function getWhatsAppLayoutMode(pathname: string | null | undefined): WhatsAppLayoutMode {
+  return findWhatsAppNavItem(pathname)?.layout || "scroll";
 }
 
 export function getWhatsAppSenderStatusText(senderConnected: boolean) {

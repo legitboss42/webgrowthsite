@@ -6,9 +6,17 @@
 
 ## Current phase
 
-**Increment 2 (Overview dashboard + route split) — COMPLETE and verified.**
-Next up: Increment 3 (Conversations polish — 3-column desktop / one-panel mobile).
-Nothing is in progress mid-edit.
+**Increment 3 (3-column conversations inbox) — COMPLETE and verified.**
+Next up: Increment 4 (Contacts). Nothing is in progress mid-edit.
+
+## NEVER run `npm run build` while `npm run dev` is running
+
+Both write the same `.next/` directory, so a production build clobbers the dev
+server's chunks and every dev request then 500s with
+`Cannot find module './383.js'` from `.next/server/webpack-runtime.js` (or a
+`segment-explorer-node.js#SegmentViewNode` manifest error). **It is not a code bug.**
+Fix: stop dev, `rm -rf .next`, restart dev. Verify order that works: run tests →
+tsc → eslint → stop dev → build → restart dev → curl smoke test.
 
 ## CRITICAL build rule — register every new page
 
@@ -130,11 +138,40 @@ Growth Ledger, light/paper identity. Tailwind v4 `@theme` in `src/app/globals.cs
   from server config, recent conversations, quick actions into filtered inbox views,
   and an honest "not built yet" campaigns card. Counts that cannot be read render as
   "—", never a fabricated 0.
-- **Increment 3 — Conversations polish. ← NEXT.** 3-column desktop / one-panel-at-a-time
-  mobile using the already-working thread + composer + auto-refresh.
-- **Increment 4 — Contacts** (real data).
+- **Increment 3 — Conversations polish. ✅ COMPLETE (verified).** The inbox is now the
+  mockup's 3-column layout (list | thread | contact details) on desktop and shows exactly
+  one panel at a time on phones. Chat-bubble thread on a dotted canvas, per-column
+  scrolling, and the composer pinned below the thread. All prior behaviour intact.
+- **Increment 4 — Contacts. ← NEXT.** Real data from `whatsapp_contacts`.
 - **Later** — Templates, Quick Replies, Campaigns, Automations, deep Analytics
   (each its own increment, additive migrations only, honest empty states until wired).
+
+## Increment 3 notes
+
+- **Layout modes.** `nav.ts` now carries an optional `layout: "scroll" | "fill"` per nav
+  item, read by the shell through `getWhatsAppLayoutMode(pathname)`. Only the inbox is
+  `"fill"`: the shell root becomes `h-dvh overflow-hidden` so the three columns scroll
+  independently. Every other page stays `min-h-dvh` and scrolls normally. `h-dvh` (not
+  `h-screen`) so mobile browser chrome does not clip the composer.
+- **Mobile panels are URL-driven, not client state.** `?lead=` selects the thread and
+  `?panel=contact` the details panel; with neither, the list shows. So the browser back
+  button walks list → thread → details, and any panel is linkable. Desktop ignores this
+  and always renders all three via `lg:flex`.
+- **Deliberate distinction:** `buildWhatsAppDashboardModel` still defaults `selectedLead`
+  to the first row (desktop shows a thread immediately), but the *mobile* panel choice
+  keys off the raw `params.lead`, so a phone opens on the list instead of jumping into a
+  conversation. Don't "simplify" these into one value.
+- **New real columns surfaced.** The conversation query now also selects
+  `first_message_at`, `assigned_to`, and contact `business_name`, `email`, `phone`. These
+  are all real schema columns (see `202608130001_whatsapp_crm.sql`); nulls render as "—".
+  `WhatsAppLeadRow` gained them as optional fields, so existing test fixtures still typecheck.
+- **Notes/labels are still absent on purpose.** The mockup shows them but the schema has
+  no columns for them. The panel says so rather than faking content. They need an additive
+  migration in their own increment.
+- **Composer** was slimmed (3-row textarea, tighter padding, no outer card) because it is
+  now pinned under the thread inside a `max-h-[55%] overflow-y-auto` container.
+  Presentational only — no logic touched.
+
 
 ## Increment 2 notes
 
@@ -193,17 +230,17 @@ Growth Ledger, light/paper identity. Tailwind v4 `@theme` in `src/app/globals.cs
 - `src/lib/route-governance.json` — added `/admin/whatsapp/conversations/` (NOINDEX) and
   retitled the root entry. Scheduler entries untouched.
 
-## Verification (Increments 1–2, all green)
+## Verification (Increments 1–3, all green)
 
-- `npx tsx --test src/app/admin/whatsapp/*.test.ts src/components/whatsapp/nav.test.ts src/lib/whatsapp/*.test.ts` → **76/76 pass**
+- `npx tsx --test src/app/admin/whatsapp/*.test.ts src/components/whatsapp/nav.test.ts src/lib/whatsapp/*.test.ts` → **77/77 pass**
 - `npx tsc --noEmit` → **clean**
 - `npx eslint src/components/whatsapp src/components/SiteChrome.tsx src/app/admin/whatsapp src/app/layout.tsx` → **0 problems**
   (do NOT judge by bare `npm run lint`: it walks `.codex-temp/` and reports ~814 pre-existing findings)
-- `npm run build` → **✓ Compiled successfully**; "Sitemap validation passed / Governed
-  routes: 86"; `/admin/whatsapp`, `/admin/whatsapp/conversations`, all 4 admin API routes
-  and the webhook present; public pages still prerendered static.
-- Dev smoke test: `/admin/whatsapp/` 200, `/admin/whatsapp/conversations/` 200, `/` 200;
-  unauthenticated requests correctly render the unlock form on console routes.
+- `npm run build` → **✓ Compiled successfully**; "Sitemap validation passed"; both console
+  routes, all 4 admin API routes and the webhook present; public pages still static.
+- Dev smoke test on a clean `.next`: `/admin/whatsapp/` 200,
+  `/admin/whatsapp/conversations/` 200, `?filter=REVIEW&panel=contact` 200, `/` 200.
+  Unauthenticated requests correctly render the unlock form on console routes.
 - `git status` → only WhatsApp-redesign files. No TikTok/scheduler file, no
   `package-lock.json`, no `.codex-temp` change.
 
@@ -248,12 +285,13 @@ WhatsApp-redesign files by explicit path. Never `git add -A` / `commit -am`.
 
 ## Next exact task
 
-Increment 3 — Conversations polish:
-1. Rework `/admin/whatsapp/conversations` into the mockup's 3-column desktop layout
-   (list | thread | contact details) and one-panel-at-a-time on mobile.
-2. Keep every existing behaviour: 7 filters, `?filter=`/`?lead=` params, message thread,
-   audio playback, `ReplyComposer` (text + voice), `AutoRefresh` polling and alerts.
-3. Chat-bubble thread styling; the contact panel uses only real columns
-   (`website`, `source`, `intent`, `status`, `assigned_to`, `lead_temperature`).
-   Notes/labels need an additive migration — defer to their own increment, do not fake them.
-4. Re-run the full verification list above, update this doc, checkpoint-commit.
+Increment 4 — Contacts:
+1. Add `src/app/admin/whatsapp/contacts/page.tsx` listing `whatsapp_contacts` (real
+   columns only: `display_name`, `wa_id`, `phone`, `business_name`, `email`, `website`,
+   `source`, `lead_temperature`, `lead_status`, `created_at`).
+2. **Register `/admin/whatsapp/contacts/` in `src/lib/route-governance.json`** or the
+   build fails (see the CRITICAL build rule near the top of this file).
+3. Flip Contacts to `status: "live"` in `nav.ts` and update the
+   "only routes that exist today are marked live" assertion in `nav.test.ts`.
+4. Each row links into its conversation where one exists; honest empty state otherwise.
+5. Re-run the full verification list above, update this doc, checkpoint-commit.

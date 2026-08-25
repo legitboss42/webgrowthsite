@@ -11,6 +11,12 @@ export type WhatsAppLeadRow = {
   human_review_required: boolean;
   last_message_at?: string;
   status: string;
+  // Optional real columns, surfaced by the contact panel when the query selects them.
+  business_name?: string;
+  email?: string;
+  phone?: string;
+  assigned_to?: string;
+  first_message_at?: string;
 };
 
 export type WhatsAppLeadFilter = "ALL" | "HOT" | "WARM" | "REVIEW" | "PRICING" | "MEETING" | "PROPOSAL";

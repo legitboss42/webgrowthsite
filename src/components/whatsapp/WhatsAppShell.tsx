@@ -7,6 +7,7 @@ import { WhatsAppIcon } from "./icons";
 import {
   WHATSAPP_CONSOLE_ROOT,
   WHATSAPP_NAV_SECTIONS,
+  getWhatsAppLayoutMode,
   getWhatsAppPageMeta,
   getWhatsAppSenderStatusText,
   isWhatsAppNavItemActive,
@@ -138,6 +139,7 @@ export default function WhatsAppShell({
   const [drawerOpen, setDrawerOpen] = useState(false);
   const drawerId = useId();
   const { title, description } = getWhatsAppPageMeta(pathname);
+  const fillsViewport = getWhatsAppLayoutMode(pathname) === "fill";
 
   // Close the drawer whenever the route changes so it never covers the new page.
   useEffect(() => {
@@ -160,9 +162,13 @@ export default function WhatsAppShell({
   }, [drawerOpen]);
 
   return (
-    <div className="flex min-h-screen bg-paper text-ink">
+    <div
+      className={`flex bg-paper text-ink ${
+        fillsViewport ? "h-dvh overflow-hidden" : "min-h-dvh"
+      }`}
+    >
       {/* Desktop sidebar */}
-      <aside className="sticky top-0 hidden h-screen w-64 flex-none flex-col bg-ledger-deep px-3 py-4 lg:flex">
+      <aside className="sticky top-0 hidden h-dvh w-64 flex-none flex-col bg-ledger-deep px-3 py-4 lg:flex">
         <SidebarContent senderConnected={senderConnected} senderNumber={senderNumber} />
       </aside>
 
@@ -202,8 +208,8 @@ export default function WhatsAppShell({
       ) : null}
 
       {/* Main column */}
-      <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-30 border-b border-rule bg-paper-raised/95 backdrop-blur supports-[backdrop-filter]:bg-paper-raised/80">
+      <div className={`flex min-w-0 flex-1 flex-col ${fillsViewport ? "overflow-hidden" : ""}`}>
+        <header className="sticky top-0 z-30 flex-none border-b border-rule bg-paper-raised/95 backdrop-blur supports-[backdrop-filter]:bg-paper-raised/80">
           <div className="flex flex-wrap items-center gap-x-4 gap-y-3 px-4 py-3 sm:px-6">
             <button
               type="button"
@@ -245,7 +251,9 @@ export default function WhatsAppShell({
           </div>
         </header>
 
-        <div className="min-w-0 flex-1">{children}</div>
+        <div className={`min-w-0 flex-1 ${fillsViewport ? "min-h-0 overflow-hidden" : ""}`}>
+          {children}
+        </div>
       </div>
     </div>
   );

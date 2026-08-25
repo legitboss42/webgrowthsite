@@ -191,7 +191,7 @@ export default function ReplyComposer({ conversationId, waId, initialText = "", 
   }
 
   return (
-    <form onSubmit={handleSubmit} className="mt-5 rounded-xl border border-rule bg-paper p-4">
+    <form onSubmit={handleSubmit} className="p-3 sm:p-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <h3 className="text-[0.7rem] font-semibold uppercase tracking-[.16em] text-ink-faint">
@@ -212,12 +212,12 @@ export default function ReplyComposer({ conversationId, waId, initialText = "", 
         value={message}
         onChange={(event) => setMessage(event.target.value)}
         disabled={!composerState.enabled || isPending}
-        rows={5}
-        className="mt-3.5 w-full rounded-lg border border-rule bg-paper-raised px-4 py-3 text-sm text-ink outline-none transition placeholder:text-ink-faint/70 focus:border-ledger-bright focus:ring-2 focus:ring-ledger-bright/20 disabled:cursor-not-allowed disabled:bg-paper-sunk disabled:opacity-70"
+        rows={3}
+        className="mt-3 w-full rounded-lg border border-rule bg-paper px-3.5 py-2.5 text-sm text-ink outline-none transition placeholder:text-ink-faint/70 focus:border-ledger-bright focus:ring-2 focus:ring-ledger-bright/20 disabled:cursor-not-allowed disabled:bg-paper-sunk disabled:opacity-70"
         placeholder="Type a careful reply. Avoid pricing, scope, timeline, or contract commitments unless you are intentionally handling them yourself."
       />
 
-      <div className="mt-3.5 rounded-lg border border-rule bg-paper-raised p-3">
+      <div className="mt-3 rounded-lg border border-rule bg-paper p-3">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-[0.7rem] font-semibold uppercase tracking-[.16em] text-ink-faint">Voice note</p>
