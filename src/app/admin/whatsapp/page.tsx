@@ -6,6 +6,12 @@ import { getInternalUtilityLocalPassphrase } from "@/lib/internalUtilityAuth";
 import { WhatsAppIcon, type WhatsAppIconName } from "@/components/whatsapp/icons";
 import { hasWhatsAppAdminAccess } from "./auth";
 import { countWhatsAppRows, getWhatsAppSenderConfig, readWhatsAppRows } from "./data";
+import {
+  describeWhatsAppMessagingTier,
+  describeWhatsAppQuality,
+  fetchWhatsAppPhoneNumbers,
+  findConfiguredWhatsAppSender,
+} from "@/lib/whatsapp/phoneNumbers";
 import type { WhatsAppLeadRow } from "./dashboard";
 import {
   buildWhatsAppActivitySeries,
@@ -140,6 +146,11 @@ export default async function WhatsAppOverviewPage() {
     countWhatsAppRows("whatsapp_messages?select=id&direction=eq.outbound"),
     countWhatsAppRows("whatsapp_messages?select=id&direction=eq.inbound"),
   ]);
+
+  // Quality rating, messaging limit, and the display number live at Meta, not in our
+  // database. Cached briefly so the overview does not hit the Graph API on every load.
+  const phoneResult = await fetchWhatsAppPhoneNumbers({ revalidateSeconds: 300 });
+  const senderNumber = phoneResult.ok ? findConfiguredWhatsAppSender(phoneResult.phoneNumbers) : null;
 
   const metrics = buildWhatsAppOverviewMetrics({
     leads,
@@ -342,12 +353,46 @@ export default async function WhatsAppOverviewPage() {
               <dt className="text-ink-faint">Last activity</dt>
               <dd className="text-ink">{formatRelative(metrics.lastActivityAt, now)}</dd>
             </div>
+
+            {/* Live from Meta. Absent only when the Graph API is unreachable. */}
+            {senderNumber ? (
+              <>
+                <div className="flex items-center justify-between gap-3 border-t border-rule py-2.5 text-sm">
+                  <dt className="text-ink-faint">Sender number</dt>
+                  <dd className="font-mono text-xs text-ink">
+                    {senderNumber.displayPhoneNumber || "—"}
+                  </dd>
+                </div>
+                <div className="flex items-center justify-between gap-3 border-t border-rule py-2.5 text-sm">
+                  <dt className="text-ink-faint">Quality rating</dt>
+                  <dd
+                    className={`font-medium ${
+                      senderNumber.qualityRating === "GREEN"
+                        ? "text-ledger"
+                        : senderNumber.qualityRating === "RED"
+                          ? "text-rose-700"
+                          : "text-ink"
+                    }`}
+                  >
+                    {describeWhatsAppQuality(senderNumber.qualityRating)}
+                  </dd>
+                </div>
+                <div className="flex items-start justify-between gap-3 border-t border-rule py-2.5 text-sm">
+                  <dt className="flex-none text-ink-faint">Messaging limit</dt>
+                  <dd className="min-w-0 text-right text-ink">
+                    {describeWhatsAppMessagingTier(senderNumber.messagingLimitTier) || "—"}
+                  </dd>
+                </div>
+              </>
+            ) : null}
           </dl>
 
-          <p className="mt-3 rounded-lg bg-paper px-3 py-2.5 text-xs leading-5 text-ink-faint">
-            Quality rating, messaging limits, and the sender&apos;s display number come from Meta&apos;s Graph
-            API. They arrive with the Phone Numbers page rather than being guessed here.
-          </p>
+          <Link
+            href="/admin/whatsapp/phone-numbers/"
+            className="mt-3 inline-flex text-xs font-medium text-ledger underline decoration-ledger/30 underline-offset-4 hover:text-ledger-bright"
+          >
+            {senderNumber ? "All phone number details" : "Check phone number status"}
+          </Link>
         </section>
       </div>
 

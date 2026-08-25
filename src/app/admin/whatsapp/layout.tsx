@@ -3,6 +3,10 @@ import { cookies } from "next/headers";
 import InternalUtilityUnlockForm from "@/components/internal/InternalUtilityUnlockForm";
 import { getInternalUtilityLocalPassphrase } from "@/lib/internalUtilityAuth";
 import WhatsAppShell from "@/components/whatsapp/WhatsAppShell";
+import {
+  fetchWhatsAppPhoneNumbers,
+  findConfiguredWhatsAppSender,
+} from "@/lib/whatsapp/phoneNumbers";
 import { hasWhatsAppAdminAccess } from "./auth";
 
 /**
@@ -30,5 +34,20 @@ export default async function WhatsAppConsoleLayout({ children }: { children: Re
     process.env.WHATSAPP_ACCESS_TOKEN?.trim() && process.env.WHATSAPP_PHONE_NUMBER_ID?.trim(),
   );
 
-  return <WhatsAppShell senderConnected={senderConnected}>{children}</WhatsAppShell>;
+  // The real display number comes from Meta. This layout renders on every console page,
+  // so the response is cached for 10 minutes rather than fetched per navigation. A
+  // failure just leaves the number off the sidebar; it never blocks the page.
+  let senderNumber: string | undefined;
+  if (senderConnected) {
+    const phoneResult = await fetchWhatsAppPhoneNumbers({ revalidateSeconds: 600 });
+    if (phoneResult.ok) {
+      senderNumber = findConfiguredWhatsAppSender(phoneResult.phoneNumbers)?.displayPhoneNumber;
+    }
+  }
+
+  return (
+    <WhatsAppShell senderConnected={senderConnected} senderNumber={senderNumber}>
+      {children}
+    </WhatsAppShell>
+  );
 }
