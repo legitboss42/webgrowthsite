@@ -396,3 +396,17 @@ export function LocationIcon(props: IconProps) {
     </Icon>
   );
 }
+
+/**
+ * Channel mark for the connected account block. A speech bubble with a handset,
+ * drawn in the same stroke language as the rest of the set rather than lifted
+ * from Meta's brand assets, which we have no licence to reproduce.
+ */
+export function WhatsAppGlyphIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M20.5 11.6a8.4 8.4 0 0 1-12.3 7.44L3.6 20.4l1.38-4.5A8.4 8.4 0 1 1 20.5 11.6Z" />
+      <path d="M9.3 8.7c-.3 0-.6.14-.8.4-.28.36-.5.86-.4 1.5.18 1.2.92 2.3 1.72 3.1.8.8 1.9 1.54 3.1 1.72.64.1 1.14-.12 1.5-.4a1 1 0 0 0 .4-.8l-.06-.7-1.6-.72-.86.86c-.9-.4-1.98-1.48-2.38-2.38l.86-.86-.72-1.6Z" />
+    </Icon>
+  );
+}

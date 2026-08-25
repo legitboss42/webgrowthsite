@@ -34,6 +34,37 @@ test("normalizes an inbound text message and a delivery status", () => {
   assert.equal(parsed.statuses[0]?.status, "delivered");
 });
 
+test("normalizes an inbound WhatsApp voice note with its media id", () => {
+  const payload = {
+    object: "whatsapp_business_account",
+    entry: [{ changes: [{ value: {
+      contacts: [{ wa_id: "2348000000000", profile: { name: "Ada" } }],
+      messages: [{
+        id: "wamid.voice",
+        from: "2348000000000",
+        timestamp: "1800000000",
+        type: "audio",
+        audio: { id: "media-voice-1", mime_type: "audio/ogg; codecs=opus", sha256: "hash", voice: true },
+      }],
+    } }] }],
+  };
+
+  const parsed = parseWhatsAppWebhook(payload);
+
+  assert.deepEqual(parsed.messages[0], {
+    messageId: "wamid.voice",
+    waId: "2348000000000",
+    displayName: "Ada",
+    text: undefined,
+    timestamp: 1_800_000_000,
+    type: "audio",
+    mediaId: "media-voice-1",
+    mediaMimeType: "audio/ogg; codecs=opus",
+    mediaSha256: "hash",
+    mediaVoice: true,
+  });
+});
+
 test("accepts a correct Meta signature", () => {
   const raw = '{"object":"whatsapp_business_account"}';
   const signature = `sha256=${createHmac("sha256", "secret").update(raw).digest("hex")}`;

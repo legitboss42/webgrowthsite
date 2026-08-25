@@ -4,6 +4,7 @@ import Script from "next/script";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { PublicChromeOnly, SiteMain } from "@/components/SiteChrome";
 import StructuredData from "@/components/StructuredData";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/react";
@@ -183,11 +184,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <a href="#main-content" className="skip-link">
           Skip to main content
         </a>
-        <Header />
-        <main id="main-content" tabIndex={-1} className="pt-28">
-          {children}
-        </main>
-        <Footer />
+        <PublicChromeOnly>
+          <Header />
+        </PublicChromeOnly>
+        <SiteMain>{children}</SiteMain>
+        <PublicChromeOnly>
+          <Footer />
+        </PublicChromeOnly>
         <WebVitals />
       </body>
     </html>

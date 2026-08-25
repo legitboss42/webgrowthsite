@@ -52,7 +52,6 @@
     { "path": "/mockup/", "status": "NOINDEX", "sitemap": false, "reason": "Private mockup utility" },
     { "path": "/internal/text-to-speech/", "status": "NOINDEX", "sitemap": false, "reason": "Internal voice generation utility" },
     { "path": "/admin/whatsapp/", "status": "NOINDEX", "sitemap": false, "reason": "Internal WhatsApp lead dashboard" },
-    { "path": "/admin/waitlist/", "status": "NOINDEX", "sitemap": false, "reason": "Internal automation waitlist dashboard" },
     { "path": "/connect/tiktok/", "status": "NOINDEX", "sitemap": false, "reason": "Internal TikTok authorization utility page" },
     { "path": "/connect/tiktok/callback/", "status": "NOINDEX", "sitemap": false, "reason": "TikTok OAuth callback route" },
     { "path": "/scheduler/", "status": "INDEX", "sitemap": true, "reason": "Public TikTok scheduler product and rollout page" },

@@ -6,7 +6,10 @@ import { sendWhatsAppText } from "@/lib/whatsapp/send";
 export const runtime = "nodejs";
 
 export function GET(request: Request) {
-  return verifyWebhook(new URL(request.url), process.env.WHATSAPP_VERIFY_TOKEN?.trim() || "");
+  return verifyWebhook(
+    new URL(request.url),
+    process.env.WHATSAPP_WEBHOOK_VERIFY_TOKEN?.trim() || process.env.WHATSAPP_VERIFY_TOKEN?.trim() || "",
+  );
 }
 
 export async function POST(request: Request) {

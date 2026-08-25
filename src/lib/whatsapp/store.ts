@@ -1,4 +1,5 @@
 import { classifyWhatsAppIntent } from "./classify";
+import { normalizeWhatsAppRecipient } from "./send";
 
 export type InboundMessageRecord = {
   messageId: string;
@@ -6,6 +7,16 @@ export type InboundMessageRecord = {
   displayName?: string;
   text?: string;
   timestamp: number;
+  type?: string;
+  mediaId?: string;
+  mediaMimeType?: string;
+  mediaSha256?: string;
+  mediaVoice?: boolean;
+  mediaFilename?: string;
+};
+
+export type OutboundMessageRecord = Omit<InboundMessageRecord, "displayName"> & {
+  conversationId?: string;
 };
 
 export type StoredContact = { id: string; waId: string; displayName?: string };
@@ -15,14 +26,20 @@ export type StoredMessage = {
   messageId: string;
   conversationId: string;
   direction: "inbound" | "outbound";
+  messageType?: string;
   text?: string;
   timestamp: number;
   deliveryStatus?: string;
+  mediaId?: string;
+  mediaMimeType?: string;
+  mediaSha256?: string;
+  mediaVoice?: boolean;
+  mediaFilename?: string;
 };
 
 export type WhatsAppStore = {
   recordInbound(input: InboundMessageRecord): Promise<{ duplicate: boolean }>;
-  recordOutbound(input: Omit<InboundMessageRecord, "displayName">): Promise<void>;
+  recordOutbound(input: OutboundMessageRecord): Promise<void>;
   updateMessageStatus(messageId: string, status: string): Promise<void>;
 };
 
@@ -31,6 +48,53 @@ type SupabaseStoreOptions = {
   serviceRoleKey: string;
   fetch?: typeof globalThis.fetch;
 };
+
+export type WhatsAppReplyContext = {
+  conversationId: string;
+  waId: string;
+  customerMessageTimestamp: number;
+  replyToMessageId: string;
+};
+
+export async function getSupabaseWhatsAppReplyContext(
+  options: SupabaseStoreOptions,
+  conversationId: string,
+  suppliedWaId: string,
+): Promise<WhatsAppReplyContext | null> {
+  const fetcher = options.fetch || globalThis.fetch;
+  const baseUrl = options.url.replace(/\/$/, "");
+  const headers = { apikey: options.serviceRoleKey, Authorization: `Bearer ${options.serviceRoleKey}` };
+  const suppliedRecipient = normalizeWhatsAppRecipient(suppliedWaId);
+  if (!suppliedRecipient || !conversationId.trim()) return null;
+
+  const conversationResponse = await fetcher(
+    `${baseUrl}/rest/v1/whatsapp_conversations?id=eq.${encodeURIComponent(conversationId)}&select=id,status,whatsapp_contacts!inner(wa_id)&limit=1`,
+    { headers },
+  );
+  if (!conversationResponse.ok) throw new Error(`Supabase WhatsApp conversation request failed: ${conversationResponse.status}`);
+  const conversations = (await conversationResponse.json()) as Array<{ id?: string; status?: string; whatsapp_contacts?: { wa_id?: string } | Array<{ wa_id?: string }> }>;
+  const conversation = conversations[0];
+  const contact = Array.isArray(conversation?.whatsapp_contacts) ? conversation?.whatsapp_contacts[0] : conversation?.whatsapp_contacts;
+  const actualRecipient = typeof contact?.wa_id === "string" ? normalizeWhatsAppRecipient(contact.wa_id) : null;
+  if (!conversation || conversation.status !== "open" || !actualRecipient || actualRecipient !== suppliedRecipient) return null;
+
+  const messageResponse = await fetcher(
+    `${baseUrl}/rest/v1/whatsapp_messages?conversation_id=eq.${encodeURIComponent(conversationId)}&direction=eq.inbound&select=whatsapp_message_id,message_timestamp&order=message_timestamp.desc&limit=1`,
+    { headers },
+  );
+  if (!messageResponse.ok) throw new Error(`Supabase WhatsApp message request failed: ${messageResponse.status}`);
+  const messages = (await messageResponse.json()) as Array<{ whatsapp_message_id?: string; message_timestamp?: string }>;
+  const latestInbound = messages[0];
+  const timestamp = latestInbound?.message_timestamp ? Date.parse(latestInbound.message_timestamp) : Number.NaN;
+  if (!latestInbound?.whatsapp_message_id || !Number.isFinite(timestamp)) return null;
+
+  return {
+    conversationId: String(conversation.id),
+    waId: actualRecipient,
+    replyToMessageId: latestInbound.whatsapp_message_id,
+    customerMessageTimestamp: Math.floor(timestamp / 1000),
+  };
+}
 
 type SupabaseRow = { id: string };
 
@@ -83,17 +147,51 @@ export function createSupabaseWhatsAppStore(options: SupabaseStoreOptions): What
       await request<{ id: string }>("whatsapp_messages?on_conflict=whatsapp_message_id", {
         method: "POST",
         headers: { Prefer: "resolution=ignore-duplicates,return=representation" },
-        body: JSON.stringify({ conversation_id: conversation.id, whatsapp_message_id: input.messageId, direction: "inbound", message_type: "text", message_text: input.text, message_timestamp: new Date(input.timestamp * 1000).toISOString(), raw_event_reference: eventRows[0].id }),
+        body: JSON.stringify({
+          conversation_id: conversation.id,
+          whatsapp_message_id: input.messageId,
+          direction: "inbound",
+          message_type: input.type || "text",
+          message_text: input.text,
+          message_timestamp: new Date(input.timestamp * 1000).toISOString(),
+          raw_event_reference: eventRows[0].id,
+          media_id: input.mediaId,
+          media_mime_type: input.mediaMimeType,
+          media_sha256: input.mediaSha256,
+          media_voice: input.mediaVoice === true,
+          media_filename: input.mediaFilename,
+        }),
       });
       await request<{ id: string }>(`whatsapp_events?id=eq.${encodeURIComponent(eventRows[0].id)}`, { method: "PATCH", body: JSON.stringify({ processed: true }) });
       return { duplicate: false };
     },
     async recordOutbound(input) {
-      const conversation = await getConversation(input);
+      const timestamp = new Date(input.timestamp * 1000).toISOString();
+      const conversation = input.conversationId
+        ? { id: input.conversationId }
+        : await getConversation(input);
+      if (input.conversationId) {
+        await request<{ id: string }>(`whatsapp_conversations?id=eq.${encodeURIComponent(input.conversationId)}`, {
+          method: "PATCH",
+          body: JSON.stringify({ last_message_at: timestamp, updated_at: new Date().toISOString() }),
+        });
+      }
       await request<{ id: string }>("whatsapp_messages?on_conflict=whatsapp_message_id", {
         method: "POST",
         headers: { Prefer: "resolution=ignore-duplicates,return=representation" },
-        body: JSON.stringify({ conversation_id: conversation.id, whatsapp_message_id: input.messageId, direction: "outbound", message_type: "text", message_text: input.text, message_timestamp: new Date(input.timestamp * 1000).toISOString() }),
+        body: JSON.stringify({
+          conversation_id: conversation.id,
+          whatsapp_message_id: input.messageId,
+          direction: "outbound",
+          message_type: input.type || "text",
+          message_text: input.text,
+          message_timestamp: timestamp,
+          media_id: input.mediaId,
+          media_mime_type: input.mediaMimeType,
+          media_sha256: input.mediaSha256,
+          media_voice: input.mediaVoice === true,
+          media_filename: input.mediaFilename,
+        }),
       });
     },
     async updateMessageStatus(messageId, status) {
@@ -137,13 +235,42 @@ export function createMemoryWhatsAppStore(): WhatsAppStore & {
       if (events.includes(input.messageId)) return { duplicate: true };
       events.push(input.messageId);
       const conversation = getConversation(input.waId, input.timestamp, input.displayName);
-      messages.push({ id: `message-${messages.length + 1}`, messageId: input.messageId, conversationId: conversation.id, direction: "inbound", text: input.text, timestamp: input.timestamp });
+      messages.push({
+        id: `message-${messages.length + 1}`,
+        messageId: input.messageId,
+        conversationId: conversation.id,
+        direction: "inbound",
+        messageType: input.type || "text",
+        text: input.text,
+        timestamp: input.timestamp,
+        mediaId: input.mediaId,
+        mediaMimeType: input.mediaMimeType,
+        mediaSha256: input.mediaSha256,
+        mediaVoice: input.mediaVoice === true,
+        mediaFilename: input.mediaFilename,
+      });
       return { duplicate: false };
     },
     async recordOutbound(input) {
       if (messages.some((item) => item.messageId === input.messageId)) return;
-      const conversation = getConversation(input.waId, input.timestamp);
-      messages.push({ id: `message-${messages.length + 1}`, messageId: input.messageId, conversationId: conversation.id, direction: "outbound", text: input.text, timestamp: input.timestamp });
+      const conversation = input.conversationId
+        ? conversations.find((item) => item.id === input.conversationId) || getConversation(input.waId, input.timestamp)
+        : getConversation(input.waId, input.timestamp);
+      conversation.lastMessageAt = Math.max(conversation.lastMessageAt, input.timestamp);
+      messages.push({
+        id: `message-${messages.length + 1}`,
+        messageId: input.messageId,
+        conversationId: conversation.id,
+        direction: "outbound",
+        messageType: input.type || "text",
+        text: input.text,
+        timestamp: input.timestamp,
+        mediaId: input.mediaId,
+        mediaMimeType: input.mediaMimeType,
+        mediaSha256: input.mediaSha256,
+        mediaVoice: input.mediaVoice === true,
+        mediaFilename: input.mediaFilename,
+      });
     },
     async updateMessageStatus(messageId, status) {
       const message = messages.find((item) => item.messageId === messageId);
