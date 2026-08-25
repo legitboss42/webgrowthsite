@@ -101,16 +101,26 @@ function formatDateTime(value: string | undefined) {
   return new Date(value).toLocaleString();
 }
 
+function getInitials(name: string | undefined, waId: string) {
+  const source = (name || "").trim();
+  if (!source) return waId.slice(-2) || "??";
+  return source
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() || "")
+    .join("");
+}
+
 function getTemperatureClasses(temperature: WhatsAppLeadRow["lead_temperature"]) {
-  if (temperature === "HOT") return "bg-rose-500/20 text-rose-200 ring-1 ring-rose-400/40";
-  if (temperature === "WARM") return "bg-amber-500/20 text-amber-100 ring-1 ring-amber-400/40";
-  return "bg-white/10 text-white/70 ring-1 ring-white/10";
+  if (temperature === "HOT") return "bg-rose-50 text-rose-700 ring-1 ring-rose-200";
+  if (temperature === "WARM") return "bg-brass-tint text-[#6f4f16] ring-1 ring-brass/25";
+  return "bg-paper-sunk text-ink-faint ring-1 ring-rule";
 }
 
 function getReviewClasses(needsReview: boolean) {
   return needsReview
-    ? "bg-rose-500/15 text-rose-100 ring-1 ring-rose-400/30"
-    : "bg-emerald-500/15 text-emerald-100 ring-1 ring-emerald-400/30";
+    ? "bg-rose-50 text-rose-700 ring-1 ring-rose-200"
+    : "bg-ledger-tint text-ledger ring-1 ring-ledger/15";
 }
 
 function getMessageFallbackText(message: WhatsAppLeadMessage) {
@@ -143,11 +153,11 @@ export default async function WhatsAppAdminPage({
 
   if (!unlocked) {
     return (
-      <main className="min-h-screen bg-[#050806] px-6 py-16 text-white">
-        <div className="mx-auto max-w-4xl">
+      <div className="flex min-h-screen items-center justify-center bg-[#050806] px-4 py-16 text-white">
+        <div className="w-full max-w-4xl">
           <InternalUtilityUnlockForm localHint={getInternalUtilityLocalPassphrase() || undefined} />
         </div>
-      </main>
+      </div>
     );
   }
 
@@ -178,231 +188,347 @@ export default async function WhatsAppAdminPage({
     ),
   });
 
-  return (
-    <main className="min-h-screen bg-[#050806] px-6 py-12 text-white">
-      <WhatsAppInboxAutoRefresh />
-      <div className="mx-auto max-w-7xl">
-        <p className="text-xs uppercase tracking-[.2em] text-emerald-300">Internal lead queue</p>
-        <div className="mt-3 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <h1 className="text-4xl font-semibold">WhatsApp leads</h1>
-            <p className="mt-3 max-w-2xl text-sm text-white/70">
-              Review inbound WhatsApp leads, spot commercial escalations quickly, and read the most recent
-              conversation context before replying.
-            </p>
-          </div>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            {[
-              { label: "All leads", value: model.filterCounts.ALL },
-              { label: "Hot leads", value: model.filterCounts.HOT },
-              { label: "Needs review", value: model.filterCounts.REVIEW },
-              { label: "Open conversations", value: model.filteredLeads.filter((lead) => lead.status === "open").length },
-            ].map((item) => (
-              <div key={item.label} className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
-                <p className="text-xs uppercase tracking-[.18em] text-white/45">{item.label}</p>
-                <p className="mt-2 text-2xl font-semibold">{item.value}</p>
-              </div>
-            ))}
-          </div>
-        </div>
+  const summaryCards = [
+    { label: "All leads", value: model.filterCounts.ALL },
+    { label: "Hot leads", value: model.filterCounts.HOT },
+    { label: "Needs review", value: model.filterCounts.REVIEW },
+    { label: "Open", value: model.filteredLeads.filter((lead) => lead.status === "open").length },
+  ];
 
-        <nav className="mt-8 flex flex-wrap gap-2">
+  return (
+    <div className="px-4 py-5 sm:px-6 sm:py-6">
+      <WhatsAppInboxAutoRefresh />
+
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        {summaryCards.map((item) => (
+          <div key={item.label} className="rounded-xl border border-rule bg-paper-raised px-4 py-3">
+            <p className="text-[0.65rem] font-medium uppercase tracking-[.14em] text-ink-faint">
+              {item.label}
+            </p>
+            <p className="mt-1 font-display text-2xl font-semibold text-ink">{item.value}</p>
+          </div>
+        ))}
+      </div>
+
+      <nav aria-label="Lead filters" className="mt-5 -mx-4 overflow-x-auto px-4 sm:mx-0 sm:px-0">
+        <div className="flex w-max gap-2 pb-1 sm:w-auto sm:flex-wrap">
           {filters.map((item) => {
             const active = filter === item;
             return (
               <Link
                 key={item}
                 href={getFilterHref(item, model.selectedLead?.id)}
-                className={`rounded-full px-4 py-2 text-sm transition ${
-                  active ? "bg-emerald-400 text-black" : "bg-white/10 text-white/80 hover:bg-white/15"
+                aria-current={active ? "page" : undefined}
+                className={`inline-flex flex-none items-center gap-2 rounded-full px-3.5 py-1.5 text-xs font-medium transition ${
+                  active
+                    ? "bg-ledger-bright text-white"
+                    : "border border-rule bg-paper-raised text-ink-soft hover:border-rule-strong hover:text-ink"
                 }`}
               >
                 {item}
-                <span className={`ml-2 rounded-full px-2 py-0.5 text-xs ${active ? "bg-black/15" : "bg-black/20 text-white/65"}`}>
+                <span
+                  className={`rounded-full px-1.5 py-0.5 text-[0.65rem] tabular-nums ${
+                    active ? "bg-white/20 text-white" : "bg-paper-sunk text-ink-faint"
+                  }`}
+                >
                   {model.filterCounts[item]}
                 </span>
               </Link>
             );
           })}
-        </nav>
+        </div>
+      </nav>
 
-        <div className="mt-8 grid gap-6 xl:grid-cols-[minmax(0,1.35fr)_minmax(320px,0.85fr)]">
-          <section className="overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03]">
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[980px] text-left text-sm">
-                <thead className="bg-white/5 text-white/60">
-                  <tr>
-                    {["Lead", "WhatsApp", "Website", "Source", "Intent", "Temperature", "Review", "Last contact", "Status"].map(
-                      (heading) => (
-                        <th key={heading} className="px-4 py-3 font-medium">
-                          {heading}
-                        </th>
-                      ),
-                    )}
-                  </tr>
-                </thead>
-                <tbody>
-                  {model.filteredLeads.map((lead) => {
-                    const active = model.selectedLead?.id === lead.id;
-                    return (
-                      <tr
-                        key={lead.id}
-                        className={`border-t border-white/10 transition ${
-                          active ? "bg-emerald-500/10" : "hover:bg-white/[0.035]"
-                        }`}
+      <div className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1.35fr)_minmax(340px,0.85fr)]">
+        <section className="min-w-0 overflow-hidden rounded-xl border border-rule bg-paper-raised">
+          {/* Mobile + tablet: a tap-friendly card list instead of a wide table */}
+          <ul className="divide-y divide-rule lg:hidden">
+            {model.filteredLeads.map((lead) => {
+              const active = model.selectedLead?.id === lead.id;
+              return (
+                <li key={lead.id} className={active ? "bg-ledger-tint/50" : undefined}>
+                  <Link href={getLeadHref(filter, lead.id)} className="flex gap-3 px-4 py-3.5">
+                    <span className="grid h-10 w-10 flex-none place-items-center rounded-full bg-paper-sunk text-xs font-semibold text-ink-soft">
+                      {getInitials(lead.display_name, lead.wa_id)}
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="flex items-center gap-2">
+                        <span className="truncate text-sm font-semibold text-ink">
+                          {lead.display_name || "Unknown"}
+                        </span>
+                        <span
+                          className={`ml-auto flex-none rounded-full px-2 py-0.5 text-[0.625rem] font-semibold ${getTemperatureClasses(
+                            lead.lead_temperature,
+                          )}`}
+                        >
+                          {lead.lead_temperature}
+                        </span>
+                      </span>
+                      <span className="mt-0.5 block truncate font-mono text-xs text-ink-faint">
+                        {lead.wa_id}
+                      </span>
+                      <span className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[0.7rem] text-ink-faint">
+                        <span className="uppercase tracking-[.1em]">{lead.status}</span>
+                        <span aria-hidden="true">·</span>
+                        <span>{lead.intent || "No intent"}</span>
+                        {lead.human_review_required ? (
+                          <span className="rounded-full bg-rose-50 px-2 py-0.5 font-medium text-rose-700">
+                            Needs review
+                          </span>
+                        ) : null}
+                      </span>
+                      <span className="mt-1 block text-[0.7rem] text-ink-faint">
+                        {formatDateTime(lead.last_message_at)}
+                      </span>
+                    </span>
+                  </Link>
+                </li>
+              );
+            })}
+            {model.filteredLeads.length === 0 ? (
+              <li className="px-4 py-10 text-center text-sm text-ink-faint">
+                No leads match this filter yet.
+              </li>
+            ) : null}
+          </ul>
+
+          {/* Desktop: the full lead table */}
+          <div className="hidden overflow-x-auto lg:block">
+            <table className="w-full min-w-[980px] text-left text-sm">
+              <thead className="bg-paper-sunk text-ink-faint">
+                <tr>
+                  {["Lead", "WhatsApp", "Website", "Source", "Intent", "Temperature", "Review", "Last contact", "Status"].map(
+                    (heading) => (
+                      <th
+                        key={heading}
+                        scope="col"
+                        className="px-4 py-2.5 text-[0.7rem] font-semibold uppercase tracking-[.1em]"
                       >
-                        <td className="px-4 py-4">
-                          <Link href={getLeadHref(filter, lead.id)} className="block">
-                            <span className="font-medium text-white">{lead.display_name || "Unknown"}</span>
-                          </Link>
-                        </td>
-                        <td className="px-4 py-4 font-mono text-xs text-white/80">{lead.wa_id}</td>
-                        <td className="px-4 py-4">
-                          {lead.website ? (
-                            <a href={lead.website} target="_blank" rel="noreferrer" className="text-emerald-200 underline decoration-emerald-500/40 underline-offset-4">
-                              {lead.website}
-                            </a>
-                          ) : (
-                            "—"
-                          )}
-                        </td>
-                        <td className="px-4 py-4">{lead.source || "WhatsApp"}</td>
-                        <td className="px-4 py-4">{lead.intent || "—"}</td>
-                        <td className="px-4 py-4">
-                          <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${getTemperatureClasses(lead.lead_temperature)}`}>
-                            {lead.lead_temperature}
+                        {heading}
+                      </th>
+                    ),
+                  )}
+                </tr>
+              </thead>
+              <tbody>
+                {model.filteredLeads.map((lead) => {
+                  const active = model.selectedLead?.id === lead.id;
+                  return (
+                    <tr
+                      key={lead.id}
+                      className={`border-t border-rule transition ${
+                        active ? "bg-ledger-tint/60" : "hover:bg-paper-sunk/60"
+                      }`}
+                    >
+                      <td className="px-4 py-3">
+                        <Link href={getLeadHref(filter, lead.id)} className="flex items-center gap-2.5">
+                          <span className="grid h-8 w-8 flex-none place-items-center rounded-full bg-paper-sunk text-[0.7rem] font-semibold text-ink-soft">
+                            {getInitials(lead.display_name, lead.wa_id)}
                           </span>
-                        </td>
-                        <td className="px-4 py-4">
-                          <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${getReviewClasses(lead.human_review_required)}`}>
-                            {lead.human_review_required ? "Needs review" : "Clear"}
-                          </span>
-                        </td>
-                        <td className="px-4 py-4 text-white/70">{formatDateTime(lead.last_message_at)}</td>
-                        <td className="px-4 py-4 uppercase tracking-[.14em] text-white/65">{lead.status}</td>
-                      </tr>
-                    );
-                  })}
-                  {model.filteredLeads.length === 0 ? (
-                    <tr>
-                      <td colSpan={9} className="px-4 py-10 text-center text-white/60">
-                        No leads match this filter yet.
+                          <span className="font-medium text-ink">{lead.display_name || "Unknown"}</span>
+                        </Link>
+                      </td>
+                      <td className="px-4 py-3 font-mono text-xs text-ink-soft">{lead.wa_id}</td>
+                      <td className="px-4 py-3">
+                        {lead.website ? (
+                          <a
+                            href={lead.website}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-ledger underline decoration-ledger/30 underline-offset-4 hover:text-ledger-bright"
+                          >
+                            {lead.website}
+                          </a>
+                        ) : (
+                          "—"
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-ink-soft">{lead.source || "WhatsApp"}</td>
+                      <td className="px-4 py-3 text-ink-soft">{lead.intent || "—"}</td>
+                      <td className="px-4 py-3">
+                        <span
+                          className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${getTemperatureClasses(
+                            lead.lead_temperature,
+                          )}`}
+                        >
+                          {lead.lead_temperature}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span
+                          className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${getReviewClasses(
+                            lead.human_review_required,
+                          )}`}
+                        >
+                          {lead.human_review_required ? "Needs review" : "Clear"}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-ink-faint">{formatDateTime(lead.last_message_at)}</td>
+                      <td className="px-4 py-3 text-xs uppercase tracking-[.12em] text-ink-faint">
+                        {lead.status}
                       </td>
                     </tr>
-                  ) : null}
-                </tbody>
-              </table>
-            </div>
-          </section>
+                  );
+                })}
+                {model.filteredLeads.length === 0 ? (
+                  <tr>
+                    <td colSpan={9} className="px-4 py-12 text-center text-ink-faint">
+                      No leads match this filter yet.
+                    </td>
+                  </tr>
+                ) : null}
+              </tbody>
+            </table>
+          </div>
+        </section>
 
-          <aside className="rounded-3xl border border-white/10 bg-white/[0.03] p-5">
-            {model.selectedLead ? (
-              <>
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <p className="text-xs uppercase tracking-[.18em] text-emerald-300">Selected conversation</p>
-                    <h2 className="mt-2 text-2xl font-semibold">{model.selectedLead.display_name || "Unknown lead"}</h2>
-                    <p className="mt-2 font-mono text-xs text-white/60">{model.selectedLead.wa_id}</p>
-                  </div>
-                  <span
-                    className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${getTemperatureClasses(
-                      model.selectedLead.lead_temperature,
-                    )}`}
-                  >
-                    {model.selectedLead.lead_temperature}
+        <aside className="min-w-0 rounded-xl border border-rule bg-paper-raised p-5">
+          {model.selectedLead ? (
+            <>
+              <div className="flex items-start gap-3">
+                <span className="grid h-11 w-11 flex-none place-items-center rounded-full bg-ledger text-sm font-semibold text-on-dark">
+                  {getInitials(model.selectedLead.display_name, model.selectedLead.wa_id)}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <h2 className="truncate font-display text-xl font-semibold text-ink">
+                    {model.selectedLead.display_name || "Unknown lead"}
+                  </h2>
+                  <p className="mt-0.5 truncate font-mono text-xs text-ink-faint">
+                    {model.selectedLead.wa_id}
+                  </p>
+                </div>
+                <span
+                  className={`flex-none rounded-full px-2.5 py-1 text-xs font-medium ${getTemperatureClasses(
+                    model.selectedLead.lead_temperature,
+                  )}`}
+                >
+                  {model.selectedLead.lead_temperature}
+                </span>
+              </div>
+
+              <dl className="mt-5 grid grid-cols-2 gap-2.5 text-sm">
+                <div className="rounded-lg border border-rule bg-paper px-3 py-2.5">
+                  <dt className="text-[0.65rem] uppercase tracking-[.14em] text-ink-faint">Intent</dt>
+                  <dd className="mt-1 text-ink">{model.selectedLead.intent || "—"}</dd>
+                </div>
+                <div className="rounded-lg border border-rule bg-paper px-3 py-2.5">
+                  <dt className="text-[0.65rem] uppercase tracking-[.14em] text-ink-faint">Status</dt>
+                  <dd className="mt-1 uppercase tracking-[.1em] text-ink">
+                    {model.selectedLead.status}
+                  </dd>
+                </div>
+                <div className="rounded-lg border border-rule bg-paper px-3 py-2.5">
+                  <dt className="text-[0.65rem] uppercase tracking-[.14em] text-ink-faint">
+                    Last contact
+                  </dt>
+                  <dd className="mt-1 text-ink">{formatDateTime(model.selectedLead.last_message_at)}</dd>
+                </div>
+                <div className="rounded-lg border border-rule bg-paper px-3 py-2.5">
+                  <dt className="text-[0.65rem] uppercase tracking-[.14em] text-ink-faint">Review</dt>
+                  <dd className="mt-1 text-ink">
+                    {model.selectedLead.human_review_required ? "Required" : "Not required"}
+                  </dd>
+                </div>
+              </dl>
+
+              <div className="mt-5">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-[0.7rem] font-semibold uppercase tracking-[.16em] text-ink-faint">
+                    Conversation history
+                  </h3>
+                  <span className="text-xs tabular-nums text-ink-faint">
+                    {model.selectedMessages.length} message(s)
                   </span>
                 </div>
-
-                <dl className="mt-6 grid grid-cols-2 gap-3 text-sm">
-                  <div className="rounded-2xl border border-white/10 bg-black/10 p-3">
-                    <dt className="text-xs uppercase tracking-[.18em] text-white/45">Intent</dt>
-                    <dd className="mt-2 text-white">{model.selectedLead.intent || "—"}</dd>
-                  </div>
-                  <div className="rounded-2xl border border-white/10 bg-black/10 p-3">
-                    <dt className="text-xs uppercase tracking-[.18em] text-white/45">Status</dt>
-                    <dd className="mt-2 uppercase tracking-[.14em] text-white/75">{model.selectedLead.status}</dd>
-                  </div>
-                  <div className="rounded-2xl border border-white/10 bg-black/10 p-3">
-                    <dt className="text-xs uppercase tracking-[.18em] text-white/45">Last contact</dt>
-                    <dd className="mt-2 text-white">{formatDateTime(model.selectedLead.last_message_at)}</dd>
-                  </div>
-                  <div className="rounded-2xl border border-white/10 bg-black/10 p-3">
-                    <dt className="text-xs uppercase tracking-[.18em] text-white/45">Review</dt>
-                    <dd className="mt-2 text-white">{model.selectedLead.human_review_required ? "Required" : "Not required"}</dd>
-                  </div>
-                </dl>
-
-                <div className="mt-6">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-sm font-semibold uppercase tracking-[.18em] text-white/70">Conversation history</h3>
-                    <span className="text-xs text-white/45">{model.selectedMessages.length} message(s)</span>
-                  </div>
-                  <div className="mt-4 space-y-3">
-                    {model.selectedMessages.length ? (
-                      model.selectedMessages.map((message) => (
-                        <article
-                          key={message.id}
-                          className={`rounded-2xl px-4 py-3 ${
-                            message.direction === "outbound"
-                              ? "ml-6 bg-emerald-500/15 text-emerald-50"
-                              : "mr-6 bg-white/8 text-white"
+                <div className="mt-3 space-y-2.5">
+                  {model.selectedMessages.length ? (
+                    model.selectedMessages.map((message) => (
+                      <article
+                        key={message.id}
+                        className={`rounded-xl px-3.5 py-2.5 ${
+                          message.direction === "outbound"
+                            ? "ml-5 bg-ledger-bright text-white"
+                            : "mr-5 border border-rule bg-paper text-ink"
+                        }`}
+                      >
+                        <div
+                          className={`flex items-center justify-between gap-3 text-[0.65rem] uppercase tracking-[.12em] ${
+                            message.direction === "outbound" ? "text-white/70" : "text-ink-faint"
                           }`}
                         >
-                          <div className="flex items-center justify-between gap-3 text-xs uppercase tracking-[.14em] text-white/50">
-                            <span>{message.direction === "outbound" ? "Outbound" : "Inbound"}</span>
-                            <span>{formatDateTime(message.message_timestamp)}</span>
-                          </div>
-                          {message.message_type === "audio" && message.media_id ? (
-                            <div className="mt-3 rounded-2xl border border-white/10 bg-black/15 p-3">
-                              <p className="mb-2 text-xs font-medium uppercase tracking-[.14em] text-white/55">
-                                {message.media_voice ? "Voice note" : "Audio message"}
-                              </p>
-                              <audio
-                                controls
-                                preload="none"
-                                src={`/api/admin/whatsapp/media/${encodeURIComponent(message.media_id)}`}
-                                className="w-full"
-                              >
-                                Your browser cannot play this WhatsApp audio message.
-                              </audio>
-                              {message.media_filename || message.media_mime_type ? (
-                                <p className="mt-2 text-xs text-white/45">
-                                  {[message.media_filename, message.media_mime_type].filter(Boolean).join(" · ")}
-                                </p>
-                              ) : null}
-                            </div>
-                          ) : (
-                            <p className="mt-2 whitespace-pre-wrap text-sm leading-6">
-                              {message.message_text || getMessageFallbackText(message)}
+                          <span>{message.direction === "outbound" ? "Outbound" : "Inbound"}</span>
+                          <span>{formatDateTime(message.message_timestamp)}</span>
+                        </div>
+                        {message.message_type === "audio" && message.media_id ? (
+                          <div
+                            className={`mt-2.5 rounded-lg p-2.5 ${
+                              message.direction === "outbound"
+                                ? "bg-white/15"
+                                : "border border-rule bg-paper-sunk"
+                            }`}
+                          >
+                            <p
+                              className={`mb-2 text-[0.65rem] font-medium uppercase tracking-[.12em] ${
+                                message.direction === "outbound" ? "text-white/80" : "text-ink-faint"
+                              }`}
+                            >
+                              {message.media_voice ? "Voice note" : "Audio message"}
                             </p>
-                          )}
-                          {message.delivery_status ? (
-                            <p className="mt-2 text-xs text-white/45">Delivery status: {message.delivery_status}</p>
-                          ) : null}
-                        </article>
-                      ))
-                    ) : (
-                      <div className="rounded-2xl border border-dashed border-white/15 px-4 py-6 text-sm text-white/55">
-                        No stored conversation messages for this lead yet.
-                      </div>
-                    )}
-                  </div>
+                            <audio
+                              controls
+                              preload="none"
+                              src={`/api/admin/whatsapp/media/${encodeURIComponent(message.media_id)}`}
+                              className="w-full"
+                            >
+                              Your browser cannot play this WhatsApp audio message.
+                            </audio>
+                            {message.media_filename || message.media_mime_type ? (
+                              <p
+                                className={`mt-2 text-[0.7rem] ${
+                                  message.direction === "outbound" ? "text-white/65" : "text-ink-faint"
+                                }`}
+                              >
+                                {[message.media_filename, message.media_mime_type].filter(Boolean).join(" · ")}
+                              </p>
+                            ) : null}
+                          </div>
+                        ) : (
+                          <p className="mt-1.5 whitespace-pre-wrap text-sm leading-6">
+                            {message.message_text || getMessageFallbackText(message)}
+                          </p>
+                        )}
+                        {message.delivery_status ? (
+                          <p
+                            className={`mt-1.5 text-[0.7rem] ${
+                              message.direction === "outbound" ? "text-white/65" : "text-ink-faint"
+                            }`}
+                          >
+                            Delivery status: {message.delivery_status}
+                          </p>
+                        ) : null}
+                      </article>
+                    ))
+                  ) : (
+                    <div className="rounded-lg border border-dashed border-rule-strong px-4 py-6 text-sm text-ink-faint">
+                      No stored conversation messages for this lead yet.
+                    </div>
+                  )}
                 </div>
-
-                <ReplyComposer
-                  conversationId={model.selectedLead.id}
-                  waId={model.selectedLead.wa_id}
-                  composerState={composerState}
-                />
-              </>
-            ) : (
-              <div className="rounded-2xl border border-dashed border-white/10 px-4 py-10 text-center text-sm text-white/55">
-                Select a lead to view conversation details.
               </div>
-            )}
-          </aside>
-        </div>
+
+              <ReplyComposer
+                conversationId={model.selectedLead.id}
+                waId={model.selectedLead.wa_id}
+                composerState={composerState}
+              />
+            </>
+          ) : (
+            <div className="rounded-lg border border-dashed border-rule-strong px-4 py-12 text-center text-sm text-ink-faint">
+              Select a lead to view conversation details.
+            </div>
+          )}
+        </aside>
       </div>
-    </main>
+    </div>
   );
 }

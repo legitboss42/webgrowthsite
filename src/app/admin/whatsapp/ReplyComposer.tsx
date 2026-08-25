@@ -191,16 +191,18 @@ export default function ReplyComposer({ conversationId, waId, initialText = "", 
   }
 
   return (
-    <form onSubmit={handleSubmit} className="mt-6 rounded-3xl border border-white/10 bg-black/15 p-4">
-      <div className="flex items-center justify-between gap-3">
-        <div>
-          <h3 className="text-sm font-semibold uppercase tracking-[.18em] text-white/70">Reply from inbox</h3>
-          <p className="mt-2 text-sm text-white/60">{helperText}</p>
+    <form onSubmit={handleSubmit} className="mt-5 rounded-xl border border-rule bg-paper p-4">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="min-w-0 flex-1">
+          <h3 className="text-[0.7rem] font-semibold uppercase tracking-[.16em] text-ink-faint">
+            Reply from inbox
+          </h3>
+          <p className="mt-1.5 text-sm leading-6 text-ink-soft">{helperText}</p>
         </div>
         <button
           type="submit"
           disabled={!composerState.enabled || isPending}
-          className="rounded-full bg-emerald-400 px-4 py-2 text-sm font-medium text-black transition disabled:cursor-not-allowed disabled:bg-white/10 disabled:text-white/45"
+          className="flex-none rounded-full bg-ledger-bright px-4 py-2 text-sm font-medium text-white transition hover:bg-ledger disabled:cursor-not-allowed disabled:bg-paper-sunk disabled:text-ink-faint"
         >
           {isPending ? "Sending..." : "Send reply"}
         </button>
@@ -211,15 +213,15 @@ export default function ReplyComposer({ conversationId, waId, initialText = "", 
         onChange={(event) => setMessage(event.target.value)}
         disabled={!composerState.enabled || isPending}
         rows={5}
-        className="mt-4 w-full rounded-2xl border border-white/10 bg-[#07110c] px-4 py-3 text-sm text-white outline-none ring-0 placeholder:text-white/30 disabled:cursor-not-allowed disabled:opacity-60"
+        className="mt-3.5 w-full rounded-lg border border-rule bg-paper-raised px-4 py-3 text-sm text-ink outline-none transition placeholder:text-ink-faint/70 focus:border-ledger-bright focus:ring-2 focus:ring-ledger-bright/20 disabled:cursor-not-allowed disabled:bg-paper-sunk disabled:opacity-70"
         placeholder="Type a careful reply. Avoid pricing, scope, timeline, or contract commitments unless you are intentionally handling them yourself."
       />
 
-      <div className="mt-4 rounded-2xl border border-white/10 bg-white/[0.03] p-3">
+      <div className="mt-3.5 rounded-lg border border-rule bg-paper-raised p-3">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[.18em] text-white/55">Voice note</p>
-            <p className="mt-1 text-xs text-white/45">
+            <p className="text-[0.7rem] font-semibold uppercase tracking-[.16em] text-ink-faint">Voice note</p>
+            <p className="mt-1 text-xs leading-5 text-ink-faint">
               Record short replies only when the customer service window is open. Your browser will ask for microphone permission.
             </p>
           </div>
@@ -229,7 +231,7 @@ export default function ReplyComposer({ conversationId, waId, initialText = "", 
                 type="button"
                 onClick={stopRecording}
                 disabled={isPending}
-                className="rounded-full bg-rose-400 px-4 py-2 text-xs font-semibold text-black transition disabled:cursor-not-allowed disabled:bg-white/10 disabled:text-white/45"
+                className="rounded-full bg-rose-600 px-4 py-2 text-xs font-semibold text-white transition hover:bg-rose-700 disabled:cursor-not-allowed disabled:bg-paper-sunk disabled:text-ink-faint"
               >
                 Stop recording
               </button>
@@ -238,7 +240,7 @@ export default function ReplyComposer({ conversationId, waId, initialText = "", 
                 type="button"
                 onClick={startRecording}
                 disabled={!composerState.enabled || isPending || recordingState === "unsupported"}
-                className="rounded-full bg-white px-4 py-2 text-xs font-semibold text-black transition hover:bg-emerald-100 disabled:cursor-not-allowed disabled:bg-white/10 disabled:text-white/45"
+                className="rounded-full border border-rule-strong bg-paper px-4 py-2 text-xs font-semibold text-ink transition hover:border-ledger hover:text-ledger disabled:cursor-not-allowed disabled:border-rule disabled:bg-paper-sunk disabled:text-ink-faint"
               >
                 Record voice note
               </button>
@@ -247,7 +249,7 @@ export default function ReplyComposer({ conversationId, waId, initialText = "", 
               type="button"
               onClick={sendRecordedAudio}
               disabled={!composerState.enabled || !recordedAudio || isPending}
-              className="rounded-full bg-emerald-400 px-4 py-2 text-xs font-semibold text-black transition disabled:cursor-not-allowed disabled:bg-white/10 disabled:text-white/45"
+              className="rounded-full bg-ledger-bright px-4 py-2 text-xs font-semibold text-white transition hover:bg-ledger disabled:cursor-not-allowed disabled:bg-paper-sunk disabled:text-ink-faint"
             >
               Send voice note
             </button>
@@ -256,7 +258,7 @@ export default function ReplyComposer({ conversationId, waId, initialText = "", 
                 type="button"
                 onClick={discardRecording}
                 disabled={isPending}
-                className="rounded-full border border-white/10 px-4 py-2 text-xs font-semibold text-white/70 transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60"
+                className="rounded-full border border-rule px-4 py-2 text-xs font-semibold text-ink-soft transition hover:border-rule-strong hover:text-ink disabled:cursor-not-allowed disabled:opacity-60"
               >
                 Discard
               </button>
@@ -264,19 +266,19 @@ export default function ReplyComposer({ conversationId, waId, initialText = "", 
           </div>
         </div>
         {recordingState === "unsupported" ? (
-          <p className="mt-3 text-xs text-amber-100">
+          <p className="mt-3 rounded-lg border border-brass/25 bg-brass-tint px-3 py-2 text-xs leading-5 text-[#6f4f16]">
             In-browser recording is not supported by this browser in a Meta-compatible audio format. Use the audio upload fallback below.
           </p>
         ) : null}
-        <label className="mt-3 block rounded-2xl border border-dashed border-white/15 bg-black/10 p-3 text-xs text-white/65">
-          <span className="block font-semibold text-white/75">Mobile fallback: upload a recorded audio file</span>
-          <span className="mt-1 block">Accepted: OGG, MP3, MP4/M4A, AAC, or AMR. This is useful when your phone browser cannot record a Meta-compatible voice note directly.</span>
+        <label className="mt-3 block rounded-lg border border-dashed border-rule-strong bg-paper p-3 text-xs text-ink-soft">
+          <span className="block font-semibold text-ink">Mobile fallback: upload a recorded audio file</span>
+          <span className="mt-1 block leading-5 text-ink-faint">Accepted: OGG, MP3, MP4/M4A, AAC, or AMR. This is useful when your phone browser cannot record a Meta-compatible voice note directly.</span>
           <input
             type="file"
             accept="audio/ogg,audio/mpeg,audio/mp4,audio/aac,audio/amr,.ogg,.mp3,.m4a,.mp4,.aac,.amr"
             disabled={!composerState.enabled || isPending}
             onChange={(event) => handleAudioFileSelected(event.target.files?.[0] || null)}
-            className="mt-3 block w-full text-xs text-white/70 file:mr-3 file:rounded-full file:border-0 file:bg-white file:px-3 file:py-2 file:text-xs file:font-semibold file:text-black disabled:cursor-not-allowed disabled:opacity-60"
+            className="mt-3 block w-full text-xs text-ink-soft file:mr-3 file:rounded-full file:border-0 file:bg-ledger file:px-3 file:py-2 file:text-xs file:font-semibold file:text-on-dark disabled:cursor-not-allowed disabled:opacity-60"
           />
         </label>
         {recordedAudioUrl ? (

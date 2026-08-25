@@ -85,21 +85,21 @@ export default function WhatsAppInboxAutoRefresh() {
 
   if (permission === "granted") {
     return (
-      <div className="fixed bottom-4 right-4 z-40 rounded-full border border-emerald-400/25 bg-emerald-500/15 px-4 py-2 text-xs font-medium text-emerald-100 shadow-lg shadow-black/25">
+      <div className="fixed bottom-4 right-4 z-40 rounded-full border border-ledger/15 bg-ledger-tint px-4 py-2 text-xs font-medium text-ledger shadow-lg shadow-ink/10">
         {statusText}
       </div>
     );
   }
 
   return (
-    <div className="fixed bottom-4 right-4 z-40 max-w-[min(22rem,calc(100vw-2rem))] rounded-2xl border border-white/10 bg-[#07110c] p-3 text-xs text-white shadow-lg shadow-black/30">
+    <div className="fixed bottom-4 right-4 z-40 max-w-[min(22rem,calc(100vw-2rem))] rounded-xl border border-rule bg-paper-raised p-3 text-xs text-ink shadow-xl shadow-ink/15">
       {inPageAlert ? (
-        <div className="mb-3 rounded-xl border border-emerald-400/25 bg-emerald-500/15 p-3">
-          <p className="font-semibold text-emerald-100">{inPageAlert.title}</p>
-          <p className="mt-1 text-white/70">{inPageAlert.body}</p>
+        <div className="mb-3 rounded-lg border border-ledger/15 bg-ledger-tint p-3">
+          <p className="font-semibold text-ledger">{inPageAlert.title}</p>
+          <p className="mt-1 leading-5 text-ink-soft">{inPageAlert.body}</p>
         </div>
       ) : null}
-      <p className="text-white/65">{statusText}</p>
+      <p className="leading-5 text-ink-soft">{statusText}</p>
       {permission === "default" ? (
         <button
           type="button"
@@ -107,7 +107,7 @@ export default function WhatsAppInboxAutoRefresh() {
             const nextPermission = await Notification.requestPermission();
             setPermission(nextPermission);
           }}
-          className="mt-3 rounded-full bg-white px-4 py-2 text-xs font-semibold text-black transition hover:bg-emerald-100"
+          className="mt-3 rounded-full bg-ledger-bright px-4 py-2 text-xs font-semibold text-white transition hover:bg-ledger"
         >
           Enable WhatsApp alerts
         </button>
