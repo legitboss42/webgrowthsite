@@ -6,8 +6,9 @@
 
 ## Current phase
 
-**Increment 3 (3-column conversations inbox) — COMPLETE and verified.**
-Next up: Increment 4 (Contacts). Nothing is in progress mid-edit.
+**Increment 4 (Contacts) — COMPLETE and verified.** This closes the first milestone
+except Templates and Quick Replies. Next up: Increment 5 (Templates or Quick Replies).
+Nothing is in progress mid-edit.
 
 ## NEVER run `npm run build` while `npm run dev` is running
 
@@ -142,9 +143,37 @@ Growth Ledger, light/paper identity. Tailwind v4 `@theme` in `src/app/globals.cs
   mockup's 3-column layout (list | thread | contact details) on desktop and shows exactly
   one panel at a time on phones. Chat-bubble thread on a dotted canvas, per-column
   scrolling, and the composer pinned below the thread. All prior behaviour intact.
-- **Increment 4 — Contacts. ← NEXT.** Real data from `whatsapp_contacts`.
-- **Later** — Templates, Quick Replies, Campaigns, Automations, deep Analytics
+- **Increment 4 — Contacts. ✅ COMPLETE (verified).** `/admin/whatsapp/contacts` lists
+  `whatsapp_contacts` with real columns only, temperature filter chips with counts, a
+  no-JavaScript search, desktop table + mobile cards, and a link into each contact's
+  conversation where one exists.
+- **Increment 5 — Templates or Quick Replies. ← NEXT.** See "Next exact task".
+- **Later** — Campaigns, Automations, deep Analytics, Phone Numbers, Settings
   (each its own increment, additive migrations only, honest empty states until wired).
+
+## Increment 4 notes
+
+- **Search is injection-safe by construction.** `sanitizeWhatsAppSearchTerm` strips every
+  character with meaning inside a PostgREST filter (`,` `(` `)` `*` `%` quotes, backslashes,
+  control chars), keeps what people actually search with (letters, digits, space, `@ . _ - +`),
+  and caps length at 64. `buildWhatsAppContactSearchFilter` then builds the
+  `or=(...)` fragment URL-encoded. A test asserts a hostile term
+  (`x),lead_status.eq.open,(y`) cannot escape. **Never interpolate raw user input into a
+  PostgREST query** — route it through these helpers.
+- **Search needs no client JavaScript** — it is a plain `<form method="get">`, so the page
+  stays a server component and the query lives in the URL.
+- **The temperature filter is whitelisted** (`isWhatsAppContactFilter`) before reaching
+  `lead_temperature=eq.…`, so that value can never be attacker-controlled either.
+- **Embedded conversation shape.** PostgREST may return an embedded row as an object or a
+  single-element array depending on how it resolves the relationship, so
+  `normalizeWhatsAppContactRow` accepts both (tested both ways).
+- **Naming:** the model module is `contactsModel.ts`, deliberately NOT `contacts.ts`,
+  because a `contacts/` route directory sits beside it — `contacts.ts` would resolve fine
+  today but silently lose to `contacts/index.ts` if anyone ever added one.
+- **Result cap is disclosed.** The query pulls at most `WHATSAPP_CONTACT_PAGE_SIZE` (200)
+  rows ordered by `updated_at.desc`; when that cap is hit the page says so and points at
+  search, rather than silently truncating.
+
 
 ## Increment 3 notes
 
@@ -207,6 +236,9 @@ Growth Ledger, light/paper identity. Tailwind v4 `@theme` in `src/app/globals.cs
 - `src/app/admin/whatsapp/overview.ts` — pure overview model + hand-rolled SVG geometry
 - `src/app/admin/whatsapp/overview.test.ts` — 11 tests for the model and chart maths
 - `src/app/admin/whatsapp/conversations/page.tsx` — the inbox (moved from the root, via `git mv`)
+- `src/app/admin/whatsapp/contactsModel.ts` — contact model + injection-safe search helpers
+- `src/app/admin/whatsapp/contactsModel.test.ts` — 12 tests incl. a search-injection test
+- `src/app/admin/whatsapp/contacts/page.tsx` — the contact directory
 
 ## Files modified (this redesign)
 
@@ -230,17 +262,19 @@ Growth Ledger, light/paper identity. Tailwind v4 `@theme` in `src/app/globals.cs
 - `src/lib/route-governance.json` — added `/admin/whatsapp/conversations/` (NOINDEX) and
   retitled the root entry. Scheduler entries untouched.
 
-## Verification (Increments 1–3, all green)
+## Verification (Increments 1–4, all green)
 
-- `npx tsx --test src/app/admin/whatsapp/*.test.ts src/components/whatsapp/nav.test.ts src/lib/whatsapp/*.test.ts` → **77/77 pass**
+- `npx tsx --test src/app/admin/whatsapp/*.test.ts src/components/whatsapp/nav.test.ts src/lib/whatsapp/*.test.ts` → **89/89 pass**
 - `npx tsc --noEmit` → **clean**
 - `npx eslint src/components/whatsapp src/components/SiteChrome.tsx src/app/admin/whatsapp src/app/layout.tsx` → **0 problems**
   (do NOT judge by bare `npm run lint`: it walks `.codex-temp/` and reports ~814 pre-existing findings)
-- `npm run build` → **✓ Compiled successfully**; "Sitemap validation passed"; both console
-  routes, all 4 admin API routes and the webhook present; public pages still static.
-- Dev smoke test on a clean `.next`: `/admin/whatsapp/` 200,
-  `/admin/whatsapp/conversations/` 200, `?filter=REVIEW&panel=contact` 200, `/` 200.
-  Unauthenticated requests correctly render the unlock form on console routes.
+- `npm run build` → **✓ Compiled successfully**; "Sitemap validation passed / Governed
+  routes: 87"; `/admin/whatsapp`, `/admin/whatsapp/conversations`,
+  `/admin/whatsapp/contacts`, all 4 admin API routes and the webhook present; public pages
+  still prerendered static. (A cold build after `rm -rf .next` takes ~4.5 min.)
+- Dev smoke test on a clean `.next`: contacts 200, contacts with `?temp=HOT&q=…` 200,
+  contacts with deliberately hostile `temp`/`q` values 200 (filters neutralised, no 500),
+  inbox 200, overview 200, `/` 200. Unauthenticated requests render the unlock form.
 - `git status` → only WhatsApp-redesign files. No TikTok/scheduler file, no
   `package-lock.json`, no `.codex-temp` change.
 
@@ -285,13 +319,26 @@ WhatsApp-redesign files by explicit path. Never `git add -A` / `commit -am`.
 
 ## Next exact task
 
-Increment 4 — Contacts:
-1. Add `src/app/admin/whatsapp/contacts/page.tsx` listing `whatsapp_contacts` (real
-   columns only: `display_name`, `wa_id`, `phone`, `business_name`, `email`, `website`,
-   `source`, `lead_temperature`, `lead_status`, `created_at`).
-2. **Register `/admin/whatsapp/contacts/` in `src/lib/route-governance.json`** or the
-   build fails (see the CRITICAL build rule near the top of this file).
-3. Flip Contacts to `status: "live"` in `nav.ts` and update the
-   "only routes that exist today are marked live" assertion in `nav.test.ts`.
-4. Each row links into its conversation where one exists; honest empty state otherwise.
-5. Re-run the full verification list above, update this doc, checkpoint-commit.
+Increment 5 — Templates and Quick Replies (pick one; Quick Replies is the smaller win):
+
+**Quick Replies** (no Meta dependency, so it can ship first):
+1. New additive migration `supabase/migrations/<timestamp>_whatsapp_quick_replies.sql`:
+   `whatsapp_quick_replies` (id, shortcut text unique, body text, created_at, updated_at),
+   `enable row level security` and NO policies, matching the existing tables.
+2. `/admin/whatsapp/quick-replies` page: list, create, edit, delete via a server action or
+   an `/api/admin/whatsapp/quick-replies` route — reuse `hasWhatsAppAdminAccess`.
+3. Surface them in `ReplyComposer` as insert-into-textarea buttons (client-side only, no
+   change to how sending works).
+
+**Templates** (read-only first): fetch approved templates from the Graph API
+`/{WHATSAPP_BUSINESS_ACCOUNT_ID}/message_templates` server-side. NOTE: there is currently
+no `WHATSAPP_BUSINESS_ACCOUNT_ID` env var — confirm it exists before promising the page,
+and show an honest "not configured" state if it is missing.
+
+For either one, remember:
+- **Register the new route in `src/lib/route-governance.json`** or the build fails.
+- Flip its `status` to `"live"` in `nav.ts` and update the "only routes that exist today
+  are marked live" assertion in `nav.test.ts`.
+- Re-run the full verification list above (stop dev before building), update this doc,
+  checkpoint-commit.
+

@@ -55,7 +55,11 @@ test("unknown console routes fall back to a neutral page title", () => {
 
 test("only routes that exist today are marked live", () => {
   const live = WHATSAPP_NAV_ITEMS.filter((item) => item.status === "live").map((item) => item.href);
-  assert.deepEqual(live, ["/admin/whatsapp", "/admin/whatsapp/conversations"]);
+  assert.deepEqual(live, [
+    "/admin/whatsapp",
+    "/admin/whatsapp/conversations",
+    "/admin/whatsapp/contacts",
+  ]);
 });
 
 test("only the inbox fills the viewport; other pages scroll normally", () => {

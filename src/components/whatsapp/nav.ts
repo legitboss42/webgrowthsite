@@ -57,7 +57,7 @@ export const WHATSAPP_NAV_SECTIONS: WhatsAppNavSection[] = [
         href: `${WHATSAPP_CONSOLE_ROOT}/contacts`,
         icon: "contacts",
         description: "Everyone who has messaged the business number.",
-        status: "soon",
+        status: "live",
       },
       {
         label: "Templates",
