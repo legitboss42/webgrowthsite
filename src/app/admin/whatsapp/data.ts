@@ -65,6 +65,43 @@ export function parseWhatsAppContentRangeTotal(value: string | null | undefined)
   return Number.isFinite(parsed) ? parsed : null;
 }
 
+export type WhatsAppTableProbe = "ok" | "missing" | "unreachable" | "unconfigured";
+
+/**
+ * Reports whether a table exists, so Settings can tell "the migration has not been
+ * applied" apart from "the database is unreachable". `readWhatsAppRows` collapses
+ * both into `null`, which is right for a page rendering data but useless for a page
+ * diagnosing configuration.
+ *
+ * PostgREST answers an unknown table with 404 and a `PGRST205` (formerly `42P01`)
+ * code, so a 404 is read as a missing table rather than a transport failure.
+ */
+export async function probeWhatsAppTable(table: string): Promise<WhatsAppTableProbe> {
+  const config = getWhatsAppSupabaseConfig();
+  if (!config) return "unconfigured";
+
+  try {
+    const response = await fetch(
+      `${config.url}/rest/v1/${encodeURIComponent(table)}?select=*&limit=1`,
+      {
+        headers: { apikey: config.key, Authorization: `Bearer ${config.key}`, Range: "0-0" },
+        cache: "no-store",
+      },
+    );
+    if (response.ok) return "ok";
+    if (response.status === 404) return "missing";
+
+    const payload = (await response.json().catch(() => null)) as { code?: string } | null;
+    if (payload?.code === "PGRST205" || payload?.code === "42P01") return "missing";
+
+    console.error("WhatsApp table probe failed", { table, status: response.status });
+    return "unreachable";
+  } catch (error) {
+    console.error("Unable to probe WhatsApp table", table, error);
+    return "unreachable";
+  }
+}
+
 export type WhatsAppMutationResult =
   | { ok: true; rows: Array<Record<string, unknown>> }
   | { ok: false; status: number; code?: string; message: string };

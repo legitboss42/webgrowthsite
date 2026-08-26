@@ -6,8 +6,8 @@
 
 ## Current phase
 
-**Increment 8 (Analytics) — COMPLETE and verified.** Seven console pages live.
-Remaining: Campaigns, Automations, Settings — none started.
+**Increment 9 (Settings) — COMPLETE and verified.** Eight console pages live.
+Remaining: Campaigns, Automations — neither started.
 Nothing is in progress mid-edit.
 
 ### The user's 15-stage order, mapped to code (as at 2026-08-26)
@@ -32,6 +32,10 @@ Nothing is in progress mid-edit.
 
 Stage 9 is the only genuinely unfinished earlier stage, and it is blocked on the same
 kind of hand-applied migration as Stage 11 — not on code.
+
+Settings is not one of the user's 15 stages. It was built as Increment 9 because it was
+the lightest remaining route and it makes the two migration blockers (Stages 9 and 11)
+visible in the UI instead of only in this document.
 
 ## Session recovery log — 2026-08-26
 
@@ -288,8 +292,54 @@ Growth Ledger, light/paper identity. Tailwind v4 `@theme` in `src/app/globals.cs
   volume, delivery, response time, and new-contact quality over a 7/30/90-day range, all
   derived from stored messages. No Meta Insights call, no charting dependency, and every
   rate is blank rather than 0% when there is nothing to divide by.
-- **Later** — Campaigns, Automations, Settings
+- **Increment 9 — Settings. ✅ COMPLETE (verified).** `/admin/whatsapp/settings` reports
+  which environment variables are set, which capabilities that leaves available, whether
+  Meta still accepts the token, which tables actually exist, and how the console is gated.
+  Read-only. Secrets are reported as set/missing and never displayed — a test enforces it.
+- **Later** — Campaigns, Automations
   (each its own increment, additive migrations only, honest empty states until wired).
+
+## Increment 9 notes
+
+- **The model is `settingsModel.ts`**, following the same suffix rule as
+  `analyticsModel.ts` / `contactsModel.ts` / `quickRepliesModel.ts`.
+- **The display rule is mechanical, not a judgement call at each render site.** Every row
+  carries a `kind`: `secret` rows always have `value: null`, `identifier` and `option` rows
+  carry their value. A test builds rows from an env where every secret is the literal
+  `LEAKED-SECRET-VALUE` and asserts that string appears nowhere in
+  `JSON.stringify(rows)`. If someone later adds a masked-preview field, that test fails.
+- **Identifiers are shown in full; secrets never are.** `WHATSAPP_PHONE_NUMBER_ID`,
+  `WHATSAPP_BUSINESS_ACCOUNT_ID`, and `SUPABASE_URL` are configuration — they cannot send
+  or read anything on their own, and the Phone Numbers page already displays phone number
+  ids. The access token, app secret, verify token, and service role key are reported as
+  set/missing and nothing more: no prefix, no last-4, no length.
+- **Resolution order mirrors production exactly.** `resolveWhatsAppGraphApiVersion` and
+  `resolveWhatsAppVerifyTokenSource` replicate the fallback chains in `send.ts`,
+  `phoneNumbers.ts`, and `api/whatsapp/webhook/route.ts`. If those ever diverge, Settings
+  would report a configuration the app is not using — worse than reporting nothing. Both
+  chains are covered by tests naming the file they mirror.
+- **Capabilities map missing variables onto symptoms.** "META_APP_SECRET is missing" means
+  little; "every inbound webhook is rejected as unsigned, so no message arrives" is the
+  thing the operator is already looking at. A test asserts no consequence string contains
+  a `WHATSAPP_` variable name, which keeps them written as symptoms.
+  Verified against the code: an empty app secret makes `isValidMetaSignature` return false
+  (webhook.ts:35) → 401 on every POST; an empty verify token makes `verifyWebhook` return
+  403 on the handshake (webhook.ts:28).
+- **`probeWhatsAppTable` was added to `data.ts` rather than reusing `readWhatsAppRows`.**
+  That helper collapses "table does not exist" and "database unreachable" into `null`,
+  which is right for rendering data and useless for diagnosing configuration. The probe
+  reads the status code and treats 404 / `PGRST205` / `42P01` as a missing table. This is
+  what surfaces the unapplied quick-replies migration directly in the UI.
+- **The one live check is the cached Graph read.** Presence of a token is not proof it
+  still works, so Settings reuses `fetchWhatsAppPhoneNumbers({ revalidateSeconds: 300 })` —
+  the same cached call the overview already makes, so the page adds no new Graph traffic.
+  Reasons are mapped to plain sentences; no provider response body is rendered.
+- **The console-pages list reads `WHATSAPP_NAV_SECTIONS`** instead of restating routes, so
+  it cannot drift from the nav. Links append a trailing slash because nav hrefs omit it and
+  `trailingSlash: true` would otherwise 308.
+- The webhook endpoint is shown **for reference only**, with a note that whatever is already
+  registered at Meta is what receives traffic. Settings must never imply the operator should
+  go change a working subscription.
 
 ## Increment 8 notes
 
@@ -491,6 +541,10 @@ Growth Ledger, light/paper identity. Tailwind v4 `@theme` in `src/app/globals.cs
   delivery breakdown, response times, totals, duration/rate formatting)
 - `src/app/admin/whatsapp/analyticsModel.test.ts` — 20 tests, no network or database
 - `src/app/admin/whatsapp/analytics/page.tsx` — the analytics page
+- `src/app/admin/whatsapp/settingsModel.ts` — pure settings model (env presence, resolution
+  chains, capability mapping, webhook URL); never returns a secret value
+- `src/app/admin/whatsapp/settingsModel.test.ts` — 20 tests incl. the secret-leak invariant
+- `src/app/admin/whatsapp/settings/page.tsx` — the settings page
 
 ## Files modified (this redesign)
 
@@ -513,6 +567,13 @@ Growth Ledger, light/paper identity. Tailwind v4 `@theme` in `src/app/globals.cs
   not touched.
 - `src/lib/route-governance.json` — added `/admin/whatsapp/conversations/` (NOINDEX) and
   retitled the root entry. Scheduler entries untouched.
+- `src/app/admin/whatsapp/data.ts` — **additive only.** Increment 9 appended
+  `probeWhatsAppTable` + `WhatsAppTableProbe`. No existing function was altered.
+- `src/components/whatsapp/nav.ts` + `nav.test.ts` — Increment 8 promoted Analytics to
+  `live`; Increment 9 promoted Settings to `live` and gave it a truer description. The
+  ordered live-routes assertion in the test is the thing that must be updated in step.
+- `src/lib/route-governance.json` — Increment 8 added `/admin/whatsapp/analytics/`,
+  Increment 9 added `/admin/whatsapp/settings/`. Both NOINDEX, `sitemap: false`.
 
 ## Files deleted (2026-08-26 recovery)
 
@@ -527,26 +588,39 @@ The live shell is `src/components/whatsapp/WhatsAppShell.tsx` with
 `src/app/admin/whatsapp/data.ts` (raw PostgREST + service-role key), **not**
 `supabase-js createClient`.
 
-## Verification (Increments 1–8, all green)
+## Verification (Increments 1–9, all green)
 
-Latest run — 2026-08-26, after Increment 8:
+Latest run — 2026-08-26, after Increment 9 (Settings):
 
-- `npx tsx --test $(git ls-files '*.test.ts')` plus the new
-  `src/app/admin/whatsapp/analyticsModel.test.ts` → **439/439 pass** (whole repo, scheduler
-  suites included; 140 of those are WhatsApp).
+- Every test file under `src/` (58 files) → **459/459 pass** (whole repo, scheduler suites
+  included; 160 of those are WhatsApp). There is **no `npm test` script** — run
+  `npx tsx --test $(find src -name '*.test.ts' -o -name '*.test.tsx')`.
 - `npx tsc --noEmit` → **clean**
 - `npx eslint src/app/admin/whatsapp src/components/whatsapp src/lib/whatsapp` → **0 problems**
   (do NOT judge by bare `npm run lint`: it walks `.codex-temp/` and reports ~814 pre-existing
   findings). Takes >2 minutes — run it in the background.
-- `npm run build` → **exit 0**. `node scripts/validate-sitemap.mjs` → "Sitemap validation
-  passed / Governed routes: **93**". `.next/app-path-routes-manifest.json` contains all
-  **seven** console pages (`/admin/whatsapp`, `/conversations`, `/contacts`, `/templates`,
-  `/quick-replies`, `/phone-numbers`, `/analytics`) plus all 5 admin API routes and the
-  webhook. Public pages still prerendered static.
+- `npm run build` → **exit 0**, "Compiled successfully". `validate-sitemap.mjs` → "Sitemap
+  validation passed / Governed routes: **94**". The build output lists all **eight** console
+  pages (`/admin/whatsapp`, `/analytics`, `/contacts`, `/conversations`, `/phone-numbers`,
+  `/quick-replies`, `/settings`, `/templates`) plus all 5 admin API routes and the webhook.
+  Public pages still prerendered static.
+- Security sweep of the three new files: no `NEXT_PUBLIC`, no `"use client"`, no `console.*`,
+  no placeholder text, and no secret env var interpolated into JSX. The three `process.env`
+  reads in the page pass the whole env into pure presence-only functions.
 - `git status --porcelain` by path → **no** `src/lib/scheduler`, `src/app/scheduler`,
   `src/app/api/scheduler`, `src/components/scheduler`, `src/app/connect`,
-  `src/app/api/tiktok`, `src/lib/tiktok*.ts`, `src/app/tiktok-media`, `.codex-temp`, or
-  `supabase/migrations` change. No landing-page change. No `package-lock.json` change.
+  `src/app/api/tiktok`, `src/lib/tiktok*.ts`, `src/app/tiktok-media`, `.codex-temp`,
+  `supabase/migrations`, `src/app/automation`, or `src/app/layout.tsx` change.
+
+**Not verified, both increments:** neither Analytics nor Settings has been opened in a real
+browser at any viewport, and no automated accessibility audit has been run. Both follow the
+established responsive grid + `overflow-x-auto` patterns and carry `<dl>`/`<table>` semantics
+with `scope` attributes, but that is structural, not observed.
+
+Previous run — 2026-08-26, after Increment 8:
+
+- 439/439 tests, `tsc --noEmit` clean, eslint 0 problems, build exit 0, 93 governed routes,
+  seven console pages in `.next/app-path-routes-manifest.json`.
 
 Earlier run — Increments 1–6:
 
@@ -615,19 +689,22 @@ WhatsApp-redesign files by explicit path. Never `git add -A` / `commit -am`.
 
 ## Next exact task
 
-Increment 8 is complete and nothing is half-finished. The remaining console routes are
-Campaigns, Automations, and Settings — plus one genuinely unfinished earlier requirement
-that is **blocked on the user, not on code**.
+Increment 9 is complete and nothing is half-finished. The remaining console routes are
+Campaigns and Automations — plus one genuinely unfinished earlier requirement that is
+**blocked on the user, not on code**.
 
 **Outstanding user actions**
 1. **Run the quick-replies migration against Supabase** —
    `supabase/migrations/202608250001_whatsapp_quick_replies.sql`. Nothing in the build or
    deploy applies migrations. Until it runs, `/admin/whatsapp/quick-replies` lists nothing
    and saving errors. See the BLOCKED section at the top for why it cannot be applied from
-   this environment.
+   this environment. **`/admin/whatsapp/settings` now reports this directly** — the
+   `whatsapp_quick_replies` row reads "Not created" until the SQL is run, so this is
+   verifiable in the UI rather than only in this document.
 2. **Confirm the production env** has `WHATSAPP_BUSINESS_ACCOUNT_ID` (it is in `.env.local`;
    Vercel needs it too, or Templates and Phone Numbers show their "not configured" state in
-   production).
+   production). Settings shows this as a missing variable and names the two features it
+   blocks.
 
 **Blocked, not skipped: conversation notes and labels.** The schema has no `notes` or
 `labels` column on `whatsapp_conversations` — the inbox says so honestly rather than
@@ -635,20 +712,23 @@ rendering an input that cannot save. Finishing it needs an additive migration th
 apply by hand, exactly like quick-replies. Do not build the UI before the column exists.
 
 **Candidate next increments** (ask which; do not assume):
-- **Settings** — lightest. A read-only integration/configuration page: webhook URL and
-  verify-token presence, app-secret presence, Graph API version, configured sender, and the
-  console's own preferences. Everything it needs already exists in `getWhatsAppSenderConfig()`.
 - **Automations** — auto-replies and routing rules. Needs a new table plus a decision about
   where rules execute (webhook path vs a job), so it touches the working receive path.
-  Read `src/lib/whatsapp/store.ts` end to end before proposing a design.
+  Read `src/lib/whatsapp/store.ts` end to end before proposing a design. Lighter of the two.
 - **Campaigns** — sends approved templates outbound. Heaviest and highest-risk: needs a new
-  send path, recipient selection, rate limiting, and opt-out/consent thinking. Do not start
-  it casually.
+  send path, recipient selection, rate limiting, and opt-out/consent thinking. This is the
+  one remaining piece that can get the WhatsApp account restricted if done carelessly. Do
+  not start it casually.
+- **Browser + accessibility pass** — a non-feature increment worth considering first.
+  Analytics and Settings are structurally responsive and semantically marked up but have
+  never been opened in a browser or audited. Cheaper than either feature and it closes the
+  one honest gap in the verification list.
 
 For any of them: register the route in `src/lib/route-governance.json`, flip `status` to
 `"live"` in `nav.ts`, update the live-routes assertion in `nav.test.ts` (**it asserts the
 exact ordered list**, and nav order is Workspace → Growth → Configuration), run the full
-verification list above (stop dev before building), update this doc, checkpoint-commit.
+verification list above (stop dev before building), update this doc, then commit **only if
+the user asks** — do not commit unprompted.
 
 
 

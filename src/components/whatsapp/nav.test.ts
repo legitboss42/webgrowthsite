@@ -63,6 +63,7 @@ test("only routes that exist today are marked live", () => {
     "/admin/whatsapp/quick-replies",
     "/admin/whatsapp/analytics",
     "/admin/whatsapp/phone-numbers",
+    "/admin/whatsapp/settings",
   ]);
 });
 

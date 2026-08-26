@@ -349,6 +349,12 @@
       "reason": "Internal WhatsApp volume, delivery, and response-time reporting"
     },
     {
+      "path": "/admin/whatsapp/settings/",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Internal WhatsApp integration configuration and readiness reporting"
+    },
+    {
       "path": "/connect/tiktok/",
       "status": "NOINDEX",
       "sitemap": false,
