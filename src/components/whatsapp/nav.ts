@@ -97,7 +97,7 @@ export const WHATSAPP_NAV_SECTIONS: WhatsAppNavSection[] = [
         href: `${WHATSAPP_CONSOLE_ROOT}/analytics`,
         icon: "analytics",
         description: "Response times, volumes, and lead quality.",
-        status: "soon",
+        status: "live",
       },
     ],
   },

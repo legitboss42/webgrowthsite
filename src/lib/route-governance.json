@@ -343,6 +343,12 @@
       "reason": "Internal WhatsApp sender status and limits"
     },
     {
+      "path": "/admin/whatsapp/analytics/",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Internal WhatsApp volume, delivery, and response-time reporting"
+    },
+    {
       "path": "/connect/tiktok/",
       "status": "NOINDEX",
       "sitemap": false,
