@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useId, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { WhatsAppIcon } from "./icons";
@@ -73,18 +74,31 @@ function SidebarContent({
       <Link
         href={WHATSAPP_CONSOLE_ROOT}
         onClick={onNavigate}
-        className="flex items-center gap-3 rounded-lg px-2 py-1.5 transition hover:bg-white/5"
+        aria-label="Web Growth WhatsApp console"
+        className="flex flex-col gap-1.5 rounded-lg px-2 py-2 transition hover:bg-white/5"
       >
-        <span className="grid h-9 w-9 flex-none place-items-center rounded-[0.625rem] bg-ledger-bright/90 text-white ring-1 ring-inset ring-white/15">
-          <WhatsAppIcon name="logo" className="h-[1.15rem] w-[1.15rem]" />
-        </span>
-        <span className="min-w-0">
-          <span className="block truncate text-[0.9rem] font-semibold leading-tight text-white">
-            Web Growth
-          </span>
-          <span className="block text-[0.65rem] uppercase tracking-[.16em] text-white/45">
-            WhatsApp
-          </span>
+        {/*
+          The project's own wordmark, not a console-only stand-in. The brass letterforms
+          carry their own contrast against the deep ledger green, which is the same
+          pairing the site loading screen already uses. `h-5 w-auto` lets the intrinsic
+          6.75:1 ratio drive the width, so it can never stretch.
+
+          `quality` must be one of `images.qualities` in next.config.mjs — an unlisted
+          value makes next/image throw at render, which took the whole console down to
+          its loading shell. 75 is what Header and Footer already use for this asset.
+        */}
+        <Image
+          src="/images/brand/web-growth-logo.webp"
+          alt="Web Growth"
+          width={270}
+          height={40}
+          sizes="160px"
+          quality={75}
+          priority
+          className="h-5 w-auto"
+        />
+        <span className="block text-[0.65rem] uppercase tracking-[.16em] text-white/45">
+          WhatsApp business
         </span>
       </Link>
 
@@ -221,6 +235,30 @@ export default function WhatsAppShell({
               <WhatsAppIcon name="menu" className="h-5 w-5" />
               <span className="sr-only">Open navigation</span>
             </button>
+
+            {/*
+              On a phone the sidebar wordmark sits behind the drawer, so nothing on screen
+              carries the mark until it is opened. The same official asset is repeated here
+              for small viewports only — the public site header already uses it on light
+              paper, so this is a proven pairing rather than a new treatment. `flex-none`
+              inside the wrapping row means a long page title reflows instead of squashing
+              the mark, and `h-4 w-auto` keeps the intrinsic 6.75:1 ratio.
+            */}
+            <Link
+              href={WHATSAPP_CONSOLE_ROOT}
+              aria-label="Web Growth WhatsApp console"
+              className="flex-none rounded-md p-1 transition hover:bg-paper-sunk lg:hidden"
+            >
+              <Image
+                src="/images/brand/web-growth-logo.webp"
+                alt="Web Growth"
+                width={270}
+                height={40}
+                sizes="120px"
+                quality={75}
+                className="h-4 w-auto"
+              />
+            </Link>
 
             <div className="min-w-0 flex-1">
               <h1 className="font-display text-lg font-semibold leading-tight text-ink sm:text-xl">

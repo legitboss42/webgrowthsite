@@ -1,5 +1,7 @@
 import { classifyWhatsAppIntent } from "./classify";
+import { getWhatsAppStatusesBelow, shouldApplyWhatsAppStatus } from "./messageStatus";
 import { normalizeWhatsAppRecipient } from "./send";
+import type { WhatsAppLeadKeywordRules } from "./settings";
 
 export type InboundMessageRecord = {
   messageId: string;
@@ -30,6 +32,7 @@ export type StoredMessage = {
   text?: string;
   timestamp: number;
   deliveryStatus?: string;
+  deliveryError?: string;
   mediaId?: string;
   mediaMimeType?: string;
   mediaSha256?: string;
@@ -40,13 +43,23 @@ export type StoredMessage = {
 export type WhatsAppStore = {
   recordInbound(input: InboundMessageRecord): Promise<{ duplicate: boolean }>;
   recordOutbound(input: OutboundMessageRecord): Promise<void>;
-  updateMessageStatus(messageId: string, status: string): Promise<void>;
+  /**
+   * Records a delivery status. Only ever moves forward: an out-of-order webhook
+   * cannot walk `delivered` back to `sent`, and nothing can un-fail a failed message.
+   * `error` is an already-sanitized sentence, never a provider payload.
+   */
+  updateMessageStatus(messageId: string, status: string, error?: string): Promise<void>;
 };
 
 type SupabaseStoreOptions = {
   url: string;
   serviceRoleKey: string;
   fetch?: typeof globalThis.fetch;
+  /**
+   * Operator keyword rules from the Settings page. Optional: without them the
+   * store classifies exactly as it did before settings existed.
+   */
+  leadKeywords?: WhatsAppLeadKeywordRules;
 };
 
 export type WhatsAppReplyContext = {
@@ -116,7 +129,7 @@ export function createSupabaseWhatsAppStore(options: SupabaseStoreOptions): What
   };
 
   const getConversation = async (input: InboundMessageRecord) => {
-    const classification = classifyWhatsAppIntent(input.text || "");
+    const classification = classifyWhatsAppIntent(input.text || "", options.leadKeywords);
     const contacts = await request<{ id: string }>("whatsapp_contacts?on_conflict=wa_id", {
       method: "POST",
       headers: { Prefer: "resolution=merge-duplicates,return=representation" },
@@ -186,6 +199,10 @@ export function createSupabaseWhatsAppStore(options: SupabaseStoreOptions): What
           message_type: input.type || "text",
           message_text: input.text,
           message_timestamp: timestamp,
+          // Ours, not Meta's: the Cloud API accepted the message and gave us an id.
+          // Ranked below `sent`, so the first real webhook supersedes it. Without this
+          // an outbound message would sit with no status at all until a webhook lands.
+          delivery_status: "accepted",
           media_id: input.mediaId,
           media_mime_type: input.mediaMimeType,
           media_sha256: input.mediaSha256,
@@ -194,8 +211,35 @@ export function createSupabaseWhatsAppStore(options: SupabaseStoreOptions): What
         }),
       });
     },
-    async updateMessageStatus(messageId, status) {
-      await request<{ id: string }>(`whatsapp_messages?whatsapp_message_id=eq.${encodeURIComponent(messageId)}`, { method: "PATCH", body: JSON.stringify({ delivery_status: status }) });
+    async updateMessageStatus(messageId, status, error) {
+      // Expressed as one conditional PATCH rather than a read followed by a write, so
+      // two webhooks arriving together cannot interleave and lose an update. The
+      // filter is the guard: rows already at or beyond `status` simply do not match.
+      const overwritable = getWhatsAppStatusesBelow(status);
+      const guard = overwritable.length
+        ? `&or=(delivery_status.is.null,delivery_status.in.(${overwritable.join(",")}))`
+        : "&delivery_status.is.null";
+      const path = `whatsapp_messages?whatsapp_message_id=eq.${encodeURIComponent(messageId)}${guard}`;
+
+      if (error) {
+        try {
+          await request<{ id: string }>(path, {
+            method: "PATCH",
+            body: JSON.stringify({ delivery_status: status, delivery_error: error }),
+          });
+          return;
+        } catch {
+          // `delivery_error` is an additive migration and may not have been applied on
+          // this deployment yet. The status is the part that matters, so fall through
+          // and store it alone rather than dropping the webhook entirely.
+          console.warn("WhatsApp delivery_error column unavailable; storing the status only");
+        }
+      }
+
+      await request<{ id: string }>(path, {
+        method: "PATCH",
+        body: JSON.stringify({ delivery_status: status }),
+      });
     },
   };
 }
@@ -265,6 +309,7 @@ export function createMemoryWhatsAppStore(): WhatsAppStore & {
         messageType: input.type || "text",
         text: input.text,
         timestamp: input.timestamp,
+        deliveryStatus: "accepted",
         mediaId: input.mediaId,
         mediaMimeType: input.mediaMimeType,
         mediaSha256: input.mediaSha256,
@@ -272,9 +317,12 @@ export function createMemoryWhatsAppStore(): WhatsAppStore & {
         mediaFilename: input.mediaFilename,
       });
     },
-    async updateMessageStatus(messageId, status) {
+    async updateMessageStatus(messageId, status, error) {
       const message = messages.find((item) => item.messageId === messageId);
-      if (message) message.deliveryStatus = status;
+      // The same forward-only rule the Supabase store enforces in its PATCH filter.
+      if (!message || !shouldApplyWhatsAppStatus(message.deliveryStatus, status)) return;
+      message.deliveryStatus = status;
+      if (error) message.deliveryError = error;
     },
   };
 }

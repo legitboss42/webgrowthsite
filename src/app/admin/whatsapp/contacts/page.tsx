@@ -3,6 +3,7 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import InternalUtilityUnlockForm from "@/components/internal/InternalUtilityUnlockForm";
 import { getInternalUtilityLocalPassphrase } from "@/lib/internalUtilityAuth";
+import ContactAvatar from "@/components/whatsapp/ContactAvatar";
 import { WhatsAppIcon } from "@/components/whatsapp/icons";
 import { hasWhatsAppAdminAccess } from "../auth";
 import { readWhatsAppRows } from "../data";
@@ -53,16 +54,6 @@ function formatDate(value: string | undefined) {
   const parsed = Date.parse(value);
   if (!Number.isFinite(parsed)) return "—";
   return new Date(parsed).toLocaleDateString([], { year: "numeric", month: "short", day: "numeric" });
-}
-
-function getInitials(contact: WhatsAppContactRow) {
-  const name = (contact.display_name || contact.business_name || "").trim();
-  if (!name) return contact.wa_id.slice(-2) || "??";
-  return name
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase() || "")
-    .join("");
 }
 
 function getTemperatureClasses(temperature: WhatsAppContactRow["lead_temperature"]) {
@@ -194,9 +185,13 @@ export default async function WhatsAppContactsPage({
             return (
               <li key={contact.id} className="px-4 py-3.5">
                 <div className="flex gap-3">
-                  <span className="grid h-10 w-10 flex-none place-items-center rounded-full bg-paper-sunk text-xs font-semibold text-ink-soft">
-                    {getInitials(contact)}
-                  </span>
+                  <ContactAvatar
+                    identity={{
+                      displayName: contact.display_name,
+                      businessName: contact.business_name,
+                      waId: contact.wa_id,
+                    }}
+                  />
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
                       <p className="truncate text-sm font-semibold text-ink">
@@ -278,9 +273,14 @@ export default async function WhatsAppContactsPage({
                   <tr key={contact.id} className="border-t border-rule transition hover:bg-paper-sunk/60">
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2.5">
-                        <span className="grid h-8 w-8 flex-none place-items-center rounded-full bg-paper-sunk text-[0.7rem] font-semibold text-ink-soft">
-                          {getInitials(contact)}
-                        </span>
+                        <ContactAvatar
+                          identity={{
+                            displayName: contact.display_name,
+                            businessName: contact.business_name,
+                            waId: contact.wa_id,
+                          }}
+                          size="sm"
+                        />
                         <div className="min-w-0">
                           <p className="truncate font-medium text-ink">{getWhatsAppContactName(contact)}</p>
                           {contact.business_name ? (

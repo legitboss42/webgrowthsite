@@ -105,3 +105,26 @@ test("sends one safe portfolio reply and never replies to a duplicate event", as
   assert.equal(replies.length, 1);
   assert.match(replies[0] || "", /webgrowth\.info\/portfolio/);
 });
+
+test("a message matching an operator spam keyword is stored but never auto-replied to", async () => {
+  const replies: string[] = [];
+  const stored: string[] = [];
+  const payload = {
+    object: "whatsapp_business_account",
+    entry: [{ changes: [{ value: { messages: [{ id: "wamid.spam", from: "2348000000000", timestamp: "1800000000", type: "text", text: { body: "Cheap loan, what is your price?" } }] } }] }],
+  };
+  const store = {
+    async recordInbound(message: { messageId: string }) { stored.push(message.messageId); return { duplicate: false }; },
+    async updateMessageStatus() {},
+    async recordOutbound() {},
+  };
+  const send = async ({ text }: { text: string }) => { replies.push(text); return { sent: true as const, messageId: "wamid.reply" }; };
+
+  // Without rules the built-in pricing match would acknowledge it.
+  await processWhatsAppWebhook(payload, store, send);
+  assert.equal(replies.length, 1);
+
+  await processWhatsAppWebhook(payload, store, send, { leadKeywords: { hot: [], warm: [], spam: ["loan"] } });
+  assert.equal(replies.length, 1, "the spam keyword must suppress the auto-reply");
+  assert.deepEqual(stored, ["wamid.spam", "wamid.spam"], "the message is still recorded either way");
+});

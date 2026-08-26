@@ -29,6 +29,12 @@ export type WhatsAppLeadMessage = {
   message_text?: string;
   message_timestamp?: string;
   delivery_status?: string;
+  /**
+   * Sanitized failure sentence for a message Meta rejected. Written by the status
+   * webhook, never a raw provider payload, and absent until migration 202608260002
+   * adds the column.
+   */
+  delivery_error?: string;
   media_id?: string;
   media_mime_type?: string;
   media_voice?: boolean;

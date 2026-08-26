@@ -13,7 +13,7 @@ import {
   resolveWhatsAppVerifyTokenSource,
   summarizeWhatsAppCapabilities,
   type WhatsAppEnvRecord,
-} from "./settingsModel";
+} from "./integrationModel";
 
 /** A deliberately obvious marker so a leak is unmistakable in an assertion failure. */
 const SECRET = "LEAKED-SECRET-VALUE";
@@ -240,5 +240,6 @@ test("the expected table list matches the applied migrations", () => {
     "whatsapp_messages",
     "whatsapp_events",
     "whatsapp_quick_replies",
+    "whatsapp_settings",
   ]);
 });

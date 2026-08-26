@@ -3,9 +3,13 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import InternalUtilityUnlockForm from "@/components/internal/InternalUtilityUnlockForm";
 import { getInternalUtilityLocalPassphrase } from "@/lib/internalUtilityAuth";
+import ContactAvatar from "@/components/whatsapp/ContactAvatar";
+import MessageStatus from "@/components/whatsapp/MessageStatus";
 import { WhatsAppIcon } from "@/components/whatsapp/icons";
+import { loadWhatsAppSettings } from "@/lib/whatsapp/settingsStore";
 import { hasWhatsAppAdminAccess } from "../auth";
 import WhatsAppInboxAutoRefresh from "../AutoRefresh";
+import OutboundQueueProvider, { PendingOutboundList } from "../OutboundQueue";
 import ReplyComposer from "../ReplyComposer";
 import { readWhatsAppRows } from "../data";
 import {
@@ -62,12 +66,32 @@ async function getLeads(): Promise<WhatsAppLeadRow[]> {
   });
 }
 
+const MESSAGE_COLUMNS =
+  "id,whatsapp_message_id,conversation_id,direction,message_type,message_text,message_timestamp,delivery_status,media_id,media_mime_type,media_voice,media_filename";
+
+/**
+ * Reads a thread, treating `delivery_error` as optional.
+ *
+ * That column arrives with migration 202608260002. PostgREST rejects a select that
+ * names a column the table does not have, and that rejection would blank the whole
+ * thread — so an unapplied migration costs the failure sentence on failed messages,
+ * never the messages themselves. Same degrade-don't-break rule the writer uses.
+ */
+async function readConversationMessageRows(conversationId: string) {
+  const scope = `whatsapp_messages?conversation_id=eq.${encodeURIComponent(conversationId)}`;
+  const withError = await readWhatsAppRows<Record<string, unknown>>(
+    `${scope}&select=${MESSAGE_COLUMNS},delivery_error&order=message_timestamp.asc`,
+  );
+  if (withError) return withError;
+  return readWhatsAppRows<Record<string, unknown>>(
+    `${scope}&select=${MESSAGE_COLUMNS}&order=message_timestamp.asc`,
+  );
+}
+
 async function getConversationMessages(conversationId: string | undefined): Promise<WhatsAppLeadMessage[]> {
   if (!conversationId) return [];
 
-  const rows = await readWhatsAppRows<Record<string, unknown>>(
-    `whatsapp_messages?conversation_id=eq.${encodeURIComponent(conversationId)}&select=id,whatsapp_message_id,conversation_id,direction,message_type,message_text,message_timestamp,delivery_status,media_id,media_mime_type,media_voice,media_filename&order=message_timestamp.asc`,
-  );
+  const rows = await readConversationMessageRows(conversationId);
   if (!rows) return [];
 
   return rows.map((row) => ({
@@ -79,6 +103,9 @@ async function getConversationMessages(conversationId: string | undefined): Prom
     message_text: typeof row.message_text === "string" ? row.message_text : undefined,
     message_timestamp: typeof row.message_timestamp === "string" ? row.message_timestamp : undefined,
     delivery_status: typeof row.delivery_status === "string" ? row.delivery_status : undefined,
+    // Already sanitized on the way in by the webhook handler, so this is a plain
+    // sentence rather than anything Meta said verbatim.
+    delivery_error: typeof row.delivery_error === "string" ? row.delivery_error : undefined,
     media_id: typeof row.media_id === "string" ? row.media_id : undefined,
     media_mime_type: typeof row.media_mime_type === "string" ? row.media_mime_type : undefined,
     media_voice: row.media_voice === true,
@@ -117,16 +144,6 @@ function formatRelative(value: string | undefined, now: number) {
   const diffDays = Math.round(diffHours / 24);
   if (diffDays < 7) return `${diffDays}d`;
   return new Date(parsed).toLocaleDateString([], { month: "short", day: "numeric" });
-}
-
-function getInitials(name: string | undefined, waId: string) {
-  const source = (name || "").trim();
-  if (!source) return waId.slice(-2) || "??";
-  return source
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase() || "")
-    .join("");
 }
 
 function getTemperatureClasses(temperature: WhatsAppLeadRow["lead_temperature"]) {
@@ -192,6 +209,9 @@ export default async function WhatsAppConversationsPage({
 
   const leadRows = await getLeads();
   const quickReplies = await getQuickReplies();
+  // Console settings drive the polling interval. The cache keeps this off the
+  // critical path, and a missing table falls back to the built-in default.
+  const { settings } = await loadWhatsAppSettings();
   const initialModel = buildWhatsAppDashboardModel({
     leads: leadRows,
     messages: [],
@@ -225,6 +245,13 @@ export default async function WhatsAppConversationsPage({
     lastMessageByConversation.set(message.conversation_id, message);
   }
 
+  // The dedup key for optimistic replies: every WhatsApp id the rendered thread already
+  // holds. A bubble whose id turns up here has become a real row and stops being drawn
+  // twice — see OutboundQueue.
+  const storedMessageIds = model.selectedMessages
+    .map((message) => message.whatsapp_message_id)
+    .filter((id): id is string => Boolean(id));
+
   const contactRows = lead
     ? [
         { label: "Intent", value: lead.intent || "—" },
@@ -242,7 +269,7 @@ export default async function WhatsAppConversationsPage({
 
   return (
     <div className="flex h-full min-h-0 flex-col lg:flex-row">
-      <WhatsAppInboxAutoRefresh />
+      <WhatsAppInboxAutoRefresh refreshSeconds={settings.console.inboxRefreshSeconds} />
 
       {/* Column 1 — conversation list */}
       <section
@@ -300,9 +327,13 @@ export default async function WhatsAppConversationsPage({
                     active ? "bg-ledger-tint" : "hover:bg-paper-sunk/60"
                   }`}
                 >
-                  <span className="grid h-10 w-10 flex-none place-items-center rounded-full bg-paper-sunk text-xs font-semibold text-ink-soft">
-                    {getInitials(item.display_name, item.wa_id)}
-                  </span>
+                  <ContactAvatar
+                    identity={{
+                      displayName: item.display_name,
+                      businessName: item.business_name,
+                      waId: item.wa_id,
+                    }}
+                  />
                   <span className="min-w-0 flex-1">
                     <span className="flex items-center gap-2">
                       <span className="truncate text-sm font-semibold text-ink">
@@ -356,7 +387,9 @@ export default async function WhatsAppConversationsPage({
         }`}
       >
         {lead ? (
-          <>
+          // Keyed on the conversation: switching leads must not carry a half-typed draft
+          // or an in-flight bubble across into someone else's thread.
+          <OutboundQueueProvider key={lead.id} storedMessageIds={storedMessageIds}>
             <div className="flex flex-none items-center gap-3 border-b border-rule bg-paper-raised px-4 py-3">
               <Link
                 href={getFilterHref(filter)}
@@ -365,9 +398,13 @@ export default async function WhatsAppConversationsPage({
                 <WhatsAppIcon name="chevronLeft" className="h-5 w-5" />
                 <span className="sr-only">Back to conversations</span>
               </Link>
-              <span className="grid h-10 w-10 flex-none place-items-center rounded-full bg-ledger text-sm font-semibold text-on-dark">
-                {getInitials(lead.display_name, lead.wa_id)}
-              </span>
+              <ContactAvatar
+                identity={{
+                  displayName: lead.display_name,
+                  businessName: lead.business_name,
+                  waId: lead.wa_id,
+                }}
+              />
               <div className="min-w-0 flex-1">
                 <h2 className="truncate text-sm font-semibold text-ink">
                   {lead.display_name || "Unknown lead"}
@@ -442,7 +479,12 @@ export default async function WhatsAppConversationsPage({
                         <time dateTime={message.message_timestamp}>
                           {formatTime(message.message_timestamp)}
                         </time>
-                        {message.delivery_status ? <span>· {message.delivery_status}</span> : null}
+                        <MessageStatus
+                          status={message.delivery_status}
+                          direction={message.direction}
+                          error={message.delivery_error}
+                          onDark={outbound}
+                        />
                       </p>
                     </article>
                   );
@@ -452,6 +494,7 @@ export default async function WhatsAppConversationsPage({
                   No stored messages for this conversation yet.
                 </div>
               )}
+              <PendingOutboundList />
             </div>
 
             <div className="max-h-[55%] flex-none overflow-y-auto border-t border-rule bg-paper-raised">
@@ -462,7 +505,7 @@ export default async function WhatsAppConversationsPage({
                 quickReplies={quickReplies}
               />
             </div>
-          </>
+          </OutboundQueueProvider>
         ) : (
           <div className="flex min-h-0 flex-1 items-center justify-center px-6 py-16">
             <div className="max-w-sm text-center">
@@ -504,9 +547,16 @@ export default async function WhatsAppConversationsPage({
             </p>
 
             <div className="mt-4 text-center">
-              <span className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-ledger text-xl font-semibold text-on-dark">
-                {getInitials(lead.display_name, lead.wa_id)}
-              </span>
+              <ContactAvatar
+                identity={{
+                  displayName: lead.display_name,
+                  businessName: lead.business_name,
+                  waId: lead.wa_id,
+                }}
+                size="lg"
+                labelled
+                className="mx-auto"
+              />
               <p className="mt-2.5 text-sm font-semibold text-ink">
                 {lead.display_name || "Unknown lead"}
               </p>

@@ -1,3 +1,4 @@
+import { applyWhatsAppLeadKeywords, type WhatsAppLeadKeywordRules } from "./settings";
 import type { WhatsAppClassification, WhatsAppIntent } from "./types";
 
 const SERVICE_WINDOW_SECONDS = 24 * 60 * 60;
@@ -11,8 +12,12 @@ function hot(intent: WhatsAppIntent): WhatsAppClassification {
   };
 }
 
-export function classifyWhatsAppIntent(input: string): WhatsAppClassification {
-  const text = input.trim().toLowerCase();
+/**
+ * The built-in rules. These are the floor: operator keywords layer on top of the
+ * result rather than replacing it, so intent detection cannot be switched off.
+ * `text` is already trimmed and lowercased.
+ */
+function classifyBuiltInIntent(text: string): WhatsAppClassification {
   if (!text) {
     return {
       intent: "OTHER",
@@ -51,6 +56,31 @@ export function classifyWhatsAppIntent(input: string): WhatsAppClassification {
     return { intent: "NEW_LEAD", temperature: "WARM", humanReviewRequired: false, safeReplyKind: "NEW_LEAD" };
   }
   return { intent: "OTHER", temperature: "COLD", humanReviewRequired: false, safeReplyKind: "NONE" };
+}
+
+/**
+ * Classifies an inbound message, optionally applying the operator's keyword rules
+ * from the Settings page.
+ *
+ * `rules` is optional so every existing caller and test keeps its behaviour
+ * exactly. When it is absent the result is the built-in classification and
+ * nothing else.
+ */
+export function classifyWhatsAppIntent(
+  input: string,
+  rules?: WhatsAppLeadKeywordRules,
+): WhatsAppClassification {
+  const text = input.trim().toLowerCase();
+  const base = classifyBuiltInIntent(text);
+  if (!rules) return base;
+
+  const applied = applyWhatsAppLeadKeywords(base, text, rules);
+  return {
+    intent: applied.intent,
+    temperature: applied.temperature,
+    humanReviewRequired: applied.humanReviewRequired,
+    safeReplyKind: applied.safeReplyKind,
+  };
 }
 
 export function isFreeformReplyAllowed(messageTimestamp: number, now = Date.now() / 1000) {

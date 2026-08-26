@@ -6,9 +6,21 @@ import { getInternalUtilityLocalPassphrase } from "@/lib/internalUtilityAuth";
 import { WhatsAppIcon } from "@/components/whatsapp/icons";
 import { WHATSAPP_NAV_SECTIONS } from "@/components/whatsapp/nav";
 import { SITE_URL } from "@/lib/site";
+import {
+  WHATSAPP_PROFILE_FIELD_LABELS,
+  fetchWhatsAppBusinessProfile,
+  summarizeWhatsAppBusinessProfile,
+} from "@/lib/whatsapp/businessProfile";
 import { fetchWhatsAppPhoneNumbers } from "@/lib/whatsapp/phoneNumbers";
+import {
+  describeWhatsAppBusinessDays,
+  isWhatsAppBusinessHoursOpen,
+  summarizeWhatsAppSettings,
+} from "@/lib/whatsapp/settings";
+import { loadWhatsAppSettings } from "@/lib/whatsapp/settingsStore";
 import { probeWhatsAppTable, type WhatsAppTableProbe } from "../data";
 import { hasWhatsAppAdminAccess } from "../auth";
+import SettingsEditor from "../SettingsEditor";
 import {
   WHATSAPP_EXPECTED_TABLES,
   buildWhatsAppCapabilities,
@@ -20,7 +32,7 @@ import {
   summarizeWhatsAppCapabilities,
   type WhatsAppSettingRow,
   type WhatsAppSettingStatus,
-} from "../settingsModel";
+} from "../integrationModel";
 
 export const metadata: Metadata = {
   title: "WhatsApp Settings | Web Growth",
@@ -64,7 +76,7 @@ function Section({
 }) {
   return (
     <section className="min-w-0 rounded-xl border border-rule bg-paper-raised p-5">
-      <h2 className="text-sm font-semibold text-ink">{title}</h2>
+      <h3 className="text-sm font-semibold text-ink">{title}</h3>
       <p className="mt-0.5 text-xs leading-5 text-ink-faint">{description}</p>
       <div className="mt-4">{children}</div>
     </section>
@@ -154,15 +166,24 @@ export default async function WhatsAppSettingsPage() {
 
   // Presence of a token is not proof it still works, so the one live check worth
   // making is the same cached Graph read the overview already performs.
-  const [phoneResult, tableProbes] = await Promise.all([
+  const [phoneResult, profileResult, tableProbes, settingsLoad] = await Promise.all([
     fetchWhatsAppPhoneNumbers({ revalidateSeconds: 300 }),
+    fetchWhatsAppBusinessProfile({ revalidateSeconds: 300 }),
     Promise.all(
       WHATSAPP_EXPECTED_TABLES.map(async (table) => ({
         table,
         probe: await probeWhatsAppTable(table),
       })),
     ),
+    // maxAgeMs: 0 — the editor must show what is actually stored, not a cached copy
+    // that could be up to a minute behind a save made in another tab.
+    loadWhatsAppSettings({ maxAgeMs: 0 }),
   ]);
+
+  const settings = settingsLoad.settings;
+  const settingsSummary = summarizeWhatsAppSettings(settings);
+  const openNow = isWhatsAppBusinessHoursOpen(settings.businessHours, new Date());
+  const storageReady = settingsLoad.reason !== "missing-table";
 
   const credentialCheck = phoneResult.ok
     ? { tone: "good" as Tone, label: "Accepted by Meta", note: `Read ${phoneResult.phoneNumbers.length} number${phoneResult.phoneNumbers.length === 1 ? "" : "s"} from the business account.` }
@@ -174,35 +195,148 @@ export default async function WhatsAppSettingsPage() {
 
   const missingTables = tableProbes.filter((entry) => entry.probe === "missing");
 
+  // The profile card reports Meta's own record. `unavailable` means we could not read it
+  // at all, which is a different statement from "there is no picture" and must not be
+  // collapsed into one.
+  const profileCard = (() => {
+    if (!profileResult.ok) {
+      return {
+        tone: "unavailable" as const,
+        chipTone: (profileResult.reason === "NOT_CONFIGURED" ? "neutral" : "warn") as Tone,
+        label: profileResult.reason === "NOT_CONFIGURED" ? "Not checked" : "Could not read",
+        note:
+          profileResult.reason === "NOT_CONFIGURED"
+            ? "The access token or phone number ID is missing, so there was nothing to read."
+            : "Meta did not return the business profile. The server log has the detail.",
+        hasPicture: false,
+        setFields: [] as string[],
+      };
+    }
+
+    const profileSummary = summarizeWhatsAppBusinessProfile(profileResult.profile);
+    return {
+      tone: "read" as const,
+      chipTone: (profileSummary.customerVisiblePicture ? "good" : "bad") as Tone,
+      label: profileSummary.customerVisiblePicture ? "Registered" : "Missing",
+      note: profileSummary.customerVisiblePicture
+        ? `${profileSummary.set.length} of ${profileSummary.set.length + profileSummary.missing.length} profile fields are filled in.${
+            profileSummary.missing.length ? ` Not set: ${profileSummary.missing.join(", ").toLowerCase()}.` : ""
+          }`
+        : "Meta holds no profile picture for this number, so customers see a blank avatar. Upload one in WhatsApp Manager.",
+      hasPicture: profileSummary.customerVisiblePicture,
+      setFields: profileSummary.set,
+    };
+  })();
+
   return (
     <div className="px-4 py-5 sm:px-6 sm:py-6">
-      <div
-        className={`rounded-xl border p-5 ${
-          missingRequired === 0
-            ? "border-ledger/20 bg-ledger-tint"
-            : "border-rose-200 bg-rose-50"
-        }`}
+      <section aria-labelledby="whatsapp-console-settings">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="min-w-0">
+            <h2 id="whatsapp-console-settings" className="text-base font-semibold text-ink">
+              Console settings
+            </h2>
+            <p className="mt-0.5 max-w-2xl text-xs leading-5 text-ink-soft">
+              Stored in this project&apos;s database and applied as soon as you save. Meta
+              credentials are deliberately not editable here — they belong to the hosting
+              environment, and the connection status below reports on them.
+            </p>
+          </div>
+          <div className="flex flex-none flex-wrap items-center gap-2">
+            <StatusChip
+              tone={openNow === null ? "neutral" : openNow ? "good" : "warn"}
+            >
+              {openNow === null
+                ? "Hours not tracked"
+                : openNow
+                  ? "Open now"
+                  : "Closed now"}
+            </StatusChip>
+            <StatusChip tone={settingsSummary.changedFromDefaults ? "good" : "neutral"}>
+              {settingsLoad.source === "database"
+                ? settingsSummary.changedFromDefaults
+                  ? "Customised"
+                  : "Defaults"
+                : "Defaults"}
+            </StatusChip>
+          </div>
+        </div>
+
+        <dl className="mt-4 grid gap-2 sm:grid-cols-3">
+          <div className="rounded-lg border border-rule bg-paper px-3.5 py-3">
+            <dt className="text-[0.65rem] font-semibold uppercase tracking-[.14em] text-ink-faint">
+              Keywords
+            </dt>
+            <dd className="mt-0.5 text-sm text-ink">
+              <span className="tabular-nums">{settingsSummary.keywordCount}</span> in use
+            </dd>
+          </div>
+          <div className="rounded-lg border border-rule bg-paper px-3.5 py-3">
+            <dt className="text-[0.65rem] font-semibold uppercase tracking-[.14em] text-ink-faint">
+              Business hours
+            </dt>
+            <dd className="mt-0.5 text-sm text-ink">
+              {settings.businessHours.enabled
+                ? `${describeWhatsAppBusinessDays(settings.businessHours.days)}, ${settings.businessHours.start}–${settings.businessHours.end}`
+                : "Not tracked"}
+            </dd>
+          </div>
+          <div className="rounded-lg border border-rule bg-paper px-3.5 py-3">
+            <dt className="text-[0.65rem] font-semibold uppercase tracking-[.14em] text-ink-faint">
+              First reply target
+            </dt>
+            <dd className="mt-0.5 text-sm text-ink">
+              {settingsSummary.targetSet
+                ? `${settings.targetFirstResponseMinutes} minutes`
+                : "None set"}
+            </dd>
+          </div>
+        </dl>
+
+        <div className="mt-4">
+          <SettingsEditor settings={settings} storageReady={storageReady} />
+        </div>
+      </section>
+
+      <section
+        aria-labelledby="whatsapp-connection-status"
+        className="mt-8 border-t border-rule pt-6"
       >
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
-            <h1 className="text-sm font-semibold text-ink">
-              {missingRequired === 0
-                ? "Every required variable is set"
-                : `${missingRequired} required variable${missingRequired === 1 ? "" : "s"} missing`}
-            </h1>
-            <p className="mt-0.5 text-xs leading-5 text-ink-soft">
-              <span className="tabular-nums">{summary.available}</span> of{" "}
-              <span className="tabular-nums">{summary.total}</span> integration capabilities
-              available on this deployment.
+            <h2 id="whatsapp-connection-status" className="text-base font-semibold text-ink">
+              Connection status
+            </h2>
+            <p className="mt-0.5 max-w-2xl text-xs leading-5 text-ink-soft">
+              Read-only. Everything below is set in the hosting environment or in Meta, and is
+              reported here so you can tell a missing variable from a broken credential.
             </p>
           </div>
           <StatusChip tone={missingRequired === 0 ? "good" : "bad"}>
             {missingRequired === 0 ? "Configured" : "Incomplete"}
           </StatusChip>
         </div>
-      </div>
 
-      <div className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1.35fr)_minmax(320px,1fr)]">
+        <div
+          className={`mt-4 rounded-xl border p-5 ${
+            missingRequired === 0
+              ? "border-ledger/20 bg-ledger-tint"
+              : "border-rose-200 bg-rose-50"
+          }`}
+        >
+          <h3 className="text-sm font-semibold text-ink">
+            {missingRequired === 0
+              ? "Every required variable is set"
+              : `${missingRequired} required variable${missingRequired === 1 ? "" : "s"} missing`}
+          </h3>
+          <p className="mt-0.5 text-xs leading-5 text-ink-soft">
+            <span className="tabular-nums">{summary.available}</span> of{" "}
+            <span className="tabular-nums">{summary.total}</span> integration capabilities
+            available on this deployment.
+          </p>
+        </div>
+
+        <div className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1.35fr)_minmax(320px,1fr)]">
         <div className="grid min-w-0 gap-5">
           <Section
             title="What works right now"
@@ -323,6 +457,77 @@ export default async function WhatsAppSettingsPage() {
           </Section>
 
           <Section
+            title="Business profile"
+            description="What a customer sees on our WhatsApp profile screen, read live from Meta."
+          >
+            {profileCard.tone === "unavailable" ? (
+              <div className="flex flex-wrap items-start justify-between gap-2">
+                <p className="min-w-0 text-sm text-ink-soft">{profileCard.note}</p>
+                <StatusChip tone={profileCard.chipTone}>{profileCard.label}</StatusChip>
+              </div>
+            ) : (
+              <>
+                <div className="flex items-start gap-3.5">
+                  {profileCard.hasPicture ? (
+                    // Proxied, not embedded: the CDN URL is signed and short-lived, and
+                    // these bytes coming back at all is the proof the picture is really
+                    // registered against this number.
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src="/api/admin/whatsapp/profile-photo/"
+                      alt="The WhatsApp Business profile picture Meta currently holds for this number"
+                      width={64}
+                      height={64}
+                      className="h-16 w-16 flex-none rounded-full border border-rule object-cover"
+                    />
+                  ) : (
+                    <span className="grid h-16 w-16 flex-none place-items-center rounded-full border border-dashed border-rule-strong bg-paper text-[0.6rem] font-medium uppercase tracking-wide text-ink-faint">
+                      None
+                    </span>
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-start justify-between gap-2">
+                      <p className="min-w-0 text-sm font-medium text-ink">
+                        {profileCard.hasPicture ? "Picture registered at Meta" : "No picture registered"}
+                      </p>
+                      <StatusChip tone={profileCard.chipTone}>{profileCard.label}</StatusChip>
+                    </div>
+                    <p className="mt-1 text-xs leading-5 text-ink-soft">{profileCard.note}</p>
+                  </div>
+                </div>
+
+                <dl className="mt-4">
+                  {WHATSAPP_PROFILE_FIELD_LABELS.map((field) => {
+                    const populated = profileCard.setFields.includes(field.label);
+                    return (
+                      <Row
+                        key={field.label}
+                        label={field.label}
+                        value={
+                          <span className="inline-flex flex-wrap items-center justify-end gap-2">
+                            <span className="text-xs text-ink-faint">{field.note}</span>
+                            <StatusChip tone={populated ? "good" : "neutral"}>
+                              {populated ? "Set" : "Not set"}
+                            </StatusChip>
+                          </span>
+                        }
+                      />
+                    );
+                  })}
+                </dl>
+
+                <p className="mt-3 rounded-lg bg-paper-sunk px-3 py-2.5 text-xs leading-5 text-ink-faint">
+                  A picture registered here is not proof every customer is seeing it yet. WhatsApp
+                  caches business profile pictures on the customer&apos;s own device, and an old one
+                  can persist there for a while after Meta has the new one. Nothing in this API can
+                  report on another person&apos;s cache, so this page reports Meta&apos;s record and
+                  stops there. Profile fields are changed in WhatsApp Manager, not here.
+                </p>
+              </>
+            )}
+          </Section>
+
+          <Section
             title="Webhook"
             description="Where Meta delivers inbound messages and status updates."
           >
@@ -415,30 +620,36 @@ export default async function WhatsAppSettingsPage() {
         </div>
       </div>
 
-      <div className="mt-5 rounded-xl border border-rule bg-paper-raised p-5">
-        <h2 className="text-sm font-semibold text-ink">What this page does and does not do</h2>
-        <ul className="mt-2 grid gap-1.5 text-xs leading-5 text-ink-faint">
-          <li>
-            It is read-only. Nothing here writes to the database, to Meta, or to the environment.
-          </li>
-          <li>
-            It never displays a secret. Access tokens, the app secret, the verify token, and the
-            service role key are reported as set or missing and nothing more.
-          </li>
-          <li>
-            Identifiers and the Graph API version are shown in full — they are configuration, and on
-            their own cannot send or read anything.
-          </li>
-          <li>
-            A variable being set means a value exists, not that it still works. The live credential
-            check is the only real test on this page.
-          </li>
-          <li>
-            Table checks distinguish a missing migration from an unreachable database, which is the
-            difference between work you need to do and a fault you should wait out.
-          </li>
-        </ul>
-      </div>
+        <div className="mt-5 rounded-xl border border-rule bg-paper-raised p-5">
+          <h3 className="text-sm font-semibold text-ink">What this page does and does not do</h3>
+          <ul className="mt-2 grid gap-1.5 text-xs leading-5 text-ink-faint">
+            <li>
+              Console settings above are written to this project&apos;s database. Nothing on this
+              page can change the environment, or anything in Meta.
+            </li>
+            <li>
+              It never displays a secret. Access tokens, the app secret, the verify token, and the
+              service role key are reported as set or missing and nothing more.
+            </li>
+            <li>
+              Identifiers and the Graph API version are shown in full — they are configuration, and
+              on their own cannot send or read anything.
+            </li>
+            <li>
+              A variable being set means a value exists, not that it still works. The live
+              credential check is the only real test on this page.
+            </li>
+            <li>
+              Table checks distinguish a missing migration from an unreachable database, which is
+              the difference between work you need to do and a fault you should wait out.
+            </li>
+            <li>
+              Keyword rules change how new messages are scored. They are not retroactive, and a
+              spam keyword suppresses the automatic reply without discarding the message.
+            </li>
+          </ul>
+        </div>
+      </section>
     </div>
   );
 }

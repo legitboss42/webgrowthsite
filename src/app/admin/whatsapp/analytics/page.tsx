@@ -25,6 +25,8 @@ import {
   type WhatsAppAnalyticsMessage,
   type WhatsAppDeliveryStatusKey,
 } from "../analyticsModel";
+import { compareWhatsAppResponseToTarget } from "@/lib/whatsapp/settings";
+import { loadWhatsAppSettings } from "@/lib/whatsapp/settingsStore";
 
 export const metadata: Metadata = {
   title: "WhatsApp Analytics | Web Growth",
@@ -217,10 +219,11 @@ export default async function WhatsAppAnalyticsPage({
   const now = Date.now();
   const sinceIso = new Date(now - (range - 1) * 24 * 60 * 60 * 1000).toISOString();
 
-  const [read, newContacts, temperatureMix] = await Promise.all([
+  const [read, newContacts, temperatureMix, settingsLoad] = await Promise.all([
     getAnalyticsMessages(sinceIso),
     countWhatsAppRows(`whatsapp_contacts?select=id&created_at=gte.${encodeURIComponent(sinceIso)}`),
     getNewContactTemperatures(sinceIso),
+    loadWhatsAppSettings(),
   ]);
 
   if (read.unavailable) {
@@ -240,6 +243,12 @@ export default async function WhatsAppAnalyticsPage({
   const totals = buildWhatsAppAnalyticsTotals(read.messages);
   const delivery = buildWhatsAppDeliveryBreakdown(read.messages);
   const responseTimes = buildWhatsAppResponseTimes(read.messages);
+  // The target is an operator setting; the model measures in milliseconds and the
+  // comparison takes seconds, so the conversion happens here rather than in either.
+  const responseTarget = compareWhatsAppResponseToTarget(
+    responseTimes.medianMs === null ? null : responseTimes.medianMs / 1000,
+    settingsLoad.settings.targetFirstResponseMinutes,
+  );
 
   const series = buildWhatsAppActivitySeries({ messages: read.messages, days: range, now });
   const activityMax = getWhatsAppActivityMax(series);
@@ -497,6 +506,28 @@ export default async function WhatsAppAnalyticsPage({
                 answered message{responseTimes.measured === 1 ? "" : "s"}
               </p>
 
+              {responseTarget.status === "unset" ? (
+                <p className="mt-2.5 text-xs text-ink-faint">
+                  No first-reply target set.{" "}
+                  <Link href="/admin/whatsapp/settings/" className="font-medium text-ledger underline">
+                    Set one in Settings
+                  </Link>{" "}
+                  to judge this against a number.
+                </p>
+              ) : (
+                <p
+                  className={`mt-2.5 inline-flex items-center rounded-full px-2.5 py-1 text-[0.65rem] font-semibold ${
+                    responseTarget.status === "met"
+                      ? "bg-ledger-tint text-ledger ring-1 ring-ledger/15"
+                      : responseTarget.status === "missed"
+                        ? "bg-rose-50 text-rose-700 ring-1 ring-rose-200"
+                        : "bg-paper-sunk text-ink-faint ring-1 ring-rule"
+                  }`}
+                >
+                  {responseTarget.label}
+                </p>
+              )}
+
               <dl className="mt-3">
                 <StatRow label="Average" value={formatWhatsAppDuration(responseTimes.averageMs)} />
                 <StatRow label="Fastest" value={formatWhatsAppDuration(responseTimes.fastestMs)} />
@@ -515,6 +546,12 @@ export default async function WhatsAppAnalyticsPage({
                 A response time needs an inbound message answered by an outbound one inside this
                 range.
               </p>
+              {responseTarget.status === "unknown" ? (
+                <p className="mt-2 text-[0.65rem] text-ink-faint">
+                  A {responseTarget.targetMinutes} minute target is set and will be judged once there
+                  is something to measure.
+                </p>
+              ) : null}
             </div>
           )}
         </section>

@@ -20,7 +20,12 @@ export type WhatsAppIconName =
   | "menu"
   | "close"
   | "chevronLeft"
-  | "logo";
+  | "logo"
+  | "statusPending"
+  | "statusSent"
+  | "statusDelivered"
+  | "statusRead"
+  | "statusFailed";
 
 const ICON_PATHS: Record<WhatsAppIconName, ReactNode> = {
   overview: (
@@ -71,6 +76,33 @@ const ICON_PATHS: Record<WhatsAppIconName, ReactNode> = {
     <>
       <path d="M3 20.5l1.7-4.4A8.7 8.7 0 1 1 8.4 19L3 20.5z" />
       <path d="M8.6 10.4c.5 2.1 2.6 4.1 4.7 4.7" />
+    </>
+  ),
+  // Delivery states. Each silhouette differs from the others at message-bubble size,
+  // so the state survives greyscale, a colour-vision difference, and a dark bubble.
+  statusPending: (
+    <>
+      <circle cx="12" cy="12" r="8.5" />
+      <path d="M12 7.5v5l3.5 2" />
+    </>
+  ),
+  statusSent: <path d="M4 13l4.5 4.5L19.5 6.5" />,
+  statusDelivered: (
+    <>
+      <path d="M1.5 13l4 4L13.5 8.5" />
+      <path d="M9 13l4 4L21.5 8.5" />
+    </>
+  ),
+  statusRead: (
+    <>
+      <path d="M2 12s3.6-6 10-6 10 6 10 6-3.6 6-10 6-10-6-10-6z" />
+      <circle cx="12" cy="12" r="2.6" />
+    </>
+  ),
+  statusFailed: (
+    <>
+      <circle cx="12" cy="12" r="8.5" />
+      <path d="M12 7.75v4.75M12 16.25h.01" />
     </>
   ),
 };

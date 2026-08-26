@@ -43,11 +43,11 @@ export function describeWhatsAppAnalyticsRange(range: WhatsAppAnalyticsRange) {
 /* -------------------------------------------------------------------------- */
 
 /**
- * `queued` is our own label for an outbound row Meta has not acknowledged yet
- * (`delivery_status` still null). The other four are Meta's own vocabulary.
- * `unknown` catches any status Meta adds later, so a new value is surfaced
- * rather than silently dropped — the same degrade-don't-throw rule as
- * `templates.ts`.
+ * `queued` is our own label for an outbound row Meta has not acknowledged yet:
+ * a null `delivery_status`, or one of our own pre-webhook markers (`accepted`,
+ * `queued`, `sending`). The other four are Meta's own vocabulary. `unknown`
+ * catches any status Meta adds later, so a new value is surfaced rather than
+ * silently dropped — the same degrade-don't-throw rule as `templates.ts`.
  */
 export const WHATSAPP_DELIVERY_STATUS_KEYS = [
   "queued",
@@ -64,6 +64,7 @@ export function normalizeWhatsAppDeliveryStatus(
 ): WhatsAppDeliveryStatusKey {
   const raw = (value || "").trim().toLowerCase();
   if (!raw) return "queued";
+  if (raw === "accepted" || raw === "queued" || raw === "sending") return "queued";
   if (raw === "sent") return "sent";
   if (raw === "delivered") return "delivered";
   if (raw === "read") return "read";

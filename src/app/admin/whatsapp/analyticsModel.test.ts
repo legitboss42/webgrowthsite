@@ -58,6 +58,11 @@ test("delivery statuses normalize, and a missing one means queued", () => {
   assert.equal(normalizeWhatsAppDeliveryStatus(null), "queued");
   assert.equal(normalizeWhatsAppDeliveryStatus(""), "queued");
   assert.equal(normalizeWhatsAppDeliveryStatus(undefined), "queued");
+  // Our own pre-webhook markers. `accepted` is written the moment the Cloud API
+  // hands back a message id, so it must count as queued rather than unknown.
+  assert.equal(normalizeWhatsAppDeliveryStatus("accepted"), "queued");
+  assert.equal(normalizeWhatsAppDeliveryStatus("sending"), "queued");
+  assert.equal(normalizeWhatsAppDeliveryStatus("queued"), "queued");
 });
 
 test("a status Meta adds later degrades to unknown instead of throwing", () => {

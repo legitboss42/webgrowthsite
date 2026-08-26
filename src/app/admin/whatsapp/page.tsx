@@ -3,6 +3,7 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import InternalUtilityUnlockForm from "@/components/internal/InternalUtilityUnlockForm";
 import { getInternalUtilityLocalPassphrase } from "@/lib/internalUtilityAuth";
+import ContactAvatar from "@/components/whatsapp/ContactAvatar";
 import { WhatsAppIcon, type WhatsAppIconName } from "@/components/whatsapp/icons";
 import { hasWhatsAppAdminAccess } from "./auth";
 import { countWhatsAppRows, getWhatsAppSenderConfig, readWhatsAppRows } from "./data";
@@ -21,19 +22,19 @@ import {
   getWhatsAppActivityMax,
   type WhatsAppActivityMessage,
 } from "./overview";
+import { loadWhatsAppSettings } from "@/lib/whatsapp/settingsStore";
 
 export const metadata: Metadata = {
   title: "WhatsApp Overview | Web Growth",
   robots: { index: false, follow: false },
 };
 
-const ACTIVITY_DAYS = 14;
 const CHART_WIDTH = 640;
 const CHART_HEIGHT = 170;
 
 async function getConversationSummaries(): Promise<WhatsAppLeadRow[]> {
   const rows = await readWhatsAppRows<Record<string, unknown>>(
-    `whatsapp_conversations?select=id,status,intent,human_review_required,last_message_at,whatsapp_contacts!inner(wa_id,display_name,website,source,lead_temperature)&order=last_message_at.desc`,
+    `whatsapp_conversations?select=id,status,intent,human_review_required,last_message_at,whatsapp_contacts!inner(wa_id,display_name,business_name,website,source,lead_temperature)&order=last_message_at.desc`,
   );
   if (!rows) return [];
 
@@ -47,6 +48,9 @@ async function getConversationSummaries(): Promise<WhatsAppLeadRow[]> {
       last_message_at: typeof row.last_message_at === "string" ? row.last_message_at : undefined,
       wa_id: String(contact?.wa_id || ""),
       display_name: typeof contact?.display_name === "string" ? contact.display_name : undefined,
+      // Selected only so the fallback avatar here matches the one the conversations and
+      // contacts pages draw for the same person.
+      business_name: typeof contact?.business_name === "string" ? contact.business_name : undefined,
       website: typeof contact?.website === "string" ? contact.website : undefined,
       source: typeof contact?.source === "string" ? contact.source : undefined,
       lead_temperature:
@@ -84,16 +88,6 @@ function formatRelative(value: string | undefined, now: number) {
   const diffDays = Math.round(diffHours / 24);
   if (diffDays < 30) return `${diffDays}d ago`;
   return new Date(parsed).toLocaleDateString();
-}
-
-function getInitials(name: string | undefined, waId: string) {
-  const source = (name || "").trim();
-  if (!source) return waId.slice(-2) || "??";
-  return source
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase() || "")
-    .join("");
 }
 
 function MetricCard({
@@ -136,7 +130,11 @@ export default async function WhatsAppOverviewPage() {
   }
 
   const now = Date.now();
-  const sinceIso = new Date(now - (ACTIVITY_DAYS - 1) * 24 * 60 * 60 * 1000).toISOString();
+  // The activity window is an operator setting. Loaded before the counts because the
+  // range query depends on it; the in-process cache keeps this to one round trip a minute.
+  const { settings } = await loadWhatsAppSettings();
+  const activityDays = settings.console.activityWindowDays;
+  const sinceIso = new Date(now - (activityDays - 1) * 24 * 60 * 60 * 1000).toISOString();
   const sender = getWhatsAppSenderConfig();
 
   const [leads, activityMessages, contacts, messagesSent, messagesReceived] = await Promise.all([
@@ -160,7 +158,7 @@ export default async function WhatsAppOverviewPage() {
     senderConnected: sender.senderConnected,
   });
 
-  const series = buildWhatsAppActivitySeries({ messages: activityMessages, days: ACTIVITY_DAYS, now });
+  const series = buildWhatsAppActivitySeries({ messages: activityMessages, days: activityDays, now });
   const activityMax = getWhatsAppActivityMax(series);
   const sentGeometry = buildWhatsAppChartGeometry(
     series.map((point) => point.sent),
@@ -235,7 +233,7 @@ export default async function WhatsAppOverviewPage() {
             <div>
               <h2 className="text-sm font-semibold text-ink">Messages performance</h2>
               <p className="mt-0.5 text-xs text-ink-faint">
-                Sent vs received · last {ACTIVITY_DAYS} days (UTC)
+                Sent vs received · last {activityDays} days (UTC)
               </p>
             </div>
             <div className="flex items-center gap-4 text-[0.7rem] text-ink-faint">
@@ -257,7 +255,7 @@ export default async function WhatsAppOverviewPage() {
                   viewBox={`0 0 ${CHART_WIDTH} ${CHART_HEIGHT}`}
                   className="h-44 w-full min-w-[420px]"
                   role="img"
-                  aria-label={`Messages sent and received per day over the last ${ACTIVITY_DAYS} days. Peak of ${activityMax} messages in a day.`}
+                  aria-label={`Messages sent and received per day over the last ${activityDays} days. Peak of ${activityMax} messages in a day.`}
                 >
                   {[0, 0.25, 0.5, 0.75, 1].map((fraction) => (
                     <line
@@ -313,7 +311,7 @@ export default async function WhatsAppOverviewPage() {
             </>
           ) : (
             <div className="mt-4 rounded-lg border border-dashed border-rule-strong px-4 py-12 text-center">
-              <p className="text-sm text-ink-soft">No messages in the last {ACTIVITY_DAYS} days.</p>
+              <p className="text-sm text-ink-soft">No messages in the last {activityDays} days.</p>
               <p className="mt-1 text-xs text-ink-faint">
                 This chart fills in from stored WhatsApp messages as conversations come in.
               </p>
@@ -416,9 +414,14 @@ export default async function WhatsAppOverviewPage() {
                     href={`/admin/whatsapp/conversations/?lead=${encodeURIComponent(lead.id)}`}
                     className="flex items-center gap-3 py-2.5"
                   >
-                    <span className="grid h-9 w-9 flex-none place-items-center rounded-full bg-paper-sunk text-[0.7rem] font-semibold text-ink-soft">
-                      {getInitials(lead.display_name, lead.wa_id)}
-                    </span>
+                    <ContactAvatar
+                      identity={{
+                        displayName: lead.display_name,
+                        businessName: lead.business_name,
+                        waId: lead.wa_id,
+                      }}
+                      size="sm"
+                    />
                     <span className="min-w-0 flex-1">
                       <span className="block truncate text-sm font-medium text-ink">
                         {lead.display_name || "Unknown"}

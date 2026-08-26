@@ -3,7 +3,9 @@
 import { useEffect, useMemo, useRef, useState, useTransition, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { chooseWhatsAppRecordingMimeType, getWhatsAppAudioFilename, isSupportedWhatsAppAudioMimeType } from "@/lib/whatsapp/audio";
+import { shouldSendWhatsAppTypingSignal } from "@/lib/whatsapp/typing";
 import type { WhatsAppReplyComposerState } from "./dashboard";
+import { useWhatsAppOutboundQueue } from "./OutboundQueue";
 import type { WhatsAppQuickReply } from "./quickRepliesModel";
 
 type ReplyComposerProps = {
@@ -33,6 +35,7 @@ export default function ReplyComposer({
   quickReplies = [],
 }: ReplyComposerProps) {
   const router = useRouter();
+  const { queueOutbound, settleOutbound, markOutboundUnconfirmed, dropOutbound } = useWhatsAppOutboundQueue();
   const [message, setMessage] = useState(initialText);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [recordingState, setRecordingState] = useState<"unsupported" | "idle" | "recording" | "ready">("unsupported");
@@ -42,6 +45,8 @@ export default function ReplyComposer({
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const chunksRef = useRef<Blob[]>([]);
+  /** When the last real typing indicator went to Meta, for throttling. */
+  const typingSentAtRef = useRef<number | undefined>(undefined);
   const [isPending, startTransition] = useTransition();
 
   useEffect(() => {
@@ -66,6 +71,43 @@ export default function ReplyComposer({
     return (composerState.reason ? reasonCopy[composerState.reason] : undefined) || composerState.helperText;
   }, [composerState.helperText, composerState.reason, feedback]);
 
+  /**
+   * Triggers the real WhatsApp typing indicator on the customer's phone.
+   *
+   * Throttled to one request per refresh window rather than one per keystroke, and
+   * every failure is swallowed on purpose: the indicator is a courtesy, and it must
+   * never be able to interfere with sending the message. The credentials stay on the
+   * server — this only names the conversation, and the route decides which message
+   * the receipt attaches to.
+   */
+  function signalTyping(draft: string) {
+    if (!composerState.enabled) return;
+
+    const now = Date.now();
+    const due = shouldSendWhatsAppTypingSignal({
+      hasDraft: draft.trim().length > 0,
+      lastSentAt: typingSentAtRef.current,
+      now,
+    });
+    if (!due) return;
+
+    typingSentAtRef.current = now;
+    void fetch("/api/admin/whatsapp/typing/", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ conversationId, waId }),
+      keepalive: true,
+    }).catch(() => {
+      // Silent. A missed indicator is invisible to the customer; a thrown error here
+      // would not be.
+    });
+  }
+
+  function handleDraftChange(draft: string) {
+    setMessage(draft);
+    signalTyping(draft);
+  }
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!composerState.enabled) return;
@@ -78,6 +120,12 @@ export default function ReplyComposer({
     }
 
     startTransition(async () => {
+      // The bubble appears before the round trip finishes. Its key is how it gets
+      // reconciled: settled with the WhatsApp message id the route returns, which is
+      // the same id the stored row carries, so the two can never both be displayed.
+      const pendingKey = queueOutbound(text);
+      setMessage("");
+
       try {
         const response = await fetch("/api/admin/whatsapp/reply", {
           method: "POST",
@@ -88,8 +136,17 @@ export default function ReplyComposer({
             text,
           }),
         });
-        const payload = (await response.json().catch(() => ({}))) as { ok?: boolean; error?: string };
+        const payload = (await response.json().catch(() => ({}))) as {
+          ok?: boolean;
+          error?: string;
+          messageId?: string;
+        };
         if (!response.ok || !payload.ok) {
+          // The server answered and refused, so nothing was stored anywhere. Take the
+          // bubble back and hand the draft over rather than leaving a reply on screen
+          // that never went out.
+          dropOutbound(pendingKey);
+          setMessage(text);
           if (payload.error === "NOT_CONFIGURED") {
             setFeedback("Sender credentials are still missing in production, so the inbox cannot send yet.");
             return;
@@ -102,11 +159,19 @@ export default function ReplyComposer({
           return;
         }
 
-        setMessage("");
+        settleOutbound(pendingKey, payload.messageId);
         setFeedback("Reply sent and stored in the WhatsApp CRM thread.");
         router.refresh();
       } catch {
-        setFeedback("Unable to send the reply right now. Please try again in a moment.");
+        // No answer at all. Meta may or may not have taken it, so calling this failed
+        // would be a guess, and restoring the draft could send the same reply twice.
+        markOutboundUnconfirmed(
+          pendingKey,
+          "The connection dropped before WhatsApp confirmed it.",
+        );
+        setFeedback(
+          "The connection dropped before WhatsApp confirmed the reply. Check the thread before sending it again.",
+        );
       }
     });
   }
@@ -227,12 +292,20 @@ export default function ReplyComposer({
 
       <textarea
         value={message}
-        onChange={(event) => setMessage(event.target.value)}
+        onChange={(event) => handleDraftChange(event.target.value)}
         disabled={!composerState.enabled || isPending}
         rows={3}
         className="mt-3 w-full rounded-lg border border-rule bg-paper px-3.5 py-2.5 text-sm text-ink outline-none transition placeholder:text-ink-faint/70 focus:border-ledger-bright focus:ring-2 focus:ring-ledger-bright/20 disabled:cursor-not-allowed disabled:bg-paper-sunk disabled:opacity-70"
         placeholder="Type a careful reply. Avoid pricing, scope, timeline, or contract commitments unless you are intentionally handling them yourself."
       />
+
+      {composerState.enabled ? (
+        <p className="mt-1.5 text-[0.7rem] leading-5 text-ink-faint">
+          Typing here shows a real typing indicator on the customer&rsquo;s WhatsApp. Meta sends
+          that together with a read receipt, so their last message is marked as read at the
+          same time.
+        </p>
+      ) : null}
 
       {quickReplies.length ? (
         <div className="mt-3">

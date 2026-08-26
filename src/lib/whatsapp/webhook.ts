@@ -1,5 +1,7 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { classifyWhatsAppIntent } from "./classify";
+import { sanitizeWhatsAppStatusError } from "./messageStatus";
+import type { WhatsAppLeadKeywordRules } from "./settings";
 
 export type NormalizedIncomingMessage = {
   messageId: string;
@@ -19,6 +21,11 @@ export type NormalizedStatus = {
   waId?: string;
   status: string;
   timestamp: number;
+  /**
+   * An operator-safe sentence explaining a `failed` status, already stripped of trace
+   * ids and provider detail. Absent for every other status.
+   */
+  error?: string;
 };
 
 export function verifyWebhook(url: URL, verifyToken: string) {
@@ -79,7 +86,17 @@ export function parseWhatsAppWebhook(payload: unknown): { messages: NormalizedIn
       if (Array.isArray(value.statuses)) for (const status of value.statuses) {
         const item = asRecord(status);
         if (typeof item?.id !== "string" || typeof item?.status !== "string" || typeof item?.timestamp !== "string") continue;
-        statuses.push({ messageId: item.id, waId: typeof item.recipient_id === "string" ? item.recipient_id : undefined, status: item.status, timestamp: Number(item.timestamp) });
+        // Meta attaches an `errors` array to a failed status. Only the code and the
+        // short title survive: the rest of that payload carries trace ids and internal
+        // messages that must never reach an admin screen.
+        const failure = Array.isArray(item.errors) ? asRecord(item.errors[0]) : null;
+        const error = failure
+          ? sanitizeWhatsAppStatusError({
+              code: typeof failure.code === "number" ? failure.code : undefined,
+              title: typeof failure.title === "string" ? failure.title : undefined,
+            })
+          : undefined;
+        statuses.push({ messageId: item.id, waId: typeof item.recipient_id === "string" ? item.recipient_id : undefined, status: item.status, timestamp: Number(item.timestamp), error });
       }
     }
   }
@@ -88,7 +105,7 @@ export function parseWhatsAppWebhook(payload: unknown): { messages: NormalizedIn
 
 export type WebhookProcessorStore = {
   recordInbound(message: NormalizedIncomingMessage): Promise<{ duplicate: boolean }>;
-  updateMessageStatus(messageId: string, status: string): Promise<void>;
+  updateMessageStatus(messageId: string, status: string, error?: string): Promise<void>;
   recordOutbound?(message: { messageId: string; waId: string; text: string; timestamp: number }): Promise<void>;
 };
 
@@ -99,8 +116,8 @@ export type WhatsAppTextSender = (input: {
   replyToMessageId?: string;
 }) => Promise<{ sent: boolean; messageId?: string }>;
 
-function getSafeReply(text: string | undefined) {
-  const classification = classifyWhatsAppIntent(text || "");
+function getSafeReply(text: string | undefined, rules?: WhatsAppLeadKeywordRules) {
+  const classification = classifyWhatsAppIntent(text || "", rules);
   if (classification.safeReplyKind === "PORTFOLIO") return "You can view selected Web Growth work here: https://webgrowth.info/portfolio/";
   if (classification.safeReplyKind === "AUDIT") return "Thanks for reaching out. Please send your website URL and tell us the main thing you would like improved.";
   if (classification.safeReplyKind === "SERVICE") return "Web Growth can help with website design, redesigns, ecommerce, SEO, performance, tracking, CRM, and marketing automation. Which service are you considering?";
@@ -109,18 +126,32 @@ function getSafeReply(text: string | undefined) {
   return null;
 }
 
-export async function processWhatsAppWebhook(payload: unknown, store: WebhookProcessorStore, send?: WhatsAppTextSender) {
+/**
+ * `options.leadKeywords` carries the operator's keyword rules. It is optional, so
+ * a caller that does not pass it gets the original behaviour. Its practical effect
+ * here is that a message matching a spam keyword is classified COLD with no safe
+ * reply, so nothing is auto-sent back to it.
+ */
+export async function processWhatsAppWebhook(
+  payload: unknown,
+  store: WebhookProcessorStore,
+  send?: WhatsAppTextSender,
+  options: { leadKeywords?: WhatsAppLeadKeywordRules } = {},
+) {
   const { messages, statuses } = parseWhatsAppWebhook(payload);
   for (const message of messages) {
     const result = await store.recordInbound(message);
     if (result.duplicate || !send || message.type !== "text") continue;
-    const reply = getSafeReply(message.text);
+    const reply = getSafeReply(message.text, options.leadKeywords);
     if (!reply) continue;
     const sent = await send({ to: message.waId, text: reply, customerMessageTimestamp: message.timestamp, replyToMessageId: message.messageId });
     if (sent.sent && sent.messageId && store.recordOutbound) {
       await store.recordOutbound({ messageId: sent.messageId, waId: message.waId, text: reply, timestamp: Math.floor(Date.now() / 1000) });
     }
   }
-  for (const status of statuses) await store.updateMessageStatus(status.messageId, status.status);
+  // Statuses are applied in whatever order Meta bundled them. The store's forward-only
+  // guard is what makes that safe, so a `sent` callback arriving after `delivered` in
+  // the same payload cannot walk the message backwards.
+  for (const status of statuses) await store.updateMessageStatus(status.messageId, status.status, status.error);
   return { messages: messages.length, statuses: statuses.length };
 }

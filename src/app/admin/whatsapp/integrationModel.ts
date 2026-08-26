@@ -1,5 +1,11 @@
 /**
- * Pure model behind the WhatsApp console Settings page.
+ * Pure model behind the connection status half of the WhatsApp Settings page.
+ *
+ * This file is about the hosting environment: which variables are set, what that
+ * enables, and which migrations have been applied. The operator-editable settings
+ * that page also writes live in `src/lib/whatsapp/settings.ts` — the two are kept
+ * apart because one is read-only environment reporting and the other is a document
+ * this console owns.
  *
  * Every function takes the environment as an argument rather than reading
  * `process.env` itself — the same injection `send.ts` and `phoneNumbers.ts` use,
@@ -63,6 +69,7 @@ export const WHATSAPP_EXPECTED_TABLES = [
   "whatsapp_messages",
   "whatsapp_events",
   "whatsapp_quick_replies",
+  "whatsapp_settings",
 ] as const;
 
 export type WhatsAppExpectedTable = (typeof WHATSAPP_EXPECTED_TABLES)[number];
