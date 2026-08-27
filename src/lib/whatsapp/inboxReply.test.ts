@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { createMemoryWhatsAppStore } from "./store";
-import { sendInboxWhatsAppAudioReply, sendInboxWhatsAppReply } from "./inboxReply";
+import { sendInboxWhatsAppAudioReply, sendInboxWhatsAppMediaReply, sendInboxWhatsAppReply } from "./inboxReply";
 
 const baseInput = {
   conversationId: "conversation-1",
@@ -90,4 +90,90 @@ test("stores an outbound inbox audio reply after Meta accepts the message", asyn
   assert.equal(store.messages[0]?.messageType, "audio");
   assert.equal(store.messages[0]?.mediaId, "media-audio-1");
   assert.equal(store.messages[0]?.mediaVoice, true);
+});
+
+test("stores an outbound image reply with its caption as the message text", async () => {
+  const store = createMemoryWhatsAppStore();
+  let sent: { kind?: string; caption?: string } = {};
+
+  const result = await sendInboxWhatsAppMediaReply(
+    {
+      conversationId: baseInput.conversationId,
+      waId: baseInput.waId,
+      kind: "image",
+      file: new Blob(["png-bytes"], { type: "image/png" }),
+      filename: "mockup.png",
+      mimeType: "image/png",
+      caption: "  Here is the mockup  ",
+      customerMessageTimestamp: baseInput.customerMessageTimestamp,
+      replyToMessageId: baseInput.replyToMessageId,
+    },
+    {
+      store,
+      now: baseInput.customerMessageTimestamp + 60,
+      send: async (input) => {
+        sent = { kind: input.kind, caption: input.caption };
+        return { sent: true, messageId: "wamid.image-1", mediaId: "media-image-1" };
+      },
+    },
+  );
+
+  assert.deepEqual(result, { ok: true, messageId: "wamid.image-1", mediaId: "media-image-1" });
+  assert.equal(sent.kind, "image");
+  assert.equal(sent.caption, "Here is the mockup");
+  assert.equal(store.messages.length, 1);
+  assert.equal(store.messages[0]?.messageType, "image");
+  assert.equal(store.messages[0]?.text, "Here is the mockup");
+  assert.equal(store.messages[0]?.mediaId, "media-image-1");
+  assert.equal(store.messages[0]?.mediaFilename, "mockup.png");
+  // An uploaded file is not a voice note, whatever its type.
+  assert.equal(store.messages[0]?.mediaVoice, false);
+});
+
+test("stores a document reply even though it carries no caption", async () => {
+  const store = createMemoryWhatsAppStore();
+
+  const result = await sendInboxWhatsAppMediaReply(
+    {
+      conversationId: baseInput.conversationId,
+      waId: baseInput.waId,
+      kind: "document",
+      file: new Blob(["pdf-bytes"], { type: "application/pdf" }),
+      filename: "Proposal.pdf",
+      mimeType: "application/pdf",
+      customerMessageTimestamp: baseInput.customerMessageTimestamp,
+    },
+    {
+      store,
+      now: baseInput.customerMessageTimestamp + 60,
+      send: async () => ({ sent: true, messageId: "wamid.doc-1", mediaId: "media-doc-1" }),
+    },
+  );
+
+  assert.deepEqual(result, { ok: true, messageId: "wamid.doc-1", mediaId: "media-doc-1" });
+  assert.equal(store.messages[0]?.messageType, "document");
+  assert.equal(store.messages[0]?.mediaFilename, "Proposal.pdf");
+});
+
+test("does not store a media reply that Meta refused", async () => {
+  const store = createMemoryWhatsAppStore();
+
+  const result = await sendInboxWhatsAppMediaReply(
+    {
+      conversationId: baseInput.conversationId,
+      waId: baseInput.waId,
+      kind: "image",
+      file: new Blob(["png-bytes"], { type: "image/png" }),
+      filename: "mockup.png",
+      mimeType: "image/png",
+      customerMessageTimestamp: baseInput.customerMessageTimestamp,
+    },
+    {
+      store,
+      send: async () => ({ sent: false, reason: "SERVICE_WINDOW_CLOSED" }),
+    },
+  );
+
+  assert.deepEqual(result, { ok: false, reason: "SERVICE_WINDOW_CLOSED" });
+  assert.equal(store.messages.length, 0);
 });

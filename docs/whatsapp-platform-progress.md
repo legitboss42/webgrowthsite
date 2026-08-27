@@ -1125,6 +1125,54 @@ every thread**, because PostgREST rejects a select naming a column the table lac
 `readWhatsAppRows` collapses that to `null`; `readConversationMessageRows` now retries without
 the column, so the unapplied migration costs the failure *sentence*, never the messages.
 
+## Checkpoint: Composer Redesign (approved mockup) — Complete
+
+A **temporary task**, taken on top of the paused interface work and finished. It does not move
+the broader resume point recorded at the end of this file, which is unchanged.
+
+Scope was the composer inside `/admin/whatsapp/conversations` only. Files touched:
+`ReplyComposer.tsx`, `AttachmentMenu.tsx`, `EmojiPicker.tsx`, `emojiModel.ts`,
+`composerModel.ts`, new `ReplyTarget.tsx`, `conversations/page.tsx`,
+`src/components/whatsapp/icons.tsx`, `src/lib/whatsapp/store.ts`, and the two reply routes.
+
+What the mockup asked for, and where it lives:
+
+- **Editor pill** — `rounded-[1.4rem]`, `focus-within:border-ledger-bright`, auto-resizing from
+  one line to four then scrolling internally (`clampComposerHeight`, `isComposerScrolling`).
+  Placeholder is exactly `Type a message...`; `Enter` sends, `Shift + Enter` breaks the line
+  (`shouldSendOnKey`, which also refuses to steal an IME commit). Emoji, paperclip and
+  microphone sit **inside** the pill; the green send button and the `+` sit **outside** it.
+- **Attachment panel** — a four-across grid of tiles (Document, Image, Video, Audio) with a
+  caret pointing back at the `+` on desktop, and a bottom sheet on mobile. The mockup's
+  Contact / Location / Camera tiles were **deliberately not built**: the send path cannot
+  produce those message types, and §2 forbids fake functionality. Per-kind size and format
+  hints moved to `title` + `aria-label`, since a grid cell has no room for a subtitle. Quick
+  Replies and Templates keep their row below the divider, in brass, so §9 and §10 survive.
+- **Emoji picker** — the recents tab (`WHATSAPP_EMOJI_RECENTS_TAB_ID`) leads a `role="tablist"`
+  strip, the active tab carries a green underline (emoji glyphs ignore `color`, so the rule is
+  what has to carry the state), and insertion goes in at the caret via `insertIntoDraft`.
+- **Recording row** — `[X] · pulse + waveform · 00:08 · [trash] · [green mic]`, matching the
+  mockup. Both `X` and the trash can call `cancelRecording` with distinct accessible names
+  rather than inventing a second, fake outcome. Duration and levels come from the tested
+  `formatRecordingDuration` / `measureWaveformLevel` / `pushWaveformLevel` model.
+- **Reply Mode** — a quoted panel above the editor: green left rule, author in `ledger`, the
+  excerpt truncated on a word boundary (`buildWhatsAppReplyQuote`, `truncateQuoteExcerpt`), and
+  an `X`. `Escape` leaves reply mode, checked *after* the quick-reply list so one key never
+  does two things. A per-bubble `ReplyToButton` reaches the composer through
+  `ReplyTargetProvider`, a client context nested inside the existing `OutboundQueueProvider`
+  and keyed per conversation — chosen over a search param, which would round-trip the server
+  on every click.
+
+One security decision worth keeping: the quoted wamid **originates in a browser**, so sending it
+straight into Meta's `context` would let an authenticated admin quote another thread's message
+and leak its content into this customer's chat. `resolveSupabaseWhatsAppQuotedMessageId` in
+`src/lib/whatsapp/store.ts` re-checks server-side that the id belongs to this conversation, and
+anything unrecognised silently falls back to the conversation's own latest inbound message. Both
+the text and media reply routes go through it. Two unit tests cover the accept and refuse paths.
+
+Nothing else moved: the send path, media upload, typing throttle, 24-hour window rules,
+template flow, internal notes and the polling reconciler were reused as they were.
+
 ## Build Status
 
 Lint: **0 warnings, 0 errors** on `src/app/admin/whatsapp`, `src/components/whatsapp`,
@@ -1136,12 +1184,15 @@ pre-existing findings; scope the lint to the WhatsApp paths.
 
 Typecheck: **clean** — `npx tsc --noEmit`, no output.
 
-Build: **exit 0** — `npm run build`; sitemap validation passed, **94 governed routes**. Tests:
-**574/574 pass**, 0 fail (up from 572 — two new branding guards). Live: **35/35** against the
-production build, including that neither the access token nor the admin passphrase appears in
-any of the eight rendered admin pages or in any of the 16 client bundles scanned. §24 TikTok
-untouched; §25 verified — `/` and `/services/business-automation/` both still render (HTTP 200,
-112,514 and 104,283 bytes) with no console chrome.
+Build: **exit 0** — `npm run build`; sitemap validation passed, **94 governed routes**, 136/136
+static pages generated. Tests: **621/621 pass**, 0 fail (up from 574 — the composer redesign
+added coverage for the reply-quote model, the emoji recents tab, the media model, and the
+server-side quoted-message check; the composer introduced no new *page*, so route governance
+needed no entry). Live: **35/35** against the production build, including that neither the access
+token nor the admin passphrase appears in any of the eight rendered admin pages or in any of the
+16 client bundles scanned. §24 TikTok untouched; §25 verified — `/` and
+`/services/business-automation/` both still render (HTTP 200, 112,514 and 104,283 bytes) with no
+console chrome.
 
 Reviewed, not a defect: the settings page shows the configured `WHATSAPP_BUSINESS_ACCOUNT_ID`
 and `WHATSAPP_PHONE_NUMBER_ID` **values** to an authenticated admin, and the phone-numbers page
@@ -1171,6 +1222,13 @@ Those items are verified by unit tests, live Graph API probes, and production-bu
 checks — not by an observed message on a handset, and this checkpoint does not claim otherwise.
 Everything reachable without those two values *was* tested live, and that is what found the
 `quality={80}` bug.
+
+The composer redesign inherits exactly that gap. Its editor, keyboard path, emoji insertion,
+attachment picker, recording UI and Reply Mode were exercised locally and are covered by unit
+tests over their pure models; but a real send — attachment upload, a voice note arriving as a
+playable WhatsApp audio message, the typing indicator reaching Meta, and Sent/Delivered/Read
+coming back — still needs `SUPABASE_SERVICE_ROLE_KEY` and a deployment Meta can reach. Those
+paths were **not rewritten**, so they carry their prior verification, not a new claim.
 
 ## Interface Resume Point
 

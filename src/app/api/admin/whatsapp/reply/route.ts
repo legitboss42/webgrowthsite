@@ -3,7 +3,11 @@ import { NextResponse } from "next/server";
 import { hasWhatsAppAdminAccess } from "@/app/admin/whatsapp/auth";
 import { isSameOriginMutation } from "@/lib/scheduler/policy";
 import { sendInboxWhatsAppReply } from "@/lib/whatsapp/inboxReply";
-import { createSupabaseWhatsAppStore, getSupabaseWhatsAppReplyContext } from "@/lib/whatsapp/store";
+import {
+  createSupabaseWhatsAppStore,
+  getSupabaseWhatsAppReplyContext,
+  resolveSupabaseWhatsAppQuotedMessageId,
+} from "@/lib/whatsapp/store";
 
 export const runtime = "nodejs";
 
@@ -11,12 +15,15 @@ type ReplyBody = {
   conversationId?: unknown;
   waId?: unknown;
   text?: unknown;
+  replyToMessageId?: unknown;
 };
 
 type ValidReplyBody = {
   conversationId: string;
   waId: string;
   text: string;
+  /** The message the operator chose to quote. Verified against the thread before use. */
+  replyToMessageId?: string;
 };
 
 function parseReplyBody(body: ReplyBody): ValidReplyBody | null {
@@ -29,6 +36,10 @@ function parseReplyBody(body: ReplyBody): ValidReplyBody | null {
       conversationId: body.conversationId,
       waId: body.waId,
       text: body.text,
+      replyToMessageId:
+        typeof body.replyToMessageId === "string" && body.replyToMessageId.trim()
+          ? body.replyToMessageId.trim()
+          : undefined,
     };
   }
 
@@ -72,13 +83,21 @@ export async function POST(request: Request) {
     );
   }
 
+  // Reply mode is a hint from a browser, so the quoted id is only honoured once it is found
+  // in this conversation. Otherwise we quote what we always quoted: their latest message.
+  const quotedMessageId = await resolveSupabaseWhatsAppQuotedMessageId(
+    storeOptions,
+    replyContext.conversationId,
+    validBody.replyToMessageId,
+  );
+
   const result = await sendInboxWhatsAppReply(
     {
       conversationId: replyContext.conversationId,
       waId: replyContext.waId,
       text: validBody.text,
       customerMessageTimestamp: replyContext.customerMessageTimestamp,
-      replyToMessageId: replyContext.replyToMessageId,
+      replyToMessageId: quotedMessageId || replyContext.replyToMessageId,
     },
     {
       store: createSupabaseWhatsAppStore(storeOptions),

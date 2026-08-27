@@ -9,8 +9,10 @@ import { WhatsAppIcon } from "@/components/whatsapp/icons";
 import { loadWhatsAppSettings } from "@/lib/whatsapp/settingsStore";
 import { hasWhatsAppAdminAccess } from "../auth";
 import WhatsAppInboxAutoRefresh from "../AutoRefresh";
+import MessageMedia, { hasRenderableWhatsAppMedia } from "../MessageMedia";
 import OutboundQueueProvider, { PendingOutboundList } from "../OutboundQueue";
 import ReplyComposer from "../ReplyComposer";
+import ReplyTargetProvider, { ReplyToButton } from "../ReplyTarget";
 import { readWhatsAppRows } from "../data";
 import {
   buildWhatsAppDashboardModel,
@@ -154,12 +156,20 @@ function getTemperatureClasses(temperature: WhatsAppLeadRow["lead_temperature"])
 
 function getMessageFallbackText(message: WhatsAppLeadMessage) {
   if (message.message_type === "audio") return message.media_voice ? "Voice note" : "Audio message";
+  if (message.message_type === "image") return "Image";
+  if (message.message_type === "video") return "Video";
+  if (message.message_type === "document") return message.media_filename || "Document";
   return "No text content stored.";
 }
 
 function getMessagePreview(message: WhatsAppLeadMessage | undefined) {
   if (!message) return "No messages yet";
   if (message.message_type === "audio") return message.media_voice ? "🎙 Voice note" : "🎧 Audio message";
+  if (message.message_type === "image") return `🖼 ${message.message_text || "Image"}`;
+  if (message.message_type === "video") return `🎬 ${message.message_text || "Video"}`;
+  if (message.message_type === "document") {
+    return `📄 ${message.message_text || message.media_filename || "Document"}`;
+  }
   return message.message_text || getMessageFallbackText(message);
 }
 
@@ -332,7 +342,7 @@ export default async function WhatsAppConversationsPage({
                       displayName: item.display_name,
                       businessName: item.business_name,
                       waId: item.wa_id,
-                    }}
+                    }}
                   />
                   <span className="min-w-0 flex-1">
                     <span className="flex items-center gap-2">
@@ -390,6 +400,7 @@ export default async function WhatsAppConversationsPage({
           // Keyed on the conversation: switching leads must not carry a half-typed draft
           // or an in-flight bubble across into someone else's thread.
           <OutboundQueueProvider key={lead.id} storedMessageIds={storedMessageIds}>
+            <ReplyTargetProvider>
             <div className="flex flex-none items-center gap-3 border-b border-rule bg-paper-raised px-4 py-3">
               <Link
                 href={getFilterHref(filter)}
@@ -403,7 +414,7 @@ export default async function WhatsAppConversationsPage({
                   displayName: lead.display_name,
                   businessName: lead.business_name,
                   waId: lead.wa_id,
-                }}
+                }}
               />
               <div className="min-w-0 flex-1">
                 <h2 className="truncate text-sm font-semibold text-ink">
@@ -430,6 +441,7 @@ export default async function WhatsAppConversationsPage({
               {model.selectedMessages.length ? (
                 model.selectedMessages.map((message) => {
                   const outbound = message.direction === "outbound";
+                  const showsMedia = hasRenderableWhatsAppMedia(message);
                   return (
                     <article
                       key={message.id}
@@ -439,43 +451,24 @@ export default async function WhatsAppConversationsPage({
                           : "mr-auto rounded-bl-md border border-rule bg-paper-raised text-ink"
                       }`}
                     >
-                      {message.message_type === "audio" && message.media_id ? (
-                        <div>
-                          <p
-                            className={`mb-2 text-[0.65rem] font-medium uppercase tracking-[.12em] ${
-                              outbound ? "text-white/80" : "text-ink-faint"
-                            }`}
-                          >
-                            {message.media_voice ? "Voice note" : "Audio message"}
-                          </p>
-                          <audio
-                            controls
-                            preload="none"
-                            src={`/api/admin/whatsapp/media/${encodeURIComponent(message.media_id)}`}
-                            className="w-full max-w-[18rem]"
-                          >
-                            Your browser cannot play this WhatsApp audio message.
-                          </audio>
-                          {message.media_filename || message.media_mime_type ? (
-                            <p
-                              className={`mt-1.5 text-[0.65rem] ${
-                                outbound ? "text-white/65" : "text-ink-faint"
-                              }`}
-                            >
-                              {[message.media_filename, message.media_mime_type].filter(Boolean).join(" · ")}
-                            </p>
-                          ) : null}
-                        </div>
-                      ) : (
-                        <p className="whitespace-pre-wrap text-sm leading-6">
+                      {showsMedia ? <MessageMedia message={message} outbound={outbound} /> : null}
+                      {message.message_text || !showsMedia ? (
+                        <p className={`whitespace-pre-wrap text-sm leading-6 ${showsMedia ? "mt-2" : ""}`}>
                           {message.message_text || getMessageFallbackText(message)}
                         </p>
-                      )}
+                      ) : null}
                       <p
                         className={`mt-1 flex items-center justify-end gap-1.5 text-[0.65rem] tabular-nums ${
                           outbound ? "text-white/70" : "text-ink-faint"
                         }`}
                       >
+                        <span className="-my-1 mr-auto">
+                          <ReplyToButton
+                            message={message}
+                            contactLabel={lead.display_name || "Customer"}
+                            onDark={outbound}
+                          />
+                        </span>
                         <time dateTime={message.message_timestamp}>
                           {formatTime(message.message_timestamp)}
                         </time>
@@ -497,7 +490,9 @@ export default async function WhatsAppConversationsPage({
               <PendingOutboundList />
             </div>
 
-            <div className="max-h-[55%] flex-none overflow-y-auto border-t border-rule bg-paper-raised">
+            {/* No `overflow` here on purpose: the composer's own popovers (emoji, `+` menu,
+                quick replies) sit above the row, and the editor bounds its own height. */}
+            <div className="flex-none border-t border-rule bg-paper-raised">
               <ReplyComposer
                 conversationId={lead.id}
                 waId={lead.wa_id}
@@ -505,6 +500,7 @@ export default async function WhatsAppConversationsPage({
                 quickReplies={quickReplies}
               />
             </div>
+            </ReplyTargetProvider>
           </OutboundQueueProvider>
         ) : (
           <div className="flex min-h-0 flex-1 items-center justify-center px-6 py-16">

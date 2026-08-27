@@ -19,6 +19,7 @@ const messages = [
 const pagePath = new URL("./conversations/page.tsx", import.meta.url);
 const overviewPagePath = new URL("./page.tsx", import.meta.url);
 const replyComposerPath = new URL("./ReplyComposer.tsx", import.meta.url);
+const messageMediaPath = new URL("./MessageMedia.tsx", import.meta.url);
 
 test("returns only hot WhatsApp leads for the HOT filter", () => {
   assert.deepEqual(filterWhatsAppLeads(leads, "HOT").map((lead) => lead.id), ["hot"]);
@@ -128,10 +129,18 @@ test("every WhatsApp console page is gated behind the same admin access check", 
 
 test("WhatsApp admin page loads and renders protected audio messages", () => {
   const source = readFileSync(pagePath, "utf8");
+  const mediaSource = readFileSync(messageMediaPath, "utf8");
 
   assert.match(source, /message_type,message_text,message_timestamp,delivery_status,media_id,media_mime_type,media_voice,media_filename/);
-  assert.match(source, /\/api\/admin\/whatsapp\/media\//);
-  assert.match(source, /<audio/);
+  // Every stored media kind is played back through the authenticated proxy, never through
+  // a Meta URL: those need the access token, which must not reach a page.
+  assert.match(mediaSource, /\/api\/admin\/whatsapp\/media\//);
+  assert.doesNotMatch(mediaSource, /graph\.facebook\.com/);
+  assert.match(mediaSource, /<audio/);
+  assert.match(mediaSource, /<video/);
+  for (const kind of ["audio", "image", "video", "document"]) {
+    assert.match(mediaSource, new RegExp(`message_type === "${kind}"`), `${kind} bubble missing`);
+  }
 });
 
 test("WhatsApp reply composer can post recorded audio through the protected audio reply route", () => {

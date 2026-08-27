@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { createMemoryWhatsAppStore, createSupabaseWhatsAppStore, getSupabaseWhatsAppReplyContext } from "./store";
+import { createMemoryWhatsAppStore, createSupabaseWhatsAppStore, getSupabaseWhatsAppReplyContext, resolveSupabaseWhatsAppQuotedMessageId } from "./store";
 
 const inbound = {
   messageId: "wamid.test-1",
@@ -178,4 +178,47 @@ test("fails closed when the requested reply conversation is inactive or belongs 
     "2348099999999",
   );
   assert.equal(context, null);
+});
+
+test("only quotes a message the browser asked for once it is found in that conversation", async () => {
+  const urls: string[] = [];
+  const options = {
+    url: "https://example.supabase.co",
+    serviceRoleKey: "test-key",
+    fetch: async (url: URL | RequestInfo) => {
+      urls.push(String(url));
+      // The row only comes back for the id that really belongs to conversation-1.
+      const body = String(url).includes("wamid.mine") ? [{ whatsapp_message_id: "wamid.mine" }] : [];
+      return new Response(JSON.stringify(body), { status: 200 });
+    },
+  };
+
+  assert.equal(
+    await resolveSupabaseWhatsAppQuotedMessageId(options, "conversation-1", "wamid.mine"),
+    "wamid.mine",
+  );
+  // Someone else's thread, so it is refused and the caller falls back to its own context.
+  assert.equal(
+    await resolveSupabaseWhatsAppQuotedMessageId(options, "conversation-1", "wamid.someone-else"),
+    null,
+  );
+  assert.match(urls[0] || "", /conversation_id=eq\.conversation-1/);
+  assert.match(urls[0] || "", /whatsapp_message_id=eq\.wamid\.mine/);
+});
+
+test("asks Supabase nothing when there is no quoted message to check", async () => {
+  let called = false;
+  const options = {
+    url: "https://example.supabase.co",
+    serviceRoleKey: "test-key",
+    fetch: async () => {
+      called = true;
+      return new Response("[]", { status: 200 });
+    },
+  };
+
+  assert.equal(await resolveSupabaseWhatsAppQuotedMessageId(options, "conversation-1", undefined), null);
+  assert.equal(await resolveSupabaseWhatsAppQuotedMessageId(options, "conversation-1", "   "), null);
+  assert.equal(await resolveSupabaseWhatsAppQuotedMessageId(options, "", "wamid.mine"), null);
+  assert.equal(called, false);
 });

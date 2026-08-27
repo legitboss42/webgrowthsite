@@ -21,6 +21,18 @@ export type WhatsAppIconName =
   | "close"
   | "chevronLeft"
   | "logo"
+  // Composer controls.
+  | "plus"
+  | "smile"
+  | "paperclip"
+  | "microphone"
+  | "send"
+  | "trash"
+  | "stop"
+  | "reply"
+  | "image"
+  | "video"
+  | "document"
   | "statusPending"
   | "statusSent"
   | "statusDelivered"
@@ -76,6 +88,70 @@ const ICON_PATHS: Record<WhatsAppIconName, ReactNode> = {
     <>
       <path d="M3 20.5l1.7-4.4A8.7 8.7 0 1 1 8.4 19L3 20.5z" />
       <path d="M8.6 10.4c.5 2.1 2.6 4.1 4.7 4.7" />
+    </>
+  ),
+  // Composer controls. Same 24×24 box and stroke weight as the navigation glyphs, so a
+  // row of them lines up without per-icon nudging.
+  plus: <path d="M12 5v14M5 12h14" />,
+  smile: (
+    <>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M8.5 14.5a4.5 4.5 0 0 0 7 0" />
+      <path d="M9 9.5h.01M15 9.5h.01" />
+    </>
+  ),
+  paperclip: (
+    <path d="M20.5 11.5l-8 8a5 5 0 0 1-7-7l8.5-8.5a3.3 3.3 0 0 1 4.7 4.7l-8.5 8.5a1.7 1.7 0 0 1-2.4-2.4l7.8-7.8" />
+  ),
+  microphone: (
+    <>
+      <rect x="9" y="2.5" width="6" height="11" rx="3" />
+      <path d="M5.5 11a6.5 6.5 0 0 0 13 0" />
+      <path d="M12 17.5V21M9 21h6" />
+    </>
+  ),
+  // Filled so it reads as the one primary action in the composer even at 20px. The
+  // per-element fill overrides the shared `fill="none"` on the <svg>.
+  send: (
+    <path
+      fill="currentColor"
+      stroke="none"
+      d="M4.2 11.5 20 4.3a.62.62 0 0 1 .82.82L13.6 20.9a.62.62 0 0 1-1.14-.02l-2.6-6.24-6.24-2.6a.62.62 0 0 1-.02-1.14z"
+    />
+  ),
+  trash: (
+    <>
+      <path d="M4 7h16M9.5 7V4.5h5V7" />
+      <path d="M6 7l1 13h10l1-13" />
+      <path d="M10.5 11v5.5M13.5 11v5.5" />
+    </>
+  ),
+  // Reply: the arrow curls back on itself, the same shape WhatsApp uses on a quoted message.
+  reply: (
+    <>
+      <path d="M9.5 6.5 4 12l5.5 5.5" />
+      <path d="M4 12h9.5a6.5 6.5 0 0 1 6.5 6.5V20" />
+    </>
+  ),
+  stop: <rect x="6.5" y="6.5" width="11" height="11" rx="2" />,
+  image: (
+    <>
+      <rect x="3" y="4.5" width="18" height="15" rx="2.5" />
+      <circle cx="8.75" cy="9.75" r="1.6" />
+      <path d="M3.5 17l4.8-4.8a1.8 1.8 0 0 1 2.5 0L15 16.4l1.9-1.9a1.8 1.8 0 0 1 2.5 0l1.1 1.1" />
+    </>
+  ),
+  video: (
+    <>
+      <rect x="2.5" y="6" width="13" height="12" rx="2.5" />
+      <path d="M15.5 11l5-3v8l-5-3z" />
+    </>
+  ),
+  document: (
+    <>
+      <path d="M6 3h7.5L18 7.5V21H6z" />
+      <path d="M13.5 3v4.5H18" />
+      <path d="M9 12.5h6M9 16.5h4" />
     </>
   ),
   // Delivery states. Each silhouette differs from the others at message-bubble size,

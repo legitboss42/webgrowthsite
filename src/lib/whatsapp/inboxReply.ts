@@ -1,4 +1,5 @@
-import { sendWhatsAppAudio, sendWhatsAppText, type SendResult } from "./send";
+import { sendWhatsAppAudio, sendWhatsAppMedia, sendWhatsAppText, type SendResult } from "./send";
+import type { WhatsAppMediaKind } from "./media";
 import type { WhatsAppStore } from "./store";
 
 type InboxReplySend = (
@@ -48,6 +49,34 @@ export type InboxReplyResult =
 export type InboxAudioReplyResult =
   | { ok: true; messageId: string; mediaId: string }
   | { ok: false; reason: Extract<SendResult, { sent: false }>["reason"] };
+
+type InboxMediaReplySend = (
+  input: {
+    to: string;
+    kind: WhatsAppMediaKind;
+    file: Blob;
+    filename: string;
+    mimeType: string;
+    caption?: string;
+    customerMessageTimestamp: number;
+    replyToMessageId?: string;
+  },
+  options?: { now?: number },
+) => Promise<SendResult>;
+
+export type InboxMediaReplyInput = {
+  conversationId: string;
+  waId: string;
+  kind: WhatsAppMediaKind;
+  file: Blob;
+  filename: string;
+  mimeType: string;
+  caption?: string;
+  customerMessageTimestamp: number;
+  replyToMessageId?: string;
+};
+
+export type InboxMediaReplyResult = InboxAudioReplyResult;
 
 export async function sendInboxWhatsAppReply(
   input: InboxReplyInput,
@@ -115,6 +144,57 @@ export async function sendInboxWhatsAppAudioReply(
     mediaId: result.mediaId,
     mediaMimeType: input.mimeType,
     mediaVoice: true,
+    mediaFilename: input.filename,
+  });
+
+  return { ok: true, messageId: result.messageId, mediaId: result.mediaId };
+}
+
+/**
+ * Attachments from the composer's `+` menu and paperclip: image, video, document, and
+ * plain audio files.
+ *
+ * Separate from `sendInboxWhatsAppAudioReply` on purpose — that one always records a
+ * voice note, and an uploaded MP3 is not one. The caption is stored as the message text
+ * so the thread reads the same as it does on the customer's phone.
+ */
+export async function sendInboxWhatsAppMediaReply(
+  input: InboxMediaReplyInput,
+  options: {
+    store: WhatsAppStore;
+    send?: InboxMediaReplySend;
+    now?: number;
+  },
+): Promise<InboxMediaReplyResult> {
+  const send = options.send || sendWhatsAppMedia;
+  const caption = input.caption?.trim() || "";
+  const result = await send(
+    {
+      to: input.waId,
+      kind: input.kind,
+      file: input.file,
+      filename: input.filename,
+      mimeType: input.mimeType,
+      caption,
+      customerMessageTimestamp: input.customerMessageTimestamp,
+      replyToMessageId: input.replyToMessageId,
+    },
+    { now: options.now },
+  );
+
+  if (!result.sent) return { ok: false, reason: result.reason };
+  if (!result.mediaId) return { ok: false, reason: "API_ERROR" };
+
+  await options.store.recordOutbound({
+    conversationId: input.conversationId,
+    messageId: result.messageId,
+    waId: input.waId,
+    timestamp: options.now || Math.floor(Date.now() / 1000),
+    type: input.kind,
+    text: caption || undefined,
+    mediaId: result.mediaId,
+    mediaMimeType: input.mimeType,
+    mediaVoice: false,
     mediaFilename: input.filename,
   });
 

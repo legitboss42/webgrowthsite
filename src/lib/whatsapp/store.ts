@@ -111,6 +111,37 @@ export async function getSupabaseWhatsAppReplyContext(
 
 type SupabaseRow = { id: string };
 
+/**
+ * Confirms a WhatsApp message id the composer asked to quote really belongs to this
+ * conversation, and returns it only then.
+ *
+ * The id arrives from a browser, so it is untrusted: without this check an administrator
+ * could make Meta quote a message from someone else's thread, which would leak the other
+ * conversation's content into this customer's chat. Anything unrecognised resolves to null
+ * and the caller falls back to the conversation's own latest inbound message.
+ */
+export async function resolveSupabaseWhatsAppQuotedMessageId(
+  options: SupabaseStoreOptions,
+  conversationId: string,
+  candidateMessageId: string | undefined,
+): Promise<string | null> {
+  const candidate = candidateMessageId?.trim();
+  if (!candidate || !conversationId.trim()) return null;
+
+  const fetcher = options.fetch || globalThis.fetch;
+  const response = await fetcher(
+    `${options.url.replace(/\/$/, "")}/rest/v1/whatsapp_messages?conversation_id=eq.${encodeURIComponent(
+      conversationId,
+    )}&whatsapp_message_id=eq.${encodeURIComponent(candidate)}&select=whatsapp_message_id&limit=1`,
+    { headers: { apikey: options.serviceRoleKey, Authorization: `Bearer ${options.serviceRoleKey}` } },
+  );
+  if (!response.ok) throw new Error(`Supabase WhatsApp quoted message request failed: ${response.status}`);
+
+  const rows = (await response.json()) as Array<{ whatsapp_message_id?: string }>;
+  const stored = rows[0]?.whatsapp_message_id;
+  return typeof stored === "string" && stored === candidate ? stored : null;
+}
+
 export function createSupabaseWhatsAppStore(options: SupabaseStoreOptions): WhatsAppStore {
   const fetcher = options.fetch || globalThis.fetch;
   const request = async <T extends SupabaseRow>(path: string, init: RequestInit) => {

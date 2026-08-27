@@ -1,5 +1,10 @@
 import { isFreeformReplyAllowed } from "./classify";
-import { isSupportedWhatsAppAudioMimeType } from "./audio";
+import {
+  WHATSAPP_MEDIA_CAPTION_MAX,
+  isSupportedWhatsAppMediaMimeType,
+  supportsWhatsAppMediaCaption,
+  type WhatsAppMediaKind,
+} from "./media";
 
 type WhatsAppEnvironment = Record<string, string | undefined>;
 
@@ -21,6 +26,18 @@ type AudioSendInput = {
   audio: Blob;
   filename: string;
   mimeType: string;
+  customerMessageTimestamp: number;
+  replyToMessageId?: string;
+};
+
+type MediaSendInput = {
+  to: string;
+  kind: WhatsAppMediaKind;
+  file: Blob;
+  filename: string;
+  mimeType: string;
+  /** Ignored for audio, which Meta does not caption. */
+  caption?: string;
   customerMessageTimestamp: number;
   replyToMessageId?: string;
 };
@@ -109,7 +126,14 @@ export async function sendWhatsAppText(input: SendInput, options: SendOptions = 
   }
 }
 
-export async function sendWhatsAppAudio(input: AudioSendInput, options: SendOptions = {}): Promise<SendResult> {
+/**
+ * Uploads a file to Meta and then sends it as a message.
+ *
+ * Two calls, in this order, because the Cloud API has no single-shot media send: the
+ * bytes go to `/media` and come back as an id, and only that id may appear in a
+ * `/messages` body. The token never leaves this function.
+ */
+export async function sendWhatsAppMedia(input: MediaSendInput, options: SendOptions = {}): Promise<SendResult> {
   const env = options.env || process.env;
   const token = env.WHATSAPP_ACCESS_TOKEN?.trim();
   const phoneNumberId = env.WHATSAPP_PHONE_NUMBER_ID?.trim();
@@ -117,16 +141,19 @@ export async function sendWhatsAppAudio(input: AudioSendInput, options: SendOpti
   if (!isFreeformReplyAllowed(input.customerMessageTimestamp, options.now)) return { sent: false, reason: "SERVICE_WINDOW_CLOSED" };
   const recipient = normalizeWhatsAppRecipient(input.to);
   if (!recipient) return { sent: false, reason: "INVALID_RECIPIENT" };
-  if (!isSupportedWhatsAppAudioMimeType(input.mimeType)) return { sent: false, reason: "UNSUPPORTED_MEDIA_TYPE" };
+  if (!isSupportedWhatsAppMediaMimeType(input.kind, input.mimeType)) return { sent: false, reason: "UNSUPPORTED_MEDIA_TYPE" };
 
   const apiVersion = env.WHATSAPP_API_VERSION?.trim() || env.WHATSAPP_GRAPH_API_VERSION?.trim() || "v26.0";
   const fetcher = options.fetch || globalThis.fetch;
+  const caption = supportsWhatsAppMediaCaption(input.kind)
+    ? input.caption?.trim().slice(0, WHATSAPP_MEDIA_CAPTION_MAX) || ""
+    : "";
 
   try {
     const formData = new FormData();
     formData.set("messaging_product", "whatsapp");
     formData.set("type", input.mimeType);
-    formData.set("file", input.audio, input.filename);
+    formData.set("file", input.file, input.filename);
 
     const uploadResponse = await fetcher(`https://graph.facebook.com/${apiVersion}/${phoneNumberId}/media`, {
       method: "POST",
@@ -152,8 +179,13 @@ export async function sendWhatsAppAudio(input: AudioSendInput, options: SendOpti
         messaging_product: "whatsapp",
         recipient_type: "individual",
         to: recipient,
-        type: "audio",
-        audio: { id: mediaId },
+        type: input.kind,
+        [input.kind]: {
+          id: mediaId,
+          ...(caption ? { caption } : {}),
+          // Meta shows the original filename on a document bubble and nowhere else.
+          ...(input.kind === "document" ? { filename: input.filename } : {}),
+        },
         ...(input.replyToMessageId ? { context: { message_id: input.replyToMessageId } } : {}),
       }),
     });
@@ -161,7 +193,7 @@ export async function sendWhatsAppAudio(input: AudioSendInput, options: SendOpti
     if (!sendResponse.ok) {
       const payload: unknown = await sendResponse.json().catch(() => undefined);
       const failure = classifyMetaFailure(sendResponse.status, payload);
-      console.error("WhatsApp Cloud API audio send failed", failure.diagnostic);
+      console.error("WhatsApp Cloud API media send failed", failure.diagnostic);
       return failure;
     }
 
@@ -170,7 +202,26 @@ export async function sendWhatsAppAudio(input: AudioSendInput, options: SendOpti
     if (!messageId) return { sent: false, reason: "API_ERROR" };
     return { sent: true, messageId, mediaId };
   } catch {
-    console.error("WhatsApp Cloud API audio request failed");
+    console.error("WhatsApp Cloud API media request failed");
     return { sent: false, reason: "API_ERROR" };
   }
+}
+
+/**
+ * Voice notes. Kept as its own export with its own signature because the inbox has
+ * called it that way since audio replies shipped; the transport is `sendWhatsAppMedia`.
+ */
+export async function sendWhatsAppAudio(input: AudioSendInput, options: SendOptions = {}): Promise<SendResult> {
+  return sendWhatsAppMedia(
+    {
+      to: input.to,
+      kind: "audio",
+      file: input.audio,
+      filename: input.filename,
+      mimeType: input.mimeType,
+      customerMessageTimestamp: input.customerMessageTimestamp,
+      replyToMessageId: input.replyToMessageId,
+    },
+    options,
+  );
 }
