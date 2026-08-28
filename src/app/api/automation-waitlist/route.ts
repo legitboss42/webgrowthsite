@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
 import { ADMIN_EMAIL, sendTransactionalEmail } from "@/lib/email";
+import { readGoogleAuthSessionFromCookieStore } from "@/lib/googleAuth";
 import {
   checkRateLimit,
   getClientIp,
@@ -62,6 +64,14 @@ export async function POST(req: Request) {
     }
 
     const body = (await req.json()) as Record<string, unknown>;
+    const cookieStore = await cookies();
+    const googleSession = readGoogleAuthSessionFromCookieStore(cookieStore);
+    if (!googleSession?.email) {
+      return NextResponse.json(
+        { error: "Please sign in with Google before joining the waitlist." },
+        { status: 401 }
+      );
+    }
 
     // Honeypot. The field is visually hidden and unlabelled for assistive tech,
     // so only a script fills it. Respond as if accepted rather than revealing
@@ -72,7 +82,11 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: true, emailSent: false }, { status: 200 });
     }
 
-    const validation = validateWaitlistSubmission(body);
+    const validation = validateWaitlistSubmission({
+      ...body,
+      email: googleSession.email,
+      fullName: sanitizeText(body.fullName, 120) || googleSession.fullName || googleSession.email,
+    });
     if (!validation.ok) {
       return NextResponse.json(
         { error: "Please check the highlighted fields.", fieldErrors: validation.errors },

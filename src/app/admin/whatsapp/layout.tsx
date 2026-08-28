@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { cookies } from "next/headers";
-import InternalUtilityUnlockForm from "@/components/internal/InternalUtilityUnlockForm";
-import { getInternalUtilityLocalPassphrase } from "@/lib/internalUtilityAuth";
+import GoogleAdminPrompt from "@/components/auth/GoogleAdminPrompt";
+import { getDefaultAdminGoogleEmail } from "@/lib/googleAuth";
 import WhatsAppShell from "@/components/whatsapp/WhatsAppShell";
 import {
   fetchWhatsAppPhoneNumbers,
@@ -23,7 +23,7 @@ export default async function WhatsAppConsoleLayout({ children }: { children: Re
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#050806] px-4 py-16 text-white">
         <div className="w-full max-w-4xl">
-          <InternalUtilityUnlockForm localHint={getInternalUtilityLocalPassphrase() || undefined} />
+          <GoogleAdminPrompt nextPath="/admin/whatsapp/" adminEmail={getDefaultAdminGoogleEmail()} />
         </div>
       </div>
     );

@@ -52,8 +52,17 @@ const INITIAL_VALUES: FormValues = {
 
 const GENERIC_ERROR = "We couldn't submit your request right now. Please try again.";
 
-export default function WaitlistForm() {
-  const [values, setValues] = useState<FormValues>(INITIAL_VALUES);
+type WaitlistFormProps = {
+  sessionEmail: string;
+  sessionFullName?: string;
+};
+
+export default function WaitlistForm({ sessionEmail, sessionFullName = "" }: WaitlistFormProps) {
+  const [values, setValues] = useState<FormValues>({
+    ...INITIAL_VALUES,
+    fullName: sessionFullName,
+    email: sessionEmail,
+  });
   const [fieldErrors, setFieldErrors] = useState<WaitlistFieldErrors>({});
   const [status, setStatus] = useState<Status>("idle");
   const [formError, setFormError] = useState("");
@@ -173,7 +182,11 @@ export default function WaitlistForm() {
         confirmation_email_sent: data.emailSent === true,
       });
 
-      setValues(INITIAL_VALUES);
+      setValues({
+        ...INITIAL_VALUES,
+        fullName: sessionFullName,
+        email: sessionEmail,
+      });
       setTurnstileResetKey((current) => current + 1);
 
       // Send focus to the confirmation so screen-reader and keyboard users land
@@ -230,6 +243,10 @@ export default function WaitlistForm() {
         Tell us which tool matters to you and how you would use it. That helps us build the right thing
         first, and it decides what we send you.
       </p>
+      <p className="automation-form-footnote">
+        Signed in as <span className="font-semibold">{sessionEmail}</span>. This Google account email will
+        be used for your waitlist record.
+      </p>
 
       {status === "error" && formError ? (
         <p className="automation-form-alert" role="alert">
@@ -266,27 +283,19 @@ export default function WaitlistForm() {
 
           <div className="automation-field">
             <label htmlFor="waitlist-email" className="automation-label">
-              Email address <span className="automation-required">*</span>
+              Google account email
             </label>
             <input
               id="waitlist-email"
               name="email"
               type="email"
               autoComplete="email"
-              required
               maxLength={WAITLIST_LIMITS.emailMax}
-              value={values.email}
-              onChange={(event) => updateValue("email", event.target.value)}
-              onBlur={() => handleBlur("email")}
-              className="automation-control"
-              aria-invalid={fieldErrors.email ? true : undefined}
-              aria-describedby={fieldErrors.email ? "waitlist-email-error" : undefined}
+              value={sessionEmail}
+              readOnly
+              disabled
+              className="automation-control opacity-75"
             />
-            {fieldErrors.email ? (
-              <p className="automation-field-error" id="waitlist-email-error">
-                {fieldErrors.email}
-              </p>
-            ) : null}
           </div>
         </div>
 

@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { cookies } from "next/headers";
-import InternalUtilityUnlockForm from "@/components/internal/InternalUtilityUnlockForm";
-import { getInternalUtilityLocalPassphrase } from "@/lib/internalUtilityAuth";
+import GoogleAdminPrompt from "@/components/auth/GoogleAdminPrompt";
+import { getDefaultAdminGoogleEmail } from "@/lib/googleAuth";
 import { WhatsAppIcon, type WhatsAppIconName } from "@/components/whatsapp/icons";
 import { hasWhatsAppAdminAccess } from "../auth";
 import { countWhatsAppRows, readWhatsAppRows } from "../data";
@@ -207,7 +207,10 @@ export default async function WhatsAppAnalyticsPage({
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#050806] px-4 py-16 text-white">
         <div className="w-full max-w-4xl">
-          <InternalUtilityUnlockForm localHint={getInternalUtilityLocalPassphrase() || undefined} />
+          <GoogleAdminPrompt
+            nextPath="/admin/whatsapp/analytics/"
+            adminEmail={getDefaultAdminGoogleEmail()}
+          />
         </div>
       </div>
     );

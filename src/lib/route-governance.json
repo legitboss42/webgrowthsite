@@ -307,6 +307,12 @@
       "reason": "Internal automation waitlist administration"
     },
     {
+      "path": "/auth/google/callback/",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Supabase Google OAuth callback page for admin and waitlist access"
+    },
+    {
       "path": "/admin/whatsapp/",
       "status": "NOINDEX",
       "sitemap": false,

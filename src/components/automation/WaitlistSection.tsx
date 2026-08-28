@@ -1,4 +1,7 @@
+import { cookies } from "next/headers";
 import WaitlistForm from "@/components/automation/WaitlistForm";
+import GoogleWaitlistGate from "@/components/auth/GoogleWaitlistGate";
+import { readGoogleAuthSessionFromCookieStore } from "@/lib/googleAuth";
 
 /**
  * Waitlist section: the form plus the reassurance that belongs next to it.
@@ -28,7 +31,10 @@ const assurances = [
   },
 ];
 
-export default function WaitlistSection() {
+export default async function WaitlistSection() {
+  const cookieStore = await cookies();
+  const session = readGoogleAuthSessionFromCookieStore(cookieStore);
+
   return (
     <section
       className="automation-section automation-waitlist"
@@ -60,7 +66,11 @@ export default function WaitlistSection() {
         </div>
 
         <div className="automation-waitlist-form">
-          <WaitlistForm />
+          {session ? (
+            <WaitlistForm sessionEmail={session.email} sessionFullName={session.fullName || ""} />
+          ) : (
+            <GoogleWaitlistGate />
+          )}
         </div>
       </div>
     </section>

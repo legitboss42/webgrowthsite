@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
-import InternalUtilityUnlockForm from "@/components/internal/InternalUtilityUnlockForm";
-import { getInternalUtilityLocalPassphrase } from "@/lib/internalUtilityAuth";
+import GoogleAdminPrompt from "@/components/auth/GoogleAdminPrompt";
+import { getDefaultAdminGoogleEmail } from "@/lib/googleAuth";
 import { hasWhatsAppAdminAccess } from "../auth";
 import { readWhatsAppRows } from "../data";
 import QuickReplyManager from "../QuickReplyManager";
@@ -32,7 +32,10 @@ export default async function WhatsAppQuickRepliesPage() {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#050806] px-4 py-16 text-white">
         <div className="w-full max-w-4xl">
-          <InternalUtilityUnlockForm localHint={getInternalUtilityLocalPassphrase() || undefined} />
+          <GoogleAdminPrompt
+            nextPath="/admin/whatsapp/quick-replies/"
+            adminEmail={getDefaultAdminGoogleEmail()}
+          />
         </div>
       </div>
     );
