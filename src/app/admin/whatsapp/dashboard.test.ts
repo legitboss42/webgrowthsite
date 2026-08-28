@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
-import { createInternalUtilityCookieValue, getInternalUtilityCookieName } from "@/lib/internalUtilityAuth";
+import { createGoogleAuthSessionValue, getGoogleAuthCookieName } from "@/lib/googleAuth";
 import { createSchedulerSession, SCHEDULER_SESSION_COOKIE } from "@/lib/scheduler/session";
 import { hasWhatsAppAdminAccess } from "./auth";
 import { buildWhatsAppDashboardModel, buildWhatsAppReplyComposerState, filterWhatsAppLeads } from "./dashboard";
@@ -151,22 +151,29 @@ test("WhatsApp reply composer can post recorded audio through the protected audi
   assert.match(source, /\/api\/admin\/whatsapp\/reply\/audio/);
 });
 
-test("WhatsApp admin access accepts the internal utility cookie", () => {
-  const originalSessionSecret = process.env.INTERNAL_TOOL_SESSION_SECRET;
+test("WhatsApp admin access accepts the configured Google admin session", () => {
+  const originalSessionSecret = process.env.GOOGLE_AUTH_SESSION_SECRET;
+  const originalAdminEmails = process.env.GOOGLE_ADMIN_EMAILS;
 
-  process.env.INTERNAL_TOOL_SESSION_SECRET = "internal-utility-secret";
-  const cookieValue = createInternalUtilityCookieValue();
+  process.env.GOOGLE_AUTH_SESSION_SECRET = "google-auth-secret";
+  process.env.GOOGLE_ADMIN_EMAILS = "vickysaintbrown02@gmail.com";
+  const cookieValue = createGoogleAuthSessionValue({
+    userId: "google-admin",
+    email: "Vickysaintbrown02@gmail.com",
+    fullName: "Vicky Saint Brown",
+  });
 
   assert.equal(
     hasWhatsAppAdminAccess({
       get(name) {
-        return name === getInternalUtilityCookieName() ? { value: cookieValue } : undefined;
+        return name === getGoogleAuthCookieName() ? { value: cookieValue } : undefined;
       },
     }),
     true,
   );
 
-  process.env.INTERNAL_TOOL_SESSION_SECRET = originalSessionSecret;
+  process.env.GOOGLE_AUTH_SESSION_SECRET = originalSessionSecret;
+  process.env.GOOGLE_ADMIN_EMAILS = originalAdminEmails;
 });
 
 test("WhatsApp admin access accepts an owner scheduler session", () => {
@@ -188,6 +195,31 @@ test("WhatsApp admin access accepts an owner scheduler session", () => {
 
   process.env.SCHEDULER_SESSION_SECRET = originalSchedulerSecret;
   process.env.OWNER_TIKTOK_OPEN_IDS = originalOwnerIds;
+});
+
+test("WhatsApp admin access rejects a non-admin Google session", () => {
+  const originalSessionSecret = process.env.GOOGLE_AUTH_SESSION_SECRET;
+  const originalAdminEmails = process.env.GOOGLE_ADMIN_EMAILS;
+
+  process.env.GOOGLE_AUTH_SESSION_SECRET = "google-auth-secret";
+  process.env.GOOGLE_ADMIN_EMAILS = "vickysaintbrown02@gmail.com";
+  const cookieValue = createGoogleAuthSessionValue({
+    userId: "google-user",
+    email: "someone@example.com",
+    fullName: "Someone Else",
+  });
+
+  assert.equal(
+    hasWhatsAppAdminAccess({
+      get(name) {
+        return name === getGoogleAuthCookieName() ? { value: cookieValue } : undefined;
+      },
+    }),
+    false,
+  );
+
+  process.env.GOOGLE_AUTH_SESSION_SECRET = originalSessionSecret;
+  process.env.GOOGLE_ADMIN_EMAILS = originalAdminEmails;
 });
 
 test("WhatsApp admin access rejects non-owner scheduler sessions", () => {

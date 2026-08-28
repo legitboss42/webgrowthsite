@@ -1,10 +1,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
-import {
-  createInternalUtilityCookieValue,
-  getInternalUtilityCookieName,
-} from "@/lib/internalUtilityAuth";
+import { createGoogleAuthSessionValue, getGoogleAuthCookieName } from "@/lib/googleAuth";
 import { NO_VALUE } from "@/lib/waitlist/schema";
 import { hasWaitlistAdminAccess } from "./auth";
 import {
@@ -125,28 +122,35 @@ test("signup dates render without a locale so the server and client agree", () =
   assert.equal(formatSignupDate("not-a-date"), NO_VALUE);
 });
 
-test("waitlist admin access accepts a valid internal utility cookie", () => {
-  const originalSessionSecret = process.env.INTERNAL_TOOL_SESSION_SECRET;
+test("waitlist admin access accepts the configured Google admin session", () => {
+  const originalSessionSecret = process.env.GOOGLE_AUTH_SESSION_SECRET;
+  const originalAdminEmails = process.env.GOOGLE_ADMIN_EMAILS;
 
-  process.env.INTERNAL_TOOL_SESSION_SECRET = "waitlist-admin-secret";
-  const cookieValue = createInternalUtilityCookieValue();
+  process.env.GOOGLE_AUTH_SESSION_SECRET = "waitlist-admin-secret";
+  process.env.GOOGLE_ADMIN_EMAILS = "vickysaintbrown02@gmail.com";
+  const cookieValue = createGoogleAuthSessionValue({
+    userId: "google-admin",
+    email: "Vickysaintbrown02@gmail.com",
+    fullName: "Vicky Saint Brown",
+  });
 
   assert.equal(
     hasWaitlistAdminAccess({
       get(name) {
-        return name === getInternalUtilityCookieName() ? { value: cookieValue } : undefined;
+        return name === getGoogleAuthCookieName() ? { value: cookieValue } : undefined;
       },
     }),
     true,
   );
 
-  process.env.INTERNAL_TOOL_SESSION_SECRET = originalSessionSecret;
+  process.env.GOOGLE_AUTH_SESSION_SECRET = originalSessionSecret;
+  process.env.GOOGLE_ADMIN_EMAILS = originalAdminEmails;
 });
 
 test("waitlist admin access fails closed for missing and tampered cookies", () => {
-  const originalSessionSecret = process.env.INTERNAL_TOOL_SESSION_SECRET;
+  const originalSessionSecret = process.env.GOOGLE_AUTH_SESSION_SECRET;
 
-  process.env.INTERNAL_TOOL_SESSION_SECRET = "waitlist-admin-secret";
+  process.env.GOOGLE_AUTH_SESSION_SECRET = "waitlist-admin-secret";
 
   assert.equal(
     hasWaitlistAdminAccess({
@@ -160,7 +164,7 @@ test("waitlist admin access fails closed for missing and tampered cookies", () =
   assert.equal(
     hasWaitlistAdminAccess({
       get(name) {
-        return name === getInternalUtilityCookieName() ? { value: "forged.cookie.value" } : undefined;
+        return name === getGoogleAuthCookieName() ? { value: "forged.cookie.value" } : undefined;
       },
     }),
     false,
@@ -175,26 +179,30 @@ test("waitlist admin access fails closed for missing and tampered cookies", () =
     false,
   );
 
-  process.env.INTERNAL_TOOL_SESSION_SECRET = originalSessionSecret;
+  process.env.GOOGLE_AUTH_SESSION_SECRET = originalSessionSecret;
 });
 
 test("waitlist admin access does not accept a cookie sealed with a different secret", () => {
-  const originalSessionSecret = process.env.INTERNAL_TOOL_SESSION_SECRET;
+  const originalSessionSecret = process.env.GOOGLE_AUTH_SESSION_SECRET;
 
-  process.env.INTERNAL_TOOL_SESSION_SECRET = "first-secret";
-  const cookieValue = createInternalUtilityCookieValue();
-  process.env.INTERNAL_TOOL_SESSION_SECRET = "rotated-secret";
+  process.env.GOOGLE_AUTH_SESSION_SECRET = "first-secret";
+  const cookieValue = createGoogleAuthSessionValue({
+    userId: "google-admin",
+    email: "vickysaintbrown02@gmail.com",
+    fullName: "Vicky Saint Brown",
+  });
+  process.env.GOOGLE_AUTH_SESSION_SECRET = "rotated-secret";
 
   assert.equal(
     hasWaitlistAdminAccess({
       get(name) {
-        return name === getInternalUtilityCookieName() ? { value: cookieValue } : undefined;
+        return name === getGoogleAuthCookieName() ? { value: cookieValue } : undefined;
       },
     }),
     false,
   );
 
-  process.env.INTERNAL_TOOL_SESSION_SECRET = originalSessionSecret;
+  process.env.GOOGLE_AUTH_SESSION_SECRET = originalSessionSecret;
 });
 
 test("the waitlist admin page is gated, non-indexable and reads only real rows", () => {
