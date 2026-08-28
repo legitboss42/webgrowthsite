@@ -18,6 +18,14 @@ const publicSchedulerPgcryptoCorrectionPath = new URL(
   "../../../supabase/migrations/202608240002_public_scheduler_pgcrypto_search_path.sql",
   import.meta.url
 );
+const publicSchedulerLegacyQuotaCorrectionPath = new URL(
+  "../../../supabase/migrations/202608280001_public_scheduler_legacy_quota.sql",
+  import.meta.url
+);
+const publicSchedulerLegacyQuotaFallbackCorrectionPath = new URL(
+  "../../../supabase/migrations/202608280002_public_scheduler_legacy_quota_fallback.sql",
+  import.meta.url
+);
 const vercelConfigPath = new URL("../../../vercel.json", import.meta.url);
 
 test("scheduler migration enables isolation and atomic worker safeguards", () => {
@@ -387,4 +395,54 @@ test("forward scheduler correction schema-qualifies deletion hashes without wide
   assert.match(sql, /grant execute on function public\.request_scheduler_account_deletion\(uuid\) to service_role/);
   assert.match(sql, /revoke execute on function public\.complete_scheduler_account_deletion\(uuid, uuid\) from public, anon, authenticated/);
   assert.match(sql, /grant execute on function public\.complete_scheduler_account_deletion\(uuid, uuid\) to service_role/);
+});
+
+// Mutation target: removing the legacy backfill lets applied pre-scheduled rows
+// with scheduled_at IS NULL disappear from the rolling daily quota.
+test("forward scheduler correction backfills legacy schedule events", () => {
+  assert.equal(
+    existsSync(publicSchedulerLegacyQuotaCorrectionPath),
+    true,
+    "the applied scheduler contract requires a forward legacy-quota correction",
+  );
+
+  const sql = readFileSync(publicSchedulerLegacyQuotaCorrectionPath, "utf8").toLowerCase();
+  const start = sql.indexOf("create or replace function public.reserve_public_scheduler_slot");
+  const revoke = sql.indexOf("revoke execute", start);
+  assert.notEqual(start, -1);
+  assert.notEqual(revoke, -1);
+  const fn = sql.slice(start, revoke);
+
+  assert.match(sql, /update public\.scheduled_posts post[\s\S]*scheduled_at = post\.created_at[\s\S]*post\.scheduled_at is null[\s\S]*post\.scheduled_for is not null/);
+  assert.match(fn, /security definer/);
+  assert.match(fn, /set search_path = public/);
+  assert.match(fn, /pg_advisory_xact_lock/);
+  assert.match(sql, /revoke execute on function public\.reserve_public_scheduler_slot\(uuid, uuid, timestamptz, text, timestamptz\) from public, anon, authenticated/);
+  assert.match(sql, /grant execute on function public\.reserve_public_scheduler_slot\(uuid, uuid, timestamptz, text, timestamptz\) to service_role/);
+});
+
+// Mutation target: an unconditional created_at fallback counts unscheduled
+// candidates as daily events and denies the actual final slot.
+test("forward scheduler fallback counts only legacy rows that were scheduled", () => {
+  assert.equal(
+    existsSync(publicSchedulerLegacyQuotaFallbackCorrectionPath),
+    true,
+    "the live 202608280001 semantics require a forward fallback correction",
+  );
+
+  const sql = readFileSync(publicSchedulerLegacyQuotaFallbackCorrectionPath, "utf8").toLowerCase();
+  const start = sql.indexOf("create or replace function public.reserve_public_scheduler_slot");
+  const revoke = sql.indexOf("revoke execute", start);
+  assert.notEqual(start, -1);
+  assert.notEqual(revoke, -1);
+  const fn = sql.slice(start, revoke);
+
+  assert.match(fn, /security definer/);
+  assert.match(fn, /set search_path = public/);
+  assert.match(fn, /pg_advisory_xact_lock/);
+  assert.match(fn, /post\.scheduled_at >= p_now - interval '24 hours'[\s\S]*post\.scheduled_at is null[\s\S]*post\.scheduled_for is not null[\s\S]*post\.created_at >= p_now - interval '24 hours'/);
+  assert.doesNotMatch(fn, /coalesce\(post\.scheduled_at, post\.created_at\)/);
+  assert.ok(fn.indexOf("pg_advisory_xact_lock") < fn.indexOf("post.scheduled_at >= p_now"));
+  assert.match(sql, /revoke execute on function public\.reserve_public_scheduler_slot\(uuid, uuid, timestamptz, text, timestamptz\) from public, anon, authenticated/);
+  assert.match(sql, /grant execute on function public\.reserve_public_scheduler_slot\(uuid, uuid, timestamptz, text, timestamptz\) to service_role/);
 });
