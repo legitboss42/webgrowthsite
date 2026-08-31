@@ -140,20 +140,40 @@ const FAILURE_REASONS: Record<number, string> = {
   368: "The recipient's account is restricted.",
 };
 
+function sanitizeMetaFailureDetail(detail: string | undefined) {
+  const compact = (detail || "").replace(/[\r\n\t]+/g, " ").replace(/\s{2,}/g, " ").trim();
+  if (!compact) return undefined;
+
+  // Error details are useful for media scrutiny, but they are still provider-controlled
+  // text. Strip common credential/trace shapes before persisting anything operators can see.
+  const redacted = compact
+    .replace(/\baccess[_-]?token\s*[:=]\s*[^\s,;]+/gi, "access_token=[redacted]")
+    .replace(/\bauthorization\s*[:=]\s*bearer\s+[^\s,;]+/gi, "authorization=[redacted]")
+    .replace(/\bfbtrace[_-]?id\s*[:=]\s*[^\s,;]+/gi, "fbtrace_id=[redacted]");
+
+  return redacted.slice(0, 240);
+}
+
 /**
  * An operator-safe explanation for a failed status.
  *
- * Meta's error payloads carry trace ids, internal messages and occasionally request
- * detail; none of that belongs on an admin screen. This maps the codes we understand
- * to plain English and otherwise records the code alone, which is enough to look up
- * without leaking the provider response.
+ * Codes remain the stable diagnostic key. For media failures, Meta's `error_data.details`
+ * is also retained after redaction because it often names the exact MIME/container problem;
+ * throwing that sentence away turns a precise failure into another round of guesswork.
  */
 export function sanitizeWhatsAppStatusError(input: {
   code?: number;
   title?: string;
+  details?: string;
 }): string | undefined {
+  const safeDetail = sanitizeMetaFailureDetail(input.details);
+
   if (typeof input.code === "number" && FAILURE_REASONS[input.code]) {
-    return `${FAILURE_REASONS[input.code]} (code ${input.code})`;
+    const base = `${FAILURE_REASONS[input.code]} (code ${input.code})`;
+    if (safeDetail && (input.code === 131051 || input.code === 131052 || input.code === 131053)) {
+      return `${base} ${safeDetail}`;
+    }
+    return base;
   }
   if (typeof input.code === "number") {
     return `WhatsApp rejected the message (code ${input.code}).`;
