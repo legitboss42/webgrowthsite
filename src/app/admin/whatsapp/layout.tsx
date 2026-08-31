@@ -8,6 +8,7 @@ import {
   findConfiguredWhatsAppSender,
 } from "@/lib/whatsapp/phoneNumbers";
 import { hasWhatsAppAdminAccess } from "./auth";
+import InstantInteractionLayer from "./InstantInteractionLayer";
 
 /**
  * Console chrome for every /admin/whatsapp route.
@@ -34,14 +35,10 @@ export default async function WhatsAppConsoleLayout({ children }: { children: Re
     );
   }
 
-  // Only a boolean crosses to the client — credentials never leave the server.
   const senderConnected = Boolean(
     process.env.WHATSAPP_ACCESS_TOKEN?.trim() && process.env.WHATSAPP_PHONE_NUMBER_ID?.trim(),
   );
 
-  // The real display number comes from Meta. This layout renders on every console page,
-  // so the response is cached for 10 minutes rather than fetched per navigation. A
-  // failure just leaves the number off the sidebar; it never blocks the page.
   let senderNumber: string | undefined;
   if (senderConnected) {
     const phoneResult = await fetchWhatsAppPhoneNumbers({ revalidateSeconds: 600 });
@@ -52,6 +49,7 @@ export default async function WhatsAppConsoleLayout({ children }: { children: Re
 
   return (
     <WhatsAppShell senderConnected={senderConnected} senderNumber={senderNumber}>
+      <InstantInteractionLayer />
       {children}
     </WhatsAppShell>
   );
