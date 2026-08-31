@@ -5,18 +5,10 @@ import {
   WHATSAPP_INBOX_ACTIVITY_LIMIT,
   buildWhatsAppInboxActivity,
 } from "@/lib/whatsapp/notifications";
+import { loadWhatsAppQuickSettings } from "@/lib/whatsapp/quickSettings";
 
 export const runtime = "nodejs";
 
-/**
- * The inbox's change feed.
- *
- * One small request answers both questions the console polls for: is there a new
- * inbound message worth alerting about, and has anything in the recent thread moved
- * (a reply stored, a delivery receipt applied). The browser refreshes the page only
- * when the fingerprint changes, so an idle inbox costs one tiny read per interval
- * instead of a full re-render of the conversation list.
- */
 async function readRecentActivity() {
   const url = process.env.SUPABASE_URL?.trim();
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
@@ -42,11 +34,15 @@ export async function GET() {
   }
 
   try {
-    const result = await readRecentActivity();
+    const [result, quickSettings] = await Promise.all([
+      readRecentActivity(),
+      loadWhatsAppQuickSettings(),
+    ]);
     if (!result.ok) return NextResponse.json({ error: result.error }, { status: result.status });
     return NextResponse.json({
-      latest: result.activity.latest,
+      latest: quickSettings.newMessageAlertsEnabled ? result.activity.latest : null,
       fingerprint: result.activity.fingerprint,
+      alertsEnabled: quickSettings.newMessageAlertsEnabled,
     });
   } catch (error) {
     console.error("Unable to load WhatsApp notification state", error);
