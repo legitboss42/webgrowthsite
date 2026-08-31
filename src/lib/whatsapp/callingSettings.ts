@@ -57,15 +57,11 @@ function extractCallingSettings(payload: unknown): WhatsAppCallingSettings | nul
   return null;
 }
 
-/**
- * Meta's Calling settings schema expects HH:MM values. Older examples and some
- * integrations use HHMM, so normalize at the server boundary before Graph sees the
- * payload. This protects every caller, including older deployed clients.
- */
+/** Meta Calling API uses four-digit 24-hour values such as 0800 and 1730. */
 function normalizeMetaCallingTime(value: unknown): string {
   const raw = typeof value === "string" ? value.trim() : "";
-  if (/^\d{2}:\d{2}$/.test(raw)) return raw;
-  if (/^\d{4}$/.test(raw)) return `${raw.slice(0, 2)}:${raw.slice(2)}`;
+  if (/^\d{4}$/.test(raw)) return raw;
+  if (/^\d{2}:\d{2}$/.test(raw)) return raw.replace(":", "");
   return raw;
 }
 
@@ -82,7 +78,9 @@ function normalizeCallingUpdate(update: Partial<WhatsAppCallingSettings>): Parti
         open_time: normalizeMetaCallingTime(row.open_time),
         close_time: normalizeMetaCallingTime(row.close_time),
       })),
-      holiday_schedule: callHours.holiday_schedule?.map((row) => ({
+      // Always send the collection when call_hours is written. This prevents Meta
+      // from rejecting a partially shaped call_hours object with schema code 100.
+      holiday_schedule: (callHours.holiday_schedule || []).map((row) => ({
         ...row,
         start_time: normalizeMetaCallingTime(row.start_time),
         end_time: normalizeMetaCallingTime(row.end_time),
@@ -168,14 +166,9 @@ export async function fetchWhatsAppCallingSettings(
     const scoped = await readCallingSettings(`${base}?fields=calling`, config.token, fetchImpl);
     if (scoped.ok || scoped.reason === "PERMISSION_DENIED") return scoped;
 
-    // Meta has changed the exact settings response shape across Graph API versions.
-    // A plain /settings read is an official form too, so use it as a compatibility
-    // fallback when the field-scoped request is rejected or returns no calling block.
     const fallback = await readCallingSettings(base, config.token, fetchImpl);
     if (fallback.ok) return fallback;
 
-    // Keep the more useful of the two provider errors. The fallback usually contains
-    // the current-version reason when a field expansion itself was the problem.
     return fallback.detail ? fallback : scoped;
   } catch (error) {
     return { ok: false, reason: "API_ERROR", detail: error instanceof Error ? error.message : "Request failed" };
