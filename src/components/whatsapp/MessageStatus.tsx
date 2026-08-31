@@ -1,18 +1,16 @@
+"use client";
+
 import { describeWhatsAppMessageStatus } from "@/lib/whatsapp/messageStatus";
+import { useMessageStatusVisibility } from "@/components/whatsapp/MessageStatusVisibility";
 import { WhatsAppIcon } from "./icons";
 
 /**
  * The delivery receipt on an outbound message bubble.
  *
- * Each state has its own silhouette, a title for a pointer and a visually hidden
- * sentence for a screen reader, so the state never depends on colour alone. Failed
- * and still-sending also carry a visible word, because "not delivered" is the one
- * thing an operator must not have to squint at.
- *
- * Nothing here invents a state: what is rendered is whatever Meta's webhooks last
- * reported, and an unconfirmed message reads as sending rather than as sent.
+ * Meta's webhook status remains the source of truth. Console visibility settings
+ * can hide normal delivery/read indicators, but a failed message is always visible
+ * so an operator can never mistake an undelivered message for a successful one.
  */
-
 export default function MessageStatus({
   status,
   direction,
@@ -25,8 +23,22 @@ export default function MessageStatus({
   error?: string | null;
   onDark?: boolean;
 }) {
-  const presentation = describeWhatsAppMessageStatus({ status, direction });
+  const visibility = useMessageStatusVisibility();
+  let presentation = describeWhatsAppMessageStatus({ status, direction });
   if (!presentation) return null;
+
+  // Failure is operationally important and is never hidden by a cosmetic setting.
+  if (presentation.key !== "failed") {
+    if (presentation.key === "read") {
+      if (!visibility.readStatusVisible) {
+        if (!visibility.deliveryStatusVisible) return null;
+        presentation = describeWhatsAppMessageStatus({ status: "delivered", direction });
+        if (!presentation) return null;
+      }
+    } else if (!visibility.deliveryStatusVisible) {
+      return null;
+    }
+  }
 
   const failed = presentation.key === "failed";
   const tone = failed

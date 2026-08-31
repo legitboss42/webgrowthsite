@@ -3,6 +3,8 @@ import { cookies } from "next/headers";
 import GoogleAdminPrompt from "@/components/auth/GoogleAdminPrompt";
 import { getDefaultAdminGoogleEmail, getGoogleClientId, isGoogleAuthConfigured } from "@/lib/googleAuth";
 import WhatsAppShell from "@/components/whatsapp/WhatsAppShell";
+import { MessageStatusVisibilityProvider } from "@/components/whatsapp/MessageStatusVisibility";
+import { loadWhatsAppQuickSettings } from "@/lib/whatsapp/quickSettings";
 import {
   fetchWhatsAppPhoneNumbers,
   findConfiguredWhatsAppSender,
@@ -32,6 +34,7 @@ export default async function WhatsAppConsoleLayout({ children }: { children: Re
   const senderConnected = Boolean(
     process.env.WHATSAPP_ACCESS_TOKEN?.trim() && process.env.WHATSAPP_PHONE_NUMBER_ID?.trim(),
   );
+  const quickSettings = await loadWhatsAppQuickSettings();
 
   let senderNumber: string | undefined;
   if (senderConnected) {
@@ -43,9 +46,14 @@ export default async function WhatsAppConsoleLayout({ children }: { children: Re
 
   return (
     <WhatsAppShell senderConnected={senderConnected} senderNumber={senderNumber}>
-      <InstantInteractionLayer />
-      <IncomingCallOverlay />
-      {children}
+      <MessageStatusVisibilityProvider
+        deliveryStatusVisible={quickSettings.deliveryStatusVisible}
+        readStatusVisible={quickSettings.readStatusVisible}
+      >
+        <InstantInteractionLayer />
+        <IncomingCallOverlay />
+        {children}
+      </MessageStatusVisibilityProvider>
     </WhatsAppShell>
   );
 }
