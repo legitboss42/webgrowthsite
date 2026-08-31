@@ -5,7 +5,7 @@ export const WHATSAPP_TEAM_INVITATION_SUBJECT =
   "You're invited to the Web Growth WhatsApp workspace";
 
 const SITE_URL = "https://webgrowth.info";
-const WORKSPACE_URL = `${SITE_URL}/admin/whatsapp/`;
+const WORKSPACE_URL = `${SITE_URL}/admin/whatsapp/conversations/`;
 const LOGO_URL = `${SITE_URL}/email/web-growth-logo.png`;
 const ADMIN_EMAIL = "admin@webgrowth.info";
 
@@ -51,7 +51,7 @@ export function buildWhatsAppTeamInvitationEmail(input: WhatsAppTeamInvitationIn
     "",
     `Your workspace access is tied to this Google account: ${input.googleEmail}`,
     "",
-    "When team sign-in is available, use this same Google account to open the workspace.",
+    "Use this same Google account to sign in and open your assigned WhatsApp workspace.",
     "",
     `Workspace: ${WORKSPACE_URL}`,
     "",

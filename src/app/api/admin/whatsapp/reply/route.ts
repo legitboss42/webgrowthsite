@@ -1,6 +1,9 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { hasWhatsAppAdminAccess } from "@/app/admin/whatsapp/auth";
+import {
+  canWhatsAppAccessConversation,
+  getWhatsAppWorkspaceAccess,
+} from "@/app/admin/whatsapp/auth";
 import { isSameOriginMutation } from "@/lib/scheduler/policy";
 import { sendInboxWhatsAppReply } from "@/lib/whatsapp/inboxReply";
 import {
@@ -22,7 +25,6 @@ type ValidReplyBody = {
   conversationId: string;
   waId: string;
   text: string;
-  /** The message the operator chose to quote. Verified against the thread before use. */
   replyToMessageId?: string;
 };
 
@@ -42,13 +44,12 @@ function parseReplyBody(body: ReplyBody): ValidReplyBody | null {
           : undefined,
     };
   }
-
   return null;
 }
 
 export async function POST(request: Request) {
-  const cookieStore = await cookies();
-  if (!hasWhatsAppAdminAccess(cookieStore)) {
+  const access = await getWhatsAppWorkspaceAccess(await cookies());
+  if (!access) {
     return NextResponse.json({ error: "Authentication required." }, { status: 401 });
   }
 
@@ -68,6 +69,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid request payload." }, { status: 400 });
   }
 
+  if (!(await canWhatsAppAccessConversation(access, validBody.conversationId))) {
+    return NextResponse.json({ error: "This conversation is not assigned to you." }, { status: 403 });
+  }
+
   const supabaseUrl = process.env.SUPABASE_URL?.trim();
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
   if (!supabaseUrl || !serviceRoleKey) {
@@ -83,8 +88,6 @@ export async function POST(request: Request) {
     );
   }
 
-  // Reply mode is a hint from a browser, so the quoted id is only honoured once it is found
-  // in this conversation. Otherwise we quote what we always quoted: their latest message.
   const quotedMessageId = await resolveSupabaseWhatsAppQuotedMessageId(
     storeOptions,
     replyContext.conversationId,
@@ -99,9 +102,7 @@ export async function POST(request: Request) {
       customerMessageTimestamp: replyContext.customerMessageTimestamp,
       replyToMessageId: quotedMessageId || replyContext.replyToMessageId,
     },
-    {
-      store: createSupabaseWhatsAppStore(storeOptions),
-    },
+    { store: createSupabaseWhatsAppStore(storeOptions) },
   );
 
   if (!result.ok) {

@@ -30,7 +30,11 @@ function label(value: string) {
   return value.charAt(0).toUpperCase() + value.slice(1);
 }
 
-export default function TeamSettingsPanel() {
+export default function TeamSettingsPanel({
+  viewerRole = "owner",
+}: {
+  viewerRole?: WhatsAppTeamRole;
+}) {
   const [members, setMembers] = useState<WhatsAppTeamMember[]>([]);
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -41,6 +45,7 @@ export default function TeamSettingsPanel() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<WhatsAppTeamRole>("agent");
+  const ownerView = viewerRole === "owner";
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -137,7 +142,7 @@ export default function TeamSettingsPanel() {
           </p>
           <h2 className="mt-1 font-display text-xl font-semibold text-ink">Team members</h2>
           <p className="mt-1 text-sm text-ink-soft">
-            {active} active · Google accounts only · adding a member sends a branded email invitation automatically.
+            {active} active · Google accounts only · {ownerView ? "adding a member sends a branded email invitation automatically." : "Managers can supervise Agent availability and access."}
           </p>
         </div>
         <button
@@ -171,43 +176,47 @@ export default function TeamSettingsPanel() {
         </div>
       ) : null}
 
-      <form onSubmit={addMember} className="mt-4 grid gap-3 rounded-xl border border-rule bg-paper p-3 lg:grid-cols-[1fr_1.2fr_.7fr_auto]">
-        <input
-          value={name}
-          onChange={(event) => setName(event.target.value)}
-          placeholder="Name"
-          required
-          className="rounded-lg border border-rule bg-paper-raised px-3 py-2.5 text-sm outline-none focus:border-ledger"
-        />
-        <input
-          value={email}
-          onChange={(event) => setEmail(event.target.value)}
-          placeholder="Google email"
-          type="email"
-          required
-          className="rounded-lg border border-rule bg-paper-raised px-3 py-2.5 text-sm outline-none focus:border-ledger"
-        />
-        <select
-          value={role}
-          onChange={(event) => setRole(event.target.value as WhatsAppTeamRole)}
-          className="rounded-lg border border-rule bg-paper-raised px-3 py-2.5 text-sm"
-        >
-          {WHATSAPP_TEAM_ROLES.map((item) => (
-            <option key={item} value={item}>{label(item)}</option>
-          ))}
-        </select>
-        <button
-          type="submit"
-          disabled={adding || migrationRequired}
-          className="rounded-lg bg-ledger-bright px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
-        >
-          {adding ? "Adding…" : "Add member"}
-        </button>
-      </form>
+      {ownerView ? (
+        <form onSubmit={addMember} className="mt-4 grid gap-3 rounded-xl border border-rule bg-paper p-3 lg:grid-cols-[1fr_1.2fr_.7fr_auto]">
+          <input
+            value={name}
+            onChange={(event) => setName(event.target.value)}
+            placeholder="Name"
+            required
+            className="rounded-lg border border-rule bg-paper-raised px-3 py-2.5 text-sm outline-none focus:border-ledger"
+          />
+          <input
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            placeholder="Google email"
+            type="email"
+            required
+            className="rounded-lg border border-rule bg-paper-raised px-3 py-2.5 text-sm outline-none focus:border-ledger"
+          />
+          <select
+            value={role}
+            onChange={(event) => setRole(event.target.value as WhatsAppTeamRole)}
+            className="rounded-lg border border-rule bg-paper-raised px-3 py-2.5 text-sm"
+          >
+            {WHATSAPP_TEAM_ROLES.map((item) => (
+              <option key={item} value={item}>{label(item)}</option>
+            ))}
+          </select>
+          <button
+            type="submit"
+            disabled={adding || migrationRequired}
+            className="rounded-lg bg-ledger-bright px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
+          >
+            {adding ? "Adding…" : "Add member"}
+          </button>
+        </form>
+      ) : null}
 
       <div className="mt-4 space-y-2">
         {members.map((member) => {
           const busy = busyId === member.id;
+          const managerCanEdit = viewerRole === "manager" && member.role === "agent";
+          const canEdit = ownerView || managerCanEdit;
           return (
             <div key={member.id} className="grid gap-3 rounded-xl border border-rule bg-paper px-3 py-3 md:grid-cols-[1.4fr_1.4fr_.8fr_.9fr_auto] md:items-center">
               <div>
@@ -217,9 +226,9 @@ export default function TeamSettingsPanel() {
               <p className="break-all font-mono text-xs text-ink-soft">{member.googleEmail}</p>
               <select
                 value={member.role}
-                disabled={busy}
+                disabled={busy || !ownerView}
                 onChange={(event) => void updateMember(member, { role: event.target.value as WhatsAppTeamRole })}
-                className="rounded-lg border border-rule bg-paper-raised px-2.5 py-2 text-xs"
+                className="rounded-lg border border-rule bg-paper-raised px-2.5 py-2 text-xs disabled:opacity-60"
               >
                 {WHATSAPP_TEAM_ROLES.map((item) => (
                   <option key={item} value={item}>{label(item)}</option>
@@ -227,9 +236,9 @@ export default function TeamSettingsPanel() {
               </select>
               <select
                 value={member.availability}
-                disabled={busy || !member.active}
+                disabled={busy || !member.active || !canEdit}
                 onChange={(event) => void updateMember(member, { availability: event.target.value as WhatsAppTeamAvailability })}
-                className="rounded-lg border border-rule bg-paper-raised px-2.5 py-2 text-xs"
+                className="rounded-lg border border-rule bg-paper-raised px-2.5 py-2 text-xs disabled:opacity-60"
               >
                 {WHATSAPP_TEAM_AVAILABILITY.map((item) => (
                   <option key={item} value={item}>{label(item)}</option>
@@ -237,7 +246,7 @@ export default function TeamSettingsPanel() {
               </select>
               <button
                 type="button"
-                disabled={busy}
+                disabled={busy || !canEdit}
                 onClick={() => void updateMember(member, { active: !member.active })}
                 className={`rounded-lg border px-3 py-2 text-xs font-semibold disabled:opacity-50 ${
                   member.active ? "border-rose-200 bg-rose-50 text-rose-700" : "border-ledger/20 bg-ledger-tint text-ledger"

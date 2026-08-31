@@ -1,3 +1,4 @@
+import type { WhatsAppTeamRole } from "@/lib/whatsapp/teamModel";
 import type { WhatsAppIconName } from "./icons";
 
 export type WhatsAppNavStatus = "live" | "soon";
@@ -10,6 +11,7 @@ export type WhatsAppNavItem = {
   description: string;
   status: WhatsAppNavStatus;
   layout?: WhatsAppLayoutMode;
+  roles?: WhatsAppTeamRole[];
 };
 
 export type WhatsAppNavSection = {
@@ -18,37 +20,47 @@ export type WhatsAppNavSection = {
 };
 
 export const WHATSAPP_CONSOLE_ROOT = "/admin/whatsapp";
+const OWNER: WhatsAppTeamRole[] = ["owner"];
+const SUPERVISORS: WhatsAppTeamRole[] = ["owner", "manager"];
 
 export const WHATSAPP_NAV_SECTIONS: WhatsAppNavSection[] = [
   {
     label: "Workspace",
     items: [
-      { label: "Overview", href: `${WHATSAPP_CONSOLE_ROOT}`, icon: "overview", description: "Connection health and message activity at a glance.", status: "live" },
+      { label: "Overview", href: `${WHATSAPP_CONSOLE_ROOT}`, icon: "overview", description: "Connection health and message activity at a glance.", status: "live", roles: OWNER },
       { label: "Conversations", href: `${WHATSAPP_CONSOLE_ROOT}/conversations`, icon: "conversations", description: "Inbound WhatsApp leads, full threads, and replies.", status: "live", layout: "fill" },
       { label: "Calls", href: `${WHATSAPP_CONSOLE_ROOT}/calls`, icon: "phoneNumbers", description: "Incoming and outgoing WhatsApp call history.", status: "live" },
-      { label: "Contacts", href: `${WHATSAPP_CONSOLE_ROOT}/contacts`, icon: "contacts", description: "Everyone who has messaged the business number.", status: "live" },
-      { label: "Templates", href: `${WHATSAPP_CONSOLE_ROOT}/templates`, icon: "templates", description: "Approved Meta message templates.", status: "live" },
-      { label: "Quick Replies", href: `${WHATSAPP_CONSOLE_ROOT}/quick-replies`, icon: "quickReplies", description: "Saved snippets for fast, consistent answers.", status: "live" },
+      { label: "Contacts", href: `${WHATSAPP_CONSOLE_ROOT}/contacts`, icon: "contacts", description: "Everyone who has messaged the business number.", status: "live", roles: OWNER },
+      { label: "Templates", href: `${WHATSAPP_CONSOLE_ROOT}/templates`, icon: "templates", description: "Approved Meta message templates.", status: "live", roles: OWNER },
+      { label: "Quick Replies", href: `${WHATSAPP_CONSOLE_ROOT}/quick-replies`, icon: "quickReplies", description: "Saved snippets for fast, consistent answers.", status: "live", roles: OWNER },
     ],
   },
   {
     label: "Growth",
     items: [
-      { label: "Campaigns", href: `${WHATSAPP_CONSOLE_ROOT}/campaigns`, icon: "campaigns", description: "Outbound template broadcasts.", status: "soon" },
-      { label: "Automations", href: `${WHATSAPP_CONSOLE_ROOT}/automations`, icon: "automations", description: "Auto-replies and lead routing rules.", status: "soon" },
-      { label: "Analytics", href: `${WHATSAPP_CONSOLE_ROOT}/analytics`, icon: "analytics", description: "Response times, volumes, and lead quality.", status: "live" },
+      { label: "Campaigns", href: `${WHATSAPP_CONSOLE_ROOT}/campaigns`, icon: "campaigns", description: "Outbound template broadcasts.", status: "soon", roles: SUPERVISORS },
+      { label: "Automations", href: `${WHATSAPP_CONSOLE_ROOT}/automations`, icon: "automations", description: "Auto-replies and lead routing rules.", status: "soon", roles: SUPERVISORS },
+      { label: "Analytics", href: `${WHATSAPP_CONSOLE_ROOT}/analytics`, icon: "analytics", description: "Response times, volumes, and lead quality.", status: "live", roles: OWNER },
     ],
   },
   {
     label: "Configuration",
     items: [
-      { label: "Phone Numbers", href: `${WHATSAPP_CONSOLE_ROOT}/phone-numbers`, icon: "phoneNumbers", description: "Connected senders, quality rating, and limits.", status: "live" },
-      { label: "Settings", href: `${WHATSAPP_CONSOLE_ROOT}/settings`, icon: "settings", description: "Integration configuration and connection readiness.", status: "live" },
+      { label: "Team", href: `${WHATSAPP_CONSOLE_ROOT}/team`, icon: "contacts", description: "Team members, roles, availability, and access.", status: "live", roles: SUPERVISORS },
+      { label: "Phone Numbers", href: `${WHATSAPP_CONSOLE_ROOT}/phone-numbers`, icon: "phoneNumbers", description: "Connected senders, quality rating, and limits.", status: "live", roles: OWNER },
+      { label: "Settings", href: `${WHATSAPP_CONSOLE_ROOT}/settings`, icon: "settings", description: "Integration configuration and connection readiness.", status: "live", roles: OWNER },
     ],
   },
 ];
 
 export const WHATSAPP_NAV_ITEMS: WhatsAppNavItem[] = WHATSAPP_NAV_SECTIONS.flatMap((section) => section.items);
+
+export function getWhatsAppNavSectionsForRole(role: WhatsAppTeamRole) {
+  return WHATSAPP_NAV_SECTIONS.map((section) => ({
+    ...section,
+    items: section.items.filter((item) => !item.roles || item.roles.includes(role)),
+  })).filter((section) => section.items.length > 0);
+}
 
 export function normalizeWhatsAppPath(pathname: string | null | undefined) {
   if (!pathname) return "";

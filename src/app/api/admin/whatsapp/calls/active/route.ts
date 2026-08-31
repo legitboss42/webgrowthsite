@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { hasWhatsAppAdminAccess } from "@/app/admin/whatsapp/auth";
+import { getWhatsAppWorkspaceAccess } from "@/app/admin/whatsapp/auth";
 import { readWhatsAppRows } from "@/app/admin/whatsapp/data";
 
 export const runtime = "nodejs";
@@ -25,8 +25,7 @@ function getOfferSdp(raw: unknown) {
 }
 
 export async function GET(request: Request) {
-  const cookieStore = await cookies();
-  if (!hasWhatsAppAdminAccess(cookieStore)) {
+  if (!(await getWhatsAppWorkspaceAccess(await cookies()))) {
     return NextResponse.json({ error: "Authentication required." }, { status: 401 });
   }
 

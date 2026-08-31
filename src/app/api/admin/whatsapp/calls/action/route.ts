@@ -1,13 +1,12 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { hasWhatsAppAdminAccess } from "@/app/admin/whatsapp/auth";
+import { getWhatsAppWorkspaceAccess } from "@/app/admin/whatsapp/auth";
 import { getWhatsAppSupabaseConfig } from "@/app/admin/whatsapp/data";
 import { isSameOriginMutation } from "@/lib/scheduler/policy";
 
 export const runtime = "nodejs";
 
 type CallAction = "pre_accept" | "accept" | "reject" | "terminate";
-
 const ALLOWED_ACTIONS = new Set<CallAction>(["pre_accept", "accept", "reject", "terminate"]);
 
 async function updateStoredCall(callId: string, action: CallAction) {
@@ -41,8 +40,7 @@ async function updateStoredCall(callId: string, action: CallAction) {
 }
 
 export async function POST(request: Request) {
-  const cookieStore = await cookies();
-  if (!hasWhatsAppAdminAccess(cookieStore)) {
+  if (!(await getWhatsAppWorkspaceAccess(await cookies()))) {
     return NextResponse.json({ error: "Authentication required." }, { status: 401 });
   }
   if (!isSameOriginMutation(request.headers.get("origin"), request.url)) {

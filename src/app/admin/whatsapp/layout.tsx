@@ -9,14 +9,15 @@ import {
   fetchWhatsAppPhoneNumbers,
   findConfiguredWhatsAppSender,
 } from "@/lib/whatsapp/phoneNumbers";
-import { hasWhatsAppAdminAccess } from "./auth";
+import { getWhatsAppWorkspaceAccess } from "./auth";
 import InstantInteractionLayer from "./InstantInteractionLayer";
 import IncomingCallOverlay from "./IncomingCallOverlay";
 
 export default async function WhatsAppConsoleLayout({ children }: { children: ReactNode }) {
   const cookieStore = await cookies();
+  const access = await getWhatsAppWorkspaceAccess(cookieStore);
 
-  if (!hasWhatsAppAdminAccess(cookieStore)) {
+  if (!access) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#050806] px-4 py-16 text-white">
         <div className="w-full max-w-4xl">
@@ -25,6 +26,7 @@ export default async function WhatsAppConsoleLayout({ children }: { children: Re
             adminEmail={getDefaultAdminGoogleEmail()}
             clientId={getGoogleClientId()}
             googleReady={isGoogleAuthConfigured()}
+            workspaceTeamAccess
           />
         </div>
       </div>
@@ -45,7 +47,12 @@ export default async function WhatsAppConsoleLayout({ children }: { children: Re
   }
 
   return (
-    <WhatsAppShell senderConnected={senderConnected} senderNumber={senderNumber}>
+    <WhatsAppShell
+      senderConnected={senderConnected}
+      senderNumber={senderNumber}
+      role={access.role}
+      memberName={access.displayName}
+    >
       <MessageStatusVisibilityProvider
         deliveryStatusVisible={quickSettings.deliveryStatusVisible}
         readStatusVisible={quickSettings.readStatusVisible}

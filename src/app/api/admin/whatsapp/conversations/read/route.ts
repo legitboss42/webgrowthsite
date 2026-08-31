@@ -1,13 +1,16 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { hasWhatsAppAdminAccess } from "@/app/admin/whatsapp/auth";
+import {
+  canWhatsAppAccessConversation,
+  getWhatsAppWorkspaceAccess,
+} from "@/app/admin/whatsapp/auth";
 import { isSameOriginMutation } from "@/lib/scheduler/policy";
 
 export const runtime = "nodejs";
 
 export async function POST(request: Request) {
-  const cookieStore = await cookies();
-  if (!hasWhatsAppAdminAccess(cookieStore)) {
+  const access = await getWhatsAppWorkspaceAccess(await cookies());
+  if (!access) {
     return NextResponse.json({ error: "Authentication required." }, { status: 401 });
   }
   if (!isSameOriginMutation(request.headers.get("origin"), request.url)) {
@@ -18,6 +21,9 @@ export async function POST(request: Request) {
   const conversationId = typeof body?.conversationId === "string" ? body.conversationId.trim() : "";
   if (!conversationId || conversationId.length > 128) {
     return NextResponse.json({ error: "Invalid conversation." }, { status: 400 });
+  }
+  if (!(await canWhatsAppAccessConversation(access, conversationId, { allowUnassigned: true }))) {
+    return NextResponse.json({ error: "You do not have access to this conversation." }, { status: 403 });
   }
 
   const url = process.env.SUPABASE_URL?.trim();

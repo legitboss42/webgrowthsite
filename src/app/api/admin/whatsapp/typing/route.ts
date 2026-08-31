@@ -1,6 +1,9 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { hasWhatsAppAdminAccess } from "@/app/admin/whatsapp/auth";
+import {
+  canWhatsAppAccessConversation,
+  getWhatsAppWorkspaceAccess,
+} from "@/app/admin/whatsapp/auth";
 import { isSameOriginMutation } from "@/lib/scheduler/policy";
 import { loadWhatsAppQuickSettings } from "@/lib/whatsapp/quickSettings";
 import { getSupabaseWhatsAppReplyContext } from "@/lib/whatsapp/store";
@@ -14,8 +17,8 @@ type TypingBody = {
 };
 
 export async function POST(request: Request) {
-  const cookieStore = await cookies();
-  if (!hasWhatsAppAdminAccess(cookieStore)) {
+  const access = await getWhatsAppWorkspaceAccess(await cookies());
+  if (!access) {
     return NextResponse.json({ error: "Authentication required." }, { status: 401 });
   }
 
@@ -37,6 +40,9 @@ export async function POST(request: Request) {
 
   if (typeof body.conversationId !== "string" || typeof body.waId !== "string") {
     return NextResponse.json({ error: "Invalid request payload." }, { status: 400 });
+  }
+  if (!(await canWhatsAppAccessConversation(access, body.conversationId))) {
+    return NextResponse.json({ error: "This conversation is not assigned to you." }, { status: 403 });
   }
 
   const supabaseUrl = process.env.SUPABASE_URL?.trim();

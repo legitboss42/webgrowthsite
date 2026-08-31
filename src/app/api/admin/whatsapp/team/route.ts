@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { hasWhatsAppAdminAccess } from "@/app/admin/whatsapp/auth";
+import { getWhatsAppWorkspaceAccess } from "@/app/admin/whatsapp/auth";
 import {
   mutateWhatsAppRest,
   POSTGRES_UNIQUE_VIOLATION,
@@ -10,15 +10,13 @@ import {
 import { buildWhatsAppTeamInvitationEmail } from "@/emails/whatsapp-team-invitation";
 import { ADMIN_EMAIL, sendTransactionalEmail } from "@/lib/email";
 import {
-  getDefaultAdminGoogleEmail,
-  readGoogleAuthSessionFromCookieStore,
-} from "@/lib/googleAuth";
-import {
   isValidWhatsAppTeamEmail,
   normalizeWhatsAppTeamAvailability,
   normalizeWhatsAppTeamEmail,
   normalizeWhatsAppTeamMember,
   normalizeWhatsAppTeamRole,
+  canWhatsAppRoleManageTeam,
+  canWhatsAppRoleSuperviseTeam,
 } from "@/lib/whatsapp/teamModel";
 import { isSameOriginMutation } from "@/lib/scheduler/policy";
 
@@ -28,13 +26,11 @@ function cleanText(value: unknown, maxLength: number) {
   return typeof value === "string" ? value.trim().slice(0, maxLength) : "";
 }
 
-async function getOwnerContext() {
+async function getTeamContext() {
   const cookieStore = await cookies();
-  if (!hasWhatsAppAdminAccess(cookieStore)) return null;
-  const session = readGoogleAuthSessionFromCookieStore(cookieStore);
-  return {
-    actorEmail: session?.email || getDefaultAdminGoogleEmail(),
-  };
+  const access = await getWhatsAppWorkspaceAccess(cookieStore);
+  if (!access || !canWhatsAppRoleSuperviseTeam(access.role)) return null;
+  return access;
 }
 
 async function ensureTeamStorage() {
@@ -53,6 +49,7 @@ async function ensureTeamStorage() {
 }
 
 async function recordActivity(input: {
+  actorMemberId?: string | null;
   actorEmail: string;
   targetMemberId?: string | null;
   eventType: string;
@@ -62,6 +59,7 @@ async function recordActivity(input: {
     method: "POST",
     pathAndQuery: "whatsapp_team_activity",
     body: {
+      actor_member_id: input.actorMemberId || null,
       actor_email: input.actorEmail,
       target_member_id: input.targetMemberId || null,
       event_type: input.eventType,
@@ -71,9 +69,9 @@ async function recordActivity(input: {
 }
 
 export async function GET() {
-  const owner = await getOwnerContext();
-  if (!owner) {
-    return NextResponse.json({ error: "Authentication required." }, { status: 401 });
+  const access = await getTeamContext();
+  if (!access) {
+    return NextResponse.json({ error: "Manager or Owner access required." }, { status: 403 });
   }
   const storageError = await ensureTeamStorage();
   if (storageError) return storageError;
@@ -87,14 +85,18 @@ export async function GET() {
 
   return NextResponse.json({
     ok: true,
+    viewerRole: access.role,
     members: rows.map(normalizeWhatsAppTeamMember),
   });
 }
 
 export async function POST(request: Request) {
-  const owner = await getOwnerContext();
-  if (!owner) {
-    return NextResponse.json({ error: "Authentication required." }, { status: 401 });
+  const access = await getTeamContext();
+  if (!access) {
+    return NextResponse.json({ error: "Manager or Owner access required." }, { status: 403 });
+  }
+  if (!canWhatsAppRoleManageTeam(access.role)) {
+    return NextResponse.json({ error: "Only the Owner can add team members." }, { status: 403 });
   }
   if (!isSameOriginMutation(request.headers.get("origin"), request.url)) {
     return NextResponse.json({ error: "Invalid request origin." }, { status: 403 });
@@ -129,7 +131,7 @@ export async function POST(request: Request) {
       role,
       availability: "available",
       active: true,
-      created_by_email: owner.actorEmail,
+      created_by_email: access.email,
       updated_at: new Date().toISOString(),
     },
   });
@@ -144,7 +146,8 @@ export async function POST(request: Request) {
   const member = created.rows[0] ? normalizeWhatsAppTeamMember(created.rows[0]) : null;
   if (member) {
     await recordActivity({
-      actorEmail: owner.actorEmail,
+      actorMemberId: access.memberId,
+      actorEmail: access.email,
       targetMemberId: member.id,
       eventType: "team_member_created",
       metadata: { googleEmail: member.googleEmail, role: member.role },
@@ -161,7 +164,7 @@ export async function POST(request: Request) {
       displayName: member.displayName,
       googleEmail: member.googleEmail,
       role: member.role,
-      invitedByEmail: owner.actorEmail,
+      invitedByEmail: access.email,
     });
 
     try {
@@ -176,7 +179,8 @@ export async function POST(request: Request) {
       if (delivery.ok) {
         invite = { sent: true };
         await recordActivity({
-          actorEmail: owner.actorEmail,
+          actorMemberId: access.memberId,
+          actorEmail: access.email,
           targetMemberId: member.id,
           eventType: "team_invite_sent",
           metadata: { googleEmail: member.googleEmail },
@@ -184,7 +188,8 @@ export async function POST(request: Request) {
       } else {
         invite = { sent: false, reason: "setup_required" };
         await recordActivity({
-          actorEmail: owner.actorEmail,
+          actorMemberId: access.memberId,
+          actorEmail: access.email,
           targetMemberId: member.id,
           eventType: "team_invite_failed",
           metadata: { reason: "email_setup_required" },
@@ -194,7 +199,8 @@ export async function POST(request: Request) {
       console.error("WhatsApp team invitation email failed", error);
       invite = { sent: false, reason: "delivery_failed" };
       await recordActivity({
-        actorEmail: owner.actorEmail,
+        actorMemberId: access.memberId,
+        actorEmail: access.email,
         targetMemberId: member.id,
         eventType: "team_invite_failed",
         metadata: { reason: "delivery_failed" },
@@ -206,9 +212,9 @@ export async function POST(request: Request) {
 }
 
 export async function PATCH(request: Request) {
-  const owner = await getOwnerContext();
-  if (!owner) {
-    return NextResponse.json({ error: "Authentication required." }, { status: 401 });
+  const access = await getTeamContext();
+  if (!access) {
+    return NextResponse.json({ error: "Manager or Owner access required." }, { status: 403 });
   }
   if (!isSameOriginMutation(request.headers.get("origin"), request.url)) {
     return NextResponse.json({ error: "Invalid request origin." }, { status: 403 });
@@ -226,6 +232,23 @@ export async function PATCH(request: Request) {
   const id = cleanText(body.id, 80);
   if (!id) {
     return NextResponse.json({ error: "Team member id is required." }, { status: 400 });
+  }
+
+  const targetRows = await readWhatsAppRows<Record<string, unknown>>(
+    `whatsapp_team_members?id=eq.${encodeURIComponent(id)}&select=id,google_email,display_name,role,availability,active,google_user_id,last_seen_at,created_at,updated_at&limit=1`,
+  );
+  const target = targetRows?.[0] ? normalizeWhatsAppTeamMember(targetRows[0]) : null;
+  if (!target) {
+    return NextResponse.json({ error: "Team member was not found." }, { status: 404 });
+  }
+
+  if (access.role === "manager") {
+    if (target.role !== "agent") {
+      return NextResponse.json({ error: "Managers can only supervise Agents." }, { status: 403 });
+    }
+    if ("role" in body || "displayName" in body) {
+      return NextResponse.json({ error: "Only the Owner can change team roles or names." }, { status: 403 });
+    }
   }
 
   const patch: Record<string, unknown> = { updated_at: new Date().toISOString() };
@@ -279,7 +302,8 @@ export async function PATCH(request: Request) {
 
   const member = normalizeWhatsAppTeamMember(updated.rows[0]);
   await recordActivity({
-    actorEmail: owner.actorEmail,
+    actorMemberId: access.memberId,
+    actorEmail: access.email,
     targetMemberId: member.id,
     eventType: member.active ? "team_member_updated" : "team_member_deactivated",
     metadata: {

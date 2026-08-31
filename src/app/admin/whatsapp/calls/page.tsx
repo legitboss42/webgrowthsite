@@ -3,7 +3,7 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import GoogleAdminPrompt from "@/components/auth/GoogleAdminPrompt";
 import { getDefaultAdminGoogleEmail, getGoogleClientId, isGoogleAuthConfigured } from "@/lib/googleAuth";
-import { hasWhatsAppAdminAccess } from "../auth";
+import { getWhatsAppWorkspaceAccess } from "../auth";
 import { readWhatsAppRows } from "../data";
 import type { WhatsAppCallRow } from "@/lib/whatsapp/callHistory";
 
@@ -34,12 +34,12 @@ function statusClasses(status: string) {
 }
 
 export default async function WhatsAppCallsPage({ searchParams }: { searchParams: Promise<{ direction?: string }> }) {
-  const cookieStore = await cookies();
-  if (!hasWhatsAppAdminAccess(cookieStore)) {
+  const access = await getWhatsAppWorkspaceAccess(await cookies());
+  if (!access) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#050806] px-4 py-16 text-white">
         <div className="w-full max-w-4xl">
-          <GoogleAdminPrompt nextPath="/admin/whatsapp/calls/" adminEmail={getDefaultAdminGoogleEmail()} clientId={getGoogleClientId()} googleReady={isGoogleAuthConfigured()} />
+          <GoogleAdminPrompt nextPath="/admin/whatsapp/calls/" adminEmail={getDefaultAdminGoogleEmail()} clientId={getGoogleClientId()} googleReady={isGoogleAuthConfigured()} workspaceTeamAccess />
         </div>
       </div>
     );

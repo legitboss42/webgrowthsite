@@ -9,6 +9,10 @@ import {
   isAllowedGoogleAdminEmail,
   readGoogleOAuthState,
 } from "@/lib/googleAuth";
+import {
+  bindWhatsAppTeamGoogleIdentity,
+  isWhatsAppTeamEmailAllowed,
+} from "@/lib/whatsapp/teamAccess";
 
 export const runtime = "nodejs";
 
@@ -20,6 +24,10 @@ function buildErrorRedirect(requestUrl: URL, code: string) {
 
 function secureCookieFlag(requestUrl: URL) {
   return requestUrl.protocol === "https:";
+}
+
+function isWhatsAppWorkspacePath(path: string) {
+  return path === "/admin/whatsapp" || path.startsWith("/admin/whatsapp/");
 }
 
 export async function GET(request: Request) {
@@ -56,15 +64,25 @@ export async function GET(request: Request) {
   try {
     const identity = await exchangeGoogleCodeForIdentity(returnedCode);
     const isAdmin = isAllowedGoogleAdminEmail(identity.email);
-    if (savedState.next.startsWith("/admin/") && !isAdmin) {
+    const whatsappWorkspace = isWhatsAppWorkspacePath(savedState.next);
+    const isTeamMember = whatsappWorkspace
+      ? await isWhatsAppTeamEmailAllowed(identity.email)
+      : false;
+
+    if (savedState.next.startsWith("/admin/") && !isAdmin && !isTeamMember) {
       const response = buildErrorRedirect(requestUrl, "not-approved");
       response.cookies.delete(stateCookieName);
       return response;
     }
 
-    const response = NextResponse.redirect(
-      new URL(isAdmin ? savedState.next : savedState.next, requestUrl.origin),
-    );
+    if (whatsappWorkspace && isTeamMember) {
+      await bindWhatsAppTeamGoogleIdentity({
+        email: identity.email,
+        googleUserId: identity.userId,
+      });
+    }
+
+    const response = NextResponse.redirect(new URL(savedState.next, requestUrl.origin));
     response.cookies.delete(stateCookieName);
     response.cookies.set({
       name: getGoogleAuthCookieName(),

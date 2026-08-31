@@ -1,6 +1,9 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { hasWhatsAppAdminAccess } from "@/app/admin/whatsapp/auth";
+import {
+  canWhatsAppAccessConversation,
+  getWhatsAppWorkspaceAccess,
+} from "@/app/admin/whatsapp/auth";
 import { isSameOriginMutation } from "@/lib/scheduler/policy";
 import { sendInboxWhatsAppMediaReply } from "@/lib/whatsapp/inboxReply";
 import {
@@ -22,17 +25,9 @@ function getStringField(formData: FormData, name: string) {
   return typeof value === "string" ? value.trim() : "";
 }
 
-/**
- * Sends one attachment to the open conversation.
- *
- * Same guards, same failure vocabulary, and the same sanitized sentences as the text and
- * voice-note routes — this only differs in what it puts on the wire. The file is
- * revalidated here even though the composer already did: the composer is a convenience,
- * this is the boundary.
- */
 export async function POST(request: Request) {
-  const cookieStore = await cookies();
-  if (!hasWhatsAppAdminAccess(cookieStore)) {
+  const access = await getWhatsAppWorkspaceAccess(await cookies());
+  if (!access) {
     return NextResponse.json({ error: "Authentication required." }, { status: 401 });
   }
 
@@ -55,13 +50,15 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid attachment upload." }, { status: 400 });
   }
 
+  if (!(await canWhatsAppAccessConversation(access, conversationId))) {
+    return NextResponse.json({ error: "This conversation is not assigned to you." }, { status: 403 });
+  }
+
   const validation = validateWhatsAppMediaFile({ mimeType: file.type, size: file.size, name: file.name });
   if (!validation.ok) {
     return NextResponse.json({ error: validation.error }, { status: 400 });
   }
 
-  // The resolved kind wins over the requested one when they disagree: the file's own type
-  // decides what Meta will accept, and a mismatch is the client's bug, not the operator's.
   const kind = isWhatsAppMediaKind(requestedKind) && requestedKind === validation.kind ? requestedKind : validation.kind;
   const caption = supportsWhatsAppMediaCaption(kind)
     ? getStringField(formData, "caption").slice(0, WHATSAPP_MEDIA_CAPTION_MAX)
@@ -82,8 +79,6 @@ export async function POST(request: Request) {
     );
   }
 
-  // Same rule as the text route: a quoted id from the browser is only used once it has been
-  // found in this conversation.
   const quotedMessageId = await resolveSupabaseWhatsAppQuotedMessageId(
     storeOptions,
     replyContext.conversationId,

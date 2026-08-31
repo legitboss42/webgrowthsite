@@ -3,6 +3,7 @@ import test from "node:test";
 import {
   canWhatsAppRoleManageTeam,
   canWhatsAppRoleSuperviseTeam,
+  canWhatsAppRoleViewAllConversations,
   isValidWhatsAppTeamEmail,
   normalizeWhatsAppTeamAvailability,
   normalizeWhatsAppTeamEmail,
@@ -52,7 +53,7 @@ test("normalizes persisted team rows safely", () => {
   });
 });
 
-test("team permissions keep management owner-only while managers can supervise", () => {
+test("team permissions separate ownership, supervision, and agent inbox scope", () => {
   assert.equal(canWhatsAppRoleManageTeam("owner"), true);
   assert.equal(canWhatsAppRoleManageTeam("manager"), false);
   assert.equal(canWhatsAppRoleManageTeam("agent"), false);
@@ -60,4 +61,8 @@ test("team permissions keep management owner-only while managers can supervise",
   assert.equal(canWhatsAppRoleSuperviseTeam("owner"), true);
   assert.equal(canWhatsAppRoleSuperviseTeam("manager"), true);
   assert.equal(canWhatsAppRoleSuperviseTeam("agent"), false);
+
+  assert.equal(canWhatsAppRoleViewAllConversations("owner"), true);
+  assert.equal(canWhatsAppRoleViewAllConversations("manager"), true);
+  assert.equal(canWhatsAppRoleViewAllConversations("agent"), false);
 });

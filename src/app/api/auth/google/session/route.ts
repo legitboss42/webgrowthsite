@@ -9,6 +9,10 @@ import {
   verifyGoogleIdToken,
 } from "@/lib/googleAuth";
 import {
+  bindWhatsAppTeamGoogleIdentity,
+  isWhatsAppTeamEmailAllowed,
+} from "@/lib/whatsapp/teamAccess";
+import {
   checkRateLimit,
   getClientIp,
   getUserAgent,
@@ -21,6 +25,10 @@ export const runtime = "nodejs";
 
 function secureCookieFlag() {
   return process.env.NODE_ENV === "production";
+}
+
+function isWhatsAppWorkspacePath(path: string) {
+  return path === "/admin/whatsapp" || path.startsWith("/admin/whatsapp/");
 }
 
 export async function POST(request: Request) {
@@ -51,8 +59,21 @@ export async function POST(request: Request) {
     }
 
     const identity = await verifyGoogleIdToken(credential);
-    if (next.startsWith("/admin/") && !isAllowedGoogleAdminEmail(identity.email)) {
-      return NextResponse.json({ error: "This Google account is not approved for admin access." }, { status: 403 });
+    const isAdmin = isAllowedGoogleAdminEmail(identity.email);
+    const whatsappWorkspace = isWhatsAppWorkspacePath(next);
+    const isTeamMember = whatsappWorkspace
+      ? await isWhatsAppTeamEmailAllowed(identity.email)
+      : false;
+
+    if (next.startsWith("/admin/") && !isAdmin && !isTeamMember) {
+      return NextResponse.json({ error: "This Google account is not approved for this workspace." }, { status: 403 });
+    }
+
+    if (whatsappWorkspace && isTeamMember) {
+      await bindWhatsAppTeamGoogleIdentity({
+        email: identity.email,
+        googleUserId: identity.userId,
+      });
     }
 
     const response = NextResponse.json({
@@ -74,4 +95,3 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Google sign-in could not be completed. Please try again." }, { status: 500 });
   }
 }
-

@@ -1,6 +1,9 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { hasWhatsAppAdminAccess } from "@/app/admin/whatsapp/auth";
+import {
+  canWhatsAppAccessConversation,
+  getWhatsAppWorkspaceAccess,
+} from "@/app/admin/whatsapp/auth";
 import { isSameOriginMutation } from "@/lib/scheduler/policy";
 import { isSupportedWhatsAppRecordingMimeType } from "@/lib/whatsapp/audio";
 import { sendInboxWhatsAppAudioReply } from "@/lib/whatsapp/inboxReply";
@@ -17,8 +20,8 @@ function getStringField(formData: FormData, name: string) {
 }
 
 export async function POST(request: Request) {
-  const cookieStore = await cookies();
-  if (!hasWhatsAppAdminAccess(cookieStore)) {
+  const access = await getWhatsAppWorkspaceAccess(await cookies());
+  if (!access) {
     return NextResponse.json({ error: "Authentication required." }, { status: 401 });
   }
 
@@ -38,6 +41,10 @@ export async function POST(request: Request) {
   const audio = formData.get("audio");
   if (!conversationId || !waId || !(audio instanceof File)) {
     return NextResponse.json({ error: "Invalid audio upload." }, { status: 400 });
+  }
+
+  if (!(await canWhatsAppAccessConversation(access, conversationId))) {
+    return NextResponse.json({ error: "This conversation is not assigned to you." }, { status: 403 });
   }
 
   const browserMimeType = audio.type || "";

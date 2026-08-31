@@ -15,6 +15,7 @@ export type WhatsAppLeadRow = {
   email?: string;
   phone?: string;
   assigned_to?: string;
+  assigned_member_id?: string;
   first_message_at?: string;
 };
 
@@ -44,7 +45,7 @@ export type WhatsAppDashboardModel = {
 
 export type WhatsAppReplyComposerState = {
   enabled: boolean;
-  reason?: "NOT_CONFIGURED" | "NO_CUSTOMER_MESSAGE" | "SERVICE_WINDOW_CLOSED";
+  reason?: "NOT_CONFIGURED" | "NO_CUSTOMER_MESSAGE" | "SERVICE_WINDOW_CLOSED" | "NOT_ASSIGNED";
   helperText: string;
   customerMessageTimestamp?: number;
   replyToMessageId?: string;
@@ -77,8 +78,6 @@ export function buildWhatsAppDashboardModel(input: {
   } satisfies Record<WhatsAppLeadFilter, number>;
 
   const filteredLeads = filterWhatsAppLeads(input.leads, input.filter);
-  // Match WhatsApp Web: opening Conversations shows the list and an empty branded
-  // workspace. A thread is only selected after the operator explicitly clicks it.
   const selectedLead = input.selectedLeadId
     ? filteredLeads.find((lead) => lead.id === input.selectedLeadId) || null
     : null;

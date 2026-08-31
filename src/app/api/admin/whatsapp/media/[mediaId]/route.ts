@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { hasWhatsAppAdminAccess } from "@/app/admin/whatsapp/auth";
+import { getWhatsAppWorkspaceAccess } from "@/app/admin/whatsapp/auth";
 
 export const runtime = "nodejs";
 
@@ -18,8 +18,7 @@ function getWhatsAppConfig() {
 }
 
 export async function GET(request: Request, context: { params: Promise<{ mediaId: string }> }) {
-  const cookieStore = await cookies();
-  if (!hasWhatsAppAdminAccess(cookieStore)) {
+  if (!(await getWhatsAppWorkspaceAccess(await cookies()))) {
     return NextResponse.json({ error: "Authentication required." }, { status: 401 });
   }
 
@@ -62,9 +61,6 @@ export async function GET(request: Request, context: { params: Promise<{ mediaId
       return NextResponse.json({ error: "Unable to download this WhatsApp media item." }, { status: 502 });
     }
 
-    // Audio/video controls issue byte-range requests to discover duration and seek. Forward
-    // Meta's range response rather than buffering the whole file into a new 200 response,
-    // which made valid voice notes appear as 0:00 in Chromium on Android.
     const responseHeaders = new Headers({
       "Content-Type": metadata.mime_type || mediaResponse.headers.get("content-type") || "application/octet-stream",
       "Cache-Control": "private, no-store",
