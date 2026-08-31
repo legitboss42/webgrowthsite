@@ -1,16 +1,5 @@
 import { createECDH } from "node:crypto";
-
-// `web-push` has no bundled TypeScript declaration. Keeping the tiny runtime surface
-// typed here avoids adding a second package purely for types.
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const webPush = require("web-push") as {
-  setVapidDetails(subject: string, publicKey: string, privateKey: string): void;
-  sendNotification(
-    subscription: { endpoint: string; keys: { p256dh: string; auth: string } },
-    payload: string,
-    options?: { TTL?: number; urgency?: "very-low" | "low" | "normal" | "high" },
-  ): Promise<unknown>;
-};
+import * as webPush from "web-push";
 
 type StoredSubscription = {
   endpoint: string;
