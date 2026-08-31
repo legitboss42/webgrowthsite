@@ -3,17 +3,14 @@ import { cookies } from "next/headers";
 import GoogleAdminPrompt from "@/components/auth/GoogleAdminPrompt";
 import { getDefaultAdminGoogleEmail, getGoogleClientId, isGoogleAuthConfigured } from "@/lib/googleAuth";
 import { SITE_URL } from "@/lib/site";
-import {
-  WHATSAPP_PROFILE_FIELD_LABELS,
-  fetchWhatsAppBusinessProfile,
-  summarizeWhatsAppBusinessProfile,
-} from "@/lib/whatsapp/businessProfile";
+import { fetchWhatsAppBusinessProfile, summarizeWhatsAppBusinessProfile } from "@/lib/whatsapp/businessProfile";
 import { fetchWhatsAppPhoneNumbers } from "@/lib/whatsapp/phoneNumbers";
 import { isWhatsAppBusinessHoursOpen, summarizeWhatsAppSettings } from "@/lib/whatsapp/settings";
 import { loadWhatsAppSettings } from "@/lib/whatsapp/settingsStore";
 import { probeWhatsAppTable, type WhatsAppTableProbe } from "../data";
 import { hasWhatsAppAdminAccess } from "../auth";
 import SettingsEditor from "../SettingsEditor";
+import BusinessProfileEditor from "../BusinessProfileEditor";
 import {
   WHATSAPP_EXPECTED_TABLES,
   buildWhatsAppCapabilities,
@@ -116,8 +113,8 @@ export default async function WhatsAppSettingsPage() {
   const webhookUrl = buildWhatsAppWebhookUrl(SITE_URL);
 
   const [phoneResult, profileResult, tableProbes, settingsLoad] = await Promise.all([
-    fetchWhatsAppPhoneNumbers({ revalidateSeconds: 300 }),
-    fetchWhatsAppBusinessProfile({ revalidateSeconds: 300 }),
+    fetchWhatsAppPhoneNumbers({ revalidateSeconds: 60 }),
+    fetchWhatsAppBusinessProfile({ revalidateSeconds: 0 }),
     Promise.all(WHATSAPP_EXPECTED_TABLES.map(async (table) => ({ table, probe: await probeWhatsAppTable(table) }))),
     loadWhatsAppSettings({ maxAgeMs: 0 }),
   ]);
@@ -138,7 +135,6 @@ export default async function WhatsAppSettingsPage() {
 
   const profileSummary = profileResult.ok ? summarizeWhatsAppBusinessProfile(profileResult.profile) : null;
   const hasPicture = Boolean(profileSummary?.customerVisiblePicture);
-  const setFields = profileSummary?.set ?? [];
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-5 sm:px-6 sm:py-7">
@@ -146,7 +142,7 @@ export default async function WhatsAppSettingsPage() {
         <div>
           <p className="text-[0.68rem] font-semibold uppercase tracking-[.16em] text-ledger">WhatsApp Business</p>
           <h1 className="mt-1 text-2xl font-semibold tracking-tight text-ink">Settings</h1>
-          <p className="mt-1 text-sm text-ink-soft">Manage your business identity, messaging preferences and WhatsApp connection.</p>
+          <p className="mt-1 text-sm text-ink-soft">Change your business profile and messaging preferences from here.</p>
         </div>
         <StatusChip tone={credentialCheck.tone}>{credentialCheck.label}</StatusChip>
       </header>
@@ -155,12 +151,12 @@ export default async function WhatsAppSettingsPage() {
         <div className="grid min-w-0 gap-5">
           <Card
             title="Business profile"
-            description="The business identity customers see on WhatsApp. Profile data is read live from Meta."
-            action={<StatusChip tone={profileResult.ok ? "good" : "warn"}>{profileResult.ok ? "Synced with Meta" : "Unavailable"}</StatusChip>}
+            description="Edit the customer-facing profile stored by Meta for this WhatsApp number."
+            action={<StatusChip tone={profileResult.ok ? "good" : "warn"}>{profileResult.ok ? "Editable" : "Unavailable"}</StatusChip>}
           >
             {profileResult.ok ? (
               <>
-                <div className="flex items-center gap-4 rounded-xl border border-rule bg-paper p-4">
+                <div className="mb-5 flex items-center gap-4 rounded-xl border border-rule bg-paper p-4">
                   {hasPicture ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src="/api/admin/whatsapp/profile-photo/" alt="Web Growth WhatsApp Business profile" width={72} height={72} className="h-[72px] w-[72px] flex-none rounded-full border border-rule object-cover" />
@@ -170,22 +166,17 @@ export default async function WhatsAppSettingsPage() {
                   <div className="min-w-0">
                     <p className="text-base font-semibold text-ink">Web Growth</p>
                     <p className="mt-1 text-xs leading-5 text-ink-soft">{profileSummary ? `${profileSummary.set.length} of ${profileSummary.set.length + profileSummary.missing.length} profile fields are complete.` : "Profile loaded."}</p>
-                    <p className="mt-1 text-[0.7rem] text-ink-faint">Profile changes are managed in WhatsApp Manager and reflected here after Meta syncs them.</p>
+                    <p className="mt-1 text-[0.7rem] text-ink-faint">Edit the fields below and save. Changes are sent directly to Meta.</p>
                   </div>
                 </div>
-                <dl className="mt-3">
-                  {WHATSAPP_PROFILE_FIELD_LABELS.map((field) => {
-                    const populated = setFields.includes(field.label);
-                    return <Row key={field.label} label={field.label} value={<StatusChip tone={populated ? "good" : "neutral"}>{populated ? "Set" : "Not set"}</StatusChip>} />;
-                  })}
-                </dl>
+                <BusinessProfileEditor profile={profileResult.profile} />
               </>
             ) : (
-              <p className="rounded-xl border border-brass/25 bg-brass-tint p-4 text-sm text-ink-soft">Meta did not return the business profile during this request. Your saved configuration has not been changed.</p>
+              <p className="rounded-xl border border-brass/25 bg-brass-tint p-4 text-sm text-ink-soft">Meta did not return the business profile, so editing is temporarily unavailable.</p>
             )}
           </Card>
 
-          <Card title="Messaging & response" description="Control business hours, response targets, inbox behaviour and lead classification.">
+          <Card title="Messaging & response" description="These settings are saved in the WhatsApp console database and apply immediately.">
             <div className="mb-4 flex flex-wrap gap-2">
               <StatusChip tone={openNow === null ? "neutral" : openNow ? "good" : "warn"}>{openNow === null ? "Hours not tracked" : openNow ? "Open now" : "Closed now"}</StatusChip>
               <StatusChip tone={settingsSummary.changedFromDefaults ? "good" : "neutral"}>{settingsSummary.changedFromDefaults ? "Customised" : "Defaults"}</StatusChip>
@@ -205,7 +196,7 @@ export default async function WhatsAppSettingsPage() {
             </dl>
           </Card>
 
-          <Card title="Connection health" description="The checks that matter day to day, without making you read environment variables for sport.">
+          <Card title="Connection health" description="The checks that matter day to day.">
             <div className="grid gap-2">
               {capabilities.map((capability) => (
                 <div key={capability.key} className="flex items-center justify-between gap-3 rounded-xl border border-rule bg-paper px-3.5 py-3">
@@ -216,7 +207,7 @@ export default async function WhatsAppSettingsPage() {
             </div>
           </Card>
 
-          <Card title="Webhook & API" description="Read-only production routing information.">
+          <Card title="Webhook & API" description="Production routing information. These values are intentionally read-only.">
             <dl>
               <Row label="Webhook" value={<span className="max-w-[190px] break-all font-mono text-[0.68rem] text-ink-soft">{webhookUrl}</span>} />
               <Row label="Signature" value={<StatusChip tone={capabilities.find((item) => item.key === "signature")?.available ? "good" : "bad"}>{capabilities.find((item) => item.key === "signature")?.available ? "Enforced" : "Off"}</StatusChip>} />
@@ -232,7 +223,7 @@ export default async function WhatsAppSettingsPage() {
         <div className="grid gap-5 border-t border-rule p-5 sm:p-6 xl:grid-cols-2">
           <section>
             <h2 className="text-sm font-semibold text-ink">Environment configuration</h2>
-            <p className="mt-1 text-xs leading-5 text-ink-faint">Secrets stay hidden. This area is for troubleshooting, not normal account management.</p>
+            <p className="mt-1 text-xs leading-5 text-ink-faint">Secrets stay hidden. This area is for troubleshooting.</p>
             <div className="mt-3 overflow-x-auto">
               <table className="w-full min-w-[520px] border-collapse text-left text-sm">
                 <thead><tr className="border-b border-rule text-[0.68rem] uppercase tracking-wide text-ink-faint"><th className="pb-2 pr-3 font-medium">Variable</th><th className="pb-2 pr-3 font-medium">Value</th><th className="pb-2 font-medium">Status</th></tr></thead>
@@ -258,13 +249,9 @@ export default async function WhatsAppSettingsPage() {
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <h2 className="text-base font-semibold text-ink">Account & safety</h2>
-            <p className="mt-1 text-xs leading-5 text-ink-faint">Connection-changing and destructive controls will live here only when they have a safe, real backend action.</p>
+            <p className="mt-1 text-xs leading-5 text-ink-faint">Destructive actions stay unavailable until they have a safe server-side implementation.</p>
           </div>
           <StatusChip tone="neutral">Protected</StatusChip>
-        </div>
-        <div className="mt-4 rounded-xl border border-rule bg-paper p-4">
-          <p className="text-sm font-medium text-ink">No destructive actions are exposed yet</p>
-          <p className="mt-1 text-xs leading-5 text-ink-soft">The console will not show fake Disconnect, Reset or Delete buttons. Those controls will be added only with confirmation, audit logging and a working server-side operation.</p>
         </div>
       </section>
     </div>
