@@ -212,6 +212,14 @@ export default function ReplyComposer({
     return () => window.clearInterval(timer);
   }, [recordingState]);
 
+  // Successful send confirmations are useful for a moment, not forever. Errors remain
+  // until the operator takes another action, but success feedback clears itself after 3s.
+  useEffect(() => {
+    if (feedback?.tone !== "info") return;
+    const timer = window.setTimeout(() => setFeedback(null), 3_000);
+    return () => window.clearTimeout(timer);
+  }, [feedback]);
+
   // The quick-reply list can also be opened from the `+` menu, where there is no draft to
   // clear it, so it needs the same outside-click and Escape rules as the other popovers.
   useEffect(() => {
@@ -933,14 +941,7 @@ export default function ReplyComposer({
             aria-label={recordingState === "recording" ? "Stop and send voice note" : "Send voice note"}
             className="grid h-11 w-11 flex-none place-items-center rounded-full bg-ledger-bright text-white shadow-sm transition hover:bg-ledger focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ledger-bright/40 focus-visible:ring-offset-2 focus-visible:ring-offset-paper-raised disabled:cursor-not-allowed disabled:bg-ledger-bright/40"
           >
-            {busy ? (
-              <Spinner />
-            ) : (
-              <WhatsAppIcon
-                name={recordingState === "recording" ? "microphone" : "send"}
-                className="h-5 w-5"
-              />
-            )}
+            {busy ? <Spinner /> : <WhatsAppIcon name="send" className="h-5 w-5" />}
           </button>
         </div>
       ) : (

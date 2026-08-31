@@ -83,6 +83,25 @@ async function persistSubscription(subscription: PushSubscription) {
   if (!response.ok) throw new Error("Push subscription could not be saved.");
 }
 
+function NotificationBellIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.8}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="h-5 w-5"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" />
+      <path d="M10 21h4" />
+    </svg>
+  );
+}
+
 export default function WhatsAppInboxAutoRefresh({
   refreshSeconds,
 }: {
@@ -243,21 +262,33 @@ export default function WhatsAppInboxAutoRefresh({
       <div className="fixed bottom-4 right-4 z-40 max-w-[min(22rem,calc(100vw-2rem))] rounded-xl border border-rule bg-paper-raised p-3 text-xs text-ink shadow-xl shadow-ink/15">
         <p className="font-semibold text-ink">New message alerts are off</p>
         <p className="mt-1 leading-5 text-ink-soft">Turn them on in Quick Settings to receive desktop and mobile notifications.</p>
-        <Link href="/admin/whatsapp/" className="mt-2 inline-block font-semibold text-ledger hover:underline">Open Quick Settings</Link>
+        <Link href="/admin/whatsapp/settings/" className="mt-2 inline-block font-semibold text-ledger hover:underline">Open Quick Settings</Link>
       </div>
     );
   }
 
   if (pushStatus === "subscribed" && permission === "granted") {
+    const statusText = live ? "Background WhatsApp alerts are on" : reconnectingText;
     return (
-      <div
-        aria-live="polite"
-        className={`fixed bottom-4 right-4 z-40 rounded-full border px-4 py-2 text-xs font-medium shadow-lg shadow-ink/10 ${
-          live ? "border-ledger/15 bg-ledger-tint text-ledger" : "border-brass/30 bg-brass-tint text-[#6f4f16]"
+      <button
+        type="button"
+        onClick={() => router.push("/admin/whatsapp/settings/")}
+        aria-label={`${statusText}. Open notification settings.`}
+        title={`${statusText}. Open notification settings.`}
+        className={`fixed bottom-4 right-4 z-40 grid h-11 w-11 place-items-center rounded-full border shadow-lg shadow-ink/10 transition hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ledger-bright/40 ${
+          live
+            ? "border-ledger/20 bg-ledger-bright text-white hover:bg-ledger"
+            : "border-brass/30 bg-brass-tint text-[#6f4f16]"
         }`}
       >
-        {live ? "Background WhatsApp alerts on" : reconnectingText}
-      </div>
+        <NotificationBellIcon />
+        <span
+          aria-hidden="true"
+          className={`absolute right-1.5 top-1.5 h-2 w-2 rounded-full ring-2 ring-paper-raised ${
+            live ? "bg-emerald-300" : "bg-brass"
+          }`}
+        />
+      </button>
     );
   }
 
