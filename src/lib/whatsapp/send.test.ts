@@ -107,7 +107,7 @@ test("uploads and sends an audio reply through Meta's official media and message
     recipient_type: "individual",
     to: "2348012345678",
     type: "audio",
-    audio: { id: "media-upload-1" },
+    audio: { id: "media-upload-1", voice: true },
     context: { message_id: "wamid.customer" },
   });
 });

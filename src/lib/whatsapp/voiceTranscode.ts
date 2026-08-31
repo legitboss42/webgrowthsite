@@ -9,15 +9,15 @@ const execFileAsync = promisify(execFile);
 
 export type NormalizedWhatsAppVoiceNote = {
   file: File;
-  mimeType: "audio/ogg";
+  mimeType: "audio/ogg; codecs=opus";
   filename: "webgrowth-voice-note.ogg";
 };
 
 /**
  * Converts browser MediaRecorder output into Meta's native voice-note format:
- * an OGG container carrying a mono Opus stream. The upload MIME stays the canonical
- * `audio/ogg`; `codecs=opus` describes the stream but is not part of the media type
- * Meta expects in the multipart upload.
+ * an OGG container carrying a mono Opus stream. Meta explicitly requires the Opus
+ * codec for OGG audio, so the multipart media upload keeps the codec declaration
+ * instead of degrading the file to the unsupported bare `audio/ogg` media type.
  */
 export async function normalizeRecordedVoiceNote(audio: File): Promise<NormalizedWhatsAppVoiceNote> {
   if (!ffmpegPath) throw new Error("FFmpeg is unavailable on this deployment.");
@@ -63,12 +63,13 @@ export async function normalizeRecordedVoiceNote(audio: File): Promise<Normalize
     const bytes = await readFile(outputPath);
     if (bytes.length <= 0) throw new Error("FFmpeg produced an empty voice note.");
 
+    const mimeType = "audio/ogg; codecs=opus" as const;
     return {
       file: new File([bytes], "webgrowth-voice-note.ogg", {
-        type: "audio/ogg",
+        type: mimeType,
         lastModified: Date.now(),
       }),
-      mimeType: "audio/ogg",
+      mimeType,
       filename: "webgrowth-voice-note.ogg",
     };
   } finally {

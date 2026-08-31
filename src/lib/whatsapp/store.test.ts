@@ -54,6 +54,49 @@ test("records the webhook event before writing CRM records to Supabase", async (
   assert.match(requests[2]?.body || "", /PORTFOLIO_REQUEST/);
 });
 
+test("never lets an older inbound webhook move an existing conversation backwards", async () => {
+  const requests: Array<{ url: string; method: string; body?: string }> = [];
+  const store = createSupabaseWhatsAppStore({
+    url: "https://example.supabase.co",
+    serviceRoleKey: "test-key",
+    fetch: async (url, init) => {
+      const target = String(url);
+      const method = init?.method || "GET";
+      requests.push({ url: target, method, body: String(init?.body || "") });
+
+      if (target.includes("whatsapp_events") && method === "POST") {
+        return new Response(JSON.stringify([{ id: "event-older" }]), { status: 201 });
+      }
+      if (target.includes("whatsapp_contacts")) {
+        return new Response(JSON.stringify([{ id: "contact-1" }]), { status: 201 });
+      }
+      if (target.includes("whatsapp_conversations?on_conflict=contact_id")) {
+        return new Response(JSON.stringify([]), { status: 201 });
+      }
+      if (target.includes("whatsapp_conversations?contact_id=eq.contact-1")) {
+        return new Response(JSON.stringify([{ id: "conversation-1" }]), { status: 200 });
+      }
+      if (target.includes("whatsapp_conversations?id=eq.conversation-1")) {
+        return new Response(JSON.stringify([]), { status: 200 });
+      }
+      if (target.includes("whatsapp_messages")) {
+        return new Response(JSON.stringify([{ id: "message-older" }]), { status: 201 });
+      }
+      return new Response(JSON.stringify([{ id: "event-older" }]), { status: 200 });
+    },
+  });
+
+  await store.recordInbound({ ...inbound, messageId: "wamid.older", timestamp: 1_799_999_000 });
+
+  const conversationPatch = requests.find(
+    (request) => request.method === "PATCH" && request.url.includes("whatsapp_conversations?id=eq.conversation-1"),
+  );
+  assert.ok(conversationPatch, "an existing conversation should receive a guarded freshness update");
+  assert.match(conversationPatch.url, /last_message_at\.lt\./);
+  assert.doesNotMatch(conversationPatch.body || "", /first_message_at/);
+  assert.match(conversationPatch.body || "", /last_message_at/);
+});
+
 test("stores inbound WhatsApp audio metadata in Supabase", async () => {
   const requests: Array<{ url: string; method: string; body?: string }> = [];
   const store = createSupabaseWhatsAppStore({
@@ -133,6 +176,7 @@ test("records an inbox outbound reply on the selected conversation without recla
 
   assert.equal(requests.length, 2);
   assert.match(requests[0]?.url || "", /whatsapp_conversations\?id=eq\.conversation-1/);
+  assert.match(requests[0]?.url || "", /last_message_at\.lt\./);
   assert.equal(requests[0]?.method, "PATCH");
   assert.doesNotMatch(requests[0]?.body || "", /intent|human_review_required|lead_temperature/);
   assert.match(requests[1]?.url || "", /whatsapp_messages\?on_conflict=whatsapp_message_id/);
@@ -187,7 +231,6 @@ test("only quotes a message the browser asked for once it is found in that conve
     serviceRoleKey: "test-key",
     fetch: async (url: URL | RequestInfo) => {
       urls.push(String(url));
-      // The row only comes back for the id that really belongs to conversation-1.
       const body = String(url).includes("wamid.mine") ? [{ whatsapp_message_id: "wamid.mine" }] : [];
       return new Response(JSON.stringify(body), { status: 200 });
     },
@@ -197,7 +240,6 @@ test("only quotes a message the browser asked for once it is found in that conve
     await resolveSupabaseWhatsAppQuotedMessageId(options, "conversation-1", "wamid.mine"),
     "wamid.mine",
   );
-  // Someone else's thread, so it is refused and the caller falls back to its own context.
   assert.equal(
     await resolveSupabaseWhatsAppQuotedMessageId(options, "conversation-1", "wamid.someone-else"),
     null,
