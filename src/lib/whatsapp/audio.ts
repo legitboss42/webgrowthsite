@@ -18,6 +18,10 @@ export function normalizeWhatsAppAudioMimeType(value: string) {
   return value.trim().toLowerCase().replace(/\s*;\s*/g, "; ");
 }
 
+export function getWhatsAppAudioBaseMimeType(value: string) {
+  return normalizeWhatsAppAudioMimeType(value).split(";")[0]?.trim() || "audio/ogg";
+}
+
 export function isSupportedWhatsAppAudioMimeType(value: string) {
   const normalized = normalizeWhatsAppAudioMimeType(value);
   return supportedAudioMimeTypes.has(normalized) || supportedAudioMimeTypes.has(normalized.replace("; ", ";"));
@@ -28,9 +32,9 @@ export function chooseWhatsAppRecordingMimeType(isTypeSupported: (type: string) 
 }
 
 export function getWhatsAppAudioFilename(mimeType: string) {
-  const normalized = normalizeWhatsAppAudioMimeType(mimeType);
-  if (normalized.startsWith("audio/ogg")) return "webgrowth-voice-note.ogg";
-  if (normalized.startsWith("audio/mp4")) return "webgrowth-voice-note.m4a";
+  const normalized = getWhatsAppAudioBaseMimeType(mimeType);
+  if (normalized === "audio/ogg") return "webgrowth-voice-note.ogg";
+  if (normalized === "audio/mp4") return "webgrowth-voice-note.m4a";
   if (normalized === "audio/mpeg") return "webgrowth-voice-note.mp3";
   if (normalized === "audio/aac") return "webgrowth-voice-note.aac";
   if (normalized === "audio/amr") return "webgrowth-voice-note.amr";

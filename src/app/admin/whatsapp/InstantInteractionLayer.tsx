@@ -2,15 +2,17 @@
 
 import { useEffect, useState, type MouseEvent as ReactMouseEvent } from "react";
 import Image from "next/image";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 export default function InstantInteractionLayer() {
   const pathname = usePathname();
+  const router = useRouter();
   const searchParams = useSearchParams();
   const [navigating, setNavigating] = useState(false);
   const routeKey = `${pathname}?${searchParams.toString()}`;
   const conversationsRoute = pathname?.startsWith("/admin/whatsapp/conversations") ?? false;
   const hasSelectedConversation = Boolean(searchParams.get("lead"));
+  const detailsOpen = searchParams.get("panel") === "contact";
 
   useEffect(() => {
     document.documentElement.classList.add("whatsapp-instant-ui");
@@ -23,16 +25,43 @@ export default function InstantInteractionLayer() {
   }, [conversationsRoute]);
 
   useEffect(() => {
+    document.documentElement.classList.toggle("whatsapp-details-open", conversationsRoute && detailsOpen);
+    return () => document.documentElement.classList.remove("whatsapp-details-open");
+  }, [conversationsRoute, detailsOpen]);
+
+  useEffect(() => {
     setNavigating(false);
   }, [routeKey]);
+
+  function closeDesktopDetails() {
+    const query = new URLSearchParams(searchParams.toString());
+    query.delete("panel");
+    const suffix = query.toString();
+    router.replace(suffix ? `${pathname}?${suffix}` : pathname || "/admin/whatsapp/conversations/", { scroll: false });
+  }
 
   function handleClickCapture(event: ReactMouseEvent<HTMLDivElement>) {
     if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
     const target = event.target as Element | null;
     const anchor = target?.closest("a[href]") as HTMLAnchorElement | null;
     if (!anchor || anchor.target === "_blank" || anchor.hasAttribute("download")) return;
+
     const destination = new URL(anchor.href, window.location.href);
     if (destination.origin !== window.location.origin || !destination.pathname.startsWith("/admin/whatsapp")) return;
+
+    // On desktop the existing Details link becomes a toggle. The mobile flow keeps its
+    // normal list → thread → contact navigation and its own back button.
+    if (
+      conversationsRoute &&
+      detailsOpen &&
+      destination.searchParams.get("panel") === "contact" &&
+      window.matchMedia("(min-width: 1024px)").matches
+    ) {
+      event.preventDefault();
+      closeDesktopDetails();
+      return;
+    }
+
     const current = `${window.location.pathname}${window.location.search}${window.location.hash}`;
     const next = `${destination.pathname}${destination.search}${destination.hash}`;
     if (current !== next) setNavigating(true);
@@ -47,7 +76,7 @@ export default function InstantInteractionLayer() {
       ) : null}
 
       {conversationsRoute && !hasSelectedConversation ? (
-        <div className="pointer-events-none fixed bottom-0 left-[calc(16rem+20rem)] right-72 top-[4.5rem] z-20 hidden items-center justify-center bg-paper lg:flex xl:left-[calc(16rem+22rem)] xl:right-80">
+        <div className="pointer-events-none fixed bottom-0 left-[calc(16rem+20rem)] right-0 top-[4.5rem] z-20 hidden items-center justify-center bg-paper lg:flex xl:left-[calc(16rem+22rem)]">
           <div className="max-w-sm px-8 text-center">
             <Image src="/images/brand/web-growth-logo.webp" alt="Web Growth" width={270} height={40} sizes="220px" quality={75} className="mx-auto h-auto w-52 opacity-70" />
             <p className="mt-5 text-sm font-medium text-ink-soft">Web Growth WhatsApp</p>
@@ -67,13 +96,30 @@ export default function InstantInteractionLayer() {
           -webkit-tap-highlight-color: transparent;
         }
 
-        /* The inbox owns the viewport. Never let the document become a second scroll
-           container on phones; only the message/list panels are allowed to scroll. */
         html.whatsapp-conversations-ui,
         html.whatsapp-conversations-ui body {
           height: 100%;
           overflow: hidden;
           overscroll-behavior: none;
+        }
+
+        @media (min-width: 1024px) {
+          /* The thread gets the whole remaining workspace until Details is requested. */
+          html.whatsapp-conversations-ui:not(.whatsapp-details-open) aside[class*="lg:w-72"] {
+            display: none !important;
+          }
+
+          /* The page already owns the real Details link. Make it available on desktop too
+             instead of maintaining a second fake control in a client overlay. */
+          html.whatsapp-conversations-ui a[href*="panel=contact"] {
+            display: inline-flex !important;
+          }
+
+          html.whatsapp-details-open a[href*="panel=contact"] {
+            border-color: var(--ledger-bright);
+            color: var(--ledger);
+            background: var(--ledger-tint);
+          }
         }
 
         @media (hover: none) and (pointer: coarse) {

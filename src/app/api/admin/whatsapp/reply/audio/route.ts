@@ -2,7 +2,10 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { hasWhatsAppAdminAccess } from "@/app/admin/whatsapp/auth";
 import { isSameOriginMutation } from "@/lib/scheduler/policy";
-import { isSupportedWhatsAppAudioMimeType } from "@/lib/whatsapp/audio";
+import {
+  getWhatsAppAudioBaseMimeType,
+  isSupportedWhatsAppAudioMimeType,
+} from "@/lib/whatsapp/audio";
 import { sendInboxWhatsAppAudioReply } from "@/lib/whatsapp/inboxReply";
 import { createSupabaseWhatsAppStore, getSupabaseWhatsAppReplyContext } from "@/lib/whatsapp/store";
 
@@ -38,16 +41,27 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid audio upload." }, { status: 400 });
   }
 
-  const mimeType = audio.type || "audio/ogg";
-  if (!isSupportedWhatsAppAudioMimeType(mimeType)) {
+  const browserMimeType = audio.type || "audio/ogg";
+  if (!isSupportedWhatsAppAudioMimeType(browserMimeType)) {
     return NextResponse.json({
-      error: `Unsupported audio format (${mimeType || "unknown"}). Upload OGG, MP3, MP4/M4A, AAC, or AMR audio.`,
+      error: `Unsupported audio format (${browserMimeType || "unknown"}). Upload OGG, MP3, MP4/M4A, AAC, or AMR audio.`,
     }, { status: 400 });
   }
 
   if (audio.size <= 0 || audio.size > maxAudioBytes) {
     return NextResponse.json({ error: "Audio must be larger than 0 bytes and no more than 16 MB." }, { status: 400 });
   }
+
+  // Browsers commonly report codec-qualified types such as
+  // `audio/mp4;codecs=mp4a.40.2`. Meta's media upload contract expects the base
+  // media type (`audio/mp4`) in both the explicit `type` field and the multipart
+  // file part. Re-wrapping the exact same bytes fixes the metadata without
+  // transcoding or degrading the recording.
+  const mimeType = getWhatsAppAudioBaseMimeType(browserMimeType);
+  const normalizedAudio = new File([audio], audio.name || "whatsapp-voice-note", {
+    type: mimeType,
+    lastModified: Date.now(),
+  });
 
   const supabaseUrl = process.env.SUPABASE_URL?.trim();
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
@@ -68,8 +82,8 @@ export async function POST(request: Request) {
     {
       conversationId: replyContext.conversationId,
       waId: replyContext.waId,
-      audio,
-      filename: audio.name || "whatsapp-voice-note.ogg",
+      audio: normalizedAudio,
+      filename: normalizedAudio.name || "whatsapp-voice-note.ogg",
       mimeType,
       customerMessageTimestamp: replyContext.customerMessageTimestamp,
       replyToMessageId: replyContext.replyToMessageId,
