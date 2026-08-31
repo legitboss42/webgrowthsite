@@ -9,6 +9,7 @@ import { WhatsAppIcon } from "@/components/whatsapp/icons";
 import { loadWhatsAppSettings } from "@/lib/whatsapp/settingsStore";
 import { hasWhatsAppAdminAccess } from "../auth";
 import WhatsAppInboxAutoRefresh from "../AutoRefresh";
+import MarkConversationRead from "../MarkConversationRead";
 import MessageMedia, { hasRenderableWhatsAppMedia } from "../MessageMedia";
 import OutboundQueueProvider, { PendingOutboundList } from "../OutboundQueue";
 import ReplyComposer from "../ReplyComposer";
@@ -36,6 +37,12 @@ const filters: WhatsAppLeadFilter[] = ["ALL", "HOT", "WARM", "REVIEW", "PRICING"
 
 /** Which single panel a phone shows. Desktop always shows all three. */
 type MobilePanel = "list" | "thread" | "contact";
+
+type WhatsAppInboxState = {
+  conversationId: string;
+  unreadCount: number;
+  latestMessage?: WhatsAppLeadMessage;
+};
 
 async function getLeads(): Promise<WhatsAppLeadRow[]> {
   const rows = await readWhatsAppRows<Record<string, unknown>>(
@@ -115,6 +122,37 @@ async function getConversationMessages(conversationId: string | undefined): Prom
   }));
 }
 
+async function getInboxStates(): Promise<WhatsAppInboxState[]> {
+  const rows = await readWhatsAppRows<Record<string, unknown>>(
+    "whatsapp_conversation_inbox_state?select=conversation_id,unread_count,latest_message_row_id,latest_message_id,latest_direction,latest_message_type,latest_message_text,latest_message_timestamp,latest_media_voice,latest_media_filename",
+  );
+  if (!rows) return [];
+
+  return rows.map((row) => {
+    const conversationId = String(row.conversation_id || "");
+    const latestRowId = typeof row.latest_message_row_id === "string" ? row.latest_message_row_id : "";
+    const latestMessage = latestRowId
+      ? {
+          id: latestRowId,
+          whatsapp_message_id: typeof row.latest_message_id === "string" ? row.latest_message_id : undefined,
+          conversation_id: conversationId,
+          direction: row.latest_direction === "outbound" ? ("outbound" as const) : ("inbound" as const),
+          message_type: typeof row.latest_message_type === "string" ? row.latest_message_type : undefined,
+          message_text: typeof row.latest_message_text === "string" ? row.latest_message_text : undefined,
+          message_timestamp: typeof row.latest_message_timestamp === "string" ? row.latest_message_timestamp : undefined,
+          media_voice: row.latest_media_voice === true,
+          media_filename: typeof row.latest_media_filename === "string" ? row.latest_media_filename : undefined,
+        }
+      : undefined;
+
+    return {
+      conversationId,
+      unreadCount: Math.max(0, Number(row.unread_count) || 0),
+      latestMessage,
+    };
+  });
+}
+
 function formatDateTime(value: string | undefined) {
   if (!value) return "—";
   return new Date(value).toLocaleString();
@@ -164,13 +202,14 @@ function getMessageFallbackText(message: WhatsAppLeadMessage) {
 
 function getMessagePreview(message: WhatsAppLeadMessage | undefined) {
   if (!message) return "No messages yet";
-  if (message.message_type === "audio") return message.media_voice ? "🎙 Voice note" : "🎧 Audio message";
-  if (message.message_type === "image") return `🖼 ${message.message_text || "Image"}`;
-  if (message.message_type === "video") return `🎬 ${message.message_text || "Video"}`;
+  const prefix = message.direction === "outbound" ? "You: " : "";
+  if (message.message_type === "audio") return `${prefix}${message.media_voice ? "🎙 Voice note" : "🎧 Audio message"}`;
+  if (message.message_type === "image") return `${prefix}🖼 ${message.message_text || "Image"}`;
+  if (message.message_type === "video") return `${prefix}🎬 ${message.message_text || "Video"}`;
   if (message.message_type === "document") {
-    return `📄 ${message.message_text || message.media_filename || "Document"}`;
+    return `${prefix}📄 ${message.message_text || message.media_filename || "Document"}`;
   }
-  return message.message_text || getMessageFallbackText(message);
+  return `${prefix}${message.message_text || getMessageFallbackText(message)}`;
 }
 
 function buildHref(input: {
@@ -222,11 +261,13 @@ export default async function WhatsAppConversationsPage({
     ? (params.filter as WhatsAppLeadFilter)
     : "ALL";
 
-  const leadRows = await getLeads();
-  const quickReplies = await getQuickReplies();
-  // Console settings drive the polling interval. The cache keeps this off the
-  // critical path, and a missing table falls back to the built-in default.
-  const { settings } = await loadWhatsAppSettings();
+  const [leadRows, quickReplies, inboxStates, settingsLoad] = await Promise.all([
+    getLeads(),
+    getQuickReplies(),
+    getInboxStates(),
+    loadWhatsAppSettings(),
+  ]);
+  const settings = settingsLoad.settings;
   const initialModel = buildWhatsAppDashboardModel({
     leads: leadRows,
     messages: [],
@@ -255,10 +296,9 @@ export default async function WhatsAppConversationsPage({
   const mobilePanel: MobilePanel =
     params.panel === "contact" && lead ? "contact" : params.lead ? "thread" : "list";
 
-  const lastMessageByConversation = new Map<string, WhatsAppLeadMessage>();
-  for (const message of selectedMessages) {
-    lastMessageByConversation.set(message.conversation_id, message);
-  }
+  const inboxStateByConversation = new Map(inboxStates.map((state) => [state.conversationId, state]));
+  const totalUnread = inboxStates.reduce((sum, state) => sum + state.unreadCount, 0);
+  const selectedUnread = lead ? inboxStateByConversation.get(lead.id)?.unreadCount || 0 : 0;
 
   // The dedup key for optimistic replies: every WhatsApp id the rendered thread already
   // holds. A bubble whose id turns up here has become a real row and stops being drawn
@@ -285,6 +325,13 @@ export default async function WhatsAppConversationsPage({
   return (
     <div className="flex h-full min-h-0 flex-col lg:flex-row">
       <WhatsAppInboxAutoRefresh refreshSeconds={settings.console.inboxRefreshSeconds} />
+      {lead ? (
+        <MarkConversationRead
+          conversationId={lead.id}
+          unreadCount={selectedUnread}
+          explicitSelection={Boolean(params.lead)}
+        />
+      ) : null}
 
       {/* Column 1 — conversation list */}
       <section
@@ -294,7 +341,14 @@ export default async function WhatsAppConversationsPage({
       >
         <div className="flex-none border-b border-rule px-4 py-3">
           <div className="flex items-baseline justify-between gap-2">
-            <h2 className="text-sm font-semibold text-ink">Conversations</h2>
+            <div className="flex items-center gap-2">
+              <h2 className="text-sm font-semibold text-ink">Conversations</h2>
+              {totalUnread > 0 ? (
+                <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-ledger-bright px-1.5 py-0.5 text-[0.625rem] font-bold tabular-nums text-white">
+                  {totalUnread > 99 ? "99+" : totalUnread}
+                </span>
+              ) : null}
+            </div>
             <span className="text-xs tabular-nums text-ink-faint">
               {model.filteredLeads.length} of {model.filterCounts.ALL}
             </span>
@@ -332,14 +386,21 @@ export default async function WhatsAppConversationsPage({
         <ul className="min-h-0 flex-1 overflow-y-auto">
           {model.filteredLeads.map((item) => {
             const active = lead?.id === item.id;
-            const preview = getMessagePreview(lastMessageByConversation.get(item.id));
+            const inboxState = inboxStateByConversation.get(item.id);
+            const unreadCount = inboxState?.unreadCount || 0;
+            const unread = unreadCount > 0;
+            const preview = getMessagePreview(inboxState?.latestMessage);
             return (
               <li key={item.id} className="border-b border-rule">
                 <Link
                   href={getLeadHref(filter, item.id)}
                   aria-current={active ? "true" : undefined}
                   className={`flex gap-3 px-4 py-3 transition ${
-                    active ? "bg-ledger-tint" : "hover:bg-paper-sunk/60"
+                    active
+                      ? "bg-ledger-tint"
+                      : unread
+                        ? "bg-ledger/10 hover:bg-ledger/15"
+                        : "hover:bg-paper-sunk/60"
                   }`}
                 >
                   <ContactAvatar
@@ -351,15 +412,25 @@ export default async function WhatsAppConversationsPage({
                   />
                   <span className="min-w-0 flex-1">
                     <span className="flex items-center gap-2">
-                      <span className="truncate text-sm font-semibold text-ink">
+                      <span className={`truncate text-sm text-ink ${unread ? "font-bold" : "font-semibold"}`}>
                         {item.display_name || "Unknown"}
                       </span>
-                      <span className="ml-auto flex-none text-[0.65rem] tabular-nums text-ink-faint">
+                      <span className={`ml-auto flex-none text-[0.65rem] tabular-nums ${unread ? "font-semibold text-ledger" : "text-ink-faint"}`}>
                         {formatRelative(item.last_message_at, now)}
                       </span>
                     </span>
-                    <span className="mt-0.5 block truncate text-xs text-ink-faint">
-                      {active ? preview : item.wa_id}
+                    <span className="mt-0.5 flex min-w-0 items-center gap-2">
+                      <span className={`min-w-0 flex-1 truncate text-xs ${unread ? "font-semibold text-ink" : "text-ink-faint"}`}>
+                        {preview}
+                      </span>
+                      {unread ? (
+                        <span
+                          aria-label={`${unreadCount} unread message${unreadCount === 1 ? "" : "s"}`}
+                          className="inline-flex min-w-5 flex-none items-center justify-center rounded-full bg-ledger-bright px-1.5 py-0.5 text-[0.625rem] font-bold tabular-nums text-white"
+                        >
+                          {unreadCount > 99 ? "99+" : unreadCount}
+                        </span>
+                      ) : null}
                     </span>
                     <span className="mt-1 flex flex-wrap items-center gap-1">
                       {item.lead_temperature !== "COLD" ? (
