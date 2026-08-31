@@ -38,6 +38,8 @@ type MediaSendInput = {
   mimeType: string;
   /** Ignored for audio, which Meta does not caption. */
   caption?: string;
+  /** Marks OGG/Opus audio as a native WhatsApp voice note. */
+  voice?: boolean;
   customerMessageTimestamp: number;
   replyToMessageId?: string;
 };
@@ -126,13 +128,6 @@ export async function sendWhatsAppText(input: SendInput, options: SendOptions = 
   }
 }
 
-/**
- * Uploads a file to Meta and then sends it as a message.
- *
- * Two calls, in this order, because the Cloud API has no single-shot media send: the
- * bytes go to `/media` and come back as an id, and only that id may appear in a
- * `/messages` body. The token never leaves this function.
- */
 export async function sendWhatsAppMedia(input: MediaSendInput, options: SendOptions = {}): Promise<SendResult> {
   const env = options.env || process.env;
   const token = env.WHATSAPP_ACCESS_TOKEN?.trim();
@@ -183,7 +178,7 @@ export async function sendWhatsAppMedia(input: MediaSendInput, options: SendOpti
         [input.kind]: {
           id: mediaId,
           ...(caption ? { caption } : {}),
-          // Meta shows the original filename on a document bubble and nowhere else.
+          ...(input.kind === "audio" && input.voice ? { voice: true } : {}),
           ...(input.kind === "document" ? { filename: input.filename } : {}),
         },
         ...(input.replyToMessageId ? { context: { message_id: input.replyToMessageId } } : {}),
@@ -207,10 +202,6 @@ export async function sendWhatsAppMedia(input: MediaSendInput, options: SendOpti
   }
 }
 
-/**
- * Voice notes. Kept as its own export with its own signature because the inbox has
- * called it that way since audio replies shipped; the transport is `sendWhatsAppMedia`.
- */
 export async function sendWhatsAppAudio(input: AudioSendInput, options: SendOptions = {}): Promise<SendResult> {
   return sendWhatsAppMedia(
     {
@@ -219,6 +210,7 @@ export async function sendWhatsAppAudio(input: AudioSendInput, options: SendOpti
       file: input.audio,
       filename: input.filename,
       mimeType: input.mimeType,
+      voice: true,
       customerMessageTimestamp: input.customerMessageTimestamp,
       replyToMessageId: input.replyToMessageId,
     },

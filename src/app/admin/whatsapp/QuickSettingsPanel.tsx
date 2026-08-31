@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import type { WhatsAppSettings } from "@/lib/whatsapp/settings";
 import type { WhatsAppQuickSettings } from "@/lib/whatsapp/quickSettings";
@@ -17,7 +17,6 @@ function Switch({ checked, disabled, onChange }: { checked: boolean; disabled?: 
 }
 
 export default function QuickSettingsPanel({ settings, quickSettings }: { settings: WhatsAppSettings; quickSettings: WhatsAppQuickSettings }) {
-  const pathname = usePathname();
   const router = useRouter();
   const [businessHours, setBusinessHours] = useState(settings.businessHours.enabled);
   const [typingIndicator, setTypingIndicator] = useState(quickSettings.typingIndicatorEnabled);
@@ -25,9 +24,6 @@ export default function QuickSettingsPanel({ settings, quickSettings }: { settin
   const [serviceWindowWarning, setServiceWindowWarning] = useState(quickSettings.serviceWindowWarningEnabled);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
-
-  const isOverview = pathname === "/admin/whatsapp" || pathname === "/admin/whatsapp/";
-  if (!isOverview) return null;
 
   function saveQuick(update: Partial<WhatsAppQuickSettings>, rollback?: () => void) {
     startTransition(async () => {
@@ -115,7 +111,7 @@ export default function QuickSettingsPanel({ settings, quickSettings }: { settin
   ];
 
   return (
-    <section className="relative z-10 mx-4 mt-5 rounded-xl border border-rule bg-paper-raised p-5 shadow-sm sm:mx-6">
+    <section className="relative z-10 mx-4 mt-5 rounded-xl border border-rule bg-paper-raised p-4 shadow-sm sm:mx-6 sm:p-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h2 className="text-sm font-semibold text-ink">Quick settings</h2>
@@ -125,7 +121,7 @@ export default function QuickSettingsPanel({ settings, quickSettings }: { settin
       </div>
       <div className="mt-4 grid gap-3 md:grid-cols-2">
         {rows.map((row) => (
-          <div key={row.key} className="flex items-center justify-between gap-4 rounded-xl border border-rule bg-paper px-3.5 py-3">
+          <div key={row.key} className="flex items-center justify-between gap-3 rounded-xl border border-rule bg-paper px-3.5 py-3 sm:gap-4">
             <div className="min-w-0">
               <p className="text-sm font-medium text-ink">{row.title}</p>
               <p className="mt-0.5 text-xs leading-4 text-ink-faint">{row.description}</p>

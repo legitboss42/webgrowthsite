@@ -18,8 +18,6 @@ const securityHeaders = [
   { key: "X-Content-Type-Options", value: "nosniff" },
   { key: "X-Frame-Options", value: "DENY" },
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-  // The WhatsApp inbox records voice notes. Keep camera/geolocation closed, but allow
-  // this same-origin application to request microphone permission from the operator.
   { key: "Permissions-Policy", value: "camera=(), microphone=(self), geolocation=()" },
   { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },
   {
@@ -43,8 +41,11 @@ const securityHeaders = [
 const nextConfig = {
   reactStrictMode: true,
   trailingSlash: true,
-  serverExternalPackages: ["edge-tts-universal", "ffprobe-static", "ws", "bufferutil", "utf-8-validate"],
-  outputFileTracingIncludes: { "/api/scheduler/uploads": ["./node_modules/ffprobe-static/bin/linux/x64/ffprobe"] },
+  serverExternalPackages: ["edge-tts-universal", "ffmpeg-static", "ffprobe-static", "ws", "bufferutil", "utf-8-validate"],
+  outputFileTracingIncludes: {
+    "/api/scheduler/uploads": ["./node_modules/ffprobe-static/bin/linux/x64/ffprobe"],
+    "/api/admin/whatsapp/reply/audio": ["./node_modules/ffmpeg-static/ffmpeg"],
+  },
   distDir: ".next",
   images: { qualities: [60, 65, 68, 75] },
   async headers() {
