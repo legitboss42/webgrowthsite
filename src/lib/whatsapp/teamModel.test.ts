@@ -4,7 +4,9 @@ import {
   canWhatsAppRoleManageTeam,
   canWhatsAppRoleSuperviseTeam,
   canWhatsAppRoleViewAllConversations,
+  getWhatsAppPresenceLabel,
   isValidWhatsAppTeamEmail,
+  isWhatsAppTeamMemberAssignable,
   normalizeWhatsAppTeamAvailability,
   normalizeWhatsAppTeamEmail,
   normalizeWhatsAppTeamMember,
@@ -65,4 +67,15 @@ test("team permissions separate ownership, supervision, and agent inbox scope", 
   assert.equal(canWhatsAppRoleViewAllConversations("owner"), true);
   assert.equal(canWhatsAppRoleViewAllConversations("manager"), true);
   assert.equal(canWhatsAppRoleViewAllConversations("agent"), false);
+});
+
+test("presence labels expose human states while assignment only accepts active online members", () => {
+  assert.equal(getWhatsAppPresenceLabel("available"), "Online");
+  assert.equal(getWhatsAppPresenceLabel("busy"), "Away");
+  assert.equal(getWhatsAppPresenceLabel("offline"), "Offline");
+
+  assert.equal(isWhatsAppTeamMemberAssignable({ active: true, availability: "available" }), true);
+  assert.equal(isWhatsAppTeamMemberAssignable({ active: true, availability: "busy" }), false);
+  assert.equal(isWhatsAppTeamMemberAssignable({ active: true, availability: "offline" }), false);
+  assert.equal(isWhatsAppTeamMemberAssignable({ active: false, availability: "available" }), false);
 });

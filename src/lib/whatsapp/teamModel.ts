@@ -57,6 +57,16 @@ export function normalizeWhatsAppTeamMember(row: Record<string, unknown>): Whats
   };
 }
 
+export function getWhatsAppPresenceLabel(availability: WhatsAppTeamAvailability) {
+  if (availability === "available") return "Online";
+  if (availability === "busy") return "Away";
+  return "Offline";
+}
+
+export function isWhatsAppTeamMemberAssignable(member: Pick<WhatsAppTeamMember, "active" | "availability">) {
+  return member.active && member.availability === "available";
+}
+
 export function canWhatsAppRoleManageTeam(role: WhatsAppTeamRole) {
   return role === "owner";
 }

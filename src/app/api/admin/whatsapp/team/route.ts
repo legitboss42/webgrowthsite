@@ -11,7 +11,6 @@ import { buildWhatsAppTeamInvitationEmail } from "@/emails/whatsapp-team-invitat
 import { ADMIN_EMAIL, sendTransactionalEmail } from "@/lib/email";
 import {
   isValidWhatsAppTeamEmail,
-  normalizeWhatsAppTeamAvailability,
   normalizeWhatsAppTeamEmail,
   normalizeWhatsAppTeamMember,
   normalizeWhatsAppTeamRole,
@@ -129,7 +128,7 @@ export async function POST(request: Request) {
       display_name: displayName,
       google_email: googleEmail,
       role,
-      availability: "available",
+      availability: "offline",
       active: true,
       created_by_email: access.email,
       updated_at: new Date().toISOString(),
@@ -233,6 +232,12 @@ export async function PATCH(request: Request) {
   if (!id) {
     return NextResponse.json({ error: "Team member id is required." }, { status: 400 });
   }
+  if ("availability" in body) {
+    return NextResponse.json(
+      { error: "Activity status is self-managed. Each team member changes their own Online, Away, or Offline status." },
+      { status: 403 },
+    );
+  }
 
   const targetRows = await readWhatsAppRows<Record<string, unknown>>(
     `whatsapp_team_members?id=eq.${encodeURIComponent(id)}&select=id,google_email,display_name,role,availability,active,google_user_id,last_seen_at,created_at,updated_at&limit=1`,
@@ -265,14 +270,6 @@ export async function PATCH(request: Request) {
     const role = normalizeWhatsAppTeamRole(body.role);
     if (!role) return NextResponse.json({ error: "Invalid team role." }, { status: 400 });
     patch.role = role;
-  }
-
-  if ("availability" in body) {
-    const availability = normalizeWhatsAppTeamAvailability(body.availability);
-    if (!availability) {
-      return NextResponse.json({ error: "Invalid availability state." }, { status: 400 });
-    }
-    patch.availability = availability;
   }
 
   if ("active" in body) {

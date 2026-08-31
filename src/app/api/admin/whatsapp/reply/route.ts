@@ -4,6 +4,7 @@ import {
   canWhatsAppAccessConversation,
   getWhatsAppWorkspaceAccess,
 } from "@/app/admin/whatsapp/auth";
+import { recordWhatsAppConversationActivity } from "@/app/admin/whatsapp/teamActivity";
 import { isSameOriginMutation } from "@/lib/scheduler/policy";
 import { sendInboxWhatsAppReply } from "@/lib/whatsapp/inboxReply";
 import {
@@ -119,6 +120,14 @@ export async function POST(request: Request) {
     const failure = errors[result.reason];
     return NextResponse.json({ error: failure.error }, { status: failure.status });
   }
+
+  await recordWhatsAppConversationActivity({
+    conversationId: replyContext.conversationId,
+    actorMemberId: access.memberId,
+    actorEmail: access.email,
+    eventType: "conversation_reply_sent",
+    metadata: { kind: "text", messageId: result.messageId },
+  });
 
   return NextResponse.json({ ok: true, messageId: result.messageId });
 }

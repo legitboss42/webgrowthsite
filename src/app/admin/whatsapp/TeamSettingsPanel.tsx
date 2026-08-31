@@ -3,9 +3,8 @@
 import { useCallback, useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import {
-  WHATSAPP_TEAM_AVAILABILITY,
   WHATSAPP_TEAM_ROLES,
-  type WhatsAppTeamAvailability,
+  getWhatsAppPresenceLabel,
   type WhatsAppTeamMember,
   type WhatsAppTeamRole,
 } from "@/lib/whatsapp/teamModel";
@@ -28,6 +27,12 @@ type Notice = {
 
 function label(value: string) {
   return value.charAt(0).toUpperCase() + value.slice(1);
+}
+
+function presenceDot(member: WhatsAppTeamMember) {
+  if (member.availability === "available") return "bg-emerald-500";
+  if (member.availability === "busy") return "bg-amber-400";
+  return "bg-rose-600";
 }
 
 export default function TeamSettingsPanel({
@@ -88,7 +93,7 @@ export default function TeamSettingsPanel({
 
       setNotice(
         payload?.invite?.sent
-          ? { tone: "success", text: `Member added. Invitation sent to ${inviteAddress}.` }
+          ? { tone: "success", text: `Member added. Invitation sent to ${inviteAddress}. They start Offline until they set themselves Online.` }
           : {
               tone: "warning",
               text: `Member added, but the invitation email could not be sent to ${inviteAddress}.`,
@@ -107,7 +112,7 @@ export default function TeamSettingsPanel({
 
   async function updateMember(
     member: WhatsAppTeamMember,
-    patch: Partial<Pick<WhatsAppTeamMember, "role" | "availability" | "active">>,
+    patch: Partial<Pick<WhatsAppTeamMember, "role" | "active">>,
   ) {
     setBusyId(member.id);
     setError(null);
@@ -142,7 +147,7 @@ export default function TeamSettingsPanel({
           </p>
           <h2 className="mt-1 font-display text-xl font-semibold text-ink">Team members</h2>
           <p className="mt-1 text-sm text-ink-soft">
-            {active} active · Google accounts only · {ownerView ? "adding a member sends a branded email invitation automatically." : "Managers can supervise Agent availability and access."}
+            {active} active · Google accounts only · presence is self-managed by each team member.
           </p>
         </div>
         <button
@@ -216,7 +221,7 @@ export default function TeamSettingsPanel({
         {members.map((member) => {
           const busy = busyId === member.id;
           const managerCanEdit = viewerRole === "manager" && member.role === "agent";
-          const canEdit = ownerView || managerCanEdit;
+          const canEditAccess = ownerView || managerCanEdit;
           return (
             <div key={member.id} className="grid gap-3 rounded-xl border border-rule bg-paper px-3 py-3 md:grid-cols-[1.4fr_1.4fr_.8fr_.9fr_auto] md:items-center">
               <div>
@@ -234,19 +239,13 @@ export default function TeamSettingsPanel({
                   <option key={item} value={item}>{label(item)}</option>
                 ))}
               </select>
-              <select
-                value={member.availability}
-                disabled={busy || !member.active || !canEdit}
-                onChange={(event) => void updateMember(member, { availability: event.target.value as WhatsAppTeamAvailability })}
-                className="rounded-lg border border-rule bg-paper-raised px-2.5 py-2 text-xs disabled:opacity-60"
-              >
-                {WHATSAPP_TEAM_AVAILABILITY.map((item) => (
-                  <option key={item} value={item}>{label(item)}</option>
-                ))}
-              </select>
+              <div className="flex items-center gap-2 rounded-lg border border-rule bg-paper-raised px-2.5 py-2 text-xs text-ink-soft">
+                <span aria-hidden="true" className={`h-2.5 w-2.5 rounded-full ${presenceDot(member)}`} />
+                <span>{getWhatsAppPresenceLabel(member.availability)}</span>
+              </div>
               <button
                 type="button"
-                disabled={busy || !canEdit}
+                disabled={busy || !canEditAccess}
                 onClick={() => void updateMember(member, { active: !member.active })}
                 className={`rounded-lg border px-3 py-2 text-xs font-semibold disabled:opacity-50 ${
                   member.active ? "border-rose-200 bg-rose-50 text-rose-700" : "border-ledger/20 bg-ledger-tint text-ledger"

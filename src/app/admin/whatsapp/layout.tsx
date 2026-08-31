@@ -12,6 +12,7 @@ import {
 import { getWhatsAppWorkspaceAccess } from "./auth";
 import InstantInteractionLayer from "./InstantInteractionLayer";
 import IncomingCallOverlay from "./IncomingCallOverlay";
+import WorkspaceCollaborationLayer from "./WorkspaceCollaborationLayer";
 
 export default async function WhatsAppConsoleLayout({ children }: { children: ReactNode }) {
   const cookieStore = await cookies();
@@ -59,6 +60,7 @@ export default async function WhatsAppConsoleLayout({ children }: { children: Re
       >
         <InstantInteractionLayer />
         <IncomingCallOverlay />
+        <WorkspaceCollaborationLayer />
         {children}
       </MessageStatusVisibilityProvider>
     </WhatsAppShell>

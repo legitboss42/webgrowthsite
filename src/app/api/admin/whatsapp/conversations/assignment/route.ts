@@ -10,6 +10,7 @@ import {
 import { isSameOriginMutation } from "@/lib/scheduler/policy";
 import {
   canWhatsAppRoleSuperviseTeam,
+  isWhatsAppTeamMemberAssignable,
   normalizeWhatsAppTeamMember,
 } from "@/lib/whatsapp/teamModel";
 
@@ -70,6 +71,9 @@ export async function POST(request: Request) {
     }
   }
 
+  const nextMemberId = targetMember?.id || null;
+  const assignmentIsUnchanged = currentMemberId === nextMemberId;
+
   if (!canWhatsAppRoleSuperviseTeam(access.role)) {
     if (!access.memberId) {
       return NextResponse.json({ error: "Your team profile is not ready for assignment." }, { status: 409 });
@@ -82,8 +86,14 @@ export async function POST(request: Request) {
     }
   }
 
-  const nextMemberId = targetMember?.id || null;
-  if (currentMemberId === nextMemberId) {
+  if (targetMember && !assignmentIsUnchanged && !isWhatsAppTeamMemberAssignable(targetMember)) {
+    return NextResponse.json(
+      { error: `${targetMember.displayName} is not Online and cannot receive a new conversation assignment.` },
+      { status: 409 },
+    );
+  }
+
+  if (assignmentIsUnchanged) {
     return NextResponse.json({
       ok: true,
       assignment: targetMember
