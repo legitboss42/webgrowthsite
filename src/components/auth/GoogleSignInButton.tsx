@@ -15,7 +15,18 @@ function createBrowserSupabaseClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!url || !anonKey) throw new Error("Google sign-in is not configured yet.");
-  return createClient(url, anonKey);
+  // The callback route completes the OAuth exchange from a PKCE ?code= value.
+  // Supabase browser clients default to the implicit flow, which does not return
+  // that code. Pin this client to PKCE so the browser and callback agree on the
+  // same contract and the redirect can complete deterministically.
+  return createClient(url, anonKey, {
+    auth: {
+      flowType: "pkce",
+      detectSessionInUrl: false,
+      persistSession: true,
+      autoRefreshToken: false,
+    },
+  });
 }
 
 export default function GoogleSignInButton({

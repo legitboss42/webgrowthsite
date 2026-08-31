@@ -89,13 +89,30 @@ export default function GoogleAuthCallback() {
   }, [router, searchParams]);
 
   return (
-    <main className="min-h-screen bg-[#050806] px-6 py-20 text-white">
-      <div className="mx-auto max-w-2xl rounded-[28px] border border-white/10 bg-black/35 p-8 shadow-[0_24px_70px_rgba(0,0,0,0.25)]">
-        <p className="text-xs uppercase tracking-[0.2em] text-emerald-300/80">Google sign-in</p>
-        <h1 className="mt-3 text-3xl font-semibold tracking-[-0.03em] text-white">
-          Completing your sign-in
-        </h1>
-        <p className="mt-4 text-base leading-7 text-white/72">{message}</p>
+    <main className="min-h-screen bg-[#070a08] px-6 py-20 text-white">
+      <div className="relative mx-auto max-w-3xl overflow-hidden rounded-[36px] border border-[#d9c9ae]/16 bg-[#0d110d] shadow-[0_30px_90px_rgba(0,0,0,0.35)]">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(214,182,120,0.16),transparent_40%),radial-gradient(circle_at_85%_18%,rgba(93,151,121,0.18),transparent_28%)]"
+        />
+        <div className="relative grid gap-6 p-8 md:grid-cols-[minmax(0,1.1fr)_16rem] md:p-10">
+          <div>
+            <p className="text-[11px] uppercase tracking-[0.28em] text-[#d7c9b2]/72">Google sign-in</p>
+            <h1 className="mt-5 font-display text-4xl font-medium tracking-[-0.04em] text-[#f8f1e7] md:text-5xl">
+              Completing your admin session
+            </h1>
+            <p className="mt-5 max-w-2xl text-base leading-7 text-[#e9dfcf]/74">{message}</p>
+          </div>
+
+          <aside className="rounded-[28px] border border-white/10 bg-black/18 p-5">
+            <p className="text-[11px] uppercase tracking-[0.24em] text-[#d7c9b2]/60">What happens next</p>
+            <ul className="mt-4 space-y-3 text-sm leading-6 text-white/68">
+              <li>Google confirms the account identity</li>
+              <li>The app seals its own session cookie</li>
+              <li>You are redirected only if the email is approved</li>
+            </ul>
+          </aside>
+        </div>
       </div>
     </main>
   );
