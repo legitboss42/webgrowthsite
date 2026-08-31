@@ -121,6 +121,33 @@ test("normalizes inbound image, video and document metadata", () => {
   assert.equal(parsed.messages[2]?.text, "Proposal attached");
 });
 
+test("keeps Meta media scrutiny detail on a failed status", () => {
+  const payload = {
+    object: "whatsapp_business_account",
+    entry: [{ changes: [{ value: {
+      statuses: [{
+        id: "wamid.voice-outbound",
+        status: "failed",
+        timestamp: "1800000003",
+        recipient_id: "2348000000000",
+        errors: [{
+          code: 131053,
+          title: "Media upload error",
+          error_data: {
+            details: "Unsupported Audio mime type audio/opus. Please use audio/ogg; codecs=opus.",
+          },
+        }],
+      }],
+    } }] }],
+  };
+
+  const parsed = parseWhatsAppWebhook(payload);
+  assert.equal(parsed.statuses[0]?.status, "failed");
+  assert.ok(parsed.statuses[0]?.error?.includes("131053"));
+  assert.ok(parsed.statuses[0]?.error?.includes("Unsupported Audio mime type audio/opus"));
+  assert.ok(parsed.statuses[0]?.error?.includes("audio/ogg; codecs=opus"));
+});
+
 test("accepts a correct Meta signature", () => {
   const raw = '{"object":"whatsapp_business_account"}';
   const signature = `sha256=${createHmac("sha256", "secret").update(raw).digest("hex")}`;
