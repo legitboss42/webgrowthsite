@@ -152,6 +152,7 @@ for (const article of indexedArticles) {
 const governedPageRoutes = new Set(routes.map((route) => route.path));
 const privateAdminRoutes = new Set([
   "/admin/whatsapp/calls/",
+  "/admin/whatsapp/team/",
 ]);
 for (const file of walk(appDirectory, "page.tsx")) {
   const route = pageFileToRoute(file);
