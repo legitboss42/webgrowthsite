@@ -33,12 +33,43 @@ export default function InstantInteractionLayer() {
     setNavigating(false);
   }, [routeKey]);
 
-  function closeDesktopDetails() {
+  function replaceConversationQuery(mutator: (query: URLSearchParams) => void) {
     const query = new URLSearchParams(searchParams.toString());
-    query.delete("panel");
+    mutator(query);
     const suffix = query.toString();
     router.replace(suffix ? `${pathname}?${suffix}` : pathname || "/admin/whatsapp/conversations/", { scroll: false });
   }
+
+  function closeDesktopDetails() {
+    replaceConversationQuery((query) => query.delete("panel"));
+  }
+
+  useEffect(() => {
+    if (!conversationsRoute || !hasSelectedConversation) return;
+
+    function handleEscape(event: KeyboardEvent) {
+      if (event.key !== "Escape" || event.defaultPrevented) return;
+      if (!window.matchMedia("(min-width: 1024px)").matches) return;
+
+      const target = event.target as HTMLElement | null;
+      const editable = target?.matches("input, textarea, select, [contenteditable='true']") || target?.isContentEditable;
+      if (editable) return;
+
+      event.preventDefault();
+      if (detailsOpen) {
+        closeDesktopDetails();
+        return;
+      }
+
+      replaceConversationQuery((query) => {
+        query.delete("lead");
+        query.delete("panel");
+      });
+    }
+
+    document.addEventListener("keydown", handleEscape);
+    return () => document.removeEventListener("keydown", handleEscape);
+  }, [conversationsRoute, detailsOpen, hasSelectedConversation, pathname, router, searchParams]);
 
   function handleClickCapture(event: ReactMouseEvent<HTMLDivElement>) {
     if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
@@ -49,8 +80,6 @@ export default function InstantInteractionLayer() {
     const destination = new URL(anchor.href, window.location.href);
     if (destination.origin !== window.location.origin || !destination.pathname.startsWith("/admin/whatsapp")) return;
 
-    // On desktop the existing Details link becomes a toggle. The mobile flow keeps its
-    // normal list → thread → contact navigation and its own back button.
     if (
       conversationsRoute &&
       detailsOpen &&
@@ -104,13 +133,10 @@ export default function InstantInteractionLayer() {
         }
 
         @media (min-width: 1024px) {
-          /* The thread gets the whole remaining workspace until Details is requested. */
           html.whatsapp-conversations-ui:not(.whatsapp-details-open) aside[class*="lg:w-72"] {
             display: none !important;
           }
 
-          /* The page already owns the real Details link. Make it available on desktop too
-             instead of maintaining a second fake control in a client overlay. */
           html.whatsapp-conversations-ui a[href*="panel=contact"] {
             display: inline-flex !important;
           }
