@@ -55,16 +55,21 @@ export default function MessageStatus({
 
   return (
     <span
-      className={`inline-flex items-center gap-1 ${tone}`}
+      className={`inline-flex max-w-[min(22rem,72vw)] flex-wrap items-center justify-end gap-x-1 gap-y-0.5 ${tone}`}
       title={`${presentation.description}${error ? `. ${error}` : ""}`}
     >
       <WhatsAppIcon name={presentation.icon} className="h-3.5 w-3.5" />
       {failed || presentation.key === "pending" ? (
         <span className="font-medium">{presentation.label}</span>
       ) : null}
+      {failed && error ? (
+        <span className="basis-full whitespace-normal text-right text-[0.6rem] font-normal leading-4 opacity-90">
+          {error}
+        </span>
+      ) : null}
       <span className="sr-only">
         {presentation.description}
-        {error ? `. ${error}` : ""}
+        {!failed && error ? `. ${error}` : ""}
       </span>
     </span>
   );
