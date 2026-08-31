@@ -24,7 +24,7 @@ const DAYS = [
   { label: "Sunday", meta: "SUNDAY", number: 0 },
 ] as const;
 
-const COMMON_TIMEZONES = [
+const FALLBACK_TIMEZONES = [
   "Africa/Lagos",
   "Africa/Johannesburg",
   "Africa/Accra",
@@ -73,6 +73,30 @@ function metaTime(value: string) {
   return value.replace(":", "");
 }
 
+function timezoneLabel(timezone: string) {
+  try {
+    const formatter = new Intl.DateTimeFormat("en", {
+      timeZone: timezone,
+      timeZoneName: "longOffset",
+      hour: "2-digit",
+    });
+    const offset = formatter.formatToParts(new Date()).find((part) => part.type === "timeZoneName")?.value;
+    return offset ? `(${offset}) ${timezone}` : timezone;
+  } catch {
+    return timezone;
+  }
+}
+
+function getSupportedTimezones() {
+  const intl = Intl as typeof Intl & { supportedValuesOf?: (key: string) => string[] };
+  try {
+    const supported = intl.supportedValuesOf?.("timeZone") || [];
+    return supported.length ? supported : FALLBACK_TIMEZONES;
+  } catch {
+    return FALLBACK_TIMEZONES;
+  }
+}
+
 function buildScheduleDraft(calling: WhatsAppCallingSettings | null, businessHours: WhatsAppBusinessHours): ScheduleDraft {
   const liveRows = calling?.call_hours?.weekly_operating_hours || [];
   const fallbackStart = inputTime(businessHours.start, "08:00");
@@ -104,6 +128,13 @@ export default function CallingSettingsPanel({ businessHours }: { businessHours:
   const [scheduleDraft, setScheduleDraft] = useState<ScheduleDraft>(() => buildScheduleDraft(null, businessHours));
   const [scheduleError, setScheduleError] = useState<string | null>(null);
   const [scheduleSaving, setScheduleSaving] = useState(false);
+
+  const timezoneOptions = useMemo(() => {
+    const current = scheduleDraft.timezone.trim();
+    const business = businessHours.timezone?.trim();
+    const all = [current, business, ...getSupportedTimezones(), ...FALLBACK_TIMEZONES].filter((value): value is string => Boolean(value));
+    return Array.from(new Set(all)).sort((a, b) => a.localeCompare(b));
+  }, [businessHours.timezone, scheduleDraft.timezone]);
 
   async function loadCallingSettings() {
     setLoading(true);
@@ -311,17 +342,17 @@ export default function CallingSettingsPanel({ businessHours }: { businessHours:
             <div className="space-y-4 px-4 py-4 sm:px-5">
               <div>
                 <label htmlFor="calling-timezone" className="text-xs font-semibold text-ink">Time zone</label>
-                <input
+                <select
                   id="calling-timezone"
-                  list="calling-timezones"
                   value={scheduleDraft.timezone}
                   onChange={(event) => setScheduleDraft((current) => ({ ...current, timezone: event.target.value }))}
                   className="mt-1.5 w-full rounded-lg border border-rule bg-paper px-3 py-2.5 text-sm text-ink outline-none focus:border-ledger/60 focus:ring-2 focus:ring-ledger/10"
-                  placeholder="Africa/Lagos"
-                />
-                <datalist id="calling-timezones">
-                  {COMMON_TIMEZONES.map((timezone) => <option key={timezone} value={timezone} />)}
-                </datalist>
+                >
+                  {timezoneOptions.map((timezone) => (
+                    <option key={timezone} value={timezone}>{timezoneLabel(timezone)}</option>
+                  ))}
+                </select>
+                <p className="mt-1.5 text-[0.68rem] leading-4 text-ink-faint">This timezone is saved with your Meta Calling schedule and controls how the regular hours are interpreted.</p>
               </div>
 
               <div className="space-y-2">
