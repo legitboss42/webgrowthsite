@@ -131,9 +131,33 @@ test("known failure codes become plain English", () => {
   assert.ok(reason?.includes("131047"));
 });
 
+test("media upload failures keep the useful Meta scrutiny detail", () => {
+  const reason = sanitizeWhatsAppStatusError({
+    code: 131053,
+    title: "Media upload error",
+    details: "Unsupported Audio mime type audio/opus. Please use audio/ogg; codecs=opus.",
+  });
+
+  assert.ok(reason?.includes("131053"));
+  assert.ok(reason?.includes("Unsupported Audio mime type audio/opus"));
+  assert.ok(reason?.includes("audio/ogg; codecs=opus"));
+});
+
+test("media failure detail is redacted before it can reach an operator", () => {
+  const reason = sanitizeWhatsAppStatusError({
+    code: 131053,
+    details: "Decode failed access_token=EAAG-secret fbtrace_id=trace-123 authorization=Bearer hidden-token",
+  });
+
+  assert.ok(reason?.includes("Decode failed"));
+  assert.equal(reason?.includes("EAAG-secret"), false);
+  assert.equal(reason?.includes("trace-123"), false);
+  assert.equal(reason?.includes("hidden-token"), false);
+});
+
 test("an unknown code records the code alone rather than the provider payload", () => {
   assert.equal(
-    sanitizeWhatsAppStatusError({ code: 999999, title: "internal trace 0xdeadbeef" }),
+    sanitizeWhatsAppStatusError({ code: 999999, title: "internal trace 0xdeadbeef", details: "secret provider detail" }),
     "WhatsApp rejected the message (code 999999).",
   );
 });
