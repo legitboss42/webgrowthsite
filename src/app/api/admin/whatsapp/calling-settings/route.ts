@@ -7,6 +7,7 @@ import {
   updateWhatsAppCallingSettings,
   type WhatsAppCallingSettings,
 } from "@/lib/whatsapp/callingSettings";
+import { loadWhatsAppSettings } from "@/lib/whatsapp/settingsStore";
 
 export const runtime = "nodejs";
 
@@ -21,13 +22,96 @@ function failureResponse(result: { reason: string; detail?: string }) {
   return NextResponse.json({ error, detail: result.detail }, { status });
 }
 
+function isBrokenCallHoursSchema(result: { reason: string; detail?: string }) {
+  const detail = (result.detail || "").toLowerCase();
+  return result.reason === "API_ERROR" && detail.includes("calling.call_hours") && detail.includes("meta code 100");
+}
+
+function metaTime(value: string | undefined, fallback: string) {
+  const compact = (value || "").replace(":", "").trim();
+  return /^\d{4}$/.test(compact) ? compact : fallback;
+}
+
+async function repairMalformedCallHours(): Promise<{ ok: true } | { ok: false; detail: string }> {
+  const token = process.env.WHATSAPP_ACCESS_TOKEN?.trim();
+  const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID?.trim();
+  const apiVersion = process.env.WHATSAPP_API_VERSION?.trim() || process.env.WHATSAPP_GRAPH_API_VERSION?.trim() || "v26.0";
+  if (!token || !phoneNumberId) {
+    return { ok: false, detail: "WhatsApp Calling credentials are not configured." };
+  }
+
+  const { settings } = await loadWhatsAppSettings({ maxAgeMs: 0 });
+  const hours = settings.businessHours;
+  const days = hours.days.length ? hours.days : [1, 2, 3, 4, 5];
+  const dayNames = ["SUNDAY", "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"];
+
+  const callHours = {
+    status: hours.enabled ? "ENABLED" : "DISABLED",
+    timezone_id: hours.timezone || "Africa/Lagos",
+    weekly_operating_hours: days.map((day) => ({
+      day_of_week: dayNames[day] || "MONDAY",
+      open_time: metaTime(hours.start, "0800"),
+      close_time: metaTime(hours.end, "1700"),
+    })),
+    // Meta's call_hours schema can reject a partially stored object. Supplying the
+    // complete collection explicitly repairs the object and also clears stale holidays.
+    holiday_schedule: [],
+  };
+
+  try {
+    const response = await fetch(
+      `https://graph.facebook.com/${apiVersion}/${phoneNumberId}/settings`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          messaging_product: "whatsapp",
+          calling: { call_hours: callHours },
+        }),
+        cache: "no-store",
+      },
+    );
+
+    if (response.ok) return { ok: true };
+    const text = await response.text().catch(() => "");
+    return {
+      ok: false,
+      detail: text.slice(0, 300) || `Meta returned HTTP ${response.status} while repairing call hours.`,
+    };
+  } catch (error) {
+    return {
+      ok: false,
+      detail: error instanceof Error ? error.message : "Call-hours repair request failed.",
+    };
+  }
+}
+
 export async function GET() {
   const cookieStore = await cookies();
   if (!hasWhatsAppAdminAccess(cookieStore)) {
     return NextResponse.json({ error: "Authentication required." }, { status: 401 });
   }
 
-  const result = await fetchWhatsAppCallingSettings();
+  let result = await fetchWhatsAppCallingSettings();
+
+  // Earlier builds could write an incomplete call_hours object. Meta then rejects
+  // subsequent reads with code 100 before the console can display the live settings.
+  // Repair only that exact known-bad state, then retry the authoritative Meta read.
+  if (!result.ok && isBrokenCallHoursSchema(result)) {
+    const repaired = await repairMalformedCallHours();
+    if (repaired.ok) {
+      result = await fetchWhatsAppCallingSettings();
+    } else {
+      return failureResponse({
+        ...result,
+        detail: `${result.detail || "Meta rejected the stored call-hours configuration."} Repair attempt: ${repaired.detail}`.slice(0, 600),
+      });
+    }
+  }
+
   if (!result.ok) return failureResponse(result);
   return NextResponse.json({ ok: true, calling: result.settings });
 }
