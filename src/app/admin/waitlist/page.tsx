@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import GoogleAdminPrompt from "@/components/auth/GoogleAdminPrompt";
-import { getDefaultAdminGoogleEmail } from "@/lib/googleAuth";
+import { getDefaultAdminGoogleEmail, isGoogleAuthConfigured } from "@/lib/googleAuth";
 import { NO_VALUE, getBusinessSizeLabel, getInterestLabel } from "@/lib/waitlist/schema";
 import { isWaitlistStorageConfigured, listWaitlistSignups } from "@/lib/waitlist/store";
 import { hasWaitlistAdminAccess } from "./auth";
@@ -75,7 +75,11 @@ export default async function AutomationWaitlistAdminPage({
     return (
       <main className="min-h-screen bg-[#050806] px-6 py-16 text-white">
         <div className="mx-auto max-w-4xl">
-          <GoogleAdminPrompt nextPath="/admin/waitlist/" adminEmail={getDefaultAdminGoogleEmail()} />
+          <GoogleAdminPrompt
+            nextPath="/admin/waitlist/"
+            adminEmail={getDefaultAdminGoogleEmail()}
+            googleReady={isGoogleAuthConfigured()}
+          />
         </div>
       </main>
     );

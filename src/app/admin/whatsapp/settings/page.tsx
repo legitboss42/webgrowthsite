@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 import Link from "next/link";
 import GoogleAdminPrompt from "@/components/auth/GoogleAdminPrompt";
 import { WhatsAppIcon } from "@/components/whatsapp/icons";
-import { getDefaultAdminGoogleEmail } from "@/lib/googleAuth";
+import { getDefaultAdminGoogleEmail, isGoogleAuthConfigured } from "@/lib/googleAuth";
 import { WHATSAPP_NAV_SECTIONS } from "@/components/whatsapp/nav";
 import { SITE_URL } from "@/lib/site";
 import {
@@ -154,6 +154,7 @@ export default async function WhatsAppSettingsPage() {
           <GoogleAdminPrompt
             nextPath="/admin/whatsapp/settings/"
             adminEmail={getDefaultAdminGoogleEmail()}
+            googleReady={isGoogleAuthConfigured()}
           />
         </div>
       </div>

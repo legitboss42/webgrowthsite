@@ -1,6 +1,10 @@
 import GoogleSignInButton from "./GoogleSignInButton";
 
-export default function GoogleWaitlistGate() {
+type GoogleWaitlistGateProps = {
+  googleReady?: boolean;
+};
+
+export default function GoogleWaitlistGate({ googleReady = true }: GoogleWaitlistGateProps) {
   return (
     <div
       className="automation-form-shell relative overflow-hidden border border-[rgba(209,188,154,0.18)] bg-[linear-gradient(180deg,rgba(20,23,18,0.96),rgba(10,12,10,0.98))]"
@@ -28,12 +32,18 @@ export default function GoogleWaitlistGate() {
         </div>
 
         <div className="mt-8">
-          <GoogleSignInButton
-            nextPath="/automation/#waitlist"
-            label="Continue with Google"
-            pendingLabel="Opening Google..."
-            className="inline-flex min-h-14 items-center justify-center rounded-full border border-[#d6b678]/30 bg-[#e7d1a5] px-7 py-3 text-sm font-semibold text-[#17140e] shadow-[0_14px_36px_rgba(231,209,165,0.22)] transition-transform duration-200 hover:-translate-y-0.5 hover:bg-[#f1dfbd] disabled:cursor-not-allowed disabled:opacity-60"
-          />
+          {googleReady ? (
+            <GoogleSignInButton
+              nextPath="/automation/#waitlist"
+              label="Continue with Google"
+              pendingLabel="Opening Google..."
+              className="inline-flex min-h-14 items-center justify-center rounded-full border border-[#d6b678]/30 bg-[#e7d1a5] px-7 py-3 text-sm font-semibold text-[#17140e] shadow-[0_14px_36px_rgba(231,209,165,0.22)] transition-transform duration-200 hover:-translate-y-0.5 hover:bg-[#f1dfbd] disabled:cursor-not-allowed disabled:opacity-60"
+            />
+          ) : (
+            <div className="rounded-[24px] border border-amber-300/20 bg-amber-300/10 p-5 text-sm leading-6 text-amber-50/86">
+              Google waitlist sign-in is not configured in this environment yet.
+            </div>
+          )}
         </div>
 
         <p className="automation-form-footnote mt-6 !text-[#d2c3ad]/68">

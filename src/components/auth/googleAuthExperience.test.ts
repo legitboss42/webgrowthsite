@@ -9,8 +9,8 @@ const waitlistGatePath = new URL("./GoogleWaitlistGate.tsx", import.meta.url);
 test("Google sign-in button pins the browser client to PKCE code flow", () => {
   const source = readFileSync(signInButtonPath, "utf8");
 
-  assert.match(source, /flowType:\s*"pkce"/);
-  assert.match(source, /detectSessionInUrl:\s*false/);
+  assert.match(source, /\/api\/auth\/google\/start\//);
+  assert.doesNotMatch(source, /signInWithOAuth/);
 });
 
 test("admin gate copy presents Google as the primary path instead of a passphrase fallback", () => {

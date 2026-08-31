@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { cookies } from "next/headers";
 import GoogleAdminPrompt from "@/components/auth/GoogleAdminPrompt";
-import { getDefaultAdminGoogleEmail } from "@/lib/googleAuth";
+import { getDefaultAdminGoogleEmail, isGoogleAuthConfigured } from "@/lib/googleAuth";
 import ContactAvatar from "@/components/whatsapp/ContactAvatar";
 import { WhatsAppIcon, type WhatsAppIconName } from "@/components/whatsapp/icons";
 import { hasWhatsAppAdminAccess } from "./auth";
@@ -123,7 +123,11 @@ export default async function WhatsAppOverviewPage() {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#050806] px-4 py-16 text-white">
         <div className="w-full max-w-4xl">
-          <GoogleAdminPrompt nextPath="/admin/whatsapp/" adminEmail={getDefaultAdminGoogleEmail()} />
+          <GoogleAdminPrompt
+            nextPath="/admin/whatsapp/"
+            adminEmail={getDefaultAdminGoogleEmail()}
+            googleReady={isGoogleAuthConfigured()}
+          />
         </div>
       </div>
     );
