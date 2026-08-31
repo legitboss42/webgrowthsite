@@ -12,10 +12,6 @@ import {
   type WhatsAppSettings,
 } from "@/lib/whatsapp/settings";
 
-/**
- * Keyword lists are held as raw text while the operator types, so a half-finished
- * line is never reformatted underneath the cursor. They are normalised on save.
- */
 type Draft = {
   hot: string;
   warm: string;
@@ -77,25 +73,68 @@ function toPayload(draft: Draft) {
 }
 
 const FIELD_CLASS =
-  "mt-1 w-full rounded-lg border border-rule bg-paper px-3 py-2 text-sm text-ink outline-none transition placeholder:text-ink-faint/70 focus:border-ledger-bright focus:ring-2 focus:ring-ledger-bright/20 disabled:opacity-60";
-const LABEL_CLASS =
-  "block text-[0.65rem] font-semibold uppercase tracking-[.14em] text-ink-faint";
+  "mt-1.5 w-full rounded-xl border border-rule bg-paper px-3.5 py-2.5 text-sm text-ink outline-none transition placeholder:text-ink-faint/70 focus:border-ledger-bright focus:ring-2 focus:ring-ledger-bright/15 disabled:cursor-not-allowed disabled:opacity-60";
+const LABEL_CLASS = "block text-xs font-semibold text-ink-soft";
 
-function Group({
+function SectionCard({
+  number,
   title,
   description,
   children,
 }: {
+  number: string;
   title: string;
   description: string;
   children: React.ReactNode;
 }) {
   return (
-    <fieldset className="rounded-xl border border-rule bg-paper-raised p-5">
-      <legend className="px-1 text-sm font-semibold text-ink">{title}</legend>
-      <p className="mt-0.5 text-xs leading-5 text-ink-faint">{description}</p>
-      <div className="mt-4">{children}</div>
+    <fieldset className="min-w-0 rounded-2xl border border-rule bg-paper-raised p-4 shadow-[0_12px_32px_-28px_rgba(14,26,20,.45)] sm:p-5">
+      <legend className="sr-only">{title}</legend>
+      <div className="flex items-start gap-3">
+        <span className="grid h-7 w-7 flex-none place-items-center rounded-lg bg-ledger-tint text-xs font-bold text-ledger">
+          {number}
+        </span>
+        <div className="min-w-0">
+          <h3 className="text-sm font-semibold text-ink">{title}</h3>
+          <p className="mt-0.5 text-xs leading-5 text-ink-faint">{description}</p>
+        </div>
+      </div>
+      <div className="mt-5">{children}</div>
     </fieldset>
+  );
+}
+
+function Toggle({
+  checked,
+  onChange,
+  disabled,
+  label,
+  description,
+}: {
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+  disabled?: boolean;
+  label: string;
+  description: string;
+}) {
+  return (
+    <label className="flex cursor-pointer items-center justify-between gap-4 rounded-xl border border-rule bg-paper px-3.5 py-3 transition hover:border-rule-strong">
+      <span className="min-w-0">
+        <span className="block text-sm font-medium text-ink">{label}</span>
+        <span className="mt-0.5 block text-xs leading-4 text-ink-faint">{description}</span>
+      </span>
+      <span className="relative flex-none">
+        <input
+          type="checkbox"
+          checked={checked}
+          onChange={(event) => onChange(event.target.checked)}
+          disabled={disabled}
+          className="peer sr-only"
+        />
+        <span className="block h-6 w-11 rounded-full bg-paper-sunk ring-1 ring-rule transition peer-checked:bg-ledger-bright peer-focus-visible:ring-2 peer-focus-visible:ring-ledger-bright/30 peer-disabled:opacity-50" />
+        <span className="absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition peer-checked:translate-x-5" />
+      </span>
+    </label>
   );
 }
 
@@ -118,42 +157,26 @@ function KeywordField({
   const overflow = parsed.length >= WHATSAPP_SETTINGS_LIMITS.keywordsPerList;
   return (
     <div className="min-w-0">
-      <label htmlFor={id} className={LABEL_CLASS}>
-        {label}
-      </label>
+      <label htmlFor={id} className={LABEL_CLASS}>{label}</label>
       <textarea
         id={id}
         value={value}
         onChange={(event) => onChange(event.target.value)}
         disabled={disabled}
-        rows={5}
+        rows={4}
         aria-describedby={`${id}-hint`}
-        placeholder="One per line"
-        className={FIELD_CLASS}
+        placeholder="One keyword or phrase per line"
+        className={`${FIELD_CLASS} resize-y`}
       />
-      <p id={`${id}-hint`} className="mt-1 text-[0.65rem] leading-4 text-ink-faint">
-        {hint}{" "}
-        <span className="tabular-nums text-ink-soft">
-          {parsed.length} keyword{parsed.length === 1 ? "" : "s"}
-        </span>
-        {overflow ? (
-          <span className="text-rose-700">
-            {" "}
-            — only the first {WHATSAPP_SETTINGS_LIMITS.keywordsPerList} are kept
-          </span>
-        ) : null}
+      <p id={`${id}-hint`} className="mt-1.5 text-[0.68rem] leading-4 text-ink-faint">
+        {hint} <span className="tabular-nums text-ink-soft">{parsed.length} saved</span>
+        {overflow ? <span className="text-rose-700"> · only the first {WHATSAPP_SETTINGS_LIMITS.keywordsPerList} are kept</span> : null}
       </p>
     </div>
   );
 }
 
-export default function SettingsEditor({
-  settings,
-  storageReady,
-}: {
-  settings: WhatsAppSettings;
-  storageReady: boolean;
-}) {
+export default function SettingsEditor({ settings, storageReady }: { settings: WhatsAppSettings; storageReady: boolean }) {
   const router = useRouter();
   const [draft, setDraft] = useState<Draft>(() => toDraft(settings));
   const [feedback, setFeedback] = useState<{ tone: "ok" | "error"; text: string } | null>(null);
@@ -174,38 +197,29 @@ export default function SettingsEditor({
     setFeedback(null);
   };
 
-  // The same validator the API route uses, so an invalid submission is caught before
-  // a request is made and the message is identical either way.
   const validation = useMemo(() => validateWhatsAppSettingsInput(toPayload(draft)), [draft]);
-  const dirty = validation.ok
-    ? JSON.stringify(validation.value) !== JSON.stringify(settings)
-    : true;
+  const dirty = validation.ok ? JSON.stringify(validation.value) !== JSON.stringify(settings) : true;
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setFeedback(null);
-
     if (!validation.ok) {
       setFeedback({ tone: "error", text: validation.error });
       return;
     }
 
     startTransition(async () => {
-      // Trailing slash matches next.config's trailingSlash: true, avoiding a 308 hop.
       const response = await fetch("/api/admin/whatsapp/settings/", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(toPayload(draft)),
       });
-      const payload = (await response.json().catch(() => ({}))) as {
-        ok?: boolean;
-        error?: string;
-      };
+      const payload = (await response.json().catch(() => ({}))) as { ok?: boolean; error?: string };
       if (!payload.ok) {
         setFeedback({ tone: "error", text: payload.error || "The settings could not be saved." });
         return;
       }
-      setFeedback({ tone: "ok", text: "Settings saved. They apply to new activity immediately." });
+      setFeedback({ tone: "ok", text: "Settings saved. Changes apply immediately." });
       router.refresh();
     });
   }
@@ -213,263 +227,111 @@ export default function SettingsEditor({
   return (
     <form onSubmit={handleSubmit} className="grid gap-4">
       {!storageReady ? (
-        <p className="rounded-xl border border-brass/30 bg-brass-tint px-4 py-3 text-xs leading-5 text-ink-soft">
-          <span className="font-semibold text-ink">Settings storage is not created yet.</span> The
-          console is running on the built-in defaults shown below. Run the{" "}
-          <span className="font-mono">whatsapp_settings</span> migration in Supabase, then save.
-          Until then a save will be refused rather than silently lost.
-        </p>
+        <div className="rounded-2xl border border-brass/30 bg-brass-tint px-4 py-3 text-xs leading-5 text-ink-soft">
+          <span className="font-semibold text-ink">Settings storage is unavailable.</span> The console is using built-in defaults and saving is disabled until the WhatsApp settings table is available.
+        </div>
       ) : null}
 
-      <Group
-        title="Lead scoring keywords"
-        description="Your own words, layered on top of the built-in rules. The built-in rules still decide what a message is about; these only change how warm it is. Precedence is spam first, then hot, then warm — so a message mentioning both a price and a spam word stays silenced."
+      <SectionCard
+        number="3"
+        title="Messaging & response settings"
+        description="Control business hours, response targets and how quickly the inbox refreshes."
       >
-        <div className="grid gap-4 sm:grid-cols-3">
-          <KeywordField
-            id="keywords-hot"
-            label="Hot"
-            hint="Always treated as a hot lead and flagged for review."
-            value={draft.hot}
-            onChange={(value) => update("hot", value)}
-            disabled={isPending}
-          />
-          <KeywordField
-            id="keywords-warm"
-            label="Warm"
-            hint="Lifts a cold message to warm. Never cools a hot one."
-            value={draft.warm}
-            onChange={(value) => update("warm", value)}
-            disabled={isPending}
-          />
-          <KeywordField
-            id="keywords-spam"
-            label="Spam"
-            hint="Forced cold and never auto-replied to. The message is still stored."
-            value={draft.spam}
-            onChange={(value) => update("spam", value)}
-            disabled={isPending}
-          />
-        </div>
-        <p className="mt-3 text-[0.65rem] leading-4 text-ink-faint">
-          Matching is on whole words, so <span className="font-mono">art</span> will not fire
-          inside <span className="font-mono">start</span>. Phrases are allowed —{" "}
-          <span className="font-mono">how much</span> works. Case does not matter.
-        </p>
-      </Group>
-
-      <Group
-        title="Business hours and response target"
-        description="Used to label activity in the console. Nothing here stops a message being received or a reply being sent — WhatsApp's own 24-hour service window is what governs replies."
-      >
-        <label className="flex items-center gap-2.5 text-sm text-ink">
-          <input
-            type="checkbox"
+        <div className="grid gap-3 lg:grid-cols-2">
+          <Toggle
             checked={draft.hoursEnabled}
-            onChange={(event) => update("hoursEnabled", event.target.checked)}
+            onChange={(checked) => update("hoursEnabled", checked)}
             disabled={isPending}
-            className="h-4 w-4 rounded border-rule-strong text-ledger-bright focus:ring-2 focus:ring-ledger-bright/20"
+            label="Track business hours"
+            description="Show whether your team is currently inside its configured working hours."
           />
-          Track business hours
-        </label>
+          <div className="rounded-xl border border-ledger/15 bg-ledger-tint px-3.5 py-3">
+            <p className="text-sm font-medium text-ink">WhatsApp 24-hour window</p>
+            <p className="mt-0.5 text-xs leading-4 text-ink-soft">This setting does not override Meta rules. Free-form replies still require an open customer-service window.</p>
+          </div>
+        </div>
 
-        <div
-          className={`mt-4 grid gap-4 sm:grid-cols-3 ${draft.hoursEnabled ? "" : "opacity-50"}`}
-        >
-          <div className="sm:col-span-3">
-            <label htmlFor="hours-timezone" className={LABEL_CLASS}>
-              Timezone
-            </label>
-            <input
-              id="hours-timezone"
-              list="whatsapp-timezones"
-              value={draft.timezone}
-              onChange={(event) => update("timezone", event.target.value)}
-              disabled={isPending || !draft.hoursEnabled}
-              placeholder="Africa/Johannesburg"
-              className={FIELD_CLASS}
-            />
-            <datalist id="whatsapp-timezones">
-              {COMMON_TIMEZONES.map((zone) => (
-                <option key={zone} value={zone} />
-              ))}
-            </datalist>
+        <div className={`mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4 ${draft.hoursEnabled ? "" : "opacity-50"}`}>
+          <div className="sm:col-span-2">
+            <label htmlFor="hours-timezone" className={LABEL_CLASS}>Timezone</label>
+            <input id="hours-timezone" list="whatsapp-timezones" value={draft.timezone} onChange={(event) => update("timezone", event.target.value)} disabled={isPending || !draft.hoursEnabled} className={FIELD_CLASS} />
+            <datalist id="whatsapp-timezones">{COMMON_TIMEZONES.map((zone) => <option key={zone} value={zone} />)}</datalist>
           </div>
           <div>
-            <label htmlFor="hours-start" className={LABEL_CLASS}>
-              Opens
-            </label>
-            <input
-              id="hours-start"
-              type="time"
-              value={draft.start}
-              onChange={(event) => update("start", event.target.value)}
-              disabled={isPending || !draft.hoursEnabled}
-              className={FIELD_CLASS}
-            />
+            <label htmlFor="hours-start" className={LABEL_CLASS}>Opens</label>
+            <input id="hours-start" type="time" value={draft.start} onChange={(event) => update("start", event.target.value)} disabled={isPending || !draft.hoursEnabled} className={FIELD_CLASS} />
           </div>
           <div>
-            <label htmlFor="hours-end" className={LABEL_CLASS}>
-              Closes
-            </label>
-            <input
-              id="hours-end"
-              type="time"
-              value={draft.end}
-              onChange={(event) => update("end", event.target.value)}
-              disabled={isPending || !draft.hoursEnabled}
-              className={FIELD_CLASS}
-            />
+            <label htmlFor="hours-end" className={LABEL_CLASS}>Closes</label>
+            <input id="hours-end" type="time" value={draft.end} onChange={(event) => update("end", event.target.value)} disabled={isPending || !draft.hoursEnabled} className={FIELD_CLASS} />
           </div>
-          <div>
-            <label htmlFor="response-target" className={LABEL_CLASS}>
-              First reply target (minutes)
-            </label>
-            <input
-              id="response-target"
-              type="number"
-              inputMode="numeric"
-              min={WHATSAPP_SETTINGS_LIMITS.targetFirstResponseMinutes.min}
-              max={WHATSAPP_SETTINGS_LIMITS.targetFirstResponseMinutes.max}
-              value={draft.target}
-              onChange={(event) => update("target", event.target.value)}
-              disabled={isPending}
-              aria-describedby="response-target-hint"
-              className={FIELD_CLASS}
-            />
-            <p id="response-target-hint" className="mt-1 text-[0.65rem] text-ink-faint">
-              0 means no target. Analytics compares your median against it.
-            </p>
-          </div>
+        </div>
 
-          <fieldset className="sm:col-span-3">
-            <legend className={LABEL_CLASS}>Open on</legend>
-            <div className="mt-2 flex flex-wrap gap-2">
-              {WHATSAPP_WEEKDAY_SHORT_LABELS.map((short, day) => {
-                const active = draft.days.includes(day);
-                return (
-                  <label
-                    key={short}
-                    // The checkbox itself is sr-only, so the focus ring has to live on the
-                    // label or keyboard users get no indication of where they are.
-                    className={`cursor-pointer rounded-full border px-3 py-1.5 text-xs font-medium transition focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-ledger-bright ${
-                      active
-                        ? "border-ledger/20 bg-ledger-tint text-ledger"
-                        : "border-rule bg-paper text-ink-faint hover:border-rule-strong"
-                    } ${isPending || !draft.hoursEnabled ? "pointer-events-none" : ""}`}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={active}
-                      onChange={() => toggleDay(day)}
-                      disabled={isPending || !draft.hoursEnabled}
-                      aria-label={WHATSAPP_WEEKDAY_LABELS[day]}
-                      className="sr-only"
-                    />
-                    {short}
-                  </label>
-                );
-              })}
+        <fieldset className={`mt-4 ${draft.hoursEnabled ? "" : "opacity-50"}`}>
+          <legend className={LABEL_CLASS}>Working days</legend>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {WHATSAPP_WEEKDAY_SHORT_LABELS.map((short, day) => {
+              const active = draft.days.includes(day);
+              return (
+                <label key={short} className={`cursor-pointer rounded-lg border px-3 py-2 text-xs font-semibold transition focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-ledger-bright ${active ? "border-ledger/20 bg-ledger-tint text-ledger" : "border-rule bg-paper text-ink-faint hover:border-rule-strong"} ${isPending || !draft.hoursEnabled ? "pointer-events-none" : ""}`}>
+                  <input type="checkbox" checked={active} onChange={() => toggleDay(day)} disabled={isPending || !draft.hoursEnabled} aria-label={WHATSAPP_WEEKDAY_LABELS[day]} className="sr-only" />
+                  {short}
+                </label>
+              );
+            })}
+          </div>
+          <p className="mt-2 text-[0.68rem] text-ink-faint">{describeWhatsAppBusinessDays(draft.days)}, {draft.start}–{draft.end}</p>
+        </fieldset>
+
+        <div className="mt-4 grid gap-4 sm:grid-cols-3">
+          <div>
+            <label htmlFor="response-target" className={LABEL_CLASS}>First reply target</label>
+            <div className="relative">
+              <input id="response-target" type="number" inputMode="numeric" min={WHATSAPP_SETTINGS_LIMITS.targetFirstResponseMinutes.min} max={WHATSAPP_SETTINGS_LIMITS.targetFirstResponseMinutes.max} value={draft.target} onChange={(event) => update("target", event.target.value)} disabled={isPending} className={`${FIELD_CLASS} pr-16`} />
+              <span className="pointer-events-none absolute bottom-2.5 right-3 text-xs text-ink-faint">minutes</span>
             </div>
-            <p className="mt-2 text-[0.65rem] text-ink-faint">
-              {describeWhatsAppBusinessDays(draft.days)}, {draft.start}–{draft.end}. Overnight
-              hours are not supported yet — closing must be later the same day.
-            </p>
-          </fieldset>
+          </div>
+          <div>
+            <label htmlFor="activity-window" className={LABEL_CLASS}>Analytics window</label>
+            <div className="relative">
+              <input id="activity-window" type="number" inputMode="numeric" min={WHATSAPP_SETTINGS_LIMITS.activityWindowDays.min} max={WHATSAPP_SETTINGS_LIMITS.activityWindowDays.max} value={draft.activityWindowDays} onChange={(event) => update("activityWindowDays", event.target.value)} disabled={isPending} className={`${FIELD_CLASS} pr-12`} />
+              <span className="pointer-events-none absolute bottom-2.5 right-3 text-xs text-ink-faint">days</span>
+            </div>
+          </div>
+          <div>
+            <label htmlFor="inbox-refresh" className={LABEL_CLASS}>Inbox refresh</label>
+            <div className="relative">
+              <input id="inbox-refresh" type="number" inputMode="numeric" min={WHATSAPP_SETTINGS_LIMITS.inboxRefreshSeconds.min} max={WHATSAPP_SETTINGS_LIMITS.inboxRefreshSeconds.max} value={draft.inboxRefreshSeconds} onChange={(event) => update("inboxRefreshSeconds", event.target.value)} disabled={isPending} className={`${FIELD_CLASS} pr-16`} />
+              <span className="pointer-events-none absolute bottom-2.5 right-3 text-xs text-ink-faint">seconds</span>
+            </div>
+          </div>
         </div>
-      </Group>
+      </SectionCard>
 
-      <Group
-        title="Console preferences"
-        description="How this console behaves for everyone who opens it."
+      <SectionCard
+        number="4"
+        title="Lead classification"
+        description="Optional words and phrases that help the inbox prioritise conversations."
       >
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div>
-            <label htmlFor="activity-window" className={LABEL_CLASS}>
-              Overview activity window (days)
-            </label>
-            <input
-              id="activity-window"
-              type="number"
-              inputMode="numeric"
-              min={WHATSAPP_SETTINGS_LIMITS.activityWindowDays.min}
-              max={WHATSAPP_SETTINGS_LIMITS.activityWindowDays.max}
-              value={draft.activityWindowDays}
-              onChange={(event) => update("activityWindowDays", event.target.value)}
-              disabled={isPending}
-              aria-describedby="activity-window-hint"
-              className={FIELD_CLASS}
-            />
-            <p id="activity-window-hint" className="mt-1 text-[0.65rem] text-ink-faint">
-              {WHATSAPP_SETTINGS_LIMITS.activityWindowDays.min}–
-              {WHATSAPP_SETTINGS_LIMITS.activityWindowDays.max}. Sets the range the overview
-              sparkline and counts cover.
-            </p>
-          </div>
-          <div>
-            <label htmlFor="inbox-refresh" className={LABEL_CLASS}>
-              Inbox refresh (seconds)
-            </label>
-            <input
-              id="inbox-refresh"
-              type="number"
-              inputMode="numeric"
-              min={WHATSAPP_SETTINGS_LIMITS.inboxRefreshSeconds.min}
-              max={WHATSAPP_SETTINGS_LIMITS.inboxRefreshSeconds.max}
-              value={draft.inboxRefreshSeconds}
-              onChange={(event) => update("inboxRefreshSeconds", event.target.value)}
-              disabled={isPending}
-              aria-describedby="inbox-refresh-hint"
-              className={FIELD_CLASS}
-            />
-            <p id="inbox-refresh-hint" className="mt-1 text-[0.65rem] text-ink-faint">
-              {WHATSAPP_SETTINGS_LIMITS.inboxRefreshSeconds.min}–
-              {WHATSAPP_SETTINGS_LIMITS.inboxRefreshSeconds.max}. There is no push connection, so
-              the inbox polls on this interval. Shorter means more requests.
-            </p>
-          </div>
+        <div className="grid gap-4 lg:grid-cols-3">
+          <KeywordField id="keywords-hot" label="Hot leads" hint="Always flagged for review." value={draft.hot} onChange={(value) => update("hot", value)} disabled={isPending} />
+          <KeywordField id="keywords-warm" label="Warm leads" hint="Raises a cold lead to warm." value={draft.warm} onChange={(value) => update("warm", value)} disabled={isPending} />
+          <KeywordField id="keywords-spam" label="Spam / suppress" hint="Stored, but excluded from auto-reply." value={draft.spam} onChange={(value) => update("spam", value)} disabled={isPending} />
         </div>
-      </Group>
+      </SectionCard>
 
       {feedback ? (
-        <p
-          role="status"
-          className={`rounded-lg px-3 py-2 text-xs ${
-            feedback.tone === "ok"
-              ? "border border-ledger/15 bg-ledger-tint text-ledger"
-              : "border border-rose-200 bg-rose-50 text-rose-700"
-          }`}
-        >
-          {feedback.text}
-        </p>
+        <p role="status" className={`rounded-xl px-4 py-3 text-xs ${feedback.tone === "ok" ? "border border-ledger/15 bg-ledger-tint text-ledger" : "border border-rose-200 bg-rose-50 text-rose-700"}`}>{feedback.text}</p>
       ) : !validation.ok ? (
-        <p className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-700">
-          {validation.error}
-        </p>
+        <p className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-xs text-rose-700">{validation.error}</p>
       ) : null}
 
-      <div className="flex flex-wrap items-center gap-3">
-        <button
-          type="submit"
-          disabled={isPending || !validation.ok || !dirty}
-          className="rounded-full bg-ledger-bright px-5 py-2 text-sm font-medium text-white transition hover:bg-ledger disabled:cursor-not-allowed disabled:bg-paper-sunk disabled:text-ink-faint"
-        >
-          {isPending ? "Saving..." : "Save settings"}
-        </button>
-        <button
-          type="button"
-          onClick={() => {
-            setDraft(toDraft(settings));
-            setFeedback(null);
-          }}
-          disabled={isPending || !dirty}
-          className="rounded-full border border-rule px-4 py-2 text-sm font-medium text-ink-soft transition hover:border-rule-strong hover:text-ink disabled:opacity-50"
-        >
-          Discard changes
-        </button>
-        <span className="text-xs text-ink-faint">
-          {dirty ? "Unsaved changes" : "Saved"}
-        </span>
+      <div className="sticky bottom-3 z-20 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-rule bg-paper-raised/95 px-4 py-3 shadow-[0_18px_45px_-25px_rgba(14,26,20,.55)] backdrop-blur">
+        <span className="text-xs text-ink-faint">{dirty ? "You have unsaved changes" : "All changes saved"}</span>
+        <div className="flex items-center gap-2">
+          <button type="button" onClick={() => { setDraft(toDraft(settings)); setFeedback(null); }} disabled={isPending || !dirty} className="rounded-xl border border-rule px-4 py-2.5 text-sm font-medium text-ink-soft transition hover:border-rule-strong hover:text-ink disabled:cursor-not-allowed disabled:opacity-45">Discard</button>
+          <button type="submit" disabled={isPending || !storageReady || !validation.ok || !dirty} className="rounded-xl bg-ledger-bright px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-ledger disabled:cursor-not-allowed disabled:bg-paper-sunk disabled:text-ink-faint">{isPending ? "Saving..." : "Save changes"}</button>
+        </div>
       </div>
     </form>
   );
