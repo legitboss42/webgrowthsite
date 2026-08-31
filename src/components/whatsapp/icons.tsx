@@ -33,6 +33,7 @@ export type WhatsAppIconName =
   | "image"
   | "video"
   | "document"
+  | "clock"
   | "statusPending"
   | "statusSent"
   | "statusDelivered"
@@ -152,6 +153,12 @@ const ICON_PATHS: Record<WhatsAppIconName, ReactNode> = {
       <path d="M6 3h7.5L18 7.5V21H6z" />
       <path d="M13.5 3v4.5H18" />
       <path d="M9 12.5h6M9 16.5h4" />
+    </>
+  ),
+  clock: (
+    <>
+      <circle cx="12" cy="12" r="8.5" />
+      <path d="M12 7.5v5l3.5 2" />
     </>
   ),
   // Delivery states. Each silhouette differs from the others at message-bubble size,
