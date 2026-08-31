@@ -7,10 +7,7 @@ import {
   fetchWhatsAppPhoneNumbers,
   findConfiguredWhatsAppSender,
 } from "@/lib/whatsapp/phoneNumbers";
-import { loadWhatsAppSettings } from "@/lib/whatsapp/settingsStore";
-import { loadWhatsAppQuickSettings } from "@/lib/whatsapp/quickSettings";
 import { hasWhatsAppAdminAccess } from "./auth";
-import QuickSettingsPanel from "./QuickSettingsPanel";
 
 /**
  * Console chrome for every /admin/whatsapp route.
@@ -53,14 +50,8 @@ export default async function WhatsAppConsoleLayout({ children }: { children: Re
     }
   }
 
-  const [{ settings }, quickSettings] = await Promise.all([
-    loadWhatsAppSettings({ maxAgeMs: 0 }),
-    loadWhatsAppQuickSettings(),
-  ]);
-
   return (
     <WhatsAppShell senderConnected={senderConnected} senderNumber={senderNumber}>
-      <QuickSettingsPanel settings={settings} quickSettings={quickSettings} />
       {children}
     </WhatsAppShell>
   );
