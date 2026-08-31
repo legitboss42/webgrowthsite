@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import type { WhatsAppSettings } from "@/lib/whatsapp/settings";
 import type { WhatsAppQuickSettings } from "@/lib/whatsapp/quickSettings";
@@ -17,16 +17,12 @@ function Switch({ checked, disabled, onChange }: { checked: boolean; disabled?: 
 }
 
 export default function QuickSettingsPanel({ settings, quickSettings }: { settings: WhatsAppSettings; quickSettings: WhatsAppQuickSettings }) {
-  const pathname = usePathname();
   const router = useRouter();
-  const normalizedPath = (pathname || "").replace(/\/+$/, "");
   const [businessHours, setBusinessHours] = useState(settings.businessHours.enabled);
   const [typingIndicator, setTypingIndicator] = useState(quickSettings.typingIndicatorEnabled);
   const [newMessageAlerts, setNewMessageAlerts] = useState(quickSettings.newMessageAlertsEnabled);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
-
-  if (normalizedPath !== "/admin/whatsapp") return null;
 
   function saveQuick(update: Partial<WhatsAppQuickSettings>) {
     startTransition(async () => {
