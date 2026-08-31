@@ -1,0 +1,63 @@
+import assert from "node:assert/strict";
+import test from "node:test";
+import {
+  canWhatsAppRoleManageTeam,
+  canWhatsAppRoleSuperviseTeam,
+  isValidWhatsAppTeamEmail,
+  normalizeWhatsAppTeamAvailability,
+  normalizeWhatsAppTeamEmail,
+  normalizeWhatsAppTeamMember,
+  normalizeWhatsAppTeamRole,
+} from "./teamModel";
+
+test("normalizes team emails and validates Google-account style addresses", () => {
+  assert.equal(normalizeWhatsAppTeamEmail("  Agent@Example.COM "), "agent@example.com");
+  assert.equal(isValidWhatsAppTeamEmail("agent@example.com"), true);
+  assert.equal(isValidWhatsAppTeamEmail("not-an-email"), false);
+});
+
+test("accepts only supported roles and availability states", () => {
+  assert.equal(normalizeWhatsAppTeamRole("owner"), "owner");
+  assert.equal(normalizeWhatsAppTeamRole("manager"), "manager");
+  assert.equal(normalizeWhatsAppTeamRole("agent"), "agent");
+  assert.equal(normalizeWhatsAppTeamRole("superadmin"), null);
+
+  assert.equal(normalizeWhatsAppTeamAvailability("available"), "available");
+  assert.equal(normalizeWhatsAppTeamAvailability("busy"), "busy");
+  assert.equal(normalizeWhatsAppTeamAvailability("offline"), "offline");
+  assert.equal(normalizeWhatsAppTeamAvailability("away"), null);
+});
+
+test("normalizes persisted team rows safely", () => {
+  const member = normalizeWhatsAppTeamMember({
+    id: "member-1",
+    google_email: " USER@EXAMPLE.COM ",
+    display_name: "  User One ",
+    role: "manager",
+    availability: "busy",
+    active: true,
+  });
+
+  assert.deepEqual(member, {
+    id: "member-1",
+    googleEmail: "user@example.com",
+    displayName: "User One",
+    role: "manager",
+    availability: "busy",
+    active: true,
+    googleUserId: null,
+    lastSeenAt: null,
+    createdAt: null,
+    updatedAt: null,
+  });
+});
+
+test("team permissions keep management owner-only while managers can supervise", () => {
+  assert.equal(canWhatsAppRoleManageTeam("owner"), true);
+  assert.equal(canWhatsAppRoleManageTeam("manager"), false);
+  assert.equal(canWhatsAppRoleManageTeam("agent"), false);
+
+  assert.equal(canWhatsAppRoleSuperviseTeam("owner"), true);
+  assert.equal(canWhatsAppRoleSuperviseTeam("manager"), true);
+  assert.equal(canWhatsAppRoleSuperviseTeam("agent"), false);
+});
