@@ -44,6 +44,10 @@ export async function PUT(request: Request) {
       typeof body.newMessageAlertsEnabled === "boolean"
         ? body.newMessageAlertsEnabled
         : current.newMessageAlertsEnabled,
+    serviceWindowWarningEnabled:
+      typeof body.serviceWindowWarningEnabled === "boolean"
+        ? body.serviceWindowWarningEnabled
+        : current.serviceWindowWarningEnabled,
   };
 
   const result = await saveWhatsAppQuickSettings(next);
