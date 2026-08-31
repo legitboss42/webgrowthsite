@@ -150,9 +150,13 @@ for (const article of indexedArticles) {
 }
 
 const governedPageRoutes = new Set(routes.map((route) => route.path));
+const privateAdminRoutes = new Set([
+  "/admin/whatsapp/calls/",
+]);
 for (const file of walk(appDirectory, "page.tsx")) {
   const route = pageFileToRoute(file);
   if (route === "/blog/[slug]/") continue;
+  if (privateAdminRoutes.has(route)) continue;
   if (!governedPageRoutes.has(route)) fail(`Ungoverned App Router page: ${route}`);
 }
 
