@@ -7,18 +7,10 @@ const routeGovernance = JSON.parse(
 const governanceRedirects = [
   ...routeGovernance.routes
     .filter((route) => route.status === "REDIRECT")
-    .map((route) => ({
-      source: route.path === "/" ? "/" : route.path.replace(/\/$/, ""),
-      destination: route.destination,
-      permanent: true,
-    })),
+    .map((route) => ({ source: route.path === "/" ? "/" : route.path.replace(/\/$/, ""), destination: route.destination, permanent: true })),
   ...routeGovernance.articles
     .filter((article) => article.status === "REDIRECT")
-    .map((article) => ({
-      source: `/blog/${article.slug}`,
-      destination: article.destination,
-      permanent: true,
-    })),
+    .map((article) => ({ source: `/blog/${article.slug}`, destination: article.destination, permanent: true })),
 ];
 
 /** @type {import('next').NextConfig} */
@@ -26,9 +18,10 @@ const securityHeaders = [
   { key: "X-Content-Type-Options", value: "nosniff" },
   { key: "X-Frame-Options", value: "DENY" },
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-  { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+  // The WhatsApp inbox records voice notes. Keep camera/geolocation closed, but allow
+  // this same-origin application to request microphone permission from the operator.
+  { key: "Permissions-Policy", value: "camera=(), microphone=(self), geolocation=()" },
   { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },
-  // Start in report-only mode to avoid breaking scripts while we harden progressively.
   {
     key: "Content-Security-Policy-Report-Only",
     value: [
@@ -51,36 +44,17 @@ const nextConfig = {
   reactStrictMode: true,
   trailingSlash: true,
   serverExternalPackages: ["edge-tts-universal", "ffprobe-static", "ws", "bufferutil", "utf-8-validate"],
-  outputFileTracingIncludes: {
-    "/api/scheduler/uploads": ["./node_modules/ffprobe-static/bin/linux/x64/ffprobe"],
-  },
-  // Use the default `.next` output. Cleaning is handled explicitly through `dev:clean`.
+  outputFileTracingIncludes: { "/api/scheduler/uploads": ["./node_modules/ffprobe-static/bin/linux/x64/ffprobe"] },
   distDir: ".next",
-  images: {
-    qualities: [60, 65, 68, 75],
-  },
+  images: { qualities: [60, 65, 68, 75] },
   async headers() {
-    return [
-      {
-        source: "/:path*",
-        headers: securityHeaders,
-      },
-    ];
+    return [{ source: "/:path*", headers: securityHeaders }];
   },
   async redirects() {
     return [
       ...governanceRedirects,
-      {
-        source: "/:path*",
-        has: [{ type: "host", value: "www.webgrowth.info" }],
-        destination: "https://webgrowth.info/:path*",
-        permanent: true,
-      },
-      {
-        source: "/images/:path*.png",
-        destination: "/images/:path*.webp",
-        permanent: true,
-      },
+      { source: "/:path*", has: [{ type: "host", value: "www.webgrowth.info" }], destination: "https://webgrowth.info/:path*", permanent: true },
+      { source: "/images/:path*.png", destination: "/images/:path*.webp", permanent: true },
     ];
   },
 };

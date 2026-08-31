@@ -11,7 +11,6 @@ export type WhatsAppLeadRow = {
   human_review_required: boolean;
   last_message_at?: string;
   status: string;
-  // Optional real columns, surfaced by the contact panel when the query selects them.
   business_name?: string;
   email?: string;
   phone?: string;
@@ -29,11 +28,6 @@ export type WhatsAppLeadMessage = {
   message_text?: string;
   message_timestamp?: string;
   delivery_status?: string;
-  /**
-   * Sanitized failure sentence for a message Meta rejected. Written by the status
-   * webhook, never a raw provider payload, and absent until migration 202608260002
-   * adds the column.
-   */
   delivery_error?: string;
   media_id?: string;
   media_mime_type?: string;
@@ -83,10 +77,11 @@ export function buildWhatsAppDashboardModel(input: {
   } satisfies Record<WhatsAppLeadFilter, number>;
 
   const filteredLeads = filterWhatsAppLeads(input.leads, input.filter);
-  const selectedLead =
-    filteredLeads.find((lead) => lead.id === input.selectedLeadId) ||
-    filteredLeads[0] ||
-    null;
+  // Match WhatsApp Web: opening Conversations shows the list and an empty branded
+  // workspace. A thread is only selected after the operator explicitly clicks it.
+  const selectedLead = input.selectedLeadId
+    ? filteredLeads.find((lead) => lead.id === input.selectedLeadId) || null
+    : null;
 
   const selectedMessages = selectedLead
     ? input.messages
@@ -98,12 +93,7 @@ export function buildWhatsAppDashboardModel(input: {
         })
     : [];
 
-  return {
-    filterCounts,
-    filteredLeads,
-    selectedLead,
-    selectedMessages,
-  };
+  return { filterCounts, filteredLeads, selectedLead, selectedMessages };
 }
 
 export function buildWhatsAppReplyComposerState(input: {
@@ -112,21 +102,8 @@ export function buildWhatsAppReplyComposerState(input: {
   senderConfigured: boolean;
   now?: number;
 }): WhatsAppReplyComposerState {
-  if (!input.selectedLead) {
-    return {
-      enabled: false,
-      reason: "NO_CUSTOMER_MESSAGE",
-      helperText: "Select a conversation before sending a reply.",
-    };
-  }
-
-  if (!input.senderConfigured) {
-    return {
-      enabled: false,
-      reason: "NOT_CONFIGURED",
-      helperText: "Official Meta sender credentials are not configured yet, so replies stay disabled here.",
-    };
-  }
+  if (!input.selectedLead) return { enabled: false, reason: "NO_CUSTOMER_MESSAGE", helperText: "Select a conversation before sending a reply." };
+  if (!input.senderConfigured) return { enabled: false, reason: "NOT_CONFIGURED", helperText: "Official Meta sender credentials are not configured yet, so replies stay disabled here." };
 
   const latestInbound = [...input.selectedMessages]
     .filter((message) => message.direction === "inbound" && message.message_timestamp)
@@ -136,23 +113,11 @@ export function buildWhatsAppReplyComposerState(input: {
       return rightTime - leftTime;
     })[0];
 
-  if (!latestInbound?.message_timestamp) {
-    return {
-      enabled: false,
-      reason: "NO_CUSTOMER_MESSAGE",
-      helperText: "This conversation needs an inbound customer message before a free-form reply can be sent.",
-    };
-  }
+  if (!latestInbound?.message_timestamp) return { enabled: false, reason: "NO_CUSTOMER_MESSAGE", helperText: "This conversation needs an inbound customer message before a free-form reply can be sent." };
 
   const customerMessageTimestamp = Math.floor(Date.parse(latestInbound.message_timestamp) / 1000);
   if (!isFreeformReplyAllowed(customerMessageTimestamp, input.now)) {
-    return {
-      enabled: false,
-      reason: "SERVICE_WINDOW_CLOSED",
-      customerMessageTimestamp,
-      replyToMessageId: latestInbound.whatsapp_message_id,
-      helperText: "The 24-hour customer service window has closed, so this inbox will not send a free-form reply.",
-    };
+    return { enabled: false, reason: "SERVICE_WINDOW_CLOSED", customerMessageTimestamp, replyToMessageId: latestInbound.whatsapp_message_id, helperText: "The 24-hour customer service window has closed, so this inbox will not send a free-form reply." };
   }
 
   return {
