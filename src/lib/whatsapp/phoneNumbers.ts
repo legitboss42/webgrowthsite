@@ -5,9 +5,6 @@
  * at Meta, not in our database, so this calls the Graph API server-side with the
  * existing token. Never import this into a client component — the browser must not
  * hold Meta credentials.
- *
- * Field list verified against the live account: every field below is returned
- * together by `GET /{business-account-id}/phone_numbers`.
  */
 export type WhatsAppQualityRating = "GREEN" | "YELLOW" | "RED" | "UNKNOWN";
 
@@ -39,6 +36,10 @@ const PHONE_NUMBER_FIELDS = [
   "name_status",
   "platform_type",
   "throughput",
+  // Meta moved messaging limits to the business-portfolio level in 2025. This field
+  // is current and may be requested through the phone-number resource. Keep the old
+  // field as a fallback while accounts and API versions finish migrating.
+  "whatsapp_business_manager_messaging_limit",
   "messaging_limit_tier",
   "is_official_business_account",
   "account_mode",
@@ -47,14 +48,15 @@ const PHONE_NUMBER_FIELDS = [
 
 const QUALITY_RATINGS: WhatsAppQualityRating[] = ["GREEN", "YELLOW", "RED"];
 
-/** Meta's published tiers, as business-initiated conversations per rolling 24 hours. */
 const MESSAGING_TIERS: Record<string, string> = {
   TIER_50: "50 business-initiated conversations / 24h",
   TIER_250: "250 business-initiated conversations / 24h",
   TIER_1K: "1,000 business-initiated conversations / 24h",
+  TIER_2K: "2,000 business-initiated conversations / 24h",
   TIER_10K: "10,000 business-initiated conversations / 24h",
   TIER_100K: "100,000 business-initiated conversations / 24h",
   TIER_UNLIMITED: "Unlimited business-initiated conversations",
+  UNTIERED: "Not tiered",
 };
 
 function readText(value: unknown) {
@@ -77,7 +79,8 @@ export function normalizeWhatsAppPhoneNumber(raw: Record<string, unknown>): What
     nameStatus: readText(raw.name_status),
     platformType: readText(raw.platform_type),
     throughputLevel: readText(throughput?.level),
-    messagingLimitTier: readText(raw.messaging_limit_tier),
+    messagingLimitTier:
+      readText(raw.whatsapp_business_manager_messaging_limit) || readText(raw.messaging_limit_tier),
     isOfficialBusinessAccount:
       typeof raw.is_official_business_account === "boolean" ? raw.is_official_business_account : undefined,
     accountMode: readText(raw.account_mode),
@@ -85,7 +88,6 @@ export function normalizeWhatsAppPhoneNumber(raw: Record<string, unknown>): What
   };
 }
 
-/** Meta labels the rating bands High/Medium/Low; keep that wording. */
 export function describeWhatsAppQuality(rating: WhatsAppQualityRating) {
   if (rating === "GREEN") return "High";
   if (rating === "YELLOW") return "Medium";
@@ -93,13 +95,11 @@ export function describeWhatsAppQuality(rating: WhatsAppQualityRating) {
   return "Not rated yet";
 }
 
-/** Falls back to the raw tier string so a new Meta tier is shown, not hidden. */
 export function describeWhatsAppMessagingTier(tier: string | undefined) {
   if (!tier) return undefined;
   return MESSAGING_TIERS[tier.toUpperCase()] || tier;
 }
 
-/** Turns SCREAMING_SNAKE enum values into readable text. */
 export function humanizeWhatsAppEnum(value: string | undefined) {
   if (!value) return undefined;
   return value
@@ -113,7 +113,6 @@ export function humanizeWhatsAppEnum(value: string | undefined) {
 type FetchOptions = {
   env?: Record<string, string | undefined>;
   fetch?: typeof globalThis.fetch;
-  /** Seconds to cache the response. Omit for a fresh read every time. */
   revalidateSeconds?: number;
 };
 
@@ -157,10 +156,6 @@ export async function fetchWhatsAppPhoneNumbers(
   }
 }
 
-/**
- * The single sender the app is configured to send from, if it is among the account's
- * numbers. Used to fill the console shell and overview with the real display number.
- */
 export function findConfiguredWhatsAppSender(
   phoneNumbers: WhatsAppPhoneNumber[],
   env: Record<string, string | undefined> = process.env,
