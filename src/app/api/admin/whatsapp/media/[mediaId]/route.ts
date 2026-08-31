@@ -17,7 +17,7 @@ function getWhatsAppConfig() {
   return token ? { token, apiVersion } : null;
 }
 
-export async function GET(_request: Request, context: { params: Promise<{ mediaId: string }> }) {
+export async function GET(request: Request, context: { params: Promise<{ mediaId: string }> }) {
   const cookieStore = await cookies();
   if (!hasWhatsAppAdminAccess(cookieStore)) {
     return NextResponse.json({ error: "Authentication required." }, { status: 401 });
@@ -33,10 +33,10 @@ export async function GET(_request: Request, context: { params: Promise<{ mediaI
     return NextResponse.json({ error: "The WhatsApp sender is not configured on this deployment." }, { status: 503 });
   }
 
-  const headers = { Authorization: `Bearer ${config.token}` };
+  const authorization = `Bearer ${config.token}`;
   try {
     const metadataResponse = await fetch(`https://graph.facebook.com/${config.apiVersion}/${encodeURIComponent(mediaId)}`, {
-      headers,
+      headers: { Authorization: authorization },
       cache: "no-store",
     });
     if (!metadataResponse.ok) {
@@ -49,19 +49,35 @@ export async function GET(_request: Request, context: { params: Promise<{ mediaI
       return NextResponse.json({ error: "WhatsApp media URL was not returned by Meta." }, { status: 502 });
     }
 
-    const mediaResponse = await fetch(metadata.url, { headers, cache: "no-store" });
+    const range = request.headers.get("range");
+    const mediaHeaders: Record<string, string> = { Authorization: authorization };
+    if (range) mediaHeaders.Range = range;
+
+    const mediaResponse = await fetch(metadata.url, {
+      headers: mediaHeaders,
+      cache: "no-store",
+    });
     if (!mediaResponse.ok) {
       console.error("WhatsApp Cloud API media download failed", { status: mediaResponse.status });
       return NextResponse.json({ error: "Unable to download this WhatsApp media item." }, { status: 502 });
     }
 
-    const body = await mediaResponse.arrayBuffer();
-    return new Response(body, {
-      status: 200,
-      headers: {
-        "Content-Type": metadata.mime_type || mediaResponse.headers.get("content-type") || "application/octet-stream",
-        "Cache-Control": "private, no-store",
-      },
+    // Audio/video controls issue byte-range requests to discover duration and seek. Forward
+    // Meta's range response rather than buffering the whole file into a new 200 response,
+    // which made valid voice notes appear as 0:00 in Chromium on Android.
+    const responseHeaders = new Headers({
+      "Content-Type": metadata.mime_type || mediaResponse.headers.get("content-type") || "application/octet-stream",
+      "Cache-Control": "private, no-store",
+      "Accept-Ranges": mediaResponse.headers.get("accept-ranges") || "bytes",
+    });
+    for (const header of ["content-length", "content-range", "etag", "last-modified"]) {
+      const value = mediaResponse.headers.get(header);
+      if (value) responseHeaders.set(header, value);
+    }
+
+    return new Response(mediaResponse.body, {
+      status: mediaResponse.status,
+      headers: responseHeaders,
     });
   } catch (error) {
     console.error("WhatsApp media proxy failed", error);

@@ -53,19 +53,22 @@ export default function MessageStatus({
         ? "text-white/70"
         : "text-ink-faint";
 
+  const title = `${presentation.description}${error ? `. ${error}` : ""}`;
+
   return (
-    <span
-      className={`inline-flex items-center gap-1 ${tone}`}
-      title={`${presentation.description}${error ? `. ${error}` : ""}`}
-    >
-      <WhatsAppIcon name={presentation.icon} className="h-3.5 w-3.5" />
-      {failed || presentation.key === "pending" ? (
-        <span className="font-medium">{presentation.label}</span>
-      ) : null}
-      <span className="sr-only">
-        {presentation.description}
-        {error ? `. ${error}` : ""}
+    <span className={`inline-flex max-w-[min(20rem,72vw)] flex-col items-end ${tone}`} title={title}>
+      <span className="inline-flex items-center gap-1">
+        <WhatsAppIcon name={presentation.icon} className="h-3.5 w-3.5" />
+        {failed || presentation.key === "pending" ? (
+          <span className="font-medium">{presentation.label}</span>
+        ) : null}
       </span>
+      {failed && error ? (
+        <span className="mt-0.5 text-right text-[0.62rem] leading-4 opacity-95">
+          {error}
+        </span>
+      ) : null}
+      <span className="sr-only">{title}</span>
     </span>
   );
 }

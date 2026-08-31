@@ -7,6 +7,7 @@ import ffmpegPath from "ffmpeg-static";
 import ffprobeStatic from "ffprobe-static";
 
 const execFileAsync = promisify(execFile);
+const WHATSAPP_VOICE_INPUT_SAMPLE_RATE = 16_000;
 
 export type NormalizedWhatsAppVoiceNote = {
   file: File;
@@ -34,6 +35,32 @@ function finiteNumber(value: unknown) {
   return Number.isFinite(parsed) ? parsed : Number.NaN;
 }
 
+export function readOpusHeadInputSampleRate(bytes: Uint8Array) {
+  const signature = [79, 112, 117, 115, 72, 101, 97, 100]; // OpusHead
+  let offset = -1;
+  for (let index = 0; index <= bytes.length - signature.length; index += 1) {
+    let matches = true;
+    for (let signatureIndex = 0; signatureIndex < signature.length; signatureIndex += 1) {
+      if (bytes[index + signatureIndex] !== signature[signatureIndex]) {
+        matches = false;
+        break;
+      }
+    }
+    if (matches) {
+      offset = index;
+      break;
+    }
+  }
+
+  if (offset < 0 || offset + 16 > bytes.length) return Number.NaN;
+  return (
+    bytes[offset + 12]! |
+    (bytes[offset + 13]! << 8) |
+    (bytes[offset + 14]! << 16) |
+    (bytes[offset + 15]! << 24)
+  ) >>> 0;
+}
+
 export function assertValidWhatsAppVoiceProbe(raw: unknown) {
   const output = raw && typeof raw === "object" ? raw as FFprobeVoiceOutput : {};
   const stream = output.streams?.find((item) => item.codec_type === "audio");
@@ -49,7 +76,9 @@ export function assertValidWhatsAppVoiceProbe(raw: unknown) {
   if (!formats.has("ogg")) throw new Error("Converted voice note is not an OGG container.");
   if (codecName !== "opus") throw new Error("Converted voice note is not encoded with Opus.");
   if (channels !== 1) throw new Error("Converted voice note is not mono.");
-  if (sampleRate !== 48_000) throw new Error("Converted voice note does not use a 48 kHz sample rate.");
+  // Opus is always decoded on a 48 kHz clock even when the OpusHead input sample rate is
+  // 16 kHz. The WhatsApp-style 16 kHz source rate is checked separately from the bytes.
+  if (sampleRate !== 48_000) throw new Error("Converted voice note does not use the Opus 48 kHz clock.");
   if (!Number.isFinite(durationSeconds) || durationSeconds <= 0.05) {
     throw new Error("Converted voice note contains no usable audio duration.");
   }
@@ -58,10 +87,9 @@ export function assertValidWhatsAppVoiceProbe(raw: unknown) {
 }
 
 /**
- * Converts browser MediaRecorder output into Meta's native voice-note format:
- * an OGG container carrying a mono Opus stream. The resulting file is probed before
- * it ever reaches Meta so an empty/header-only or incorrectly encoded clip fails here
- * instead of being accepted first and rejected later with the unhelpful 131053 status.
+ * Converts browser MediaRecorder output into a WhatsApp-native voice-note profile:
+ * OGG/Opus, mono, 16 kHz input rate, 32 kbps voice-oriented Opus frames. FFprobe validates
+ * the container/codec/duration and the OpusHead bytes verify the source sample-rate field.
  */
 export async function normalizeRecordedVoiceNote(audio: File): Promise<NormalizedWhatsAppVoiceNote> {
   if (!ffmpegPath) throw new Error("FFmpeg is unavailable on this deployment.");
@@ -89,15 +117,23 @@ export async function normalizeRecordedVoiceNote(audio: File): Promise<Normalize
         "-ac",
         "1",
         "-ar",
-        "48000",
+        String(WHATSAPP_VOICE_INPUT_SAMPLE_RATE),
         "-c:a",
         "libopus",
         "-b:a",
         "32k",
         "-vbr",
         "on",
+        "-compression_level",
+        "10",
+        "-frame_duration",
+        "60",
         "-application",
         "voip",
+        "-packet_loss",
+        "0",
+        "-avoid_negative_ts",
+        "make_zero",
         "-f",
         "ogg",
         outputPath,
@@ -107,6 +143,10 @@ export async function normalizeRecordedVoiceNote(audio: File): Promise<Normalize
 
     const bytes = await readFile(outputPath);
     if (bytes.length <= 0) throw new Error("FFmpeg produced an empty voice note.");
+    const opusHeadInputSampleRate = readOpusHeadInputSampleRate(bytes);
+    if (opusHeadInputSampleRate !== WHATSAPP_VOICE_INPUT_SAMPLE_RATE) {
+      throw new Error("Converted voice note does not carry the WhatsApp voice input sample rate.");
+    }
 
     const probeResult = await execFileAsync(
       ffprobeStatic.path,
