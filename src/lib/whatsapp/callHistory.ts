@@ -47,6 +47,10 @@ export function extractWhatsAppCallEvents(payload: unknown) {
       const contactName = asText(profile?.name);
       const contactWaId = asText(firstContact?.wa_id);
 
+      // Call history is sourced only from Meta's Calling API `calls` array. The sibling
+      // `statuses` array belongs to ordinary WhatsApp message delivery receipts (sent,
+      // delivered, read, failed). Treating those message ids as call ids polluted call
+      // history with voice notes and other outbound messages.
       const calls = Array.isArray(value.calls) ? value.calls : [];
       for (const callValue of calls) {
         const call = asRecord(callValue);
@@ -67,25 +71,6 @@ export function extractWhatsAppCallEvents(payload: unknown) {
           event,
           occurred_at: toIso(call.timestamp),
           raw: call,
-        });
-      }
-
-      const statuses = Array.isArray(value.statuses) ? value.statuses : [];
-      for (const statusValue of statuses) {
-        const status = asRecord(statusValue);
-        if (!status) continue;
-        const id = asText(status.id);
-        if (!id) continue;
-        const statusText = (asText(status.status) || "unknown").toLowerCase();
-        events.push({
-          call_id: id,
-          direction: "outbound",
-          customer_wa_id: asText(status.recipient_id),
-          customer_name: contactName,
-          status: statusText,
-          event: statusText,
-          occurred_at: toIso(status.timestamp),
-          raw: status,
         });
       }
     }
