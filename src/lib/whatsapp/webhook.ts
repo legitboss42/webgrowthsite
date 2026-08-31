@@ -14,6 +14,7 @@ export type NormalizedIncomingMessage = {
   mediaMimeType?: string;
   mediaSha256?: string;
   mediaVoice?: boolean;
+  mediaFilename?: string;
 };
 
 export type NormalizedStatus = {
@@ -21,10 +22,6 @@ export type NormalizedStatus = {
   waId?: string;
   status: string;
   timestamp: number;
-  /**
-   * An operator-safe sentence explaining a `failed` status, already stripped of trace
-   * ids and provider detail. Absent for every other status.
-   */
   error?: string;
 };
 
@@ -51,6 +48,11 @@ function asRecord(value: unknown): UnknownRecord | null {
   return value && typeof value === "object" && !Array.isArray(value) ? (value as UnknownRecord) : null;
 }
 
+function getIncomingMedia(item: UnknownRecord, type: string) {
+  if (type !== "audio" && type !== "image" && type !== "video" && type !== "document") return null;
+  return asRecord(item[type]);
+}
+
 export function parseWhatsAppWebhook(payload: unknown): { messages: NormalizedIncomingMessage[]; statuses: NormalizedStatus[] } {
   const root = asRecord(payload);
   if (!root || root.object !== "whatsapp_business_account" || !Array.isArray(root.entry)) throw new Error("Invalid WhatsApp webhook payload");
@@ -68,27 +70,32 @@ export function parseWhatsAppWebhook(payload: unknown): { messages: NormalizedIn
         if (typeof item?.wa_id === "string" && typeof profile?.name === "string") names.set(item.wa_id, profile.name);
       }
       if (Array.isArray(value.messages)) for (const message of value.messages) {
-        const item = asRecord(message); const text = asRecord(item?.text); const audio = asRecord(item?.audio);
+        const item = asRecord(message);
+        const text = asRecord(item?.text);
         if (typeof item?.id !== "string" || typeof item?.from !== "string" || typeof item?.timestamp !== "string" || typeof item?.type !== "string") continue;
+        const media = getIncomingMedia(item, item.type);
+        const body = typeof text?.body === "string"
+          ? text.body
+          : typeof media?.caption === "string"
+            ? media.caption
+            : undefined;
         messages.push({
           messageId: item.id,
           waId: item.from,
           displayName: names.get(item.from),
-          text: typeof text?.body === "string" ? text.body : undefined,
+          text: body,
           timestamp: Number(item.timestamp),
           type: item.type,
-          mediaId: typeof audio?.id === "string" ? audio.id : undefined,
-          mediaMimeType: typeof audio?.mime_type === "string" ? audio.mime_type : undefined,
-          mediaSha256: typeof audio?.sha256 === "string" ? audio.sha256 : undefined,
-          mediaVoice: audio?.voice === true,
+          mediaId: typeof media?.id === "string" ? media.id : undefined,
+          mediaMimeType: typeof media?.mime_type === "string" ? media.mime_type : undefined,
+          mediaSha256: typeof media?.sha256 === "string" ? media.sha256 : undefined,
+          mediaVoice: item.type === "audio" && media?.voice === true,
+          mediaFilename: typeof media?.filename === "string" ? media.filename : undefined,
         });
       }
       if (Array.isArray(value.statuses)) for (const status of value.statuses) {
         const item = asRecord(status);
         if (typeof item?.id !== "string" || typeof item?.status !== "string" || typeof item?.timestamp !== "string") continue;
-        // Meta attaches an `errors` array to a failed status. Only the code and the
-        // short title survive: the rest of that payload carries trace ids and internal
-        // messages that must never reach an admin screen.
         const failure = Array.isArray(item.errors) ? asRecord(item.errors[0]) : null;
         const error = failure
           ? sanitizeWhatsAppStatusError({
@@ -126,12 +133,6 @@ function getSafeReply(text: string | undefined, rules?: WhatsAppLeadKeywordRules
   return null;
 }
 
-/**
- * `options.leadKeywords` carries the operator's keyword rules. It is optional, so
- * a caller that does not pass it gets the original behaviour. Its practical effect
- * here is that a message matching a spam keyword is classified COLD with no safe
- * reply, so nothing is auto-sent back to it.
- */
 export async function processWhatsAppWebhook(
   payload: unknown,
   store: WebhookProcessorStore,
@@ -149,9 +150,6 @@ export async function processWhatsAppWebhook(
       await store.recordOutbound({ messageId: sent.messageId, waId: message.waId, text: reply, timestamp: Math.floor(Date.now() / 1000) });
     }
   }
-  // Statuses are applied in whatever order Meta bundled them. The store's forward-only
-  // guard is what makes that safe, so a `sent` callback arriving after `delivered` in
-  // the same payload cannot walk the message backwards.
   for (const status of statuses) await store.updateMessageStatus(status.messageId, status.status, status.error);
   return { messages: messages.length, statuses: statuses.length };
 }
