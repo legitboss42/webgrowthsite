@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createSupabaseWhatsAppStore } from "@/lib/whatsapp/store";
 import { loadWhatsAppSettings } from "@/lib/whatsapp/settingsStore";
 import { loadWhatsAppQuickSettings } from "@/lib/whatsapp/quickSettings";
+import { storeWhatsAppCallEvents } from "@/lib/whatsapp/callHistory";
 import {
   isValidMetaSignature,
   parseWhatsAppWebhook,
@@ -64,10 +65,15 @@ export async function POST(request: Request) {
       { leadKeywords: settings.leadKeywords },
     );
 
-    // Push is downstream of successful CRM processing, and is awaited so a serverless
-    // runtime cannot terminate delivery after the webhook response has already gone out.
-    // Individual push failures are swallowed below, so they still never make Meta retry
-    // a webhook whose CRM work succeeded.
+    // Calling API events share this signed Meta webhook endpoint. Persist them separately
+    // from messages so a call's ringing/accepted/terminated events collapse into one
+    // history row instead of polluting the conversation message stream.
+    try {
+      await storeWhatsAppCallEvents(payload);
+    } catch (error) {
+      console.error("WhatsApp call history processing failed", error);
+    }
+
     if (quickSettings.newMessageAlertsEnabled && parsed.messages.length) {
       await Promise.all(
         parsed.messages.map(async (message) => {
