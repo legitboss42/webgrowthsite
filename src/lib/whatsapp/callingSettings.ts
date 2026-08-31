@@ -57,6 +57,40 @@ function extractCallingSettings(payload: unknown): WhatsAppCallingSettings | nul
   return null;
 }
 
+/**
+ * Meta's Calling settings schema expects HH:MM values. Older examples and some
+ * integrations use HHMM, so normalize at the server boundary before Graph sees the
+ * payload. This protects every caller, including older deployed clients.
+ */
+function normalizeMetaCallingTime(value: unknown): string {
+  const raw = typeof value === "string" ? value.trim() : "";
+  if (/^\d{2}:\d{2}$/.test(raw)) return raw;
+  if (/^\d{4}$/.test(raw)) return `${raw.slice(0, 2)}:${raw.slice(2)}`;
+  return raw;
+}
+
+function normalizeCallingUpdate(update: Partial<WhatsAppCallingSettings>): Partial<WhatsAppCallingSettings> {
+  if (!update.call_hours) return update;
+
+  const callHours = update.call_hours;
+  return {
+    ...update,
+    call_hours: {
+      ...callHours,
+      weekly_operating_hours: callHours.weekly_operating_hours?.map((row) => ({
+        ...row,
+        open_time: normalizeMetaCallingTime(row.open_time),
+        close_time: normalizeMetaCallingTime(row.close_time),
+      })),
+      holiday_schedule: callHours.holiday_schedule?.map((row) => ({
+        ...row,
+        start_time: normalizeMetaCallingTime(row.start_time),
+        end_time: normalizeMetaCallingTime(row.end_time),
+      })),
+    },
+  };
+}
+
 async function classifyMetaFailure(response: Response): Promise<Exclude<CallingResult, { ok: true }>> {
   const raw = await response.text().catch(() => "");
   let parsed: MetaGraphError | null = null;
@@ -73,6 +107,9 @@ async function classifyMetaFailure(response: Response): Promise<Exclude<CallingR
   const subcode = graphError?.error_subcode;
   const haystack = `${message} ${type}`.toLowerCase();
 
+  // Meta frequently labels ordinary validation errors (including code 100 schema
+  // errors) as OAuthException. The type alone therefore does NOT mean the token lacks
+  // permission. Only explicit auth/permission signals are classified that way.
   const permissionDenied =
     response.status === 401 ||
     response.status === 403 ||
@@ -80,8 +117,8 @@ async function classifyMetaFailure(response: Response): Promise<Exclude<CallingR
     code === 190 ||
     code === 200 ||
     haystack.includes("permission") ||
-    haystack.includes("oauth") ||
-    haystack.includes("access token");
+    haystack.includes("access token") ||
+    haystack.includes("not authorized");
 
   const parts: string[] = [];
   if (message) parts.push(message.slice(0, 220));
@@ -152,6 +189,8 @@ export async function updateWhatsAppCallingSettings(
   const config = getConfig(options.env || process.env);
   if (!config) return { ok: false, reason: "NOT_CONFIGURED" };
 
+  const normalizedUpdate = normalizeCallingUpdate(update);
+
   try {
     const response = await (options.fetch || globalThis.fetch)(
       `https://graph.facebook.com/${config.apiVersion}/${config.phoneNumberId}/settings`,
@@ -161,7 +200,7 @@ export async function updateWhatsAppCallingSettings(
           Authorization: `Bearer ${config.token}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ messaging_product: "whatsapp", calling: update }),
+        body: JSON.stringify({ messaging_product: "whatsapp", calling: normalizedUpdate }),
         cache: "no-store",
       },
     );
