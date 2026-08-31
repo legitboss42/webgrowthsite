@@ -104,6 +104,8 @@ export default function ReplyComposer({
   const [attachment, setAttachment] = useState<StagedAttachment | null>(null);
   const [quickReplyOpen, setQuickReplyOpen] = useState(false);
   const [quickReplyIndex, setQuickReplyIndex] = useState(0);
+  const [serviceWindowWarningEnabled, setServiceWindowWarningEnabled] = useState(true);
+  const [clockNow, setClockNow] = useState<number | null>(null);
 
   const [recordingState, setRecordingState] = useState<RecordingState>("unsupported");
   const [recordedAudio, setRecordedAudio] = useState<Blob | null>(null);
@@ -138,6 +140,33 @@ export default function ReplyComposer({
     setRecordingState(
       supportedType && typeof navigator.mediaDevices?.getUserMedia === "function" ? "idle" : "unsupported",
     );
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    void fetch("/api/admin/whatsapp/quick-settings/", { cache: "no-store" })
+      .then(async (response) => {
+        if (!response.ok) return null;
+        return (await response.json().catch(() => null)) as
+          | { settings?: { serviceWindowWarningEnabled?: boolean } }
+          | null;
+      })
+      .then((payload) => {
+        if (cancelled) return;
+        if (typeof payload?.settings?.serviceWindowWarningEnabled === "boolean") {
+          setServiceWindowWarningEnabled(payload.settings.serviceWindowWarningEnabled);
+        }
+      })
+      .catch(() => {
+        // Keep the safe default: warnings stay visible if settings cannot be loaded.
+      });
+
+    setClockNow(Date.now());
+    const timer = window.setInterval(() => setClockNow(Date.now()), 60_000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(timer);
+    };
   }, []);
 
   // One teardown for every resource a recording can leave behind. Runs on unmount only,
@@ -206,6 +235,23 @@ export default function ReplyComposer({
   const helperText = useMemo(() => {
     return (composerState.reason ? reasonCopy[composerState.reason] : undefined) || composerState.helperText;
   }, [composerState.helperText, composerState.reason]);
+
+  const serviceWindowSoonText = useMemo(() => {
+    if (!serviceWindowWarningEnabled || !composerState.enabled || !composerState.customerMessageTimestamp || clockNow === null) {
+      return null;
+    }
+    const closesAt = composerState.customerMessageTimestamp * 1000 + 24 * 60 * 60 * 1000;
+    const remainingMs = closesAt - clockNow;
+    if (remainingMs <= 0 || remainingMs > 2 * 60 * 60 * 1000) return null;
+    const remainingMinutes = Math.max(1, Math.ceil(remainingMs / 60_000));
+    if (remainingMinutes < 60) return `Meta's 24-hour reply window closes in about ${remainingMinutes} minute${remainingMinutes === 1 ? "" : "s"}.`;
+    const remainingHours = Math.ceil(remainingMinutes / 60);
+    return `Meta's 24-hour reply window closes in about ${remainingHours} hour${remainingHours === 1 ? "" : "s"}.`;
+  }, [clockNow, composerState.customerMessageTimestamp, composerState.enabled, serviceWindowWarningEnabled]);
+
+  const showDisabledNotice = disabled && (
+    composerState.reason !== "SERVICE_WINDOW_CLOSED" || serviceWindowWarningEnabled
+  );
 
   const quickReplyQuery = getQuickReplyQuery(message);
   const quickReplyMatches = useMemo(() => {
@@ -713,7 +759,7 @@ export default function ReplyComposer({
         onChange={(event) => stageFile(event.target.files?.[0] || null)}
       />
 
-      {disabled ? (
+      {showDisabledNotice ? (
         <div className="mb-2.5 flex flex-wrap items-center gap-x-2 gap-y-1 rounded-xl border border-brass/25 bg-brass-tint px-3 py-2 text-xs leading-5 text-[#6f4f16]">
           <span>{helperText}</span>
           {composerState.reason === "SERVICE_WINDOW_CLOSED" ? (
@@ -721,6 +767,13 @@ export default function ReplyComposer({
               Open templates
             </Link>
           ) : null}
+        </div>
+      ) : null}
+
+      {serviceWindowSoonText ? (
+        <div className="mb-2.5 flex items-center gap-2 rounded-xl border border-brass/25 bg-brass-tint px-3 py-2 text-xs leading-5 text-[#6f4f16]">
+          <WhatsAppIcon name="clock" className="h-4 w-4 flex-none" />
+          <span>{serviceWindowSoonText}</span>
         </div>
       ) : null}
 
