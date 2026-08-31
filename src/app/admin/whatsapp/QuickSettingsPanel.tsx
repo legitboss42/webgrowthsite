@@ -19,13 +19,14 @@ function Switch({ checked, disabled, onChange }: { checked: boolean; disabled?: 
 export default function QuickSettingsPanel({ settings, quickSettings }: { settings: WhatsAppSettings; quickSettings: WhatsAppQuickSettings }) {
   const pathname = usePathname();
   const router = useRouter();
+  const normalizedPath = (pathname || "").replace(/\/+$/, "");
   const [businessHours, setBusinessHours] = useState(settings.businessHours.enabled);
   const [typingIndicator, setTypingIndicator] = useState(quickSettings.typingIndicatorEnabled);
   const [newMessageAlerts, setNewMessageAlerts] = useState(quickSettings.newMessageAlertsEnabled);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
-  if (pathname !== "/admin/whatsapp" && pathname !== "/admin/whatsapp/") return null;
+  if (normalizedPath !== "/admin/whatsapp") return null;
 
   function saveQuick(update: Partial<WhatsAppQuickSettings>) {
     startTransition(async () => {
@@ -92,7 +93,7 @@ export default function QuickSettingsPanel({ settings, quickSettings }: { settin
   ];
 
   return (
-    <section className="mx-4 mt-5 rounded-xl border border-rule bg-paper-raised p-5 sm:mx-6">
+    <section className="relative z-10 mx-4 mt-5 rounded-xl border border-rule bg-paper-raised p-5 shadow-sm sm:mx-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h2 className="text-sm font-semibold text-ink">Quick settings</h2>
