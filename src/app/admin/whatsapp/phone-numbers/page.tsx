@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import GoogleAdminPrompt from "@/components/auth/GoogleAdminPrompt";
-import { getDefaultAdminGoogleEmail, isGoogleAuthConfigured } from "@/lib/googleAuth";
+import { getDefaultAdminGoogleEmail, getGoogleClientId, isGoogleAuthConfigured } from "@/lib/googleAuth";
 import { WhatsAppIcon } from "@/components/whatsapp/icons";
 import {
   describeWhatsAppMessagingTier,
@@ -147,6 +147,7 @@ export default async function WhatsAppPhoneNumbersPage() {
           <GoogleAdminPrompt
             nextPath="/admin/whatsapp/phone-numbers/"
             adminEmail={getDefaultAdminGoogleEmail()}
+            clientId={getGoogleClientId()}
             googleReady={isGoogleAuthConfigured()}
           />
         </div>

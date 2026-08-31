@@ -51,8 +51,16 @@ function getGoogleAuthSecret() {
   );
 }
 
+export function getGoogleClientId() {
+  return (
+    process.env.GOOGLE_OAUTH_CLIENT_ID?.trim() ||
+    process.env.NEXT_PUBLIC_GOOGLE_OAUTH_CLIENT_ID?.trim() ||
+    ""
+  );
+}
+
 function getGoogleOAuthConfig() {
-  const clientId = process.env.GOOGLE_OAUTH_CLIENT_ID?.trim() || "";
+  const clientId = getGoogleClientId();
   const clientSecret = process.env.GOOGLE_OAUTH_CLIENT_SECRET?.trim() || "";
   const redirectUri = process.env.GOOGLE_OAUTH_REDIRECT_URI?.trim() || absoluteUrl("/api/auth/google/callback/");
 
@@ -97,7 +105,7 @@ export function isAllowedGoogleAdminEmail(email: string | null | undefined) {
 }
 
 export function isGoogleAuthConfigured() {
-  return Boolean(getGoogleAuthSecret() && getGoogleOAuthConfig());
+  return Boolean(getGoogleAuthSecret() && getGoogleClientId());
 }
 
 export function sanitizeGoogleAuthNext(value: string | null | undefined, fallback = "/") {
@@ -260,5 +268,56 @@ export async function exchangeGoogleCodeForIdentity(code: string) {
     userId: userPayload.sub,
     email: userPayload.email.trim().toLowerCase(),
     fullName: userPayload.name?.trim() || null,
+  } satisfies GoogleUserIdentity;
+}
+
+export async function verifyGoogleIdToken(
+  credential: string,
+  options: { fetch?: typeof globalThis.fetch } = {},
+) {
+  const clientId = getGoogleClientId();
+  if (!clientId) throw new Error("Google OAuth client configuration is missing.");
+
+  const token = credential.trim();
+  if (!token) throw new Error("Google did not return a verified email address.");
+
+  const response = await (options.fetch || globalThis.fetch)(
+    `https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(token)}`,
+    {
+      cache: "no-store",
+    },
+  );
+  const payload = (await response.json().catch(() => null)) as
+    | {
+        aud?: string;
+        sub?: string;
+        email?: string;
+        email_verified?: boolean | string;
+        name?: string;
+        iss?: string;
+      }
+    | null;
+
+  const verified = payload?.email_verified === true || payload?.email_verified === "true";
+  const issuerAllowed =
+    payload?.iss === undefined ||
+    payload.iss === "accounts.google.com" ||
+    payload.iss === "https://accounts.google.com";
+
+  if (
+    !response.ok ||
+    !payload?.sub ||
+    !payload.email?.trim() ||
+    payload.aud !== clientId ||
+    !verified ||
+    !issuerAllowed
+  ) {
+    throw new Error("Google did not return a verified email address.");
+  }
+
+  return {
+    userId: payload.sub,
+    email: payload.email.trim().toLowerCase(),
+    fullName: payload.name?.trim() || null,
   } satisfies GoogleUserIdentity;
 }

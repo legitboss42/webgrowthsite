@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { cookies } from "next/headers";
 import GoogleAdminPrompt from "@/components/auth/GoogleAdminPrompt";
-import { getDefaultAdminGoogleEmail, isGoogleAuthConfigured } from "@/lib/googleAuth";
+import { getDefaultAdminGoogleEmail, getGoogleClientId, isGoogleAuthConfigured } from "@/lib/googleAuth";
 import WhatsAppShell from "@/components/whatsapp/WhatsAppShell";
 import {
   fetchWhatsAppPhoneNumbers,
@@ -26,6 +26,7 @@ export default async function WhatsAppConsoleLayout({ children }: { children: Re
           <GoogleAdminPrompt
             nextPath="/admin/whatsapp/"
             adminEmail={getDefaultAdminGoogleEmail()}
+            clientId={getGoogleClientId()}
             googleReady={isGoogleAuthConfigured()}
           />
         </div>

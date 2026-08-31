@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import GoogleAdminPrompt from "@/components/auth/GoogleAdminPrompt";
-import { getDefaultAdminGoogleEmail, isGoogleAuthConfigured } from "@/lib/googleAuth";
+import { getDefaultAdminGoogleEmail, getGoogleClientId, isGoogleAuthConfigured } from "@/lib/googleAuth";
 import { hasWhatsAppAdminAccess } from "../auth";
 import { readWhatsAppRows } from "../data";
 import QuickReplyManager from "../QuickReplyManager";
@@ -35,6 +35,7 @@ export default async function WhatsAppQuickRepliesPage() {
           <GoogleAdminPrompt
             nextPath="/admin/whatsapp/quick-replies/"
             adminEmail={getDefaultAdminGoogleEmail()}
+            clientId={getGoogleClientId()}
             googleReady={isGoogleAuthConfigured()}
           />
         </div>

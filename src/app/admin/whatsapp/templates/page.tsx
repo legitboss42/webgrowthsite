@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import GoogleAdminPrompt from "@/components/auth/GoogleAdminPrompt";
 import { WhatsAppIcon } from "@/components/whatsapp/icons";
-import { getDefaultAdminGoogleEmail, isGoogleAuthConfigured } from "@/lib/googleAuth";
+import { getDefaultAdminGoogleEmail, getGoogleClientId, isGoogleAuthConfigured } from "@/lib/googleAuth";
 import {
   countWhatsAppTemplatesByStatus,
   fetchWhatsAppTemplates,
@@ -133,6 +133,7 @@ export default async function WhatsAppTemplatesPage() {
           <GoogleAdminPrompt
             nextPath="/admin/whatsapp/templates/"
             adminEmail={getDefaultAdminGoogleEmail()}
+            clientId={getGoogleClientId()}
             googleReady={isGoogleAuthConfigured()}
           />
         </div>

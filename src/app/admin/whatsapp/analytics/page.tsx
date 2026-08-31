@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { cookies } from "next/headers";
 import GoogleAdminPrompt from "@/components/auth/GoogleAdminPrompt";
-import { getDefaultAdminGoogleEmail, isGoogleAuthConfigured } from "@/lib/googleAuth";
+import { getDefaultAdminGoogleEmail, getGoogleClientId, isGoogleAuthConfigured } from "@/lib/googleAuth";
 import { WhatsAppIcon, type WhatsAppIconName } from "@/components/whatsapp/icons";
 import { hasWhatsAppAdminAccess } from "../auth";
 import { countWhatsAppRows, readWhatsAppRows } from "../data";
@@ -210,6 +210,7 @@ export default async function WhatsAppAnalyticsPage({
           <GoogleAdminPrompt
             nextPath="/admin/whatsapp/analytics/"
             adminEmail={getDefaultAdminGoogleEmail()}
+            clientId={getGoogleClientId()}
             googleReady={isGoogleAuthConfigured()}
           />
         </div>

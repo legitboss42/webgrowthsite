@@ -1,10 +1,11 @@
 import GoogleSignInButton from "./GoogleSignInButton";
 
 type GoogleWaitlistGateProps = {
+  clientId?: string;
   googleReady?: boolean;
 };
 
-export default function GoogleWaitlistGate({ googleReady = true }: GoogleWaitlistGateProps) {
+export default function GoogleWaitlistGate({ clientId = "", googleReady = true }: GoogleWaitlistGateProps) {
   return (
     <div
       className="automation-form-shell relative overflow-hidden border border-[rgba(209,188,154,0.18)] bg-[linear-gradient(180deg,rgba(20,23,18,0.96),rgba(10,12,10,0.98))]"
@@ -34,9 +35,10 @@ export default function GoogleWaitlistGate({ googleReady = true }: GoogleWaitlis
         <div className="mt-8">
           {googleReady ? (
             <GoogleSignInButton
+              clientId={clientId}
               nextPath="/automation/#waitlist"
               label="Continue with Google"
-              pendingLabel="Opening Google..."
+              pendingLabel="Signing you in..."
               className="inline-flex min-h-14 items-center justify-center rounded-full border border-[#d6b678]/30 bg-[#e7d1a5] px-7 py-3 text-sm font-semibold text-[#17140e] shadow-[0_14px_36px_rgba(231,209,165,0.22)] transition-transform duration-200 hover:-translate-y-0.5 hover:bg-[#f1dfbd] disabled:cursor-not-allowed disabled:opacity-60"
             />
           ) : (

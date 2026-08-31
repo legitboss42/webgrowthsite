@@ -1,7 +1,11 @@
 import { cookies } from "next/headers";
 import WaitlistForm from "@/components/automation/WaitlistForm";
 import GoogleWaitlistGate from "@/components/auth/GoogleWaitlistGate";
-import { isGoogleAuthConfigured, readGoogleAuthSessionFromCookieStore } from "@/lib/googleAuth";
+import {
+  getGoogleClientId,
+  isGoogleAuthConfigured,
+  readGoogleAuthSessionFromCookieStore,
+} from "@/lib/googleAuth";
 
 /**
  * Waitlist section: the form plus the reassurance that belongs next to it.
@@ -69,7 +73,7 @@ export default async function WaitlistSection() {
           {session ? (
             <WaitlistForm sessionEmail={session.email} sessionFullName={session.fullName || ""} />
           ) : (
-            <GoogleWaitlistGate googleReady={isGoogleAuthConfigured()} />
+            <GoogleWaitlistGate clientId={getGoogleClientId()} googleReady={isGoogleAuthConfigured()} />
           )}
         </div>
       </div>

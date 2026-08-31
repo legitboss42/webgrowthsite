@@ -3,12 +3,14 @@ import GoogleSignInButton from "./GoogleSignInButton";
 type GoogleAdminPromptProps = {
   nextPath: string;
   adminEmail: string;
+  clientId?: string;
   googleReady?: boolean;
 };
 
 export default function GoogleAdminPrompt({
   nextPath,
   adminEmail,
+  clientId = "",
   googleReady = true,
 }: GoogleAdminPromptProps) {
   return (
@@ -62,9 +64,10 @@ export default function GoogleAdminPrompt({
             {googleReady ? (
               <GoogleSignInButton
                 nextPath={nextPath}
+                clientId={clientId}
                 loginHint={adminEmail}
                 label="Continue with Google"
-                pendingLabel="Opening Google..."
+                pendingLabel="Signing you in..."
                 className="inline-flex min-h-14 items-center justify-center rounded-full border border-[#d6b678]/30 bg-[#e7d1a5] px-7 py-3 text-sm font-semibold text-[#17140e] shadow-[0_14px_36px_rgba(231,209,165,0.22)] transition-transform duration-200 hover:-translate-y-0.5 hover:bg-[#f1dfbd] disabled:cursor-not-allowed disabled:opacity-60"
               />
             ) : (
