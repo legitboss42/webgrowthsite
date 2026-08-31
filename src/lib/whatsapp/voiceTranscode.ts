@@ -8,7 +8,7 @@ import ffmpegPath from "ffmpeg-static";
 const execFileAsync = promisify(execFile);
 const OGG_CAPTURE = Buffer.from("OggS", "ascii");
 const OPUS_HEAD = Buffer.from("OpusHead", "ascii");
-const UNKNOWN_GRANULE_POSITION = (1n << 64n) - 1n;
+const UNKNOWN_GRANULE_POSITION = BigInt("18446744073709551615");
 const OPUS_SAMPLE_RATE = 48_000;
 
 export type NormalizedWhatsAppVoiceNote = {
@@ -35,7 +35,7 @@ function inspectOggOpusVoiceNote(bytes: Buffer) {
   const preSkip = bytes.readUInt16LE(opusHeadOffset + 10);
 
   let offset = 0;
-  let lastGranule = -1n;
+  let lastGranule = BigInt(-1);
   while (offset + 27 <= bytes.length) {
     if (!bytes.subarray(offset, offset + 4).equals(OGG_CAPTURE)) {
       throw new Error("Converted voice note contains a malformed Ogg page.");
