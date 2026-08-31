@@ -1,11 +1,13 @@
 export type WhatsAppQuickSettings = {
   typingIndicatorEnabled: boolean;
   newMessageAlertsEnabled: boolean;
+  serviceWindowWarningEnabled: boolean;
 };
 
 export const WHATSAPP_DEFAULT_QUICK_SETTINGS: WhatsAppQuickSettings = {
   typingIndicatorEnabled: true,
   newMessageAlertsEnabled: true,
+  serviceWindowWarningEnabled: true,
 };
 
 const TABLE = "whatsapp_settings";
@@ -31,6 +33,10 @@ function parse(raw: unknown): WhatsAppQuickSettings {
       typeof value.newMessageAlertsEnabled === "boolean"
         ? value.newMessageAlertsEnabled
         : WHATSAPP_DEFAULT_QUICK_SETTINGS.newMessageAlertsEnabled,
+    serviceWindowWarningEnabled:
+      typeof value.serviceWindowWarningEnabled === "boolean"
+        ? value.serviceWindowWarningEnabled
+        : WHATSAPP_DEFAULT_QUICK_SETTINGS.serviceWindowWarningEnabled,
   };
 }
 
