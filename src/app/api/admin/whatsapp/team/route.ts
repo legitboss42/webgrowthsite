@@ -7,6 +7,8 @@ import {
   probeWhatsAppTable,
   readWhatsAppRows,
 } from "@/app/admin/whatsapp/data";
+import { buildWhatsAppTeamInvitationEmail } from "@/emails/whatsapp-team-invitation";
+import { ADMIN_EMAIL, sendTransactionalEmail } from "@/lib/email";
 import {
   getDefaultAdminGoogleEmail,
   readGoogleAuthSessionFromCookieStore,
@@ -149,7 +151,58 @@ export async function POST(request: Request) {
     });
   }
 
-  return NextResponse.json({ ok: true, member }, { status: 201 });
+  let invite: {
+    sent: boolean;
+    reason?: "setup_required" | "delivery_failed" | "member_not_created";
+  } = { sent: false, reason: "member_not_created" };
+
+  if (member) {
+    const invitation = buildWhatsAppTeamInvitationEmail({
+      displayName: member.displayName,
+      googleEmail: member.googleEmail,
+      role: member.role,
+      invitedByEmail: owner.actorEmail,
+    });
+
+    try {
+      const delivery = await sendTransactionalEmail({
+        to: [{ email: member.googleEmail, name: member.displayName }],
+        replyTo: { email: ADMIN_EMAIL, name: "Web Growth" },
+        subject: invitation.subject,
+        text: invitation.text,
+        html: invitation.html,
+      });
+
+      if (delivery.ok) {
+        invite = { sent: true };
+        await recordActivity({
+          actorEmail: owner.actorEmail,
+          targetMemberId: member.id,
+          eventType: "team_invite_sent",
+          metadata: { googleEmail: member.googleEmail },
+        });
+      } else {
+        invite = { sent: false, reason: "setup_required" };
+        await recordActivity({
+          actorEmail: owner.actorEmail,
+          targetMemberId: member.id,
+          eventType: "team_invite_failed",
+          metadata: { reason: "email_setup_required" },
+        });
+      }
+    } catch (error) {
+      console.error("WhatsApp team invitation email failed", error);
+      invite = { sent: false, reason: "delivery_failed" };
+      await recordActivity({
+        actorEmail: owner.actorEmail,
+        targetMemberId: member.id,
+        eventType: "team_invite_failed",
+        metadata: { reason: "delivery_failed" },
+      });
+    }
+  }
+
+  return NextResponse.json({ ok: true, member, invite }, { status: 201 });
 }
 
 export async function PATCH(request: Request) {

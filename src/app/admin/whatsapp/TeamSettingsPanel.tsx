@@ -13,8 +13,17 @@ import {
 type TeamResponse = {
   members?: WhatsAppTeamMember[];
   member?: WhatsAppTeamMember | null;
+  invite?: {
+    sent: boolean;
+    reason?: "setup_required" | "delivery_failed" | "member_not_created";
+  };
   error?: string;
   migrationRequired?: boolean;
+};
+
+type Notice = {
+  tone: "success" | "warning";
+  text: string;
 };
 
 function label(value: string) {
@@ -27,6 +36,7 @@ export default function TeamSettingsPanel() {
   const [busyId, setBusyId] = useState<string | null>(null);
   const [adding, setAdding] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<Notice | null>(null);
   const [migrationRequired, setMigrationRequired] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -59,6 +69,9 @@ export default function TeamSettingsPanel() {
     event.preventDefault();
     setAdding(true);
     setError(null);
+    setNotice(null);
+    const inviteAddress = email.trim().toLowerCase();
+
     try {
       const response = await fetch("/api/admin/whatsapp/team/", {
         method: "POST",
@@ -67,6 +80,15 @@ export default function TeamSettingsPanel() {
       });
       const payload = (await response.json().catch(() => null)) as TeamResponse | null;
       if (!response.ok) throw new Error(payload?.error || "Team member could not be added.");
+
+      setNotice(
+        payload?.invite?.sent
+          ? { tone: "success", text: `Member added. Invitation sent to ${inviteAddress}.` }
+          : {
+              tone: "warning",
+              text: `Member added, but the invitation email could not be sent to ${inviteAddress}.`,
+            },
+      );
       setName("");
       setEmail("");
       setRole("agent");
@@ -84,6 +106,7 @@ export default function TeamSettingsPanel() {
   ) {
     setBusyId(member.id);
     setError(null);
+    setNotice(null);
     try {
       const response = await fetch("/api/admin/whatsapp/team/", {
         method: "PATCH",
@@ -114,7 +137,7 @@ export default function TeamSettingsPanel() {
           </p>
           <h2 className="mt-1 font-display text-xl font-semibold text-ink">Team members</h2>
           <p className="mt-1 text-sm text-ink-soft">
-            {active} active · Google accounts only · deactivate members without deleting their history.
+            {active} active · Google accounts only · adding a member sends a branded email invitation automatically.
           </p>
         </div>
         <button
@@ -133,6 +156,18 @@ export default function TeamSettingsPanel() {
           {migrationRequired ? (
             <p className="mt-1 text-xs">Apply the Stage 2 team migration in Supabase, then refresh.</p>
           ) : null}
+        </div>
+      ) : null}
+
+      {notice ? (
+        <div
+          className={`mt-4 rounded-xl border px-3 py-3 text-sm ${
+            notice.tone === "success"
+              ? "border-emerald-200 bg-emerald-50 text-emerald-800"
+              : "border-amber-200 bg-amber-50 text-amber-800"
+          }`}
+        >
+          {notice.text}
         </div>
       ) : null}
 
