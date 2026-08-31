@@ -21,10 +21,11 @@ export default function QuickSettingsPanel({ settings, quickSettings }: { settin
   const [businessHours, setBusinessHours] = useState(settings.businessHours.enabled);
   const [typingIndicator, setTypingIndicator] = useState(quickSettings.typingIndicatorEnabled);
   const [newMessageAlerts, setNewMessageAlerts] = useState(quickSettings.newMessageAlertsEnabled);
+  const [serviceWindowWarning, setServiceWindowWarning] = useState(quickSettings.serviceWindowWarningEnabled);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
-  function saveQuick(update: Partial<WhatsAppQuickSettings>) {
+  function saveQuick(update: Partial<WhatsAppQuickSettings>, rollback?: () => void) {
     startTransition(async () => {
       setFeedback(null);
       const response = await fetch("/api/admin/whatsapp/quick-settings/", {
@@ -33,8 +34,10 @@ export default function QuickSettingsPanel({ settings, quickSettings }: { settin
         body: JSON.stringify(update),
       });
       const payload = (await response.json().catch(() => ({}))) as { ok?: boolean; error?: string };
-      if (!payload.ok) setFeedback(payload.error || "Could not save quick setting.");
-      else {
+      if (!payload.ok) {
+        rollback?.();
+        setFeedback(payload.error || "Could not save quick setting.");
+      } else {
         setFeedback("Saved");
         router.refresh();
       }
@@ -70,21 +73,40 @@ export default function QuickSettingsPanel({ settings, quickSettings }: { settin
       title: "Customer typing indicator",
       description: "Show a typing indicator to the customer while an agent writes a reply.",
       checked: typingIndicator,
-      onChange: (checked: boolean) => { setTypingIndicator(checked); saveQuick({ typingIndicatorEnabled: checked }); },
+      onChange: (checked: boolean) => {
+        const previous = typingIndicator;
+        setTypingIndicator(checked);
+        saveQuick({ typingIndicatorEnabled: checked }, () => setTypingIndicator(previous));
+      },
     },
     {
       key: "alerts",
-      title: "New message alerts",
-      description: "Allow browser and in-page alerts when a new WhatsApp message arrives.",
+      title: "New message notifications",
+      description: "Show browser and in-page alerts when a new WhatsApp message arrives.",
       checked: newMessageAlerts,
-      onChange: (checked: boolean) => { setNewMessageAlerts(checked); saveQuick({ newMessageAlertsEnabled: checked }); },
+      onChange: (checked: boolean) => {
+        const previous = newMessageAlerts;
+        setNewMessageAlerts(checked);
+        saveQuick({ newMessageAlertsEnabled: checked }, () => setNewMessageAlerts(previous));
+      },
     },
     {
       key: "hours",
-      title: "Business hours tracking",
+      title: "Business hours",
       description: "Track whether the team is currently inside the configured working hours.",
       checked: businessHours,
       onChange: toggleBusinessHours,
+    },
+    {
+      key: "service-window",
+      title: "24-hour messaging warning",
+      description: "Warn agents when a conversation is close to, or outside, Meta's 24-hour reply window.",
+      checked: serviceWindowWarning,
+      onChange: (checked: boolean) => {
+        const previous = serviceWindowWarning;
+        setServiceWindowWarning(checked);
+        saveQuick({ serviceWindowWarningEnabled: checked }, () => setServiceWindowWarning(previous));
+      },
     },
   ];
 
@@ -97,7 +119,7 @@ export default function QuickSettingsPanel({ settings, quickSettings }: { settin
         </div>
         <Link href="/admin/whatsapp/settings/" className="text-xs font-semibold text-ledger hover:underline">Manage all settings →</Link>
       </div>
-      <div className="mt-4 grid gap-3 lg:grid-cols-3">
+      <div className="mt-4 grid gap-3 md:grid-cols-2">
         {rows.map((row) => (
           <div key={row.key} className="flex items-center justify-between gap-4 rounded-xl border border-rule bg-paper px-3.5 py-3">
             <div className="min-w-0">
