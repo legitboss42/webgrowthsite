@@ -147,7 +147,11 @@ export async function sendWhatsAppMedia(input: MediaSendInput, options: SendOpti
   try {
     const formData = new FormData();
     formData.set("messaging_product", "whatsapp");
-    formData.set("type", input.mimeType);
+    // Meta's current Upload Audio example derives the audio MIME type from the file part
+    // itself. Sending a second `type=audio/ogg; codecs=opus` field is redundant and can
+    // leave the uploaded media object with a MIME declaration that later fails scrutiny.
+    // Keep the legacy type field for the other media paths that are already proven here.
+    if (input.kind !== "audio") formData.set("type", input.mimeType);
     formData.set("file", input.file, input.filename);
 
     const uploadResponse = await fetcher(`https://graph.facebook.com/${apiVersion}/${phoneNumberId}/media`, {

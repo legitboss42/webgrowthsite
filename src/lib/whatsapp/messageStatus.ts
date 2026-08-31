@@ -140,27 +140,40 @@ const FAILURE_REASONS: Record<number, string> = {
   368: "The recipient's account is restricted.",
 };
 
+function sanitizeMetaDetail(value: string | undefined) {
+  if (!value) return "";
+  return value
+    .replace(/[\u0000-\u001f\u007f]/g, " ")
+    .replace(/\s+/g, " ")
+    .replace(/access_token\s*=\s*[^\s,;]+/gi, "access_token=[redacted]")
+    .replace(/fbtrace_id\s*=\s*[^\s,;]+/gi, "fbtrace_id=[redacted]")
+    .replace(/authorization\s*=\s*Bearer\s+[^\s,;]+/gi, "authorization=[redacted]")
+    .replace(/\bEAA[A-Za-z0-9_-]{4,}\b/g, "[redacted]")
+    .trim()
+    .slice(0, 220);
+}
+
 /**
  * An operator-safe explanation for a failed status.
  *
- * Meta's error payloads carry trace ids, internal messages and occasionally request
- * detail; none of that belongs on an admin screen. This maps the codes we understand
- * to plain English and otherwise records the code alone, which is enough to look up
- * without leaking the provider response.
+ * Meta's `error_data.details` is often the only useful clue for 131053 media failures,
+ * so known error codes may keep a short redacted detail. Unknown provider payloads are
+ * still reduced to the code alone.
  */
 export function sanitizeWhatsAppStatusError(input: {
   code?: number;
   title?: string;
+  details?: string;
 }): string | undefined {
   if (typeof input.code === "number" && FAILURE_REASONS[input.code]) {
-    return `${FAILURE_REASONS[input.code]} (code ${input.code})`;
+    const detail = sanitizeMetaDetail(input.details);
+    return `${FAILURE_REASONS[input.code]}${detail ? ` ${detail}` : ""} (code ${input.code})`;
   }
   if (typeof input.code === "number") {
     return `WhatsApp rejected the message (code ${input.code}).`;
   }
-  // Meta's `title` is a short enum-like phrase, not a stack trace, so it is safe to
-  // keep — clipped, in case a future payload puts something longer there.
-  const title = (input.title || "").trim();
+
+  const title = sanitizeMetaDetail(input.title);
   if (title) return title.slice(0, 120);
   return undefined;
 }

@@ -97,10 +97,12 @@ export function parseWhatsAppWebhook(payload: unknown): { messages: NormalizedIn
         const item = asRecord(status);
         if (typeof item?.id !== "string" || typeof item?.status !== "string" || typeof item?.timestamp !== "string") continue;
         const failure = Array.isArray(item.errors) ? asRecord(item.errors[0]) : null;
+        const failureData = asRecord(failure?.error_data);
         const error = failure
           ? sanitizeWhatsAppStatusError({
               code: typeof failure.code === "number" ? failure.code : undefined,
               title: typeof failure.title === "string" ? failure.title : undefined,
+              details: typeof failureData?.details === "string" ? failureData.details : undefined,
             })
           : undefined;
         statuses.push({ messageId: item.id, waId: typeof item.recipient_id === "string" ? item.recipient_id : undefined, status: item.status, timestamp: Number(item.timestamp), error });

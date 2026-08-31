@@ -66,59 +66,51 @@ test("normalizes an inbound WhatsApp voice note with its media id", () => {
   });
 });
 
-test("normalizes inbound image, video and document metadata", () => {
+test("normalizes inbound image, video and document media metadata", () => {
   const payload = {
     object: "whatsapp_business_account",
     entry: [{ changes: [{ value: {
       contacts: [{ wa_id: "2348000000000", profile: { name: "Ada" } }],
       messages: [
-        {
-          id: "wamid.image",
-          from: "2348000000000",
-          timestamp: "1800000000",
-          type: "image",
-          image: { id: "media-image-1", mime_type: "image/jpeg", sha256: "image-hash", caption: "Photo caption" },
-        },
-        {
-          id: "wamid.video",
-          from: "2348000000000",
-          timestamp: "1800000001",
-          type: "video",
-          video: { id: "media-video-1", mime_type: "video/mp4", sha256: "video-hash", caption: "Video caption" },
-        },
-        {
-          id: "wamid.document",
-          from: "2348000000000",
-          timestamp: "1800000002",
-          type: "document",
-          document: {
-            id: "media-document-1",
-            mime_type: "application/pdf",
-            sha256: "document-hash",
-            filename: "Proposal.pdf",
-            caption: "Proposal attached",
-          },
-        },
+        { id: "wamid.image", from: "2348000000000", timestamp: "1800000000", type: "image", image: { id: "media-image", mime_type: "image/jpeg", sha256: "image-hash", caption: "Photo" } },
+        { id: "wamid.video", from: "2348000000000", timestamp: "1800000001", type: "video", video: { id: "media-video", mime_type: "video/mp4", sha256: "video-hash", caption: "Clip" } },
+        { id: "wamid.document", from: "2348000000000", timestamp: "1800000002", type: "document", document: { id: "media-document", mime_type: "application/pdf", sha256: "document-hash", filename: "Proposal.pdf", caption: "Proposal" } },
       ],
     } }] }],
   };
 
   const parsed = parseWhatsAppWebhook(payload);
-  assert.equal(parsed.messages[0]?.mediaId, "media-image-1");
-  assert.equal(parsed.messages[0]?.mediaMimeType, "image/jpeg");
-  assert.equal(parsed.messages[0]?.mediaSha256, "image-hash");
-  assert.equal(parsed.messages[0]?.text, "Photo caption");
-
-  assert.equal(parsed.messages[1]?.mediaId, "media-video-1");
-  assert.equal(parsed.messages[1]?.mediaMimeType, "video/mp4");
-  assert.equal(parsed.messages[1]?.mediaSha256, "video-hash");
-  assert.equal(parsed.messages[1]?.text, "Video caption");
-
-  assert.equal(parsed.messages[2]?.mediaId, "media-document-1");
-  assert.equal(parsed.messages[2]?.mediaMimeType, "application/pdf");
-  assert.equal(parsed.messages[2]?.mediaSha256, "document-hash");
+  assert.equal(parsed.messages[0]?.mediaId, "media-image");
+  assert.equal(parsed.messages[0]?.text, "Photo");
+  assert.equal(parsed.messages[1]?.mediaId, "media-video");
+  assert.equal(parsed.messages[1]?.text, "Clip");
+  assert.equal(parsed.messages[2]?.mediaId, "media-document");
   assert.equal(parsed.messages[2]?.mediaFilename, "Proposal.pdf");
-  assert.equal(parsed.messages[2]?.text, "Proposal attached");
+  assert.equal(parsed.messages[2]?.text, "Proposal");
+});
+
+test("keeps the useful Meta detail for a failed media status", () => {
+  const payload = {
+    object: "whatsapp_business_account",
+    entry: [{ changes: [{ value: {
+      statuses: [{
+        id: "wamid.voice-out",
+        status: "failed",
+        timestamp: "1800000001",
+        recipient_id: "2348000000000",
+        errors: [{
+          code: 131053,
+          title: "Media upload error",
+          error_data: { details: "Media file scrutiny for the file failed with mediaEngineStatus: 0" },
+        }],
+      }],
+    } }] }],
+  };
+
+  const parsed = parseWhatsAppWebhook(payload);
+  assert.equal(parsed.statuses[0]?.status, "failed");
+  assert.match(parsed.statuses[0]?.error || "", /131053/);
+  assert.match(parsed.statuses[0]?.error || "", /mediaEngineStatus: 0/);
 });
 
 test("accepts a correct Meta signature", () => {

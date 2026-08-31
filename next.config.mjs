@@ -44,7 +44,10 @@ const nextConfig = {
   serverExternalPackages: ["edge-tts-universal", "ffmpeg-static", "ffprobe-static", "ws", "bufferutil", "utf-8-validate"],
   outputFileTracingIncludes: {
     "/api/scheduler/uploads": ["./node_modules/ffprobe-static/bin/linux/x64/ffprobe"],
-    "/api/admin/whatsapp/reply/audio": ["./node_modules/ffmpeg-static/ffmpeg"],
+    "/api/admin/whatsapp/reply/audio": [
+      "./node_modules/ffmpeg-static/ffmpeg",
+      "./node_modules/ffprobe-static/bin/linux/x64/ffprobe",
+    ],
   },
   distDir: ".next",
   images: { qualities: [60, 65, 68, 75] },
