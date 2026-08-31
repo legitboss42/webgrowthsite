@@ -86,6 +86,24 @@ function classifyMetaFailure(status: number, payload: unknown): Extract<SendResu
   return { sent: false, reason: "API_ERROR", diagnostic };
 }
 
+function baseMimeType(value: string) {
+  return value.split(";", 1)[0]?.trim().toLowerCase() || value.trim().toLowerCase();
+}
+
+/**
+ * Meta's media processor validates the multipart file part separately from the codec
+ * carried inside the OGG container. Its upload examples send an OGG file part as
+ * `audio/ogg`; the Opus requirement is satisfied by the actual encoded stream and by
+ * `voice: true` on the message send. Sending `audio/ogg; codecs=opus` as the multipart
+ * part caused Meta's scrutiny layer to reinterpret the same uploaded bytes as
+ * `application/octet-stream` and fail them later with 131053.
+ */
+export function getWhatsAppUploadMimeType(kind: WhatsAppMediaKind, mimeType: string) {
+  const base = baseMimeType(mimeType);
+  if (kind === "audio" && base === "audio/ogg") return "audio/ogg";
+  return base;
+}
+
 export async function sendWhatsAppText(input: SendInput, options: SendOptions = {}): Promise<SendResult> {
   const env = options.env || process.env;
   const token = env.WHATSAPP_ACCESS_TOKEN?.trim();
@@ -145,14 +163,17 @@ export async function sendWhatsAppMedia(input: MediaSendInput, options: SendOpti
     : "";
 
   try {
+    const uploadMimeType = getWhatsAppUploadMimeType(input.kind, input.mimeType);
+    const uploadFile = input.file.type === uploadMimeType
+      ? input.file
+      : new Blob([input.file], { type: uploadMimeType });
+
     const formData = new FormData();
     formData.set("messaging_product", "whatsapp");
-    // Meta's current Upload Audio example derives the audio MIME type from the file part
-    // itself. Sending a second `type=audio/ogg; codecs=opus` field is redundant and can
-    // leave the uploaded media object with a MIME declaration that later fails scrutiny.
-    // Keep the legacy type field for the other media paths that are already proven here.
-    if (input.kind !== "audio") formData.set("type", input.mimeType);
-    formData.set("file", input.file, input.filename);
+    // Keep the explicit upload type aligned with the multipart file part. For OGG/Opus
+    // voice notes this must be the base `audio/ogg`; the Opus codec is inside the file.
+    formData.set("type", uploadMimeType);
+    formData.set("file", uploadFile, input.filename);
 
     const uploadResponse = await fetcher(`https://graph.facebook.com/${apiVersion}/${phoneNumberId}/media`, {
       method: "POST",
