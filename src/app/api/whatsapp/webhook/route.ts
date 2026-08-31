@@ -64,10 +64,12 @@ export async function POST(request: Request) {
       { leadKeywords: settings.leadKeywords },
     );
 
-    // Push is intentionally downstream of successful CRM processing. A push provider
-    // failure must never make Meta retry a webhook whose message was already stored.
+    // Push is downstream of successful CRM processing, and is awaited so a serverless
+    // runtime cannot terminate delivery after the webhook response has already gone out.
+    // Individual push failures are swallowed below, so they still never make Meta retry
+    // a webhook whose CRM work succeeded.
     if (quickSettings.newMessageAlertsEnabled && parsed.messages.length) {
-      void Promise.all(
+      await Promise.all(
         parsed.messages.map(async (message) => {
           try {
             const claimed = await claimWhatsAppPushDelivery(message.messageId);
