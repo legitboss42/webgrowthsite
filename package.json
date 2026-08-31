@@ -18,6 +18,9 @@
     "magnets:build": "node scripts/build-magnets.mjs",
     "magnets:watch": "node scripts/watch-magnets.mjs"
   },
+  "allowScripts": {
+    "ffmpeg-static@5.3.0": true
+  },
   "dependencies": {
     "@next/third-parties": "^16.2.1",
     "@remotion/cli": "^4.0.481",

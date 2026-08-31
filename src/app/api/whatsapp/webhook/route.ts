@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { createSupabaseWhatsAppStore } from "@/lib/whatsapp/store";
 import { loadWhatsAppSettings } from "@/lib/whatsapp/settingsStore";
 import { loadWhatsAppQuickSettings } from "@/lib/whatsapp/quickSettings";
-import { storeWhatsAppCallEvents } from "@/lib/whatsapp/callHistory";
+import { extractWhatsAppCallEvents, storeWhatsAppCallEvents } from "@/lib/whatsapp/callHistory";
 import {
   isValidMetaSignature,
   parseWhatsAppWebhook,
@@ -49,6 +49,7 @@ export async function POST(request: Request) {
 
     const payload = JSON.parse(rawBody);
     const parsed = parseWhatsAppWebhook(payload);
+    const callEvents = extractWhatsAppCallEvents(payload);
     const [{ settings }, quickSettings] = await Promise.all([
       loadWhatsAppSettings(),
       loadWhatsAppQuickSettings(),
@@ -65,13 +66,38 @@ export async function POST(request: Request) {
       { leadKeywords: settings.leadKeywords },
     );
 
-    // Calling API events share this signed Meta webhook endpoint. Persist them separately
-    // from messages so a call's ringing/accepted/terminated events collapse into one
-    // history row instead of polluting the conversation message stream.
     try {
       await storeWhatsAppCallEvents(payload);
     } catch (error) {
       console.error("WhatsApp call history processing failed", error);
+    }
+
+    const incomingRinging = callEvents.filter(
+      (event) => event.direction === "inbound" && event.status === "ringing",
+    );
+    if (incomingRinging.length) {
+      await Promise.all(
+        incomingRinging.map(async (event) => {
+          try {
+            const id = `call:${String(event.call_id)}:ringing`;
+            const claimed = await claimWhatsAppPushDelivery(id);
+            if (!claimed) return;
+            const name = typeof event.customer_name === "string" && event.customer_name.trim()
+              ? event.customer_name.trim()
+              : typeof event.customer_wa_id === "string" && event.customer_wa_id.trim()
+                ? event.customer_wa_id.trim()
+                : "WhatsApp caller";
+            await sendWhatsAppPushNotification({
+              id,
+              title: `Incoming WhatsApp call · ${name}`,
+              body: "Tap to open Web Growth and answer or reject the call.",
+              url: `/admin/whatsapp/calls/?call=${encodeURIComponent(String(event.call_id))}`,
+            });
+          } catch (error) {
+            console.error("WhatsApp incoming-call push failed", error);
+          }
+        }),
+      );
     }
 
     if (quickSettings.newMessageAlertsEnabled && parsed.messages.length) {

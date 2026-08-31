@@ -9,14 +9,8 @@ import {
 } from "@/lib/whatsapp/phoneNumbers";
 import { hasWhatsAppAdminAccess } from "./auth";
 import InstantInteractionLayer from "./InstantInteractionLayer";
+import IncomingCallOverlay from "./IncomingCallOverlay";
 
-/**
- * Console chrome for every /admin/whatsapp route.
- *
- * When the session is locked the shell is skipped entirely so the unlock form is
- * the only thing on screen (it keeps its own dark treatment, shared with the other
- * internal utilities).
- */
 export default async function WhatsAppConsoleLayout({ children }: { children: ReactNode }) {
   const cookieStore = await cookies();
 
@@ -50,6 +44,7 @@ export default async function WhatsAppConsoleLayout({ children }: { children: Re
   return (
     <WhatsAppShell senderConnected={senderConnected} senderNumber={senderNumber}>
       <InstantInteractionLayer />
+      <IncomingCallOverlay />
       {children}
     </WhatsAppShell>
   );
