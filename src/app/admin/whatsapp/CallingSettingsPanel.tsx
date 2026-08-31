@@ -32,25 +32,48 @@ function toMetaHours(hours: WhatsAppBusinessHours) {
   } as const;
 }
 
+type CallingApiPayload = {
+  ok?: boolean;
+  calling?: WhatsAppCallingSettings;
+  error?: string;
+  detail?: string;
+};
+
 export default function CallingSettingsPanel({ businessHours }: { businessHours: WhatsAppBusinessHours }) {
   const [calling, setCalling] = useState<WhatsAppCallingSettings | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [detail, setDetail] = useState<string | null>(null);
   const [saved, setSaved] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [pending, startTransition] = useTransition();
 
+  async function loadCallingSettings() {
+    setLoading(true);
+    setError(null);
+    setDetail(null);
+    try {
+      const response = await fetch("/api/admin/whatsapp/calling-settings/", { cache: "no-store" });
+      const payload = (await response.json().catch(() => ({}))) as CallingApiPayload;
+      if (!response.ok || !payload.ok || !payload.calling) {
+        setCalling(null);
+        setError(payload.error || "Could not load Calling settings.");
+        setDetail(payload.detail || null);
+        return;
+      }
+      setCalling(payload.calling);
+    } catch (reason) {
+      setCalling(null);
+      setError(reason instanceof Error ? reason.message : "Could not load Calling settings.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   useEffect(() => {
-    let active = true;
-    fetch("/api/admin/whatsapp/calling-settings/", { cache: "no-store" })
-      .then(async (response) => {
-        const payload = (await response.json().catch(() => ({}))) as { ok?: boolean; calling?: WhatsAppCallingSettings; error?: string };
-        if (!active) return;
-        if (!response.ok || !payload.ok) throw new Error(payload.error || "Could not load Calling settings.");
-        setCalling(payload.calling || {});
-      })
-      .catch((reason) => active && setError(reason instanceof Error ? reason.message : "Could not load Calling settings."))
-      .finally(() => active && setLoading(false));
-    return () => { active = false; };
+    void loadCallingSettings();
+    // This panel owns the live Meta read. It intentionally loads once on mount; the
+    // Retry button exists for transient Graph API failures.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const hoursSummary = useMemo(() => {
@@ -65,6 +88,7 @@ export default function CallingSettingsPanel({ businessHours }: { businessHours:
     const previous = calling;
     setCalling(optimistic(calling));
     setError(null);
+    setDetail(null);
     setSaved(null);
     startTransition(async () => {
       const response = await fetch("/api/admin/whatsapp/calling-settings/", {
@@ -72,16 +96,25 @@ export default function CallingSettingsPanel({ businessHours }: { businessHours:
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(fields),
       });
-      const payload = (await response.json().catch(() => ({}))) as { ok?: boolean; calling?: WhatsAppCallingSettings; error?: string };
-      if (!response.ok || !payload.ok) {
+      const payload = (await response.json().catch(() => ({}))) as CallingApiPayload;
+      if (!response.ok || !payload.ok || !payload.calling) {
         setCalling(previous);
         setError(payload.error || "Meta rejected the Calling setting.");
+        setDetail(payload.detail || null);
         return;
       }
-      setCalling(payload.calling || optimistic(previous));
+      setCalling(payload.calling);
       setSaved(successLabel);
     });
   }
+
+  const badge = loading
+    ? "Loading…"
+    : !calling
+      ? "Live state unavailable"
+      : calling.status === "ENABLED"
+        ? "Calling enabled"
+        : "Calling disabled";
 
   return (
     <section className="relative z-10 mx-4 mt-5 rounded-xl border border-rule bg-paper-raised p-5 shadow-sm sm:mx-6">
@@ -92,11 +125,28 @@ export default function CallingSettingsPanel({ businessHours }: { businessHours:
           <p className="mt-0.5 max-w-2xl text-xs leading-5 text-ink-faint">These controls read and write the Calls settings on your WhatsApp business phone number directly at Meta.</p>
         </div>
         <span className={`rounded-full px-2.5 py-1 text-[0.65rem] font-semibold ${calling?.status === "ENABLED" ? "bg-ledger-tint text-ledger" : "bg-paper-sunk text-ink-faint"}`}>
-          {loading ? "Loading…" : calling?.status === "ENABLED" ? "Calling enabled" : "Calling disabled"}
+          {badge}
         </span>
       </div>
 
-      {error ? <p className="mt-4 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-700">{error}</p> : null}
+      {error ? (
+        <div className="mt-4 rounded-lg border border-rose-200 bg-rose-50 px-3 py-3 text-xs text-rose-700">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <p className="font-medium">{error}</p>
+              {detail ? <p className="mt-1 break-words leading-5 text-rose-700/85">{detail}</p> : null}
+            </div>
+            <button
+              type="button"
+              onClick={() => void loadCallingSettings()}
+              disabled={loading}
+              className="flex-none rounded-md border border-rose-300 px-2.5 py-1 font-medium transition hover:bg-rose-100 disabled:opacity-50"
+            >
+              Retry
+            </button>
+          </div>
+        </div>
+      ) : null}
 
       {calling ? (
         <div className="mt-4 grid gap-3 md:grid-cols-2">
