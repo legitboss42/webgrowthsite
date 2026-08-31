@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useLayoutEffect } from "react";
 import { useRouter } from "next/navigation";
 
 export default function MarkConversationRead({
@@ -13,6 +13,36 @@ export default function MarkConversationRead({
   explicitSelection: boolean;
 }) {
   const router = useRouter();
+
+  // A conversation opens where the work actually is: the newest message. Run once for
+  // the selected conversation, then repeat across two animation frames so hydration and
+  // the native media controls have finished settling before the final scroll position is
+  // locked in. Normal manual scrolling is untouched after that.
+  useLayoutEffect(() => {
+    const visibleOnThisDevice =
+      explicitSelection || window.matchMedia("(min-width: 1024px)").matches;
+    if (!visibleOnThisDevice) return;
+
+    const scrollToLatest = () => {
+      const editor = document.getElementById("whatsapp-composer-editor");
+      const composerShell = editor?.closest("form")?.parentElement;
+      const messageViewport = composerShell?.previousElementSibling;
+      if (!(messageViewport instanceof HTMLElement)) return;
+      messageViewport.scrollTop = messageViewport.scrollHeight;
+    };
+
+    scrollToLatest();
+    let secondFrame = 0;
+    const firstFrame = window.requestAnimationFrame(() => {
+      scrollToLatest();
+      secondFrame = window.requestAnimationFrame(scrollToLatest);
+    });
+
+    return () => {
+      window.cancelAnimationFrame(firstFrame);
+      if (secondFrame) window.cancelAnimationFrame(secondFrame);
+    };
+  }, [conversationId, explicitSelection]);
 
   useEffect(() => {
     if (unreadCount <= 0) return;
