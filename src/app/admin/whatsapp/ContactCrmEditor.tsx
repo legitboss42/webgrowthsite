@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent, type MouseEvent } from "react";
+import ContactTimeline from "./ContactTimeline";
 import {
   WHATSAPP_CONTACT_LEAD_STAGES,
   WHATSAPP_CONTACT_OPT_IN_STATUSES,
@@ -205,6 +206,8 @@ function ContactForm({ mode, contact, crmReady, onClose }: { mode: "create" | "e
       ) : (
         <p className="mx-5 mb-5 rounded-lg border border-brass/25 bg-brass-tint px-3 py-2.5 text-xs leading-5 text-[#6f4f16] sm:mx-6">Stage 3 pipeline, tags, custom fields and consent controls are waiting for the additive Supabase migration. Existing contact editing remains available.</p>
       )}
+
+      {mode === "edit" && contact ? <ContactTimeline contactId={contact.id} /> : null}
 
       {error ? <p className="mx-5 mb-4 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-700 sm:mx-6">{error}</p> : null}
       <div className="flex items-center justify-end gap-2 border-t border-rule px-5 py-4 sm:px-6">
