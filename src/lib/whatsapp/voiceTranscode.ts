@@ -7,7 +7,7 @@ import ffmpegPath from "ffmpeg-static";
 import ffprobeStatic from "ffprobe-static";
 
 const execFileAsync = promisify(execFile);
-const WHATSAPP_VOICE_INPUT_SAMPLE_RATE = 16_000;
+const WHATSAPP_VOICE_SAMPLE_RATE = 48_000;
 
 export type NormalizedWhatsAppVoiceNote = {
   file: File;
@@ -21,10 +21,12 @@ type FFprobeVoiceOutput = {
     codec_name?: unknown;
     channels?: unknown;
     sample_rate?: unknown;
+    start_time?: unknown;
     duration?: unknown;
   }>;
   format?: {
     format_name?: unknown;
+    start_time?: unknown;
     duration?: unknown;
   };
 };
@@ -67,6 +69,9 @@ export function assertValidWhatsAppVoiceProbe(raw: unknown) {
   const codecName = typeof stream?.codec_name === "string" ? stream.codec_name.toLowerCase() : "";
   const channels = finiteNumber(stream?.channels);
   const sampleRate = finiteNumber(stream?.sample_rate);
+  const streamStartTime = finiteNumber(stream?.start_time);
+  const formatStartTime = finiteNumber(output.format?.start_time);
+  const startTime = Number.isFinite(streamStartTime) ? streamStartTime : formatStartTime;
   const streamDuration = finiteNumber(stream?.duration);
   const formatDuration = finiteNumber(output.format?.duration);
   const durationSeconds = Number.isFinite(streamDuration) ? streamDuration : formatDuration;
@@ -76,20 +81,24 @@ export function assertValidWhatsAppVoiceProbe(raw: unknown) {
   if (!formats.has("ogg")) throw new Error("Converted voice note is not an OGG container.");
   if (codecName !== "opus") throw new Error("Converted voice note is not encoded with Opus.");
   if (channels !== 1) throw new Error("Converted voice note is not mono.");
-  // Opus is always decoded on a 48 kHz clock even when the OpusHead input sample rate is
-  // 16 kHz. The WhatsApp-style 16 kHz source rate is checked separately from the bytes.
-  if (sampleRate !== 48_000) throw new Error("Converted voice note does not use the Opus 48 kHz clock.");
+  if (sampleRate !== WHATSAPP_VOICE_SAMPLE_RATE) {
+    throw new Error("Converted voice note does not use the Opus 48 kHz sample rate.");
+  }
+  if (!Number.isFinite(startTime) || Math.abs(startTime) > 0.001) {
+    throw new Error("Converted voice note does not start at timestamp zero.");
+  }
   if (!Number.isFinite(durationSeconds) || durationSeconds <= 0.05) {
     throw new Error("Converted voice note contains no usable audio duration.");
   }
 
-  return { codecName, channels, sampleRate, durationSeconds };
+  return { codecName, channels, sampleRate, startTime, durationSeconds };
 }
 
 /**
- * Converts browser MediaRecorder output into a WhatsApp-native voice-note profile:
- * OGG/Opus, mono, 16 kHz input rate, 32 kbps voice-oriented Opus frames. FFprobe validates
- * the container/codec/duration and the OpusHead bytes verify the source sample-rate field.
+ * Converts browser MediaRecorder output into a conservative WhatsApp voice-note profile:
+ * OGG/Opus, mono, 48 kHz, 20 ms voice-oriented Opus frames, with timestamps reset to zero.
+ * FFprobe validates the container, codec, channels, sample rate, start time and duration,
+ * while the OpusHead bytes verify the rate advertised inside the OGG stream itself.
  */
 export async function normalizeRecordedVoiceNote(audio: File): Promise<NormalizedWhatsAppVoiceNote> {
   if (!ffmpegPath) throw new Error("FFmpeg is unavailable on this deployment.");
@@ -114,10 +123,12 @@ export async function normalizeRecordedVoiceNote(audio: File): Promise<Normalize
         "-vn",
         "-map_metadata",
         "-1",
+        "-af",
+        `aresample=${WHATSAPP_VOICE_SAMPLE_RATE}:async=1:first_pts=0`,
         "-ac",
         "1",
         "-ar",
-        String(WHATSAPP_VOICE_INPUT_SAMPLE_RATE),
+        String(WHATSAPP_VOICE_SAMPLE_RATE),
         "-c:a",
         "libopus",
         "-b:a",
@@ -127,7 +138,7 @@ export async function normalizeRecordedVoiceNote(audio: File): Promise<Normalize
         "-compression_level",
         "10",
         "-frame_duration",
-        "60",
+        "20",
         "-application",
         "voip",
         "-packet_loss",
@@ -144,8 +155,8 @@ export async function normalizeRecordedVoiceNote(audio: File): Promise<Normalize
     const bytes = await readFile(outputPath);
     if (bytes.length <= 0) throw new Error("FFmpeg produced an empty voice note.");
     const opusHeadInputSampleRate = readOpusHeadInputSampleRate(bytes);
-    if (opusHeadInputSampleRate !== WHATSAPP_VOICE_INPUT_SAMPLE_RATE) {
-      throw new Error("Converted voice note does not carry the WhatsApp voice input sample rate.");
+    if (opusHeadInputSampleRate !== WHATSAPP_VOICE_SAMPLE_RATE) {
+      throw new Error("Converted voice note does not carry the WhatsApp voice sample rate.");
     }
 
     const probeResult = await execFileAsync(
@@ -154,7 +165,7 @@ export async function normalizeRecordedVoiceNote(audio: File): Promise<Normalize
         "-v",
         "error",
         "-show_entries",
-        "stream=codec_type,codec_name,channels,sample_rate,duration:format=format_name,duration",
+        "stream=codec_type,codec_name,channels,sample_rate,start_time,duration:format=format_name,start_time,duration",
         "-of",
         "json",
         outputPath,
