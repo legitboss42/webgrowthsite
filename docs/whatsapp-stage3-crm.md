@@ -2,11 +2,17 @@
 
 This document is the authoritative checkpoint for Stage 3 of the current Web Growth WhatsApp Platform roadmap.
 
-A sub-stage is not complete because code exists. It is complete only after the relevant production test gate passes and known blockers are closed.
+## Stage 3 status
+
+**COMPLETE — 100% PRODUCTION VERIFIED ON 2026-09-01.**
+
+Stage 4 — Saved Replies & Agent Productivity is now unlocked.
+
+Stage 3 was only marked complete after all implementation, production, permission, mobile/desktop, Stage 1 regression, and Stage 2 regression gates passed.
 
 ## Stage 3 completion standard
 
-Stage 3 is complete only when we physically verify:
+The following were physically verified in production:
 
 - contact creation
 - contact editing
@@ -27,7 +33,7 @@ Stage 3 is complete only when we physically verify:
 
 **Status: COMPLETE.**
 
-Implemented before 3B:
+Verified capabilities:
 
 - automatic contact creation from inbound WhatsApp messages
 - manual contact creation
@@ -41,28 +47,25 @@ Implemented before 3B:
 - Manager/Owner manual-contact creation permission
 - contact create/update activity records
 
-Do not reopen 3A unless production testing exposes a regression.
+Do not reopen 3A unless later regression testing exposes a real defect.
 
 ## 3B — tags + custom fields + consent + CRM pipeline
 
-**Status: COMPLETE — PRODUCTION VERIFIED ON 2026-09-01.**
+**Status: COMPLETE — PRODUCTION VERIFIED.**
 
-Implemented and production-tested:
+Verified capabilities:
 
 - pipeline stages: `NEW`, `QUALIFIED`, `FOLLOW_UP`, `CUSTOMER`, `REPEAT_CUSTOMER`, `LOST`
-- tags, capped and case-insensitively de-duplicated
-- flat string custom fields, capped and validated
+- tags with case-insensitive duplicate prevention
+- flat validated custom fields
 - consent state: `UNKNOWN`, `OPTED_IN`, `OPTED_OUT`
-- last opt-in and last opt-out timestamps retained as history
-- pipeline filtering in Contacts
-- Stage 3 fields visible on mobile cards and desktop table
-- Stage 3 fields editable inside the contact profile
-- server-side validation for all new CRM fields
-- additive Supabase migration applied successfully
-- duplicate manual-contact prevention retained
-- conversation linking retained
-- Agent / Manager / Owner access behaviour verified
-- mobile and desktop behaviour verified
+- retained opt-in and opt-out timestamps
+- pipeline filtering
+- mobile and desktop CRM presentation
+- server-side validation
+- duplicate manual-contact protection
+- conversation linking
+- Agent / Manager / Owner access behaviour
 
 ### Migration applied
 
@@ -70,73 +73,77 @@ Implemented and production-tested:
 
 The migration was applied manually in the Supabase SQL editor. Do not run `supabase db push` for WhatsApp migrations.
 
-### 3B production gate result
-
-All required 3B production checks passed on 2026-09-01:
-
-1. Stage 3 migration warning removed after migration.
-2. Automatically created WhatsApp contacts default to **New**.
-3. Pipeline changes persist after full reload.
-4. Tags persist and case-insensitive duplicates are removed.
-5. Tag removal persists.
-6. Custom fields round-trip correctly.
-7. Custom-field removal persists.
-8. Unknown → Opted in persists with opt-in timestamp.
-9. Opted in → Opted out preserves old opt-in timestamp and records opt-out timestamp.
-10. Opted out → Opted in preserves prior opt-out timestamp and records the latest opt-in timestamp.
-11. CRM field validation behaved correctly.
-12. Pipeline filtering returned the expected contacts.
-13. Contact profile remained usable on mobile and desktop.
-14. Agent contact access rules passed.
-15. Manager / Owner create and edit permissions passed.
-16. Duplicate manual contact creation remained blocked.
-17. Contact-to-conversation linking opened the correct customer thread.
-
 ## 3C — timeline + import/export + final permissions/regression gate
 
-**Status: IN PRODUCTION VERIFICATION — TIMELINE AND CSV GATES PASSED ON 2026-09-01.**
+**Status: COMPLETE — PRODUCTION VERIFIED.**
 
-Scope:
+### 3C-1 — Unified contact timeline
 
-- unified contact timeline
-- message history in contact context
-- call history in contact context
-- contact/profile activity history
-- CSV import
-- CSV export
-- final Agent / Manager / Owner permission matrix
-- final conversation-link validation
-- final mobile and desktop checks
-- Stage 1 regression matrix
-- Stage 2 regression matrix
+Verified:
 
-### 3C implementation status
+- message history appears in the correct contact timeline
+- WhatsApp call history resolves to the correct contact
+- CRM/contact activity appears in the timeline
+- All / Message / Call / Activity filters work
+- timeline access follows the same contact permission rules as the CRM
+- no additional database migration was required
 
-- 3C-1 unified contact timeline: implemented, deployed, Vercel green, production verified
-- 3C-2 CSV import/export: implemented, deployed, Vercel green, production verified
-- 3C-3 final permissions/mobile/regression gate: current
-- no additional Supabase migration was required for 3C-1 or 3C-2
+### 3C-2 — CSV import/export
 
-### 3C production checks already passed
+Verified:
 
-1. Contact profile timeline loads messages in correct order.
-2. Timeline filters for All / Message / Call / Activity work correctly.
-3. CRM profile changes appear as contact activity in the timeline.
-4. WhatsApp call history resolves to the correct contact and displays correct call data.
-5. CSV export downloads with stable headers and correct CRM values.
-6. CSV template downloads and opens correctly.
-7. Mixed CSV import safely inserted a new record, skipped an existing WhatsApp number, and reported an invalid row without corrupting valid data.
-8. Imported CRM fields persisted correctly after refresh.
+- stable CSV export headers
+- correct CRM values in export
+- CSV template download
+- safe quoted-field parsing
+- duplicate existing WhatsApp numbers are skipped rather than overwritten
+- invalid rows are reported without corrupting valid rows
+- valid rows import successfully
+- imported pipeline, tags, consent and custom fields persist after refresh
+- CSV import/export is supervisor-only
+- no additional database migration was required
 
-### Remaining 3C gate
+### 3C-3 — Final production and regression gate
 
-3C is complete only when the remaining checks pass:
+All final checks passed:
 
-1. Agent / Manager / Owner permissions are physically reverified across the complete Stage 3 surface, including timeline and CSV access.
-2. Contact-to-conversation links are physically reverified after the 3C changes.
-3. Mobile and desktop behavior is physically reverified for timeline and CSV controls.
-4. Stage 1 production regression matrix passes.
-5. Stage 2 production regression matrix passes.
-6. No known Stage 3 blocker remains.
+1. Owner can view/edit any accessible contact, use timeline, import and export CSV.
+2. Manager has the expected CRM/timeline/import/export permissions.
+3. Agent access is restricted to assigned or permitted unassigned contacts and cannot access another agent's assigned contact.
+4. Agents do not receive supervisor CSV import/export controls.
+5. Contact-to-conversation links open the correct customer thread.
+6. Contacts, profile, timeline and CSV controls are usable on mobile.
+7. Contacts table, profile, timeline and CSV controls are usable on desktop.
+8. Text sending and receiving still work.
+9. Image/file and voice-note sending still work.
+10. Sent / delivered / read status progression still works.
+11. Unread count, typing indicator and 24-hour warning still work.
+12. WhatsApp calling, answer/reject/hang-up, call history and call analytics still work.
+13. Two-agent assignment and transfer/reassignment still work.
+14. Internal notes and @mentions still work.
+15. Collision/presence handling still works.
+16. An agent cannot improperly take another agent's assigned conversation.
+17. No known Stage 3 blocker remains.
 
-Stage 3 is marked 100% only after the complete Stage 3 completion standard at the top of this document passes in production.
+## Final Stage 3 result
+
+**Stage 3 — Contact CRM: 100% COMPLETE.**
+
+The next roadmap stage is:
+
+## Stage 4 — Saved Replies & Agent Productivity
+
+Required scope:
+
+- `/shortcut` replies
+- personal saved replies
+- team saved replies
+- categories
+- variables such as `{{first_name}}`
+- media attachments in replies
+- search
+- reply preview
+
+Stage 4 gate:
+
+> An agent can answer common enquiries in seconds without manually copying text.
