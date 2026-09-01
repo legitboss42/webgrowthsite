@@ -155,13 +155,11 @@ function applyOptInTimestamps(
   const now = new Date().toISOString();
   if (patch.opt_in_status === "OPTED_IN") {
     patch.opt_in_at = now;
-    patch.opt_out_at = null;
   } else if (patch.opt_in_status === "OPTED_OUT") {
     patch.opt_out_at = now;
-  } else {
-    patch.opt_in_at = null;
-    patch.opt_out_at = null;
   }
+  // UNKNOWN changes only the current consent state. Historical opt-in/opt-out
+  // timestamps are retained so operators do not erase useful consent history.
 }
 
 function stage3SchemaMissing(result: WhatsAppMutationResult) {
