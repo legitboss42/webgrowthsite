@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   getWhatsAppPresenceLabel,
@@ -49,6 +49,7 @@ function formatTime(value?: string | null) {
 
 export default function TeamPresenceWidget({ senderConnected }: { senderConnected: boolean }) {
   const router = useRouter();
+  const rootRef = useRef<HTMLDivElement | null>(null);
   const [members, setMembers] = useState<WhatsAppTeamMember[]>([]);
   const [viewerMemberId, setViewerMemberId] = useState<string | null>(null);
   const [mentions, setMentions] = useState<MentionNotification[]>([]);
@@ -80,6 +81,19 @@ export default function TeamPresenceWidget({ senderConnected }: { senderConnecte
     const timer = window.setInterval(() => void load(), 15_000);
     return () => window.clearInterval(timer);
   }, [load]);
+
+  useEffect(() => {
+    if (!open) return;
+
+    function handlePointerDown(event: PointerEvent) {
+      const target = event.target;
+      if (!(target instanceof Node)) return;
+      if (!rootRef.current?.contains(target)) setOpen(false);
+    }
+
+    document.addEventListener("pointerdown", handlePointerDown);
+    return () => document.removeEventListener("pointerdown", handlePointerDown);
+  }, [open]);
 
   const viewer = useMemo(
     () => members.find((member) => member.id === viewerMemberId) || null,
@@ -125,7 +139,7 @@ export default function TeamPresenceWidget({ senderConnected }: { senderConnecte
   const statusLabel = senderConnected ? "Sender connected" : "Sender disconnected";
 
   return (
-    <div className="relative">
+    <div ref={rootRef} className="relative">
       <button
         type="button"
         onClick={() => setOpen((current) => !current)}
@@ -138,21 +152,12 @@ export default function TeamPresenceWidget({ senderConnected }: { senderConnecte
             : "border-rule bg-paper text-ink-faint hover:border-rule-strong"
         }`}
       >
-        <span
-          aria-hidden="true"
-          className={`h-2 w-2 rounded-full ${senderConnected ? "bg-ledger-bright" : "bg-ink-faint/50"}`}
-        />
         <span className="hidden sm:inline">{statusLabel}</span>
         {viewer ? (
           <span
             aria-hidden="true"
             className={`h-2 w-2 rounded-full ring-2 ring-white/70 ${dotClass(viewer.availability)}`}
           />
-        ) : null}
-        {mentions.length > 0 ? (
-          <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-rose-600 px-1.5 py-0.5 text-[0.625rem] font-bold text-white">
-            {mentions.length > 9 ? "9+" : mentions.length}
-          </span>
         ) : null}
       </button>
 
