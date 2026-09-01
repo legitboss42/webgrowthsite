@@ -145,14 +145,14 @@ function readEditableFields(body: Record<string, unknown>) {
   return { patch } as const;
 }
 
-export function applyOptInTimestamps(
+function applyOptInTimestamps(
   patch: Record<string, unknown>,
   previousStatus?: string,
-  now = new Date().toISOString(),
 ) {
   if (!Object.prototype.hasOwnProperty.call(patch, "opt_in_status")) return;
   if (patch.opt_in_status === previousStatus) return;
 
+  const now = new Date().toISOString();
   if (patch.opt_in_status === "OPTED_IN") {
     patch.opt_in_at = now;
   } else if (patch.opt_in_status === "OPTED_OUT") {
