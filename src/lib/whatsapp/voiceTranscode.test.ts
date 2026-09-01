@@ -9,15 +9,14 @@ test("accepts a conservative WhatsApp voice-note probe shape", () => {
       codec_name: "opus",
       channels: 1,
       sample_rate: "48000",
-      start_time: "0.000000",
+      start_time: "0.006500",
     }],
-    format: { format_name: "ogg", start_time: "0.000000", duration: "6.42" },
+    format: { format_name: "ogg", start_time: "0.006500", duration: "6.42" },
   });
 
   assert.equal(result.codecName, "opus");
   assert.equal(result.channels, 1);
   assert.equal(result.sampleRate, 48_000);
-  assert.equal(result.startTime, 0);
   assert.equal(result.durationSeconds, 6.42);
 });
 
@@ -37,24 +36,19 @@ test("returns NaN when an OpusHead is absent or truncated", () => {
   assert.equal(Number.isNaN(readOpusHeadInputSampleRate(new TextEncoder().encode("OpusHead"))), true);
 });
 
-test("rejects header-only, wrong-codec, stereo and offset-start output before Meta sees it", () => {
+test("rejects header-only, wrong-codec and stereo output before Meta sees it", () => {
   assert.throws(() => assertValidWhatsAppVoiceProbe({
-    streams: [{ codec_type: "audio", codec_name: "opus", channels: 1, sample_rate: "48000", start_time: "0" }],
-    format: { format_name: "ogg", start_time: "0", duration: "0" },
+    streams: [{ codec_type: "audio", codec_name: "opus", channels: 1, sample_rate: "48000", start_time: "0.0065" }],
+    format: { format_name: "ogg", start_time: "0.0065", duration: "0" },
   }), /usable audio duration/);
 
   assert.throws(() => assertValidWhatsAppVoiceProbe({
-    streams: [{ codec_type: "audio", codec_name: "vorbis", channels: 1, sample_rate: "48000", start_time: "0" }],
-    format: { format_name: "ogg", start_time: "0", duration: "4.2" },
+    streams: [{ codec_type: "audio", codec_name: "vorbis", channels: 1, sample_rate: "48000", start_time: "0.0065" }],
+    format: { format_name: "ogg", start_time: "0.0065", duration: "4.2" },
   }), /Opus/);
 
   assert.throws(() => assertValidWhatsAppVoiceProbe({
-    streams: [{ codec_type: "audio", codec_name: "opus", channels: 2, sample_rate: "48000", start_time: "0" }],
-    format: { format_name: "ogg", start_time: "0", duration: "4.2" },
-  }), /mono/);
-
-  assert.throws(() => assertValidWhatsAppVoiceProbe({
-    streams: [{ codec_type: "audio", codec_name: "opus", channels: 1, sample_rate: "48000", start_time: "0.0065" }],
+    streams: [{ codec_type: "audio", codec_name: "opus", channels: 2, sample_rate: "48000", start_time: "0.0065" }],
     format: { format_name: "ogg", start_time: "0.0065", duration: "4.2" },
-  }), /timestamp zero/);
+  }), /mono/);
 });

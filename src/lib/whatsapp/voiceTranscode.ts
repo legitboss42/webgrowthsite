@@ -21,12 +21,10 @@ type FFprobeVoiceOutput = {
     codec_name?: unknown;
     channels?: unknown;
     sample_rate?: unknown;
-    start_time?: unknown;
     duration?: unknown;
   }>;
   format?: {
     format_name?: unknown;
-    start_time?: unknown;
     duration?: unknown;
   };
 };
@@ -69,9 +67,6 @@ export function assertValidWhatsAppVoiceProbe(raw: unknown) {
   const codecName = typeof stream?.codec_name === "string" ? stream.codec_name.toLowerCase() : "";
   const channels = finiteNumber(stream?.channels);
   const sampleRate = finiteNumber(stream?.sample_rate);
-  const streamStartTime = finiteNumber(stream?.start_time);
-  const formatStartTime = finiteNumber(output.format?.start_time);
-  const startTime = Number.isFinite(streamStartTime) ? streamStartTime : formatStartTime;
   const streamDuration = finiteNumber(stream?.duration);
   const formatDuration = finiteNumber(output.format?.duration);
   const durationSeconds = Number.isFinite(streamDuration) ? streamDuration : formatDuration;
@@ -84,21 +79,19 @@ export function assertValidWhatsAppVoiceProbe(raw: unknown) {
   if (sampleRate !== WHATSAPP_VOICE_SAMPLE_RATE) {
     throw new Error("Converted voice note does not use the Opus 48 kHz sample rate.");
   }
-  if (!Number.isFinite(startTime) || Math.abs(startTime) > 0.001) {
-    throw new Error("Converted voice note does not start at timestamp zero.");
-  }
   if (!Number.isFinite(durationSeconds) || durationSeconds <= 0.05) {
     throw new Error("Converted voice note contains no usable audio duration.");
   }
 
-  return { codecName, channels, sampleRate, startTime, durationSeconds };
+  return { codecName, channels, sampleRate, durationSeconds };
 }
 
 /**
  * Converts browser MediaRecorder output into a conservative WhatsApp voice-note profile:
- * OGG/Opus, mono, 48 kHz, 20 ms voice-oriented Opus frames, with timestamps reset to zero.
- * FFprobe validates the container, codec, channels, sample rate, start time and duration,
- * while the OpusHead bytes verify the rate advertised inside the OGG stream itself.
+ * OGG/Opus, mono, 48 kHz, 20 ms voice-oriented Opus frames. FFprobe validates the
+ * container, codec, channels, sample rate and duration, while the OpusHead bytes verify
+ * the rate advertised inside the OGG stream itself. Opus pre-skip means a valid file may
+ * report a small non-zero start time, so start_time is deliberately not a rejection rule.
  */
 export async function normalizeRecordedVoiceNote(audio: File): Promise<NormalizedWhatsAppVoiceNote> {
   if (!ffmpegPath) throw new Error("FFmpeg is unavailable on this deployment.");
@@ -165,7 +158,7 @@ export async function normalizeRecordedVoiceNote(audio: File): Promise<Normalize
         "-v",
         "error",
         "-show_entries",
-        "stream=codec_type,codec_name,channels,sample_rate,start_time,duration:format=format_name,start_time,duration",
+        "stream=codec_type,codec_name,channels,sample_rate,duration:format=format_name,duration",
         "-of",
         "json",
         outputPath,
