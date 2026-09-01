@@ -30,7 +30,7 @@ export const WHATSAPP_NAV_SECTIONS: WhatsAppNavSection[] = [
       { label: "Overview", href: `${WHATSAPP_CONSOLE_ROOT}`, icon: "overview", description: "Connection health and message activity at a glance.", status: "live", roles: OWNER },
       { label: "Conversations", href: `${WHATSAPP_CONSOLE_ROOT}/conversations`, icon: "conversations", description: "Inbound WhatsApp leads, full threads, and replies.", status: "live", layout: "fill" },
       { label: "Calls", href: `${WHATSAPP_CONSOLE_ROOT}/calls`, icon: "phoneNumbers", description: "Incoming and outgoing WhatsApp call history.", status: "live" },
-      { label: "Contacts", href: `${WHATSAPP_CONSOLE_ROOT}/contacts`, icon: "contacts", description: "Everyone who has messaged the business number.", status: "live", roles: OWNER },
+      { label: "Contacts", href: `${WHATSAPP_CONSOLE_ROOT}/contacts`, icon: "contacts", description: "CRM profiles, lead details, and conversation links.", status: "live" },
       { label: "Templates", href: `${WHATSAPP_CONSOLE_ROOT}/templates`, icon: "templates", description: "Approved Meta message templates.", status: "live", roles: OWNER },
       { label: "Quick Replies", href: `${WHATSAPP_CONSOLE_ROOT}/quick-replies`, icon: "quickReplies", description: "Saved snippets for fast, consistent answers.", status: "live", roles: OWNER },
     ],

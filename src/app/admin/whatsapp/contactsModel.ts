@@ -1,5 +1,5 @@
 /**
- * Pure model for the WhatsApp contacts list.
+ * Pure model for the WhatsApp contacts list and Stage 3 CRM forms.
  *
  * Everything here maps to real `whatsapp_contacts` columns (see
  * `supabase/migrations/202608130001_whatsapp_crm.sql`). Missing values stay
@@ -11,6 +11,7 @@ export type WhatsAppContactConversation = {
   intent?: string;
   last_message_at?: string;
   human_review_required: boolean;
+  assigned_member_id?: string;
 };
 
 export type WhatsAppContactRow = {
@@ -30,13 +31,55 @@ export type WhatsAppContactRow = {
 };
 
 export const WHATSAPP_CONTACT_FILTERS = ["ALL", "HOT", "WARM", "COLD"] as const;
+export const WHATSAPP_CONTACT_TEMPERATURES = ["COLD", "WARM", "HOT"] as const;
 export type WhatsAppContactFilter = (typeof WHATSAPP_CONTACT_FILTERS)[number];
+export type WhatsAppContactTemperature = (typeof WHATSAPP_CONTACT_TEMPERATURES)[number];
 
 /** Widest list we will pull in one request; the UI says so when it is reached. */
 export const WHATSAPP_CONTACT_PAGE_SIZE = 200;
 
 export function isWhatsAppContactFilter(value: string | undefined): value is WhatsAppContactFilter {
   return WHATSAPP_CONTACT_FILTERS.includes(value as WhatsAppContactFilter);
+}
+
+export function isWhatsAppContactTemperature(value: unknown): value is WhatsAppContactTemperature {
+  return WHATSAPP_CONTACT_TEMPERATURES.includes(value as WhatsAppContactTemperature);
+}
+
+/**
+ * Normalises a manual CRM number into the digits-only WhatsApp `wa_id` form.
+ * Nigerian local mobile numbers are converted to +234; international numbers should
+ * be entered with their country code. E.164 allows at most 15 digits.
+ */
+export function normalizeWhatsAppContactNumber(value: unknown): string | null {
+  if (typeof value !== "string") return null;
+  let compact = value.trim().replace(/[\s().-]/g, "");
+  if (!compact) return null;
+  if (compact.startsWith("00")) compact = compact.slice(2);
+  if (compact.startsWith("+")) compact = compact.slice(1);
+  if (/^0[789]\d{9}$/.test(compact)) compact = `234${compact.slice(1)}`;
+  if (!/^[1-9]\d{7,14}$/.test(compact)) return null;
+  return compact;
+}
+
+export function isValidWhatsAppContactEmail(value: string) {
+  if (!value) return true;
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) && value.length <= 254;
+}
+
+/** Returns an empty string for blank input, null for an invalid URL, or a safe http(s) URL. */
+export function normalizeWhatsAppContactWebsite(value: unknown): string | null {
+  if (typeof value !== "string") return "";
+  const clean = value.trim().slice(0, 300);
+  if (!clean) return "";
+  const candidate = /^[a-z][a-z0-9+.-]*:\/\//i.test(clean) ? clean : `https://${clean}`;
+  try {
+    const parsed = new URL(candidate);
+    if (parsed.protocol !== "http:" && parsed.protocol !== "https:") return null;
+    return parsed.toString();
+  } catch {
+    return null;
+  }
 }
 
 /**
@@ -70,8 +113,6 @@ export function buildWhatsAppContactSearchFilter(term: string) {
 }
 
 function readConversation(value: unknown): WhatsAppContactConversation | undefined {
-  // PostgREST returns an embedded row as an object or a single-element array
-  // depending on how it resolves the relationship, so accept both.
   const row = (Array.isArray(value) ? value[0] : value) as Record<string, unknown> | undefined;
   if (!row || typeof row !== "object" || !row.id) return undefined;
 
@@ -81,6 +122,8 @@ function readConversation(value: unknown): WhatsAppContactConversation | undefin
     intent: typeof row.intent === "string" ? row.intent : undefined,
     last_message_at: typeof row.last_message_at === "string" ? row.last_message_at : undefined,
     human_review_required: row.human_review_required === true,
+    assigned_member_id:
+      typeof row.assigned_member_id === "string" ? row.assigned_member_id : undefined,
   };
 }
 
@@ -111,6 +154,13 @@ export function normalizeWhatsAppContactRow(row: Record<string, unknown>): Whats
 
 export function getWhatsAppContactName(contact: WhatsAppContactRow) {
   return contact.display_name || contact.business_name || contact.wa_id || "Unknown contact";
+}
+
+/** Agents may see contacts for their own conversations and the same unassigned pool they can claim. */
+export function canAgentAccessWhatsAppContact(contact: WhatsAppContactRow, memberId: string | null) {
+  if (!memberId || !contact.conversation) return false;
+  const assigned = contact.conversation.assigned_member_id;
+  return !assigned || assigned === memberId;
 }
 
 export function countWhatsAppContactsByTemperature(contacts: WhatsAppContactRow[]) {
