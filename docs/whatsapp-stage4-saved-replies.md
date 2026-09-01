@@ -1,57 +1,41 @@
 # WhatsApp Platform — Stage 4 Saved Replies & Agent Productivity
 
-Stage 4 follows the same gate used by the rest of the current roadmap:
+Stage 4 follows the production gate used by the current roadmap:
 
-> Build → production test → fix every discovered issue → retest → mark complete → unlock next sub-stage.
+> Build → production test → fix every discovered issue → retest → mark complete → unlock Stage 5.
 
-## Stage 4A — Saved reply foundation
+The user chose to deploy Stage 4A/4B/4C/4D together and run one combined production test after both required migrations are applied.
 
-**Status: CODE READY; PRODUCTION GATE REQUIRES THE ADDITIVE SUPABASE MIGRATION.**
+## Current status
 
-Scope:
+**CODE READY AS ONE COMBINED STAGE 4 RELEASE; PRODUCTION GATE PENDING.**
+
+Stage 4 is not complete until the combined production test passes.
+
+## 4A — Saved reply foundation
+
+Implemented:
 
 - existing quick replies preserved as Team replies
-- Team and Personal saved-reply scopes
-- Personal reply ownership by WhatsApp team member
-- Owner/Manager can create, edit and delete Team replies
-- every workspace member can create, edit and delete their own Personal replies
+- Team and Personal scopes
+- Personal ownership by WhatsApp team member
+- Owner/Manager Team management permissions
+- every member can manage their own Personal replies
 - Personal replies are not loaded for other members
-- categories stored per saved reply
-- search by shortcut, title, message and category
+- categories
 - Team Replies / My Replies tabs
+- search by shortcut, title, message and category
 - category filtering
-- migration-safe legacy read fallback
-- API authorization enforced server-side
+- server-side authorization
+- legacy fallback while the migration is absent
 
 Required migration:
 
 `supabase/migrations/202609010002_whatsapp_saved_replies_stage4.sql`
 
-Apply manually in the Supabase SQL editor. Do not run `supabase db push`.
+## 4B — Variables + preview
 
-### 4A production gate
-
-1. Existing quick replies still appear as Team replies after migration.
-2. Owner can create/edit/delete a Team reply.
-3. Manager can create/edit/delete a Team reply.
-4. Agent can view Team replies but cannot edit/delete/create Team replies.
-5. Agent can create/edit/delete their own Personal reply.
-6. A second agent cannot see the first agent's Personal reply.
-7. Two different agents can both create the same Personal shortcut.
-8. Duplicate Team shortcut is rejected.
-9. Duplicate Personal shortcut for the same owner is rejected.
-10. Category persists after reload and category filtering works.
-11. Search matches shortcut, title, body and category.
-12. Saved Replies page works on mobile and desktop.
-13. Existing quick replies still work in the inbox composer; 4A must not regress the existing shortcut insertion flow.
-
-Only after all 4A checks pass may Stage 4B begin.
-
-## Stage 4B — Variables + preview
-
-**Status: LOCKED UNTIL 4A PASSES PRODUCTION.**
-
-Planned:
+Implemented variables:
 
 - `{{first_name}}`
 - `{{full_name}}`
@@ -60,32 +44,85 @@ Planned:
 - `{{email}}`
 - `{{agent_name}}`
 - `{{custom.FieldName}}`
+
+Behavior:
+
+- variables resolve from the selected CRM contact and signed-in team member
+- custom fields resolve case-insensitively
+- missing values remain visible as their `{{variable}}` token rather than becoming a silent blank
+- Saved Replies browser shows resolved text before insertion
+- missing-variable warnings appear before the agent inserts/sends the reply
+
+## 4C — Composer productivity
+
+Implemented:
+
+- Team plus only the signed-in member's Personal replies in the inbox
+- `/shortcut` search
+- shortcut-prefix ranking
+- fallback search across shortcut, title, message and category
+- Arrow Up / Arrow Down navigation in slash mode
+- Enter/Tab inserts a saved reply
+- Escape closes the list
+- direct Saved Replies composer button
+- Team/My scope filtering
+- category filtering
+- browse search
 - resolved preview before insertion
-- visible missing-variable warnings
+- saved replies fill the composer and never auto-send
+- existing text, normal attachment, voice-note, reply-to and typing flows preserved
 
-## Stage 4C — Composer productivity
+## 4D — Saved reply media
 
-**Status: LOCKED.**
+Implemented:
 
-Planned:
+- one optional image, video, document or audio attachment per saved reply
+- private Supabase Storage bucket: `whatsapp-saved-replies`
+- only metadata/path stored on the saved reply row
+- authenticated media preview/download
+- Owner/Manager Team media permissions
+- owner-only Personal media permissions
+- replace/remove attachment support
+- existing WhatsApp media validation and size limits reused
+- image/video/document send resolved saved-reply text as the WhatsApp caption
+- audio sends resolved text first and then the audio because WhatsApp audio does not support captions
+- partial audio failure is explicit: if text was sent but media failed, retry sends only the attachment
+- existing Meta media sender reused; no parallel send stack and no paid media service
 
-- Team + Personal saved replies in composer
-- slash search
-- keyboard navigation
-- category/search browser
-- Saved Replies composer button
-- insert without auto-send
+Required migration:
 
-## Stage 4D — Media + final production gate
+`supabase/migrations/202609010003_whatsapp_saved_reply_media_stage4.sql`
 
-**Status: LOCKED.**
+Apply migration `202609010002` first, then `202609010003`, manually in the Supabase SQL editor. Do not run `supabase db push`.
 
-Planned:
+## Combined Stage 4 production gate
 
-- one optional image/video/audio/document attachment per saved reply
-- media preview
-- production permission checks
-- mobile/desktop checks
-- Stage 1/2/3 regression checks
+Stage 4 is complete only when all of these pass in production:
 
-Stage 4 is complete only when an agent can answer common enquiries in seconds without manually copying text.
+1. Existing pre-Stage-4 replies remain Team replies.
+2. Owner can create/edit/delete Team replies.
+3. Manager can create/edit/delete Team replies.
+4. Agent can use but cannot modify Team replies.
+5. Agent can create/edit/delete their own Personal reply.
+6. One member cannot see another member's Personal replies in Saved Replies or the inbox browser.
+7. Different members may use the same Personal shortcut; duplicate Team and same-owner Personal shortcuts are rejected.
+8. Categories persist and search/category filtering work.
+9. Every supported built-in variable resolves correctly against a real contact.
+10. `{{custom.FieldName}}` resolves a real CRM custom field.
+11. Missing variables remain visible and produce a warning.
+12. Saved Replies browser shows the resolved preview before insertion.
+13. Slash search, Arrow keys, Enter/Tab and Escape behave correctly.
+14. Direct Saved Replies composer button opens the full Team/My/category/search browser.
+15. Selecting a saved reply inserts it without sending automatically and remains editable.
+16. Image saved reply stores, previews, inserts and sends correctly.
+17. Video saved reply stores, previews, inserts and sends correctly.
+18. Document saved reply stores, previews, inserts and sends correctly.
+19. Audio saved reply sends text then audio without duplicating text on a retry after partial failure.
+20. Attachment replace/remove works and permissions are enforced server-side.
+21. Saved Replies manager and composer work on mobile and desktop.
+22. Stage 1 messaging/media/voice/status/typing/call functionality has no regression.
+23. Stage 2 assignment/transfer/notes/@mentions/collision functionality has no regression.
+24. Stage 3 CRM/timeline/import-export/conversation-link functionality has no regression.
+25. No known Stage 4 blocker remains.
+
+Only after all combined Stage 4 checks pass may Stage 5 — WhatsApp Template Manager — unlock.

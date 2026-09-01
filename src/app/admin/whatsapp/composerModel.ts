@@ -2,7 +2,7 @@
  * Pure model behind the message composer.
  *
  * Everything here is text and numbers: cursor arithmetic for emoji insertion, the `/`
- * quick-reply trigger, the recording clock, the auto-resize clamp, and the rolling
+ * saved-reply trigger, the recording clock, the auto-resize clamp, and the rolling
  * waveform history. It lives apart from `ReplyComposer.tsx` so each rule can be tested
  * without a DOM, matching the other `*Model` modules in this console.
  */
@@ -26,7 +26,7 @@ export function insertIntoDraft(input: {
 }
 
 /**
- * The `/` quick-reply trigger.
+ * The `/` saved-reply trigger.
  *
  * Only fires while the whole draft is one slash token, which is how the operator types a
  * shortcut in practice and keeps a "/" inside a sentence — "20/hour", a URL — from
@@ -42,14 +42,13 @@ export function filterQuickReplies(replies: WhatsAppQuickReply[], query: string)
   const needle = query.toLowerCase();
   const starts = replies.filter((reply) => reply.shortcut.toLowerCase().startsWith(needle));
   if (starts.length) return starts;
-  return replies.filter(
-    (reply) =>
-      reply.shortcut.toLowerCase().includes(needle) || reply.title.toLowerCase().includes(needle),
+  return replies.filter((reply) =>
+    [reply.shortcut, reply.title, reply.body, reply.category].some((value) => value.toLowerCase().includes(needle)),
   );
 }
 
 /**
- * Applies a quick reply to the draft: the slash token is replaced outright, anything else
+ * Applies a saved reply to the draft: the slash token is replaced outright, anything else
  * gets the body appended a blank line down, which is how the previous chip row behaved.
  */
 export function applyQuickReply(draft: string, body: string) {

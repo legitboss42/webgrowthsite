@@ -30,6 +30,7 @@ import {
   type WhatsAppReplyComposerState,
 } from "../dashboard";
 import {
+  canUseWhatsAppQuickReply,
   normalizeWhatsAppQuickReplyRow,
   sortWhatsAppQuickReplies,
   type WhatsAppQuickReply,
@@ -61,9 +62,19 @@ type WhatsAppInboxState = {
   latestMessage?: WhatsAppLeadMessage;
 };
 
+function normalizeCustomFields(value: unknown) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return undefined;
+  const fields = Object.fromEntries(
+    Object.entries(value as Record<string, unknown>)
+      .filter((entry): entry is [string, string] => typeof entry[1] === "string")
+      .map(([key, field]) => [key, field.trim()]),
+  );
+  return Object.keys(fields).length ? fields : undefined;
+}
+
 async function getLeads(): Promise<WhatsAppLeadRow[]> {
   const rows = await readWhatsAppRows<Record<string, unknown>>(
-    `whatsapp_conversations?select=id,status,intent,human_review_required,last_message_at,first_message_at,assigned_to,assigned_member_id,whatsapp_contacts!inner(wa_id,display_name,business_name,email,phone,website,source,lead_temperature)&order=last_message_at.desc`,
+    `whatsapp_conversations?select=id,status,intent,human_review_required,last_message_at,first_message_at,assigned_to,assigned_member_id,whatsapp_contacts!inner(wa_id,display_name,business_name,email,phone,website,source,lead_temperature,custom_fields)&order=last_message_at.desc`,
   );
   if (!rows) return [];
 
@@ -77,8 +88,7 @@ async function getLeads(): Promise<WhatsAppLeadRow[]> {
       last_message_at: typeof row.last_message_at === "string" ? row.last_message_at : undefined,
       first_message_at: typeof row.first_message_at === "string" ? row.first_message_at : undefined,
       assigned_to: typeof row.assigned_to === "string" ? row.assigned_to : undefined,
-      assigned_member_id:
-        typeof row.assigned_member_id === "string" ? row.assigned_member_id : undefined,
+      assigned_member_id: typeof row.assigned_member_id === "string" ? row.assigned_member_id : undefined,
       wa_id: String(contact?.wa_id || ""),
       display_name: typeof contact?.display_name === "string" ? contact.display_name : undefined,
       business_name: typeof contact?.business_name === "string" ? contact.business_name : undefined,
@@ -86,6 +96,7 @@ async function getLeads(): Promise<WhatsAppLeadRow[]> {
       phone: typeof contact?.phone === "string" ? contact.phone : undefined,
       website: typeof contact?.website === "string" ? contact.website : undefined,
       source: typeof contact?.source === "string" ? contact.source : undefined,
+      custom_fields: normalizeCustomFields(contact?.custom_fields),
       lead_temperature:
         contact?.lead_temperature === "HOT" || contact?.lead_temperature === "WARM"
           ? contact.lead_temperature
@@ -169,16 +180,10 @@ async function getInboxStates(): Promise<WhatsAppInboxState[]> {
   });
 }
 
-function filterLeadsByScope(
-  leads: WhatsAppLeadRow[],
-  scope: InboxScope,
-  memberId: string | null,
-) {
+function filterLeadsByScope(leads: WhatsAppLeadRow[], scope: InboxScope, memberId: string | null) {
   if (scope === "unassigned") return leads.filter((lead) => !lead.assigned_member_id);
   if (scope === "mine") return memberId ? leads.filter((lead) => lead.assigned_member_id === memberId) : [];
-  if (scope === "others") {
-    return leads.filter((lead) => Boolean(lead.assigned_member_id) && lead.assigned_member_id !== memberId);
-  }
+  if (scope === "others") return leads.filter((lead) => Boolean(lead.assigned_member_id) && lead.assigned_member_id !== memberId);
   return leads;
 }
 
@@ -187,12 +192,29 @@ function formatDateTime(value: string | undefined) {
   return new Date(value).toLocaleString();
 }
 
-async function getQuickReplies(): Promise<WhatsAppQuickReply[]> {
-  const rows = await readWhatsAppRows<Record<string, unknown>>(
+async function getQuickReplies(memberId: string | null): Promise<WhatsAppQuickReply[]> {
+  const mediaRows = await readWhatsAppRows<Record<string, unknown>>(
+    "whatsapp_quick_replies?select=id,shortcut,title,body,scope,category,owner_member_id,created_by_member_id,media_kind,media_path,media_filename,media_mime_type,media_size&order=category.asc,shortcut.asc",
+  );
+  if (mediaRows !== null) {
+    return sortWhatsAppQuickReplies(
+      mediaRows.map(normalizeWhatsAppQuickReplyRow).filter((reply) => canUseWhatsAppQuickReply(reply, memberId)),
+    );
+  }
+
+  const stage4Rows = await readWhatsAppRows<Record<string, unknown>>(
+    "whatsapp_quick_replies?select=id,shortcut,title,body,scope,category,owner_member_id,created_by_member_id&order=category.asc,shortcut.asc",
+  );
+  if (stage4Rows !== null) {
+    return sortWhatsAppQuickReplies(
+      stage4Rows.map(normalizeWhatsAppQuickReplyRow).filter((reply) => canUseWhatsAppQuickReply(reply, memberId)),
+    );
+  }
+
+  const legacy = await readWhatsAppRows<Record<string, unknown>>(
     "whatsapp_quick_replies?select=id,shortcut,title,body&order=shortcut.asc",
   );
-  if (!rows) return [];
-  return sortWhatsAppQuickReplies(rows.map(normalizeWhatsAppQuickReplyRow));
+  return sortWhatsAppQuickReplies((legacy || []).map(normalizeWhatsAppQuickReplyRow));
 }
 
 function formatTime(value: string | undefined) {
@@ -238,12 +260,7 @@ function getMessagePreview(message: WhatsAppLeadMessage | undefined) {
   return `${prefix}${message.message_text || getMessageFallbackText(message)}`;
 }
 
-function buildHref(input: {
-  filter: WhatsAppLeadFilter;
-  scope: InboxScope;
-  leadId?: string;
-  panel?: MobilePanel;
-}) {
+function buildHref(input: { filter: WhatsAppLeadFilter; scope: InboxScope; leadId?: string; panel?: MobilePanel }) {
   const query = new URLSearchParams();
   if (input.filter !== "ALL") query.set("filter", input.filter);
   if (input.scope !== "all") query.set("scope", input.scope);
@@ -273,93 +290,63 @@ export default async function WhatsAppConversationsPage({
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#050806] px-4 py-16 text-white">
         <div className="w-full max-w-4xl">
-          <GoogleAdminPrompt
-            nextPath="/admin/whatsapp/conversations/"
-            adminEmail={getDefaultAdminGoogleEmail()}
-            clientId={getGoogleClientId()}
-            googleReady={isGoogleAuthConfigured()}
-            workspaceTeamAccess
-          />
+          <GoogleAdminPrompt nextPath="/admin/whatsapp/conversations/" adminEmail={getDefaultAdminGoogleEmail()} clientId={getGoogleClientId()} googleReady={isGoogleAuthConfigured()} workspaceTeamAccess />
         </div>
       </div>
     );
   }
 
   const params = await searchParams;
-  const filter = filters.includes(params.filter as WhatsAppLeadFilter)
-    ? (params.filter as WhatsAppLeadFilter)
-    : "ALL";
+  const filter = filters.includes(params.filter as WhatsAppLeadFilter) ? (params.filter as WhatsAppLeadFilter) : "ALL";
   const canViewAll = canWhatsAppRoleViewAllConversations(access.role);
   const scopes = canViewAll ? supervisorScopes : agentScopes;
   const requestedScope = params.scope as InboxScope;
-  const scope = scopes.some((item) => item.value === requestedScope)
-    ? requestedScope
-    : canViewAll
-      ? "all"
-      : "mine";
+  const scope = scopes.some((item) => item.value === requestedScope) ? requestedScope : canViewAll ? "all" : "mine";
 
   const [leadRows, quickReplies, inboxStates, settingsLoad, teamMembers] = await Promise.all([
     getLeads(),
-    getQuickReplies(),
+    getQuickReplies(access.memberId),
     getInboxStates(),
     loadWhatsAppSettings(),
     getActiveTeamMembers(),
   ]);
   const settings = settingsLoad.settings;
   const scopedLeadRows = filterLeadsByScope(leadRows, scope, access.memberId);
-  const initialModel = buildWhatsAppDashboardModel({
-    leads: scopedLeadRows,
-    messages: [],
-    filter,
-    selectedLeadId: params.lead,
-  });
+  const initialModel = buildWhatsAppDashboardModel({ leads: scopedLeadRows, messages: [], filter, selectedLeadId: params.lead });
   const selectedMessages = await getConversationMessages(initialModel.selectedLead?.id);
-  const model = buildWhatsAppDashboardModel({
-    leads: scopedLeadRows,
-    messages: selectedMessages,
-    filter,
-    selectedLeadId: params.lead,
-  });
+  const model = buildWhatsAppDashboardModel({ leads: scopedLeadRows, messages: selectedMessages, filter, selectedLeadId: params.lead });
 
   const lead = model.selectedLead;
   let composerState: WhatsAppReplyComposerState = buildWhatsAppReplyComposerState({
     selectedLead: lead,
     selectedMessages: model.selectedMessages,
-    senderConfigured: Boolean(
-      process.env.WHATSAPP_ACCESS_TOKEN?.trim() && process.env.WHATSAPP_PHONE_NUMBER_ID?.trim(),
-    ),
+    senderConfigured: Boolean(process.env.WHATSAPP_ACCESS_TOKEN?.trim() && process.env.WHATSAPP_PHONE_NUMBER_ID?.trim()),
   });
-  if (
-    access.role === "agent" &&
-    lead &&
-    (!access.memberId || lead.assigned_member_id !== access.memberId)
-  ) {
-    composerState = {
-      enabled: false,
-      reason: "NOT_ASSIGNED",
-      helperText: "Assign this conversation to yourself before replying.",
-    };
+  if (access.role === "agent" && lead && (!access.memberId || lead.assigned_member_id !== access.memberId)) {
+    composerState = { enabled: false, reason: "NOT_ASSIGNED", helperText: "Assign this conversation to yourself before replying." };
   }
 
   const now = Date.now();
-  const mobilePanel: MobilePanel =
-    params.panel === "contact" && lead ? "contact" : params.lead ? "thread" : "list";
+  const mobilePanel: MobilePanel = params.panel === "contact" && lead ? "contact" : params.lead ? "thread" : "list";
   const inboxStateByConversation = new Map(inboxStates.map((state) => [state.conversationId, state]));
   const scopedConversationIds = new Set(scopedLeadRows.map((item) => item.id));
-  const totalUnread = inboxStates.reduce(
-    (sum, state) => sum + (scopedConversationIds.has(state.conversationId) ? state.unreadCount : 0),
-    0,
-  );
+  const totalUnread = inboxStates.reduce((sum, state) => sum + (scopedConversationIds.has(state.conversationId) ? state.unreadCount : 0), 0);
   const selectedUnread = lead ? inboxStateByConversation.get(lead.id)?.unreadCount || 0 : 0;
   const memberById = new Map(teamMembers.map((member) => [member.id, member]));
+  const currentMember = access.memberId ? memberById.get(access.memberId) : undefined;
+  const variableContext = lead
+    ? {
+        fullName: lead.display_name,
+        company: lead.business_name,
+        phone: lead.phone || `+${lead.wa_id}`,
+        email: lead.email,
+        agentName: currentMember?.displayName || access.email.split("@")[0],
+        customFields: lead.custom_fields,
+      }
+    : undefined;
 
-  const storedMessageIds = model.selectedMessages
-    .map((message) => message.whatsapp_message_id)
-    .filter((id): id is string => Boolean(id));
-
-  const assignedName = lead?.assigned_member_id
-    ? memberById.get(lead.assigned_member_id)?.displayName || lead.assigned_to || "Assigned"
-    : "Unassigned";
+  const storedMessageIds = model.selectedMessages.map((message) => message.whatsapp_message_id).filter((id): id is string => Boolean(id));
+  const assignedName = lead?.assigned_member_id ? memberById.get(lead.assigned_member_id)?.displayName || lead.assigned_to || "Assigned" : "Unassigned";
 
   const contactRows = lead
     ? [
@@ -379,50 +366,23 @@ export default async function WhatsAppConversationsPage({
   return (
     <div className="flex h-full min-h-0 flex-col lg:flex-row">
       <WhatsAppInboxAutoRefresh refreshSeconds={settings.console.inboxRefreshSeconds} />
-      {lead ? (
-        <MarkConversationRead
-          conversationId={lead.id}
-          unreadCount={selectedUnread}
-          explicitSelection={Boolean(params.lead)}
-        />
-      ) : null}
+      {lead ? <MarkConversationRead conversationId={lead.id} unreadCount={selectedUnread} explicitSelection={Boolean(params.lead)} /> : null}
 
-      <section
-        className={`min-h-0 w-full flex-col lg:flex lg:w-80 lg:flex-none lg:border-r lg:border-rule xl:w-[22rem] ${
-          mobilePanel === "list" ? "flex" : "hidden"
-        }`}
-      >
+      <section className={`min-h-0 w-full flex-col lg:flex lg:w-80 lg:flex-none lg:border-r lg:border-rule xl:w-[22rem] ${mobilePanel === "list" ? "flex" : "hidden"}`}>
         <div className="flex-none border-b border-rule px-4 py-3">
           <div className="flex items-baseline justify-between gap-2">
             <div className="flex items-center gap-2">
               <h2 className="text-sm font-semibold text-ink">Conversations</h2>
-              {totalUnread > 0 ? (
-                <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-ledger-bright px-1.5 py-0.5 text-[0.625rem] font-bold tabular-nums text-white">
-                  {totalUnread > 99 ? "99+" : totalUnread}
-                </span>
-              ) : null}
+              {totalUnread > 0 ? <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-ledger-bright px-1.5 py-0.5 text-[0.625rem] font-bold tabular-nums text-white">{totalUnread > 99 ? "99+" : totalUnread}</span> : null}
             </div>
-            <span className="text-xs tabular-nums text-ink-faint">
-              {model.filteredLeads.length} of {model.filterCounts.ALL}
-            </span>
+            <span className="text-xs tabular-nums text-ink-faint">{model.filteredLeads.length} of {model.filterCounts.ALL}</span>
           </div>
 
           <nav aria-label="Assignment scope" className="-mx-4 mt-2.5 overflow-x-auto px-4">
             <div className="flex w-max gap-1.5 pb-1">
               {scopes.map((item) => {
                 const active = scope === item.value;
-                return (
-                  <Link
-                    key={item.value}
-                    href={buildHref({ filter, scope: item.value })}
-                    aria-current={active ? "page" : undefined}
-                    className={`rounded-full px-2.5 py-1 text-[0.7rem] font-semibold transition ${
-                      active ? "bg-ink text-white" : "border border-rule bg-paper-raised text-ink-soft"
-                    }`}
-                  >
-                    {item.label}
-                  </Link>
-                );
+                return <Link key={item.value} href={buildHref({ filter, scope: item.value })} aria-current={active ? "page" : undefined} className={`rounded-full px-2.5 py-1 text-[0.7rem] font-semibold transition ${active ? "bg-ink text-white" : "border border-rule bg-paper-raised text-ink-soft"}`}>{item.label}</Link>;
               })}
             </div>
           </nav>
@@ -432,20 +392,8 @@ export default async function WhatsAppConversationsPage({
               {filters.map((item) => {
                 const active = filter === item;
                 return (
-                  <Link
-                    key={item}
-                    href={getFilterHref(item, scope, lead?.id)}
-                    aria-current={active ? "page" : undefined}
-                    className={`inline-flex flex-none items-center gap-1.5 rounded-full px-2.5 py-1 text-[0.7rem] font-medium transition ${
-                      active
-                        ? "bg-ledger-bright text-white"
-                        : "border border-rule bg-paper-raised text-ink-soft hover:border-rule-strong hover:text-ink"
-                    }`}
-                  >
-                    {item}
-                    <span className={`rounded-full px-1 text-[0.625rem] tabular-nums ${active ? "bg-white/20 text-white" : "bg-paper-sunk text-ink-faint"}`}>
-                      {model.filterCounts[item]}
-                    </span>
+                  <Link key={item} href={getFilterHref(item, scope, lead?.id)} aria-current={active ? "page" : undefined} className={`inline-flex flex-none items-center gap-1.5 rounded-full px-2.5 py-1 text-[0.7rem] font-medium transition ${active ? "bg-ledger-bright text-white" : "border border-rule bg-paper-raised text-ink-soft hover:border-rule-strong hover:text-ink"}`}>
+                    {item}<span className={`rounded-full px-1 text-[0.625rem] tabular-nums ${active ? "bg-white/20 text-white" : "bg-paper-sunk text-ink-faint"}`}>{model.filterCounts[item]}</span>
                   </Link>
                 );
               })}
@@ -463,39 +411,19 @@ export default async function WhatsAppConversationsPage({
             const assignee = item.assigned_member_id ? memberById.get(item.assigned_member_id) : null;
             return (
               <li key={item.id} className="border-b border-rule">
-                <Link
-                  href={getLeadHref(filter, scope, item.id)}
-                  aria-current={active ? "true" : undefined}
-                  className={`flex gap-3 px-4 py-3 transition ${
-                    active
-                      ? "bg-ledger-tint"
-                      : unread
-                        ? "bg-ledger/10 hover:bg-ledger/15"
-                        : "hover:bg-paper-sunk/60"
-                  }`}
-                >
+                <Link href={getLeadHref(filter, scope, item.id)} aria-current={active ? "true" : undefined} className={`flex gap-3 px-4 py-3 transition ${active ? "bg-ledger-tint" : unread ? "bg-ledger/10 hover:bg-ledger/15" : "hover:bg-paper-sunk/60"}`}>
                   <ContactAvatar identity={{ displayName: item.display_name, businessName: item.business_name, waId: item.wa_id }} />
                   <span className="min-w-0 flex-1">
                     <span className="flex items-center gap-2">
-                      <span className={`truncate text-sm text-ink ${unread ? "font-bold" : "font-semibold"}`}>
-                        {item.display_name || "Unknown"}
-                      </span>
-                      <span className={`ml-auto flex-none text-[0.65rem] tabular-nums ${unread ? "font-semibold text-ledger" : "text-ink-faint"}`}>
-                        {formatRelative(item.last_message_at, now)}
-                      </span>
+                      <span className={`truncate text-sm text-ink ${unread ? "font-bold" : "font-semibold"}`}>{item.display_name || "Unknown"}</span>
+                      <span className={`ml-auto flex-none text-[0.65rem] tabular-nums ${unread ? "font-semibold text-ledger" : "text-ink-faint"}`}>{formatRelative(item.last_message_at, now)}</span>
                     </span>
                     <span className="mt-0.5 flex min-w-0 items-center gap-2">
                       <span className={`min-w-0 flex-1 truncate text-xs ${unread ? "font-semibold text-ink" : "text-ink-faint"}`}>{preview}</span>
-                      {unread ? (
-                        <span aria-label={`${unreadCount} unread message${unreadCount === 1 ? "" : "s"}`} className="inline-flex min-w-5 flex-none items-center justify-center rounded-full bg-ledger-bright px-1.5 py-0.5 text-[0.625rem] font-bold tabular-nums text-white">
-                          {unreadCount > 99 ? "99+" : unreadCount}
-                        </span>
-                      ) : null}
+                      {unread ? <span aria-label={`${unreadCount} unread message${unreadCount === 1 ? "" : "s"}`} className="inline-flex min-w-5 flex-none items-center justify-center rounded-full bg-ledger-bright px-1.5 py-0.5 text-[0.625rem] font-bold tabular-nums text-white">{unreadCount > 99 ? "99+" : unreadCount}</span> : null}
                     </span>
                     <span className="mt-1 flex flex-wrap items-center gap-1">
-                      {item.lead_temperature !== "COLD" ? (
-                        <span className={`rounded-full px-1.5 py-0.5 text-[0.6rem] font-semibold ${getTemperatureClasses(item.lead_temperature)}`}>{item.lead_temperature}</span>
-                      ) : null}
+                      {item.lead_temperature !== "COLD" ? <span className={`rounded-full px-1.5 py-0.5 text-[0.6rem] font-semibold ${getTemperatureClasses(item.lead_temperature)}`}>{item.lead_temperature}</span> : null}
                       {item.human_review_required ? <span className="rounded-full bg-rose-50 px-1.5 py-0.5 text-[0.6rem] font-semibold text-rose-700">Review</span> : null}
                       {item.intent ? <span className="truncate rounded-full bg-paper-sunk px-1.5 py-0.5 text-[0.6rem] text-ink-faint">{item.intent}</span> : null}
                       {canViewAll && assignee ? <span className="max-w-28 truncate rounded-full border border-rule bg-paper px-1.5 py-0.5 text-[0.6rem] text-ink-faint">{assignee.displayName}</span> : null}
@@ -514,61 +442,41 @@ export default async function WhatsAppConversationsPage({
           <OutboundQueueProvider key={lead.id} storedMessageIds={storedMessageIds}>
             <ReplyTargetProvider>
               <div className="flex flex-none items-center gap-3 border-b border-rule bg-paper-raised px-4 py-3">
-                <Link href={getFilterHref(filter, scope)} className="-ml-1 rounded-lg p-1.5 text-ink-soft transition hover:bg-paper-sunk hover:text-ink lg:hidden">
-                  <WhatsAppIcon name="chevronLeft" className="h-5 w-5" />
-                  <span className="sr-only">Back to conversations</span>
-                </Link>
+                <Link href={getFilterHref(filter, scope)} className="-ml-1 rounded-lg p-1.5 text-ink-soft transition hover:bg-paper-sunk hover:text-ink lg:hidden"><WhatsAppIcon name="chevronLeft" className="h-5 w-5" /><span className="sr-only">Back to conversations</span></Link>
                 <ContactAvatar identity={{ displayName: lead.display_name, businessName: lead.business_name, waId: lead.wa_id }} />
-                <div className="min-w-0 flex-1">
-                  <h2 className="truncate text-sm font-semibold text-ink">{lead.display_name || "Unknown lead"}</h2>
-                  <p className="truncate font-mono text-[0.7rem] text-ink-faint">{lead.wa_id}</p>
-                </div>
-                <ConversationAssignment
-                  conversationId={lead.id}
-                  assignedMemberId={lead.assigned_member_id}
-                  viewerMemberId={access.memberId}
-                  viewerRole={access.role}
-                  members={teamMembers}
-                />
+                <div className="min-w-0 flex-1"><h2 className="truncate text-sm font-semibold text-ink">{lead.display_name || "Unknown lead"}</h2><p className="truncate font-mono text-[0.7rem] text-ink-faint">{lead.wa_id}</p></div>
+                <ConversationAssignment conversationId={lead.id} assignedMemberId={lead.assigned_member_id} viewerMemberId={access.memberId} viewerRole={access.role} members={teamMembers} />
                 <span className={`hidden flex-none rounded-full px-2.5 py-1 text-xs font-medium sm:inline-flex ${getTemperatureClasses(lead.lead_temperature)}`}>{lead.lead_temperature}</span>
                 <Link href={buildHref({ filter, scope, leadId: lead.id, panel: "contact" })} className="rounded-lg border border-rule px-2.5 py-1.5 text-xs font-medium text-ink-soft transition hover:border-ledger hover:text-ledger lg:hidden">Details</Link>
               </div>
 
               <div className="min-h-0 flex-1 space-y-2.5 overflow-y-auto bg-paper bg-[radial-gradient(circle_at_1px_1px,rgba(18,74,56,.06)_1px,transparent_0)] bg-[length:24px_24px] px-4 py-4">
-                {model.selectedMessages.length ? (
-                  model.selectedMessages.map((message) => {
-                    const outbound = message.direction === "outbound";
-                    const showsMedia = hasRenderableWhatsAppMedia(message);
-                    return (
-                      <article key={message.id} className={`max-w-[min(32rem,85%)] rounded-2xl px-3.5 py-2.5 shadow-sm ${outbound ? "ml-auto rounded-br-md bg-ledger-bright text-white" : "mr-auto rounded-bl-md border border-rule bg-paper-raised text-ink"}`}>
-                        {showsMedia ? <MessageMedia message={message} outbound={outbound} /> : null}
-                        {message.message_text || !showsMedia ? <p className={`whitespace-pre-wrap text-sm leading-6 ${showsMedia ? "mt-2" : ""}`}>{message.message_text || getMessageFallbackText(message)}</p> : null}
-                        <p className={`mt-1 flex items-center justify-end gap-1.5 text-[0.65rem] tabular-nums ${outbound ? "text-white/70" : "text-ink-faint"}`}>
-                          <span className="-my-1 mr-auto"><ReplyToButton message={message} contactLabel={lead.display_name || "Customer"} onDark={outbound} /></span>
-                          <time dateTime={message.message_timestamp}>{formatTime(message.message_timestamp)}</time>
-                          <MessageStatus status={message.delivery_status} direction={message.direction} error={message.delivery_error} onDark={outbound} />
-                        </p>
-                      </article>
-                    );
-                  })
-                ) : (
-                  <div className="mx-auto mt-8 max-w-sm rounded-lg border border-dashed border-rule-strong bg-paper-raised px-4 py-8 text-center text-sm text-ink-faint">No stored messages for this conversation yet.</div>
-                )}
+                {model.selectedMessages.length ? model.selectedMessages.map((message) => {
+                  const outbound = message.direction === "outbound";
+                  const showsMedia = hasRenderableWhatsAppMedia(message);
+                  return (
+                    <article key={message.id} className={`max-w-[min(32rem,85%)] rounded-2xl px-3.5 py-2.5 shadow-sm ${outbound ? "ml-auto rounded-br-md bg-ledger-bright text-white" : "mr-auto rounded-bl-md border border-rule bg-paper-raised text-ink"}`}>
+                      {showsMedia ? <MessageMedia message={message} outbound={outbound} /> : null}
+                      {message.message_text || !showsMedia ? <p className={`whitespace-pre-wrap text-sm leading-6 ${showsMedia ? "mt-2" : ""}`}>{message.message_text || getMessageFallbackText(message)}</p> : null}
+                      <p className={`mt-1 flex items-center justify-end gap-1.5 text-[0.65rem] tabular-nums ${outbound ? "text-white/70" : "text-ink-faint"}`}>
+                        <span className="-my-1 mr-auto"><ReplyToButton message={message} contactLabel={lead.display_name || "Customer"} onDark={outbound} /></span>
+                        <time dateTime={message.message_timestamp}>{formatTime(message.message_timestamp)}</time>
+                        <MessageStatus status={message.delivery_status} direction={message.direction} error={message.delivery_error} onDark={outbound} />
+                      </p>
+                    </article>
+                  );
+                }) : <div className="mx-auto mt-8 max-w-sm rounded-lg border border-dashed border-rule-strong bg-paper-raised px-4 py-8 text-center text-sm text-ink-faint">No stored messages for this conversation yet.</div>}
                 <PendingOutboundList />
               </div>
 
               <div className="flex-none border-t border-rule bg-paper-raised">
-                <ReplyComposer conversationId={lead.id} waId={lead.wa_id} composerState={composerState} quickReplies={quickReplies} />
+                <ReplyComposer conversationId={lead.id} waId={lead.wa_id} composerState={composerState} quickReplies={quickReplies} variableContext={variableContext} />
               </div>
             </ReplyTargetProvider>
           </OutboundQueueProvider>
         ) : (
           <div className="flex min-h-0 flex-1 items-center justify-center px-6 py-16">
-            <div className="max-w-sm text-center">
-              <span className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-paper-sunk text-ink-faint"><WhatsAppIcon name="conversations" className="h-6 w-6" /></span>
-              <p className="mt-3 text-sm font-medium text-ink">No conversation selected</p>
-              <p className="mt-1 text-xs text-ink-faint">{model.filterCounts.ALL === 0 ? "No conversations are available in this view." : "Pick a conversation from the list to read the thread and reply."}</p>
-            </div>
+            <div className="max-w-sm text-center"><span className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-paper-sunk text-ink-faint"><WhatsAppIcon name="conversations" className="h-6 w-6" /></span><p className="mt-3 text-sm font-medium text-ink">No conversation selected</p><p className="mt-1 text-xs text-ink-faint">{model.filterCounts.ALL === 0 ? "No conversations are available in this view." : "Pick a conversation from the list to read the thread and reply."}</p></div>
           </div>
         )}
       </section>
@@ -576,44 +484,22 @@ export default async function WhatsAppConversationsPage({
       <aside className={`min-h-0 w-full flex-col overflow-y-auto lg:flex lg:w-72 lg:flex-none lg:border-l lg:border-rule xl:w-80 ${mobilePanel === "contact" ? "flex" : "hidden"}`}>
         {lead ? (
           <div className="px-4 py-4">
-            <div className="flex items-center gap-2 lg:hidden">
-              <Link href={getLeadHref(filter, scope, lead.id)} className="-ml-1 rounded-lg p-1.5 text-ink-soft transition hover:bg-paper-sunk hover:text-ink">
-                <WhatsAppIcon name="chevronLeft" className="h-5 w-5" />
-                <span className="sr-only">Back to conversation</span>
-              </Link>
-              <span className="text-sm font-semibold text-ink">Contact details</span>
-            </div>
+            <div className="flex items-center gap-2 lg:hidden"><Link href={getLeadHref(filter, scope, lead.id)} className="-ml-1 rounded-lg p-1.5 text-ink-soft transition hover:bg-paper-sunk hover:text-ink"><WhatsAppIcon name="chevronLeft" className="h-5 w-5" /><span className="sr-only">Back to conversation</span></Link><span className="text-sm font-semibold text-ink">Contact details</span></div>
             <p className="hidden text-[0.65rem] font-semibold uppercase tracking-[.16em] text-ink-faint lg:block">Contact details</p>
-
             <div className="mt-4 text-center">
               <ContactAvatar identity={{ displayName: lead.display_name, businessName: lead.business_name, waId: lead.wa_id }} size="lg" labelled className="mx-auto" />
               <p className="mt-2.5 text-sm font-semibold text-ink">{lead.display_name || "Unknown lead"}</p>
               <p className="font-mono text-xs text-ink-faint">{lead.phone || lead.wa_id}</p>
               {lead.lead_temperature !== "COLD" ? <span className={`mt-2 inline-flex rounded-full px-2.5 py-1 text-[0.65rem] font-semibold ${getTemperatureClasses(lead.lead_temperature)}`}>{lead.lead_temperature} LEAD</span> : null}
             </div>
-
             {lead.website ? <a href={lead.website} target="_blank" rel="noreferrer" className="mt-4 block truncate rounded-lg border border-rule bg-paper px-3 py-2 text-center text-xs text-ledger underline decoration-ledger/30 underline-offset-4 hover:border-ledger">{lead.website}</a> : null}
-
             <dl className="mt-4">
-              {contactRows.map((row) => (
-                <div key={row.label} className="flex items-start justify-between gap-3 border-t border-rule py-2 text-xs first:border-t-0">
-                  <dt className="flex-none text-ink-faint">{row.label}</dt>
-                  <dd className="min-w-0 break-words text-right text-ink">{row.value}</dd>
-                </div>
-              ))}
+              {contactRows.map((row) => <div key={row.label} className="flex items-start justify-between gap-3 border-t border-rule py-2 text-xs first:border-t-0"><dt className="flex-none text-ink-faint">{row.label}</dt><dd className="min-w-0 break-words text-right text-ink">{row.value}</dd></div>)}
             </dl>
-
-            <div className="mt-4 rounded-lg border border-rule bg-paper px-3 py-3">
-              <p className="text-[0.65rem] font-semibold uppercase tracking-[.12em] text-ink-faint">Assignment</p>
-              <div className="mt-2">
-                <ConversationAssignment conversationId={lead.id} assignedMemberId={lead.assigned_member_id} viewerMemberId={access.memberId} viewerRole={access.role} members={teamMembers} />
-              </div>
-            </div>
-            <p className="mt-3 rounded-lg bg-paper px-3 py-2.5 text-[0.7rem] leading-5 text-ink-faint">Internal notes and @mentions are the next Stage 2 sub-batch after team login and assignment pass production testing.</p>
+            <div className="mt-4 rounded-lg border border-rule bg-paper px-3 py-3"><p className="text-[0.65rem] font-semibold uppercase tracking-[.12em] text-ink-faint">Assignment</p><div className="mt-2"><ConversationAssignment conversationId={lead.id} assignedMemberId={lead.assigned_member_id} viewerMemberId={access.memberId} viewerRole={access.role} members={teamMembers} /></div></div>
+            <p className="mt-3 rounded-lg bg-paper px-3 py-2.5 text-[0.7rem] leading-5 text-ink-faint">Internal notes and @mentions are available from the collaboration panel in the conversation workflow.</p>
           </div>
-        ) : (
-          <div className="px-4 py-8 text-center text-sm text-ink-faint">Select a conversation to see contact details.</div>
-        )}
+        ) : <div className="px-4 py-8 text-center text-sm text-ink-faint">Select a conversation to see contact details.</div>}
       </aside>
     </div>
   );

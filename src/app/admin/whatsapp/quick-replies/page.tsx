@@ -18,15 +18,29 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-async function getSavedReplies(memberId: string | null): Promise<{ replies: WhatsAppQuickReply[]; stage4Ready: boolean }> {
+type SavedReplyLoad = { replies: WhatsAppQuickReply[]; stage4Ready: boolean; mediaReady: boolean };
+
+async function getSavedReplies(memberId: string | null): Promise<SavedReplyLoad> {
+  const media = await readWhatsAppRows<Record<string, unknown>>(
+    "whatsapp_quick_replies?select=id,shortcut,title,body,scope,category,owner_member_id,created_by_member_id,media_kind,media_path,media_filename,media_mime_type,media_size,created_at,updated_at&order=category.asc,shortcut.asc",
+  );
+  if (media !== null) {
+    return {
+      replies: sortWhatsAppQuickReplies(media.map(normalizeWhatsAppQuickReplyRow).filter((reply) => canUseWhatsAppQuickReply(reply, memberId))),
+      stage4Ready: true,
+      mediaReady: true,
+    };
+  }
+
   const enriched = await readWhatsAppRows<Record<string, unknown>>(
     "whatsapp_quick_replies?select=id,shortcut,title,body,scope,category,owner_member_id,created_by_member_id,created_at,updated_at&order=category.asc,shortcut.asc",
   );
   if (enriched !== null) {
-    const replies = sortWhatsAppQuickReplies(
-      enriched.map(normalizeWhatsAppQuickReplyRow).filter((reply) => canUseWhatsAppQuickReply(reply, memberId)),
-    );
-    return { replies, stage4Ready: true };
+    return {
+      replies: sortWhatsAppQuickReplies(enriched.map(normalizeWhatsAppQuickReplyRow).filter((reply) => canUseWhatsAppQuickReply(reply, memberId))),
+      stage4Ready: true,
+      mediaReady: false,
+    };
   }
 
   const legacy = await readWhatsAppRows<Record<string, unknown>>(
@@ -35,6 +49,7 @@ async function getSavedReplies(memberId: string | null): Promise<{ replies: What
   return {
     replies: sortWhatsAppQuickReplies((legacy || []).map(normalizeWhatsAppQuickReplyRow)),
     stage4Ready: false,
+    mediaReady: false,
   };
 }
 
@@ -63,6 +78,7 @@ export default async function WhatsAppQuickRepliesPage() {
       <QuickReplyManager
         quickReplies={loaded.replies}
         stage4Ready={loaded.stage4Ready}
+        mediaReady={loaded.mediaReady}
         currentMemberId={access.memberId}
         canManageTeam={canWhatsAppRoleSuperviseTeam(access.role)}
         role={access.role}

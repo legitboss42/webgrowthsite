@@ -14,6 +14,7 @@ export type WhatsAppLeadRow = {
   business_name?: string;
   email?: string;
   phone?: string;
+  custom_fields?: Record<string, string>;
   assigned_to?: string;
   assigned_member_id?: string;
   first_message_at?: string;

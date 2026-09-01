@@ -14,8 +14,9 @@ import {
   validateWhatsAppQuickReplyInput,
   type WhatsAppQuickReply,
 } from "@/app/admin/whatsapp/quickRepliesModel";
-import { canWhatsAppRoleSuperviseTeam } from "@/lib/whatsapp/teamModel";
 import { isSameOriginMutation } from "@/lib/scheduler/policy";
+import { canWhatsAppRoleSuperviseTeam } from "@/lib/whatsapp/teamModel";
+import { deleteWhatsAppSavedReplyMedia } from "@/lib/whatsapp/savedReplyMedia";
 
 export const runtime = "nodejs";
 
@@ -62,6 +63,14 @@ async function getReply(id: string): Promise<{ ready: boolean; reply: WhatsAppQu
   );
   if (rows === null) return { ready: false, reply: null };
   return { ready: true, reply: rows[0] ? normalizeWhatsAppQuickReplyRow(rows[0]) : null };
+}
+
+async function getOptionalMediaPath(id: string) {
+  const rows = await readWhatsAppRows<Record<string, unknown>>(
+    `${TABLE}?id=eq.${encodeURIComponent(id)}&select=media_path&limit=1`,
+  );
+  if (rows === null) return undefined;
+  return typeof rows[0]?.media_path === "string" ? rows[0].media_path : undefined;
 }
 
 function canEditReply(access: WhatsAppWorkspaceAccess, reply: WhatsAppQuickReply) {
@@ -193,11 +202,14 @@ export async function DELETE(request: Request) {
     return NextResponse.json({ error: "You do not have permission to delete that saved reply." }, { status: 403 });
   }
 
+  const mediaPath = await getOptionalMediaPath(id);
   const result = await mutateWhatsAppRest({
     method: "DELETE",
     pathAndQuery: `${TABLE}?id=eq.${encodeURIComponent(id)}`,
   });
   if (!result.ok) return NextResponse.json({ error: result.message }, { status: result.status });
   if (result.rows.length === 0) return NextResponse.json({ error: "That saved reply no longer exists." }, { status: 404 });
+
+  if (mediaPath) await deleteWhatsAppSavedReplyMedia(mediaPath);
   return NextResponse.json({ ok: true });
 }
