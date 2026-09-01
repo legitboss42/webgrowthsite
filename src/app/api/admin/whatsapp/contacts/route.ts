@@ -5,13 +5,18 @@ import {
   mutateWhatsAppRest,
   POSTGRES_UNIQUE_VIOLATION,
   readWhatsAppRows,
+  type WhatsAppMutationResult,
 } from "@/app/admin/whatsapp/data";
 import {
   canAgentAccessWhatsAppContact,
   isValidWhatsAppContactEmail,
+  isWhatsAppContactLeadStage,
+  isWhatsAppContactOptInStatus,
   isWhatsAppContactTemperature,
+  normalizeWhatsAppContactCustomFields,
   normalizeWhatsAppContactNumber,
   normalizeWhatsAppContactRow,
+  normalizeWhatsAppContactTags,
   normalizeWhatsAppContactWebsite,
 } from "@/app/admin/whatsapp/contactsModel";
 import { isSameOriginMutation } from "@/lib/scheduler/policy";
@@ -19,8 +24,10 @@ import { canWhatsAppRoleSuperviseTeam } from "@/lib/whatsapp/teamModel";
 
 export const runtime = "nodejs";
 
-const CONTACT_SELECT =
+const CONTACT_SELECT_BASE =
   "id,wa_id,phone,display_name,business_name,email,website,source,lead_status,lead_temperature,created_at,updated_at,whatsapp_conversations(id,status,intent,last_message_at,human_review_required,assigned_member_id)";
+const CONTACT_SELECT_STAGE3 =
+  "id,wa_id,phone,display_name,business_name,email,website,source,lead_status,lead_temperature,lead_stage,tags,custom_fields,opt_in_status,opt_in_at,opt_out_at,created_at,updated_at,whatsapp_conversations(id,status,intent,last_message_at,human_review_required,assigned_member_id)";
 
 function cleanText(value: unknown, maxLength: number) {
   return typeof value === "string" ? value.trim().slice(0, maxLength) : "";
@@ -35,10 +42,16 @@ async function getAccess() {
 }
 
 async function getContact(contactId: string) {
-  const rows = await readWhatsAppRows<Record<string, unknown>>(
-    `whatsapp_contacts?id=eq.${encodeURIComponent(contactId)}&select=${CONTACT_SELECT}&limit=1`,
+  const id = encodeURIComponent(contactId);
+  const enriched = await readWhatsAppRows<Record<string, unknown>>(
+    `whatsapp_contacts?id=eq.${id}&select=${CONTACT_SELECT_STAGE3}&limit=1`,
   );
-  return rows?.[0] ? normalizeWhatsAppContactRow(rows[0]) : null;
+  if (enriched?.[0]) return normalizeWhatsAppContactRow(enriched[0]);
+
+  const legacy = await readWhatsAppRows<Record<string, unknown>>(
+    `whatsapp_contacts?id=eq.${id}&select=${CONTACT_SELECT_BASE}&limit=1`,
+  );
+  return legacy?.[0] ? normalizeWhatsAppContactRow(legacy[0]) : null;
 }
 
 function canAccessContact(access: WhatsAppWorkspaceAccess, contact: ReturnType<typeof normalizeWhatsAppContactRow>) {
@@ -85,6 +98,7 @@ function readEditableFields(body: Record<string, unknown>) {
     patch.website = website || null;
   }
 
+  // Kept for compatibility with the original CRM schema. The Stage 3 pipeline uses lead_stage.
   if (hasOwn(body, "leadStatus")) {
     const leadStatus = cleanText(body.leadStatus, 40);
     if (!leadStatus) return { error: "Lead status cannot be blank." } as const;
@@ -98,7 +112,67 @@ function readEditableFields(body: Record<string, unknown>) {
     patch.lead_temperature = body.leadTemperature;
   }
 
+  if (hasOwn(body, "leadStage")) {
+    if (!isWhatsAppContactLeadStage(body.leadStage)) {
+      return { error: "Choose a valid CRM pipeline stage." } as const;
+    }
+    patch.lead_stage = body.leadStage;
+  }
+
+  if (hasOwn(body, "tags")) {
+    const tags = normalizeWhatsAppContactTags(body.tags);
+    if (tags === null) {
+      return { error: "Use no more than 20 tags, with each tag under 40 characters." } as const;
+    }
+    patch.tags = tags;
+  }
+
+  if (hasOwn(body, "customFields")) {
+    const customFields = normalizeWhatsAppContactCustomFields(body.customFields);
+    if (customFields === null) {
+      return { error: "Custom fields must use key=value lines, with at most 20 fields." } as const;
+    }
+    patch.custom_fields = customFields;
+  }
+
+  if (hasOwn(body, "optInStatus")) {
+    if (!isWhatsAppContactOptInStatus(body.optInStatus)) {
+      return { error: "Choose Unknown, Opted in, or Opted out." } as const;
+    }
+    patch.opt_in_status = body.optInStatus;
+  }
+
   return { patch } as const;
+}
+
+function applyOptInTimestamps(
+  patch: Record<string, unknown>,
+  previousStatus?: string,
+) {
+  if (!Object.prototype.hasOwnProperty.call(patch, "opt_in_status")) return;
+  if (patch.opt_in_status === previousStatus) return;
+
+  const now = new Date().toISOString();
+  if (patch.opt_in_status === "OPTED_IN") {
+    patch.opt_in_at = now;
+    patch.opt_out_at = null;
+  } else if (patch.opt_in_status === "OPTED_OUT") {
+    patch.opt_out_at = now;
+  } else {
+    patch.opt_in_at = null;
+    patch.opt_out_at = null;
+  }
+}
+
+function stage3SchemaMissing(result: WhatsAppMutationResult) {
+  return !result.ok && (result.code === "PGRST204" || result.code === "42703");
+}
+
+function stage3MigrationResponse() {
+  return NextResponse.json(
+    { error: "The Stage 3 Contact CRM migration has not been applied in Supabase yet." },
+    { status: 503 },
+  );
 }
 
 export async function POST(request: Request) {
@@ -133,7 +207,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "A contact with that WhatsApp number already exists." }, { status: 409 });
   }
 
-  const editable = readEditableFields({
+  const editableInput: Record<string, unknown> = {
     displayName: body.displayName,
     businessName: body.businessName,
     email: body.email,
@@ -142,8 +216,14 @@ export async function POST(request: Request) {
     source: body.source ?? "Manual",
     leadStatus: body.leadStatus ?? "open",
     leadTemperature: body.leadTemperature ?? "COLD",
-  });
+  };
+  for (const key of ["leadStage", "tags", "customFields", "optInStatus"] as const) {
+    if (hasOwn(body, key)) editableInput[key] = body[key];
+  }
+
+  const editable = readEditableFields(editableInput);
   if ("error" in editable) return NextResponse.json({ error: editable.error }, { status: 400 });
+  applyOptInTimestamps(editable.patch);
 
   const now = new Date().toISOString();
   const created = await mutateWhatsAppRest({
@@ -158,6 +238,7 @@ export async function POST(request: Request) {
   });
 
   if (!created.ok) {
+    if (stage3SchemaMissing(created)) return stage3MigrationResponse();
     if (created.code === POSTGRES_UNIQUE_VIOLATION) {
       return NextResponse.json({ error: "A contact with that WhatsApp number already exists." }, { status: 409 });
     }
@@ -202,6 +283,7 @@ export async function PATCH(request: Request) {
 
   const editable = readEditableFields(body);
   if ("error" in editable) return NextResponse.json({ error: editable.error }, { status: 400 });
+  applyOptInTimestamps(editable.patch, existing.opt_in_status);
   const fields = Object.keys(editable.patch);
   if (!fields.length) return NextResponse.json({ error: "No changes were provided." }, { status: 400 });
 
@@ -210,7 +292,10 @@ export async function PATCH(request: Request) {
     pathAndQuery: `whatsapp_contacts?id=eq.${encodeURIComponent(contactId)}`,
     body: { ...editable.patch, updated_at: new Date().toISOString() },
   });
-  if (!updated.ok) return NextResponse.json({ error: updated.message }, { status: updated.status });
+  if (!updated.ok) {
+    if (stage3SchemaMissing(updated)) return stage3MigrationResponse();
+    return NextResponse.json({ error: updated.message }, { status: updated.status });
+  }
   if (!updated.rows[0]) return NextResponse.json({ error: "Contact not found." }, { status: 404 });
 
   const contact = normalizeWhatsAppContactRow(updated.rows[0]);

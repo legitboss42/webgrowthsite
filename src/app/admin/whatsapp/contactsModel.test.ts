@@ -2,15 +2,21 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   WHATSAPP_CONTACT_FILTERS,
+  WHATSAPP_CONTACT_LEAD_STAGES,
   buildWhatsAppContactSearchFilter,
   canAgentAccessWhatsAppContact,
   countWhatsAppContactsByTemperature,
+  formatWhatsAppLeadStage,
   getWhatsAppContactName,
   isValidWhatsAppContactEmail,
   isWhatsAppContactFilter,
+  isWhatsAppContactLeadStage,
+  isWhatsAppContactOptInStatus,
   isWhatsAppContactTemperature,
+  normalizeWhatsAppContactCustomFields,
   normalizeWhatsAppContactNumber,
   normalizeWhatsAppContactRow,
+  normalizeWhatsAppContactTags,
   normalizeWhatsAppContactWebsite,
   sanitizeWhatsAppSearchTerm,
 } from "./contactsModel";
@@ -62,7 +68,42 @@ test("CRM email and website helpers reject malformed values", () => {
   assert.equal(normalizeWhatsAppContactWebsite(""), "");
 });
 
-test("contact rows normalize real columns and embedded assignment", () => {
+test("Stage 3 tags are trimmed, deduplicated and bounded", () => {
+  assert.deepEqual(normalizeWhatsAppContactTags("VIP, Follow-up, vip"), ["VIP", "Follow-up"]);
+  assert.deepEqual(normalizeWhatsAppContactTags(["Retail", " Lagos "]), ["Retail", "Lagos"]);
+  assert.equal(normalizeWhatsAppContactTags(["x".repeat(41)]), null);
+  assert.equal(normalizeWhatsAppContactTags(Array.from({ length: 21 }, (_, index) => `tag-${index}`)), null);
+});
+
+test("Stage 3 custom fields accept key=value lines or flat objects only", () => {
+  assert.deepEqual(normalizeWhatsAppContactCustomFields("Budget=500000\nLocation=Lagos"), {
+    Budget: "500000",
+    Location: "Lagos",
+  });
+  assert.deepEqual(normalizeWhatsAppContactCustomFields({ Industry: "Retail", Empty: "" }), {
+    Industry: "Retail",
+  });
+  assert.equal(normalizeWhatsAppContactCustomFields("missing separator"), null);
+  assert.equal(normalizeWhatsAppContactCustomFields({ Nested: { no: true } }), null);
+});
+
+test("pipeline stages and opt-in values are strict enums", () => {
+  assert.deepEqual([...WHATSAPP_CONTACT_LEAD_STAGES], [
+    "NEW",
+    "QUALIFIED",
+    "FOLLOW_UP",
+    "CUSTOMER",
+    "REPEAT_CUSTOMER",
+    "LOST",
+  ]);
+  assert.equal(isWhatsAppContactLeadStage("FOLLOW_UP"), true);
+  assert.equal(isWhatsAppContactLeadStage("open"), false);
+  assert.equal(isWhatsAppContactOptInStatus("OPTED_IN"), true);
+  assert.equal(isWhatsAppContactOptInStatus("yes"), false);
+  assert.equal(formatWhatsAppLeadStage("REPEAT_CUSTOMER"), "Repeat Customer");
+});
+
+test("contact rows normalize original and Stage 3 CRM columns", () => {
   const contact = normalizeWhatsAppContactRow({
     id: "c1",
     wa_id: "2348030000000",
@@ -73,6 +114,11 @@ test("contact rows normalize real columns and embedded assignment", () => {
     source: "WhatsApp",
     lead_status: "open",
     lead_temperature: "HOT",
+    lead_stage: "QUALIFIED",
+    tags: ["VIP", "Website"],
+    custom_fields: { Budget: "500000", Invalid: 3 },
+    opt_in_status: "OPTED_IN",
+    opt_in_at: "2026-09-01T08:00:00.000Z",
     created_at: "2026-08-01T10:00:00.000Z",
     whatsapp_conversations: {
       id: "conv-1",
@@ -86,7 +132,21 @@ test("contact rows normalize real columns and embedded assignment", () => {
   assert.equal(contact.business_name, undefined);
   assert.equal(contact.email, undefined);
   assert.equal(contact.lead_temperature, "HOT");
+  assert.equal(contact.lead_stage, "QUALIFIED");
+  assert.deepEqual(contact.tags, ["VIP", "Website"]);
+  assert.deepEqual(contact.custom_fields, { Budget: "500000" });
+  assert.equal(contact.opt_in_status, "OPTED_IN");
+  assert.equal(contact.crm_ready, true);
   assert.equal(contact.conversation?.assigned_member_id, "agent-1");
+});
+
+test("legacy rows stay renderable before the Stage 3 migration is applied", () => {
+  const contact = normalizeWhatsAppContactRow({ id: "legacy", wa_id: "2348000000000" });
+  assert.equal(contact.lead_stage, "NEW");
+  assert.deepEqual(contact.tags, []);
+  assert.deepEqual(contact.custom_fields, {});
+  assert.equal(contact.opt_in_status, "UNKNOWN");
+  assert.equal(contact.crm_ready, false);
 });
 
 test("agent CRM visibility follows Mine and Unassigned conversation access", () => {
