@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent, type MouseEvent } from "react";
+import ContactCsvTools from "./ContactCsvTools";
 import ContactTimeline from "./ContactTimeline";
 import {
   WHATSAPP_CONTACT_LEAD_STAGES,
@@ -227,6 +228,7 @@ export function ContactCreateButton({ crmReady }: { crmReady: boolean }) {
       <button type="button" onClick={() => setOpen(true)} className="inline-flex items-center justify-center rounded-lg bg-ledger-bright px-4 py-2 text-sm font-semibold text-white transition hover:bg-ledger">
         + Add contact
       </button>
+      <ContactCsvTools />
       {open ? (
         <ModalShell title="Add contact" subtitle="Create a CRM contact before they message the business. Duplicate WhatsApp numbers are blocked automatically." onClose={() => setOpen(false)}>
           <ContactForm mode="create" crmReady={crmReady} onClose={() => setOpen(false)} />
