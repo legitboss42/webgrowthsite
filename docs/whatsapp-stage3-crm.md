@@ -94,7 +94,7 @@ All required 3B production checks passed on 2026-09-01:
 
 ## 3C — timeline + import/export + final permissions/regression gate
 
-**Status: UNLOCKED — CURRENT SUB-STAGE.**
+**Status: IN PRODUCTION VERIFICATION — TIMELINE AND CSV GATES PASSED ON 2026-09-01.**
 
 Scope:
 
@@ -110,19 +110,33 @@ Scope:
 - Stage 1 regression matrix
 - Stage 2 regression matrix
 
-### 3C gate
+### 3C implementation status
 
-3C is complete only when:
+- 3C-1 unified contact timeline: implemented, deployed, Vercel green, production verified
+- 3C-2 CSV import/export: implemented, deployed, Vercel green, production verified
+- 3C-3 final permissions/mobile/regression gate: current
+- no additional Supabase migration was required for 3C-1 or 3C-2
 
-1. A contact profile exposes one ordered timeline containing CRM activity, message history, and call history where data exists.
-2. Timeline records resolve to the correct contact and cannot expose another contact's data.
-3. CSV export produces correct CRM data with stable headers and safe escaping.
-4. CSV import validates rows, rejects malformed/duplicate records safely, and reports per-row outcomes without corrupting existing contacts.
-5. Agent / Manager / Owner permissions are physically verified across the full Stage 3 surface.
-6. Contact-to-conversation links are physically reverified.
-7. Mobile and desktop behavior is physically reverified.
-8. Stage 1 production regression matrix passes.
-9. Stage 2 production regression matrix passes.
-10. No known Stage 3 blocker remains.
+### 3C production checks already passed
+
+1. Contact profile timeline loads messages in correct order.
+2. Timeline filters for All / Message / Call / Activity work correctly.
+3. CRM profile changes appear as contact activity in the timeline.
+4. WhatsApp call history resolves to the correct contact and displays correct call data.
+5. CSV export downloads with stable headers and correct CRM values.
+6. CSV template downloads and opens correctly.
+7. Mixed CSV import safely inserted a new record, skipped an existing WhatsApp number, and reported an invalid row without corrupting valid data.
+8. Imported CRM fields persisted correctly after refresh.
+
+### Remaining 3C gate
+
+3C is complete only when the remaining checks pass:
+
+1. Agent / Manager / Owner permissions are physically reverified across the complete Stage 3 surface, including timeline and CSV access.
+2. Contact-to-conversation links are physically reverified after the 3C changes.
+3. Mobile and desktop behavior is physically reverified for timeline and CSV controls.
+4. Stage 1 production regression matrix passes.
+5. Stage 2 production regression matrix passes.
+6. No known Stage 3 blocker remains.
 
 Stage 3 is marked 100% only after the complete Stage 3 completion standard at the top of this document passes in production.
