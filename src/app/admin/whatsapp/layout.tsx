@@ -12,6 +12,7 @@ import {
 import { getWhatsAppWorkspaceAccess } from "./auth";
 import InstantInteractionLayer from "./InstantInteractionLayer";
 import IncomingCallOverlay from "./IncomingCallOverlay";
+import TeamPresenceWidget from "./TeamPresenceWidget";
 import WorkspaceCollaborationLayer from "./WorkspaceCollaborationLayer";
 
 export default async function WhatsAppConsoleLayout({ children }: { children: ReactNode }) {
@@ -53,6 +54,7 @@ export default async function WhatsAppConsoleLayout({ children }: { children: Re
       senderNumber={senderNumber}
       role={access.role}
       memberName={access.displayName}
+      presenceControl={<TeamPresenceWidget senderConnected={senderConnected} />}
     >
       <MessageStatusVisibilityProvider
         deliveryStatusVisible={quickSettings.deliveryStatusVisible}

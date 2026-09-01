@@ -4,6 +4,7 @@ import { useEffect, useId, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import type { ReactNode } from "react";
 import type { WhatsAppTeamRole } from "@/lib/whatsapp/teamModel";
 import { WhatsAppIcon } from "./icons";
 import {
@@ -22,6 +23,7 @@ type WhatsAppShellProps = {
   senderNumber?: string;
   role: WhatsAppTeamRole;
   memberName: string;
+  presenceControl?: ReactNode;
   toolbar?: React.ReactNode;
 };
 
@@ -101,7 +103,7 @@ function SidebarContent({
   );
 }
 
-export default function WhatsAppShell({ children, senderConnected, senderNumber, role, memberName, toolbar }: WhatsAppShellProps) {
+export default function WhatsAppShell({ children, senderConnected, senderNumber, role, memberName, presenceControl, toolbar }: WhatsAppShellProps) {
   const pathname = usePathname();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const drawerId = useId();
@@ -166,10 +168,12 @@ export default function WhatsAppShell({ children, senderConnected, senderNumber,
 
             <div className="flex items-center gap-2">
               <span className="hidden rounded-full border border-rule bg-paper px-2.5 py-1 text-[0.65rem] font-semibold uppercase tracking-[.08em] text-ink-faint md:inline-flex">{role}</span>
-              <span className={`hidden items-center gap-2 rounded-full border px-3 py-1.5 text-xs sm:inline-flex ${senderConnected ? "border-ledger-tint bg-ledger-tint/60 text-ledger" : "border-rule bg-paper text-ink-faint"}`}>
-                <span aria-hidden="true" className={`h-2 w-2 rounded-full ${senderConnected ? "bg-ledger-bright" : "bg-ink-faint/50"}`} />
-                {getWhatsAppSenderStatusText(senderConnected)}
-              </span>
+              {presenceControl ?? (
+                <span className={`hidden items-center gap-2 rounded-full border px-3 py-1.5 text-xs sm:inline-flex ${senderConnected ? "border-ledger-tint bg-ledger-tint/60 text-ledger" : "border-rule bg-paper text-ink-faint"}`}>
+                  <span aria-hidden="true" className={`h-2 w-2 rounded-full ${senderConnected ? "bg-ledger-bright" : "bg-ink-faint/50"}`} />
+                  {getWhatsAppSenderStatusText(senderConnected)}
+                </span>
+              )}
             </div>
 
             {toolbar ? <div className="w-full min-w-0 lg:w-auto">{toolbar}</div> : null}

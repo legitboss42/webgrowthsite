@@ -47,7 +47,7 @@ function formatTime(value?: string | null) {
   });
 }
 
-export default function TeamPresenceWidget() {
+export default function TeamPresenceWidget({ senderConnected }: { senderConnected: boolean }) {
   const router = useRouter();
   const [members, setMembers] = useState<WhatsAppTeamMember[]>([]);
   const [viewerMemberId, setViewerMemberId] = useState<string | null>(null);
@@ -85,7 +85,6 @@ export default function TeamPresenceWidget() {
     () => members.find((member) => member.id === viewerMemberId) || null,
     [members, viewerMemberId],
   );
-  const onlineCount = members.filter((member) => member.availability === "available").length;
 
   async function changeStatus(availability: WhatsAppTeamAvailability) {
     if (!viewer || saving || viewer.availability === availability) return;
@@ -123,17 +122,33 @@ export default function TeamPresenceWidget() {
     router.push(`/admin/whatsapp/conversations/?lead=${encodeURIComponent(notification.conversationId)}`);
   }
 
+  const statusLabel = senderConnected ? "Sender connected" : "Sender disconnected";
+
   return (
-    <div className="fixed right-3 top-[4.75rem] z-[55] sm:right-5">
+    <div className="relative">
       <button
         type="button"
         onClick={() => setOpen((current) => !current)}
         aria-expanded={open}
-        className="flex items-center gap-2 rounded-full border border-rule bg-paper-raised px-3 py-2 text-xs font-semibold text-ink shadow-lg shadow-ink/10"
+        aria-haspopup="dialog"
+        title={viewer ? `${statusLabel}. Your status: ${getWhatsAppPresenceLabel(viewer.availability)}.` : statusLabel}
+        className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs transition ${
+          senderConnected
+            ? "border-ledger-tint bg-ledger-tint/60 text-ledger hover:border-ledger/30 hover:bg-ledger-tint"
+            : "border-rule bg-paper text-ink-faint hover:border-rule-strong"
+        }`}
       >
-        <span aria-hidden="true" className={`h-2.5 w-2.5 rounded-full ${dotClass(viewer?.availability || "offline")}`} />
-        <span className="hidden sm:inline">{viewer ? getWhatsAppPresenceLabel(viewer.availability) : "Team"}</span>
-        <span className="text-ink-faint">{onlineCount} online</span>
+        <span
+          aria-hidden="true"
+          className={`h-2 w-2 rounded-full ${senderConnected ? "bg-ledger-bright" : "bg-ink-faint/50"}`}
+        />
+        <span className="hidden sm:inline">{statusLabel}</span>
+        {viewer ? (
+          <span
+            aria-hidden="true"
+            className={`h-2 w-2 rounded-full ring-2 ring-white/70 ${dotClass(viewer.availability)}`}
+          />
+        ) : null}
         {mentions.length > 0 ? (
           <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-rose-600 px-1.5 py-0.5 text-[0.625rem] font-bold text-white">
             {mentions.length > 9 ? "9+" : mentions.length}
@@ -142,7 +157,11 @@ export default function TeamPresenceWidget() {
       </button>
 
       {open ? (
-        <div className="mt-2 w-[min(22rem,calc(100vw-1.5rem))] overflow-hidden rounded-2xl border border-rule bg-paper-raised shadow-2xl shadow-ink/20">
+        <div
+          role="dialog"
+          aria-label="Team presence and mentions"
+          className="absolute right-0 top-full z-[70] mt-2 w-[min(22rem,calc(100vw-1.5rem))] overflow-hidden rounded-2xl border border-rule bg-paper-raised text-ink shadow-2xl shadow-ink/20"
+        >
           <div className="border-b border-rule px-4 py-3">
             <p className="text-xs font-semibold uppercase tracking-[.14em] text-ink-faint">Your activity status</p>
             <div className="mt-2 grid grid-cols-3 gap-2">
