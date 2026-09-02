@@ -27,6 +27,7 @@ export const WHATSAPP_NAV_SECTIONS: WhatsAppNavSection[] = [
       { label: "Campaigns", href: `${WHATSAPP_CONSOLE_ROOT}/campaigns`, icon: "campaigns", description: "Opt-in template campaigns, audiences, scheduling, and delivery performance.", status: "live", roles: SUPERVISORS },
       { label: "Flows", href: `${WHATSAPP_CONSOLE_ROOT}/flows`, icon: "templates", description: "Build, publish, send, and track interactive WhatsApp Flows.", status: "live", roles: SUPERVISORS },
       { label: "Automations", href: `${WHATSAPP_CONSOLE_ROOT}/automations`, icon: "automations", description: "Trigger, condition, and action workflows for WhatsApp operations.", status: "live", roles: SUPERVISORS },
+      { label: "AI", href: `${WHATSAPP_CONSOLE_ROOT}/ai`, icon: "automations", description: "AI Assist, business knowledge, AI Agents, safety controls, and usage.", status: "live", roles: SUPERVISORS },
       { label: "Analytics", href: `${WHATSAPP_CONSOLE_ROOT}/analytics`, icon: "analytics", description: "Response times, volumes, and lead quality.", status: "live", roles: OWNER },
     ],
   },
