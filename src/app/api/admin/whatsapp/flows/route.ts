@@ -4,9 +4,10 @@ import { NextResponse } from "next/server";
 import { getWhatsAppWorkspaceAccess } from "@/app/admin/whatsapp/auth";
 import { mutateWhatsAppRest, readWhatsAppRows } from "@/app/admin/whatsapp/data";
 import { isSameOriginMutation } from "@/lib/scheduler/policy";
+import { isWhatsAppFlowEncryptionConfigured } from "@/lib/whatsapp/flowCrypto";
 import { normalizeWhatsAppFlowRow, validateWhatsAppFlowInput, WHATSAPP_FLOW_DATA_API_VERSION, WHATSAPP_FLOW_JSON_VERSION } from "@/lib/whatsapp/flowModel";
 import { canWhatsAppRoleSuperviseTeam } from "@/lib/whatsapp/teamModel";
-import { createMetaWhatsAppFlow, deleteMetaWhatsAppFlow, deprecateMetaWhatsAppFlow, getMetaWhatsAppFlow, publishMetaWhatsAppFlow, uploadMetaWhatsAppFlowJson } from "@/lib/whatsapp/flows";
+import { createMetaWhatsAppFlow, deleteMetaWhatsAppFlow, deprecateMetaWhatsAppFlow, getMetaWhatsAppFlow, publishMetaWhatsAppFlow, uploadMetaWhatsAppFlowJson, type MetaWhatsAppFlow } from "@/lib/whatsapp/flows";
 
 export const runtime = "nodejs";
 
@@ -24,7 +25,7 @@ async function load(id: string) {
   return rows?.[0] ? normalizeWhatsAppFlowRow(rows[0]) : null;
 }
 function endpointUri() { return "https://webgrowth.info/api/whatsapp/flows/data/"; }
-function metaPatch(flow: Awaited<ReturnType<typeof getMetaWhatsAppFlow>> extends { ok: true; flow: infer T } ? T : never) {
+function metaPatch(flow: MetaWhatsAppFlow) {
   return {
     name: flow.name || undefined,
     status: flow.status,
@@ -95,6 +96,7 @@ export async function POST(request: Request) {
   if (action === "PUBLISH") {
     const flow = await load(text(input.id, 100)); if (!flow?.metaFlowId) return NextResponse.json({ error: "Flow not found or not linked to Meta." }, { status: 404 });
     if (flow.status !== "DRAFT") return NextResponse.json({ error: "Only Draft Flows can be published." }, { status: 409 });
+    if (flow.builder.dynamic && !isWhatsAppFlowEncryptionConfigured()) return NextResponse.json({ error: "Dynamic Flow publishing is blocked until WHATSAPP_FLOW_PRIVATE_KEY is configured and its public key is registered with Meta." }, { status: 409 });
     const uploaded = await uploadMetaWhatsAppFlowJson(flow.metaFlowId, flow.flowJson); if (!uploaded.ok) return NextResponse.json({ error: uploaded.error }, { status: 502 });
     if (uploaded.validationErrors.length) {
       await mutateWhatsAppRest({ method: "PATCH", pathAndQuery: `whatsapp_flows?id=eq.${encodeURIComponent(flow.id)}`, body: { validation_errors: uploaded.validationErrors, updated_at: new Date().toISOString() } });
