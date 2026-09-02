@@ -1,6 +1,6 @@
 # WhatsApp Stage 9 — Advanced Analytics Implementation Checkpoint
 
-Status: IMPLEMENTED ON `stage9-advanced-analytics` / AWAITING VALIDATION AND OWNER PRODUCTION GATE
+Status: IMPLEMENTED / BRANCH VALIDATED / SUPABASE INDEXES APPLIED / READY FOR PRODUCTION PROMOTION
 
 ## Implementation completed
 
@@ -128,6 +128,8 @@ High-level call metrics are included in Advanced Analytics while the existing de
 Migration file:
 `supabase/migrations/20260902223000_whatsapp_stage9_analytics_indexes.sql`
 
+Applied successfully to production Supabase on 2026-09-02.
+
 It adds only time-range indexes for:
 - `whatsapp_messages.message_timestamp`
 - `whatsapp_team_activity.created_at`
@@ -139,7 +141,9 @@ It adds only time-range indexes for:
 
 No schema or data-model rewrite is required.
 
-## Tests
+Post-migration Supabase advisors introduced no new blocking security or performance finding. Newly-created indexes can initially appear as `unused_index` informational notices until production traffic exercises them.
+
+## Tests and build validation
 
 Added:
 `src/app/admin/whatsapp/advancedAnalyticsModel.test.ts`
@@ -152,19 +156,25 @@ Coverage includes:
 - top-entry aggregation
 - safe rate calculation
 
-The Stage 9 model test is included in `npm run test:whatsapp`, and therefore in the normal production build command.
+Validation result on the finished branch:
+- `npm run test:whatsapp`: 178 passed / 0 failed
+- sitemap validation: passed
+- Next.js optimized production compile: passed
+- TypeScript validity check: passed
+- only pre-existing unrelated lint warnings remained
+
+Independent production-data sanity checks also matched the Stage 9 source data for messages, conversations, contacts, automation runs, Flow submissions, calls and team activity.
 
 ## Deferred by explicit project decision
 
 The Web Growth `WG — PROJECT ENQUIRY` Flow-completion automation remains deferred. It is not silently folded into Stage 9.
 
-## Remaining gate
+## Remaining production gate
 
 Before Stage 9 can be marked 100% complete:
-1. branch build/tests must pass;
-2. the additive Stage 9 indexes must be applied to production Supabase;
-3. production deployment must complete successfully;
-4. Advanced Analytics must load against real production data;
-5. Messages and Calls analytics must regress successfully;
-6. no new blocking Supabase/Vercel issue may be introduced;
-7. Owner production verification must pass.
+1. promote the validated finished branch to `main`;
+2. production deployment must complete successfully;
+3. Advanced Analytics must load against real production data;
+4. Messages and Calls analytics must regress successfully;
+5. no new blocking Vercel production issue may be introduced;
+6. Owner production verification must pass.
