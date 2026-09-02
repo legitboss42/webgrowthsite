@@ -108,23 +108,17 @@ export default function GoogleSignInButton({
     });
 
     googleId.renderButton(buttonRef.current, {
-      theme: "filled_black",
+      theme: "outline",
       size: "large",
       text: "continue_with",
-      shape: "pill",
-      width: 320,
+      shape: "rectangular",
+      width: 360,
       logo_alignment: "left",
     });
   }, [clientId, loginHint, nextPath, scriptReady]);
 
   if (!clientId) {
-    return (
-      <div className="space-y-3">
-        <div className="rounded-[24px] border border-amber-300/20 bg-amber-300/10 p-5 text-sm leading-6 text-amber-50/86">
-          Google sign-in is not configured in this environment yet.
-        </div>
-      </div>
-    );
+    return <p className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm leading-5 text-amber-800">Google sign-in is not configured.</p>;
   }
 
   return (
@@ -134,18 +128,11 @@ export default function GoogleSignInButton({
         strategy="afterInteractive"
         onLoad={() => setScriptReady(true)}
       />
-      <div className="flex flex-wrap items-center gap-3">
-        <div ref={buttonRef} className={isLoading ? "pointer-events-none opacity-70" : undefined} />
-        <span className="text-sm text-[#e9dfcf]/72">{isLoading ? pendingLabel : label}</span>
+      <div className={isLoading ? "pointer-events-none opacity-65" : undefined}>
+        <div ref={buttonRef} className="min-h-11 w-full overflow-hidden rounded-lg" aria-label={isLoading ? pendingLabel : label} />
       </div>
-      {error ? (
-        <p className="rounded-[20px] border border-rose-200/16 bg-rose-200/10 px-4 py-3 text-sm leading-6 text-rose-50/90">
-          {error}
-        </p>
-      ) : null}
-      <noscript>
-        <p className={className}>JavaScript is required to continue with Google.</p>
-      </noscript>
+      {error ? <p className="rounded-xl border border-rose-200 bg-rose-50 px-3.5 py-3 text-sm leading-5 text-rose-700">{error}</p> : null}
+      <noscript><p className={className}>JavaScript is required to continue with Google.</p></noscript>
     </div>
   );
 }
