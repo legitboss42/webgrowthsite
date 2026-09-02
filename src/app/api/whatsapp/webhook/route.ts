@@ -10,6 +10,8 @@ import { sendWhatsAppText } from "@/lib/whatsapp/send";
 import { dispatchWhatsAppAutomationEvent, resumeWhatsAppAutomationQuestion } from "@/lib/whatsapp/automationRuntime";
 import { recordWhatsAppCampaignInbound, updateWhatsAppCampaignDeliveryStatus } from "@/lib/whatsapp/campaignRuntime";
 import { processWhatsAppStaticFlowWebhook } from "@/lib/whatsapp/flowRuntime";
+import { processWhatsAppAIInbound } from "@/lib/whatsapp/aiRuntime";
+import { processWhatsAppAIAutomationTags } from "@/lib/whatsapp/aiAutomationBridge";
 import { claimWhatsAppPushDelivery, sendWhatsAppPushNotification } from "@/lib/whatsapp/webPush";
 
 export const runtime = "nodejs";
@@ -107,7 +109,17 @@ export async function POST(request: Request) {
         const campaign = await recordWhatsAppCampaignInbound({ waId: message.waId, messageId: message.messageId, timestamp: message.timestamp, text: message.text });
         if (campaign.optedOut) return false;
         const automation = await dispatchMessageAutomations(message);
-        return automation.started === 0;
+        try { await processWhatsAppAIAutomationTags({ waId: message.waId }); }
+        catch (error) { console.error("WhatsApp AI automation bridge failed", error); }
+        // A Stage 6 workflow owns the current customer turn. AI routing tags created
+        // by that workflow are applied above but take effect from the next turn so
+        // automation and AI can never double-reply to the same inbound message.
+        if (automation.started > 0) return false;
+        try {
+          const ai = await processWhatsAppAIInbound({ waId: message.waId, messageId: message.messageId, text: message.text, timestamp: message.timestamp });
+          if (ai.handled) return false;
+        } catch (error) { console.error("WhatsApp AI inbound handling failed", error); }
+        return true;
       },
     });
 
