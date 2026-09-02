@@ -153,6 +153,7 @@ const governedPageRoutes = new Set(routes.map((route) => route.path));
 const privateAdminRoutes = new Set([
   "/admin/whatsapp/calls/",
   "/admin/whatsapp/team/",
+  "/admin/whatsapp/flows/",
 ]);
 for (const file of walk(appDirectory, "page.tsx")) {
   const route = pageFileToRoute(file);
