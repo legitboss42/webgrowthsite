@@ -9,6 +9,7 @@ import { readSchedulerSession, SCHEDULER_SESSION_COOKIE } from "@/lib/scheduler/
 import { readWorkspacePasswordSessionFromCookieStore } from "@/lib/whatsapp/passwordAuth";
 import { ensureWhatsAppOwnerTeamMember, findWhatsAppTeamMemberByEmail } from "@/lib/whatsapp/teamAccess";
 import { canWhatsAppRoleSuperviseTeam, type WhatsAppTeamRole } from "@/lib/whatsapp/teamModel";
+import { enterWhatsAppWorkspace } from "@/lib/whatsapp/workspaceContext";
 import type { WhatsAppWorkspace } from "@/lib/whatsapp/workspaceModel";
 import { isWhatsAppPlatformAdmin, resolveWhatsAppWorkspaceForIdentity } from "@/lib/whatsapp/workspaces";
 import { readWhatsAppRows } from "./data";
@@ -47,6 +48,12 @@ async function resolveIdentityWorkspace(input: { email: string; displayName: str
   let member = await findWhatsAppTeamMemberByEmail(input.email, { activeOnly: true, workspaceId: workspace.id });
   if (platformAdmin && workspace.isPlatformOwned && !member) member = await ensureWhatsAppOwnerTeamMember({ email: input.email, displayName: input.displayName, workspaceId: workspace.id });
   if (!platformAdmin && !member) return null;
+
+  // Bind every subsequent tenant helper in this request to the exact workspace that
+  // membership resolution approved. This also protects a user's first request before
+  // they have ever written the workspace-selection cookie.
+  enterWhatsAppWorkspace(workspace.id);
+
   return { role: platformAdmin ? "owner" : member!.role, memberId: member?.id || null, email: input.email, displayName: member?.displayName || input.displayName || input.email, source: input.source, workspaceId: workspace.id, workspaceSlug: workspace.slug, workspaceName: workspace.name, workspaceStatus: workspace.status, platformAdmin, availableWorkspaces: workspaces };
 }
 
