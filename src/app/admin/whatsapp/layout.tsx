@@ -10,6 +10,7 @@ import {
   findConfiguredWhatsAppSender,
 } from "@/lib/whatsapp/phoneNumbers";
 import { getWhatsAppWorkspaceAccess } from "./auth";
+import AIWorkspaceDeepLink from "./AIWorkspaceDeepLink";
 import AIWorkspaceLayer from "./AIWorkspaceLayer";
 import ConversationFlowLauncher from "./ConversationFlowLauncher";
 import InstantInteractionLayer from "./InstantInteractionLayer";
@@ -66,6 +67,7 @@ export default async function WhatsAppConsoleLayout({ children }: { children: Re
         <IncomingCallOverlay />
         <WorkspaceCollaborationLayer />
         <ConversationFlowLauncher />
+        <AIWorkspaceDeepLink />
         <AIWorkspaceLayer role={access.role} />
         {children}
       </MessageStatusVisibilityProvider>
