@@ -10,6 +10,7 @@ import {
   findConfiguredWhatsAppSender,
 } from "@/lib/whatsapp/phoneNumbers";
 import { getWhatsAppWorkspaceAccess } from "./auth";
+import ConversationFlowLauncher from "./ConversationFlowLauncher";
 import InstantInteractionLayer from "./InstantInteractionLayer";
 import IncomingCallOverlay from "./IncomingCallOverlay";
 import TeamPresenceWidget from "./TeamPresenceWidget";
@@ -63,6 +64,7 @@ export default async function WhatsAppConsoleLayout({ children }: { children: Re
         <InstantInteractionLayer />
         <IncomingCallOverlay />
         <WorkspaceCollaborationLayer />
+        <ConversationFlowLauncher />
         {children}
       </MessageStatusVisibilityProvider>
     </WhatsAppShell>
