@@ -22,8 +22,8 @@ export default async function WhatsAppConsoleLayout({ children }: { children: Re
 
   if (!access) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#050806] px-4 py-16 text-white">
-        <div className="w-full max-w-4xl">
+      <div className="flex min-h-screen items-center justify-center bg-[#050806] px-4 py-10 text-white sm:px-6 sm:py-14">
+        <div className="w-full max-w-6xl">
           <GoogleAdminPrompt
             nextPath="/admin/whatsapp/"
             adminEmail={getDefaultAdminGoogleEmail()}
