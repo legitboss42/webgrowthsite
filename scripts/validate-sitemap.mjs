@@ -150,15 +150,17 @@ for (const article of indexedArticles) {
 }
 
 const governedPageRoutes = new Set(routes.map((route) => route.path));
-const privateAdminRoutes = new Set([
+const privateAppRoutes = new Set([
   "/admin/whatsapp/calls/",
   "/admin/whatsapp/team/",
   "/admin/whatsapp/flows/",
+  "/admin/whatsapp/account/",
+  "/whatsapp/set-password/",
 ]);
 for (const file of walk(appDirectory, "page.tsx")) {
   const route = pageFileToRoute(file);
   if (route === "/blog/[slug]/") continue;
-  if (privateAdminRoutes.has(route)) continue;
+  if (privateAppRoutes.has(route)) continue;
   if (!governedPageRoutes.has(route)) fail(`Ungoverned App Router page: ${route}`);
 }
 
@@ -174,7 +176,7 @@ for (const route of routes.filter((entry) => entry.status === "REDIRECT")) {
 }
 for (const article of articles.filter((entry) => entry.status === "REDIRECT")) {
   if (!indexedDestinations.has(article.destination)) {
-    fail(`Article redirect destination is not indexed: ${article.slug} -> ${article.destination}`);
+    fail(`Article redirect destination is not indexed: ${article.slug}`);
   }
 }
 
