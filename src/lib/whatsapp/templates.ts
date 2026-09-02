@@ -1,6 +1,4 @@
-import { normalizeWhatsAppRecipient } from "./send";
 import { buildWhatsAppMetaTemplateComponents, listWhatsAppTemplateVariables, type WhatsAppTemplateDraftInput } from "./templateModel";
-import { resolveWhatsAppMetaConfig } from "./workspaceCredentials";
 
 export type WhatsAppTemplateStatus = "APPROVED" | "PENDING" | "REJECTED" | "PAUSED" | "DISABLED" | "UNKNOWN";
 export type WhatsAppTemplateButton = { type: string; text?: string; url?: string; phone_number?: string };
@@ -15,6 +13,17 @@ const KNOWN_COMPONENT_TYPES: WhatsAppTemplateComponent["type"][] = ["HEADER", "B
 function readText(value: unknown) { return typeof value === "string" && value.trim() ? value.trim() : undefined; }
 async function readMetaError(response: Response) { const payload = await response.json().catch(() => null) as { error?: { message?: string; code?: number } } | null; return { message: payload?.error?.message, code: payload?.error?.code }; }
 function classifyMetaPermission(status: number, code?: number) { return status === 401 || status === 403 || code === 10 || code === 200 || code === 190; }
+function normalizeRecipient(value: string) {
+  const digits = value.trim().replace(/[^\d+]/g, "").replace(/^\+/, "");
+  if (/^0\d{10}$/.test(digits)) return `234${digits.slice(1)}`;
+  return /^\d{10,15}$/.test(digits) ? digits : null;
+}
+async function resolveMeta(options: MetaOptions) {
+  // Kept behind a dynamic import so client components can use the pure presentation
+  // helpers above without bundling Node crypto/request-context modules into the browser.
+  const { resolveWhatsAppMetaConfig } = await import("./workspaceCredentials");
+  return resolveWhatsAppMetaConfig({ workspaceId: options.workspaceId, env: options.env });
+}
 
 export function normalizeWhatsAppTemplateComponent(raw: Record<string, unknown>): WhatsAppTemplateComponent {
   const rawType = typeof raw.type === "string" ? raw.type.toUpperCase() : "";
@@ -35,7 +44,7 @@ export function sortWhatsAppTemplates(templates: WhatsAppTemplate[]) { const ran
 
 type MetaOptions = { env?: Record<string, string | undefined>; workspaceId?: string | null; fetch?: typeof globalThis.fetch };
 export async function fetchWhatsAppTemplates(options: MetaOptions & { limit?: number } = {}): Promise<WhatsAppTemplateFetchResult> {
-  const meta = await resolveWhatsAppMetaConfig({ workspaceId: options.workspaceId, env: options.env });
+  const meta = await resolveMeta(options);
   if (!meta?.wabaId) return { ok: false, reason: "NOT_CONFIGURED" };
   const limit = options.limit && options.limit > 0 ? Math.min(options.limit, 100) : 100;
   try {
@@ -48,7 +57,7 @@ export async function fetchWhatsAppTemplates(options: MetaOptions & { limit?: nu
 }
 
 export async function createWhatsAppTemplate(input: WhatsAppTemplateDraftInput, options: MetaOptions = {}): Promise<WhatsAppTemplateCreateResult> {
-  const meta = await resolveWhatsAppMetaConfig({ workspaceId: options.workspaceId, env: options.env });
+  const meta = await resolveMeta(options);
   if (!meta?.wabaId) return { ok: false, reason: "NOT_CONFIGURED" };
   try {
     const response = await (options.fetch || globalThis.fetch)(`https://graph.facebook.com/${meta.apiVersion}/${meta.wabaId}/message_templates`, { method: "POST", headers: { Authorization: `Bearer ${meta.token}`, "Content-Type": "application/json" }, body: JSON.stringify({ name: input.name, language: input.language, category: input.category, components: buildWhatsAppMetaTemplateComponents(input) }) });
@@ -59,9 +68,9 @@ export async function createWhatsAppTemplate(input: WhatsAppTemplateDraftInput, 
 }
 
 export async function sendWhatsAppTemplateMessage(input: { to: string; name: string; language: string; headerParameters?: string[]; bodyParameters?: string[] }, options: MetaOptions = {}): Promise<WhatsAppTemplateSendResult> {
-  const meta = await resolveWhatsAppMetaConfig({ workspaceId: options.workspaceId, env: options.env });
+  const meta = await resolveMeta(options);
   if (!meta) return { ok: false, reason: "NOT_CONFIGURED" };
-  const recipient = normalizeWhatsAppRecipient(input.to); if (!recipient) return { ok: false, reason: "INVALID_RECIPIENT" };
+  const recipient = normalizeRecipient(input.to); if (!recipient) return { ok: false, reason: "INVALID_RECIPIENT" };
   const components: Array<Record<string, unknown>> = [];
   if (input.headerParameters?.length) components.push({ type: "header", parameters: input.headerParameters.map((text) => ({ type: "text", text })) });
   if (input.bodyParameters?.length) components.push({ type: "body", parameters: input.bodyParameters.map((text) => ({ type: "text", text })) });
