@@ -101,6 +101,13 @@ function formatWhen(value?: string) {
   return Number.isFinite(date.getTime()) ? date.toLocaleString() : "—";
 }
 
+function formatActionPath(path: ActionPath) {
+  return path.map((part) => {
+    if (typeof part === "number") return `Step ${part + 1}`;
+    return part === "then" ? "Yes" : "No";
+  }).join(" › ");
+}
+
 function actionAt(actions: WhatsAppAutomationAction[], path: ActionPath): WhatsAppAutomationAction | null {
   let list = actions;
   let current: WhatsAppAutomationAction | undefined;
@@ -162,12 +169,13 @@ function summarizeAction(action: WhatsAppAutomationAction) {
   return action.value || getWhatsAppAutomationActionLabel(action.type);
 }
 
-function Node({ title, subtitle, tone = "plain", selected, onClick }: {
+function Node({ title, subtitle, tone = "plain", selected, onClick, actionPath }: {
   title: string;
   subtitle?: string;
   tone?: "plain" | "trigger" | "condition" | "action" | "question";
   selected?: boolean;
   onClick?(): void;
+  actionPath?: string;
 }) {
   const toneClass = tone === "trigger"
     ? "border-emerald-300 bg-emerald-50"
@@ -178,7 +186,7 @@ function Node({ title, subtitle, tone = "plain", selected, onClick }: {
         : tone === "action"
           ? "border-sky-300 bg-sky-50"
           : "border-rule bg-paper";
-  return <button type="button" onClick={onClick} className={`w-[270px] rounded-2xl border p-3 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${toneClass} ${selected ? "ring-2 ring-ledger ring-offset-2" : ""}`}>
+  return <button type="button" data-automation-action-path={actionPath} onClick={onClick} className={`w-[270px] rounded-2xl border p-3 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${toneClass} ${selected ? "ring-2 ring-ledger ring-offset-2" : ""}`}>
     <div className="text-[0.65rem] font-semibold uppercase tracking-[.12em] text-ink-faint">{tone === "trigger" ? "Trigger" : tone === "condition" ? "Condition" : tone === "question" ? "Question" : tone === "action" ? "Action" : "Step"}</div>
     <div className="mt-1 text-sm font-semibold text-ink">{title}</div>
     {subtitle ? <div className="mt-1 line-clamp-2 text-xs leading-5 text-ink-faint">{subtitle}</div> : null}
@@ -186,18 +194,19 @@ function Node({ title, subtitle, tone = "plain", selected, onClick }: {
 }
 function Connector() { return <div className="mx-auto h-8 w-px bg-rule" />; }
 
-function ActionTree({ actions, parent = [], selection, setSelection }: {
+function ActionTree({ actions, parent = [], selection, setSelection, onAddBranchAction }: {
   actions: WhatsAppAutomationAction[];
   parent?: ActionPath;
   selection: Selection;
   setSelection(value: Selection): void;
+  onAddBranchAction(path: ActionPath, branch: "then" | "else"): void;
 }) {
   return <>{actions.map((action, index) => {
     const path = [...parent, index];
     const selected = selection.type === "action" && JSON.stringify(selection.path) === JSON.stringify(path);
     if (action.type === "BRANCH") {
       return <div key={path.join("-")} className="flex w-full flex-col items-center">
-        <Node tone="condition" title="Branch" subtitle={summarizeAction(action)} selected={selected} onClick={() => setSelection({ type: "action", path })} />
+        <Node tone="condition" title="Branch" subtitle={summarizeAction(action)} selected={selected} actionPath={path.join("/")} onClick={() => setSelection({ type: "action", path })} />
         <div className="h-6 w-px bg-rule" />
         <div className="grid w-full max-w-[760px] grid-cols-2 gap-8">
           {(["then", "else"] as const).map((branch) => {
@@ -205,8 +214,8 @@ function ActionTree({ actions, parent = [], selection, setSelection }: {
             return <div key={branch} className="flex min-w-0 flex-col items-center">
               <span className={`mb-2 rounded-full px-2.5 py-1 text-[0.65rem] font-bold uppercase ${branch === "then" ? "bg-emerald-100 text-emerald-700" : "bg-rose-100 text-rose-700"}`}>{branch === "then" ? "Yes" : "No"}</span>
               {child.length
-                ? <ActionTree actions={child} parent={[...path, branch]} selection={selection} setSelection={setSelection} />
-                : <button type="button" onClick={() => setSelection({ type: "action", path })} className="rounded-xl border border-dashed border-rule bg-paper/70 px-4 py-6 text-center text-xs text-ink-faint">Empty path · valid while building</button>}
+                ? <ActionTree actions={child} parent={[...path, branch]} selection={selection} setSelection={setSelection} onAddBranchAction={onAddBranchAction} />
+                : <button type="button" onClick={() => onAddBranchAction(path, branch)} className="rounded-xl border border-dashed border-rule bg-paper/70 px-4 py-6 text-center text-xs font-semibold text-ledger">+ Add {branch === "then" ? "Yes" : "No"} action</button>}
             </div>;
           })}
         </div>
@@ -214,7 +223,7 @@ function ActionTree({ actions, parent = [], selection, setSelection }: {
       </div>;
     }
     return <div key={path.join("-")} className="flex flex-col items-center">
-      <Node tone={action.type === "ASK_QUESTION" ? "question" : "action"} title={getWhatsAppAutomationActionLabel(action.type)} subtitle={summarizeAction(action)} selected={selected} onClick={() => setSelection({ type: "action", path })} />
+      <Node tone={action.type === "ASK_QUESTION" ? "question" : "action"} title={getWhatsAppAutomationActionLabel(action.type)} subtitle={summarizeAction(action)} selected={selected} actionPath={path.join("/")} onClick={() => setSelection({ type: "action", path })} />
       {index < actions.length - 1 ? <Connector /> : null}
     </div>;
   })}</>;
@@ -304,6 +313,17 @@ export default function AutomationManager({ automations, storageReady, runs, job
     if (selection.type !== "action" || locked) return;
     setDraft((value) => ({ ...value, actions: updateAction(value.actions, selection.path, (action) => ({ ...action, ...patch })) }));
   }
+
+  function addBranchAction(path: ActionPath, branch: "then" | "else") {
+    if (locked) return;
+    const parentAction = actionAt(draft.actions, path);
+    if (!parentAction || parentAction.type !== "BRANCH") return;
+    const childActions = branch === "then" ? parentAction.thenActions || [] : parentAction.elseActions || [];
+    const childPath: ActionPath = [...path, branch, childActions.length];
+    setDraft((value) => ({ ...value, actions: appendBranchAction(value.actions, path, branch) }));
+    setSelection({ type: "action", path: childPath });
+  }
+
   const selectedAction = selection.type === "action" ? actionAt(draft.actions, selection.path) : null;
 
   if (builder) {
@@ -329,15 +349,16 @@ export default function AutomationManager({ automations, storageReady, runs, job
             <Node tone="trigger" title={getWhatsAppAutomationTriggerLabel(draft.triggerType)} subtitle={draft.description || "Click to configure the workflow trigger."} selected={selection.type === "trigger"} onClick={() => setSelection({ type: "trigger" })} />
             <Connector />
             {draft.conditions.length ? <><Node tone="condition" title={`Entry conditions · ${draft.conditionJoin}`} subtitle={`${draft.conditions.length} condition${draft.conditions.length === 1 ? "" : "s"}`} selected={selection.type === "conditions"} onClick={() => setSelection({ type: "conditions" })} /><Connector /></> : !locked ? <button type="button" onClick={() => { setDraft({ ...draft, conditions: [{ field: "message.text", operator: "CONTAINS", value: "" }] }); setSelection({ type: "conditions" }); }} className="mb-2 rounded-full border border-dashed border-rule bg-paper px-3 py-1.5 text-xs font-semibold text-ledger">+ Entry condition</button> : null}
-            <ActionTree actions={draft.actions} selection={selection} setSelection={setSelection} />
+            <ActionTree actions={draft.actions} selection={selection} setSelection={setSelection} onAddBranchAction={addBranchAction} />
             {!locked && steps < WHATSAPP_AUTOMATION_MAX_STEPS ? <><Connector /><button type="button" onClick={() => { const next = [...draft.actions, newAction("SEND_TEXT")]; setDraft({ ...draft, actions: next }); setSelection({ type: "action", path: [next.length - 1] }); }} className="rounded-full border border-rule bg-paper px-4 py-2 text-sm font-semibold text-ledger shadow-sm">+ Add step</button></> : null}
           </div>
         </main>
         <aside className="min-w-0 bg-paper p-4 lg:sticky lg:top-[69px] lg:h-[calc(100vh-69px)] lg:overflow-auto">
           <div className="mb-4"><div className="text-[0.65rem] font-semibold uppercase tracking-[.12em] text-ink-faint">Properties</div><textarea disabled={locked} rows={2} value={draft.description} onChange={(event) => setDraft({ ...draft, description: event.target.value })} placeholder="What does this workflow do?" className="mt-2 w-full rounded-xl border border-rule bg-paper-raised px-3 py-2 text-sm" /></div>
+          {selection.type === "action" ? <div data-automation-selected-path={selection.path.join("/")} className="mb-3 rounded-lg border border-rule bg-paper-sunk px-3 py-2 text-[0.68rem] font-semibold text-ink-faint">Selected: {formatActionPath(selection.path)}</div> : null}
           {selection.type === "trigger" ? <TriggerInspector value={draft} disabled={locked} onChange={setDraft} /> : null}
           {selection.type === "conditions" ? <ConditionsInspector value={draft} disabled={locked} onChange={setDraft} /> : null}
-          {selection.type === "action" && selectedAction ? <ActionInspector action={selectedAction} disabled={locked} teamMembers={teamMembers} templates={templates} savedReplies={savedReplies} onChange={updateSelectedAction} onRemove={() => { setDraft((value) => ({ ...value, actions: removeAction(value.actions, selection.path) })); setSelection({ type: "trigger" }); }} onAppendBranch={(branch) => setDraft((value) => ({ ...value, actions: appendBranchAction(value.actions, selection.path, branch) }))} /> : null}
+          {selection.type === "action" && selectedAction ? <ActionInspector action={selectedAction} disabled={locked} teamMembers={teamMembers} templates={templates} savedReplies={savedReplies} onChange={updateSelectedAction} onRemove={() => { setDraft((value) => ({ ...value, actions: removeAction(value.actions, selection.path) })); setSelection({ type: "trigger" }); }} onAppendBranch={(branch) => addBranchAction(selection.path, branch)} /> : null}
           {!checked.ok ? <div className="mt-4 rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs leading-5 text-rose-700">{checked.error}</div> : <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-xs leading-5 text-emerald-700">Workflow definition is valid.</div>}
         </aside>
       </div>
@@ -422,7 +443,7 @@ function ActionInspector({ action, disabled, teamMembers, templates, savedReplie
     {new Set(["ADD_TAG", "REMOVE_TAG", "UPDATE_CRM_STAGE", "CALL_WEBHOOK"]).has(type) ? <Field label={type === "CALL_WEBHOOK" ? "HTTPS URL" : type === "UPDATE_CRM_STAGE" ? "CRM stage" : "Tag"} disabled={disabled} value={action.value || ""} onChange={(v) => onChange({ value: v })} /> : null}
     {type === "UPDATE_CONTACT_FIELD" ? <><Field label="Field" disabled={disabled} value={action.value || ""} onChange={(v) => onChange({ value: v })} placeholder="custom.budget" /><Field label="New value" disabled={disabled} value={action.value2 || ""} onChange={(v) => onChange({ value2: v })} placeholder="{{answer}}" /></> : null}
     {type === "DELAY" ? <div className="mt-3 grid grid-cols-[1fr_8rem] gap-2"><Field label="Amount" disabled={disabled} type="number" value={String(action.amount || "")} onChange={(v) => onChange({ amount: Number(v) })} /><label className="text-xs font-semibold text-ink-soft">Unit<select disabled={disabled} value={action.unit || "MINUTES"} onChange={(e) => onChange({ unit: e.target.value as "MINUTES" | "HOURS" | "DAYS" })} className="mt-1 w-full rounded-xl border border-rule bg-paper-raised px-2 py-2 text-sm"><option value="MINUTES">Minutes</option><option value="HOURS">Hours</option><option value="DAYS">Days</option></select></label></div> : null}
-    {type === "BRANCH" ? <div className="mt-3"><ConditionEditor condition={action.condition || { field: "answer", operator: "EQUALS", value: "" }} disabled={disabled} onChange={(patch) => onChange({ condition: { ...(action.condition || { field: "answer", operator: "EQUALS", value: "" }), ...patch } })} /><div className="mt-3 grid grid-cols-2 gap-2"><button type="button" disabled={disabled} onClick={() => onAppendBranch("then")} className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-700">+ Yes action</button><button type="button" disabled={disabled} onClick={() => onAppendBranch("else")} className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-700">+ No action</button></div><p className="mt-2 text-xs text-ink-faint">Yes/No paths may be empty while you build. Saving is still allowed.</p></div> : null}
+    {type === "BRANCH" ? <div className="mt-3"><ConditionEditor condition={action.condition || { field: "answer", operator: "EQUALS", value: "" }} disabled={disabled} onChange={(patch) => onChange({ condition: { ...(action.condition || { field: "answer", operator: "EQUALS", value: "" }), ...patch } })} /><div className="mt-3 grid grid-cols-2 gap-2"><button type="button" disabled={disabled} onClick={() => onAppendBranch("then")} className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-700">+ Yes action</button><button type="button" disabled={disabled} onClick={() => onAppendBranch("else")} className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-700">+ No action</button></div><p className="mt-2 text-xs text-ink-faint">New branch actions are selected automatically so their properties are immediately editable. Yes/No paths may still be empty while you build.</p></div> : null}
     <button type="button" disabled={disabled} onClick={onRemove} className="mt-5 w-full rounded-lg border border-rose-200 px-3 py-2 text-xs font-semibold text-rose-700 disabled:opacity-30">Remove step</button>
   </div>;
 }
