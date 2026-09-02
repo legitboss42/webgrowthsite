@@ -9,7 +9,21 @@ export const metadata: Metadata = {
 
 export const dynamic = "force-dynamic";
 
-export default function WhatsAppPasswordSetupPage() {
+export default async function WhatsAppPasswordSetupPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ token_hash?: string; type?: string }>;
+}) {
   const config = getWorkspacePasswordPublicConfig();
-  return <PasswordSetupForm supabaseUrl={config.url} anonKey={config.anonKey} />;
+  const params = await searchParams;
+  const tokenType = params.type === "invite" || params.type === "recovery" ? params.type : "";
+
+  return (
+    <PasswordSetupForm
+      supabaseUrl={config.url}
+      anonKey={config.anonKey}
+      tokenHash={params.token_hash?.trim() || ""}
+      tokenType={tokenType}
+    />
+  );
 }
