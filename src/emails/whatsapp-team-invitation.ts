@@ -27,6 +27,7 @@ export type WhatsAppTeamInvitationInput = {
   googleEmail: string;
   role: WhatsAppTeamRole;
   invitedByEmail?: string | null;
+  passwordSetupUrl?: string | null;
 };
 
 function roleLabel(role: WhatsAppTeamRole) {
@@ -43,15 +44,19 @@ export function buildWhatsAppTeamInvitationEmail(input: WhatsAppTeamInvitationIn
   const safeEmail = escapeHtml(input.googleEmail);
   const safeRole = escapeHtml(role);
   const safeInviter = escapeHtml(input.invitedByEmail || ADMIN_EMAIL);
+  const safeSetupUrl = input.passwordSetupUrl ? escapeHtml(input.passwordSetupUrl) : null;
 
   const text = [
     `Hi ${firstName(input.displayName)},`,
     "",
     `You've been invited to join the Web Growth WhatsApp Business workspace as a ${role}.`,
     "",
-    `Your workspace access is tied to this Google account: ${input.googleEmail}`,
+    `Workspace email: ${input.googleEmail}`,
     "",
-    "Use this same Google account to sign in and open your assigned WhatsApp workspace.",
+    "You can sign in with Google using this email address.",
+    ...(input.passwordSetupUrl
+      ? ["", `Or choose a password for email sign-in: ${input.passwordSetupUrl}`]
+      : []),
     "",
     `Workspace: ${WORKSPACE_URL}`,
     "",
@@ -108,7 +113,7 @@ export function buildWhatsAppTeamInvitationEmail(input: WhatsAppTeamInvitationIn
                   <td style="padding:18px 20px;">
                     <p style="margin:0 0 6px;font-family:${SANS};font-size:12px;line-height:19px;text-transform:uppercase;letter-spacing:.08em;color:${LEDGER};">Your role</p>
                     <p style="margin:0 0 14px;font-family:${SANS};font-size:18px;line-height:26px;font-weight:700;color:${LEDGER_DEEP};">${safeRole}</p>
-                    <p style="margin:0 0 6px;font-family:${SANS};font-size:12px;line-height:19px;text-transform:uppercase;letter-spacing:.08em;color:${LEDGER};">Google account</p>
+                    <p style="margin:0 0 6px;font-family:${SANS};font-size:12px;line-height:19px;text-transform:uppercase;letter-spacing:.08em;color:${LEDGER};">Workspace email</p>
                     <p style="margin:0;font-family:${SANS};font-size:15px;line-height:24px;font-weight:600;color:${LEDGER_DEEP};word-break:break-all;">${safeEmail}</p>
                   </td>
                 </tr>
@@ -117,19 +122,13 @@ export function buildWhatsAppTeamInvitationEmail(input: WhatsAppTeamInvitationIn
           </tr>
           <tr>
             <td class="wg-pad" style="padding:0 40px 8px;">
-              <p style="margin:0 0 18px;font-family:${SANS};font-size:16px;line-height:26px;color:${INK_SOFT};">Your access is tied to the Google account above. Use that same account when signing in to the workspace.</p>
+              <p style="margin:0 0 12px;font-family:${SANS};font-size:16px;line-height:26px;color:${INK_SOFT};">Sign in with Google using the email above${safeSetupUrl ? ", or create a password for email sign-in." : "."}</p>
               <p style="margin:0 0 18px;font-family:${SANS};font-size:14px;line-height:23px;color:${INK_FAINT};">Invited by ${safeInviter}</p>
             </td>
           </tr>
           <tr>
             <td class="wg-pad" style="padding:8px 40px 36px;">
-              <table role="presentation" cellpadding="0" cellspacing="0" border="0" class="wg-btn">
-                <tr>
-                  <td style="background-color:${LEDGER};">
-                    <a href="${WORKSPACE_URL}" style="display:inline-block;padding:15px 30px;font-family:${SANS};font-size:15px;font-weight:600;color:#ffffff;text-decoration:none;">Open WhatsApp Workspace</a>
-                  </td>
-                </tr>
-              </table>
+              ${safeSetupUrl ? `<table role="presentation" cellpadding="0" cellspacing="0" border="0" class="wg-btn"><tr><td style="background-color:${LEDGER};"><a href="${safeSetupUrl}" style="display:inline-block;padding:15px 30px;font-family:${SANS};font-size:15px;font-weight:600;color:#ffffff;text-decoration:none;">Set up password</a></td></tr></table><p style="margin:16px 0 0;font-family:${SANS};font-size:13px;line-height:21px;color:${INK_FAINT};">Prefer Google? <a href="${WORKSPACE_URL}" style="color:${LEDGER};font-weight:600;">Open the workspace</a> and continue with Google.</p>` : `<table role="presentation" cellpadding="0" cellspacing="0" border="0" class="wg-btn"><tr><td style="background-color:${LEDGER};"><a href="${WORKSPACE_URL}" style="display:inline-block;padding:15px 30px;font-family:${SANS};font-size:15px;font-weight:600;color:#ffffff;text-decoration:none;">Open WhatsApp Workspace</a></td></tr></table>`}
             </td>
           </tr>
           <tr>
