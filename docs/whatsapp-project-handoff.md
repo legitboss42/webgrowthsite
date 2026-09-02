@@ -6,16 +6,16 @@ Last updated: 2026-09-02
 
 1. Discuss each roadmap stage before implementation unless the user explicitly says proceed.
 2. Stage rule: build → production test → fix failures → retest → mark 100% → unlock next stage.
-3. Stages 6, 7 and 8 have been implemented. Stage 6 is in its final delayed No Reply production check; Stages 7 and 8 still require their full Owner production gates before they can be marked 100% complete.
+3. Stages 6, 7, 8 and 9 have been implemented. Stage 6 is in its final delayed No Reply production check; Stages 7 and 8 still require their full Owner production gates; Stage 9 is implemented and branch-validated, with its Owner production gate next after promotion.
 4. Current stage gates are OWNER ACCOUNT ONLY. Manager/Agent testing is deferred and does not block completion.
 5. Codex is TEST-ONLY unless the user explicitly authorizes live-UI configuration. It never edits source code, commits, deploys or applies migrations.
-6. Avoid duplicate deployments. Bundle code, tests, migrations, docs and checkpoint changes before moving `main`.
-7. WhatsApp migrations are additive Supabase SQL, applied manually in Supabase SQL Editor. Never `supabase db push` and never apply them to Neon/DATABASE_URL.
-8. Whenever a migration is required, paste the FULL SQL in chat.
-9. Keep infrastructure zero-cost/free-tier until revenue.
-10. Do not create routine feature branches/worktrees; do not touch TikTok scheduler areas.
-11. Official Meta WhatsApp Cloud API only. Do not claim Meta BSP/Partner certification unless verified.
-12. Existing working functionality must be regression-tested before stage completion.
+6. Never deploy partially completed stage work to production. Finish code, tests, migrations, documentation and branch validation first, then promote the finished stage to `main` as one production deployment.
+7. WhatsApp migrations are additive Supabase SQL. Use controlled Supabase migrations; never `supabase db push` and never apply them to Neon/DATABASE_URL.
+8. Keep infrastructure zero-cost/free-tier until revenue.
+9. Do not touch TikTok scheduler areas while working on the WhatsApp BSP.
+10. Official Meta WhatsApp Cloud API only. Do not claim Meta BSP/Partner certification unless verified.
+11. Existing working functionality must be regression-tested before stage completion.
+12. Temporary implementation branches are allowed when necessary to satisfy the no-partial-production-deployment rule; delete/ignore them after the finished stage is promoted.
 
 ## Repository / production
 
@@ -36,15 +36,15 @@ Last updated: 2026-09-02
 6. Automation Engine — BUILT / FINAL OWNER TESTING
 7. Campaigns & Broadcasts — BUILT / OWNER PRODUCTION TESTING PENDING
 8. WhatsApp Flows — BUILT / OWNER PRODUCTION TESTING PENDING
-9. Advanced Analytics — NEXT UNBUILT STAGE; extend existing basic message/call analytics
-10. AI Layer — NOT BUILT; zero-cost until revenue
+9. Advanced Analytics — BUILT / BRANCH VALIDATED / PRODUCTION PROMOTION + OWNER GATE PENDING
+10. AI Layer — NEXT UNBUILT STAGE; zero-cost until revenue
 11. Multi-Business / SaaS — NOT BUILT
 12. App Experience Redesign — NOT BUILT; final pre-launch frontend overhaul so the workspace feels like a native SaaS application rather than a website/admin portal
 13. Client Onboarding & Commercial Launch — NOT BUILT
 
-Implementation has therefore reached Stage 8. Do not describe Stages 7 or 8 as locked or unimplemented. The current verification backlog is: finish the Stage 6 No Reply gate, then run the full Stage 7 production gate, then the full Stage 8 production gate. New feature implementation resumes at Stage 9 after those gates are resolved.
+Implementation has therefore reached Stage 9. Do not describe Stages 7, 8 or 9 as unimplemented. The verification backlog remains: finish the Stage 6 No Reply gate, run the full Stage 7 production gate, run the full Stage 8 production gate, then complete the Stage 9 Owner production gate. New feature implementation after Stage 9 resumes at Stage 10.
 
-The Flow-completion follow-up automation discussed after the first Web Growth project-enquiry Flow is explicitly DEFERRED for later. Do not treat it as blocking Stage 9 unless the user brings it back into scope.
+The Flow-completion follow-up automation discussed after the first Web Growth project-enquiry Flow is explicitly DEFERRED for later. Do not treat it as blocking Stage 9 or Stage 10 unless the user brings it back into scope.
 
 ## Stage 5 checkpoint
 
@@ -143,25 +143,46 @@ The first real Web Growth project-enquiry Flow has begun live setup/testing. Any
 
 ## Stage 9 — Advanced Analytics
 
-Stage 9 must build on the existing basic Analytics implementation rather than replace it. The repository already contains message/call analytics, message volume, delivery status/rates, response-time measurement, activity series, contact temperature counts and date-range switching.
+Stage 9 is implemented on the validated `stage9-advanced-analytics` branch and is ready for production promotion.
 
-Stage 9 should turn that foundation into a provider-grade operations and business dashboard covering, where supported by stored production data:
-- executive overview KPIs with range comparison and trends
-- first-response and resolution/service performance
-- conversation volumes, open/closed/reopened behaviour and backlog
-- agent/team workload, assignments and response performance
-- CRM funnel, lead stages, temperatures, service interest and conversion movement
-- automation runs, success/failure/waiting/cancellation rates and top failing workflows/actions
-- campaign audience, send/delivery/read/reply/failure performance and campaign comparisons
-- Flow launches, completions, abandonment/completion rates and per-Flow performance
-- template usage/performance where reliable stored data exists
-- call volume/answer/missed/duration metrics integrated into the wider dashboard
-- filters by date range, agent, service/tag, campaign, automation and Flow where practical
-- drill-down links back to the underlying conversation/contact/run/campaign/Flow
-- no invented revenue or Meta metrics; unavailable metrics render as unavailable rather than fake zeroes
-- bounded queries/aggregation suitable for the free-tier production database
+It preserves the existing basic Messages and Calls analytics and adds a third `Advanced` view with:
+- executive KPIs and previous-equivalent-period trend indicators
+- conversation open/close/backlog/message/response-time analytics
+- team workload based only on attributable stored activity
+- CRM current-state pipeline, temperature, consent, source and tag/service distributions
+- automation run states, success/failure rates, durations, per-workflow performance, trigger mix and exact stored failure details
+- campaign recipient delivery/read/reply/failure funnels and truthful empty states
+- WhatsApp Flow launch/completion/failure/incomplete metrics and per-Flow performance
+- integrated high-level WhatsApp call answer/missed/duration metrics
+- 7 / 30 / 90 day switching and links back to operational workspaces
+- owner-only Advanced Analytics API
+- 20,000-row safety caps for time-series reads
+- no fake revenue/ROI/Meta billing metrics
+- no analytics copy tables or duplicated PII
 
-Prefer deriving metrics from existing tables first. Add additive analytics summary/snapshot tables only when raw-query cost or accuracy genuinely requires them.
+Implementation files include:
+- `src/app/admin/whatsapp/advancedAnalyticsModel.ts`
+- `src/app/admin/whatsapp/advancedAnalyticsModel.test.ts`
+- `src/app/api/admin/whatsapp/advanced-analytics/route.ts`
+- `src/app/admin/whatsapp/analytics/AdvancedAnalyticsPanel.tsx`
+- updated `src/app/admin/whatsapp/analytics/layout.tsx`
+- `docs/whatsapp-stage9-implementation-checkpoint.md`
+
+Validation before production promotion:
+- WhatsApp tests: 178 passed / 0 failed
+- sitemap validation passed
+- Next.js optimized production compile passed
+- TypeScript validity check passed
+- independent Supabase data sanity checks matched stored production counts
+- Stage 9 performance-index migration applied successfully to production Supabase
+- no new blocking Supabase security/performance advisory introduced
+
+Stage 9 performance migration:
+`supabase/migrations/20260902223000_whatsapp_stage9_analytics_indexes.sql`
+
+It adds only time-range indexes for message timestamps, team activity, automation runs, campaign recipients, Flow submissions, calls and contact creation. It adds no tables and duplicates no customer data.
+
+Do not mark Stage 9 100% complete until the production deployment loads Advanced Analytics successfully, existing Messages/Calls analytics regress successfully, no new blocking Vercel runtime error appears, and the Owner production gate passes.
 
 ## Stage 12 — App Experience Redesign
 
@@ -192,12 +213,16 @@ Conversational questions:
 
 The conversation-session bonus requires no additional migration.
 
-## Applied migrations before Stage 6
+## Applied migrations
 
 - `202609010001_whatsapp_contact_crm_stage3.sql`
 - `202609010002_whatsapp_saved_replies_stage4.sql`
 - `202609010003_whatsapp_saved_reply_media_stage4.sql`
 - `202609020001_whatsapp_template_manager_stage5.sql`
+- Stage 6 automation foundation/questions migrations
+- Stage 7 campaigns migrations
+- Stage 8 Flows migrations
+- `20260902223000_whatsapp_stage9_analytics_indexes.sql`
 
 ## Platform facts / safety
 
