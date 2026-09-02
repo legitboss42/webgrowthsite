@@ -5,7 +5,7 @@ import { normalizeWhatsAppTeamEmail } from "./teamModel";
 
 const WORKSPACE_PASSWORD_COOKIE = "wg_workspace_auth";
 const WORKSPACE_PASSWORD_TTL_SECONDS = 12 * 60 * 60;
-const PASSWORD_SETUP_PATH = "/admin/whatsapp/set-password/";
+const PASSWORD_SETUP_PATH = "/whatsapp/set-password/";
 
 export type WorkspacePasswordSession = {
   version: 1;
