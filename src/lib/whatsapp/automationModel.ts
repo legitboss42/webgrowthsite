@@ -109,7 +109,7 @@ export const WHATSAPP_AUTOMATION_TRIGGER_OPTIONS: Array<{ value: WhatsAppAutomat
   { value: "NEW_MESSAGE", label: "New incoming message", description: "Runs whenever a customer sends a new WhatsApp message." },
   { value: "KEYWORD", label: "Keyword / phrase", description: "Runs when a customer message contains the configured phrase." },
   { value: "NEW_CONTACT", label: "New contact", description: "Runs the first time a contact is created." },
-  { value: "CONVERSATION_OPENED", label: "Conversation opened", description: "Runs once when a closed conversation is opened by a customer message or manually by the team." },
+  { value: "CONVERSATION_OPENED", label: "Update lifecycle · Open chat", description: "Runs once when the conversation lifecycle changes to Open, whether a customer message reopens the chat or a team member uses Open chat manually." },
   { value: "TAG_ADDED", label: "Tag added", description: "Runs when a selected CRM tag is newly added." },
   { value: "CRM_STAGE_CHANGED", label: "CRM stage changed", description: "Runs when a contact moves into a selected pipeline stage." },
   { value: "CONVERSATION_ASSIGNED", label: "Conversation assigned", description: "Runs when a conversation is assigned." },
