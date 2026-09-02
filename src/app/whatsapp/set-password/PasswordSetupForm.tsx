@@ -1,15 +1,19 @@
 "use client";
 
-import { createClient } from "@supabase/supabase-js";
+import { createClient, type EmailOtpType } from "@supabase/supabase-js";
 import Image from "next/image";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 
 export default function PasswordSetupForm({
   supabaseUrl,
   anonKey,
+  tokenHash,
+  tokenType,
 }: {
   supabaseUrl: string;
   anonKey: string;
+  tokenHash: string;
+  tokenType: "invite" | "recovery" | "";
 }) {
   const client = useMemo(
     () =>
@@ -18,7 +22,7 @@ export default function PasswordSetupForm({
             auth: {
               persistSession: true,
               autoRefreshToken: true,
-              detectSessionInUrl: true,
+              detectSessionInUrl: false,
             },
           })
         : null,
@@ -34,24 +38,27 @@ export default function PasswordSetupForm({
   const [done, setDone] = useState(false);
 
   useEffect(() => {
-    if (!client) {
+    if (!client || !tokenHash || !tokenType) {
       setReady(true);
       return;
     }
 
     let active = true;
-    const timer = window.setTimeout(async () => {
-      const { data } = await client.auth.getSession();
+    void (async () => {
+      const { data, error: verifyError } = await client.auth.verifyOtp({
+        token_hash: tokenHash,
+        type: tokenType as EmailOtpType,
+      });
       if (!active) return;
-      setValidSession(Boolean(data.session?.user));
+      setValidSession(Boolean(!verifyError && (data.session?.user || data.user)));
       setReady(true);
-    }, 120);
+      if (!verifyError) window.history.replaceState(null, "", "/whatsapp/set-password/");
+    })();
 
     return () => {
       active = false;
-      window.clearTimeout(timer);
     };
-  }, [client]);
+  }, [client, tokenHash, tokenType]);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
