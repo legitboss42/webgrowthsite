@@ -158,7 +158,6 @@ async function generatePasswordActionLink(email: string, preferredType: "invite"
   const normalizedEmail = normalizeWhatsAppTeamEmail(email);
   if (!admin || !normalizedEmail) return null;
 
-  const redirectTo = absoluteUrl(PASSWORD_SETUP_PATH);
   const attempts: Array<"invite" | "recovery"> =
     preferredType === "invite" ? ["invite", "recovery"] : ["recovery", "invite"];
 
@@ -166,9 +165,14 @@ async function generatePasswordActionLink(email: string, preferredType: "invite"
     const { data, error } = await admin.auth.admin.generateLink({
       type,
       email: normalizedEmail,
-      options: { redirectTo },
     });
-    if (!error && data.properties?.action_link) return data.properties.action_link;
+    const tokenHash = data.properties?.hashed_token;
+    if (!error && tokenHash) {
+      const url = new URL(absoluteUrl(PASSWORD_SETUP_PATH));
+      url.searchParams.set("token_hash", tokenHash);
+      url.searchParams.set("type", type);
+      return url.toString();
+    }
   }
 
   return null;
