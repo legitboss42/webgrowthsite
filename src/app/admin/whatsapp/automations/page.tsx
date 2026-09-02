@@ -31,7 +31,7 @@ async function getAutomations(): Promise<{ automations: WhatsAppAutomation[]; re
 
 async function getRuns(): Promise<WhatsAppAutomationRun[]> {
   const rows = await readWhatsAppRows<Record<string, unknown>>(
-    "whatsapp_automation_runs?select=id,automation_id,automation_version,automation_name,status,trigger_type,trigger_event_key,contact_id,conversation_id,next_action_index,started_at,completed_at,error_code,error_message,created_at,updated_at&order=created_at.desc&limit=100",
+    "whatsapp_automation_runs?select=id,automation_id,automation_version,status,trigger_type,trigger_event_key,contact_id,conversation_id,next_action_index,started_at,completed_at,error_code,error_message,created_at,updated_at&order=created_at.desc&limit=100",
   );
   return (rows || []).map(normalizeWhatsAppAutomationRunRow);
 }

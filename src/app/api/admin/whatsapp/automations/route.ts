@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { getWhatsAppWorkspaceAccess } from "@/app/admin/whatsapp/auth";
@@ -70,7 +71,10 @@ function statusTimestamps(status: WhatsAppAutomationStatus, existing?: WhatsAppA
 function mutationError(result: { ok: false; status: number; code?: string; message: string }) {
   const duplicate = result.code === POSTGRES_UNIQUE_VIOLATION;
   return NextResponse.json(
-    { error: duplicate ? DUPLICATE_NAME : result.message },
+    {
+      error: duplicate ? DUPLICATE_NAME : result.message,
+      ...(result.code ? { code: result.code } : {}),
+    },
     { status: duplicate ? 409 : result.status },
   );
 }
@@ -97,6 +101,25 @@ function sameDefinition(existing: WhatsAppAutomation, next: WhatsAppAutomationIn
   return JSON.stringify(current) === JSON.stringify(candidate);
 }
 
+function automationBody(value: WhatsAppAutomationInput, existing?: WhatsAppAutomation) {
+  return {
+    name: value.name,
+    description: value.description,
+    status: value.status,
+    trigger_type: value.triggerType,
+    trigger_config: value.triggerConfig,
+    condition_join: value.conditionJoin,
+    conditions: value.conditions,
+    actions: value.actions,
+    ...statusTimestamps(value.status, existing),
+  };
+}
+
+async function verifyPersistedAutomation(id: string) {
+  const verified = await getAutomation(id);
+  return verified.ready ? verified.automation : null;
+}
+
 export async function POST(request: Request) {
   const guarded = await guard(request);
   if ("response" in guarded) return guarded.response;
@@ -107,27 +130,61 @@ export async function POST(request: Request) {
   const checked = validateWhatsAppAutomationInput(body);
   if (!checked.ok) return NextResponse.json({ error: checked.error }, { status: 400 });
 
-  const timestamps = statusTimestamps(checked.value.status);
-  const result = await mutateWhatsAppRest({
+  const id = randomUUID();
+  const baseBody = {
+    id,
+    ...automationBody(checked.value),
+    version: 1,
+  };
+  const actorBody = guarded.access.memberId
+    ? {
+        ...baseBody,
+        created_by_member_id: guarded.access.memberId,
+        updated_by_member_id: guarded.access.memberId,
+      }
+    : baseBody;
+
+  let result = await mutateWhatsAppRest({
     method: "POST",
     pathAndQuery: TABLE,
-    body: {
-      name: checked.value.name,
-      description: checked.value.description,
-      status: checked.value.status,
-      trigger_type: checked.value.triggerType,
-      trigger_config: checked.value.triggerConfig,
-      condition_join: checked.value.conditionJoin,
-      conditions: checked.value.conditions,
-      actions: checked.value.actions,
-      version: 1,
-      created_by_member_id: guarded.access.memberId,
-      updated_by_member_id: guarded.access.memberId,
-      ...timestamps,
-    },
+    body: actorBody,
   });
-  if (!result.ok) return mutationError(result);
-  return NextResponse.json({ ok: true, automation: result.rows[0] ? normalizeWhatsAppAutomationRow(result.rows[0]) : null });
+
+  if (!result.ok) {
+    const alreadyPersisted = await verifyPersistedAutomation(id);
+    if (alreadyPersisted) {
+      return NextResponse.json({ ok: true, automation: alreadyPersisted, recovered: true }, { status: 201 });
+    }
+
+    if (result.code !== POSTGRES_UNIQUE_VIOLATION && guarded.access.memberId) {
+      result = await mutateWhatsAppRest({
+        method: "POST",
+        pathAndQuery: TABLE,
+        body: baseBody,
+      });
+    }
+  }
+
+  if (!result.ok) {
+    const alreadyPersisted = await verifyPersistedAutomation(id);
+    if (alreadyPersisted) {
+      return NextResponse.json({ ok: true, automation: alreadyPersisted, recovered: true }, { status: 201 });
+    }
+    return mutationError(result);
+  }
+
+  const persisted = result.rows[0]
+    ? normalizeWhatsAppAutomationRow(result.rows[0])
+    : await verifyPersistedAutomation(id);
+
+  if (!persisted) {
+    return NextResponse.json(
+      { error: "Supabase accepted the workflow write but the saved row could not be verified." },
+      { status: 502 },
+    );
+  }
+
+  return NextResponse.json({ ok: true, automation: persisted }, { status: 201 });
 }
 
 export async function PATCH(request: Request) {
@@ -154,28 +211,40 @@ export async function PATCH(request: Request) {
     }
   }
 
-  const timestamps = statusTimestamps(checked.value.status, existing.automation);
-  const result = await mutateWhatsAppRest({
+  const baseBody = {
+    ...automationBody(checked.value, existing.automation),
+    version: existing.automation.version + 1,
+    updated_at: new Date().toISOString(),
+  };
+  const actorBody = guarded.access.memberId
+    ? { ...baseBody, updated_by_member_id: guarded.access.memberId }
+    : baseBody;
+
+  let result = await mutateWhatsAppRest({
     method: "PATCH",
     pathAndQuery: `${TABLE}?id=eq.${encodeURIComponent(id)}`,
-    body: {
-      name: checked.value.name,
-      description: checked.value.description,
-      status: checked.value.status,
-      trigger_type: checked.value.triggerType,
-      trigger_config: checked.value.triggerConfig,
-      condition_join: checked.value.conditionJoin,
-      conditions: checked.value.conditions,
-      actions: checked.value.actions,
-      version: existing.automation.version + 1,
-      updated_by_member_id: guarded.access.memberId,
-      updated_at: new Date().toISOString(),
-      ...timestamps,
-    },
+    body: actorBody,
   });
+
+  if (!result.ok && result.code !== POSTGRES_UNIQUE_VIOLATION && guarded.access.memberId) {
+    result = await mutateWhatsAppRest({
+      method: "PATCH",
+      pathAndQuery: `${TABLE}?id=eq.${encodeURIComponent(id)}`,
+      body: baseBody,
+    });
+  }
+
   if (!result.ok) return mutationError(result);
-  if (result.rows.length === 0) return NextResponse.json({ error: "That automation no longer exists." }, { status: 404 });
-  return NextResponse.json({ ok: true, automation: normalizeWhatsAppAutomationRow(result.rows[0]) });
+
+  const persisted = result.rows[0]
+    ? normalizeWhatsAppAutomationRow(result.rows[0])
+    : await verifyPersistedAutomation(id);
+
+  if (!persisted) {
+    return NextResponse.json({ error: "That automation no longer exists." }, { status: 404 });
+  }
+
+  return NextResponse.json({ ok: true, automation: persisted });
 }
 
 export async function DELETE(request: Request) {
@@ -203,6 +272,11 @@ export async function DELETE(request: Request) {
     pathAndQuery: `${TABLE}?id=eq.${encodeURIComponent(id)}`,
   });
   if (!result.ok) return mutationError(result);
-  if (result.rows.length === 0) return NextResponse.json({ error: "That automation no longer exists." }, { status: 404 });
+  if (result.rows.length === 0) {
+    const afterDelete = await getAutomation(id);
+    if (afterDelete.ready && afterDelete.automation) {
+      return NextResponse.json({ error: "The automation could not be deleted." }, { status: 502 });
+    }
+  }
   return NextResponse.json({ ok: true });
 }
