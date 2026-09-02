@@ -52,6 +52,7 @@ export default async function WhatsAppTemplatesPage() {
     canManage ? getDrafts() : Promise.resolve({ drafts: [] as WhatsAppTemplateDraft[], ready: true }),
   ]);
   const liveTemplates: WhatsAppTemplate[] = live.ok ? live.templates : [];
+  const submittedDrafts = local.drafts.filter((draft) => Boolean(draft.metaTemplateId));
 
   return (
     <div className="px-4 py-5 sm:px-6 sm:py-6">
@@ -63,6 +64,31 @@ export default async function WhatsAppTemplatesPage() {
         role={access.role}
         liveError={live.ok ? undefined : liveErrorCopy(live.reason)}
       />
+
+      {canManage && submittedDrafts.length ? (
+        <section className="mt-5 rounded-xl border border-rule bg-paper-raised p-4" aria-label="Submitted Meta template IDs">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <h2 className="text-sm font-semibold text-ink">Submitted Meta Template IDs</h2>
+              <p className="mt-1 text-xs text-ink-faint">IDs returned by Meta when Web Growth submitted these drafts for review.</p>
+            </div>
+            <span className="rounded-full bg-brass-tint px-2.5 py-1 text-[0.65rem] font-semibold text-[#6f4f16]">
+              {submittedDrafts.length} submitted
+            </span>
+          </div>
+          <dl className="mt-3 divide-y divide-rule rounded-lg border border-rule bg-paper">
+            {submittedDrafts.map((draft) => (
+              <div key={draft.id} className="grid gap-1 px-3 py-2.5 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:gap-4">
+                <div className="min-w-0">
+                  <dt className="truncate font-mono text-xs font-semibold text-ink">{draft.name}</dt>
+                  <dd className="mt-0.5 text-[0.68rem] text-ink-faint">{draft.language} · submitted</dd>
+                </div>
+                <dd className="break-all font-mono text-xs text-ledger">{draft.metaTemplateId}</dd>
+              </div>
+            ))}
+          </dl>
+        </section>
+      ) : null}
     </div>
   );
 }
