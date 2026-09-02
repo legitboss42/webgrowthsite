@@ -44,7 +44,7 @@ Last updated: 2026-09-02
 - Stage 2 — COMPLETE / production verified
 - Stage 3 — COMPLETE / production verified
 - Stage 4 — COMPLETE / production verified
-- Stage 5 — IMPLEMENTED; production gate pending
+- Stage 5 — IMPLEMENTED; production gate still open
 - Stage 6 — LOCKED until Stage 5 passes production testing
 
 ## Stage 3
@@ -61,6 +61,7 @@ Stage 4 completion checkpoint: `37106e8396faaec837e2fbb201f3c9a5152aa1ba`
 ## Stage 5 — Current stage
 
 Implementation commit: `b07384ea16138fc82db11c61a9778bcb8488ee2b`
+Meta-ID visibility fix: `36e9ecd9c60a4d998c1a8baa8c198a953155df14`
 
 Implemented:
 - live Meta template sync
@@ -79,6 +80,7 @@ Implemented:
 - Phone buttons
 - submit directly to Meta WABA `message_templates`
 - store Meta Template ID after submission
+- visibly display Meta Template IDs for submitted drafts
 - prevent accidental double submission
 - duplicate normal supported templates
 - approved-template test send through the phone-number `messages` endpoint
@@ -86,6 +88,41 @@ Implemented:
 
 Stage 5 migration:
 `supabase/migrations/202609020001_whatsapp_template_manager_stage5.sql`
+
+### Latest Stage 5 live-browser results
+
+Codex tested production using the active Owner Chrome profile. No project changes were made by Codex.
+
+Verified in production:
+- live Meta templates and status filtering load
+- Owner can create/edit/delete drafts
+- saved drafts survive refresh
+- duplicate name + language is rejected
+- Utility and Marketing previews work
+- header/body variable sample scopes are separate and resolve correctly
+- non-sequential and named variables are rejected
+- Quick Reply / Website / Phone button persistence works within Meta-compatible grouping rules
+- real draft submission to Meta works
+- submitted draft locks locally
+- real Meta statuses refresh; `hello_world` was APPROVED and submitted QA template was PENDING
+- supported live template duplication works
+- approved template test send works
+- mobile + desktop render without horizontal overflow
+- Stages 1–4 smoke regression passed for Overview, Conversations, Calls, Contacts and Quick Replies
+
+Defect found:
+- submitted drafts stored a Meta Template ID but did not visibly show it in the UI
+
+Fix:
+- commit `36e9ecd9c60a4d998c1a8baa8c198a953155df14` adds a supervisor-visible Submitted Meta Template IDs section showing each submitted draft's returned Meta ID
+
+Still requires direct production verification before Stage 5 can close:
+- Meta Template ID is visible after the above fix deploys
+- Manager-role create/edit/delete permissions using a real Manager session
+- Agent read-only restriction using a real Agent session
+- rejection-reason rendering when a real REJECTED Meta template exists; the current WABA had no rejected template during testing
+
+The canonical Stage 5 production gate remains 16 tests. The Codex report numbered 15 because one requested item was omitted from that particular test instruction/report; do not reduce the canonical gate.
 
 Current Stage 5 gate:
 1. Existing Meta templates load and search/filter correctly.
@@ -99,13 +136,13 @@ Current Stage 5 gate:
 9. Missing/non-sequential/named variables are rejected.
 10. Quick Reply, Website and Phone buttons persist correctly.
 11. Save a real draft and Submit to Meta.
-12. Successful submission receives a Meta Template ID and becomes locally locked.
+12. Successful submission receives a Meta Template ID, visibly displays it, and becomes locally locked.
 13. Refresh Meta and verify actual Pending / Approved / Rejected status.
 14. Duplicate a normal live template into a fresh draft.
 15. Once an approved template is available, Send test to a real WhatsApp number and verify header/body variable positions.
 16. Check mobile + desktop and regression-test Stages 1–4.
 
-Stage 5 must not be marked complete until all 16 production tests pass.
+Stage 5 must not be marked complete until the remaining directly-testable items above are verified. A rejected-template reason may remain N/A while no rejected template exists, but it must not be falsely recorded as directly verified.
 
 ## Relevant migrations already applied before Stage 5
 
