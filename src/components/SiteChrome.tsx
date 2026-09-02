@@ -4,13 +4,14 @@ import type { ReactNode } from "react";
 import { usePathname } from "next/navigation";
 
 /**
- * The marketing header/footer wrap every route from the root layout. The internal
- * consoles under /admin are full-height app surfaces with their own chrome, so the
- * public site furniture is hidden there (and the header's top offset dropped).
+ * The marketing header/footer wrap every route from the root layout. Internal app
+ * and auth surfaces need their own full-height presentation, so the public site
+ * furniture is hidden there (and the header's top offset dropped).
  */
 export function isConsoleRoute(pathname: string | null | undefined) {
   if (!pathname) return false;
-  return pathname === "/admin" || pathname.startsWith("/admin/");
+  if (pathname === "/admin" || pathname.startsWith("/admin/")) return true;
+  return pathname === "/whatsapp/set-password" || pathname.startsWith("/whatsapp/set-password/");
 }
 
 /** Renders children only on public routes. */
