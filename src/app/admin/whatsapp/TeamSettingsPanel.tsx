@@ -93,7 +93,7 @@ export default function TeamSettingsPanel({
 
       setNotice(
         payload?.invite?.sent
-          ? { tone: "success", text: `Member added. Invitation sent to ${inviteAddress}. They start Offline until they set themselves Online.` }
+          ? { tone: "success", text: `Member added. Invitation sent to ${inviteAddress}. They can create a password or continue with Google, and start Offline until they set themselves Online.` }
           : {
               tone: "warning",
               text: `Member added, but the invitation email could not be sent to ${inviteAddress}.`,
@@ -147,7 +147,7 @@ export default function TeamSettingsPanel({
           </p>
           <h2 className="mt-1 font-display text-xl font-semibold text-ink">Team members</h2>
           <p className="mt-1 text-sm text-ink-soft">
-            {active} active · Google accounts only · presence is self-managed by each team member.
+            {active} active · email or Google sign-in · presence is self-managed by each team member.
           </p>
         </div>
         <button
@@ -193,7 +193,7 @@ export default function TeamSettingsPanel({
           <input
             value={email}
             onChange={(event) => setEmail(event.target.value)}
-            placeholder="Google email"
+            placeholder="Email address"
             type="email"
             required
             className="rounded-lg border border-rule bg-paper-raised px-3 py-2.5 text-sm outline-none focus:border-ledger"
