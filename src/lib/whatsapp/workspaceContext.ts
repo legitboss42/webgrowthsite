@@ -13,6 +13,16 @@ export function runWithWhatsAppWorkspace<T>(workspaceId: string, callback: () =>
   return storage.run({ workspaceId }, callback);
 }
 
+/**
+ * Binds the remainder of the current request's async execution to a workspace.
+ * Authentication uses this after resolving membership so first-login requests are
+ * tenant-scoped even before the workspace-selection cookie has ever been written.
+ */
+export function enterWhatsAppWorkspace(workspaceId: string) {
+  if (!isWhatsAppWorkspaceId(workspaceId)) throw new Error("A valid WhatsApp workspace id is required.");
+  storage.enterWith({ workspaceId });
+}
+
 export function getWhatsAppRuntimeWorkspaceId() {
   const workspaceId = storage.getStore()?.workspaceId;
   return isWhatsAppWorkspaceId(workspaceId) ? workspaceId : null;
