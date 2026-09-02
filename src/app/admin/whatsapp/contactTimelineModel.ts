@@ -61,15 +61,15 @@ function activityCopy(row: Record<string, unknown>) {
     const fields = Array.isArray(metadata.fields)
       ? metadata.fields.filter((value): value is string => typeof value === "string")
       : [];
-    return {
-      title: "Contact updated",
-      detail: fields.length ? `Changed: ${fields.join(", ")}` : "CRM profile changed.",
-    };
+    return { title: "Contact updated", detail: fields.length ? `Changed: ${fields.join(", ")}` : "CRM profile changed." };
   }
   if (type === "conversation_assigned") return { title: "Conversation assigned", detail: "A team member took ownership of this conversation." };
   if (type === "conversation_reassigned") return { title: "Conversation reassigned", detail: "Conversation ownership changed." };
   if (type === "conversation_unassigned") return { title: "Conversation unassigned", detail: "Conversation returned to the unassigned inbox." };
   if (type === "internal_note_created") return { title: "Internal note added", detail: "A private team note was added to the conversation." };
+  if (type === "automation_started") return { title: "Automation started", detail: text(metadata.automationName) || "A workflow started for this contact." };
+  if (type === "automation_completed") return { title: "Automation completed", detail: text(metadata.automationName) || "Workflow completed successfully." };
+  if (type === "automation_failed") return { title: "Automation failed", detail: text(metadata.error) || text(metadata.automationName) || "Workflow execution failed." };
 
   return {
     title: type.split("_").map((part) => part.charAt(0).toUpperCase() + part.slice(1)).join(" "),

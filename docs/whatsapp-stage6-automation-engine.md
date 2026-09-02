@@ -1,67 +1,135 @@
 # WhatsApp Stage 6 — Automation Engine
 
-Status: **6A CODE READY; MIGRATION + OWNER PRODUCTION GATE PENDING**
+Status: **FULL CODE READY; FINAL MIGRATION + COMBINED OWNER PRODUCTION GATE PENDING**
 
-Stage 5 is complete and production verified. Stage 6 is now the current roadmap stage.
+Stage 5 is complete and production verified. Per project rule, Stage 6A–6E are implemented as one stage and are tested together once.
 
-## Stage 6 slices
+## Implemented
 
-- **6A — Builder + durable foundation**: workflow definitions, Draft/Active/Paused state, validation, CRUD, duplicate/edit/delete, run/job/event persistence schema.
-- **6B — Triggers + conditions**: wire incoming message, keyword, contact, tag, stage, assignment, missed-call, no-reply, business-hours and inbound-webhook trigger evaluation.
-- **6C — Actions**: text/template/Saved Reply sends, assignment, tags, CRM stage/field, internal note and external webhook actions.
-- **6D — Delay/execution engine**: persisted delayed jobs, retries, service-window behavior, dedupe and loop protection at runtime.
-- **6E — History + safety**: run history, waiting jobs, cancellation, contact timeline records, failure visibility and final Stage 6 gate.
+### Visual workflow builder
+- `/admin/whatsapp/automations/`
+- Respond.io-inspired dotted workflow canvas
+- connected Trigger → Conditions → Actions view
+- Yes/No branch paths
+- zoom controls and 100 total workflow-step ceiling
+- right-side properties inspector
+- Draft / Active / Paused states
+- active workflows are read-only until paused
+- create, edit, duplicate, activate, pause and delete
+- persisted workflow versions
+- Team Saved Reply, approved template and team-member selectors
 
-## 6A implemented
+### Triggers
+- New incoming message
+- Keyword / phrase
+- New contact
+- Tag added
+- CRM stage changed
+- Conversation assigned
+- Missed inbound WhatsApp call
+- No customer reply
+- No agent reply
+- Business-hours opened / closed
+- Public inbound automation webhook using an unguessable workflow key
 
-- `/admin/whatsapp/automations/` page and Growth navigation item
-- Owner/Manager server authorization; current live testing remains Owner-only by project rule
-- persistent `whatsapp_automations` definitions
-- workflow name/description/status/version
-- trigger type + trigger configuration
-- optional conditions with AND/OR logic
-- ordered action definitions
-- Draft / Active / Paused persistence
-- create / edit / duplicate / pause / activate / delete controls
-- active workflow must be paused before deletion
-- validation for required trigger/action configuration
-- direct configuration-loop checks for tag and CRM-stage self-loops
-- STOP action must be last
-- delay validation
-- webhook URL validation
-- durable foundation tables for runs, delayed jobs and events
-- duplicate trigger-event unique index prepared for runtime idempotency
-- build test coverage added through `automationModel.test.ts`
+### Conditions / branches
+- AND / OR entry conditions
+- message text/type
+- contact tags, CRM stage, phone, email, company, consent
+- conversation assignment/status
+- business-hours state
+- `contact.custom.<field>` values
+- `trigger.payload.<path>` values
+- EQUALS / NOT_EQUALS / CONTAINS / NOT_CONTAINS / STARTS_WITH / GREATER_THAN / LESS_THAN / EXISTS / NOT_EXISTS
+- nested Yes/No branch actions
 
-## Deliberate 6A boundary
+### Actions
+- Send free-form WhatsApp text inside the 24-hour service window
+- Send an approved Meta template by name/language
+- Send a Team Saved Reply, including its saved image/video/document/audio attachment
+- Assign conversation to an Online team member
+- Add/remove tags
+- Change CRM stage
+- Update built-in or `custom.<field>` contact values
+- Add internal note
+- Persisted delay in minutes/hours/days
+- POST workflow context to an external HTTPS webhook
+- Branch
+- Stop workflow
 
-An automation marked `ACTIVE` is stored as Active, but **does not execute yet**. Runtime trigger wiring starts in 6B. The UI states this explicitly so Stage 6A does not pretend configuration is already execution.
+### Runtime / safety
+- Meta webhook dispatch for New Message / Keyword / New Contact
+- missed-call dispatch from the Calling webhook
+- CRM contact route dispatch for manual New Contact / Tag Added / CRM Stage Changed
+- assignment route dispatch for Conversation Assigned
+- one-minute Supabase `pg_cron` + `pg_net` processor for delayed jobs, no-reply triggers and business-hours transitions
+- persistent run/job/event records
+- unique automation + source-event dedupe
+- direct tag/stage self-loop validation
+- cross-workflow ancestry/depth protection
+- free-form and Saved Reply sends obey Meta's 24-hour service window
+- failed actions persist exact operator-facing errors
+- delayed jobs retry up to five times with backoff
+
+### History / observability
+- Queued / Running / Waiting / Succeeded / Failed / Skipped / Cancelled runs
+- step events and branch results
+- waiting-job due time and errors
+- run inspection endpoint
+- waiting-run cancellation
+- automation start/completion/failure entries in the existing contact timeline
 
 ## Migration
 
 `supabase/migrations/202609020002_whatsapp_automation_foundation_stage6.sql`
 
-Apply manually in Supabase SQL Editor. Never use `supabase db push` and never run this against Neon/DATABASE_URL.
+The filename is retained from the original Stage 6A foundation, but it now contains the complete idempotent Stage 6 schema and one-minute processor schedule. Re-running it is safe if the earlier 6A portion was already applied.
 
-## 6A Owner production gate
+Apply manually in **Supabase SQL Editor only**. Never use `supabase db push`, never apply it to Neon/DATABASE_URL, and never touch TikTok migrations.
 
-1. Automations appears as a live Growth navigation item and the page loads for Owner.
-2. Without the migration, the page shows a clear storage/migration warning instead of crashing.
-3. After migration, Owner can create a Draft automation and it appears in the list.
-4. Saved automation survives page refresh.
-5. Owner can edit it and the persisted version number increases.
-6. Duplicate opens a separate Draft copy and it can be saved under a unique name.
-7. A duplicate automation name is rejected safely.
-8. Trigger-specific validation works, including required Keyword configuration.
-9. Conditions persist, including AND/OR join choice and EXISTS/NOT_EXISTS behavior.
-10. Multiple ordered actions persist and reload correctly.
-11. Delay action persists its amount/unit and invalid delays are rejected.
-12. Direct tag/CRM-stage self-loop definitions are rejected and STOP must remain the last action.
-13. Draft → Active → Paused state persists; Active cannot be deleted until paused.
-14. Mobile/desktop remain usable and Stages 1–5 smoke regression shows no blocker.
+## Combined Owner production gate
 
-6A is complete only after all directly-testable Owner items above pass. Trigger execution is not part of this gate because it belongs to 6B–6D.
+1. Automations page loads and workflow search/status filtering works.
+2. Owner creates, edits, duplicates and deletes Draft/Paused workflows.
+3. Duplicate workflow names are rejected.
+4. Workflow survives refresh and version increments after edits.
+5. Draft → Active → Paused persists.
+6. Active workflow is view-only and cannot be edited/deleted until paused.
+7. Dotted canvas, connectors, zoom and 100-step counter work.
+8. Yes/No branch can be built and both paths persist.
+9. New-message trigger runs once for a real inbound message.
+10. Keyword trigger runs only on matching text.
+11. New-contact trigger runs for a newly created contact.
+12. Tag-added trigger runs after a new tag is added.
+13. CRM-stage-changed trigger runs after a real pipeline change.
+14. Conversation-assigned trigger runs after assignment.
+15. Missed-call trigger runs for an unanswered inbound WhatsApp call.
+16. No-customer-reply trigger runs after its configured period.
+17. No-agent-reply trigger runs after its configured period.
+18. Business-hours Opened/Closed follows WhatsApp Settings.
+19. Inbound workflow webhook runs for the correct key and an unknown key does not trigger a workflow.
+20. AND entry conditions require every rule; OR allows any matching rule.
+21. Custom CRM-field and webhook-payload conditions work.
+22. Yes branch executes when its condition passes.
+23. No branch executes when its condition fails.
+24. Send Text works inside the service window.
+25. Send Text is blocked outside the service window rather than violating Meta policy.
+26. Approved template action sends successfully.
+27. Team Saved Reply action sends; a Saved Reply with media sends its attachment.
+28. Assignment action assigns to an Online member.
+29. Add/remove tag actions persist correctly.
+30. CRM-stage action moves the contact correctly.
+31. Built-in/custom contact-field action persists.
+32. Internal-note action appears in the conversation/contact timeline.
+33. Delay creates a Waiting run and resumes after its due time after page refresh.
+34. External HTTPS webhook action works and HTTP/error failures are visible in history.
+35. Stop prevents later actions from running.
+36. Replayed Meta/source event does not create duplicate runs/messages.
+37. Automation-created tag/stage/assignment changes do not loop infinitely.
+38. Run History shows status, trigger, waiting time and exact failure text; Inspect shows step events.
+39. Waiting run can be cancelled and does not resume.
+40. Automation start/completion/failure appears in the contact timeline.
+41. Builder/list/history are usable on mobile and desktop without page-level horizontal overflow.
+42. Stages 1–5 regression smoke check passes.
 
-## Full Stage 6 final gate
-
-The final Stage 6 gate remains broader: trigger execution, conditions, actions, delays, business hours, no-reply logic, webhook actions, duplicate-delivery protection, loop prevention, run history, cancellation, contact timeline activity, mobile/desktop and Stages 1–5 regression. Stage 6 is not marked 100% complete until 6A–6E are implemented and the combined Owner production gate passes.
+Manager and Agent role testing remains deliberately deferred by the Owner-only testing rule and does not block Stage 6 completion.

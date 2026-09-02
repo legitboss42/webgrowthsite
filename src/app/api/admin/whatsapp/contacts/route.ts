@@ -20,6 +20,7 @@ import {
   normalizeWhatsAppContactWebsite,
 } from "@/app/admin/whatsapp/contactsModel";
 import { isSameOriginMutation } from "@/lib/scheduler/policy";
+import { dispatchWhatsAppAutomationEvent } from "@/lib/whatsapp/automationRuntime";
 import { canWhatsAppRoleSuperviseTeam } from "@/lib/whatsapp/teamModel";
 
 export const runtime = "nodejs";
@@ -98,7 +99,6 @@ function readEditableFields(body: Record<string, unknown>) {
     patch.website = website || null;
   }
 
-  // Kept for compatibility with the original CRM schema. The Stage 3 pipeline uses lead_stage.
   if (hasOwn(body, "leadStatus")) {
     const leadStatus = cleanText(body.leadStatus, 40);
     if (!leadStatus) return { error: "Lead status cannot be blank." } as const;
@@ -145,32 +145,19 @@ function readEditableFields(body: Record<string, unknown>) {
   return { patch } as const;
 }
 
-function applyOptInTimestamps(
-  patch: Record<string, unknown>,
-  previousStatus?: string,
-) {
+function applyOptInTimestamps(patch: Record<string, unknown>, previousStatus?: string) {
   if (!Object.prototype.hasOwnProperty.call(patch, "opt_in_status")) return;
   if (patch.opt_in_status === previousStatus) return;
-
   const now = new Date().toISOString();
-  if (patch.opt_in_status === "OPTED_IN") {
-    patch.opt_in_at = now;
-  } else if (patch.opt_in_status === "OPTED_OUT") {
-    patch.opt_out_at = now;
-  }
-  // UNKNOWN changes only the current consent state. Historical opt-in/opt-out
-  // timestamps are retained so operators do not erase useful consent history.
+  if (patch.opt_in_status === "OPTED_IN") patch.opt_in_at = now;
+  else if (patch.opt_in_status === "OPTED_OUT") patch.opt_out_at = now;
 }
 
 function stage3SchemaMissing(result: WhatsAppMutationResult) {
   return !result.ok && (result.code === "PGRST204" || result.code === "42703");
 }
-
 function stage3MigrationResponse() {
-  return NextResponse.json(
-    { error: "The Stage 3 Contact CRM migration has not been applied in Supabase yet." },
-    { status: 503 },
-  );
+  return NextResponse.json({ error: "The Stage 3 Contact CRM migration has not been applied in Supabase yet." }, { status: 503 });
 }
 
 export async function POST(request: Request) {
@@ -184,100 +171,61 @@ export async function POST(request: Request) {
   }
 
   let body: Record<string, unknown>;
-  try {
-    body = (await request.json()) as Record<string, unknown>;
-  } catch {
-    return NextResponse.json({ error: "Invalid request payload." }, { status: 400 });
-  }
+  try { body = (await request.json()) as Record<string, unknown>; }
+  catch { return NextResponse.json({ error: "Invalid request payload." }, { status: 400 }); }
 
   const waId = normalizeWhatsAppContactNumber(body.whatsappNumber);
-  if (!waId) {
-    return NextResponse.json(
-      { error: "Enter a valid WhatsApp number with its country code, or a Nigerian mobile number." },
-      { status: 400 },
-    );
-  }
+  if (!waId) return NextResponse.json({ error: "Enter a valid WhatsApp number with its country code, or a Nigerian mobile number." }, { status: 400 });
 
-  const duplicate = await readWhatsAppRows<Record<string, unknown>>(
-    `whatsapp_contacts?wa_id=eq.${encodeURIComponent(waId)}&select=id&limit=1`,
-  );
-  if (duplicate?.length) {
-    return NextResponse.json({ error: "A contact with that WhatsApp number already exists." }, { status: 409 });
-  }
+  const duplicate = await readWhatsAppRows<Record<string, unknown>>(`whatsapp_contacts?wa_id=eq.${encodeURIComponent(waId)}&select=id&limit=1`);
+  if (duplicate?.length) return NextResponse.json({ error: "A contact with that WhatsApp number already exists." }, { status: 409 });
 
   const editableInput: Record<string, unknown> = {
-    displayName: body.displayName,
-    businessName: body.businessName,
-    email: body.email,
-    phone: body.phone,
-    website: body.website,
-    source: body.source ?? "Manual",
-    leadStatus: body.leadStatus ?? "open",
+    displayName: body.displayName, businessName: body.businessName, email: body.email, phone: body.phone,
+    website: body.website, source: body.source ?? "Manual", leadStatus: body.leadStatus ?? "open",
     leadTemperature: body.leadTemperature ?? "COLD",
   };
-  for (const key of ["leadStage", "tags", "customFields", "optInStatus"] as const) {
-    if (hasOwn(body, key)) editableInput[key] = body[key];
-  }
+  for (const key of ["leadStage", "tags", "customFields", "optInStatus"] as const) if (hasOwn(body, key)) editableInput[key] = body[key];
 
   const editable = readEditableFields(editableInput);
   if ("error" in editable) return NextResponse.json({ error: editable.error }, { status: 400 });
   applyOptInTimestamps(editable.patch);
 
-  const now = new Date().toISOString();
   const created = await mutateWhatsAppRest({
-    method: "POST",
-    pathAndQuery: "whatsapp_contacts",
-    body: {
-      wa_id: waId,
-      phone: cleanText(body.phone, 50) || `+${waId}`,
-      ...editable.patch,
-      updated_at: now,
-    },
+    method: "POST", pathAndQuery: "whatsapp_contacts",
+    body: { wa_id: waId, phone: cleanText(body.phone, 50) || `+${waId}`, ...editable.patch, updated_at: new Date().toISOString() },
   });
-
   if (!created.ok) {
     if (stage3SchemaMissing(created)) return stage3MigrationResponse();
-    if (created.code === POSTGRES_UNIQUE_VIOLATION) {
-      return NextResponse.json({ error: "A contact with that WhatsApp number already exists." }, { status: 409 });
-    }
+    if (created.code === POSTGRES_UNIQUE_VIOLATION) return NextResponse.json({ error: "A contact with that WhatsApp number already exists." }, { status: 409 });
     return NextResponse.json({ error: created.message }, { status: created.status });
   }
 
   const contact = created.rows[0] ? normalizeWhatsAppContactRow(created.rows[0]) : null;
   if (contact) {
-    await recordContactActivity({
-      access,
-      contactId: contact.id,
-      eventType: "contact_created",
-      fields: ["wa_id", ...Object.keys(editable.patch)],
+    await recordContactActivity({ access, contactId: contact.id, eventType: "contact_created", fields: ["wa_id", ...Object.keys(editable.patch)] });
+    await dispatchWhatsAppAutomationEvent({
+      type: "NEW_CONTACT", eventKey: `contact-created:${contact.id}`, contactId: contact.id, waId: contact.wa_id,
+      payload: { source: "Manual" },
     });
   }
-
   return NextResponse.json({ ok: true, contact }, { status: 201 });
 }
 
 export async function PATCH(request: Request) {
   const access = await getAccess();
   if (!access) return NextResponse.json({ error: "Authentication required." }, { status: 401 });
-  if (!isSameOriginMutation(request.headers.get("origin"), request.url)) {
-    return NextResponse.json({ error: "Invalid request origin." }, { status: 403 });
-  }
+  if (!isSameOriginMutation(request.headers.get("origin"), request.url)) return NextResponse.json({ error: "Invalid request origin." }, { status: 403 });
 
   let body: Record<string, unknown>;
-  try {
-    body = (await request.json()) as Record<string, unknown>;
-  } catch {
-    return NextResponse.json({ error: "Invalid request payload." }, { status: 400 });
-  }
+  try { body = (await request.json()) as Record<string, unknown>; }
+  catch { return NextResponse.json({ error: "Invalid request payload." }, { status: 400 }); }
 
   const contactId = cleanText(body.id, 80);
   if (!contactId) return NextResponse.json({ error: "Contact id is required." }, { status: 400 });
-
   const existing = await getContact(contactId);
   if (!existing) return NextResponse.json({ error: "Contact not found." }, { status: 404 });
-  if (!canAccessContact(access, existing)) {
-    return NextResponse.json({ error: "You do not have access to this contact." }, { status: 403 });
-  }
+  if (!canAccessContact(access, existing)) return NextResponse.json({ error: "You do not have access to this contact." }, { status: 403 });
 
   const editable = readEditableFields(body);
   if ("error" in editable) return NextResponse.json({ error: editable.error }, { status: 400 });
@@ -285,11 +233,7 @@ export async function PATCH(request: Request) {
   const fields = Object.keys(editable.patch);
   if (!fields.length) return NextResponse.json({ error: "No changes were provided." }, { status: 400 });
 
-  const updated = await mutateWhatsAppRest({
-    method: "PATCH",
-    pathAndQuery: `whatsapp_contacts?id=eq.${encodeURIComponent(contactId)}`,
-    body: { ...editable.patch, updated_at: new Date().toISOString() },
-  });
+  const updated = await mutateWhatsAppRest({ method: "PATCH", pathAndQuery: `whatsapp_contacts?id=eq.${encodeURIComponent(contactId)}`, body: { ...editable.patch, updated_at: new Date().toISOString() } });
   if (!updated.ok) {
     if (stage3SchemaMissing(updated)) return stage3MigrationResponse();
     return NextResponse.json({ error: updated.message }, { status: updated.status });
@@ -298,5 +242,22 @@ export async function PATCH(request: Request) {
 
   const contact = normalizeWhatsAppContactRow(updated.rows[0]);
   await recordContactActivity({ access, contactId, eventType: "contact_updated", fields });
+
+  const conversationId = contact.conversation?.id;
+  if (contact.lead_stage !== existing.lead_stage) {
+    await dispatchWhatsAppAutomationEvent({
+      type: "CRM_STAGE_CHANGED", eventKey: `contact:${contactId}:stage:${contact.lead_stage}:${Date.now()}`,
+      triggerValue: contact.lead_stage, contactId, conversationId,
+    });
+  }
+  const beforeTags = new Set((existing.tags || []).map((tag) => tag.toLowerCase()));
+  for (const tag of contact.tags || []) {
+    if (beforeTags.has(tag.toLowerCase())) continue;
+    await dispatchWhatsAppAutomationEvent({
+      type: "TAG_ADDED", eventKey: `contact:${contactId}:tag:${tag.toLowerCase()}:${Date.now()}`,
+      triggerValue: tag, contactId, conversationId,
+    });
+  }
+
   return NextResponse.json({ ok: true, contact });
 }

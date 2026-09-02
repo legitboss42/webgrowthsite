@@ -11,6 +11,7 @@ import {
   normalizeWhatsAppAutomationRow,
   validateWhatsAppAutomationInput,
   type WhatsAppAutomation,
+  type WhatsAppAutomationInput,
   type WhatsAppAutomationStatus,
 } from "@/lib/whatsapp/automationModel";
 import { canWhatsAppRoleSuperviseTeam } from "@/lib/whatsapp/teamModel";
@@ -20,7 +21,7 @@ export const runtime = "nodejs";
 const TABLE = "whatsapp_automations";
 const SELECT = "id,name,description,status,trigger_type,trigger_config,condition_join,conditions,actions,version,created_by_member_id,updated_by_member_id,activated_at,paused_at,created_at,updated_at";
 const DUPLICATE_NAME = "An automation with that name already exists.";
-const MIGRATION_MESSAGE = "Stage 6A automations are waiting for the additive Supabase migration.";
+const MIGRATION_MESSAGE = "Stage 6 Automation Engine storage has not been applied in Supabase yet.";
 
 async function guard(request: Request) {
   const access = await getWhatsAppWorkspaceAccess(await cookies());
@@ -74,6 +75,28 @@ function mutationError(result: { ok: false; status: number; code?: string; messa
   );
 }
 
+function sameDefinition(existing: WhatsAppAutomation, next: WhatsAppAutomationInput) {
+  const current = {
+    name: existing.name,
+    description: existing.description,
+    triggerType: existing.triggerType,
+    triggerConfig: existing.triggerConfig,
+    conditionJoin: existing.conditionJoin,
+    conditions: existing.conditions,
+    actions: existing.actions,
+  };
+  const candidate = {
+    name: next.name,
+    description: next.description,
+    triggerType: next.triggerType,
+    triggerConfig: next.triggerConfig,
+    conditionJoin: next.conditionJoin,
+    conditions: next.conditions,
+    actions: next.actions,
+  };
+  return JSON.stringify(current) === JSON.stringify(candidate);
+}
+
 export async function POST(request: Request) {
   const guarded = await guard(request);
   if ("response" in guarded) return guarded.response;
@@ -121,6 +144,16 @@ export async function PATCH(request: Request) {
 
   const checked = validateWhatsAppAutomationInput(body);
   if (!checked.ok) return NextResponse.json({ error: checked.error }, { status: 400 });
+
+  if (existing.automation.status === "ACTIVE") {
+    if (checked.value.status !== "PAUSED") {
+      return NextResponse.json({ error: "Published workflows cannot be edited. Pause this workflow before making changes." }, { status: 409 });
+    }
+    if (!sameDefinition(existing.automation, checked.value)) {
+      return NextResponse.json({ error: "Pause the workflow first, then edit its definition." }, { status: 409 });
+    }
+  }
+
   const timestamps = statusTimestamps(checked.value.status, existing.automation);
   const result = await mutateWhatsAppRest({
     method: "PATCH",
@@ -157,6 +190,12 @@ export async function DELETE(request: Request) {
   if (!existing.automation) return NextResponse.json({ error: "That automation no longer exists." }, { status: 404 });
   if (existing.automation.status === "ACTIVE") {
     return NextResponse.json({ error: "Pause this automation before deleting it." }, { status: 409 });
+  }
+  const waiting = await readWhatsAppRows<Record<string, unknown>>(
+    `whatsapp_automation_runs?automation_id=eq.${encodeURIComponent(id)}&status=eq.WAITING&select=id&limit=1`,
+  );
+  if (waiting?.length) {
+    return NextResponse.json({ error: "Cancel the waiting workflow run before deleting this automation." }, { status: 409 });
   }
 
   const result = await mutateWhatsAppRest({

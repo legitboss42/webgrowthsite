@@ -1,12 +1,14 @@
 "use client";
 
-import { useMemo, useState, useTransition, type FormEvent } from "react";
+import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
   WHATSAPP_AUTOMATION_ACTION_OPTIONS,
   WHATSAPP_AUTOMATION_CONDITION_FIELDS,
   WHATSAPP_AUTOMATION_CONDITION_OPERATORS,
+  WHATSAPP_AUTOMATION_MAX_STEPS,
   WHATSAPP_AUTOMATION_TRIGGER_OPTIONS,
+  countWhatsAppAutomationSteps,
   getWhatsAppAutomationActionLabel,
   getWhatsAppAutomationTriggerLabel,
   validateWhatsAppAutomationInput,
@@ -16,241 +18,296 @@ import {
   type WhatsAppAutomationCondition,
   type WhatsAppAutomationConditionOperator,
   type WhatsAppAutomationInput,
+  type WhatsAppAutomationJob,
+  type WhatsAppAutomationRun,
   type WhatsAppAutomationStatus,
   type WhatsAppAutomationTriggerType,
 } from "@/lib/whatsapp/automationModel";
 
+type Props = {
+  automations: WhatsAppAutomation[];
+  storageReady: boolean;
+  role: string;
+  runs: WhatsAppAutomationRun[];
+  jobs: WhatsAppAutomationJob[];
+  teamMembers: Array<{ id: string; name: string; availability: string }>;
+  templates: Array<{ name: string; language: string }>;
+  savedReplies: Array<{ shortcut: string; title: string; category: string }>;
+};
 type Notice = { tone: "ok" | "error"; text: string } | null;
 type Filter = "ALL" | WhatsAppAutomationStatus;
+type ActionPath = Array<number | "then" | "else">;
+type Selection = { type: "trigger" | "conditions" } | { type: "action"; path: ActionPath };
 
 const EMPTY: WhatsAppAutomationInput = {
-  name: "",
-  description: "",
-  status: "DRAFT",
-  triggerType: "NEW_MESSAGE",
-  triggerConfig: {},
-  conditionJoin: "AND",
-  conditions: [],
-  actions: [{ type: "SEND_TEXT", value: "" }],
+  name: "", description: "", status: "DRAFT", triggerType: "NEW_MESSAGE", triggerConfig: {},
+  conditionJoin: "AND", conditions: [], actions: [{ type: "SEND_TEXT", value: "" }],
 };
 
-function editable(value: WhatsAppAutomation): WhatsAppAutomationInput {
-  return {
-    name: value.name,
-    description: value.description,
-    status: value.status,
-    triggerType: value.triggerType,
-    triggerConfig: { ...value.triggerConfig },
-    conditionJoin: value.conditionJoin,
-    conditions: value.conditions.map((condition) => ({ ...condition })),
-    actions: value.actions.map((action) => ({ ...action })),
-  };
+function cloneInput(value: WhatsAppAutomation | WhatsAppAutomationInput): WhatsAppAutomationInput {
+  return JSON.parse(JSON.stringify({
+    name: value.name, description: value.description, status: value.status, triggerType: value.triggerType,
+    triggerConfig: value.triggerConfig, conditionJoin: value.conditionJoin, conditions: value.conditions, actions: value.actions,
+  })) as WhatsAppAutomationInput;
+}
+function statusClass(status: string) {
+  if (status === "ACTIVE" || status === "SUCCEEDED") return "bg-emerald-50 text-emerald-700 border-emerald-200";
+  if (status === "FAILED") return "bg-rose-50 text-rose-700 border-rose-200";
+  if (status === "WAITING" || status === "PAUSED") return "bg-amber-50 text-amber-800 border-amber-200";
+  if (status === "CANCELLED" || status === "SKIPPED") return "bg-slate-100 text-slate-600 border-slate-200";
+  return "bg-paper-sunk text-ink-faint border-rule";
+}
+function formatWhen(value?: string) {
+  if (!value) return "—";
+  const date = new Date(value); return Number.isFinite(date.getTime()) ? date.toLocaleString() : "—";
+}
+function actionAt(actions: WhatsAppAutomationAction[], path: ActionPath): WhatsAppAutomationAction | null {
+  let list = actions; let current: WhatsAppAutomationAction | undefined;
+  for (let index = 0; index < path.length; index += 1) {
+    const part = path[index];
+    if (typeof part !== "number") return null;
+    current = list[part]; if (!current) return null;
+    const branch = path[index + 1];
+    if (branch === "then" || branch === "else") {
+      list = branch === "then" ? current.thenActions || [] : current.elseActions || [];
+      index += 1;
+    }
+  }
+  return current || null;
+}
+function updateAction(actions: WhatsAppAutomationAction[], path: ActionPath, updater: (action: WhatsAppAutomationAction) => WhatsAppAutomationAction): WhatsAppAutomationAction[] {
+  const [head, branch, ...rest] = path;
+  if (typeof head !== "number") return actions;
+  return actions.map((action, index) => {
+    if (index !== head) return action;
+    if (!branch) return updater(action);
+    if (branch !== "then" && branch !== "else") return action;
+    const child = branch === "then" ? action.thenActions || [] : action.elseActions || [];
+    const next = updateAction(child, rest, updater);
+    return branch === "then" ? { ...action, thenActions: next } : { ...action, elseActions: next };
+  });
+}
+function removeAction(actions: WhatsAppAutomationAction[], path: ActionPath): WhatsAppAutomationAction[] {
+  const [head, branch, ...rest] = path;
+  if (typeof head !== "number") return actions;
+  if (!branch) return actions.filter((_, index) => index !== head);
+  return actions.map((action, index) => {
+    if (index !== head || (branch !== "then" && branch !== "else")) return action;
+    const child = branch === "then" ? action.thenActions || [] : action.elseActions || [];
+    const next = removeAction(child, rest);
+    return branch === "then" ? { ...action, thenActions: next } : { ...action, elseActions: next };
+  });
+}
+function appendBranchAction(actions: WhatsAppAutomationAction[], path: ActionPath, branch: "then" | "else") {
+  return updateAction(actions, path, (action) => ({
+    ...action,
+    [branch === "then" ? "thenActions" : "elseActions"]: [...(branch === "then" ? action.thenActions || [] : action.elseActions || []), { type: "SEND_TEXT", value: "" }],
+  }));
+}
+function summarizeAction(action: WhatsAppAutomationAction) {
+  if (action.type === "DELAY") return `${action.amount || "?"} ${(action.unit || "minutes").toLowerCase()}`;
+  if (action.type === "BRANCH") return action.condition ? `${action.condition.field} ${action.condition.operator.toLowerCase().replaceAll("_", " ")} ${action.condition.value}` : "Choose a condition";
+  if (action.type === "UPDATE_CONTACT_FIELD") return `${action.value || "field"} → ${action.value2 || "value"}`;
+  return action.value || getWhatsAppAutomationActionLabel(action.type);
 }
 
-function duplicateDraft(value: WhatsAppAutomation): WhatsAppAutomationInput {
-  return { ...editable(value), name: `${value.name} copy`, status: "DRAFT" };
+function Node({ title, subtitle, tone = "plain", selected, onClick }: { title: string; subtitle?: string; tone?: "plain" | "trigger" | "condition" | "action"; selected?: boolean; onClick?(): void }) {
+  const toneClass = tone === "trigger" ? "border-emerald-300 bg-emerald-50" : tone === "condition" ? "border-amber-300 bg-amber-50" : tone === "action" ? "border-sky-300 bg-sky-50" : "border-rule bg-paper";
+  return <button type="button" onClick={onClick} className={`w-[260px] rounded-2xl border p-3 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${toneClass} ${selected ? "ring-2 ring-ledger ring-offset-2" : ""}`}>
+    <div className="text-[0.65rem] font-semibold uppercase tracking-[.12em] text-ink-faint">{tone === "trigger" ? "Trigger" : tone === "condition" ? "Condition" : tone === "action" ? "Action" : "Step"}</div>
+    <div className="mt-1 text-sm font-semibold text-ink">{title}</div>
+    {subtitle ? <div className="mt-1 line-clamp-2 text-xs leading-5 text-ink-faint">{subtitle}</div> : null}
+  </button>;
 }
+function Connector() { return <div className="mx-auto h-8 w-px bg-rule" />; }
 
-function statusClass(status: WhatsAppAutomationStatus) {
-  if (status === "ACTIVE") return "bg-ledger-tint text-ledger";
-  if (status === "PAUSED") return "bg-brass-tint text-[#6f4f16]";
-  return "bg-paper-sunk text-ink-faint";
-}
-
-function triggerConfigField(type: WhatsAppAutomationTriggerType) {
-  if (type === "KEYWORD") return { key: "keyword", label: "Keyword or phrase", placeholder: "price" };
-  if (type === "TAG_ADDED") return { key: "tag", label: "Trigger tag", placeholder: "Qualified" };
-  if (type === "CRM_STAGE_CHANGED") return { key: "stage", label: "Destination CRM stage", placeholder: "QUALIFIED" };
-  if (type === "CONVERSATION_ASSIGNED") return { key: "memberId", label: "Team member ID (optional)", placeholder: "Leave blank for any assignment" };
-  if (type === "WEBHOOK") return { key: "key", label: "Webhook key", placeholder: "new-order" };
-  return null;
-}
-
-function actionValueMeta(type: WhatsAppAutomationActionType) {
-  if (type === "SEND_TEXT") return { label: "Message text", placeholder: "Thanks for contacting us...", multiline: true };
-  if (type === "SEND_TEMPLATE") return { label: "Approved template name", placeholder: "order_update" };
-  if (type === "SEND_SAVED_REPLY") return { label: "Saved Reply shortcut", placeholder: "/pricing" };
-  if (type === "ASSIGN_CONVERSATION") return { label: "Team member ID", placeholder: "member UUID" };
-  if (type === "ADD_TAG" || type === "REMOVE_TAG") return { label: "Tag", placeholder: "Qualified" };
-  if (type === "UPDATE_CRM_STAGE") return { label: "CRM stage", placeholder: "FOLLOW_UP" };
-  if (type === "ADD_INTERNAL_NOTE") return { label: "Internal note", placeholder: "Automation added this note...", multiline: true };
-  if (type === "CALL_WEBHOOK") return { label: "Webhook URL", placeholder: "https://example.com/webhook" };
-  return null;
-}
-
-function TriggerEditor({ value, onChange, disabled }: { value: WhatsAppAutomationInput; onChange(value: WhatsAppAutomationInput): void; disabled: boolean }) {
-  const option = WHATSAPP_AUTOMATION_TRIGGER_OPTIONS.find((item) => item.value === value.triggerType);
-  const field = triggerConfigField(value.triggerType);
-  const timed = value.triggerType === "NO_CUSTOMER_REPLY" || value.triggerType === "NO_AGENT_REPLY";
-  const businessHours = value.triggerType === "BUSINESS_HOURS";
-  return (
-    <section className="rounded-xl border border-rule bg-paper p-4">
-      <p className="text-[0.65rem] font-semibold uppercase tracking-[.12em] text-ink-faint">When</p>
-      <select
-        value={value.triggerType}
-        disabled={disabled}
-        onChange={(event) => onChange({ ...value, triggerType: event.target.value as WhatsAppAutomationTriggerType, triggerConfig: {} })}
-        className="mt-2 w-full rounded-lg border border-rule bg-paper-raised px-3 py-2 text-sm"
-      >
-        {WHATSAPP_AUTOMATION_TRIGGER_OPTIONS.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
-      </select>
-      <p className="mt-2 text-xs leading-5 text-ink-faint">{option?.description}</p>
-      {field ? (
-        <label className="mt-3 block">
-          <span className="text-xs font-semibold text-ink-soft">{field.label}</span>
-          <input
-            disabled={disabled}
-            value={String(value.triggerConfig[field.key] || "")}
-            onChange={(event) => onChange({ ...value, triggerConfig: { ...value.triggerConfig, [field.key]: event.target.value } })}
-            placeholder={field.placeholder}
-            className="mt-1 w-full rounded-lg border border-rule bg-paper-raised px-3 py-2 text-sm outline-none focus:border-ledger-bright"
-          />
-        </label>
-      ) : null}
-      {timed ? (
-        <div className="mt-3 grid grid-cols-[1fr_10rem] gap-2">
-          <label><span className="text-xs font-semibold text-ink-soft">Delay</span><input disabled={disabled} type="number" min={1} max={365} value={String(value.triggerConfig.amount || "")} onChange={(event) => onChange({ ...value, triggerConfig: { ...value.triggerConfig, amount: Number(event.target.value) } })} className="mt-1 w-full rounded-lg border border-rule bg-paper-raised px-3 py-2 text-sm" /></label>
-          <label><span className="text-xs font-semibold text-ink-soft">Unit</span><select disabled={disabled} value={String(value.triggerConfig.unit || "HOURS")} onChange={(event) => onChange({ ...value, triggerConfig: { ...value.triggerConfig, unit: event.target.value } })} className="mt-1 w-full rounded-lg border border-rule bg-paper-raised px-3 py-2 text-sm"><option value="MINUTES">Minutes</option><option value="HOURS">Hours</option><option value="DAYS">Days</option></select></label>
+function ActionTree({ actions, parent = [], selection, setSelection }: { actions: WhatsAppAutomationAction[]; parent?: ActionPath; selection: Selection; setSelection(value: Selection): void }) {
+  return <>{actions.map((action, index) => {
+    const path = [...parent, index];
+    const selected = selection.type === "action" && JSON.stringify(selection.path) === JSON.stringify(path);
+    if (action.type === "BRANCH") {
+      return <div key={path.join("-")} className="flex flex-col items-center">
+        <Node tone="condition" title="Branch" subtitle={summarizeAction(action)} selected={selected} onClick={() => setSelection({ type: "action", path })} />
+        <div className="h-6 w-px bg-rule" />
+        <div className="grid w-full max-w-[720px] grid-cols-2 gap-8">
+          {(["then", "else"] as const).map((branch) => <div key={branch} className="flex min-w-0 flex-col items-center">
+            <span className={`mb-2 rounded-full px-2.5 py-1 text-[0.65rem] font-bold uppercase ${branch === "then" ? "bg-emerald-100 text-emerald-700" : "bg-rose-100 text-rose-700"}`}>{branch === "then" ? "Yes" : "No"}</span>
+            {(branch === "then" ? action.thenActions : action.elseActions)?.length
+              ? <ActionTree actions={(branch === "then" ? action.thenActions : action.elseActions) || []} parent={[...path, branch]} selection={selection} setSelection={setSelection} />
+              : <div className="rounded-xl border border-dashed border-rule bg-paper/70 px-4 py-6 text-center text-xs text-ink-faint">Empty path</div>}
+          </div>)}
         </div>
-      ) : null}
-      {businessHours ? (
-        <label className="mt-3 block"><span className="text-xs font-semibold text-ink-soft">Transition</span><select disabled={disabled} value={String(value.triggerConfig.transition || "OPENED")} onChange={(event) => onChange({ ...value, triggerConfig: { ...value.triggerConfig, transition: event.target.value } })} className="mt-1 w-full rounded-lg border border-rule bg-paper-raised px-3 py-2 text-sm"><option value="OPENED">Business hours opened</option><option value="CLOSED">Business hours closed</option></select></label>
-      ) : null}
-    </section>
-  );
+        {index < actions.length - 1 ? <Connector /> : null}
+      </div>;
+    }
+    return <div key={path.join("-")} className="flex flex-col items-center">
+      <Node tone="action" title={getWhatsAppAutomationActionLabel(action.type)} subtitle={summarizeAction(action)} selected={selected} onClick={() => setSelection({ type: "action", path })} />
+      {index < actions.length - 1 ? <Connector /> : null}
+    </div>;
+  })}</>;
 }
 
-function ConditionsEditor({ value, onChange, disabled }: { value: WhatsAppAutomationInput; onChange(value: WhatsAppAutomationInput): void; disabled: boolean }) {
-  function update(index: number, patch: Partial<WhatsAppAutomationCondition>) {
-    onChange({ ...value, conditions: value.conditions.map((condition, at) => at === index ? { ...condition, ...patch } : condition) });
-  }
-  return (
-    <section className="rounded-xl border border-rule bg-paper p-4">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <div><p className="text-[0.65rem] font-semibold uppercase tracking-[.12em] text-ink-faint">If</p><p className="mt-1 text-xs text-ink-faint">Optional conditions narrow when this workflow should continue.</p></div>
-        <div className="flex items-center gap-2"><select disabled={disabled || value.conditions.length < 2} value={value.conditionJoin} onChange={(event) => onChange({ ...value, conditionJoin: event.target.value as "AND" | "OR" })} className="rounded-lg border border-rule bg-paper-raised px-2 py-1.5 text-xs"><option value="AND">Match ALL</option><option value="OR">Match ANY</option></select><button type="button" disabled={disabled || value.conditions.length >= 10} onClick={() => onChange({ ...value, conditions: [...value.conditions, { field: "message.text", operator: "CONTAINS", value: "" }] })} className="rounded-full border border-rule px-3 py-1.5 text-xs font-semibold text-ledger">+ Condition</button></div>
-      </div>
-      {value.conditions.length ? <div className="mt-3 grid gap-2">{value.conditions.map((condition, index) => {
-        const noValue = condition.operator === "EXISTS" || condition.operator === "NOT_EXISTS";
-        return <div key={index} className="grid gap-2 rounded-lg border border-rule bg-paper-raised p-2 md:grid-cols-[1fr_10rem_1fr_auto]">
-          <select disabled={disabled} value={condition.field} onChange={(event) => update(index, { field: event.target.value })} className="rounded-lg border border-rule bg-paper px-2 py-2 text-xs">{WHATSAPP_AUTOMATION_CONDITION_FIELDS.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</select>
-          <select disabled={disabled} value={condition.operator} onChange={(event) => update(index, { operator: event.target.value as WhatsAppAutomationConditionOperator })} className="rounded-lg border border-rule bg-paper px-2 py-2 text-xs">{WHATSAPP_AUTOMATION_CONDITION_OPERATORS.map((operator) => <option key={operator} value={operator}>{operator.replaceAll("_", " ")}</option>)}</select>
-          {noValue ? <div className="rounded-lg bg-paper-sunk px-3 py-2 text-xs text-ink-faint">No comparison value</div> : <input disabled={disabled} value={condition.value} onChange={(event) => update(index, { value: event.target.value })} placeholder="Comparison value" className="rounded-lg border border-rule bg-paper px-3 py-2 text-sm" />}
-          <button type="button" disabled={disabled} onClick={() => onChange({ ...value, conditions: value.conditions.filter((_, at) => at !== index) })} className="rounded-lg border border-rule px-2 text-xs text-rose-700">Remove</button>
-        </div>;
-      })}</div> : <p className="mt-3 rounded-lg bg-paper-sunk px-3 py-3 text-xs text-ink-faint">No conditions. The workflow will continue whenever its trigger fires.</p>}
-    </section>
-  );
-}
-
-function ActionsEditor({ value, onChange, disabled }: { value: WhatsAppAutomationInput; onChange(value: WhatsAppAutomationInput): void; disabled: boolean }) {
-  function update(index: number, patch: Partial<WhatsAppAutomationAction>) {
-    onChange({ ...value, actions: value.actions.map((action, at) => at === index ? { ...action, ...patch } : action) });
-  }
-  return (
-    <section className="rounded-xl border border-rule bg-paper p-4">
-      <div className="flex items-center justify-between gap-2"><div><p className="text-[0.65rem] font-semibold uppercase tracking-[.12em] text-ink-faint">Then</p><p className="mt-1 text-xs text-ink-faint">Actions execute in this order once the engine is wired in 6B–6D.</p></div><button type="button" disabled={disabled || value.actions.length >= 12} onClick={() => onChange({ ...value, actions: [...value.actions, { type: "ADD_TAG", value: "" }] })} className="rounded-full border border-rule px-3 py-1.5 text-xs font-semibold text-ledger">+ Action</button></div>
-      <div className="mt-3 grid gap-2">{value.actions.map((action, index) => {
-        const meta = actionValueMeta(action.type);
-        return <div key={index} className="rounded-lg border border-rule bg-paper-raised p-3">
-          <div className="flex items-center gap-2"><span className="grid h-6 w-6 flex-none place-items-center rounded-full bg-ledger-tint text-[0.65rem] font-semibold text-ledger">{index + 1}</span><select disabled={disabled} value={action.type} onChange={(event) => update(index, { type: event.target.value as WhatsAppAutomationActionType, value: undefined, value2: undefined, amount: undefined, unit: undefined })} className="min-w-0 flex-1 rounded-lg border border-rule bg-paper px-2 py-2 text-xs">{WHATSAPP_AUTOMATION_ACTION_OPTIONS.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</select><button type="button" disabled={disabled || value.actions.length <= 1} onClick={() => onChange({ ...value, actions: value.actions.filter((_, at) => at !== index) })} className="rounded-lg border border-rule px-2 py-2 text-xs text-rose-700">Remove</button></div>
-          {action.type === "DELAY" ? <div className="mt-2 grid grid-cols-[1fr_10rem] gap-2"><input disabled={disabled} type="number" min={1} max={365} value={action.amount || ""} onChange={(event) => update(index, { amount: Number(event.target.value) })} placeholder="Delay amount" className="rounded-lg border border-rule bg-paper px-3 py-2 text-sm" /><select disabled={disabled} value={action.unit || "HOURS"} onChange={(event) => update(index, { unit: event.target.value as "MINUTES" | "HOURS" | "DAYS" })} className="rounded-lg border border-rule bg-paper px-3 py-2 text-sm"><option value="MINUTES">Minutes</option><option value="HOURS">Hours</option><option value="DAYS">Days</option></select></div> : null}
-          {action.type === "UPDATE_CONTACT_FIELD" ? <div className="mt-2 grid gap-2 sm:grid-cols-2"><input disabled={disabled} value={action.value || ""} onChange={(event) => update(index, { value: event.target.value })} placeholder="Field name, e.g. custom.budget" className="rounded-lg border border-rule bg-paper px-3 py-2 text-sm" /><input disabled={disabled} value={action.value2 || ""} onChange={(event) => update(index, { value2: event.target.value })} placeholder="New value" className="rounded-lg border border-rule bg-paper px-3 py-2 text-sm" /></div> : null}
-          {meta ? meta.multiline ? <textarea disabled={disabled} rows={3} value={action.value || ""} onChange={(event) => update(index, { value: event.target.value })} placeholder={meta.placeholder} className="mt-2 w-full rounded-lg border border-rule bg-paper px-3 py-2 text-sm" /> : <input disabled={disabled} value={action.value || ""} onChange={(event) => update(index, { value: event.target.value })} placeholder={meta.placeholder} className="mt-2 w-full rounded-lg border border-rule bg-paper px-3 py-2 text-sm" /> : null}
-        </div>;
-      })}</div>
-    </section>
-  );
-}
-
-function WorkflowPreview({ value }: { value: WhatsAppAutomationInput }) {
-  return <div className="rounded-xl border border-rule bg-paper p-4"><p className="text-[0.65rem] font-semibold uppercase tracking-[.12em] text-ink-faint">Workflow preview</p><div className="mt-3 grid gap-2"><div className="rounded-lg bg-ledger-tint px-3 py-2"><span className="text-[0.65rem] font-semibold uppercase text-ledger">When</span><p className="mt-0.5 text-sm font-semibold text-ink">{getWhatsAppAutomationTriggerLabel(value.triggerType)}</p></div>{value.conditions.length ? <div className="rounded-lg bg-paper-sunk px-3 py-2"><span className="text-[0.65rem] font-semibold uppercase text-ink-faint">If · {value.conditionJoin}</span><p className="mt-0.5 text-sm text-ink-soft">{value.conditions.length} condition{value.conditions.length === 1 ? "" : "s"}</p></div> : null}<div className="rounded-lg bg-paper-sunk px-3 py-2"><span className="text-[0.65rem] font-semibold uppercase text-ink-faint">Then</span><ol className="mt-1 list-decimal space-y-1 pl-4 text-sm text-ink-soft">{value.actions.map((action, index) => <li key={index}>{getWhatsAppAutomationActionLabel(action.type)}</li>)}</ol></div></div></div>;
-}
-
-export default function AutomationManager({ automations, storageReady, role }: { automations: WhatsAppAutomation[]; storageReady: boolean; role: "owner" | "manager" | "agent" }) {
+export default function AutomationManager({ automations, storageReady, runs, jobs, teamMembers, templates, savedReplies }: Props) {
   const router = useRouter();
+  const [tab, setTab] = useState<"WORKFLOWS" | "HISTORY">("WORKFLOWS");
   const [filter, setFilter] = useState<Filter>("ALL");
   const [query, setQuery] = useState("");
-  const [editor, setEditor] = useState<WhatsAppAutomationInput>(EMPTY);
-  const [editingId, setEditingId] = useState<string | null>(null);
+  const [builder, setBuilder] = useState(false);
+  const [source, setSource] = useState<WhatsAppAutomation | null>(null);
+  const [draft, setDraft] = useState<WhatsAppAutomationInput>(EMPTY);
+  const [selection, setSelection] = useState<Selection>({ type: "trigger" });
   const [notice, setNotice] = useState<Notice>(null);
+  const [runDetail, setRunDetail] = useState<Record<string, unknown> | null>(null);
   const [pending, startTransition] = useTransition();
+  const [zoom, setZoom] = useState(100);
 
   const visible = useMemo(() => automations.filter((automation) => {
     if (filter !== "ALL" && automation.status !== filter) return false;
-    const q = query.trim().toLowerCase();
-    return !q || [automation.name, automation.description, automation.triggerType, automation.status].some((item) => item.toLowerCase().includes(q));
+    const needle = query.trim().toLowerCase();
+    return !needle || `${automation.name} ${automation.description} ${automation.triggerType}`.toLowerCase().includes(needle);
   }), [automations, filter, query]);
+  const waitingByRun = useMemo(() => new Map(jobs.map((job) => [job.runId, job])), [jobs]);
+  const runCounts = useMemo(() => {
+    const map = new Map<string, number>(); for (const run of runs) map.set(run.automationId, (map.get(run.automationId) || 0) + 1); return map;
+  }, [runs]);
+  const locked = source?.status === "ACTIVE";
+  const checked = validateWhatsAppAutomationInput(draft as unknown as Record<string, unknown>);
+  const steps = countWhatsAppAutomationSteps(draft.actions);
 
-  async function jsonMutation(method: "POST" | "PATCH" | "DELETE", payload: Record<string, unknown>) {
-    const response = await fetch("/api/admin/whatsapp/automations/", { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
-    const body = (await response.json().catch(() => ({}))) as { ok?: boolean; error?: string };
-    if (!response.ok || !body.ok) throw new Error(body.error || "The automation change failed.");
-    return body;
+  function openNew() { setSource(null); setDraft(cloneInput(EMPTY)); setSelection({ type: "trigger" }); setNotice(null); setBuilder(true); }
+  function openEdit(value: WhatsAppAutomation) { setSource(value); setDraft(cloneInput(value)); setSelection({ type: "trigger" }); setNotice(null); setBuilder(true); }
+  function openDuplicate(value: WhatsAppAutomation) { setSource(null); setDraft({ ...cloneInput(value), name: `${value.name} copy`, status: "DRAFT" }); setSelection({ type: "trigger" }); setNotice(null); setBuilder(true); }
+
+  async function api(method: "POST" | "PATCH" | "DELETE", body: Record<string, unknown>) {
+    const response = await fetch("/api/admin/whatsapp/automations/", { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    const payload = await response.json().catch(() => ({})) as { error?: string };
+    if (!response.ok) throw new Error(payload.error || "The automation could not be saved.");
   }
-
-  function reset() { setEditingId(null); setEditor(EMPTY); }
-
-  function save(event: FormEvent) {
-    event.preventDefault();
-    const checked = validateWhatsAppAutomationInput(editor as unknown as Record<string, unknown>);
-    if (!checked.ok) return setNotice({ tone: "error", text: checked.error });
+  function save() {
+    if (!checked.ok || pending || locked) { if (!checked.ok) setNotice({ tone: "error", text: checked.error }); return; }
     startTransition(async () => {
       try {
-        await jsonMutation(editingId ? "PATCH" : "POST", editingId ? { id: editingId, ...checked.value } : checked.value);
-        setNotice({ tone: "ok", text: editingId ? "Automation updated." : "Automation saved." });
-        reset();
-        router.refresh();
-      } catch (error) {
-        setNotice({ tone: "error", text: error instanceof Error ? error.message : "Could not save automation." });
-      }
+        await api(source ? "PATCH" : "POST", { ...(source ? { id: source.id } : {}), ...draft });
+        setNotice({ tone: "ok", text: source ? "Workflow updated." : "Workflow created." });
+        setBuilder(false); router.refresh();
+      } catch (error) { setNotice({ tone: "error", text: error instanceof Error ? error.message : "Save failed." }); }
+    });
+  }
+  function setWorkflowStatus(value: WhatsAppAutomation, status: WhatsAppAutomationStatus) {
+    startTransition(async () => {
+      try { await api("PATCH", { id: value.id, ...cloneInput(value), status }); router.refresh(); }
+      catch (error) { setNotice({ tone: "error", text: error instanceof Error ? error.message : "Status change failed." }); }
+    });
+  }
+  function removeWorkflow(value: WhatsAppAutomation) {
+    if (!confirm(`Delete “${value.name}”?`)) return;
+    startTransition(async () => {
+      try { await api("DELETE", { id: value.id }); router.refresh(); }
+      catch (error) { setNotice({ tone: "error", text: error instanceof Error ? error.message : "Delete failed." }); }
+    });
+  }
+  async function inspectRun(id: string) {
+    const response = await fetch(`/api/admin/whatsapp/automations/runs/?id=${encodeURIComponent(id)}`, { cache: "no-store" });
+    const payload = await response.json().catch(() => ({})) as Record<string, unknown>;
+    setRunDetail(response.ok ? payload : { error: payload.error || "Run could not be loaded." });
+  }
+  function cancelRun(id: string) {
+    startTransition(async () => {
+      const response = await fetch("/api/admin/whatsapp/automations/runs/", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id }) });
+      const payload = await response.json().catch(() => ({})) as { error?: string };
+      if (!response.ok) setNotice({ tone: "error", text: payload.error || "Run could not be cancelled." });
+      else { setNotice({ tone: "ok", text: "Waiting run cancelled." }); router.refresh(); }
     });
   }
 
-  function changeStatus(automation: WhatsAppAutomation, status: WhatsAppAutomationStatus) {
-    startTransition(async () => {
-      try {
-        await jsonMutation("PATCH", { id: automation.id, ...editable(automation), status });
-        setNotice({ tone: "ok", text: status === "ACTIVE" ? "Automation marked Active. Trigger execution arrives in Stage 6B." : status === "PAUSED" ? "Automation paused." : "Automation returned to Draft." });
-        router.refresh();
-      } catch (error) {
-        setNotice({ tone: "error", text: error instanceof Error ? error.message : "Could not change automation status." });
-      }
-    });
+  function updateSelectedAction(patch: Partial<WhatsAppAutomationAction>) {
+    if (selection.type !== "action" || locked) return;
+    setDraft((value) => ({ ...value, actions: updateAction(value.actions, selection.path, (action) => ({ ...action, ...patch })) }));
+  }
+  const selectedAction = selection.type === "action" ? actionAt(draft.actions, selection.path) : null;
+
+  if (builder) {
+    return <div className="-mx-3 -my-4 min-h-[calc(100vh-5rem)] bg-[#f7f8f5] sm:-mx-5 sm:-my-5">
+      <header className="sticky top-0 z-20 flex flex-wrap items-center gap-3 border-b border-rule bg-paper/95 px-4 py-3 backdrop-blur">
+        <button type="button" onClick={() => setBuilder(false)} className="rounded-lg border border-rule px-3 py-2 text-sm">← Back</button>
+        <div className="min-w-0 flex-1"><input disabled={locked} value={draft.name} onChange={(event) => setDraft({ ...draft, name: event.target.value })} placeholder="Workflow name" className="w-full max-w-xl bg-transparent text-lg font-semibold outline-none" /><p className="text-xs text-ink-faint">{source ? `Version ${source.version}` : "New workflow"} · {steps}/{WHATSAPP_AUTOMATION_MAX_STEPS} steps</p></div>
+        {source?.status === "ACTIVE" ? <button type="button" disabled={pending} onClick={() => setWorkflowStatus(source, "PAUSED")} className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-2 text-sm font-semibold text-amber-800">Pause to edit</button> : null}
+        {!locked ? <><select value={draft.status} onChange={(event) => setDraft({ ...draft, status: event.target.value as WhatsAppAutomationStatus })} className="rounded-lg border border-rule bg-paper px-3 py-2 text-sm"><option value="DRAFT">Draft</option><option value="ACTIVE">Publish / Active</option><option value="PAUSED">Paused</option></select><button type="button" disabled={pending || !checked.ok} onClick={save} className="rounded-lg bg-ledger px-4 py-2 text-sm font-semibold text-white disabled:opacity-40">{pending ? "Saving…" : "Save workflow"}</button></> : null}
+      </header>
+      {notice ? <div className={`mx-4 mt-3 rounded-lg px-3 py-2 text-sm ${notice.tone === "ok" ? "bg-emerald-50 text-emerald-700" : "bg-rose-50 text-rose-700"}`}>{notice.text}</div> : null}
+      {locked ? <div className="mx-4 mt-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">This published workflow is read-only. Pause it before changing the trigger, conditions, or actions.</div> : null}
+      <div className="grid min-h-[calc(100vh-8rem)] lg:grid-cols-[minmax(0,1fr)_340px]">
+        <main className="relative min-h-[680px] overflow-auto border-r border-rule" style={{ backgroundImage: "radial-gradient(circle, rgba(12,51,39,.16) 1px, transparent 1px)", backgroundSize: "22px 22px" }}>
+          <div className="sticky left-4 top-4 z-10 flex w-fit items-center gap-1 rounded-xl border border-rule bg-paper p-1 shadow-sm"><button onClick={() => setZoom((v) => Math.max(60, v - 10))} className="h-8 w-8 rounded-lg hover:bg-paper-sunk">−</button><span className="w-12 text-center text-xs">{zoom}%</span><button onClick={() => setZoom((v) => Math.min(140, v + 10))} className="h-8 w-8 rounded-lg hover:bg-paper-sunk">+</button></div>
+          <div className="mx-auto flex min-w-[760px] max-w-[1100px] flex-col items-center px-10 py-12 transition-transform" style={{ transform: `scale(${zoom / 100})`, transformOrigin: "top center" }}>
+            <Node tone="trigger" title={getWhatsAppAutomationTriggerLabel(draft.triggerType)} subtitle={draft.description || "Click to configure the workflow trigger."} selected={selection.type === "trigger"} onClick={() => setSelection({ type: "trigger" })} />
+            <Connector />
+            {draft.conditions.length ? <><Node tone="condition" title={`Entry conditions · ${draft.conditionJoin}`} subtitle={`${draft.conditions.length} condition${draft.conditions.length === 1 ? "" : "s"}`} selected={selection.type === "conditions"} onClick={() => setSelection({ type: "conditions" })} /><Connector /></> : !locked ? <button type="button" onClick={() => { setDraft({ ...draft, conditions: [{ field: "message.text", operator: "CONTAINS", value: "" }] }); setSelection({ type: "conditions" }); }} className="mb-2 rounded-full border border-dashed border-rule bg-paper px-3 py-1.5 text-xs font-semibold text-ledger">+ Entry condition</button> : null}
+            <ActionTree actions={draft.actions} selection={selection} setSelection={setSelection} />
+            {!locked && steps < WHATSAPP_AUTOMATION_MAX_STEPS ? <><Connector /><button type="button" onClick={() => { const next = [...draft.actions, { type: "SEND_TEXT", value: "" } as WhatsAppAutomationAction]; setDraft({ ...draft, actions: next }); setSelection({ type: "action", path: [next.length - 1] }); }} className="rounded-full border border-rule bg-paper px-4 py-2 text-sm font-semibold text-ledger shadow-sm">+ Add step</button></> : null}
+          </div>
+        </main>
+        <aside className="bg-paper p-4 lg:sticky lg:top-[69px] lg:h-[calc(100vh-69px)] lg:overflow-auto">
+          <div className="mb-4"><div className="text-[0.65rem] font-semibold uppercase tracking-[.12em] text-ink-faint">Properties</div><textarea disabled={locked} rows={2} value={draft.description} onChange={(event) => setDraft({ ...draft, description: event.target.value })} placeholder="What does this workflow do?" className="mt-2 w-full rounded-xl border border-rule bg-paper-raised px-3 py-2 text-sm" /></div>
+          {selection.type === "trigger" ? <TriggerInspector value={draft} disabled={locked} onChange={setDraft} /> : null}
+          {selection.type === "conditions" ? <ConditionsInspector value={draft} disabled={locked} onChange={setDraft} /> : null}
+          {selection.type === "action" && selectedAction ? <ActionInspector action={selectedAction} disabled={locked} teamMembers={teamMembers} templates={templates} savedReplies={savedReplies} onChange={updateSelectedAction} onRemove={() => { setDraft((value) => ({ ...value, actions: removeAction(value.actions, selection.path) })); setSelection({ type: "trigger" }); }} onAppendBranch={(branch) => setDraft((value) => ({ ...value, actions: appendBranchAction(value.actions, selection.path, branch) }))} /> : null}
+          {!checked.ok ? <div className="mt-4 rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs leading-5 text-rose-700">{checked.error}</div> : <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-xs leading-5 text-emerald-700">Workflow definition is valid.</div>}
+        </aside>
+      </div>
+    </div>;
   }
 
-  function remove(automation: WhatsAppAutomation) {
-    if (!window.confirm(`Delete “${automation.name}”?`)) return;
-    startTransition(async () => {
-      try {
-        await jsonMutation("DELETE", { id: automation.id });
-        setNotice({ tone: "ok", text: "Automation deleted." });
-        if (editingId === automation.id) reset();
-        router.refresh();
-      } catch (error) {
-        setNotice({ tone: "error", text: error instanceof Error ? error.message : "Could not delete automation." });
-      }
-    });
-  }
-
-  return <div className="pb-10">
-    <div className="flex flex-wrap items-start justify-between gap-3"><div><h1 className="text-lg font-semibold text-ink">Automation Engine</h1><p className="mt-1 max-w-3xl text-sm text-ink-faint">Stage 6A stores real workflow definitions and durable execution records. Trigger execution is wired in the next Stage 6 slices.</p><p className="mt-1 text-xs text-ink-faint">Signed in as {role}. Current production testing uses Owner only.</p></div><button type="button" onClick={() => router.refresh()} className="rounded-full border border-rule bg-paper-raised px-4 py-2 text-xs font-semibold text-ledger">Refresh</button></div>
-    <div className="mt-4 rounded-xl border border-brass/25 bg-brass-tint px-4 py-3 text-xs leading-5 text-[#6f4f16]"><strong>Stage 6A boundary:</strong> Active/Paused state is persisted now, but active workflows do not execute until the trigger engine is connected in Stage 6B. This avoids fake automation behavior.</div>
-    {!storageReady ? <div className="mt-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-xs text-rose-700">Automation storage is waiting for the Stage 6A additive Supabase migration. The builder is visible but saving is disabled.</div> : null}
-    {notice ? <div className={`mt-4 rounded-xl px-4 py-3 text-xs ${notice.tone === "ok" ? "bg-ledger-tint text-ledger" : "bg-rose-50 text-rose-700"}`}>{notice.text}</div> : null}
-
-    <div className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1fr)_34rem]">
-      <section>
-        <div className="flex flex-wrap items-center gap-2">{(["ALL", "DRAFT", "ACTIVE", "PAUSED"] as Filter[]).map((item) => <button key={item} type="button" onClick={() => setFilter(item)} className={`rounded-full px-3 py-1.5 text-xs font-semibold ${filter === item ? "bg-ledger-bright text-white" : "border border-rule bg-paper-raised text-ink-soft"}`}>{item === "ALL" ? "All" : item[0] + item.slice(1).toLowerCase()}</button>)}</div>
-        <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search automations" className="mt-3 w-full rounded-lg border border-rule bg-paper-raised px-3 py-2 text-sm outline-none focus:border-ledger-bright" />
-        <div className="mt-3 grid gap-3">{visible.map((automation) => <article key={automation.id} className="rounded-xl border border-rule bg-paper-raised p-4"><div className="flex flex-wrap items-start gap-3"><div className="min-w-0 flex-1"><div className="flex flex-wrap items-center gap-2"><h2 className="font-semibold text-ink">{automation.name}</h2><span className={`rounded-full px-2 py-1 text-[0.62rem] font-semibold ${statusClass(automation.status)}`}>{automation.status}</span></div><p className="mt-1 text-xs text-ink-faint">{getWhatsAppAutomationTriggerLabel(automation.triggerType)} · {automation.conditions.length} condition{automation.conditions.length === 1 ? "" : "s"} · {automation.actions.length} action{automation.actions.length === 1 ? "" : "s"} · v{automation.version}</p>{automation.description ? <p className="mt-2 text-sm leading-6 text-ink-soft">{automation.description}</p> : null}</div></div><div className="mt-3 flex flex-wrap gap-2"><button type="button" onClick={() => { setEditingId(automation.id); setEditor(editable(automation)); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="rounded-full border border-rule px-3 py-1.5 text-xs font-semibold text-ink-soft">Edit</button><button type="button" onClick={() => { setEditingId(null); setEditor(duplicateDraft(automation)); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="rounded-full border border-rule px-3 py-1.5 text-xs font-semibold text-ink-soft">Duplicate</button>{automation.status !== "ACTIVE" ? <button type="button" disabled={pending} onClick={() => changeStatus(automation, "ACTIVE")} className="rounded-full bg-ledger-bright px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-50">Mark Active</button> : <button type="button" disabled={pending} onClick={() => changeStatus(automation, "PAUSED")} className="rounded-full bg-brass-tint px-3 py-1.5 text-xs font-semibold text-[#6f4f16] disabled:opacity-50">Pause</button>}{automation.status !== "ACTIVE" ? <button type="button" disabled={pending} onClick={() => remove(automation)} className="rounded-full border border-rule px-3 py-1.5 text-xs font-semibold text-rose-700 disabled:opacity-50">Delete</button> : null}</div></article>)}{visible.length === 0 ? <div className="rounded-xl border border-dashed border-rule-strong px-4 py-12 text-center text-sm text-ink-faint">No automations match this view.</div> : null}</div>
-      </section>
-
-      <aside className="xl:sticky xl:top-5 xl:self-start"><form onSubmit={save} className="rounded-xl border border-rule bg-paper-raised p-4"><div className="flex items-center justify-between gap-2"><div><h2 className="text-sm font-semibold text-ink">{editingId ? "Edit automation" : "New automation"}</h2><p className="mt-1 text-xs text-ink-faint">Build Trigger → Conditions → Actions.</p></div>{editingId || editor.name ? <button type="button" onClick={reset} className="text-xs text-ink-faint underline">Clear</button> : null}</div>
-        <div className="mt-4 grid gap-3"><label><span className="text-xs font-semibold text-ink-soft">Name</span><input disabled={pending || !storageReady} value={editor.name} onChange={(event) => setEditor({ ...editor, name: event.target.value })} placeholder="Pricing lead follow-up" className="mt-1 w-full rounded-lg border border-rule bg-paper px-3 py-2 text-sm" /></label><label><span className="text-xs font-semibold text-ink-soft">Description</span><textarea disabled={pending || !storageReady} rows={2} value={editor.description} onChange={(event) => setEditor({ ...editor, description: event.target.value })} placeholder="What this workflow is meant to do" className="mt-1 w-full rounded-lg border border-rule bg-paper px-3 py-2 text-sm" /></label><label><span className="text-xs font-semibold text-ink-soft">State</span><select disabled={pending || !storageReady} value={editor.status} onChange={(event) => setEditor({ ...editor, status: event.target.value as WhatsAppAutomationStatus })} className="mt-1 w-full rounded-lg border border-rule bg-paper px-3 py-2 text-sm"><option value="DRAFT">Draft</option><option value="ACTIVE">Active (state only in 6A)</option><option value="PAUSED">Paused</option></select></label></div>
-        <div className="mt-4 grid gap-3"><TriggerEditor value={editor} onChange={setEditor} disabled={pending || !storageReady} /><ConditionsEditor value={editor} onChange={setEditor} disabled={pending || !storageReady} /><ActionsEditor value={editor} onChange={setEditor} disabled={pending || !storageReady} /><WorkflowPreview value={editor} /></div>
-        <button disabled={pending || !storageReady} className="mt-4 w-full rounded-full bg-ledger-bright px-4 py-2.5 text-sm font-semibold text-white disabled:bg-paper-sunk disabled:text-ink-faint">{pending ? "Saving…" : editingId ? "Update automation" : "Save automation"}</button>
-      </form></aside>
-    </div>
+  return <div className="mx-auto max-w-[1500px]">
+    <div className="flex flex-wrap items-end justify-between gap-4"><div><p className="text-[0.65rem] font-semibold uppercase tracking-[.14em] text-ledger">Automation Engine</p><h1 className="mt-1 font-serif text-3xl font-semibold text-ink">Workflows</h1><p className="mt-1 max-w-2xl text-sm text-ink-faint">Build visual WhatsApp workflows with triggers, branches, CRM actions, durable delays and execution history.</p></div><button type="button" onClick={openNew} disabled={!storageReady} className="rounded-xl bg-ledger px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-40">+ New workflow</button></div>
+    {!storageReady ? <div className="mt-5 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">Stage 6 storage is not ready. Apply the full Stage 6 Supabase migration before using Automations.</div> : null}
+    {notice ? <div className={`mt-4 rounded-lg px-3 py-2 text-sm ${notice.tone === "ok" ? "bg-emerald-50 text-emerald-700" : "bg-rose-50 text-rose-700"}`}>{notice.text}</div> : null}
+    <div className="mt-6 flex gap-1 border-b border-rule"><button onClick={() => setTab("WORKFLOWS")} className={`border-b-2 px-4 py-2 text-sm font-semibold ${tab === "WORKFLOWS" ? "border-ledger text-ledger" : "border-transparent text-ink-faint"}`}>Workflows</button><button onClick={() => setTab("HISTORY")} className={`border-b-2 px-4 py-2 text-sm font-semibold ${tab === "HISTORY" ? "border-ledger text-ledger" : "border-transparent text-ink-faint"}`}>Run history <span className="ml-1 rounded-full bg-paper-sunk px-2 py-0.5 text-[0.65rem]">{runs.length}</span></button></div>
+    {tab === "WORKFLOWS" ? <>
+      <div className="mt-4 flex flex-wrap gap-2"><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search workflows" className="min-w-[220px] flex-1 rounded-xl border border-rule bg-paper px-3 py-2 text-sm" /><select value={filter} onChange={(event) => setFilter(event.target.value as Filter)} className="rounded-xl border border-rule bg-paper px-3 py-2 text-sm"><option value="ALL">All statuses</option><option value="ACTIVE">Active</option><option value="DRAFT">Draft</option><option value="PAUSED">Paused</option></select></div>
+      <div className="mt-4 grid gap-3 xl:grid-cols-2">{visible.map((automation) => <article key={automation.id} className="rounded-2xl border border-rule bg-paper p-4 shadow-sm"><div className="flex items-start justify-between gap-3"><div className="min-w-0"><div className="flex flex-wrap items-center gap-2"><h2 className="truncate text-base font-semibold text-ink">{automation.name}</h2><span className={`rounded-full border px-2 py-0.5 text-[0.65rem] font-semibold ${statusClass(automation.status)}`}>{automation.status}</span></div><p className="mt-1 line-clamp-2 text-xs leading-5 text-ink-faint">{automation.description || "No description"}</p></div><div className="text-right text-xs text-ink-faint">v{automation.version}<br />{runCounts.get(automation.id) || 0} runs</div></div><div className="mt-4 grid grid-cols-[auto_1fr] gap-x-3 gap-y-2 text-xs"><span className="font-semibold text-ink-faint">Trigger</span><span>{getWhatsAppAutomationTriggerLabel(automation.triggerType)}</span><span className="font-semibold text-ink-faint">Steps</span><span>{countWhatsAppAutomationSteps(automation.actions)}</span><span className="font-semibold text-ink-faint">Updated</span><span>{formatWhen(automation.updatedAt)}</span></div><div className="mt-4 flex flex-wrap gap-2"><button onClick={() => openEdit(automation)} className="rounded-lg border border-rule px-3 py-2 text-xs font-semibold text-ledger">{automation.status === "ACTIVE" ? "View canvas" : "Edit canvas"}</button><button onClick={() => openDuplicate(automation)} className="rounded-lg border border-rule px-3 py-2 text-xs">Duplicate</button>{automation.status === "ACTIVE" ? <button onClick={() => setWorkflowStatus(automation, "PAUSED")} className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">Pause</button> : <button onClick={() => setWorkflowStatus(automation, "ACTIVE")} className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-700">Activate</button>}<button disabled={automation.status === "ACTIVE"} onClick={() => removeWorkflow(automation)} className="rounded-lg border border-rose-200 px-3 py-2 text-xs text-rose-700 disabled:opacity-30">Delete</button></div></article>)}{!visible.length ? <div className="col-span-full rounded-2xl border border-dashed border-rule bg-paper p-10 text-center text-sm text-ink-faint">No workflows match this view.</div> : null}</div>
+    </> : <History runs={runs} automations={automations} waitingByRun={waitingByRun} inspectRun={inspectRun} cancelRun={cancelRun} />}
+    {runDetail ? <div className="fixed inset-0 z-50 grid place-items-center bg-black/30 p-4" onClick={() => setRunDetail(null)}><div onClick={(event) => event.stopPropagation()} className="max-h-[80vh] w-full max-w-3xl overflow-auto rounded-2xl bg-paper p-5 shadow-xl"><div className="flex items-center justify-between"><h3 className="text-lg font-semibold">Run details</h3><button onClick={() => setRunDetail(null)} className="rounded-lg border border-rule px-3 py-1.5 text-sm">Close</button></div><pre className="mt-4 whitespace-pre-wrap break-words rounded-xl bg-paper-sunk p-4 text-xs leading-5">{JSON.stringify(runDetail, null, 2)}</pre></div></div> : null}
   </div>;
+}
+
+function TriggerInspector({ value, disabled, onChange }: { value: WhatsAppAutomationInput; disabled: boolean; onChange(value: WhatsAppAutomationInput): void }) {
+  const timed = value.triggerType === "NO_CUSTOMER_REPLY" || value.triggerType === "NO_AGENT_REPLY";
+  const setConfig = (key: string, next: string | number) => onChange({ ...value, triggerConfig: { ...value.triggerConfig, [key]: next } });
+  return <div><h3 className="text-sm font-semibold">Trigger</h3><select disabled={disabled} value={value.triggerType} onChange={(event) => onChange({ ...value, triggerType: event.target.value as WhatsAppAutomationTriggerType, triggerConfig: {} })} className="mt-2 w-full rounded-xl border border-rule bg-paper-raised px-3 py-2 text-sm">{WHATSAPP_AUTOMATION_TRIGGER_OPTIONS.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</select><p className="mt-2 text-xs leading-5 text-ink-faint">{WHATSAPP_AUTOMATION_TRIGGER_OPTIONS.find((item) => item.value === value.triggerType)?.description}</p>
+    {value.triggerType === "KEYWORD" ? <Field label="Keyword" disabled={disabled} value={String(value.triggerConfig.keyword || "")} onChange={(v) => setConfig("keyword", v)} /> : null}
+    {value.triggerType === "TAG_ADDED" ? <Field label="Tag" disabled={disabled} value={String(value.triggerConfig.tag || "")} onChange={(v) => setConfig("tag", v)} /> : null}
+    {value.triggerType === "CRM_STAGE_CHANGED" ? <Field label="Stage" disabled={disabled} value={String(value.triggerConfig.stage || "")} onChange={(v) => setConfig("stage", v)} placeholder="QUALIFIED" /> : null}
+    {value.triggerType === "CONVERSATION_ASSIGNED" ? <Field label="Member ID (blank = anyone)" disabled={disabled} value={String(value.triggerConfig.memberId || "")} onChange={(v) => setConfig("memberId", v)} /> : null}
+    {value.triggerType === "WEBHOOK" ? <><Field label="Webhook key" disabled={disabled} value={String(value.triggerConfig.key || "")} onChange={(v) => setConfig("key", v)} placeholder="new-order" /><p className="mt-2 text-[0.68rem] text-ink-faint">Endpoint: /api/whatsapp/automation-webhook/&lt;key&gt;/</p></> : null}
+    {timed ? <div className="mt-3 grid grid-cols-[1fr_8rem] gap-2"><Field label="Delay" disabled={disabled} type="number" value={String(value.triggerConfig.amount || "")} onChange={(v) => setConfig("amount", Number(v))} /><label className="text-xs font-semibold text-ink-soft">Unit<select disabled={disabled} value={String(value.triggerConfig.unit || "HOURS")} onChange={(e) => setConfig("unit", e.target.value)} className="mt-1 w-full rounded-xl border border-rule bg-paper-raised px-2 py-2 text-sm"><option value="MINUTES">Minutes</option><option value="HOURS">Hours</option><option value="DAYS">Days</option></select></label></div> : null}
+    {value.triggerType === "BUSINESS_HOURS" ? <label className="mt-3 block text-xs font-semibold text-ink-soft">Transition<select disabled={disabled} value={String(value.triggerConfig.transition || "OPENED")} onChange={(e) => setConfig("transition", e.target.value)} className="mt-1 w-full rounded-xl border border-rule bg-paper-raised px-3 py-2 text-sm"><option value="OPENED">Opened</option><option value="CLOSED">Closed</option></select></label> : null}
+  </div>;
+}
+function ConditionsInspector({ value, disabled, onChange }: { value: WhatsAppAutomationInput; disabled: boolean; onChange(value: WhatsAppAutomationInput): void }) {
+  const update = (index: number, patch: Partial<WhatsAppAutomationCondition>) => onChange({ ...value, conditions: value.conditions.map((condition, at) => at === index ? { ...condition, ...patch } : condition) });
+  return <div><div className="flex items-center justify-between"><h3 className="text-sm font-semibold">Entry conditions</h3><button disabled={disabled || value.conditions.length >= 20} onClick={() => onChange({ ...value, conditions: [...value.conditions, { field: "message.text", operator: "CONTAINS", value: "" }] })} className="text-xs font-semibold text-ledger">+ Add</button></div><select disabled={disabled || value.conditions.length < 2} value={value.conditionJoin} onChange={(e) => onChange({ ...value, conditionJoin: e.target.value as "AND" | "OR" })} className="mt-2 w-full rounded-xl border border-rule bg-paper-raised px-3 py-2 text-sm"><option value="AND">Match ALL</option><option value="OR">Match ANY</option></select><div className="mt-3 grid gap-3">{value.conditions.map((condition, index) => <div key={index} className="rounded-xl border border-rule p-3"><select disabled={disabled} value={condition.field} onChange={(e) => update(index, { field: e.target.value })} className="w-full rounded-lg border border-rule px-2 py-2 text-xs">{WHATSAPP_AUTOMATION_CONDITION_FIELDS.map((field) => <option key={field.value} value={field.value}>{field.label}</option>)}</select><select disabled={disabled} value={condition.operator} onChange={(e) => update(index, { operator: e.target.value as WhatsAppAutomationConditionOperator })} className="mt-2 w-full rounded-lg border border-rule px-2 py-2 text-xs">{WHATSAPP_AUTOMATION_CONDITION_OPERATORS.map((operator) => <option key={operator}>{operator}</option>)}</select>{!new Set(["EXISTS", "NOT_EXISTS"]).has(condition.operator) ? <input disabled={disabled} value={condition.value} onChange={(e) => update(index, { value: e.target.value })} placeholder="Value" className="mt-2 w-full rounded-lg border border-rule px-3 py-2 text-sm" /> : null}<button disabled={disabled} onClick={() => onChange({ ...value, conditions: value.conditions.filter((_, at) => at !== index) })} className="mt-2 text-xs text-rose-700">Remove</button></div>)}</div></div>;
+}
+function ActionInspector({ action, disabled, teamMembers, templates, savedReplies, onChange, onRemove, onAppendBranch }: { action: WhatsAppAutomationAction; disabled: boolean; teamMembers: Props["teamMembers"]; templates: Props["templates"]; savedReplies: Props["savedReplies"]; onChange(patch: Partial<WhatsAppAutomationAction>): void; onRemove(): void; onAppendBranch(branch: "then" | "else"): void }) {
+  const type = action.type;
+  return <div><h3 className="text-sm font-semibold">Action</h3><select disabled={disabled} value={type} onChange={(e) => onChange({ type: e.target.value as WhatsAppAutomationActionType, value: undefined, value2: undefined, amount: undefined, unit: undefined, condition: undefined, thenActions: undefined, elseActions: undefined })} className="mt-2 w-full rounded-xl border border-rule bg-paper-raised px-3 py-2 text-sm">{WHATSAPP_AUTOMATION_ACTION_OPTIONS.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</select><p className="mt-2 text-xs leading-5 text-ink-faint">{WHATSAPP_AUTOMATION_ACTION_OPTIONS.find((item) => item.value === type)?.description}</p>
+    {type === "SEND_TEXT" || type === "ADD_INTERNAL_NOTE" ? <label className="mt-3 block text-xs font-semibold text-ink-soft">Content<textarea disabled={disabled} rows={5} value={action.value || ""} onChange={(e) => onChange({ value: e.target.value })} className="mt-1 w-full rounded-xl border border-rule bg-paper-raised px-3 py-2 text-sm" placeholder="Hi {{first_name}}..." /></label> : null}
+    {type === "SEND_TEMPLATE" ? <><label className="mt-3 block text-xs font-semibold text-ink-soft">Approved template<select disabled={disabled} value={action.value || ""} onChange={(e) => { const selected = templates.find((item) => item.name === e.target.value); onChange({ value: e.target.value, value2: selected?.language || "en_US" }); }} className="mt-1 w-full rounded-xl border border-rule bg-paper-raised px-3 py-2 text-sm"><option value="">Choose template</option>{templates.map((item) => <option key={`${item.name}:${item.language}`} value={item.name}>{item.name}</option>)}</select></label><Field label="Language" disabled={disabled} value={action.value2 || "en_US"} onChange={(v) => onChange({ value2: v })} /></> : null}
+    {type === "SEND_SAVED_REPLY" ? <label className="mt-3 block text-xs font-semibold text-ink-soft">Team Saved Reply<select disabled={disabled} value={(action.value || "").replace(/^\/+/, "")} onChange={(e) => onChange({ value: e.target.value })} className="mt-1 w-full rounded-xl border border-rule bg-paper-raised px-3 py-2 text-sm"><option value="">Choose reply</option>{savedReplies.map((reply) => <option key={reply.shortcut} value={reply.shortcut}>/{reply.shortcut} · {reply.title}</option>)}</select></label> : null}
+    {type === "ASSIGN_CONVERSATION" ? <label className="mt-3 block text-xs font-semibold text-ink-soft">Assign to<select disabled={disabled} value={action.value || ""} onChange={(e) => onChange({ value: e.target.value })} className="mt-1 w-full rounded-xl border border-rule bg-paper-raised px-3 py-2 text-sm"><option value="">Choose member</option>{teamMembers.map((member) => <option key={member.id} value={member.id}>{member.name} · {member.availability}</option>)}</select></label> : null}
+    {new Set(["ADD_TAG", "REMOVE_TAG", "UPDATE_CRM_STAGE", "CALL_WEBHOOK"]).has(type) ? <Field label={type === "CALL_WEBHOOK" ? "HTTPS URL" : type === "UPDATE_CRM_STAGE" ? "CRM stage" : "Tag"} disabled={disabled} value={action.value || ""} onChange={(v) => onChange({ value: v })} /> : null}
+    {type === "UPDATE_CONTACT_FIELD" ? <><Field label="Field" disabled={disabled} value={action.value || ""} onChange={(v) => onChange({ value: v })} placeholder="custom.budget" /><Field label="New value" disabled={disabled} value={action.value2 || ""} onChange={(v) => onChange({ value2: v })} /></> : null}
+    {type === "DELAY" ? <div className="mt-3 grid grid-cols-[1fr_8rem] gap-2"><Field label="Amount" disabled={disabled} type="number" value={String(action.amount || "")} onChange={(v) => onChange({ amount: Number(v) })} /><label className="text-xs font-semibold text-ink-soft">Unit<select disabled={disabled} value={action.unit || "HOURS"} onChange={(e) => onChange({ unit: e.target.value as "MINUTES" | "HOURS" | "DAYS" })} className="mt-1 w-full rounded-xl border border-rule px-2 py-2 text-sm"><option value="MINUTES">Minutes</option><option value="HOURS">Hours</option><option value="DAYS">Days</option></select></label></div> : null}
+    {type === "BRANCH" ? <BranchInspector action={action} disabled={disabled} onChange={onChange} onAppend={onAppendBranch} /> : null}
+    {!disabled ? <button onClick={onRemove} className="mt-5 w-full rounded-xl border border-rose-200 px-3 py-2 text-sm text-rose-700">Remove step</button> : null}
+  </div>;
+}
+function BranchInspector({ action, disabled, onChange, onAppend }: { action: WhatsAppAutomationAction; disabled: boolean; onChange(patch: Partial<WhatsAppAutomationAction>): void; onAppend(branch: "then" | "else"): void }) {
+  const condition = action.condition || { field: "message.text", operator: "CONTAINS" as const, value: "" };
+  return <div className="mt-3 rounded-xl border border-rule p-3"><select disabled={disabled} value={condition.field} onChange={(e) => onChange({ condition: { ...condition, field: e.target.value } })} className="w-full rounded-lg border border-rule px-2 py-2 text-xs">{WHATSAPP_AUTOMATION_CONDITION_FIELDS.map((field) => <option key={field.value} value={field.value}>{field.label}</option>)}</select><select disabled={disabled} value={condition.operator} onChange={(e) => onChange({ condition: { ...condition, operator: e.target.value as WhatsAppAutomationConditionOperator } })} className="mt-2 w-full rounded-lg border border-rule px-2 py-2 text-xs">{WHATSAPP_AUTOMATION_CONDITION_OPERATORS.map((operator) => <option key={operator}>{operator}</option>)}</select>{!new Set(["EXISTS", "NOT_EXISTS"]).has(condition.operator) ? <input disabled={disabled} value={condition.value} onChange={(e) => onChange({ condition: { ...condition, value: e.target.value } })} className="mt-2 w-full rounded-lg border border-rule px-3 py-2 text-sm" placeholder="Comparison value" /> : null}<div className="mt-3 grid grid-cols-2 gap-2"><button disabled={disabled} onClick={() => onAppend("then")} className="rounded-lg bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-700">+ Yes action</button><button disabled={disabled} onClick={() => onAppend("else")} className="rounded-lg bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-700">+ No action</button></div></div>;
+}
+function Field({ label, value, onChange, disabled, placeholder, type = "text" }: { label: string; value: string; onChange(value: string): void; disabled?: boolean; placeholder?: string; type?: string }) { return <label className="mt-3 block text-xs font-semibold text-ink-soft">{label}<input disabled={disabled} type={type} value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} className="mt-1 w-full rounded-xl border border-rule bg-paper-raised px-3 py-2 text-sm" /></label>; }
+function History({ runs, automations, waitingByRun, inspectRun, cancelRun }: { runs: WhatsAppAutomationRun[]; automations: WhatsAppAutomation[]; waitingByRun: Map<string, WhatsAppAutomationJob>; inspectRun(id: string): void; cancelRun(id: string): void }) {
+  const names = new Map(automations.map((automation) => [automation.id, automation.name]));
+  return <div className="mt-4 overflow-hidden rounded-2xl border border-rule bg-paper"><div className="overflow-x-auto"><table className="w-full min-w-[880px] text-left text-sm"><thead className="bg-paper-sunk text-xs uppercase tracking-wide text-ink-faint"><tr><th className="px-4 py-3">Workflow</th><th className="px-4 py-3">Status</th><th className="px-4 py-3">Trigger</th><th className="px-4 py-3">Started</th><th className="px-4 py-3">Waiting until</th><th className="px-4 py-3">Error</th><th className="px-4 py-3">Actions</th></tr></thead><tbody className="divide-y divide-rule">{runs.map((run) => { const job = waitingByRun.get(run.id); return <tr key={run.id}><td className="px-4 py-3 font-medium">{names.get(run.automationId) || run.automationId.slice(0, 8)}</td><td className="px-4 py-3"><span className={`rounded-full border px-2 py-1 text-[0.65rem] font-semibold ${statusClass(run.status)}`}>{run.status}</span></td><td className="px-4 py-3 text-xs">{run.triggerType}</td><td className="px-4 py-3 text-xs">{formatWhen(run.startedAt || run.createdAt)}</td><td className="px-4 py-3 text-xs">{job ? formatWhen(job.dueAt) : "—"}</td><td className="max-w-[240px] truncate px-4 py-3 text-xs text-rose-700">{run.errorMessage || job?.lastError || "—"}</td><td className="px-4 py-3"><div className="flex gap-2"><button onClick={() => inspectRun(run.id)} className="rounded-lg border border-rule px-2.5 py-1.5 text-xs">Inspect</button>{new Set(["QUEUED", "RUNNING", "WAITING"]).has(run.status) ? <button onClick={() => cancelRun(run.id)} className="rounded-lg border border-rose-200 px-2.5 py-1.5 text-xs text-rose-700">Cancel</button> : null}</div></td></tr>; })}{!runs.length ? <tr><td colSpan={7} className="px-4 py-10 text-center text-ink-faint">No automation runs yet.</td></tr> : null}</tbody></table></div></div>;
 }

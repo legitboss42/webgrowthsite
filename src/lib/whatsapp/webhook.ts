@@ -47,7 +47,6 @@ type UnknownRecord = Record<string, unknown>;
 function asRecord(value: unknown): UnknownRecord | null {
   return value && typeof value === "object" && !Array.isArray(value) ? (value as UnknownRecord) : null;
 }
-
 function getIncomingMedia(item: UnknownRecord, type: string) {
   if (type !== "audio" && type !== "image" && type !== "video" && type !== "document") return null;
   return asRecord(item[type]);
@@ -74,11 +73,7 @@ export function parseWhatsAppWebhook(payload: unknown): { messages: NormalizedIn
         const text = asRecord(item?.text);
         if (typeof item?.id !== "string" || typeof item?.from !== "string" || typeof item?.timestamp !== "string" || typeof item?.type !== "string") continue;
         const media = getIncomingMedia(item, item.type);
-        const body = typeof text?.body === "string"
-          ? text.body
-          : typeof media?.caption === "string"
-            ? media.caption
-            : undefined;
+        const body = typeof text?.body === "string" ? text.body : typeof media?.caption === "string" ? media.caption : undefined;
         messages.push({
           messageId: item.id,
           waId: item.from,
@@ -98,13 +93,11 @@ export function parseWhatsAppWebhook(payload: unknown): { messages: NormalizedIn
         if (typeof item?.id !== "string" || typeof item?.status !== "string" || typeof item?.timestamp !== "string") continue;
         const failure = Array.isArray(item.errors) ? asRecord(item.errors[0]) : null;
         const failureData = asRecord(failure?.error_data);
-        const error = failure
-          ? sanitizeWhatsAppStatusError({
-              code: typeof failure.code === "number" ? failure.code : undefined,
-              title: typeof failure.title === "string" ? failure.title : undefined,
-              details: typeof failureData?.details === "string" ? failureData.details : undefined,
-            })
-          : undefined;
+        const error = failure ? sanitizeWhatsAppStatusError({
+          code: typeof failure.code === "number" ? failure.code : undefined,
+          title: typeof failure.title === "string" ? failure.title : undefined,
+          details: typeof failureData?.details === "string" ? failureData.details : undefined,
+        }) : undefined;
         statuses.push({ messageId: item.id, waId: typeof item.recipient_id === "string" ? item.recipient_id : undefined, status: item.status, timestamp: Number(item.timestamp), error });
       }
     }
@@ -117,7 +110,6 @@ export type WebhookProcessorStore = {
   updateMessageStatus(messageId: string, status: string, error?: string): Promise<void>;
   recordOutbound?(message: { messageId: string; waId: string; text: string; timestamp: number }): Promise<void>;
 };
-
 export type WhatsAppTextSender = (input: {
   to: string;
   text: string;
@@ -139,12 +131,17 @@ export async function processWhatsAppWebhook(
   payload: unknown,
   store: WebhookProcessorStore,
   send?: WhatsAppTextSender,
-  options: { leadKeywords?: WhatsAppLeadKeywordRules } = {},
+  options: {
+    leadKeywords?: WhatsAppLeadKeywordRules;
+    shouldUseSafeReply?: (message: NormalizedIncomingMessage) => Promise<boolean>;
+  } = {},
 ) {
   const { messages, statuses } = parseWhatsAppWebhook(payload);
   for (const message of messages) {
     const result = await store.recordInbound(message);
-    if (result.duplicate || !send || message.type !== "text") continue;
+    if (result.duplicate) continue;
+    const useSafeReply = options.shouldUseSafeReply ? await options.shouldUseSafeReply(message) : true;
+    if (!useSafeReply || !send || message.type !== "text") continue;
     const reply = getSafeReply(message.text, options.leadKeywords);
     if (!reply) continue;
     const sent = await send({ to: message.waId, text: reply, customerMessageTimestamp: message.timestamp, replyToMessageId: message.messageId });
