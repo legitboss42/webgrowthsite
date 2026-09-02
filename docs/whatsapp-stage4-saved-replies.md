@@ -4,15 +4,19 @@ Stage 4 follows the production gate used by the current roadmap:
 
 > Build → production test → fix every discovered issue → retest → mark complete → unlock Stage 5.
 
-The user chose to deploy Stage 4A/4B/4C/4D together and run one combined production test after both required migrations are applied.
+The user chose to deploy Stage 4A/4B/4C/4D together and run one combined production test after both required migrations were applied.
 
 ## Current status
 
-**CODE READY AS ONE COMBINED STAGE 4 RELEASE; PRODUCTION GATE PENDING.**
+**100% COMPLETE — PRODUCTION VERIFIED.**
 
-Stage 4 is not complete until the combined production test passes.
+Both Stage 4 migrations were applied and the combined production gate passed. No known Stage 4 blocker remains.
+
+**Stage 5 — WhatsApp Template Manager is now UNLOCKED.**
 
 ## 4A — Saved reply foundation
+
+**COMPLETE + PRODUCTION VERIFIED.**
 
 Implemented:
 
@@ -29,11 +33,13 @@ Implemented:
 - server-side authorization
 - legacy fallback while the migration is absent
 
-Required migration:
+Applied migration:
 
 `supabase/migrations/202609010002_whatsapp_saved_replies_stage4.sql`
 
 ## 4B — Variables + preview
+
+**COMPLETE + PRODUCTION VERIFIED.**
 
 Implemented variables:
 
@@ -55,6 +61,8 @@ Behavior:
 
 ## 4C — Composer productivity
 
+**COMPLETE + PRODUCTION VERIFIED.**
+
 Implemented:
 
 - Team plus only the signed-in member's Personal replies in the inbox
@@ -74,6 +82,8 @@ Implemented:
 
 ## 4D — Saved reply media
 
+**COMPLETE + PRODUCTION VERIFIED.**
+
 Implemented:
 
 - one optional image, video, document or audio attachment per saved reply
@@ -89,15 +99,15 @@ Implemented:
 - partial audio failure is explicit: if text was sent but media failed, retry sends only the attachment
 - existing Meta media sender reused; no parallel send stack and no paid media service
 
-Required migration:
+Applied migration:
 
 `supabase/migrations/202609010003_whatsapp_saved_reply_media_stage4.sql`
 
-Apply migration `202609010002` first, then `202609010003`, manually in the Supabase SQL editor. Do not run `supabase db push`.
-
 ## Combined Stage 4 production gate
 
-Stage 4 is complete only when all of these pass in production:
+**PASSED IN PRODUCTION.**
+
+Verified:
 
 1. Existing pre-Stage-4 replies remain Team replies.
 2. Owner can create/edit/delete Team replies.
@@ -125,4 +135,18 @@ Stage 4 is complete only when all of these pass in production:
 24. Stage 3 CRM/timeline/import-export/conversation-link functionality has no regression.
 25. No known Stage 4 blocker remains.
 
-Only after all combined Stage 4 checks pass may Stage 5 — WhatsApp Template Manager — unlock.
+## Next stage
+
+**Stage 5 — WhatsApp Template Manager: UNLOCKED.**
+
+Planned gate:
+
+- list/search/filter templates
+- create draft templates with variables, header/body/footer/buttons
+- preview templates before submission
+- submit templates to Meta
+- receive Approved / Pending / Rejected status back from Meta
+- show rejection reason where available
+- duplicate templates
+- send test using an approved template
+- complete the entire flow from Web Growth without requiring Meta's interface for routine template management
