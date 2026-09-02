@@ -30,6 +30,10 @@ function isWhatsAppWorkspacePath(path: string) {
   return path === "/admin/whatsapp" || path.startsWith("/admin/whatsapp/");
 }
 
+function readPassword(value: unknown) {
+  return typeof value === "string" ? value.slice(0, 256) : "";
+}
+
 export async function POST(request: Request) {
   if (!isAllowedOrigin(request, { allowMissingOrigin: false })) {
     return NextResponse.json({ error: "Forbidden origin." }, { status: 403 });
@@ -54,7 +58,7 @@ export async function POST(request: Request) {
   }
 
   const email = sanitizeText(body.email, 254).trim().toLowerCase();
-  const password = sanitizeText(body.password, 256);
+  const password = readPassword(body.password);
   const next = sanitizeGoogleAuthNext(sanitizeText(body.next, 300), "/admin/whatsapp/");
 
   if (!email || !password || !isWhatsAppWorkspacePath(next)) {
