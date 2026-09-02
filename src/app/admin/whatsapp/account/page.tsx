@@ -41,6 +41,18 @@ export default async function WhatsAppAccountSettingsPage() {
             </div>
           </dl>
           <p className="mt-5 rounded-xl bg-paper-sunk p-3 text-xs leading-5 text-ink-faint">You can continue using Google even after creating a workspace password.</p>
+
+          <div className="mt-5 border-t border-rule pt-5">
+            <form action="/api/auth/workspace/logout/" method="post">
+              <button
+                type="submit"
+                className="inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-rose-200 bg-rose-50 px-4 text-sm font-semibold text-rose-700 transition hover:border-rose-300 hover:bg-rose-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-500"
+              >
+                Log out
+              </button>
+            </form>
+            <p className="mt-2 text-center text-[11px] leading-5 text-ink-faint">Ends your Web Growth workspace session and returns you to sign in.</p>
+          </div>
         </section>
 
         <section className="rounded-2xl border border-rule bg-paper-raised p-5 sm:p-6">
