@@ -1,13 +1,23 @@
 /**
  * Server-only Supabase REST access for the WhatsApp console.
  *
- * Reads go through PostgREST with the service-role key, exactly as the rest of the
- * WhatsApp feature does — there is no browser database client and RLS carries no
- * policies, so every read must stay on the server.
- *
- * Count helpers return `null` (not 0) when Supabase is unreachable or unconfigured,
- * so the UI can show "—" instead of claiming a real zero.
+ * Stage 11 makes this the central tenant boundary for ordinary admin reads/writes.
+ * Tenant-owned tables are automatically constrained by the active workspace cookie,
+ * or by an explicit workspaceId for webhook/background jobs. Callers can opt out only
+ * for platform-control-plane work such as workspace administration.
  */
+
+import {
+  applyWhatsAppWorkspaceToBody,
+  getWhatsAppRestTable,
+  isWhatsAppWorkspaceId,
+  scopeWhatsAppRestPath,
+  WHATSAPP_TENANT_TABLES,
+} from "@/lib/whatsapp/workspaceModel";
+import {
+  getDefaultWhatsAppWorkspace,
+  readRequestedWhatsAppWorkspaceIdFromRequest,
+} from "@/lib/whatsapp/workspaces";
 
 export function getWhatsAppSupabaseConfig() {
   const url = process.env.SUPABASE_URL?.trim();
@@ -16,12 +26,28 @@ export function getWhatsAppSupabaseConfig() {
   return { url: url.replace(/\/$/, ""), key };
 }
 
-export async function readWhatsAppRows<T>(pathAndQuery: string): Promise<T[] | null> {
+type WorkspaceDataOptions = {
+  workspaceId?: string | null;
+  /** Platform-control-plane escape hatch. Never use this for client-facing data. */
+  unscoped?: boolean;
+};
+
+async function resolveDataWorkspaceId(options: WorkspaceDataOptions = {}) {
+  if (options.unscoped) return null;
+  if (isWhatsAppWorkspaceId(options.workspaceId)) return options.workspaceId;
+  const requested = await readRequestedWhatsAppWorkspaceIdFromRequest();
+  if (requested) return requested;
+  return (await getDefaultWhatsAppWorkspace())?.id || null;
+}
+
+export async function readWhatsAppRows<T>(pathAndQuery: string, options: WorkspaceDataOptions = {}): Promise<T[] | null> {
   const config = getWhatsAppSupabaseConfig();
   if (!config) return null;
+  const workspaceId = await resolveDataWorkspaceId(options);
+  const scopedPath = options.unscoped ? pathAndQuery : scopeWhatsAppRestPath(pathAndQuery, workspaceId);
 
   try {
-    const response = await fetch(`${config.url}/rest/v1/${pathAndQuery}`, {
+    const response = await fetch(`${config.url}/rest/v1/${scopedPath}`, {
       headers: { apikey: config.key, Authorization: `Bearer ${config.key}` },
       cache: "no-store",
     });
@@ -34,12 +60,14 @@ export async function readWhatsAppRows<T>(pathAndQuery: string): Promise<T[] | n
 }
 
 /** Exact row count via PostgREST's Content-Range header. */
-export async function countWhatsAppRows(pathAndQuery: string): Promise<number | null> {
+export async function countWhatsAppRows(pathAndQuery: string, options: WorkspaceDataOptions = {}): Promise<number | null> {
   const config = getWhatsAppSupabaseConfig();
   if (!config) return null;
+  const workspaceId = await resolveDataWorkspaceId(options);
+  const scopedPath = options.unscoped ? pathAndQuery : scopeWhatsAppRestPath(pathAndQuery, workspaceId);
 
   try {
-    const response = await fetch(`${config.url}/rest/v1/${pathAndQuery}`, {
+    const response = await fetch(`${config.url}/rest/v1/${scopedPath}`, {
       headers: {
         apikey: config.key,
         Authorization: `Bearer ${config.key}`,
@@ -56,7 +84,6 @@ export async function countWhatsAppRows(pathAndQuery: string): Promise<number | 
   }
 }
 
-/** Parses the total out of a `0-24/1234` style Content-Range value. */
 export function parseWhatsAppContentRangeTotal(value: string | null | undefined) {
   if (!value) return null;
   const total = value.split("/")[1];
@@ -67,15 +94,7 @@ export function parseWhatsAppContentRangeTotal(value: string | null | undefined)
 
 export type WhatsAppTableProbe = "ok" | "missing" | "unreachable" | "unconfigured";
 
-/**
- * Reports whether a table exists, so Settings can tell "the migration has not been
- * applied" apart from "the database is unreachable". `readWhatsAppRows` collapses
- * both into `null`, which is right for a page rendering data but useless for a page
- * diagnosing configuration.
- *
- * PostgREST answers an unknown table with 404 and a `PGRST205` (formerly `42P01`)
- * code, so a 404 is read as a missing table rather than a transport failure.
- */
+/** Schema diagnostics are intentionally unscoped; they only test table existence. */
 export async function probeWhatsAppTable(table: string): Promise<WhatsAppTableProbe> {
   const config = getWhatsAppSupabaseConfig();
   if (!config) return "unconfigured";
@@ -107,21 +126,27 @@ export type WhatsAppMutationResult =
   | { ok: false; status: number; code?: string; message: string };
 
 /**
- * Service-role write against PostgREST. Callers are responsible for having already
- * checked admin access and request origin.
+ * Service-role write against PostgREST. The server owns workspace_id: a browser body
+ * can never move a row into another tenant because this function overwrites it.
  */
 export async function mutateWhatsAppRest(input: {
   method: "POST" | "PATCH" | "DELETE";
   pathAndQuery: string;
   body?: unknown;
+  workspaceId?: string | null;
+  unscoped?: boolean;
 }): Promise<WhatsAppMutationResult> {
   const config = getWhatsAppSupabaseConfig();
-  if (!config) {
-    return { ok: false, status: 503, message: "WhatsApp storage is not configured." };
-  }
+  if (!config) return { ok: false, status: 503, message: "WhatsApp storage is not configured." };
+
+  const workspaceId = await resolveDataWorkspaceId({ workspaceId: input.workspaceId, unscoped: input.unscoped });
+  const table = getWhatsAppRestTable(input.pathAndQuery);
+  const tenantOwned = WHATSAPP_TENANT_TABLES.has(table) && !input.unscoped;
+  const scopedPath = tenantOwned ? scopeWhatsAppRestPath(input.pathAndQuery, workspaceId) : input.pathAndQuery;
+  const scopedBody = tenantOwned ? applyWhatsAppWorkspaceToBody(input.body, workspaceId) : input.body;
 
   try {
-    const response = await fetch(`${config.url}/rest/v1/${input.pathAndQuery}`, {
+    const response = await fetch(`${config.url}/rest/v1/${scopedPath}`, {
       method: input.method,
       headers: {
         apikey: config.key,
@@ -129,49 +154,32 @@ export async function mutateWhatsAppRest(input: {
         "Content-Type": "application/json",
         Prefer: "return=representation",
       },
-      body: input.body === undefined ? undefined : JSON.stringify(input.body),
+      body: scopedBody === undefined ? undefined : JSON.stringify(scopedBody),
       cache: "no-store",
     });
 
     const payload = (await response.json().catch(() => null)) as unknown;
-
     if (!response.ok) {
       const error = (payload || {}) as { code?: string; message?: string };
-      console.error("WhatsApp write rejected", {
-        status: response.status,
-        code: error.code,
-        message: error.message,
-      });
-      return {
-        ok: false,
-        status: response.status,
-        code: typeof error.code === "string" ? error.code : undefined,
-        // Postgres error text can name columns and constraints, so it is logged
-        // rather than returned to the browser.
-        message: "The change could not be saved.",
-      };
+      console.error("WhatsApp write rejected", { status: response.status, code: error.code, message: error.message });
+      return { ok: false, status: response.status, code: typeof error.code === "string" ? error.code : undefined, message: "The change could not be saved." };
     }
-
-    return { ok: true, rows: Array.isArray(payload) ? (payload as Array<Record<string, unknown>>) : [] };
+    return { ok: true, rows: Array.isArray(payload) ? payload as Array<Record<string, unknown>> : [] };
   } catch (error) {
     console.error("Unable to write WhatsApp rows", error);
     return { ok: false, status: 502, message: "The change could not be saved." };
   }
 }
 
-/** Postgres unique-violation code, used to report duplicate shortcuts clearly. */
 export const POSTGRES_UNIQUE_VIOLATION = "23505";
 
-
+/** Legacy env-only snapshot retained for non-tenant diagnostics. */
 export function getWhatsAppSenderConfig() {
   const env = process.env;
   return {
     senderConnected: Boolean(env.WHATSAPP_ACCESS_TOKEN?.trim() && env.WHATSAPP_PHONE_NUMBER_ID?.trim()),
-    webhookVerifyConfigured: Boolean(
-      env.WHATSAPP_WEBHOOK_VERIFY_TOKEN?.trim() || env.WHATSAPP_VERIFY_TOKEN?.trim(),
-    ),
+    webhookVerifyConfigured: Boolean(env.WHATSAPP_WEBHOOK_VERIFY_TOKEN?.trim() || env.WHATSAPP_VERIFY_TOKEN?.trim()),
     appSecretConfigured: Boolean(env.META_APP_SECRET?.trim()),
-    graphApiVersion:
-      env.WHATSAPP_API_VERSION?.trim() || env.WHATSAPP_GRAPH_API_VERSION?.trim() || "v26.0",
+    graphApiVersion: env.WHATSAPP_API_VERSION?.trim() || env.WHATSAPP_GRAPH_API_VERSION?.trim() || "v26.0",
   };
 }
