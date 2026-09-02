@@ -43,6 +43,8 @@ test("normalizes persisted team rows safely", () => {
 
   assert.deepEqual(member, {
     id: "member-1",
+    workspaceId: null,
+    userId: null,
     googleEmail: "user@example.com",
     displayName: "User One",
     role: "manager",
