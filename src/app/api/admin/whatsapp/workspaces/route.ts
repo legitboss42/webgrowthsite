@@ -60,19 +60,28 @@ export async function POST(request: Request) {
     const encrypted = token ? encryptWhatsAppWorkspaceAccessToken(token) : null;
     if (token && !encrypted) return NextResponse.json({ error: "Workspace credential encryption is not configured." }, { status: 503 });
     const existing = await readWhatsAppRows<Record<string, unknown>>(`whatsapp_workspace_connections?workspace_id=eq.${workspaceId}&select=workspace_id,credential_source,encrypted_access_token&limit=1`, { unscoped: true });
+    const previous = existing?.[0];
+    const phoneNumberId = text(body.phoneNumberId, 80);
+    const hasUsableCredential = Boolean(
+      token ||
+      previous?.credential_source === "ENV" ||
+      (previous?.credential_source === "ENCRYPTED_DB" && previous?.encrypted_access_token),
+    );
+    const requestedDisabled = body.status === "DISABLED";
+    const status = requestedDisabled ? "DISABLED" : phoneNumberId && hasUsableCredential ? "CONNECTED" : "NOT_CONFIGURED";
     const payload: Record<string, unknown> = {
       workspace_id: workspaceId,
       waba_id: text(body.wabaId, 80) || null,
-      phone_number_id: text(body.phoneNumberId, 80) || null,
+      phone_number_id: phoneNumberId || null,
       display_phone_number: text(body.displayPhoneNumber, 40) || null,
       business_name: text(body.businessName, 120) || null,
       api_version: text(body.apiVersion, 20) || "v26.0",
-      status: body.status === "DISABLED" ? "DISABLED" : text(body.phoneNumberId, 80) ? "CONNECTED" : "NOT_CONFIGURED",
+      status,
       updated_at: new Date().toISOString(),
     };
     if (token) Object.assign(payload, { credential_source: "ENCRYPTED_DB", encrypted_access_token: encrypted, token_last_four: token.slice(-4), connected_at: new Date().toISOString() });
-    else if (!existing?.[0]) Object.assign(payload, { credential_source: "ENCRYPTED_DB", encrypted_access_token: null });
-    const result = existing?.[0]
+    else if (!previous) Object.assign(payload, { credential_source: "ENCRYPTED_DB", encrypted_access_token: null });
+    const result = previous
       ? await mutateWhatsAppRest({ method: "PATCH", pathAndQuery: `whatsapp_workspace_connections?workspace_id=eq.${workspaceId}`, body: payload, unscoped: true })
       : await mutateWhatsAppRest({ method: "POST", pathAndQuery: "whatsapp_workspace_connections", body: payload, unscoped: true });
     return result.ok ? NextResponse.json({ ok: true, connection: result.rows[0] || payload }) : NextResponse.json({ error: result.message }, { status: result.status });
@@ -95,8 +104,6 @@ export async function POST(request: Request) {
     return result.ok ? NextResponse.json({ ok: true }) : NextResponse.json({ error: result.message }, { status: result.status });
   }
 
-  // Keep an explicit config check here because this route is the platform control plane;
-  // a missing service role should be distinguishable from an unsupported action.
   if (!getWhatsAppSupabaseConfig()) return NextResponse.json({ error: "WhatsApp storage is not configured." }, { status: 503 });
   return NextResponse.json({ error: "Unsupported workspace action." }, { status: 400 });
 }
