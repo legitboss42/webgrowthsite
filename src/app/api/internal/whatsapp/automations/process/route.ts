@@ -4,6 +4,7 @@ import {
   processWhatsAppAutomationQueue,
   secureAutomationSecretEqual,
 } from "@/lib/whatsapp/automationRuntime";
+import { closeInactiveWhatsAppConversations } from "@/lib/whatsapp/conversationLifecycle";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -15,5 +16,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid automation processor secret." }, { status: 401 });
   }
   const result = await processWhatsAppAutomationQueue(25);
-  return NextResponse.json({ ok: true, ...result });
+  const conversations = await closeInactiveWhatsAppConversations();
+  return NextResponse.json({ ok: true, ...result, conversations });
 }

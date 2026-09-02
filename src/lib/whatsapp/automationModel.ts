@@ -2,7 +2,7 @@ export const WHATSAPP_AUTOMATION_STATUSES = ["DRAFT", "ACTIVE", "PAUSED"] as con
 export type WhatsAppAutomationStatus = (typeof WHATSAPP_AUTOMATION_STATUSES)[number];
 
 export const WHATSAPP_AUTOMATION_TRIGGER_TYPES = [
-  "NEW_MESSAGE", "KEYWORD", "NEW_CONTACT", "TAG_ADDED", "CRM_STAGE_CHANGED",
+  "NEW_MESSAGE", "KEYWORD", "NEW_CONTACT", "CONVERSATION_OPENED", "TAG_ADDED", "CRM_STAGE_CHANGED",
   "CONVERSATION_ASSIGNED", "MISSED_CALL", "NO_CUSTOMER_REPLY", "NO_AGENT_REPLY",
   "BUSINESS_HOURS", "WEBHOOK",
 ] as const;
@@ -109,6 +109,7 @@ export const WHATSAPP_AUTOMATION_TRIGGER_OPTIONS: Array<{ value: WhatsAppAutomat
   { value: "NEW_MESSAGE", label: "New incoming message", description: "Runs whenever a customer sends a new WhatsApp message." },
   { value: "KEYWORD", label: "Keyword / phrase", description: "Runs when a customer message contains the configured phrase." },
   { value: "NEW_CONTACT", label: "New contact", description: "Runs the first time a contact is created." },
+  { value: "CONVERSATION_OPENED", label: "Conversation opened", description: "Runs once when a closed conversation is opened by a customer message or manually by the team." },
   { value: "TAG_ADDED", label: "Tag added", description: "Runs when a selected CRM tag is newly added." },
   { value: "CRM_STAGE_CHANGED", label: "CRM stage changed", description: "Runs when a contact moves into a selected pipeline stage." },
   { value: "CONVERSATION_ASSIGNED", label: "Conversation assigned", description: "Runs when a conversation is assigned." },

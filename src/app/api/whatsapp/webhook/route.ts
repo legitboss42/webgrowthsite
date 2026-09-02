@@ -4,6 +4,7 @@ import { createSupabaseWhatsAppStore } from "@/lib/whatsapp/store";
 import { loadWhatsAppSettings } from "@/lib/whatsapp/settingsStore";
 import { loadWhatsAppQuickSettings } from "@/lib/whatsapp/quickSettings";
 import { extractWhatsAppCallEvents, storeWhatsAppCallEvents } from "@/lib/whatsapp/callHistory";
+import { ensureWhatsAppConversationOpenedByInbound } from "@/lib/whatsapp/conversationLifecycle";
 import {
   isValidMetaSignature,
   parseWhatsAppWebhook,
@@ -48,17 +49,42 @@ async function dispatchMessageAutomations(message: NormalizedIncomingMessage) {
       if ("failed" in resumed && resumed.failed) return { started: 0, skipped: 0, failed: 1 };
     }
 
+    const session = await ensureWhatsAppConversationOpenedByInbound({
+      waId: message.waId,
+      messageId: message.messageId,
+    });
+
     const contacts = await readWhatsAppRows<Record<string, unknown>>(
       `whatsapp_contacts?wa_id=eq.${encodeURIComponent(message.waId)}&select=id,created_at&limit=1`,
     );
     const contact = contacts?.[0];
-    const contactId = typeof contact?.id === "string" ? contact.id : undefined;
-    const conversations = contactId
-      ? await readWhatsAppRows<Record<string, unknown>>(
-          `whatsapp_conversations?contact_id=eq.${encodeURIComponent(contactId)}&select=id&order=last_message_at.desc&limit=1`,
-        )
-      : [];
-    const conversationId = typeof conversations?.[0]?.id === "string" ? conversations[0].id : undefined;
+    const contactId = session.contactId || (typeof contact?.id === "string" ? contact.id : undefined);
+
+    let conversationId = session.conversationId;
+    if (!conversationId && contactId) {
+      const conversations = await readWhatsAppRows<Record<string, unknown>>(
+        `whatsapp_conversations?contact_id=eq.${encodeURIComponent(contactId)}&select=id&order=last_message_at.desc&limit=1`,
+      );
+      conversationId = typeof conversations?.[0]?.id === "string" ? conversations[0].id : undefined;
+    }
+
+    let openedResult = { started: 0, skipped: 0, failed: 0 };
+    if (session.opened && conversationId) {
+      openedResult = await dispatchWhatsAppAutomationEvent({
+        type: "CONVERSATION_OPENED",
+        eventKey: `conversation-opened:message:${message.messageId}`,
+        contactId,
+        conversationId,
+        waId: message.waId,
+        payload: {
+          origin: "CUSTOMER_MESSAGE",
+          displayName: message.displayName || null,
+          openingMessageId: message.messageId,
+        },
+        message: { id: message.messageId, text: message.text, type: message.type, timestamp: message.timestamp },
+      });
+    }
+
     const messageResult = await dispatchWhatsAppAutomationEvent({
       type: "NEW_MESSAGE",
       eventKey: `message:${message.messageId}`,
@@ -86,7 +112,12 @@ async function dispatchMessageAutomations(message: NormalizedIncomingMessage) {
         payload: { source: "WhatsApp inbound" },
       });
     }
-    return messageResult;
+
+    return {
+      started: openedResult.started + messageResult.started,
+      skipped: openedResult.skipped + messageResult.skipped,
+      failed: openedResult.failed + messageResult.failed,
+    };
   } catch (error) {
     console.error("WhatsApp automation message dispatch failed", error);
     return { started: 0, skipped: 0, failed: 1 };

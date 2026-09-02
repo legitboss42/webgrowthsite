@@ -8,8 +8,8 @@ Last updated: 2026-09-02
 2. Stage rule: build → production test → fix failures → retest → mark 100% → unlock next stage.
 3. Stage 6 was implemented across 6A–6E before its first combined Owner test; subsequent failures/scope gaps are fixed by ChatGPT and retested without advancing Stage 7.
 4. Current stage gates are OWNER ACCOUNT ONLY. Manager/Agent testing is deferred and does not block completion.
-5. Codex is TEST-ONLY. It uses the live production browser and reports PASS/FAIL/N/A + exact observations. It never edits code, commits, deploys, applies migrations, or fixes failures.
-6. Avoid duplicate deployments. Bundle code, tests, migration, docs and checkpoint changes before moving `main`.
+5. Codex is TEST-ONLY unless the user explicitly authorizes live-UI configuration. It never edits source code, commits, deploys or applies migrations.
+6. Avoid duplicate deployments. Bundle code, tests, migrations, docs and checkpoint changes before moving `main`.
 7. WhatsApp migrations are additive Supabase SQL, applied manually in Supabase SQL Editor. Never `supabase db push` and never apply them to Neon/DATABASE_URL.
 8. Whenever a migration is required, paste the FULL SQL in chat.
 9. Keep infrastructure zero-cost/free-tier until revenue.
@@ -23,6 +23,7 @@ Last updated: 2026-09-02
 - Branch: `main`
 - Production: `https://webgrowth.info`
 - WhatsApp console: `/admin/whatsapp/`
+- Conversations: `/admin/whatsapp/conversations/`
 - Automations: `/admin/whatsapp/automations/`
 
 ## Roadmap
@@ -42,16 +43,16 @@ Last updated: 2026-09-02
 
 ## Stage 5 checkpoint
 
-Stage 5 Owner production gate passed: Meta template loading/search/status filtering, draft CRUD/persistence, variables/buttons, real Meta submission/status refresh, visible Meta Template ID, supported duplication, approved test-send, mobile/desktop and Stages 1–4 regression. Rejected-template reason remained N/A because no rejected template existed. Manager/Agent testing remains deferred.
+Stage 5 Owner production gate passed: Meta template loading/search/status filtering, draft CRUD/persistence, variables/buttons, real Meta submission/status refresh, visible Meta Template ID, supported duplication, approved test-send, mobile/desktop and Stages 1–4 regression. Manager/Agent testing remains deferred.
 
 ## Stage 6 — Automation Engine
 
 Current implementation includes:
 - Respond.io-inspired dotted workflow canvas, connectors, zoom and 100-step ceiling
 - Draft / Active / Paused lifecycle and persistent versioned workflows
-- Active workflows read-only until paused; Active Delete removed from the UI and server remains protective
-- Yes/No branches; empty branch paths are valid while building
-- triggers: NEW_MESSAGE, KEYWORD, NEW_CONTACT, TAG_ADDED, CRM_STAGE_CHANGED, CONVERSATION_ASSIGNED, MISSED_CALL, NO_CUSTOMER_REPLY, NO_AGENT_REPLY, BUSINESS_HOURS, WEBHOOK
+- Active workflows read-only until paused; Active Delete absent from UI
+- Yes/No branches; empty branch paths valid while building
+- triggers: NEW_MESSAGE, KEYWORD, NEW_CONTACT, CONVERSATION_OPENED, TAG_ADDED, CRM_STAGE_CHANGED, CONVERSATION_ASSIGNED, MISSED_CALL, NO_CUSTOMER_REPLY, NO_AGENT_REPLY, BUSINESS_HOURS, WEBHOOK
 - AND/OR entry conditions and branch conditions
 - custom CRM paths (`contact.custom.<field>`) and webhook payload paths (`trigger.payload.<path>`)
 - actions: SEND_TEXT, ASK_QUESTION, SEND_TEMPLATE, SEND_SAVED_REPLY, ASSIGN_CONVERSATION, ADD_TAG, REMOVE_TAG, UPDATE_CRM_STAGE, UPDATE_CONTACT_FIELD, ADD_INTERNAL_NOTE, DELAY, CALL_WEBHOOK, BRANCH, STOP
@@ -63,7 +64,7 @@ Current implementation includes:
 
 ### Conversational workflow upgrade
 
-User explicitly required a workflow step that asks contacts questions with selectable options. Stage 6 now includes:
+Stage 6 includes:
 - Ask Question node
 - WhatsApp reply buttons for 2–3 choices
 - WhatsApp list choice for 2–10 choices
@@ -76,6 +77,25 @@ User explicitly required a workflow step that asks contacts questions with selec
 - sequential/chained questions
 - question wait visibility/cancellation in Run History
 
+### Bonus Stage 6 conversation-session lifecycle
+
+This is a bonus enhancement inside Stage 6, not a new roadmap stage.
+
+Conversation sessions now use `open` / `closed` lifecycle semantics:
+- a brand-new customer conversation is considered opened by its first inbound message
+- a customer message to a CLOSED conversation automatically reopens it
+- `CONVERSATION_OPENED` fires once when the session changes from closed to open, or for the first-ever message of a new conversation
+- subsequent messages while the conversation remains open do not create another Conversation Opened event
+- Owner, Manager and a permitted Agent can manually Open chat / Close chat from the Conversations header
+- manual Open chat fires the same `CONVERSATION_OPENED` trigger once
+- inbound and outbound messages continue updating `last_message_at`, which resets inactivity
+- the existing one-minute Stage 6 processor closes open conversations after 4 hours with no inbound or outbound activity
+- closing a conversation cancels its QUEUED/RUNNING/WAITING automation runs and PENDING/PROCESSING/WAITING_INPUT jobs, preventing stale questions/delays from resuming after the session is closed
+- generic NEW_MESSAGE remains available for specialized workflows/backward compatibility, but the Web Growth master intake should use CONVERSATION_OPENED so replies do not restart intake
+- no database migration is required for this bonus because `whatsapp_conversations.status` already stores text and existing `last_message_at` provides the inactivity clock
+
+Important operational rule: if an older test/master workflow is ACTIVE on NEW_MESSAGE while the new CONVERSATION_OPENED master is active, both may run. Pause/remove obsolete NEW_MESSAGE intake workflows before production activation.
+
 ### Stage 6 Owner verification already confirmed
 
 Previous live Owner tests confirmed:
@@ -84,6 +104,7 @@ Previous live Owner tests confirmed:
 - duplicate-name rejection
 - refresh persistence + versioning
 - Draft → Active → Paused
+- active workflow read-only/no Delete
 - visual canvas/zoom/step counts
 - real NEW_MESSAGE execution exactly once
 - real Send Text inside service window
@@ -91,7 +112,7 @@ Previous live Owner tests confirmed:
 - mobile/desktop list/history usability
 - Stages 1–5 regression smoke
 
-Stage 6 remains OPEN because other trigger/action/runtime cases and the conversational upgrade still require production verification.
+Stage 6 remains OPEN because conversational runtime cases, remaining trigger/action cases and this bonus conversation-session lifecycle still require Owner production verification.
 
 ## Stage 6 migrations
 
@@ -101,7 +122,7 @@ Base runtime:
 Conversational questions:
 `supabase/migrations/202609020003_whatsapp_automation_questions_stage6.sql`
 
-The question migration extends `whatsapp_automation_jobs` with `WAITING_INPUT`. Apply manually in Supabase SQL Editor before testing Ask Question.
+The conversation-session bonus requires no additional migration.
 
 ## Applied migrations before Stage 6
 

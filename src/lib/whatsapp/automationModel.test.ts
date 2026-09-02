@@ -29,6 +29,13 @@ test("validates a normal workflow definition", () => {
   assert.equal(result.value.actions.length, 1);
 });
 
+test("conversation-opened trigger needs no extra configuration", () => {
+  const result = validateWhatsAppAutomationInput(base({ triggerType: "CONVERSATION_OPENED", triggerConfig: {} }));
+  assert.equal(result.ok, true);
+  if (!result.ok) return;
+  assert.equal(result.value.triggerType, "CONVERSATION_OPENED");
+});
+
 test("keyword and webhook triggers require useful configuration", () => {
   assert.equal(validateWhatsAppAutomationInput(base({ triggerConfig: {} })).ok, false);
   assert.equal(validateWhatsAppAutomationInput(base({ triggerType: "WEBHOOK", triggerConfig: { key: "tiny" } })).ok, false);
