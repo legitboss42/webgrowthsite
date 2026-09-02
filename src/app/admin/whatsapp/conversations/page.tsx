@@ -44,6 +44,7 @@ export const metadata: Metadata = {
 const filters: WhatsAppLeadFilter[] = ["ALL", "HOT", "WARM", "REVIEW", "PRICING", "MEETING", "PROPOSAL"];
 type MobilePanel = "list" | "thread" | "contact";
 type InboxScope = "all" | "mine" | "unassigned" | "others";
+type LifecycleFilter = "all" | "open" | "closed";
 
 const supervisorScopes: Array<{ value: InboxScope; label: string }> = [
   { value: "all", label: "All" },
@@ -187,6 +188,11 @@ function filterLeadsByScope(leads: WhatsAppLeadRow[], scope: InboxScope, memberI
   return leads;
 }
 
+function filterLeadsByLifecycle(leads: WhatsAppLeadRow[], lifecycle: LifecycleFilter) {
+  if (lifecycle === "all") return leads;
+  return leads.filter((lead) => String(lead.status || "open").toLowerCase() === lifecycle);
+}
+
 function formatDateTime(value: string | undefined) {
   if (!value) return "—";
   return new Date(value).toLocaleString();
@@ -242,6 +248,12 @@ function getTemperatureClasses(temperature: WhatsAppLeadRow["lead_temperature"])
   return "bg-paper-sunk text-ink-faint ring-1 ring-rule";
 }
 
+function getLifecycleClasses(status: string) {
+  return status.toLowerCase() === "closed"
+    ? "border-slate-200 bg-slate-100 text-slate-600"
+    : "border-emerald-200 bg-emerald-50 text-emerald-700";
+}
+
 function getMessageFallbackText(message: WhatsAppLeadMessage) {
   if (message.message_type === "audio") return message.media_voice ? "Voice note" : "Audio message";
   if (message.message_type === "image") return "Image";
@@ -260,28 +272,29 @@ function getMessagePreview(message: WhatsAppLeadMessage | undefined) {
   return `${prefix}${message.message_text || getMessageFallbackText(message)}`;
 }
 
-function buildHref(input: { filter: WhatsAppLeadFilter; scope: InboxScope; leadId?: string; panel?: MobilePanel }) {
+function buildHref(input: { filter: WhatsAppLeadFilter; scope: InboxScope; lifecycle?: LifecycleFilter; leadId?: string; panel?: MobilePanel }) {
   const query = new URLSearchParams();
   if (input.filter !== "ALL") query.set("filter", input.filter);
   if (input.scope !== "all") query.set("scope", input.scope);
+  if (input.lifecycle && input.lifecycle !== "all") query.set("lifecycle", input.lifecycle);
   if (input.leadId) query.set("lead", input.leadId);
   if (input.panel === "contact") query.set("panel", "contact");
   const suffix = query.toString();
   return suffix ? `/admin/whatsapp/conversations/?${suffix}` : "/admin/whatsapp/conversations/";
 }
 
-function getFilterHref(filter: WhatsAppLeadFilter, scope: InboxScope, selectedLeadId?: string) {
-  return buildHref({ filter, scope, leadId: selectedLeadId });
+function getFilterHref(filter: WhatsAppLeadFilter, scope: InboxScope, lifecycle: LifecycleFilter, selectedLeadId?: string) {
+  return buildHref({ filter, scope, lifecycle, leadId: selectedLeadId });
 }
 
-function getLeadHref(filter: WhatsAppLeadFilter, scope: InboxScope, leadId: string) {
-  return buildHref({ filter, scope, leadId });
+function getLeadHref(filter: WhatsAppLeadFilter, scope: InboxScope, lifecycle: LifecycleFilter, leadId: string) {
+  return buildHref({ filter, scope, lifecycle, leadId });
 }
 
 export default async function WhatsAppConversationsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ filter?: string; scope?: string; lead?: string; panel?: string }>;
+  searchParams: Promise<{ filter?: string; scope?: string; lifecycle?: string; lead?: string; panel?: string }>;
 }) {
   const cookieStore = await cookies();
   const access = await getWhatsAppWorkspaceAccess(cookieStore);
@@ -302,6 +315,7 @@ export default async function WhatsAppConversationsPage({
   const scopes = canViewAll ? supervisorScopes : agentScopes;
   const requestedScope = params.scope as InboxScope;
   const scope = scopes.some((item) => item.value === requestedScope) ? requestedScope : canViewAll ? "all" : "mine";
+  const lifecycle: LifecycleFilter = params.lifecycle === "open" || params.lifecycle === "closed" ? params.lifecycle : "all";
 
   const [leadRows, quickReplies, inboxStates, settingsLoad, teamMembers] = await Promise.all([
     getLeads(),
@@ -312,9 +326,10 @@ export default async function WhatsAppConversationsPage({
   ]);
   const settings = settingsLoad.settings;
   const scopedLeadRows = filterLeadsByScope(leadRows, scope, access.memberId);
-  const initialModel = buildWhatsAppDashboardModel({ leads: scopedLeadRows, messages: [], filter, selectedLeadId: params.lead });
+  const lifecycleLeadRows = filterLeadsByLifecycle(scopedLeadRows, lifecycle);
+  const initialModel = buildWhatsAppDashboardModel({ leads: lifecycleLeadRows, messages: [], filter, selectedLeadId: params.lead });
   const selectedMessages = await getConversationMessages(initialModel.selectedLead?.id);
-  const model = buildWhatsAppDashboardModel({ leads: scopedLeadRows, messages: selectedMessages, filter, selectedLeadId: params.lead });
+  const model = buildWhatsAppDashboardModel({ leads: lifecycleLeadRows, messages: selectedMessages, filter, selectedLeadId: params.lead });
 
   const lead = model.selectedLead;
   let composerState: WhatsAppReplyComposerState = buildWhatsAppReplyComposerState({
@@ -329,7 +344,7 @@ export default async function WhatsAppConversationsPage({
   const now = Date.now();
   const mobilePanel: MobilePanel = params.panel === "contact" && lead ? "contact" : params.lead ? "thread" : "list";
   const inboxStateByConversation = new Map(inboxStates.map((state) => [state.conversationId, state]));
-  const scopedConversationIds = new Set(scopedLeadRows.map((item) => item.id));
+  const scopedConversationIds = new Set(lifecycleLeadRows.map((item) => item.id));
   const totalUnread = inboxStates.reduce((sum, state) => sum + (scopedConversationIds.has(state.conversationId) ? state.unreadCount : 0), 0);
   const selectedUnread = lead ? inboxStateByConversation.get(lead.id)?.unreadCount || 0 : 0;
   const memberById = new Map(teamMembers.map((member) => [member.id, member]));
@@ -382,17 +397,30 @@ export default async function WhatsAppConversationsPage({
             <div className="flex w-max gap-1.5 pb-1">
               {scopes.map((item) => {
                 const active = scope === item.value;
-                return <Link key={item.value} href={buildHref({ filter, scope: item.value })} aria-current={active ? "page" : undefined} className={`rounded-full px-2.5 py-1 text-[0.7rem] font-semibold transition ${active ? "bg-ink text-white" : "border border-rule bg-paper-raised text-ink-soft"}`}>{item.label}</Link>;
+                return <Link key={item.value} href={buildHref({ filter, scope: item.value, lifecycle })} aria-current={active ? "page" : undefined} className={`rounded-full px-2.5 py-1 text-[0.7rem] font-semibold transition ${active ? "bg-ink text-white" : "border border-rule bg-paper-raised text-ink-soft"}`}>{item.label}</Link>;
               })}
             </div>
           </nav>
+
+          <form action="/admin/whatsapp/conversations/" method="get" className="mt-2 flex items-end gap-2">
+            {filter !== "ALL" ? <input type="hidden" name="filter" value={filter} /> : null}
+            {scope !== "all" ? <input type="hidden" name="scope" value={scope} /> : null}
+            <label className="min-w-0 flex-1 text-[0.65rem] font-semibold uppercase tracking-[.1em] text-ink-faint">Lifecycle
+              <select name="lifecycle" defaultValue={lifecycle} className="mt-1 w-full rounded-lg border border-rule bg-paper-raised px-2.5 py-1.5 text-xs font-medium normal-case tracking-normal text-ink">
+                <option value="all">All chats</option>
+                <option value="open">Open chats</option>
+                <option value="closed">Closed chats</option>
+              </select>
+            </label>
+            <button type="submit" className="rounded-lg border border-rule bg-paper-raised px-3 py-1.5 text-xs font-semibold text-ledger">Apply</button>
+          </form>
 
           <nav aria-label="Lead filters" className="-mx-4 mt-1.5 overflow-x-auto px-4">
             <div className="flex w-max gap-1.5 pb-1">
               {filters.map((item) => {
                 const active = filter === item;
                 return (
-                  <Link key={item} href={getFilterHref(item, scope, lead?.id)} aria-current={active ? "page" : undefined} className={`inline-flex flex-none items-center gap-1.5 rounded-full px-2.5 py-1 text-[0.7rem] font-medium transition ${active ? "bg-ledger-bright text-white" : "border border-rule bg-paper-raised text-ink-soft hover:border-rule-strong hover:text-ink"}`}>
+                  <Link key={item} href={getFilterHref(item, scope, lifecycle, lead?.id)} aria-current={active ? "page" : undefined} className={`inline-flex flex-none items-center gap-1.5 rounded-full px-2.5 py-1 text-[0.7rem] font-medium transition ${active ? "bg-ledger-bright text-white" : "border border-rule bg-paper-raised text-ink-soft hover:border-rule-strong hover:text-ink"}`}>
                     {item}<span className={`rounded-full px-1 text-[0.625rem] tabular-nums ${active ? "bg-white/20 text-white" : "bg-paper-sunk text-ink-faint"}`}>{model.filterCounts[item]}</span>
                   </Link>
                 );
@@ -409,9 +437,10 @@ export default async function WhatsAppConversationsPage({
             const unread = unreadCount > 0;
             const preview = getMessagePreview(inboxState?.latestMessage);
             const assignee = item.assigned_member_id ? memberById.get(item.assigned_member_id) : null;
+            const lifecycleStatus = String(item.status || "open").toLowerCase() === "closed" ? "CLOSED" : "OPEN";
             return (
               <li key={item.id} className="border-b border-rule">
-                <Link href={getLeadHref(filter, scope, item.id)} aria-current={active ? "true" : undefined} className={`flex gap-3 px-4 py-3 transition ${active ? "bg-ledger-tint" : unread ? "bg-ledger/10 hover:bg-ledger/15" : "hover:bg-paper-sunk/60"}`}>
+                <Link href={getLeadHref(filter, scope, lifecycle, item.id)} aria-current={active ? "true" : undefined} className={`flex gap-3 px-4 py-3 transition ${active ? "bg-ledger-tint" : unread ? "bg-ledger/10 hover:bg-ledger/15" : "hover:bg-paper-sunk/60"}`}>
                   <ContactAvatar identity={{ displayName: item.display_name, businessName: item.business_name, waId: item.wa_id }} />
                   <span className="min-w-0 flex-1">
                     <span className="flex items-center gap-2">
@@ -423,6 +452,7 @@ export default async function WhatsAppConversationsPage({
                       {unread ? <span aria-label={`${unreadCount} unread message${unreadCount === 1 ? "" : "s"}`} className="inline-flex min-w-5 flex-none items-center justify-center rounded-full bg-ledger-bright px-1.5 py-0.5 text-[0.625rem] font-bold tabular-nums text-white">{unreadCount > 99 ? "99+" : unreadCount}</span> : null}
                     </span>
                     <span className="mt-1 flex flex-wrap items-center gap-1">
+                      <span className={`rounded-full border px-1.5 py-0.5 text-[0.6rem] font-bold tracking-wide ${getLifecycleClasses(item.status)}`}>{lifecycleStatus}</span>
                       {item.lead_temperature !== "COLD" ? <span className={`rounded-full px-1.5 py-0.5 text-[0.6rem] font-semibold ${getTemperatureClasses(item.lead_temperature)}`}>{item.lead_temperature}</span> : null}
                       {item.human_review_required ? <span className="rounded-full bg-rose-50 px-1.5 py-0.5 text-[0.6rem] font-semibold text-rose-700">Review</span> : null}
                       {item.intent ? <span className="truncate rounded-full bg-paper-sunk px-1.5 py-0.5 text-[0.6rem] text-ink-faint">{item.intent}</span> : null}
@@ -433,7 +463,7 @@ export default async function WhatsAppConversationsPage({
               </li>
             );
           })}
-          {model.filteredLeads.length === 0 ? <li className="px-4 py-12 text-center text-sm text-ink-faint">No conversations match this view yet.</li> : null}
+          {model.filteredLeads.length === 0 ? <li className="px-4 py-12 text-center text-sm text-ink-faint">No conversations match this lifecycle/filter view.</li> : null}
         </ul>
       </section>
 
@@ -442,12 +472,12 @@ export default async function WhatsAppConversationsPage({
           <OutboundQueueProvider key={lead.id} storedMessageIds={storedMessageIds}>
             <ReplyTargetProvider>
               <div className="flex flex-none items-center gap-3 border-b border-rule bg-paper-raised px-4 py-3">
-                <Link href={getFilterHref(filter, scope)} className="-ml-1 rounded-lg p-1.5 text-ink-soft transition hover:bg-paper-sunk hover:text-ink lg:hidden"><WhatsAppIcon name="chevronLeft" className="h-5 w-5" /><span className="sr-only">Back to conversations</span></Link>
+                <Link href={getFilterHref(filter, scope, lifecycle)} className="-ml-1 rounded-lg p-1.5 text-ink-soft transition hover:bg-paper-sunk hover:text-ink lg:hidden"><WhatsAppIcon name="chevronLeft" className="h-5 w-5" /><span className="sr-only">Back to conversations</span></Link>
                 <ContactAvatar identity={{ displayName: lead.display_name, businessName: lead.business_name, waId: lead.wa_id }} />
-                <div className="min-w-0 flex-1"><h2 className="truncate text-sm font-semibold text-ink">{lead.display_name || "Unknown lead"}</h2><p className="truncate font-mono text-[0.7rem] text-ink-faint">{lead.wa_id}</p></div>
+                <div className="min-w-0 flex-1"><div className="flex min-w-0 items-center gap-2"><h2 className="truncate text-sm font-semibold text-ink">{lead.display_name || "Unknown lead"}</h2><span className={`flex-none rounded-full border px-1.5 py-0.5 text-[0.6rem] font-bold tracking-wide ${getLifecycleClasses(lead.status)}`}>{String(lead.status || "open").toLowerCase() === "closed" ? "CLOSED" : "OPEN"}</span></div><p className="truncate font-mono text-[0.7rem] text-ink-faint">{lead.wa_id}</p></div>
                 <ConversationAssignment conversationId={lead.id} assignedMemberId={lead.assigned_member_id} viewerMemberId={access.memberId} viewerRole={access.role} members={teamMembers} />
                 <span className={`hidden flex-none rounded-full px-2.5 py-1 text-xs font-medium sm:inline-flex ${getTemperatureClasses(lead.lead_temperature)}`}>{lead.lead_temperature}</span>
-                <Link href={buildHref({ filter, scope, leadId: lead.id, panel: "contact" })} className="rounded-lg border border-rule px-2.5 py-1.5 text-xs font-medium text-ink-soft transition hover:border-ledger hover:text-ledger lg:hidden">Details</Link>
+                <Link href={buildHref({ filter, scope, lifecycle, leadId: lead.id, panel: "contact" })} className="rounded-lg border border-rule px-2.5 py-1.5 text-xs font-medium text-ink-soft transition hover:border-ledger hover:text-ledger lg:hidden">Details</Link>
               </div>
 
               <div className="min-h-0 flex-1 space-y-2.5 overflow-y-auto bg-paper bg-[radial-gradient(circle_at_1px_1px,rgba(18,74,56,.06)_1px,transparent_0)] bg-[length:24px_24px] px-4 py-4">
@@ -476,7 +506,7 @@ export default async function WhatsAppConversationsPage({
           </OutboundQueueProvider>
         ) : (
           <div className="flex min-h-0 flex-1 items-center justify-center px-6 py-16">
-            <div className="max-w-sm text-center"><span className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-paper-sunk text-ink-faint"><WhatsAppIcon name="conversations" className="h-6 w-6" /></span><p className="mt-3 text-sm font-medium text-ink">No conversation selected</p><p className="mt-1 text-xs text-ink-faint">{model.filterCounts.ALL === 0 ? "No conversations are available in this view." : "Pick a conversation from the list to read the thread and reply."}</p></div>
+            <div className="max-w-sm text-center"><span className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-paper-sunk text-ink-faint"><WhatsAppIcon name="conversations" className="h-6 w-6" /></span><p className="mt-3 text-sm font-medium text-ink">No conversation selected</p><p className="mt-1 text-xs text-ink-faint">{model.filterCounts.ALL === 0 ? "No conversations are available in this lifecycle view." : "Pick a conversation from the list to read the thread and reply."}</p></div>
           </div>
         )}
       </section>
@@ -484,13 +514,14 @@ export default async function WhatsAppConversationsPage({
       <aside className={`min-h-0 w-full flex-col overflow-y-auto lg:flex lg:w-72 lg:flex-none lg:border-l lg:border-rule xl:w-80 ${mobilePanel === "contact" ? "flex" : "hidden"}`}>
         {lead ? (
           <div className="px-4 py-4">
-            <div className="flex items-center gap-2 lg:hidden"><Link href={getLeadHref(filter, scope, lead.id)} className="-ml-1 rounded-lg p-1.5 text-ink-soft transition hover:bg-paper-sunk hover:text-ink"><WhatsAppIcon name="chevronLeft" className="h-5 w-5" /><span className="sr-only">Back to conversation</span></Link><span className="text-sm font-semibold text-ink">Contact details</span></div>
+            <div className="flex items-center gap-2 lg:hidden"><Link href={getLeadHref(filter, scope, lifecycle, lead.id)} className="-ml-1 rounded-lg p-1.5 text-ink-soft transition hover:bg-paper-sunk hover:text-ink"><WhatsAppIcon name="chevronLeft" className="h-5 w-5" /><span className="sr-only">Back to conversation</span></Link><span className="text-sm font-semibold text-ink">Contact details</span></div>
             <p className="hidden text-[0.65rem] font-semibold uppercase tracking-[.16em] text-ink-faint lg:block">Contact details</p>
             <div className="mt-4 text-center">
               <ContactAvatar identity={{ displayName: lead.display_name, businessName: lead.business_name, waId: lead.wa_id }} size="lg" labelled className="mx-auto" />
               <p className="mt-2.5 text-sm font-semibold text-ink">{lead.display_name || "Unknown lead"}</p>
               <p className="font-mono text-xs text-ink-faint">{lead.phone || lead.wa_id}</p>
-              {lead.lead_temperature !== "COLD" ? <span className={`mt-2 inline-flex rounded-full px-2.5 py-1 text-[0.65rem] font-semibold ${getTemperatureClasses(lead.lead_temperature)}`}>{lead.lead_temperature} LEAD</span> : null}
+              <span className={`mt-2 inline-flex rounded-full border px-2.5 py-1 text-[0.65rem] font-bold tracking-wide ${getLifecycleClasses(lead.status)}`}>{String(lead.status || "open").toLowerCase() === "closed" ? "CLOSED" : "OPEN"}</span>
+              {lead.lead_temperature !== "COLD" ? <span className={`ml-1 mt-2 inline-flex rounded-full px-2.5 py-1 text-[0.65rem] font-semibold ${getTemperatureClasses(lead.lead_temperature)}`}>{lead.lead_temperature} LEAD</span> : null}
             </div>
             {lead.website ? <a href={lead.website} target="_blank" rel="noreferrer" className="mt-4 block truncate rounded-lg border border-rule bg-paper px-3 py-2 text-center text-xs text-ledger underline decoration-ledger/30 underline-offset-4 hover:border-ledger">{lead.website}</a> : null}
             <dl className="mt-4">
