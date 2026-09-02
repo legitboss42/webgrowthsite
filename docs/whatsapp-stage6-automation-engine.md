@@ -1,23 +1,37 @@
 # WhatsApp Stage 6 — Automation Engine
 
-Status: **FULL CODE READY; FINAL MIGRATION + COMBINED OWNER PRODUCTION GATE PENDING**
+Status: **OPEN — conversational workflow upgrade implemented; migration + Owner production retest pending**
 
-Stage 5 is complete and production verified. Per project rule, Stage 6A–6E are implemented as one stage and are tested together once.
+Stage 5 is complete and production verified. Stage 6 remains the current roadmap stage and Stage 7 stays locked until the complete Owner production gate passes.
 
-## Implemented
+## Implemented workflow platform
 
-### Visual workflow builder
+### Visual builder
 - `/admin/whatsapp/automations/`
 - Respond.io-inspired dotted workflow canvas
-- connected Trigger → Conditions → Actions view
-- Yes/No branch paths
-- zoom controls and 100 total workflow-step ceiling
+- Trigger → Conditions → Actions flow
+- Yes/No branches, including valid empty paths while a workflow is still being built
+- zoom controls and 100-step ceiling
 - right-side properties inspector
-- Draft / Active / Paused states
-- active workflows are read-only until paused
+- Draft / Active / Paused lifecycle
+- Active workflows are read-only until paused and do not expose Delete
 - create, edit, duplicate, activate, pause and delete
 - persisted workflow versions
-- Team Saved Reply, approved template and team-member selectors
+
+### Conversational questions
+- `Ask a question` is a first-class workflow step
+- WhatsApp reply buttons for 2–3 choices
+- WhatsApp choice lists for 2–10 choices
+- question step pauses the run in `WAITING` / `WAITING_INPUT`
+- inbound Meta `button_reply` and `list_reply` messages are parsed and used to resume the waiting run
+- selected title becomes `{{answer}}`
+- selected option ID becomes `{{answer_id}}`
+- optional automatic answer storage to a built-in contact field or `custom.<field>`
+- Branch conditions can use the `answer` field immediately after a question
+- questions can be chained because resumption continues the remaining workflow plan
+- Run History describes input waits as `Waiting for customer choice`
+- cancelling a WAITING run also cancels its `WAITING_INPUT` job
+- interactive questions obey Meta's 24-hour customer-service window
 
 ### Triggers
 - New incoming message
@@ -30,106 +44,110 @@ Stage 5 is complete and production verified. Per project rule, Stage 6A–6E are
 - No customer reply
 - No agent reply
 - Business-hours opened / closed
-- Public inbound automation webhook using an unguessable workflow key
+- inbound automation webhook
 
-### Conditions / branches
+### Conditions
 - AND / OR entry conditions
+- answer from the latest workflow question
 - message text/type
 - contact tags, CRM stage, phone, email, company, consent
 - conversation assignment/status
 - business-hours state
-- `contact.custom.<field>` values
-- `trigger.payload.<path>` values
+- `contact.custom.<field>`
+- `trigger.payload.<path>`
 - EQUALS / NOT_EQUALS / CONTAINS / NOT_CONTAINS / STARTS_WITH / GREATER_THAN / LESS_THAN / EXISTS / NOT_EXISTS
-- nested Yes/No branch actions
 
 ### Actions
-- Send free-form WhatsApp text inside the 24-hour service window
-- Send an approved Meta template by name/language
-- Send a Team Saved Reply, including its saved image/video/document/audio attachment
-- Assign conversation to an Online team member
+- Send text
+- Ask a question
+- Send approved Meta template
+- Send Team Saved Reply, including saved media
+- Assign conversation
 - Add/remove tags
 - Change CRM stage
-- Update built-in or `custom.<field>` contact values
+- Update built-in/custom contact field
 - Add internal note
-- Persisted delay in minutes/hours/days
-- POST workflow context to an external HTTPS webhook
+- durable delay
+- HTTPS webhook
 - Branch
 - Stop workflow
 
 ### Runtime / safety
-- Meta webhook dispatch for New Message / Keyword / New Contact
-- missed-call dispatch from the Calling webhook
-- CRM contact route dispatch for manual New Contact / Tag Added / CRM Stage Changed
-- assignment route dispatch for Conversation Assigned
-- one-minute Supabase `pg_cron` + `pg_net` processor for delayed jobs, no-reply triggers and business-hours transitions
-- persistent run/job/event records
-- unique automation + source-event dedupe
-- direct tag/stage self-loop validation
-- cross-workflow ancestry/depth protection
-- free-form and Saved Reply sends obey Meta's 24-hour service window
-- failed actions persist exact operator-facing errors
-- delayed jobs retry up to five times with backoff
+- persistent runs/jobs/events
+- source-event dedupe
+- direct/self and ancestry/depth loop protection
+- service-window enforcement
+- delayed-job retries/backoff
+- one-minute Supabase `pg_cron` + `pg_net` processor for timed work
+- run history, step events, exact errors and cancellation
+- automation activity written to the existing contact timeline
 
-### History / observability
-- Queued / Running / Waiting / Succeeded / Failed / Skipped / Cancelled runs
-- step events and branch results
-- waiting-job due time and errors
-- run inspection endpoint
-- waiting-run cancellation
-- automation start/completion/failure entries in the existing contact timeline
+## Migrations
 
-## Migration
-
+Base Stage 6 runtime migration:
 `supabase/migrations/202609020002_whatsapp_automation_foundation_stage6.sql`
 
-The filename is retained from the original Stage 6A foundation, but it now contains the complete idempotent Stage 6 schema and one-minute processor schedule. Re-running it is safe if the earlier 6A portion was already applied.
+Conversational-question migration:
+`supabase/migrations/202609020003_whatsapp_automation_questions_stage6.sql`
 
-Apply manually in **Supabase SQL Editor only**. Never use `supabase db push`, never apply it to Neon/DATABASE_URL, and never touch TikTok migrations.
+Apply migrations manually in **Supabase SQL Editor only**. Never use `supabase db push`, never apply WhatsApp migrations to Neon/DATABASE_URL, and never touch TikTok migrations.
 
-## Combined Owner production gate
+## Latest Owner verification retained as passing
 
-1. Automations page loads and workflow search/status filtering works.
-2. Owner creates, edits, duplicates and deletes Draft/Paused workflows.
-3. Duplicate workflow names are rejected.
-4. Workflow survives refresh and version increments after edits.
+The previous Owner run confirmed workflow persistence/search/filtering, CRUD, duplicate-name rejection, versioning, Draft → Active → Paused, visual canvas/zoom/step counts, real New Message execution, Send Text inside the service window, base Run History rendering, mobile/desktop list/history layout, and Stages 1–5 smoke regression.
+
+Those passes remain useful evidence; Stage 6 is nevertheless OPEN because the conversational upgrade and remaining unverified trigger/action/runtime cases still require production verification.
+
+## Final Owner production gate
+
+1. Workflow search/status filtering works against persisted workflows.
+2. Owner can create/edit/duplicate/delete Draft/Paused workflows.
+3. Duplicate names are rejected.
+4. Refresh persistence and version increments work.
 5. Draft → Active → Paused persists.
-6. Active workflow is view-only and cannot be edited/deleted until paused.
-7. Dotted canvas, connectors, zoom and 100-step counter work.
-8. Yes/No branch can be built and both paths persist.
-9. New-message trigger runs once for a real inbound message.
-10. Keyword trigger runs only on matching text.
-11. New-contact trigger runs for a newly created contact.
-12. Tag-added trigger runs after a new tag is added.
-13. CRM-stage-changed trigger runs after a real pipeline change.
-14. Conversation-assigned trigger runs after assignment.
-15. Missed-call trigger runs for an unanswered inbound WhatsApp call.
-16. No-customer-reply trigger runs after its configured period.
-17. No-agent-reply trigger runs after its configured period.
-18. Business-hours Opened/Closed follows WhatsApp Settings.
-19. Inbound workflow webhook runs for the correct key and an unknown key does not trigger a workflow.
-20. AND entry conditions require every rule; OR allows any matching rule.
-21. Custom CRM-field and webhook-payload conditions work.
-22. Yes branch executes when its condition passes.
-23. No branch executes when its condition fails.
-24. Send Text works inside the service window.
-25. Send Text is blocked outside the service window rather than violating Meta policy.
-26. Approved template action sends successfully.
-27. Team Saved Reply action sends; a Saved Reply with media sends its attachment.
-28. Assignment action assigns to an Online member.
-29. Add/remove tag actions persist correctly.
-30. CRM-stage action moves the contact correctly.
-31. Built-in/custom contact-field action persists.
-32. Internal-note action appears in the conversation/contact timeline.
-33. Delay creates a Waiting run and resumes after its due time after page refresh.
-34. External HTTPS webhook action works and HTTP/error failures are visible in history.
-35. Stop prevents later actions from running.
-36. Replayed Meta/source event does not create duplicate runs/messages.
-37. Automation-created tag/stage/assignment changes do not loop infinitely.
-38. Run History shows status, trigger, waiting time and exact failure text; Inspect shows step events.
-39. Waiting run can be cancelled and does not resume.
-40. Automation start/completion/failure appears in the contact timeline.
-41. Builder/list/history are usable on mobile and desktop without page-level horizontal overflow.
-42. Stages 1–5 regression smoke check passes.
+6. Active workflow is read-only and Delete is absent until paused.
+7. Canvas/connectors/zoom/100-step counter work.
+8. Yes/No branch can be saved with empty paths, then populated and persisted.
+9. Ask Question with 2–3 reply buttons persists and sends real WhatsApp buttons.
+10. Selecting a reply button resumes the exact waiting workflow and records the answer.
+11. `{{answer}}` and `{{answer_id}}` resolve after selection.
+12. Optional question answer storage persists to `custom.<field>` or a supported built-in field.
+13. Branch on `answer` executes the correct Yes/No path.
+14. Ask Question List mode persists and sends 2–10 selectable list rows.
+15. Selecting a list row resumes the workflow.
+16. Two question steps can run sequentially in one workflow.
+17. Question waits appear in Run History as waiting for customer choice and Inspect records question sent/answered events.
+18. Cancelling a question WAITING run prevents later resumption.
+19. New-message trigger runs once for a real inbound message.
+20. Keyword trigger runs only on matching text.
+21. New-contact trigger works.
+22. Tag-added trigger works.
+23. CRM-stage-changed trigger works.
+24. Conversation-assigned trigger works.
+25. Missed-call trigger works when an unanswered inbound WhatsApp call is available; N/A is acceptable when no such live call can be produced.
+26. No-customer-reply trigger works.
+27. No-agent-reply trigger works.
+28. Business-hours Opened/Closed follows Settings.
+29. Inbound webhook correct key runs; unknown key does not.
+30. AND/OR conditions work.
+31. Custom CRM-field and webhook-payload conditions work.
+32. Send Text works inside the service window.
+33. Send Text is blocked outside the service window.
+34. Approved-template action sends.
+35. Team Saved Reply text/media actions send.
+36. Assignment action assigns to an Online member.
+37. Add/remove tag actions persist.
+38. CRM-stage action persists.
+39. Built-in/custom contact-field updates persist.
+40. Internal-note action appears in timeline.
+41. Delay produces WAITING and resumes after due time across refresh.
+42. HTTPS webhook success/error results are visible in history.
+43. Stop prevents later actions.
+44. Replayed source event does not duplicate runs/messages.
+45. Automation-created tag/stage/assignment changes do not loop.
+46. Run History/Inspect show statuses, waits, steps and exact failures; waiting runs can be cancelled.
+47. Automation start/completion/failure appears in contact timeline.
+48. Builder/list/history remain usable on mobile and desktop without page-level horizontal overflow.
+49. Stages 1–5 regression smoke check passes.
 
 Manager and Agent role testing remains deliberately deferred by the Owner-only testing rule and does not block Stage 6 completion.

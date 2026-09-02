@@ -7,8 +7,10 @@ import {
   type WhatsAppAutomation,
   type WhatsAppAutomationAction,
   type WhatsAppAutomationCondition,
+  type WhatsAppAutomationQuestionOption,
   type WhatsAppAutomationTriggerType,
 } from "./automationModel";
+import { sendWhatsAppInteractiveQuestion } from "./interactiveQuestion";
 import { sendWhatsAppMedia, sendWhatsAppText } from "./send";
 import { downloadWhatsAppSavedReplyMedia } from "./savedReplyMedia";
 import { createSupabaseWhatsAppStore } from "./store";
@@ -53,6 +55,8 @@ export type WhatsAppAutomationRuntimeContext = {
   businessHours: "OPEN" | "CLOSED" | "UNKNOWN";
   ancestry: string[];
   depth: number;
+  answer?: string;
+  answerId?: string;
 };
 
 type ExecutionResult = { status: "SUCCEEDED" | "WAITING" | "STOPPED" | "FAILED"; error?: string };
@@ -69,11 +73,10 @@ function seconds(unit: string | undefined, amount: number | undefined) {
   const multiplier = unit === "DAYS" ? 86400 : unit === "HOURS" ? 3600 : 60;
   return Math.max(1, Number(amount) || 1) * multiplier;
 }
+function sameWaId(left: string, right: string) { return left.replace(/^\+/, "") === right.replace(/^\+/, ""); }
 
 export function createWhatsAppAutomationEventId() { return randomUUID(); }
-export function hashWhatsAppAutomationPayload(value: unknown) {
-  return createHash("sha256").update(JSON.stringify(value ?? null)).digest("hex");
-}
+export function hashWhatsAppAutomationPayload(value: unknown) { return createHash("sha256").update(JSON.stringify(value ?? null)).digest("hex"); }
 export function secureAutomationSecretEqual(left: string, right: string) {
   if (!left || !right) return false;
   const a = Buffer.from(left); const b = Buffer.from(right);
@@ -81,9 +84,7 @@ export function secureAutomationSecretEqual(left: string, right: string) {
 }
 
 export async function getWhatsAppAutomationProcessorSecret() {
-  const rows = await readWhatsAppRows<Record<string, unknown>>(
-    "whatsapp_automation_runtime_config?id=eq.default&select=processor_secret&limit=1",
-  );
+  const rows = await readWhatsAppRows<Record<string, unknown>>("whatsapp_automation_runtime_config?id=eq.default&select=processor_secret&limit=1");
   return text(rows?.[0]?.processor_secret);
 }
 
@@ -94,6 +95,7 @@ function findCustom(fields: Record<string, string>, wanted: string) {
 }
 
 function fieldValue(field: string, ctx: WhatsAppAutomationRuntimeContext): unknown {
+  if (field === "answer") return ctx.answer || "";
   if (field === "message.text") return ctx.message?.text || "";
   if (field === "message.type") return ctx.message?.type || "";
   if (field === "contact.tags") return ctx.contact?.tags || [];
@@ -140,6 +142,8 @@ function entryConditionsMatch(automation: WhatsAppAutomation, ctx: WhatsAppAutom
 function variableValue(key: string, ctx: WhatsAppAutomationRuntimeContext) {
   const name = key.trim().toLowerCase();
   const fullName = ctx.contact?.displayName || "";
+  if (name === "answer") return ctx.answer || "";
+  if (name === "answer_id") return ctx.answerId || "";
   if (name === "first_name") return fullName.split(/\s+/)[0] || "";
   if (name === "full_name") return fullName;
   if (name === "company") return ctx.contact?.company || "";
@@ -156,9 +160,7 @@ export function resolveWhatsAppAutomationText(input: string, ctx: WhatsAppAutoma
 }
 
 async function loadMessage(conversationId: string, direction: "inbound" | "outbound") {
-  const rows = await readWhatsAppRows<Record<string, unknown>>(
-    `whatsapp_messages?conversation_id=eq.${encodeURIComponent(conversationId)}&direction=eq.${direction}&select=whatsapp_message_id,message_text,message_type,message_timestamp&order=message_timestamp.desc&limit=1`,
-  );
+  const rows = await readWhatsAppRows<Record<string, unknown>>(`whatsapp_messages?conversation_id=eq.${encodeURIComponent(conversationId)}&direction=eq.${direction}&select=whatsapp_message_id,message_text,message_type,message_timestamp&order=message_timestamp.desc&limit=1`);
   const row = rows?.[0]; if (!row) return null;
   const at = Date.parse(text(row.message_timestamp));
   return { id: text(row.whatsapp_message_id), text: text(row.message_text) || undefined, type: text(row.message_type) || undefined, timestamp: Number.isFinite(at) ? Math.floor(at / 1000) : 0 } satisfies RuntimeMessage;
@@ -168,27 +170,19 @@ async function loadContext(event: WhatsAppAutomationEvent): Promise<WhatsAppAuto
   let contactRow: Record<string, unknown> | undefined;
   let conversationRow: Record<string, unknown> | undefined;
   if (event.conversationId) {
-    const rows = await readWhatsAppRows<Record<string, unknown>>(
-      `whatsapp_conversations?id=eq.${encodeURIComponent(event.conversationId)}&select=id,contact_id,status,assigned_member_id,last_message_at&limit=1`,
-    );
+    const rows = await readWhatsAppRows<Record<string, unknown>>(`whatsapp_conversations?id=eq.${encodeURIComponent(event.conversationId)}&select=id,contact_id,status,assigned_member_id,last_message_at&limit=1`);
     conversationRow = rows?.[0];
   }
   const contactId = event.contactId || text(conversationRow?.contact_id);
   if (contactId) {
-    const rows = await readWhatsAppRows<Record<string, unknown>>(
-      `whatsapp_contacts?id=eq.${encodeURIComponent(contactId)}&select=id,wa_id,phone,display_name,business_name,email,lead_stage,tags,custom_fields,opt_in_status&limit=1`,
-    );
+    const rows = await readWhatsAppRows<Record<string, unknown>>(`whatsapp_contacts?id=eq.${encodeURIComponent(contactId)}&select=id,wa_id,phone,display_name,business_name,email,lead_stage,tags,custom_fields,opt_in_status&limit=1`);
     contactRow = rows?.[0];
   } else if (event.waId) {
-    const rows = await readWhatsAppRows<Record<string, unknown>>(
-      `whatsapp_contacts?wa_id=eq.${encodeURIComponent(event.waId.replace(/^\+/, ""))}&select=id,wa_id,phone,display_name,business_name,email,lead_stage,tags,custom_fields,opt_in_status&limit=1`,
-    );
+    const rows = await readWhatsAppRows<Record<string, unknown>>(`whatsapp_contacts?wa_id=eq.${encodeURIComponent(event.waId.replace(/^\+/, ""))}&select=id,wa_id,phone,display_name,business_name,email,lead_stage,tags,custom_fields,opt_in_status&limit=1`);
     contactRow = rows?.[0];
   }
   if (!conversationRow && contactRow?.id) {
-    const rows = await readWhatsAppRows<Record<string, unknown>>(
-      `whatsapp_conversations?contact_id=eq.${encodeURIComponent(String(contactRow.id))}&select=id,contact_id,status,assigned_member_id,last_message_at&order=last_message_at.desc&limit=1`,
-    );
+    const rows = await readWhatsAppRows<Record<string, unknown>>(`whatsapp_conversations?contact_id=eq.${encodeURIComponent(String(contactRow.id))}&select=id,contact_id,status,assigned_member_id,last_message_at&order=last_message_at.desc&limit=1`);
     conversationRow = rows?.[0];
   }
   const contact: RuntimeContact | null = contactRow ? {
@@ -213,7 +207,7 @@ async function loadContext(event: WhatsAppAutomationEvent): Promise<WhatsAppAuto
   return {
     trigger: { type: event.type, value: event.triggerValue, payload: event.payload || {} }, contact, conversation, message,
     latestInbound, latestOutbound, businessHours: open === null ? "UNKNOWN" : open ? "OPEN" : "CLOSED",
-    ancestry: event.ancestry || [], depth: event.depth || 0,
+    ancestry: event.ancestry || [], depth: event.depth || 0, answer: "", answerId: "",
   };
 }
 
@@ -255,15 +249,27 @@ async function patchContact(ctx: WhatsAppAutomationRuntimeContext, patch: Record
   await activity(ctx, "contact_updated", { fields: Object.keys(patch), automationId: automation.id, automationName: automation.name });
 }
 
+async function updateContactField(ctx: WhatsAppAutomationRuntimeContext, key: string, value: string, automation: WhatsAppAutomation) {
+  if (!ctx.contact) throw new Error("Contact-field actions need a contact.");
+  if (key.startsWith("custom.")) {
+    const field = key.slice(7); const next = { ...ctx.contact.customFields, [field]: value };
+    await patchContact(ctx, { custom_fields: next }, automation); ctx.contact.customFields = next; return;
+  }
+  const map: Record<string, string> = { email: "email", phone: "phone", company: "business_name", display_name: "display_name", opt_in_status: "opt_in_status" };
+  const column = map[key]; if (!column) throw new Error("Use email, phone, company, display_name, opt_in_status, or custom.<field>.");
+  await patchContact(ctx, { [column]: value }, automation);
+  if (key === "email") ctx.contact.email = value;
+  if (key === "phone") ctx.contact.phone = value;
+  if (key === "company") ctx.contact.company = value;
+  if (key === "display_name") ctx.contact.displayName = value;
+  if (key === "opt_in_status") ctx.contact.optInStatus = value;
+}
+
 async function recordOutbound(ctx: WhatsAppAutomationRuntimeContext, input: { id: string; text?: string; type?: string; mediaId?: string; mediaMimeType?: string; mediaFilename?: string }) {
   if (!ctx.contact) return;
   const config = getWhatsAppSupabaseConfig(); if (!config) return;
   const store = createSupabaseWhatsAppStore({ url: config.url, serviceRoleKey: config.key });
-  await store.recordOutbound({
-    messageId: input.id, waId: ctx.contact.waId, conversationId: ctx.conversation?.id, text: input.text,
-    type: input.type || "text", timestamp: Math.floor(Date.now() / 1000), mediaId: input.mediaId,
-    mediaMimeType: input.mediaMimeType, mediaFilename: input.mediaFilename,
-  });
+  await store.recordOutbound({ messageId: input.id, waId: ctx.contact.waId, conversationId: ctx.conversation?.id, text: input.text, type: input.type || "text", timestamp: Math.floor(Date.now() / 1000), mediaId: input.mediaId, mediaMimeType: input.mediaMimeType, mediaFilename: input.mediaFilename });
 }
 
 async function executeSingle(action: WhatsAppAutomationAction, automation: WhatsAppAutomation, runId: string, ctx: WhatsAppAutomationRuntimeContext, actionIndex: number): Promise<ExecutionResult | null> {
@@ -290,17 +296,10 @@ async function executeSingle(action: WhatsAppAutomationAction, automation: Whats
     const rows = await readWhatsAppRows<Record<string, unknown>>(`whatsapp_quick_replies?scope=eq.TEAM&shortcut=eq.${encodeURIComponent(shortcut)}&select=*&limit=1`);
     if (!rows?.[0]) throw new Error("That Team Saved Reply was not found.");
     const reply = normalizeWhatsAppQuickReplyRow(rows[0]);
-    const resolved = resolveWhatsAppQuickReplyVariables(reply.body, {
-      fullName: ctx.contact.displayName, company: ctx.contact.company, phone: ctx.contact.phone || ctx.contact.waId,
-      email: ctx.contact.email, agentName: "Web Growth Automation", customFields: ctx.contact.customFields,
-    });
+    const resolved = resolveWhatsAppQuickReplyVariables(reply.body, { fullName: ctx.contact.displayName, company: ctx.contact.company, phone: ctx.contact.phone || ctx.contact.waId, email: ctx.contact.email, agentName: "Web Growth Automation", customFields: ctx.contact.customFields });
     if (reply.media_kind && reply.media_path && reply.media_mime_type) {
-      const loaded = await downloadWhatsAppSavedReplyMedia(reply.media_path);
-      if (!loaded.ok) throw new Error(loaded.error);
-      const sent = await sendWhatsAppMedia({
-        to: ctx.contact.waId, kind: reply.media_kind, file: loaded.blob, filename: reply.media_filename || "attachment",
-        mimeType: reply.media_mime_type, caption: resolved.text, customerMessageTimestamp: ctx.latestInbound.timestamp,
-      });
+      const loaded = await downloadWhatsAppSavedReplyMedia(reply.media_path); if (!loaded.ok) throw new Error(loaded.error);
+      const sent = await sendWhatsAppMedia({ to: ctx.contact.waId, kind: reply.media_kind, file: loaded.blob, filename: reply.media_filename || "attachment", mimeType: reply.media_mime_type, caption: resolved.text, customerMessageTimestamp: ctx.latestInbound.timestamp });
       if (!sent.sent) throw new Error(`Saved Reply media send failed: ${sent.reason}`);
       await recordOutbound(ctx, { id: sent.messageId, text: resolved.text, type: reply.media_kind, mediaId: sent.mediaId, mediaMimeType: reply.media_mime_type, mediaFilename: reply.media_filename });
     } else {
@@ -330,16 +329,7 @@ async function executeSingle(action: WhatsAppAutomationAction, automation: Whats
     await patchContact(ctx, { lead_stage: stage }, automation); ctx.contact.leadStage = stage;
     if (stage !== previous) await dispatchWhatsAppAutomationEvent({ type: "CRM_STAGE_CHANGED", eventKey: `automation:${runId}:stage:${stage}`, triggerValue: stage, contactId: ctx.contact.id, conversationId: ctx.conversation?.id, ancestry: [...ctx.ancestry, automation.id], depth: ctx.depth + 1 });
   } else if (action.type === "UPDATE_CONTACT_FIELD") {
-    if (!ctx.contact) throw new Error("Contact-field actions need a contact.");
-    const key = action.value || ""; const value = resolveWhatsAppAutomationText(action.value2 || "", ctx);
-    if (key.startsWith("custom.")) {
-      const field = key.slice(7); const next = { ...ctx.contact.customFields, [field]: value };
-      await patchContact(ctx, { custom_fields: next }, automation); ctx.contact.customFields = next;
-    } else {
-      const map: Record<string, string> = { email: "email", phone: "phone", company: "business_name", display_name: "display_name", opt_in_status: "opt_in_status" };
-      const column = map[key]; if (!column) throw new Error("Use email, phone, company, display_name, opt_in_status, or custom.<field>.");
-      await patchContact(ctx, { [column]: value }, automation);
-    }
+    await updateContactField(ctx, action.value || "", resolveWhatsAppAutomationText(action.value2 || "", ctx), automation);
   } else if (action.type === "ADD_INTERNAL_NOTE") {
     if (!ctx.conversation) throw new Error("Internal notes need a conversation.");
     const body = resolveWhatsAppAutomationText(action.value || "", ctx);
@@ -365,15 +355,36 @@ async function executePlan(actions: WhatsAppAutomationAction[], automation: What
         const yes = Boolean(action.condition && evaluateWhatsAppAutomationCondition(action.condition, ctx));
         await addEvent(runId, automation.id, "branch_evaluated", "SUCCESS", { result: yes ? "YES" : "NO", condition: action.condition }, undefined, actionIndex);
         const chosen = yes ? action.thenActions || [] : action.elseActions || [];
-        const combined = [...chosen, ...actions.slice(index + 1)];
-        return executePlan(combined, automation, runId, ctx, actionIndex + 1);
+        return executePlan([...chosen, ...actions.slice(index + 1)], automation, runId, ctx, actionIndex + 1);
+      }
+      if (action.type === "ASK_QUESTION") {
+        if (!ctx.contact || !ctx.latestInbound) throw new Error("Ask Question needs a contact with an open 24-hour service window.");
+        const question = resolveWhatsAppAutomationText(action.value || "", ctx);
+        const choices = action.choices || [];
+        const sent = await sendWhatsAppInteractiveQuestion({
+          to: ctx.contact.waId,
+          question,
+          mode: action.questionMode || "BUTTONS",
+          choices,
+          customerMessageTimestamp: ctx.latestInbound.timestamp,
+          listButtonText: action.listButtonText,
+        });
+        if (!sent.sent) throw new Error(sent.reason === "SERVICE_WINDOW_CLOSED" ? "The 24-hour service window is closed. Ask Question requires an open service window." : `Interactive question failed: ${sent.reason}`);
+        await recordOutbound(ctx, { id: sent.messageId, text: question, type: "interactive" });
+        const expiresAt = new Date(Date.now() + 30 * 86400 * 1000).toISOString();
+        const job = await mutateWhatsAppRest({ method: "POST", pathAndQuery: "whatsapp_automation_jobs", body: {
+          run_id: runId, automation_id: automation.id, status: "WAITING_INPUT", due_at: expiresAt, action_index: actionIndex,
+          payload: { kind: "QUESTION", questionMessageId: sent.messageId, choices, saveAnswerTo: action.value2 || null, remainingActions: actions.slice(index + 1), context: ctx },
+          attempts: 0, max_attempts: 1,
+        } });
+        if (!job.ok) throw new Error(job.message);
+        await mutateWhatsAppRest({ method: "PATCH", pathAndQuery: `whatsapp_automation_runs?id=eq.${encodeURIComponent(runId)}`, body: { status: "WAITING", next_action_index: actionIndex + 1, updated_at: new Date().toISOString() } });
+        await addEvent(runId, automation.id, "question_sent", "SUCCESS", { question, mode: action.questionMode || "BUTTONS", choices, waitingFor: "customer_choice" }, undefined, actionIndex);
+        return { status: "WAITING" };
       }
       if (action.type === "DELAY") {
         const dueAt = new Date(Date.now() + seconds(action.unit, action.amount) * 1000).toISOString();
-        const job = await mutateWhatsAppRest({ method: "POST", pathAndQuery: "whatsapp_automation_jobs", body: {
-          run_id: runId, automation_id: automation.id, status: "PENDING", due_at: dueAt, action_index: actionIndex,
-          payload: { remainingActions: actions.slice(index + 1), context: ctx }, attempts: 0, max_attempts: 5,
-        } });
+        const job = await mutateWhatsAppRest({ method: "POST", pathAndQuery: "whatsapp_automation_jobs", body: { run_id: runId, automation_id: automation.id, status: "PENDING", due_at: dueAt, action_index: actionIndex, payload: { remainingActions: actions.slice(index + 1), context: ctx }, attempts: 0, max_attempts: 5 } });
         if (!job.ok) throw new Error(job.message);
         await mutateWhatsAppRest({ method: "PATCH", pathAndQuery: `whatsapp_automation_runs?id=eq.${encodeURIComponent(runId)}`, body: { status: "WAITING", next_action_index: actionIndex + 1, updated_at: new Date().toISOString() } });
         await addEvent(runId, automation.id, "delay_scheduled", "SUCCESS", { dueAt, amount: action.amount, unit: action.unit }, undefined, actionIndex);
@@ -393,10 +404,7 @@ async function executePlan(actions: WhatsAppAutomationAction[], automation: What
 async function finishRun(runId: string, automation: WhatsAppAutomation, ctx: WhatsAppAutomationRuntimeContext, result: ExecutionResult) {
   if (result.status === "WAITING") return;
   const status = result.status === "FAILED" ? "FAILED" : "SUCCEEDED";
-  await mutateWhatsAppRest({ method: "PATCH", pathAndQuery: `whatsapp_automation_runs?id=eq.${encodeURIComponent(runId)}`, body: {
-    status, completed_at: new Date().toISOString(), error_code: result.status === "FAILED" ? "ACTION_FAILED" : null,
-    error_message: result.error || null, updated_at: new Date().toISOString(),
-  } });
+  await mutateWhatsAppRest({ method: "PATCH", pathAndQuery: `whatsapp_automation_runs?id=eq.${encodeURIComponent(runId)}`, body: { status, completed_at: new Date().toISOString(), error_code: result.status === "FAILED" ? "ACTION_FAILED" : null, error_message: result.error || null, updated_at: new Date().toISOString() } });
   await addEvent(runId, automation.id, status === "FAILED" ? "run_failed" : "run_completed", status === "FAILED" ? "ERROR" : "SUCCESS", {}, result.error);
   await activity(ctx, status === "FAILED" ? "automation_failed" : "automation_completed", { automationId: automation.id, automationName: automation.name, runId, error: result.error || null });
 }
@@ -442,11 +450,71 @@ export async function dispatchWhatsAppAutomationEvent(event: WhatsAppAutomationE
   return { started, skipped, failed };
 }
 
+export async function resumeWhatsAppAutomationQuestion(input: {
+  waId: string;
+  messageId: string;
+  replyId?: string;
+  replyTitle?: string;
+  replyDescription?: string;
+  timestamp?: number;
+}) {
+  const replyId = text(input.replyId);
+  if (!replyId) return { resumed: 0, ignored: true };
+  const jobs = await readWhatsAppRows<Record<string, unknown>>("whatsapp_automation_jobs?status=eq.WAITING_INPUT&select=*&order=created_at.asc&limit=100");
+  for (const job of jobs || []) {
+    const payload = object(job.payload);
+    if (payload.kind !== "QUESTION") continue;
+    const ctx = payload.context as WhatsAppAutomationRuntimeContext;
+    if (!ctx?.contact?.waId || !sameWaId(ctx.contact.waId, input.waId)) continue;
+    const choices = Array.isArray(payload.choices) ? payload.choices as WhatsAppAutomationQuestionOption[] : [];
+    const choice = choices.find((item) => item.id === replyId);
+    if (!choice) continue;
+
+    const jobId = text(job.id); const runId = text(job.run_id); const automationId = text(job.automation_id);
+    const claimed = await mutateWhatsAppRest({ method: "PATCH", pathAndQuery: `whatsapp_automation_jobs?id=eq.${encodeURIComponent(jobId)}&status=eq.WAITING_INPUT`, body: { status: "PROCESSING", locked_at: new Date().toISOString(), attempts: Number(job.attempts || 0) + 1, updated_at: new Date().toISOString() } });
+    if (!claimed.ok || !claimed.rows.length) continue;
+
+    const [runRows, automationRows] = await Promise.all([
+      readWhatsAppRows<Record<string, unknown>>(`whatsapp_automation_runs?id=eq.${encodeURIComponent(runId)}&select=*&limit=1`),
+      readWhatsAppRows<Record<string, unknown>>(`whatsapp_automations?id=eq.${encodeURIComponent(automationId)}&select=*&limit=1`),
+    ]);
+    const run = runRows?.[0]; const automation = automationRows?.[0] ? normalizeWhatsAppAutomationRow(automationRows[0]) : null;
+    if (!run || !automation || text(run.status) === "CANCELLED") {
+      await mutateWhatsAppRest({ method: "PATCH", pathAndQuery: `whatsapp_automation_jobs?id=eq.${encodeURIComponent(jobId)}`, body: { status: "CANCELLED", completed_at: new Date().toISOString(), updated_at: new Date().toISOString() } });
+      return { resumed: 0, ignored: true };
+    }
+
+    const answer = text(input.replyTitle) || choice.title;
+    const answerAt = input.timestamp || Math.floor(Date.now() / 1000);
+    ctx.answer = answer;
+    ctx.answerId = choice.id;
+    ctx.trigger.payload = { ...ctx.trigger.payload, answer, answerId: choice.id, answerDescription: text(input.replyDescription) || choice.description || null };
+    ctx.message = { id: input.messageId, text: answer, type: "interactive", timestamp: answerAt };
+    ctx.latestInbound = ctx.message;
+
+    const saveAnswerTo = text(payload.saveAnswerTo);
+    try {
+      if (saveAnswerTo) await updateContactField(ctx, saveAnswerTo, answer, automation);
+      await mutateWhatsAppRest({ method: "PATCH", pathAndQuery: `whatsapp_automation_runs?id=eq.${encodeURIComponent(runId)}`, body: { status: "RUNNING", context: ctx, updated_at: new Date().toISOString() } });
+      await addEvent(runId, automation.id, "question_answered", "SUCCESS", { answer, answerId: choice.id, savedTo: saveAnswerTo || null }, undefined, Number(job.action_index || 0));
+      await mutateWhatsAppRest({ method: "PATCH", pathAndQuery: `whatsapp_automation_jobs?id=eq.${encodeURIComponent(jobId)}`, body: { status: "SUCCEEDED", completed_at: new Date().toISOString(), updated_at: new Date().toISOString() } });
+      const remaining = Array.isArray(payload.remainingActions) ? payload.remainingActions as WhatsAppAutomationAction[] : [];
+      const result = await executePlan(remaining, automation, runId, ctx, Number(job.action_index || 0) + 1);
+      await finishRun(runId, automation, ctx, result);
+      return { resumed: 1, runId, answer, answerId: choice.id };
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Question response could not resume the workflow.";
+      await mutateWhatsAppRest({ method: "PATCH", pathAndQuery: `whatsapp_automation_jobs?id=eq.${encodeURIComponent(jobId)}`, body: { status: "FAILED", completed_at: new Date().toISOString(), last_error: message, updated_at: new Date().toISOString() } });
+      await finishRun(runId, automation, ctx, { status: "FAILED", error: message });
+      return { resumed: 0, failed: 1, error: message };
+    }
+  }
+  return { resumed: 0, ignored: true };
+}
+
 async function processDueJobs(limit: number) {
   const now = new Date().toISOString();
-  const jobs = await readWhatsAppRows<Record<string, unknown>>(
-    `whatsapp_automation_jobs?status=eq.PENDING&due_at=lte.${encodeURIComponent(now)}&select=*&order=due_at.asc&limit=${Math.max(1, Math.min(limit, 50))}`,
-  );
+  const jobs = await readWhatsAppRows<Record<string, unknown>>(`whatsapp_automation_jobs?status=eq.PENDING&due_at=lte.${encodeURIComponent(now)}&select=*&order=due_at.asc&limit=${Math.max(1, Math.min(limit, 50))}`);
   let processed = 0; let failed = 0;
   for (const job of jobs || []) {
     const jobId = text(job.id); const runId = text(job.run_id); const automationId = text(job.automation_id);
@@ -486,29 +554,20 @@ async function processDueJobs(limit: number) {
 }
 
 async function scanNoReplyTriggers() {
-  const rows = await readWhatsAppRows<Record<string, unknown>>(
-    "whatsapp_automations?status=eq.ACTIVE&trigger_type=in.(NO_CUSTOMER_REPLY,NO_AGENT_REPLY)&select=*&order=created_at.asc&limit=50",
-  );
+  const rows = await readWhatsAppRows<Record<string, unknown>>("whatsapp_automations?status=eq.ACTIVE&trigger_type=in.(NO_CUSTOMER_REPLY,NO_AGENT_REPLY)&select=*&order=created_at.asc&limit=50");
   let dispatched = 0;
   for (const raw of rows || []) {
     const automation = normalizeWhatsAppAutomationRow(raw);
     const threshold = Date.now() - seconds(text(automation.triggerConfig.unit).toUpperCase(), Number(automation.triggerConfig.amount)) * 1000;
-    const conversations = await readWhatsAppRows<Record<string, unknown>>(
-      `whatsapp_conversations?status=eq.open&last_message_at=lte.${encodeURIComponent(new Date(threshold).toISOString())}&select=id,contact_id,last_message_at&order=last_message_at.asc&limit=100`,
-    );
+    const conversations = await readWhatsAppRows<Record<string, unknown>>(`whatsapp_conversations?status=eq.open&last_message_at=lte.${encodeURIComponent(new Date(threshold).toISOString())}&select=id,contact_id,last_message_at&order=last_message_at.asc&limit=100`);
     for (const conversation of conversations || []) {
-      const conversationId = text(conversation.id); const messages = await readWhatsAppRows<Record<string, unknown>>(
-        `whatsapp_messages?conversation_id=eq.${encodeURIComponent(conversationId)}&select=whatsapp_message_id,direction,message_timestamp&order=message_timestamp.desc&limit=1`,
-      );
+      const conversationId = text(conversation.id); const messages = await readWhatsAppRows<Record<string, unknown>>(`whatsapp_messages?conversation_id=eq.${encodeURIComponent(conversationId)}&select=whatsapp_message_id,direction,message_timestamp&order=message_timestamp.desc&limit=1`);
       const latest = messages?.[0]; if (!latest) continue;
       const direction = text(latest.direction);
       if (automation.triggerType === "NO_AGENT_REPLY" && direction !== "inbound") continue;
       if (automation.triggerType === "NO_CUSTOMER_REPLY" && direction !== "outbound") continue;
       const at = Date.parse(text(latest.message_timestamp)); if (!Number.isFinite(at) || at > threshold) continue;
-      const result = await dispatchWhatsAppAutomationEvent({
-        type: automation.triggerType, eventKey: `${automation.triggerType.toLowerCase()}:${conversationId}:${text(latest.whatsapp_message_id)}`,
-        contactId: text(conversation.contact_id), conversationId,
-      });
+      const result = await dispatchWhatsAppAutomationEvent({ type: automation.triggerType, eventKey: `${automation.triggerType.toLowerCase()}:${conversationId}:${text(latest.whatsapp_message_id)}`, contactId: text(conversation.contact_id), conversationId });
       dispatched += result.started;
     }
   }
@@ -523,8 +582,7 @@ async function scanBusinessHours() {
   const now = new Date(); const before = new Date(now.getTime() - 60_000);
   const current = isWhatsAppBusinessHoursOpen(settings.businessHours, now); const previous = isWhatsAppBusinessHoursOpen(settings.businessHours, before);
   if (current === null || previous === null || current === previous) return 0;
-  const transition = current ? "OPENED" : "CLOSED";
-  const minute = now.toISOString().slice(0, 16);
+  const transition = current ? "OPENED" : "CLOSED"; const minute = now.toISOString().slice(0, 16);
   const result = await dispatchWhatsAppAutomationEvent({ type: "BUSINESS_HOURS", eventKey: `business-hours:${transition}:${minute}`, triggerValue: transition });
   return result.started;
 }

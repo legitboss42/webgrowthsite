@@ -38,7 +38,7 @@ async function getRuns(): Promise<WhatsAppAutomationRun[]> {
 
 async function getJobs(): Promise<WhatsAppAutomationJob[]> {
   const rows = await readWhatsAppRows<Record<string, unknown>>(
-    "whatsapp_automation_jobs?status=in.(PENDING,PROCESSING)&select=id,run_id,automation_id,status,due_at,action_index,attempts,max_attempts,last_error,created_at&order=due_at.asc&limit=100",
+    "whatsapp_automation_jobs?status=in.(PENDING,PROCESSING,WAITING_INPUT)&select=id,run_id,automation_id,status,due_at,action_index,attempts,max_attempts,last_error,created_at&order=created_at.desc&limit=100",
   );
   return (rows || []).map(normalizeWhatsAppAutomationJobRow);
 }

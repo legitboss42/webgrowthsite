@@ -15,6 +15,9 @@ export type NormalizedIncomingMessage = {
   mediaSha256?: string;
   mediaVoice?: boolean;
   mediaFilename?: string;
+  interactiveReplyId?: string;
+  interactiveReplyTitle?: string;
+  interactiveReplyDescription?: string;
 };
 
 export type NormalizedStatus = {
@@ -45,11 +48,24 @@ export function isValidMetaSignature(rawBody: string, suppliedSignature: string 
 
 type UnknownRecord = Record<string, unknown>;
 function asRecord(value: unknown): UnknownRecord | null {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as UnknownRecord) : null;
+  return value && typeof value === "object" && !Array.isArray(value) ? value as UnknownRecord : null;
 }
 function getIncomingMedia(item: UnknownRecord, type: string) {
   if (type !== "audio" && type !== "image" && type !== "video" && type !== "document") return null;
   return asRecord(item[type]);
+}
+function getInteractiveReply(item: UnknownRecord) {
+  if (item.type !== "interactive") return null;
+  const interactive = asRecord(item.interactive);
+  const replyType = typeof interactive?.type === "string" ? interactive.type : "";
+  if (replyType !== "button_reply" && replyType !== "list_reply") return null;
+  const reply = asRecord(interactive?.[replyType]);
+  if (!reply || typeof reply.id !== "string" || typeof reply.title !== "string") return null;
+  return {
+    id: reply.id,
+    title: reply.title,
+    description: typeof reply.description === "string" ? reply.description : undefined,
+  };
 }
 
 export function parseWhatsAppWebhook(payload: unknown): { messages: NormalizedIncomingMessage[]; statuses: NormalizedStatus[] } {
@@ -73,7 +89,12 @@ export function parseWhatsAppWebhook(payload: unknown): { messages: NormalizedIn
         const text = asRecord(item?.text);
         if (typeof item?.id !== "string" || typeof item?.from !== "string" || typeof item?.timestamp !== "string" || typeof item?.type !== "string") continue;
         const media = getIncomingMedia(item, item.type);
-        const body = typeof text?.body === "string" ? text.body : typeof media?.caption === "string" ? media.caption : undefined;
+        const interactive = getInteractiveReply(item);
+        const body = typeof text?.body === "string"
+          ? text.body
+          : typeof media?.caption === "string"
+            ? media.caption
+            : interactive?.title;
         messages.push({
           messageId: item.id,
           waId: item.from,
@@ -86,6 +107,11 @@ export function parseWhatsAppWebhook(payload: unknown): { messages: NormalizedIn
           mediaSha256: typeof media?.sha256 === "string" ? media.sha256 : undefined,
           mediaVoice: item.type === "audio" && media?.voice === true,
           mediaFilename: typeof media?.filename === "string" ? media.filename : undefined,
+          ...(interactive ? {
+            interactiveReplyId: interactive.id,
+            interactiveReplyTitle: interactive.title,
+            ...(interactive.description ? { interactiveReplyDescription: interactive.description } : {}),
+          } : {}),
         });
       }
       if (Array.isArray(value.statuses)) for (const status of value.statuses) {

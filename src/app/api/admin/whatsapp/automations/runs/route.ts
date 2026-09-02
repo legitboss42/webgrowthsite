@@ -59,7 +59,7 @@ export async function POST(request: Request) {
   if (!updated.ok) return NextResponse.json({ error: updated.message }, { status: updated.status });
   await mutateWhatsAppRest({
     method: "PATCH",
-    pathAndQuery: `whatsapp_automation_jobs?run_id=eq.${encodeURIComponent(id)}&status=in.(PENDING,PROCESSING)`,
+    pathAndQuery: `whatsapp_automation_jobs?run_id=eq.${encodeURIComponent(id)}&status=in.(PENDING,PROCESSING,WAITING_INPUT)`,
     body: { status: "CANCELLED", completed_at: now, updated_at: now },
   });
   await mutateWhatsAppRest({

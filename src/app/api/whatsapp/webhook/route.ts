@@ -12,7 +12,7 @@ import {
   type NormalizedIncomingMessage,
 } from "@/lib/whatsapp/webhook";
 import { sendWhatsAppText } from "@/lib/whatsapp/send";
-import { dispatchWhatsAppAutomationEvent } from "@/lib/whatsapp/automationRuntime";
+import { dispatchWhatsAppAutomationEvent, resumeWhatsAppAutomationQuestion } from "@/lib/whatsapp/automationRuntime";
 import { claimWhatsAppPushDelivery, sendWhatsAppPushNotification } from "@/lib/whatsapp/webPush";
 
 export const runtime = "nodejs";
@@ -35,6 +35,19 @@ function pushBody(message: ReturnType<typeof parseWhatsAppWebhook>["messages"][n
 
 async function dispatchMessageAutomations(message: NormalizedIncomingMessage) {
   try {
+    if (message.interactiveReplyId) {
+      const resumed = await resumeWhatsAppAutomationQuestion({
+        waId: message.waId,
+        messageId: message.messageId,
+        replyId: message.interactiveReplyId,
+        replyTitle: message.interactiveReplyTitle,
+        replyDescription: message.interactiveReplyDescription,
+        timestamp: message.timestamp,
+      });
+      if (resumed.resumed > 0) return { started: resumed.resumed, skipped: 0, failed: 0 };
+      if ("failed" in resumed && resumed.failed) return { started: 0, skipped: 0, failed: 1 };
+    }
+
     const contacts = await readWhatsAppRows<Record<string, unknown>>(
       `whatsapp_contacts?wa_id=eq.${encodeURIComponent(message.waId)}&select=id,created_at&limit=1`,
     );
@@ -52,7 +65,12 @@ async function dispatchMessageAutomations(message: NormalizedIncomingMessage) {
       contactId,
       conversationId,
       waId: message.waId,
-      payload: { displayName: message.displayName || null, mediaId: message.mediaId || null },
+      payload: {
+        displayName: message.displayName || null,
+        mediaId: message.mediaId || null,
+        interactiveReplyId: message.interactiveReplyId || null,
+        interactiveReplyTitle: message.interactiveReplyTitle || null,
+      },
       message: { id: message.messageId, text: message.text, type: message.type, timestamp: message.timestamp },
     });
 
