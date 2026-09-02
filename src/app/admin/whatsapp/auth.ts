@@ -10,7 +10,7 @@ import { readWorkspacePasswordSessionFromCookieStore } from "@/lib/whatsapp/pass
 import { ensureWhatsAppOwnerTeamMember, findWhatsAppTeamMemberByEmail } from "@/lib/whatsapp/teamAccess";
 import { canWhatsAppRoleSuperviseTeam, type WhatsAppTeamRole } from "@/lib/whatsapp/teamModel";
 import { enterWhatsAppWorkspace } from "@/lib/whatsapp/workspaceContext";
-import type { WhatsAppWorkspace } from "@/lib/whatsapp/workspaceModel";
+import { isWhatsAppWorkspaceId, WHATSAPP_WORKSPACE_COOKIE, type WhatsAppWorkspace } from "@/lib/whatsapp/workspaceModel";
 import { isWhatsAppPlatformAdmin, resolveWhatsAppWorkspaceForIdentity } from "@/lib/whatsapp/workspaces";
 import { readWhatsAppRows } from "./data";
 
@@ -31,9 +31,23 @@ export type WhatsAppWorkspaceAccess = {
   availableWorkspaces: WhatsAppWorkspace[];
 };
 
+/**
+ * Legacy synchronous Owner gate. New code should use getWhatsAppWorkspaceAccess.
+ * A password Owner is accepted only when the signed workspace id exactly matches the
+ * active workspace cookie, preventing a role from being carried across tenants.
+ */
 export function hasWhatsAppAdminAccess(cookieStore: CookieStoreLike) {
   try { if (isGoogleAdminSession(readGoogleAuthSessionFromCookieStore(cookieStore))) return true; } catch {}
-  try { const passwordSession = readWorkspacePasswordSessionFromCookieStore(cookieStore); if (passwordSession && isAllowedGoogleAdminEmail(passwordSession.email)) return true; } catch {}
+  try {
+    const passwordSession = readWorkspacePasswordSessionFromCookieStore(cookieStore);
+    if (passwordSession && isAllowedGoogleAdminEmail(passwordSession.email)) return true;
+    const selectedWorkspaceId = cookieStore.get(WHATSAPP_WORKSPACE_COOKIE)?.value?.trim() || "";
+    if (
+      passwordSession?.workspaceRole === "owner" &&
+      isWhatsAppWorkspaceId(passwordSession.workspaceId) &&
+      selectedWorkspaceId === passwordSession.workspaceId
+    ) return true;
+  } catch {}
   const schedulerCookie = cookieStore.get(SCHEDULER_SESSION_COOKIE)?.value;
   if (!schedulerCookie) return false;
   try { const schedulerSession = readSchedulerSession(schedulerCookie); return Boolean(schedulerSession && isOwnerOpenId(schedulerSession.openId)); } catch { return false; }
@@ -49,9 +63,6 @@ async function resolveIdentityWorkspace(input: { email: string; displayName: str
   if (platformAdmin && workspace.isPlatformOwned && !member) member = await ensureWhatsAppOwnerTeamMember({ email: input.email, displayName: input.displayName, workspaceId: workspace.id });
   if (!platformAdmin && !member) return null;
 
-  // Bind every subsequent tenant helper in this request to the exact workspace that
-  // membership resolution approved. This also protects a user's first request before
-  // they have ever written the workspace-selection cookie.
   enterWhatsAppWorkspace(workspace.id);
 
   return { role: platformAdmin ? "owner" : member!.role, memberId: member?.id || null, email: input.email, displayName: member?.displayName || input.displayName || input.email, source: input.source, workspaceId: workspace.id, workspaceSlug: workspace.slug, workspaceName: workspace.name, workspaceStatus: workspace.status, platformAdmin, availableWorkspaces: workspaces };
