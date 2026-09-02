@@ -8,10 +8,13 @@ import {
   getUserAgent,
   hasJsonContentType,
   isAllowedOrigin,
-  sanitizeText,
 } from "@/lib/security";
 
 export const runtime = "nodejs";
+
+function readPassword(value: unknown) {
+  return typeof value === "string" ? value.slice(0, 256) : "";
+}
 
 export async function POST(request: Request) {
   if (!isAllowedOrigin(request, { allowMissingOrigin: false })) {
@@ -38,8 +41,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid request payload." }, { status: 400 });
   }
 
-  const currentPassword = sanitizeText(body.currentPassword, 256);
-  const newPassword = sanitizeText(body.newPassword, 256);
+  const currentPassword = readPassword(body.currentPassword);
+  const newPassword = readPassword(body.newPassword);
   if (!currentPassword || newPassword.length < 10) {
     return NextResponse.json({ error: "Enter your current password and a new password of at least 10 characters." }, { status: 400 });
   }
