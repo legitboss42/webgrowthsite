@@ -6,7 +6,7 @@ Last updated: 2026-09-02
 
 1. Discuss each roadmap stage before implementation unless the user explicitly says proceed.
 2. Stage rule: build → production test → fix failures → retest → mark 100% → unlock next stage.
-3. Stage 6 was implemented across 6A–6E before its first combined Owner test; subsequent failures/scope gaps are fixed by ChatGPT and retested without advancing Stage 7.
+3. Stages 6, 7 and 8 have been implemented. Stage 6 is in its final delayed No Reply production check; Stages 7 and 8 still require their full Owner production gates before they can be marked 100% complete.
 4. Current stage gates are OWNER ACCOUNT ONLY. Manager/Agent testing is deferred and does not block completion.
 5. Codex is TEST-ONLY unless the user explicitly authorizes live-UI configuration. It never edits source code, commits, deploys or applies migrations.
 6. Avoid duplicate deployments. Bundle code, tests, migrations, docs and checkpoint changes before moving `main`.
@@ -33,13 +33,15 @@ Last updated: 2026-09-02
 3. Contact CRM — COMPLETE
 4. Saved Replies & Agent Productivity — COMPLETE
 5. WhatsApp Template Manager — 100% COMPLETE / Owner production verified 2026-09-02
-6. Automation Engine — CURRENT / OPEN
-7. Campaigns & Broadcasts — LOCKED
-8. WhatsApp Flows — LOCKED
-9. Advanced Analytics — LOCKED
-10. AI Layer — LOCKED; zero-cost until revenue
-11. Multi-Business / SaaS — LOCKED
-12. Client Onboarding & Commercial Launch — LOCKED
+6. Automation Engine — BUILT / FINAL OWNER TESTING
+7. Campaigns & Broadcasts — BUILT / OWNER PRODUCTION TESTING PENDING
+8. WhatsApp Flows — BUILT / OWNER PRODUCTION TESTING PENDING
+9. Advanced Analytics — NEXT UNBUILT STAGE
+10. AI Layer — NOT BUILT; zero-cost until revenue
+11. Multi-Business / SaaS — NOT BUILT
+12. Client Onboarding & Commercial Launch — NOT BUILT
+
+Implementation has therefore reached Stage 8. Do not describe Stages 7 or 8 as locked or unimplemented. The current verification backlog is: finish the Stage 6 No Reply gate, then run the full Stage 7 production gate, then the full Stage 8 production gate. New feature implementation resumes at Stage 9 after those gates are resolved.
 
 ## Stage 5 checkpoint
 
@@ -98,21 +100,41 @@ Important operational rule: if an older test/master workflow is ACTIVE on NEW_ME
 
 ### Stage 6 Owner verification already confirmed
 
-Previous live Owner tests confirmed:
-- workflow persistence, search/status filtering
-- create/edit/duplicate/delete Draft/Paused workflows
-- duplicate-name rejection
-- refresh persistence + versioning
-- Draft → Active → Paused
-- active workflow read-only/no Delete
-- visual canvas/zoom/step counts
-- real NEW_MESSAGE execution exactly once
-- real Send Text inside service window
-- Run History base rendering
-- mobile/desktop list/history usability
-- Stages 1–5 regression smoke
+Live Owner testing has confirmed the core builder/runtime, real customer Ask Question continuation, Master routing, Business Website, Website Redesign and Automation & CRM qualification journeys, CRM/custom-field persistence, internal notes, final quote routing, Open-session duplicate prevention, automatic reopen, manual-open execution, and close-during-wait cancellation of both the run and WAITING_INPUT job.
 
-Stage 6 remains OPEN because conversational runtime cases, remaining trigger/action cases and this bonus conversation-session lifecycle still require Owner production verification.
+Stage 6 is at its final delayed production gate: `WG — NO REPLY FOLLOW-UP` is active and the two-hour no-reply behaviour is being checked separately. Do not mark Stage 6 100% complete until that result is verified.
+
+## Stage 7 — Campaigns & Broadcasts
+
+Stage 7 has already been implemented and is awaiting its full Owner production test. The implementation includes the campaign/segment persistence and runtime foundation represented by the production tables:
+- `whatsapp_segments`
+- `whatsapp_campaigns`
+- `whatsapp_campaign_recipients`
+- `whatsapp_campaign_events`
+- `whatsapp_campaign_runtime_config`
+
+Do not rebuild Stage 7 from scratch. Test the existing implementation, fix discovered failures, retest, then mark it complete.
+
+## Stage 8 — WhatsApp Flows
+
+Stage 8 has already been implemented and is awaiting its full Owner production test. Existing implementation includes:
+- Flow model/runtime and Meta API integration
+- Flow admin manager
+- dynamic Data API
+- Flow send backend and conversation launcher
+- encryption configuration/admin support
+- Stage 6 `WHATSAPP_FLOW_STARTED` / `WHATSAPP_FLOW_COMPLETED` triggers
+- Stage 6 `SEND_WHATSAPP_FLOW` action
+- Stage 8 persistence/RLS/runtime tables
+
+Production tables include:
+- `whatsapp_flows`
+- `whatsapp_flow_versions`
+- `whatsapp_flow_submissions`
+- `whatsapp_flow_events`
+- `whatsapp_flow_runtime_config`
+
+Dynamic Flows require `WHATSAPP_FLOW_PRIVATE_KEY`; static Flows do not. Do not rebuild Stage 8 from scratch. Test the existing implementation, fix failures, retest, then mark it complete.
 
 ## Stage 6 migrations
 
