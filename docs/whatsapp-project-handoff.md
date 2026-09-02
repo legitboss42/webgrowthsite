@@ -7,13 +7,14 @@ Last updated: 2026-09-02
 1. Discuss and agree each stage before implementation unless the user explicitly says to proceed.
 2. Stage rule: Build → production test → fix every discovered issue → retest → mark 100% complete → only then unlock the next stage.
 3. After implementing any stage, always give the user a SHORT Codex instruction telling Codex to use a LIVE BROWSER for production testing. The instruction MUST include the COMPLETE test list for that stage.
-4. Database migrations are additive Supabase SQL and are applied manually in Supabase SQL Editor. Never run `supabase db push` for the WhatsApp platform.
-5. Whenever a migration is required, always paste the FULL SQL migration in chat, not just the filename/path.
-6. Keep infrastructure zero-cost/free-tier until paying clients justify upgrades.
-7. WhatsApp work goes directly to `main` unless the user changes this rule.
-8. Do not touch the separate TikTok scheduler areas while working on WhatsApp.
-9. Official Meta WhatsApp Cloud API only. Never claim Meta BSP/Partner certification unless actually verified.
-10. Existing working features must be regression-tested before a stage is marked complete.
+4. Codex is TESTING-ONLY for these stage gates. Codex must not edit code, commit, deploy, apply migrations, or fix failures. It must only run the live-browser tests and report PASS/FAIL plus exact observations/errors. ChatGPT handles all fixes in this project.
+5. Database migrations are additive Supabase SQL and are applied manually in Supabase SQL Editor. Never run `supabase db push` for the WhatsApp platform.
+6. Whenever a migration is required, always paste the FULL SQL migration in chat, not just the filename/path.
+7. Keep infrastructure zero-cost/free-tier until paying clients justify upgrades.
+8. WhatsApp work goes directly to `main` unless the user changes this rule.
+9. Do not touch the separate TikTok scheduler areas while working on WhatsApp.
+10. Official Meta WhatsApp Cloud API only. Never claim Meta BSP/Partner certification unless actually verified.
+11. Existing working features must be regression-tested before a stage is marked complete.
 
 ## Repository
 
@@ -120,6 +121,6 @@ WhatsApp data uses Supabase/PostgREST with service-role access server-side. The 
 
 After every future stage implementation, ChatGPT must output a concise instruction similar to:
 
-> Use the live production browser on webgrowth.info to test Stage X end-to-end. Do not change code unless a test fails. Run every test below, record PASS/FAIL for each, capture the exact failure, fix any failure on main, deploy, and retest until all pass. Test list: [COMPLETE STAGE TEST LIST].
+> Use the live production browser on webgrowth.info to test Stage X end-to-end. TEST ONLY. Do not edit code, commit, deploy, apply migrations, or fix anything. Run every test below, record PASS/FAIL for each, and report exact observations/errors back to ChatGPT. Test list: [COMPLETE STAGE TEST LIST].
 
 Do not omit any stage test from the Codex instruction.
