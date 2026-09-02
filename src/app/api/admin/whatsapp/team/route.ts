@@ -9,6 +9,7 @@ import {
 } from "@/app/admin/whatsapp/data";
 import { buildWhatsAppTeamInvitationEmail } from "@/emails/whatsapp-team-invitation";
 import { ADMIN_EMAIL, sendTransactionalEmail } from "@/lib/email";
+import { generateWorkspacePasswordSetupLink } from "@/lib/whatsapp/passwordAuth";
 import {
   isValidWhatsAppTeamEmail,
   normalizeWhatsAppTeamEmail,
@@ -159,11 +160,19 @@ export async function POST(request: Request) {
   } = { sent: false, reason: "member_not_created" };
 
   if (member) {
+    let passwordSetupUrl: string | null = null;
+    try {
+      passwordSetupUrl = await generateWorkspacePasswordSetupLink(member.googleEmail);
+    } catch (error) {
+      console.error("WhatsApp team password setup link failed", error);
+    }
+
     const invitation = buildWhatsAppTeamInvitationEmail({
       displayName: member.displayName,
       googleEmail: member.googleEmail,
       role: member.role,
       invitedByEmail: access.email,
+      passwordSetupUrl,
     });
 
     try {
@@ -182,7 +191,10 @@ export async function POST(request: Request) {
           actorEmail: access.email,
           targetMemberId: member.id,
           eventType: "team_invite_sent",
-          metadata: { googleEmail: member.googleEmail },
+          metadata: {
+            googleEmail: member.googleEmail,
+            passwordSetupIncluded: Boolean(passwordSetupUrl),
+          },
         });
       } else {
         invite = { sent: false, reason: "setup_required" };
