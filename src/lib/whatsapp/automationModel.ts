@@ -67,7 +67,7 @@ export const WHATSAPP_AUTOMATION_TRIGGER_OPTIONS: Array<{ value: WhatsAppAutomat
 ];
 
 export const WHATSAPP_AUTOMATION_CONDITION_FIELDS = [
-  { value: "answer", label: "Last question answer" }, { value: "message.text", label: "Message text" }, { value: "message.type", label: "Message type" },
+  { value: "answer", label: "Last question answer" }, { value: "trigger.payload.answerId", label: "Last question option ID" }, { value: "message.text", label: "Message text" }, { value: "message.type", label: "Message type" },
   { value: "contact.tags", label: "Contact tags" }, { value: "contact.lead_stage", label: "CRM stage" }, { value: "contact.phone", label: "Contact phone" },
   { value: "contact.email", label: "Contact email" }, { value: "contact.company", label: "Contact company" }, { value: "contact.opt_in_status", label: "Consent status" },
   { value: "conversation.assigned_member_id", label: "Assigned team member" }, { value: "conversation.status", label: "Conversation status" }, { value: "business_hours", label: "Business hours" },
@@ -99,6 +99,7 @@ const VALID_TRIGGERS = new Set<string>(WHATSAPP_AUTOMATION_TRIGGER_TYPES);
 const VALID_ACTIONS = new Set<string>(WHATSAPP_AUTOMATION_ACTION_TYPES);
 const VALID_OPERATORS = new Set<string>(WHATSAPP_AUTOMATION_CONDITION_OPERATORS);
 const DELAY_UNITS = new Set<string>(["MINUTES", "HOURS", "DAYS"]);
+const WHATSAPP_AUTOMATION_MAX_BRANCH_DEPTH = 12;
 export const WHATSAPP_AUTOMATION_MAX_STEPS = 100;
 
 function cleanString(value: unknown, max = 500) { return typeof value === "string" ? value.trim().slice(0, max) : ""; }
@@ -145,7 +146,7 @@ function normalizeQuestionChoice(value: unknown): WhatsAppAutomationQuestionOpti
   if (!id || !title) return null; return { id, title, ...(description ? { description } : {}) };
 }
 function normalizeAction(value: unknown, depth = 0): WhatsAppAutomationAction | null {
-  if (!value || typeof value !== "object" || Array.isArray(value) || depth > 5) return null;
+  if (!value || typeof value !== "object" || Array.isArray(value) || depth > WHATSAPP_AUTOMATION_MAX_BRANCH_DEPTH) return null;
   const row = value as Record<string, unknown>; const type = cleanString(row.type, 40).toUpperCase(); if (!VALID_ACTIONS.has(type)) return null;
   const action: WhatsAppAutomationAction = { type: type as WhatsAppAutomationActionType };
   const primary = cleanString(row.value, 4000); const secondary = cleanString(row.value2, 1000); if (primary) action.value = primary; if (secondary) action.value2 = secondary;
