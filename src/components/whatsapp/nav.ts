@@ -38,7 +38,7 @@ export const WHATSAPP_NAV_SECTIONS: WhatsAppNavSection[] = [
   {
     label: "Growth",
     items: [
-      { label: "Campaigns", href: `${WHATSAPP_CONSOLE_ROOT}/campaigns`, icon: "campaigns", description: "Outbound template broadcasts.", status: "soon", roles: SUPERVISORS },
+      { label: "Campaigns", href: `${WHATSAPP_CONSOLE_ROOT}/campaigns`, icon: "campaigns", description: "Opt-in template campaigns, audiences, scheduling, and delivery performance.", status: "live", roles: SUPERVISORS },
       { label: "Automations", href: `${WHATSAPP_CONSOLE_ROOT}/automations`, icon: "automations", description: "Trigger, condition, and action workflows for WhatsApp operations.", status: "live", roles: SUPERVISORS },
       { label: "Analytics", href: `${WHATSAPP_CONSOLE_ROOT}/analytics`, icon: "analytics", description: "Response times, volumes, and lead quality.", status: "live", roles: OWNER },
     ],
@@ -48,7 +48,7 @@ export const WHATSAPP_NAV_SECTIONS: WhatsAppNavSection[] = [
     items: [
       { label: "Team", href: `${WHATSAPP_CONSOLE_ROOT}/team`, icon: "contacts", description: "Team members, roles, availability, and access.", status: "live", roles: SUPERVISORS },
       { label: "Phone Numbers", href: `${WHATSAPP_CONSOLE_ROOT}/phone-numbers`, icon: "phoneNumbers", description: "Connected senders, quality rating, and limits.", status: "live", roles: OWNER },
-      { label: "Settings", href: `${WHATSAPP_CONSOLE_ROOT}/settings`, icon: "settings", description: "Integration configuration and connection readiness.", status: "live", roles: OWNER },
+      { label: "Settings", href: `${WHATSAPP_CONSOLE_ROOT}/settings`, icon: "settings", description: "Integration configuration and connection readiness reporting.", status: "live", roles: OWNER },
     ],
   },
 ];

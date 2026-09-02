@@ -331,6 +331,12 @@
       "reason": "Internal WhatsApp contact directory"
     },
     {
+      "path": "/admin/whatsapp/campaigns/",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Internal WhatsApp opt-in campaign manager"
+    },
+    {
       "path": "/admin/whatsapp/automations/",
       "status": "NOINDEX",
       "sitemap": false,

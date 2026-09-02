@@ -14,6 +14,7 @@ import {
 } from "@/lib/whatsapp/webhook";
 import { sendWhatsAppText } from "@/lib/whatsapp/send";
 import { dispatchWhatsAppAutomationEvent, resumeWhatsAppAutomationQuestion } from "@/lib/whatsapp/automationRuntime";
+import { recordWhatsAppCampaignInbound, updateWhatsAppCampaignDeliveryStatus } from "@/lib/whatsapp/campaignRuntime";
 import { claimWhatsAppPushDelivery, sendWhatsAppPushNotification } from "@/lib/whatsapp/webPush";
 
 export const runtime = "nodejs";
@@ -181,11 +182,23 @@ export async function POST(request: Request) {
       {
         leadKeywords: settings.leadKeywords,
         shouldUseSafeReply: async (message) => {
+          const campaign = await recordWhatsAppCampaignInbound({
+            waId: message.waId,
+            messageId: message.messageId,
+            timestamp: message.timestamp,
+            text: message.text,
+          });
+          if (campaign.optedOut) return false;
           const automation = await dispatchMessageAutomations(message);
           return automation.started === 0;
         },
       },
     );
+
+    await Promise.all(parsed.statuses.map(async (status) => {
+      try { await updateWhatsAppCampaignDeliveryStatus(status.messageId, status.status, status.error); }
+      catch (error) { console.error("WhatsApp campaign delivery tracking failed", error); }
+    }));
 
     try { await storeWhatsAppCallEvents(payload); }
     catch (error) { console.error("WhatsApp call history processing failed", error); }
