@@ -1,5 +1,6 @@
 import {
   getDefaultAdminGoogleEmail,
+  isAllowedGoogleAdminEmail,
   isGoogleAdminSession,
   readGoogleAuthSessionFromCookieStore,
 } from "@/lib/googleAuth";
@@ -8,6 +9,7 @@ import {
   readSchedulerSession,
   SCHEDULER_SESSION_COOKIE,
 } from "@/lib/scheduler/session";
+import { readWorkspacePasswordSessionFromCookieStore } from "@/lib/whatsapp/passwordAuth";
 import {
   ensureWhatsAppOwnerTeamMember,
   findWhatsAppTeamMemberByEmail,
@@ -29,7 +31,7 @@ export type WhatsAppWorkspaceAccess = {
   memberId: string | null;
   email: string;
   displayName: string;
-  source: "google" | "scheduler";
+  source: "google" | "password" | "scheduler";
 };
 
 /**
@@ -39,6 +41,13 @@ export type WhatsAppWorkspaceAccess = {
 export function hasWhatsAppAdminAccess(cookieStore: CookieStoreLike) {
   try {
     if (isGoogleAdminSession(readGoogleAuthSessionFromCookieStore(cookieStore))) return true;
+  } catch {
+    // Fall through to the password and scheduler owner gates.
+  }
+
+  try {
+    const passwordSession = readWorkspacePasswordSessionFromCookieStore(cookieStore);
+    if (passwordSession && isAllowedGoogleAdminEmail(passwordSession.email)) return true;
   } catch {
     // Fall through to the scheduler-owner gate.
   }
@@ -58,7 +67,7 @@ export function hasWhatsAppAdminAccess(cookieStore: CookieStoreLike) {
  * Role-aware gate for the WhatsApp workspace.
  *
  * Invited Managers and Agents are checked against Supabase on every request. An
- * inactive row therefore loses access immediately even when a sealed Google cookie
+ * inactive row therefore loses access immediately even when a sealed auth cookie
  * is still present. The configured owner remains the ultimate recovery path and is
  * mirrored into the team table so "Mine" and assignment work for the owner too.
  */
@@ -96,7 +105,41 @@ export async function getWhatsAppWorkspaceAccess(
       }
     }
   } catch {
-    // Fail closed for team identities, then try the independent owner gate below.
+    // Fail closed for Google identities, then try password access.
+  }
+
+  try {
+    const passwordSession = readWorkspacePasswordSessionFromCookieStore(cookieStore);
+    if (passwordSession) {
+      if (isAllowedGoogleAdminEmail(passwordSession.email)) {
+        const ownerMember = await ensureWhatsAppOwnerTeamMember({
+          email: passwordSession.email,
+          displayName: passwordSession.fullName,
+        });
+        return {
+          role: "owner",
+          memberId: ownerMember?.id || null,
+          email: passwordSession.email,
+          displayName: ownerMember?.displayName || passwordSession.fullName || passwordSession.email,
+          source: "password",
+        };
+      }
+
+      const member = await findWhatsAppTeamMemberByEmail(passwordSession.email, {
+        activeOnly: true,
+      });
+      if (member) {
+        return {
+          role: member.role,
+          memberId: member.id,
+          email: member.googleEmail,
+          displayName: member.displayName,
+          source: "password",
+        };
+      }
+    }
+  } catch {
+    // Fail closed, then try the independent owner gate below.
   }
 
   const schedulerCookie = cookieStore.get(SCHEDULER_SESSION_COOKIE)?.value;
