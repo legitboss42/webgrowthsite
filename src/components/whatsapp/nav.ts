@@ -34,8 +34,9 @@ export const WHATSAPP_NAV_SECTIONS: WhatsAppNavSection[] = [
     label: "Configuration",
     items: [
       { label: "Team", href: `${WHATSAPP_CONSOLE_ROOT}/team`, icon: "contacts", description: "Team members, roles, availability, and access.", status: "live", roles: SUPERVISORS },
+      { label: "Settings", href: `${WHATSAPP_CONSOLE_ROOT}/account`, icon: "settings", description: "Manage your workspace account and sign-in preferences.", status: "live" },
       { label: "Phone Numbers", href: `${WHATSAPP_CONSOLE_ROOT}/phone-numbers`, icon: "phoneNumbers", description: "Connected senders, quality rating, and limits.", status: "live", roles: OWNER },
-      { label: "Settings", href: `${WHATSAPP_CONSOLE_ROOT}/settings`, icon: "settings", description: "Integration configuration and connection readiness reporting.", status: "live", roles: OWNER },
+      { label: "Business Settings", href: `${WHATSAPP_CONSOLE_ROOT}/settings`, icon: "settings", description: "Integration configuration and connection readiness reporting.", status: "live", roles: OWNER },
     ],
   },
 ];
