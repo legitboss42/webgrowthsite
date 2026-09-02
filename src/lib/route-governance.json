@@ -331,6 +331,12 @@
       "reason": "Internal WhatsApp contact directory"
     },
     {
+      "path": "/admin/whatsapp/automations/",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Internal WhatsApp automation workflow builder"
+    },
+    {
       "path": "/admin/whatsapp/quick-replies/",
       "status": "NOINDEX",
       "sitemap": false,
@@ -496,7 +502,7 @@
       "path": "/api/tools/sitemap-validator",
       "status": "NOINDEX",
       "sitemap": false,
-      "reason": "Public tools API endpoint"
+      "reason": "Public sitemap validation utility"
     },
     {
       "path": "/api/health/db",

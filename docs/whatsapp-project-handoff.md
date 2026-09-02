@@ -6,14 +6,14 @@ Last updated: 2026-09-02
 
 1. Discuss and agree each stage before implementation unless the user explicitly says to proceed.
 2. Stage rule: Build → production test → fix every discovered issue → retest → mark 100% complete → only then unlock the next stage.
-3. After implementing or fixing a stage, always give the user a SHORT Codex instruction telling Codex to use a LIVE PRODUCTION BROWSER. The instruction MUST contain the complete current Owner test list for that stage.
+3. After implementing or fixing a stage/slice, always give the user a SHORT Codex instruction telling Codex to use a LIVE PRODUCTION BROWSER. The instruction MUST contain the complete current Owner test list for that stage/slice.
 4. CURRENT STAGE GATES ARE TESTED WITH THE OWNER ACCOUNT ONLY. Manager and Agent role testing is deliberately deferred to a later dedicated permission-testing pass and must not block current stage completion unless the user changes this rule.
 5. Codex is TESTING-ONLY. Codex must not edit code, commit, deploy, apply migrations, or fix failures. It only runs live-browser tests and returns PASS/FAIL/N/A plus exact observations/errors. ChatGPT handles fixes.
-6. Avoid duplicate deployments. Bundle implementation/fix code, tests, docs, and checkpoint/handoff updates into the SAME commit before moving `main`. Do not make a separate docs-only/status commit after a code deployment. One implementation/fix commit should produce one intended deployment.
+6. Avoid duplicate deployments. Bundle implementation/fix code, tests, docs, and checkpoint/handoff updates into the SAME commit before moving `main`. Do not make a separate docs-only/status commit after a code deployment.
 7. Database migrations are additive Supabase SQL and are applied manually in Supabase SQL Editor. Never run `supabase db push` for the WhatsApp platform.
 8. Whenever a migration is required, always paste the FULL SQL migration in chat, not just the filename/path.
 9. Keep infrastructure zero-cost/free-tier until paying clients justify upgrades.
-10. WhatsApp work goes directly to `main` unless the user changes this rule.
+10. WhatsApp work goes directly to `main` unless a temporary Git object is genuinely required; do not create routine feature branches.
 11. Do not touch the separate TikTok scheduler areas while working on WhatsApp.
 12. Official Meta WhatsApp Cloud API only. Never claim Meta BSP/Partner certification unless actually verified.
 13. Existing working features must be regression-tested before a stage is marked complete.
@@ -46,8 +46,9 @@ Last updated: 2026-09-02
 - Stage 2 — COMPLETE / production verified
 - Stage 3 — COMPLETE / production verified
 - Stage 4 — COMPLETE / production verified
-- Stage 5 — IMPLEMENTED; Owner production gate has one remaining retest after status-filter fix
-- Stage 6 — LOCKED until Stage 5 Owner production gate passes
+- Stage 5 — **100% COMPLETE / Owner production verified 2026-09-02**
+- Stage 6 — **CURRENT STAGE; 6A implementation in progress/code-ready pending migration + Owner gate**
+- Stage 7 onward — LOCKED until Stage 6 passes its final production gate
 
 ## Stage 3
 
@@ -60,89 +61,86 @@ Saved Replies & Agent Productivity is complete. Includes Team + Personal replies
 Main Stage 4 implementation commit: `fcbb6f083b8d50f4c2dbc0620f82f662a984a9e0`
 Stage 4 completion checkpoint: `37106e8396faaec837e2fbb201f3c9a5152aa1ba`
 
-## Stage 5 — Current stage
+## Stage 5 — COMPLETE
 
 Main implementation commit: `b07384ea16138fc82db11c61a9778bcb8488ee2b`
 Meta-ID visibility fix: `36e9ecd9c60a4d998c1a8baa8c198a953155df14`
+Approved-filter fix: `eb5497270564f000c3a9cf384eaf032dcedc729c`
 
-Implemented:
-- live Meta template sync
-- search and status filters
-- Approved / Pending / Rejected / Paused / Disabled states
-- rejection reason and quality metadata when Meta provides them
-- persistent local drafts in Supabase
-- Owner/Manager draft-management code and Agent read-only code exist; non-Owner role testing is deferred
-- Utility + Marketing template drafts
-- text header / body / footer
-- positional variables with separate HEADER and BODY sample-value scopes
-- phone-style preview
-- Quick Reply buttons
-- Website buttons
-- Phone buttons
-- submit directly to Meta WABA `message_templates`
-- store Meta Template ID after submission
-- visibly display Meta Template IDs for submitted drafts
-- prevent accidental double submission
-- duplicate supported live templates
-- approved-template test send through the phone-number `messages` endpoint
-- specialized Authentication/media-header templates remain visible but their unsupported creation workflows are not faked
+Owner production verification passed:
+- Meta template load/search/status filters
+- draft create/edit/delete and refresh persistence
+- duplicate-name protection
+- Utility/Marketing previews
+- separate HEADER/BODY variables and real delivered positions
+- invalid variable rejection
+- Quick Reply/Website/Phone persistence
+- real Meta submission
+- visible Meta Template ID + local lock
+- live Pending/Approved status refresh
+- supported live-template duplication
+- approved test-send
+- mobile/desktop
+- Stages 1–4 regression
 
-Stage 5 migration:
+Rejected-template reason remained N/A because the WABA had no rejected template; N/A does not block Stage 5. Manager/Agent testing remains deferred by project rule.
+
+Stage 5 migration applied:
 `supabase/migrations/202609020001_whatsapp_template_manager_stage5.sql`
 
-### Latest Owner live-browser results
+## Stage 6 — Automation Engine
 
-Codex tested production with the Owner account only and made no project changes.
+Stage 6 is split into:
+- 6A Builder + durable foundation
+- 6B Triggers + conditions
+- 6C Actions
+- 6D Delay/execution engine
+- 6E History + runtime safety
 
-Passed:
-- Owner create/edit/delete drafts
-- saved/submitted draft survives refresh
-- duplicate name + language rejected
-- Utility and Marketing previews
-- separate HEADER/BODY sample variables and real delivered variable positions
-- named/non-sequential variables rejected
-- Quick Reply, Website and Phone persistence with Meta-compatible grouping rules
-- real draft submission to Meta
-- submitted draft locks and visibly shows Meta Template ID (`1087050393758212` in the QA run)
-- Meta refresh shows real statuses; `codex_stage5_qa_1788316315750` reached APPROVED
-- supported live-template duplication
-- approved variable-template test send
-- mobile/desktop layout
-- Stages 1–4 smoke regression for Overview, Conversations, Calls, Contacts and Quick Replies
+### Stage 6A code scope
 
-N/A during testing:
-- rejection-reason rendering because the WABA currently has no REJECTED template. N/A is acceptable and does not block Stage 5 while no rejected template exists.
+Implemented/staged:
+- `/admin/whatsapp/automations/`
+- live Automations navigation item
+- persistent workflow definitions
+- name/description/status/version
+- trigger type + trigger config
+- AND/OR conditions
+- ordered actions
+- Draft/Active/Paused persistence
+- create/edit/duplicate/activate/pause/delete
+- duplicate-name rejection
+- direct config-loop rejection for tag and CRM-stage self loops
+- STOP-last validation
+- delay and webhook validation
+- durable tables for runs, delayed jobs and run events
+- trigger-event dedupe unique index foundation
+- model tests added to `test:whatsapp`
 
-Only confirmed failure from the latest Owner retest:
-- selecting the Approved status filter returned no results even though approved templates were present on clean load
+Important boundary: Active workflows are only persisted as Active in 6A. Runtime trigger execution starts in 6B; the UI says this explicitly.
 
-Current fix being deployed/retested:
-- normalize status-filter values before comparison
-- selecting a status clears any previous search text so a stale search cannot make the status filter appear broken
+Stage 6A migration:
+`supabase/migrations/202609020002_whatsapp_automation_foundation_stage6.sql`
 
-### Current Stage 5 Owner production gate
+Stage 6A Owner gate:
+1. Automations navigation/page loads.
+2. Missing migration shows warning, not crash.
+3. Owner creates Draft automation.
+4. Automation survives refresh.
+5. Edit persists and version increments.
+6. Duplicate copy saves under unique name.
+7. Duplicate name rejected.
+8. Trigger-specific validation works.
+9. Conditions + AND/OR persist.
+10. Ordered actions persist.
+11. Delay amount/unit persists and validates.
+12. Self-loop + STOP-last validation works.
+13. Draft → Active → Paused persists; Active cannot delete until paused.
+14. Mobile/desktop + Stages 1–5 regression passes.
 
-1. Meta templates load; search and status filters work.
-2. Rejected template shows rejection reason if one exists; otherwise N/A is acceptable.
-3. Owner can create, edit and delete editable drafts.
-4. Draft survives refresh.
-5. Duplicate template name + language is rejected.
-6. Utility and Marketing previews work.
-7. Header/body variables use separate sample values and resolve correctly.
-8. Invalid, named or non-sequential variables are rejected.
-9. Quick Reply, Website and Phone buttons persist correctly.
-10. Draft submits successfully to Meta.
-11. Submitted draft locks and visibly shows its Meta Template ID.
-12. Meta refresh shows real Pending/Approved/Rejected status.
-13. Supported live template duplicates correctly.
-14. Approved template test-send works with variables in the correct positions.
-15. Mobile/desktop work and Stages 1–4 smoke regression passes.
+Do not test actual trigger execution in 6A; that is 6B–6D work.
 
-Manager and Agent tests are deferred to a later dedicated permissions pass and are not part of this Stage 5 completion gate.
-
-Stage 5 can be marked complete once the Approved status-filter fix is verified in production, since all other directly-testable Owner-gate items have passed and rejection rendering is currently N/A.
-
-## Relevant migrations already applied before Stage 5
+## Applied migrations before Stage 6
 
 - `202609010001_whatsapp_contact_crm_stage3.sql`
 - `202609010002_whatsapp_saved_replies_stage4.sql`
@@ -155,8 +153,8 @@ WhatsApp data uses Supabase/PostgREST with service-role access server-side. The 
 
 ## Codex testing instruction rule
 
-After every future stage implementation/fix, ChatGPT must output a concise instruction similar to:
+After each implementation/fix, ChatGPT outputs a concise instruction equivalent to:
 
-> Use the live production browser on webgrowth.info to test Stage X using the OWNER account only. TEST ONLY. Do not edit code, commit, deploy, apply migrations, or fix anything. Run every test below, record PASS/FAIL/N/A for each, and report exact observations/errors back to ChatGPT. Test list: [COMPLETE OWNER STAGE TEST LIST].
+> Use the live production browser on webgrowth.info to test the current WhatsApp stage/slice using the OWNER account only. TEST ONLY. Do not edit code, commit, deploy, apply migrations, or fix anything. Run every listed test and return PASS/FAIL/N/A plus exact observations.
 
-Do not include Manager/Agent testing in current stage gates unless the user explicitly starts the later permissions-testing pass. Do not omit any Owner-gate test from the Codex instruction.
+Manager/Agent testing stays out of current gates until the later permissions-testing pass.

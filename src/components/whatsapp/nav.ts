@@ -39,7 +39,7 @@ export const WHATSAPP_NAV_SECTIONS: WhatsAppNavSection[] = [
     label: "Growth",
     items: [
       { label: "Campaigns", href: `${WHATSAPP_CONSOLE_ROOT}/campaigns`, icon: "campaigns", description: "Outbound template broadcasts.", status: "soon", roles: SUPERVISORS },
-      { label: "Automations", href: `${WHATSAPP_CONSOLE_ROOT}/automations`, icon: "automations", description: "Auto-replies and lead routing rules.", status: "soon", roles: SUPERVISORS },
+      { label: "Automations", href: `${WHATSAPP_CONSOLE_ROOT}/automations`, icon: "automations", description: "Trigger, condition, and action workflows for WhatsApp operations.", status: "live", roles: SUPERVISORS },
       { label: "Analytics", href: `${WHATSAPP_CONSOLE_ROOT}/analytics`, icon: "analytics", description: "Response times, volumes, and lead quality.", status: "live", roles: OWNER },
     ],
   },
