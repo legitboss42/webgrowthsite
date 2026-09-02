@@ -5,7 +5,7 @@ import { normalizeWhatsAppFlowRow, type WhatsAppFlow, type WhatsAppFlowCrmMappin
 
 function text(value: unknown) { return typeof value === "string" ? value.trim() : ""; }
 function object(value: unknown): Record<string, unknown> { return value && typeof value === "object" && !Array.isArray(value) ? value as Record<string, unknown> : {}; }
-function scalar(value: unknown) {
+function scalar(value: unknown): string {
   if (typeof value === "string") return value.trim();
   if (typeof value === "number" || typeof value === "boolean") return String(value);
   if (Array.isArray(value)) return value.map((item) => scalar(item)).filter(Boolean).join(", ");
