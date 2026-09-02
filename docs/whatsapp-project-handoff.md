@@ -36,12 +36,15 @@ Last updated: 2026-09-02
 6. Automation Engine — BUILT / FINAL OWNER TESTING
 7. Campaigns & Broadcasts — BUILT / OWNER PRODUCTION TESTING PENDING
 8. WhatsApp Flows — BUILT / OWNER PRODUCTION TESTING PENDING
-9. Advanced Analytics — NEXT UNBUILT STAGE
+9. Advanced Analytics — NEXT UNBUILT STAGE; extend existing basic message/call analytics
 10. AI Layer — NOT BUILT; zero-cost until revenue
 11. Multi-Business / SaaS — NOT BUILT
-12. Client Onboarding & Commercial Launch — NOT BUILT
+12. App Experience Redesign — NOT BUILT; final pre-launch frontend overhaul so the workspace feels like a native SaaS application rather than a website/admin portal
+13. Client Onboarding & Commercial Launch — NOT BUILT
 
 Implementation has therefore reached Stage 8. Do not describe Stages 7 or 8 as locked or unimplemented. The current verification backlog is: finish the Stage 6 No Reply gate, then run the full Stage 7 production gate, then the full Stage 8 production gate. New feature implementation resumes at Stage 9 after those gates are resolved.
+
+The Flow-completion follow-up automation discussed after the first Web Growth project-enquiry Flow is explicitly DEFERRED for later. Do not treat it as blocking Stage 9 unless the user brings it back into scope.
 
 ## Stage 5 checkpoint
 
@@ -135,6 +138,49 @@ Production tables include:
 - `whatsapp_flow_runtime_config`
 
 Dynamic Flows require `WHATSAPP_FLOW_PRIVATE_KEY`; static Flows do not. Do not rebuild Stage 8 from scratch. Test the existing implementation, fix failures, retest, then mark it complete.
+
+The first real Web Growth project-enquiry Flow has begun live setup/testing. Any post-submission `WHATSAPP_FLOW_COMPLETED` automation is deferred for later by user instruction and is not a Stage 9 blocker.
+
+## Stage 9 — Advanced Analytics
+
+Stage 9 must build on the existing basic Analytics implementation rather than replace it. The repository already contains message/call analytics, message volume, delivery status/rates, response-time measurement, activity series, contact temperature counts and date-range switching.
+
+Stage 9 should turn that foundation into a provider-grade operations and business dashboard covering, where supported by stored production data:
+- executive overview KPIs with range comparison and trends
+- first-response and resolution/service performance
+- conversation volumes, open/closed/reopened behaviour and backlog
+- agent/team workload, assignments and response performance
+- CRM funnel, lead stages, temperatures, service interest and conversion movement
+- automation runs, success/failure/waiting/cancellation rates and top failing workflows/actions
+- campaign audience, send/delivery/read/reply/failure performance and campaign comparisons
+- Flow launches, completions, abandonment/completion rates and per-Flow performance
+- template usage/performance where reliable stored data exists
+- call volume/answer/missed/duration metrics integrated into the wider dashboard
+- filters by date range, agent, service/tag, campaign, automation and Flow where practical
+- drill-down links back to the underlying conversation/contact/run/campaign/Flow
+- no invented revenue or Meta metrics; unavailable metrics render as unavailable rather than fake zeroes
+- bounded queries/aggregation suitable for the free-tier production database
+
+Prefer deriving metrics from existing tables first. Add additive analytics summary/snapshot tables only when raw-query cost or accuracy genuinely requires them.
+
+## Stage 12 — App Experience Redesign
+
+Stage 12 is a dedicated final frontend/product-experience overhaul before commercial onboarding and launch. Its goal is to make the WhatsApp workspace feel like a cohesive application, not a collection of website/admin pages.
+
+Scope includes:
+- app-shell architecture with persistent desktop sidebar and deliberate mobile navigation
+- reduced website-like page headers, oversized whitespace and repeated marketing-style cards
+- denser, task-oriented workspace layouts where appropriate
+- consistent top bars, command/search surfaces, breadcrumbs/context controls and account/workspace controls
+- split-pane and resizable workspace patterns for Conversations and other high-frequency tools where useful
+- app-style loading, empty, error, success, modal, drawer, toast and confirmation states
+- consistent design system for tables, filters, tabs, forms, side panels, menus, badges and action bars
+- desktop, tablet and mobile behaviour designed as an application rather than merely responsive webpages
+- preserve all functionality, permissions and API contracts while redesigning presentation
+- final accessibility, keyboard navigation, focus states and interaction consistency pass
+- visual regression and production smoke test across all WhatsApp modules before Stage 13
+
+This stage should happen after feature-heavy Stages 9–11 so the final design is built around the completed product rather than repeatedly redesigned around moving functionality.
 
 ## Stage 6 migrations
 
