@@ -59,7 +59,7 @@ const nextConfig = {
     if (!isServer) {
       config.resolve.alias = {
         ...(config.resolve.alias || {}),
-        "@/lib/whatsapp/templates": path.join(projectRoot, "src/lib/whatsapp/templateClient.ts"),
+        "@/lib/whatsapp/templates$": path.resolve(projectRoot, "src/lib/whatsapp/templateClient.ts"),
       };
     }
     return config;
