@@ -16,6 +16,7 @@ import InstantInteractionLayer from "./InstantInteractionLayer";
 import IncomingCallOverlay from "./IncomingCallOverlay";
 import TeamPresenceWidget from "./TeamPresenceWidget";
 import WorkspaceCollaborationLayer from "./WorkspaceCollaborationLayer";
+import "./stage12.css";
 
 export default async function WhatsAppConsoleLayout({ children }: { children: ReactNode }) {
   const cookieStore = await cookies();
