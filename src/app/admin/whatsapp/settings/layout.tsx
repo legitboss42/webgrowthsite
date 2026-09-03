@@ -26,7 +26,7 @@ export default async function WhatsAppSettingsLayout({ children }: { children: R
   ]);
 
   return (
-    <div className="whatsapp-settings-tabs-root">
+    <div className="wg-settings-workspace whatsapp-settings-tabs-root">
       <style>{`
         .whatsapp-settings-tabs-root #business,
         .whatsapp-settings-tabs-root #messaging,
