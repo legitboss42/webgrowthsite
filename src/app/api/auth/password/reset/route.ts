@@ -44,18 +44,29 @@ export async function POST(request: Request) {
 
   try {
     const actionUrl = await generateWorkspacePasswordResetLink(email);
-    if (actionUrl) {
-      const message = buildWhatsAppPasswordEmail({
-        displayName: member?.displayName || (isOwner ? "Web Growth Owner" : null),
-        actionUrl,
-        mode: "reset",
+    if (!actionUrl) {
+      console.error("Workspace password reset link generation failed", {
+        authorizedAccount: true,
       });
-      await sendTransactionalEmail({
-        to: [{ email, name: member?.displayName || undefined }],
-        replyTo: { email: ADMIN_EMAIL, name: "Web Growth" },
-        subject: message.subject,
-        text: message.text,
-        html: message.html,
+      return NextResponse.json({ ok: true });
+    }
+
+    const message = buildWhatsAppPasswordEmail({
+      displayName: member?.displayName || (isOwner ? "Web Growth Owner" : null),
+      actionUrl,
+      mode: "reset",
+    });
+    const delivery = await sendTransactionalEmail({
+      to: [{ email, name: member?.displayName || undefined }],
+      replyTo: { email: ADMIN_EMAIL, name: "Web Growth" },
+      subject: message.subject,
+      text: message.text,
+      html: message.html,
+    });
+
+    if (!delivery.ok) {
+      console.error("Workspace password reset email was not submitted", {
+        reason: delivery.reason,
       });
     }
   } catch (error) {
