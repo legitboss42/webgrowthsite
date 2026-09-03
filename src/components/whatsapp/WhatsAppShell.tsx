@@ -82,20 +82,20 @@ export default function WhatsAppShell({ children, senderConnected, senderNumber,
   }, [drawerOpen]);
 
   return (
-    <div className={`flex bg-paper text-ink ${fillsViewport ? "h-dvh overflow-hidden" : "min-h-dvh"}`}>
+    <div className={`flex w-full max-w-full overflow-x-hidden bg-paper text-ink ${fillsViewport ? "h-dvh overflow-y-hidden" : "min-h-dvh"}`}>
       <aside className="sticky top-0 hidden h-dvh w-64 flex-none flex-col bg-ledger-deep px-3 py-4 lg:flex"><SidebarContent senderConnected={senderConnected} senderNumber={senderNumber} role={role} memberName={memberName} workspaceControl={workspaceControl} /></aside>
       {drawerOpen ? <div className="fixed inset-0 z-50 lg:hidden"><button type="button" aria-label="Close navigation" onClick={() => setDrawerOpen(false)} className="absolute inset-0 h-full w-full bg-ink/50 backdrop-blur-[2px]" /><div id={drawerId} role="dialog" aria-modal="true" aria-label="WhatsApp console navigation" className="absolute inset-y-0 left-0 flex w-[17rem] max-w-[85vw] flex-col bg-ledger-deep px-3 py-4 shadow-2xl"><div className="mb-1 flex justify-end"><button type="button" onClick={() => setDrawerOpen(false)} className="rounded-lg p-2 text-white/70 transition hover:bg-white/10 hover:text-white"><WhatsAppIcon name="close" /><span className="sr-only">Close navigation</span></button></div><SidebarContent senderConnected={senderConnected} senderNumber={senderNumber} role={role} memberName={memberName} workspaceControl={workspaceControl} onNavigate={() => setDrawerOpen(false)} /></div></div> : null}
-      <div className={`flex min-w-0 flex-1 flex-col ${fillsViewport ? "overflow-hidden" : ""}`}>
-        <header className="sticky top-0 z-30 flex-none border-b border-rule bg-paper-raised/95 backdrop-blur supports-[backdrop-filter]:bg-paper-raised/80">
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-3 px-4 py-3 sm:px-6">
+      <div className={`flex w-0 min-w-0 max-w-full flex-1 flex-col ${fillsViewport ? "overflow-hidden" : ""}`}>
+        <header className="sticky top-0 z-30 w-full max-w-full flex-none border-b border-rule bg-paper-raised/95 backdrop-blur supports-[backdrop-filter]:bg-paper-raised/80">
+          <div className="flex w-full max-w-full flex-wrap items-center gap-x-4 gap-y-3 px-4 py-3 sm:px-6">
             <button type="button" onClick={() => setDrawerOpen(true)} aria-expanded={drawerOpen} aria-controls={drawerId} className="-ml-1 rounded-lg p-2 text-ink-soft transition hover:bg-paper-sunk hover:text-ink lg:hidden"><WhatsAppIcon name="menu" className="h-5 w-5" /><span className="sr-only">Open navigation</span></button>
             <Link href={workspaceHome(role)} aria-label="Web Growth WhatsApp console" className="flex-none rounded-md p-1 transition hover:bg-paper-sunk lg:hidden"><Image src="/images/brand/web-growth-logo.webp" alt="Web Growth" width={270} height={40} sizes="120px" quality={75} className="h-4 w-auto" /></Link>
             <div className="min-w-0 flex-1"><div className="flex items-center gap-2"><h1 className="font-display text-lg font-semibold leading-tight text-ink sm:text-xl">{title}</h1>{workspaceName ? <span className="truncate rounded-full border border-rule bg-paper px-2 py-0.5 text-[0.62rem] font-semibold text-ink-faint lg:hidden">{workspaceName}</span> : null}</div><p className="mt-0.5 hidden text-xs text-ink-faint sm:block">{description}</p></div>
             <div className="flex items-center gap-2"><span className="hidden rounded-full border border-rule bg-paper px-2.5 py-1 text-[0.65rem] font-semibold uppercase tracking-[.08em] text-ink-faint md:inline-flex">{role}</span>{presenceControl ?? <span className={`hidden items-center gap-2 rounded-full border px-3 py-1.5 text-xs sm:inline-flex ${senderConnected ? "border-ledger-tint bg-ledger-tint/60 text-ledger" : "border-rule bg-paper text-ink-faint"}`}><span aria-hidden="true" className={`h-2 w-2 rounded-full ${senderConnected ? "bg-ledger-bright" : "bg-ink-faint/50"}`} />{getWhatsAppSenderStatusText(senderConnected)}</span>}</div>
-            {toolbar ? <div className="w-full min-w-0 lg:w-auto">{toolbar}</div> : null}
+            {toolbar ? <div className="w-full min-w-0 max-w-full lg:w-auto">{toolbar}</div> : null}
           </div>
         </header>
-        <div className={`min-w-0 flex-1 ${fillsViewport ? "min-h-0 overflow-hidden" : ""}`}>{children}</div>
+        <div className={`w-full min-w-0 max-w-full flex-1 ${fillsViewport ? "min-h-0 overflow-hidden" : ""}`}>{children}</div>
       </div>
     </div>
   );
