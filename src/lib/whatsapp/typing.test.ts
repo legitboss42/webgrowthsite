@@ -2,9 +2,9 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   WHATSAPP_TYPING_REFRESH_MS,
-  sendWhatsAppTypingIndicator,
   shouldSendWhatsAppTypingSignal,
 } from "./typing";
+import { sendWhatsAppTypingIndicator } from "./typingServer";
 
 // Synthetic fixture on purpose. The real production phone-number id must not be pasted
 // into a test: it pins the suite to one account and travels wherever the repo travels.
@@ -198,7 +198,7 @@ test("a hundred keystrokes inside one window produce exactly one request", () =>
   let requests = 0;
 
   for (let keystroke = 0; keystroke < 100; keystroke += 1) {
-    const now = 5_000 + keystroke * 40; // a fast typist, 25 characters a second
+    const now = 5_000 + keystroke * 40;
     if (shouldSendWhatsAppTypingSignal({ hasDraft: true, lastSentAt, now })) {
       requests += 1;
       lastSentAt = now;
