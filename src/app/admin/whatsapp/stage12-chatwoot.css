@@ -1,0 +1,172 @@
+/* Chatwoot-inspired application foundation for the WhatsApp console.
+   Structure is adapted for Web Growth's existing Next.js app and feature set. */
+
+.wg-whatsapp-app {
+  --wg-bg: #05070a;
+  --wg-bg-soft: #080c11;
+  --wg-panel: #0b1118;
+  --wg-panel-2: #0e151d;
+  --wg-panel-3: #111a24;
+  --wg-line: #1b2732;
+  --wg-line-soft: #14202a;
+  --wg-text: #f5f7f8;
+  --wg-text-2: #c8d0d7;
+  --wg-text-3: #7e8c98;
+  --wg-green: #18c964;
+  --wg-green-soft: #0d2d1c;
+  --wg-green-line: #1a6f43;
+  --wg-gold: #c79a48;
+  background:
+    radial-gradient(circle at 18% -10%, rgba(24, 201, 100, 0.08), transparent 28rem),
+    radial-gradient(circle at 82% 0%, rgba(199, 154, 72, 0.035), transparent 24rem),
+    var(--wg-bg);
+  color: var(--wg-text);
+}
+
+.wg-whatsapp-app .wg-app-sidebar {
+  width: 15.5rem;
+  background: linear-gradient(180deg, rgba(24, 201, 100, 0.035), transparent 14rem), #070b10;
+  border-right: 1px solid var(--wg-line-soft);
+  box-shadow: 14px 0 32px rgba(0, 0, 0, 0.16);
+}
+
+.wg-whatsapp-app .wg-app-topbar {
+  min-height: 3.8rem;
+  background: rgba(5, 7, 10, 0.88);
+  border-bottom: 1px solid var(--wg-line-soft);
+  box-shadow: none;
+}
+
+.wg-whatsapp-app .wg-nav-row {
+  min-height: 2.35rem;
+  border: 1px solid transparent;
+  border-radius: 0.65rem;
+}
+
+.wg-whatsapp-app .wg-nav-row[data-active="true"] {
+  border-color: rgba(24, 201, 100, 0.18);
+  background: linear-gradient(90deg, rgba(24, 201, 100, 0.12), rgba(24, 201, 100, 0.035));
+  box-shadow: inset 2px 0 0 var(--wg-green);
+}
+
+.wg-whatsapp-app .wg-nav-row:hover {
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.wg-whatsapp-app :where(button, a, input, select, textarea) {
+  border-radius: 0.65rem;
+}
+
+.wg-whatsapp-app :where(input, select, textarea) {
+  background: #080d13;
+  border-color: var(--wg-line);
+}
+
+.wg-whatsapp-app :where(input, select, textarea):focus {
+  border-color: var(--wg-green-line);
+  box-shadow: 0 0 0 3px rgba(24, 201, 100, 0.08);
+}
+
+.wg-whatsapp-app table {
+  font-size: 0.8125rem;
+}
+
+.wg-whatsapp-app thead {
+  background: #0b1118;
+}
+
+.wg-whatsapp-app thead th {
+  color: var(--wg-text-3);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.wg-whatsapp-app tbody tr {
+  background: transparent;
+}
+
+.wg-whatsapp-app tbody tr:hover {
+  background: rgba(255, 255, 255, 0.022);
+}
+
+/* Full-height operational workspaces */
+.wg-whatsapp-app :where(.wg-inbox-workspace, .wg-crm-workspace, .wg-automation-workspace, .wg-campaign-workspace, .wg-flow-workspace, .wg-template-workspace, .wg-analytics-workspace, .wg-team-workspace, .wg-settings-workspace) {
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+}
+
+/* Chatwoot-like inbox composition: list, conversation, inspector. */
+.wg-whatsapp-app .wg-inbox-workspace {
+  background: var(--wg-bg);
+}
+
+.wg-whatsapp-app .wg-inbox-workspace :where(.wg-inbox-list, [data-inbox-list]) {
+  background: #080d13;
+  border-right: 1px solid var(--wg-line-soft);
+}
+
+.wg-whatsapp-app .wg-inbox-workspace :where(.wg-inbox-thread, [data-inbox-thread]) {
+  background:
+    radial-gradient(circle at 50% 0%, rgba(24, 201, 100, 0.025), transparent 24rem),
+    #070b10;
+}
+
+.wg-whatsapp-app .wg-inbox-workspace :where(.wg-inbox-detail, [data-inbox-detail]) {
+  background: #090f15;
+  border-left: 1px solid var(--wg-line-soft);
+}
+
+/* Panels become application surfaces, not floating website cards. */
+.wg-whatsapp-app :where(.wg-crm-workspace, .wg-automation-workspace, .wg-campaign-workspace, .wg-flow-workspace, .wg-template-workspace, .wg-analytics-workspace, .wg-team-workspace, .wg-settings-workspace) .rounded-2xl {
+  border-radius: 0.85rem;
+}
+
+.wg-whatsapp-app :where(.wg-crm-workspace, .wg-automation-workspace, .wg-campaign-workspace, .wg-flow-workspace, .wg-template-workspace, .wg-analytics-workspace, .wg-team-workspace, .wg-settings-workspace) [class*="bg-paper-raised"] {
+  background: var(--wg-panel);
+}
+
+.wg-whatsapp-app :where(.wg-crm-workspace, .wg-automation-workspace, .wg-campaign-workspace, .wg-flow-workspace, .wg-template-workspace, .wg-analytics-workspace, .wg-team-workspace, .wg-settings-workspace) [class*="border-rule"] {
+  border-color: var(--wg-line-soft);
+}
+
+/* Dense secondary rails like Chatwoot filters/folders. */
+.wg-whatsapp-app :where(.wg-crm-workspace, .wg-automation-workspace, .wg-settings-workspace) aside nav a {
+  min-height: 2.3rem;
+  border-radius: 0.55rem;
+}
+
+/* Builder/editor zones receive a distinct canvas layer. */
+.wg-whatsapp-app :where(.wg-automation-workspace, .wg-flow-workspace) [data-automation-action-path],
+.wg-whatsapp-app :where(.wg-automation-workspace, .wg-flow-workspace) [class*="canvas"] {
+  background-color: #070b10;
+}
+
+/* Mobile behaves like an app: one dominant surface at a time. */
+@media (max-width: 1023px) {
+  .wg-whatsapp-app .wg-app-sidebar {
+    width: 19rem;
+  }
+
+  .wg-whatsapp-app .wg-app-topbar {
+    min-height: 3.5rem;
+  }
+
+  .wg-whatsapp-app .wg-mobile-nav {
+    background: rgba(6, 9, 13, 0.97);
+    border-top-color: var(--wg-line-soft);
+  }
+}
+
+@media (max-width: 639px) {
+  .wg-whatsapp-app .wg-app-content {
+    background: #05070a;
+  }
+
+  .wg-whatsapp-app :where(.wg-crm-workspace, .wg-automation-workspace, .wg-campaign-workspace, .wg-flow-workspace, .wg-template-workspace, .wg-analytics-workspace, .wg-team-workspace, .wg-settings-workspace) {
+    padding-left: 0.65rem;
+    padding-right: 0.65rem;
+  }
+}
