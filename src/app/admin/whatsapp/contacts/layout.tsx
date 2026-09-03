@@ -29,7 +29,7 @@ export default function ContactsWorkspaceLayout({ children }: { children: ReactN
           <section className="rounded-2xl border border-rule bg-paper-raised p-2">
             <p className="px-3 pb-2 pt-2 text-[0.62rem] font-semibold uppercase tracking-[.16em] text-ink-faint">CRM pipeline</p>
             <nav className="flex gap-1 overflow-x-auto pb-1 lg:grid lg:overflow-visible lg:pb-0">
-              {pipeline.map(([label, href], index) => <Link key={label} href={href} className={`flex flex-none items-center gap-2 rounded-xl px-3 py-2.5 text-xs font-semibold lg:w-full ${index === 0 ? "bg-ledger-tint text-ledger-bright" : "text-ink-soft hover:bg-paper-sunk hover:text-ink"}`}><span className={`h-2 w-2 rounded-full ${index === 0 ? "bg-ledger-bright" : "bg-rule-strong"}`} />{label}</Link>)}
+              {pipeline.map(([label, href]) => <Link key={label} href={href} className="flex flex-none items-center gap-2 rounded-xl px-3 py-2.5 text-xs font-semibold text-ink-soft transition hover:bg-ledger-tint hover:text-ledger-bright lg:w-full"><span className="h-2 w-2 rounded-full bg-rule-strong" />{label}</Link>)}
             </nav>
             <div className="mt-3 border-t border-rule px-3 py-3"><p className="text-[0.62rem] font-semibold uppercase tracking-[.14em] text-ink-faint">Quick links</p><div className="mt-2 grid gap-1"><Link href="/admin/whatsapp/quick-replies/" className="rounded-lg py-2 text-xs text-ink-faint hover:text-ink">Saved replies</Link><Link href="/admin/whatsapp/team/" className="rounded-lg py-2 text-xs text-ink-faint hover:text-ink">Team management</Link></div></div>
           </section>
