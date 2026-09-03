@@ -6,6 +6,8 @@ export type WhatsAppTeamAvailability = (typeof WHATSAPP_TEAM_AVAILABILITY)[numbe
 
 export type WhatsAppTeamMember = {
   id: string;
+  workspaceId?: string | null;
+  userId?: string | null;
   googleEmail: string;
   displayName: string;
   role: WhatsAppTeamRole;
@@ -28,25 +30,20 @@ export function isValidWhatsAppTeamEmail(value: unknown) {
 }
 
 export function normalizeWhatsAppTeamRole(value: unknown): WhatsAppTeamRole | null {
-  return WHATSAPP_TEAM_ROLES.includes(value as WhatsAppTeamRole)
-    ? (value as WhatsAppTeamRole)
-    : null;
+  return WHATSAPP_TEAM_ROLES.includes(value as WhatsAppTeamRole) ? value as WhatsAppTeamRole : null;
 }
 
 export function normalizeWhatsAppTeamAvailability(value: unknown): WhatsAppTeamAvailability | null {
-  return WHATSAPP_TEAM_AVAILABILITY.includes(value as WhatsAppTeamAvailability)
-    ? (value as WhatsAppTeamAvailability)
-    : null;
+  return WHATSAPP_TEAM_AVAILABILITY.includes(value as WhatsAppTeamAvailability) ? value as WhatsAppTeamAvailability : null;
 }
 
 export function normalizeWhatsAppTeamMember(row: Record<string, unknown>): WhatsAppTeamMember {
   return {
     id: String(row.id || ""),
+    workspaceId: typeof row.workspace_id === "string" ? row.workspace_id : null,
+    userId: typeof row.user_id === "string" ? row.user_id : null,
     googleEmail: normalizeWhatsAppTeamEmail(row.google_email),
-    displayName:
-      typeof row.display_name === "string" && row.display_name.trim()
-        ? row.display_name.trim()
-        : normalizeWhatsAppTeamEmail(row.google_email),
+    displayName: typeof row.display_name === "string" && row.display_name.trim() ? row.display_name.trim() : normalizeWhatsAppTeamEmail(row.google_email),
     role: normalizeWhatsAppTeamRole(row.role) || "agent",
     availability: normalizeWhatsAppTeamAvailability(row.availability) || "offline",
     active: row.active === true,
@@ -67,14 +64,6 @@ export function isWhatsAppTeamMemberAssignable(member: Pick<WhatsAppTeamMember, 
   return member.active && member.availability === "available";
 }
 
-export function canWhatsAppRoleManageTeam(role: WhatsAppTeamRole) {
-  return role === "owner";
-}
-
-export function canWhatsAppRoleSuperviseTeam(role: WhatsAppTeamRole) {
-  return role === "owner" || role === "manager";
-}
-
-export function canWhatsAppRoleViewAllConversations(role: WhatsAppTeamRole) {
-  return role === "owner" || role === "manager";
-}
+export function canWhatsAppRoleManageTeam(role: WhatsAppTeamRole) { return role === "owner"; }
+export function canWhatsAppRoleSuperviseTeam(role: WhatsAppTeamRole) { return role === "owner" || role === "manager"; }
+export function canWhatsAppRoleViewAllConversations(role: WhatsAppTeamRole) { return role === "owner" || role === "manager"; }

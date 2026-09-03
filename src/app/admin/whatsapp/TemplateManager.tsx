@@ -17,7 +17,7 @@ import {
   listWhatsAppTemplateVariables,
   type WhatsAppTemplate,
   type WhatsAppTemplateStatus,
-} from "@/lib/whatsapp/templates";
+} from "@/lib/whatsapp/templateClient";
 
 type Notice = { tone: "ok" | "error"; text: string } | null;
 type Tab = "META" | "DRAFTS";
