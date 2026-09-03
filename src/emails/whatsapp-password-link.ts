@@ -1,7 +1,7 @@
-import { escapeHtml } from "@/lib/security";
-
-const SITE_URL = "https://webgrowth.info";
-const LOGO_URL = `${SITE_URL}/email/web-growth-logo.png`;
+import {
+  renderWebGrowthTransactionalEmail,
+  WEB_GROWTH_EMAIL_ADMIN,
+} from "./web-growth-transactional";
 
 export function buildWhatsAppPasswordEmail(input: {
   displayName?: string | null;
@@ -9,11 +9,14 @@ export function buildWhatsAppPasswordEmail(input: {
   mode: "setup" | "reset";
 }) {
   const firstName = input.displayName?.trim().split(/\s+/)[0] || "there";
-  const safeName = escapeHtml(firstName);
-  const safeUrl = escapeHtml(input.actionUrl);
   const setup = input.mode === "setup";
-  const subject = setup ? "Set up your Web Growth workspace password" : "Reset your Web Growth workspace password";
+  const subject = setup
+    ? "Set up your Web Growth workspace password"
+    : "Reset your Web Growth workspace password";
   const action = setup ? "Create password" : "Reset password";
+  const heading = setup
+    ? "Create your workspace password."
+    : "Reset your workspace password.";
 
   const text = [
     `Hi ${firstName},`,
@@ -24,14 +27,34 @@ export function buildWhatsAppPasswordEmail(input: {
     "",
     `${action}: ${input.actionUrl}`,
     "",
-    "You can also continue using Google sign-in.",
+    "Google sign-in will remain available.",
     "",
-    "If you did not request this, you can ignore this email.",
+    "If you did not request this, ignore this email and contact admin@webgrowth.info if you are concerned about your account.",
     "",
     "Web Growth",
+    "Build. Automate. Grow.",
   ].join("\n");
 
-  const html = `<!doctype html><html lang="en"><body style="margin:0;background:#eff1ec;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#14140f"><table role="presentation" width="100%" cellspacing="0" cellpadding="0"><tr><td align="center" style="padding:32px 16px"><table role="presentation" width="600" cellspacing="0" cellpadding="0" style="max-width:600px;width:100%;background:#fff;border:1px solid #d2d6cb"><tr><td align="center" style="background:#0c3327;padding:26px"><img src="${LOGO_URL}" width="200" alt="Web Growth" style="display:block;width:200px;height:auto"></td></tr><tr><td style="height:3px;background:#b4802f"></td></tr><tr><td style="padding:38px 40px"><p style="margin:0 0 10px;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#1c7a54">Workspace security</p><h1 style="margin:0 0 20px;font-family:Georgia,'Times New Roman',serif;font-weight:400;font-size:30px;line-height:38px">${setup ? "Create your workspace password." : "Reset your workspace password."}</h1><p style="margin:0 0 18px;font-size:16px;line-height:26px;color:#454a3f">Hi ${safeName},</p><p style="margin:0 0 24px;font-size:16px;line-height:26px;color:#454a3f">${setup ? "Choose a password for your Web Growth WhatsApp workspace account. Google sign-in will remain available too." : "Use the secure link below to choose a new password for your Web Growth WhatsApp workspace account."}</p><a href="${safeUrl}" style="display:inline-block;background:#124a38;color:#fff;text-decoration:none;padding:14px 24px;font-weight:600">${action}</a><p style="margin:24px 0 0;font-size:13px;line-height:22px;color:#737868">If you did not request this, you can ignore this email.</p></td></tr></table></td></tr></table></body></html>`;
+  const html = renderWebGrowthTransactionalEmail({
+    subject,
+    preheader: setup
+      ? "Create your Web Growth workspace password."
+      : "Use this secure link to reset your Web Growth workspace password.",
+    eyebrow: "Workspace security",
+    heading,
+    firstName,
+    paragraphs: [
+      setup
+        ? "Choose a password for your Web Growth WhatsApp workspace account. Google sign-in will remain available too."
+        : "Use the secure link below to choose a new password for your Web Growth WhatsApp workspace account.",
+      "For your security, use the link only from a device you trust.",
+    ],
+    details: [
+      { label: "Sign-in option", value: "Email + password, with Google sign-in still available" },
+    ],
+    action: { label: action, url: input.actionUrl },
+    footerNote: `If you did not request this, ignore the email and contact ${WEB_GROWTH_EMAIL_ADMIN} if you are concerned about your account.`,
+  });
 
   return { subject, text, html };
 }

@@ -82,6 +82,19 @@ export default function PasswordSetupForm({
       return;
     }
 
+    try {
+      const { data: sessionData } = await client.auth.getSession();
+      const accessToken = sessionData.session?.access_token?.trim();
+      if (accessToken) {
+        await fetch("/api/auth/password/changed/", {
+          method: "POST",
+          headers: { Authorization: `Bearer ${accessToken}` },
+        });
+      }
+    } catch (notificationError) {
+      console.warn("Password change notification could not be sent", notificationError);
+    }
+
     await client.auth.signOut();
     setDone(true);
     setBusy(false);

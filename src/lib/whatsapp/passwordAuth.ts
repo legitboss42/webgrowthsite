@@ -67,6 +67,23 @@ export async function signInWorkspaceWithPassword(email:string,password:string) 
   return {ok:true as const,user:{id:data.user.id,email:userEmail,fullName:typeof data.user.user_metadata?.full_name==="string"?data.user.user_metadata.full_name.trim()||null:null}};
 }
 
+export async function getWorkspaceAuthUserFromAccessToken(accessToken: string) {
+  const admin = createWorkspaceSupabaseAdminClient();
+  const token = accessToken.trim();
+  if (!admin || !token) return null;
+  const { data, error } = await admin.auth.getUser(token);
+  const email = normalizeWhatsAppTeamEmail(data.user?.email);
+  if (error || !data.user?.id || !email) return null;
+  return {
+    id: data.user.id,
+    email,
+    fullName:
+      typeof data.user.user_metadata?.full_name === "string"
+        ? data.user.user_metadata.full_name.trim() || null
+        : null,
+  };
+}
+
 async function generatePasswordActionLink(email:string,preferredType:"invite"|"recovery") {
   const admin=createWorkspaceSupabaseAdminClient(); const normalizedEmail=normalizeWhatsAppTeamEmail(email); if(!admin||!normalizedEmail) return null;
   const attempts:Array<"invite"|"recovery">=preferredType==="invite"?["invite","recovery"]:["recovery","invite"];

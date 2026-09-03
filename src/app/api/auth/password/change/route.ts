@@ -1,6 +1,8 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { getWhatsAppWorkspaceAccess } from "@/app/admin/whatsapp/auth";
+import { buildWhatsAppSecurityEmail } from "@/emails/whatsapp-security-notice";
+import { ADMIN_EMAIL, sendTransactionalEmail } from "@/lib/email";
 import { createWorkspaceSupabaseClient } from "@/lib/whatsapp/passwordAuth";
 import {
   checkRateLimit,
@@ -66,6 +68,24 @@ export async function POST(request: Request) {
   const { error: updateError } = await client.auth.updateUser({ password: newPassword });
   if (updateError) {
     return NextResponse.json({ error: updateError.message || "Password could not be changed." }, { status: 400 });
+  }
+
+  try {
+    const message = buildWhatsAppSecurityEmail({
+      event: "password_changed",
+      displayName: access.displayName,
+      email: access.email,
+      workspaceName: access.workspaceName,
+    });
+    await sendTransactionalEmail({
+      to: [{ email: access.email, name: access.displayName || undefined }],
+      replyTo: { email: ADMIN_EMAIL, name: "Web Growth" },
+      subject: message.subject,
+      text: message.text,
+      html: message.html,
+    });
+  } catch (error) {
+    console.error("Workspace password changed notice failed", error);
   }
 
   await client.auth.signOut();

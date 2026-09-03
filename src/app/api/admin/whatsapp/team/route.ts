@@ -7,6 +7,7 @@ import {
   probeWhatsAppTable,
   readWhatsAppRows,
 } from "@/app/admin/whatsapp/data";
+import { buildWhatsAppSecurityEmail } from "@/emails/whatsapp-security-notice";
 import { buildWhatsAppTeamInvitationEmail } from "@/emails/whatsapp-team-invitation";
 import { ADMIN_EMAIL, sendTransactionalEmail } from "@/lib/email";
 import { generateWorkspacePasswordSetupLink } from "@/lib/whatsapp/passwordAuth";
@@ -321,6 +322,37 @@ export async function PATCH(request: Request) {
       active: member.active,
     },
   });
+
+  try {
+    const event =
+      target.active !== member.active
+        ? member.active
+          ? "reactivated"
+          : "deactivated"
+        : target.role !== member.role
+          ? "role_changed"
+          : null;
+
+    if (event) {
+      const notice = buildWhatsAppSecurityEmail({
+        event,
+        displayName: member.displayName,
+        email: member.googleEmail,
+        workspaceName: access.workspaceName,
+        oldRole: target.role,
+        newRole: member.role,
+      });
+      await sendTransactionalEmail({
+        to: [{ email: member.googleEmail, name: member.displayName }],
+        replyTo: { email: ADMIN_EMAIL, name: "Web Growth" },
+        subject: notice.subject,
+        text: notice.text,
+        html: notice.html,
+      });
+    }
+  } catch (error) {
+    console.error("WhatsApp team security notice failed", error);
+  }
 
   return NextResponse.json({ ok: true, member });
 }
