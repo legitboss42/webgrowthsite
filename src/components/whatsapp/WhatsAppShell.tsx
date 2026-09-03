@@ -62,7 +62,7 @@ function NavRow({ item, onNavigate }: { item: WhatsAppNavItem; onNavigate?: () =
 function Brand({ href, compact = false, onNavigate }: { href: string; compact?: boolean; onNavigate?: () => void }) {
   return (
     <Link href={href} onClick={onNavigate} aria-label="Web Growth WhatsApp platform" className={`flex items-center rounded-xl transition hover:bg-white/[.045] ${compact ? "gap-2 p-1" : "gap-3 px-2 py-2"}`}>
-      <span className="grid h-9 w-9 flex-none place-items-center rounded-xl border border-ledger-bright/25 bg-ledger-tint text-sm font-black tracking-[-.04em] text-ledger-bright">WG</span>
+      <img src="/images/brand/stage12-app-logo.svg" alt="" aria-hidden="true" className="h-9 w-9 flex-none rounded-xl border border-white/10 object-cover" />
       {!compact ? <span className="min-w-0"><span className="block truncate text-sm font-bold text-white">Web Growth</span><span className="block truncate text-[0.61rem] font-medium text-ledger-bright">WhatsApp Business Platform</span></span> : null}
     </Link>
   );
