@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { WorkspaceActionLink, WorkspaceRail } from "@/components/whatsapp/WorkspaceChrome";
 
 const pipeline = [
-  { label: "All contacts", href: "/admin/whatsapp/contacts/", icon: "contacts" as const, note: "Entire workspace", active: true },
+  { label: "All contacts", href: "/admin/whatsapp/contacts/", icon: "contacts" as const, note: "Entire workspace" },
   { label: "New leads", href: "/admin/whatsapp/contacts/?stage=NEW", icon: "statusPending" as const, note: "Recently added" },
   { label: "Qualified", href: "/admin/whatsapp/contacts/?stage=QUALIFIED", icon: "statusDelivered" as const, note: "Ready to progress" },
   { label: "Follow up", href: "/admin/whatsapp/contacts/?stage=FOLLOW_UP", icon: "conversations" as const, note: "Needs attention" },
