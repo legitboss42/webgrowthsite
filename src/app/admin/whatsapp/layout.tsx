@@ -23,6 +23,7 @@ import "./stage12-workspaces.css";
 import "./stage12-chatwoot.css";
 import "./stage12-chatwoot-polish.css";
 import "./stage12-overlap-fixes.css";
+import "./stage12-sidebar-collapse-fix.css";
 
 export default async function WhatsAppConsoleLayout({ children }: { children: ReactNode }) {
   const cookieStore = await cookies();
