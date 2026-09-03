@@ -4,10 +4,10 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { Suspense, useState } from "react";
 import { WhatsAppIcon } from "@/components/whatsapp/icons";
-
-type AnalyticsView = "messages" | "advanced" | "calls";
 import AdvancedAnalyticsPanel from "./AdvancedAnalyticsPanel";
 import CallAnalyticsPanel from "./CallAnalyticsPanel";
+
+type AnalyticsView = "messages" | "advanced" | "calls";
 
 function TabButton({ view, active, onSelect, children }: { view: AnalyticsView; active: AnalyticsView; onSelect: (view: AnalyticsView) => void; children: ReactNode }) {
   return <button type="button" role="tab" id={`analytics-${view}-tab`} aria-selected={active === view} aria-controls={`analytics-${view}-panel`} onClick={() => onSelect(view)} className="wg-report-tab" data-active={active === view ? "true" : "false"}>{children}</button>;
