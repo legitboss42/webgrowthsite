@@ -69,6 +69,8 @@ Seeded defaults keep spending/billing disabled:
 
 All new private settings pages are explicitly registered in `scripts/validate-sitemap.mjs` as private application routes. They must never appear in public sitemap governance or become indexable merely because they use App Router pages.
 
+The shared route shells resolve workspace auth from the WhatsApp app root (`../auth` for workspace settings and `../../auth` for platform settings). Preview validation caught and corrected those relative imports before production merge.
+
 ## Stage boundaries
 
 This settings architecture does not rebuild Stage 11 and does not weaken tenant boundaries. Commercial payment processing remains deferred to Stage 13. Stage 12 may refine the visual/application experience of these routes while preserving behavior and routing.

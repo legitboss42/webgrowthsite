@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { getWhatsAppWorkspaceAccess } from "../../auth";
+import { getWhatsAppWorkspaceAccess } from "../auth";
 import { WHATSAPP_WORKSPACE_SETTINGS_ROUTES } from "@/lib/whatsapp/settingsNavigation";
 
 export default async function WorkspaceSettingsSection({
