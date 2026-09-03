@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
+import TopbarActionPortal from "@/components/whatsapp/TopbarActionPortal";
 import type { WhatsAppTeamRole } from "@/lib/whatsapp/teamModel";
 import type { WhatsAppAIAgent, WhatsAppAISettings } from "@/lib/whatsapp/aiModel";
 
@@ -72,8 +73,12 @@ export default function AIWorkspaceLayer({ role }: { role: WhatsAppTeamRole }) {
   const enabled = status.settings?.enabled === true;
   const modes = [["DRAFT_REPLY","Draft reply"],["SHORTER","Shorter"],["FRIENDLIER","Friendlier"],["PROFESSIONAL","Professional"],["SIMPLIFY","Simplify"],["GRAMMAR","Fix grammar"],["PERSUASIVE","More persuasive"],["EMPATHETIC","More empathetic"],["TRANSLATE","Translate"]] as const;
   return <>
-    <button type="button" onClick={() => setOpen((value) => !value)} className="fixed bottom-[5.6rem] right-5 z-[62] rounded-full border border-emerald-300/60 bg-[#123d30] px-4 py-2 text-xs font-semibold text-white shadow-xl hover:bg-[#0d3026]">✦ AI Assist</button>
-    {open ? <div className="fixed bottom-[8.8rem] right-5 z-[70] w-[min(94vw,27rem)] overflow-hidden rounded-2xl border border-rule bg-paper-raised shadow-2xl">
+    <TopbarActionPortal>
+      <button type="button" onClick={() => setOpen((value) => !value)} aria-expanded={open} className="inline-flex h-8 flex-none items-center gap-1.5 rounded-lg border border-emerald-300/35 bg-[#123d30] px-2.5 text-[0.68rem] font-semibold text-white shadow-sm hover:bg-[#0d3026]">
+        <span aria-hidden="true">✦</span><span className="hidden sm:inline">AI Assist</span><span className="sm:hidden">AI</span>
+      </button>
+    </TopbarActionPortal>
+    {open ? <div className="fixed bottom-[5.25rem] right-3 z-[70] w-[min(94vw,27rem)] overflow-hidden rounded-2xl border border-rule bg-paper-raised shadow-2xl sm:bottom-5 sm:right-5">
       <div className="flex items-center justify-between border-b border-rule px-4 py-3"><div><p className="text-sm font-semibold text-ink">AI Assist</p><p className="text-[0.68rem] text-ink-faint">Human-controlled. Drafts never send automatically.</p></div><button onClick={() => setOpen(false)} className="rounded-lg px-2 py-1 text-sm text-ink-faint hover:bg-paper-sunk">×</button></div>
       <div className="space-y-3 p-4">
         <div className="flex flex-wrap gap-2"><Pill>{enabled ? "AI enabled" : "AI disabled"}</Pill><Pill>{status.provider?.ready ? "AI ready" : "AI unavailable"}</Pill><Pill>{conversation?.ai_handling_mode === "AI" ? "AI handling" : conversation?.human_review_required ? "Human attention required" : "Human handling"}</Pill></div>
