@@ -65,6 +65,10 @@ Seeded defaults keep spending/billing disabled:
 - platform support email `admin@webgrowth.info`
 - default timezone `Africa/Lagos`
 
+## Route governance
+
+All new private settings pages are explicitly registered in `scripts/validate-sitemap.mjs` as private application routes. They must never appear in public sitemap governance or become indexable merely because they use App Router pages.
+
 ## Stage boundaries
 
 This settings architecture does not rebuild Stage 11 and does not weaken tenant boundaries. Commercial payment processing remains deferred to Stage 13. Stage 12 may refine the visual/application experience of these routes while preserving behavior and routing.
