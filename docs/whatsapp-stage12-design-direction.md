@@ -215,6 +215,33 @@ Some generated images drifted in numbering, duplicated existing areas, or accide
 9. Test responsive widths and repeated hard refreshes, including the known width instability.
 10. Only when the whole Stage 12 frontend is complete and verified should it be eligible to merge to `main` and deploy once.
 
+## Implementation checkpoint — 2026-09-03
+
+Stage 12 implementation is assembled on `stage12-app-redesign`. It remains intentionally off `main` and has not been intentionally promoted to Vercel production.
+
+Implemented frontend changes:
+
+- Added a WhatsApp-scoped Stage 12 design system so the public Web Growth site is unaffected.
+- Rebuilt the shared WhatsApp application shell with a dark fixed desktop sidebar, dense top bar, workspace switcher, user/sender state, supplied Web Growth app logo, active-route treatment and width containment.
+- Added deliberate mobile application navigation: fixed bottom navigation for high-frequency areas plus the existing role-aware drawer for the complete route set.
+- Hardened the application shell against the known refresh-width defect with `min-width: 0`, viewport max-width containment, full-width workspace roots and clipped accidental horizontal shell overflow.
+- Normalized legacy light feature surfaces and old purple/indigo/violet accent utilities inside the WhatsApp scope without changing their handlers or state.
+- Preserved the existing responsive URL-driven Inbox/contact panels, live composer, quick replies, media/voice controls, assignment, CRM, internal notes, service-window states and AI handling.
+- Preserved the existing responsive Contacts/CRM table/card views, search, filters, timeline, tags, stages, custom fields and conversation deep links.
+- Reworked Automations into an app-style Automations Hub with Workflow/AI Agent sections and live workflow metrics while preserving the authenticated user's original role permissions.
+- Restyled both the Automation Builder and WhatsApp Flow builder canvases into the dark application surface without changing workflow/Flow definitions or runtime behavior.
+- Applied the same application visual system to Campaigns/Broadcasts, Message Templates, Analytics/Reports, Calls, Quick Replies, Phone Numbers and Overview while preserving their existing functional managers.
+- Rebuilt Team Management into a dense operational workspace with live totals, presence, invitations, roles and activation controls while preserving existing API handlers and permission rules.
+- Converted Workspace Settings into a desktop two-pane settings workspace with a sticky category rail and mobile horizontal categories, preserving existing section IDs and controls.
+- Converted Platform Administration settings into a persistent desktop rail and mobile horizontal navigation while retaining platform-admin authorization and all existing routed sections.
+- Converted Account & Sign-in from a centered website-style page into a full-width application workspace while preserving password and logout behavior.
+- Added Stage 12 regression tests that verify live primary navigation, workspace settings navigation, platform settings navigation, literal internal WhatsApp links, absence of exact placeholder links/javascript URLs, supplied-logo usage and shell width safeguards.
+- Added a dedicated Stage 12 branch validation workflow covering WhatsApp tests, TypeScript, scoped eslint and the production build.
+
+No Supabase schema, WhatsApp API route, Stage 6–11 runtime, Meta integration, tenant model or production deployment behavior was intentionally changed by Stage 12.
+
+Final Stage 12 gate before eligibility for `main` remains: the final branch head must pass the dedicated validation workflow in full. Production promotion remains a separate action after that gate, per the user's no-partial-deployment instruction.
+
 ## Stage 12 implementation principle
 
 Before implementing the redesign, use the approved mockups to settle the shared application shell and design system first. Then migrate existing modules into that system without changing proven APIs, tenancy boundaries, permissions or backend behavior unless a specific functional defect requires it.
@@ -223,4 +250,4 @@ Stage 11 tenant isolation remains authoritative and must be preserved throughout
 
 ## Current implementation issue to retain in Stage 12 backlog
 
-Desktop WhatsApp pages currently have a refresh-related width/layout issue: after refreshing a WhatsApp page, content can widen until the browser window is minimized/maximized or otherwise resized. A first shell width guard did not fully resolve the issue. Treat this as a global application-shell defect and verify the final Stage 12 shell against repeated reload/hard-refresh behavior on multiple WhatsApp pages and desktop viewport sizes.
+Desktop WhatsApp pages previously had a refresh-related width/layout issue: after refreshing a WhatsApp page, content could widen until the browser window was minimized/maximized or otherwise resized. Stage 12 now applies the width constraint at the application-shell boundary instead of attempting another isolated page fix. The final production gate must still verify repeated reload/hard-refresh behavior at multiple desktop widths before marking this defect closed in production.
