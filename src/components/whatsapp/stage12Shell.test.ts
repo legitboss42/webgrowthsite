@@ -75,6 +75,8 @@ test("Stage 12 shell keeps the redesign scoped to WhatsApp and uses the supplied
   const css = readFileSync(path.join(ROOT, "src/app/admin/whatsapp/stage12.css"), "utf8");
   const overrides = readFileSync(path.join(ROOT, "src/app/admin/whatsapp/stage12-overrides.css"), "utf8");
   const workspaces = readFileSync(path.join(ROOT, "src/app/admin/whatsapp/stage12-workspaces.css"), "utf8");
+  const chatwoot = readFileSync(path.join(ROOT, "src/app/admin/whatsapp/stage12-chatwoot.css"), "utf8");
+  const polish = readFileSync(path.join(ROOT, "src/app/admin/whatsapp/stage12-chatwoot-polish.css"), "utf8");
   assert.match(shell, /wg-whatsapp-app/);
   assert.match(shell, /\/images\/brand\/stage12-app-logo\.svg/);
   assert.equal(existsSync(path.join(ROOT, "public/images/brand/stage12-app-logo.svg")), true);
@@ -82,8 +84,49 @@ test("Stage 12 shell keeps the redesign scoped to WhatsApp and uses the supplied
   assert.match(css, /^\.wg-whatsapp-app/m);
   assert.match(overrides, /^\.wg-whatsapp-app/m);
   assert.match(workspaces, /^\.wg-whatsapp-app/m);
+  assert.match(chatwoot, /^\.wg-whatsapp-app/m);
+  assert.match(polish, /^\.wg-whatsapp-app/m);
+  assert.match(chatwoot, /wg-cw-inbox-list/);
+  assert.match(chatwoot, /wg-inspector-rail/);
+  assert.match(polish, /wg-report-tab/);
   assert.match(css, /max-width:\s*100vw/);
   assert.match(css, /overflow-x:\s*clip/);
+});
+
+test("corrective redesign uses shared app chrome across operational routes", () => {
+  const chrome = readFileSync(path.join(ROOT, "src/components/whatsapp/WorkspaceChrome.tsx"), "utf8");
+  assert.match(chrome, /WorkspaceToolbar/);
+  assert.match(chrome, /WorkspaceRail/);
+  assert.match(chrome, /WorkspaceStat/);
+  assert.match(chrome, /WorkspaceSurface/);
+
+  const structuralMarkers = [
+    ["src/app/admin/whatsapp/conversations/page.tsx", "wg-cw-inbox"],
+    ["src/app/admin/whatsapp/contacts/layout.tsx", "WorkspaceRail"],
+    ["src/app/admin/whatsapp/automations/page.tsx", "WorkspaceToolbar"],
+    ["src/app/admin/whatsapp/campaigns/page.tsx", "WorkspaceToolbar"],
+    ["src/app/admin/whatsapp/flows/page.tsx", "wg-editor-surface"],
+    ["src/app/admin/whatsapp/templates/page.tsx", "WorkspaceToolbar"],
+    ["src/app/admin/whatsapp/analytics/layout.tsx", "wg-page-commandbar"],
+    ["src/app/admin/whatsapp/team/layout.tsx", "WorkspaceToolbar"],
+    ["src/app/admin/whatsapp/calls/page.tsx", "WorkspaceToolbar"],
+    ["src/app/admin/whatsapp/quick-replies/page.tsx", "WorkspaceToolbar"],
+    ["src/app/admin/whatsapp/phone-numbers/page.tsx", "WorkspaceToolbar"],
+    ["src/app/admin/whatsapp/account/page.tsx", "WorkspaceToolbar"],
+    ["src/app/admin/whatsapp/platform/settings/PlatformSettingsSection.tsx", "WorkspaceToolbar"],
+  ] as const;
+
+  for (const [file, marker] of structuralMarkers) {
+    const source = readFileSync(path.join(ROOT, file), "utf8");
+    assert.ok(source.includes(marker), `${file} is missing corrective redesign marker ${marker}`);
+  }
+});
+
+test("corrective redesign branch is explicitly blocked from Vercel Git deployment", () => {
+  const config = JSON.parse(readFileSync(path.join(ROOT, "vercel.json"), "utf8")) as {
+    git?: { deploymentEnabled?: Record<string, boolean> };
+  };
+  assert.equal(config.git?.deploymentEnabled?.["stage12-visual-redesign-v2"], false);
 });
 
 test("major WhatsApp routes use dedicated app workspace frames", () => {
