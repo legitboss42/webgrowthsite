@@ -100,7 +100,7 @@ function SidebarContent({ senderConnected, senderNumber, role, memberName, works
           <div className="flex min-w-0 items-center gap-2 rounded-lg border border-white/[.06] bg-white/[.025] px-2.5 py-2">
             <span className="grid h-7 w-7 flex-none place-items-center rounded-md bg-white/[.05] text-[0.62rem] font-bold text-white/74">WG</span>
             <span className="min-w-0 flex-1 truncate text-xs font-medium text-white/78">{workspaceName || "Web Growth"}</span>
-            <WhatsAppIcon name="chevronDown" className="h-3.5 w-3.5 text-white/28" />
+            <WhatsAppIcon name="chevronLeft" className="h-3.5 w-3.5 -rotate-90 text-white/28" />
           </div>
         )}
       </div>
