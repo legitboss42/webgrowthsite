@@ -7,7 +7,7 @@ import {
 import { isSameOriginMutation } from "@/lib/scheduler/policy";
 import { loadWhatsAppQuickSettings } from "@/lib/whatsapp/quickSettings";
 import { getSupabaseWhatsAppReplyContext } from "@/lib/whatsapp/store";
-import { sendWhatsAppTypingIndicator } from "@/lib/whatsapp/typing";
+import { sendWhatsAppTypingIndicator } from "@/lib/whatsapp/typingServer";
 
 export const runtime = "nodejs";
 
@@ -61,7 +61,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, reason: "NO_INBOUND_MESSAGE" }, { status: 409 });
   }
 
-  const result = await sendWhatsAppTypingIndicator({ messageId: replyContext.replyToMessageId });
+  const result = await sendWhatsAppTypingIndicator(
+    { messageId: replyContext.replyToMessageId },
+    { workspaceId: access.workspaceId },
+  );
 
   if (!result.sent) {
     const statuses: Record<typeof result.reason, number> = {
