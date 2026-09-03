@@ -26,7 +26,7 @@ export const WHATSAPP_NAV_SECTIONS: WhatsAppNavSection[] = [
     items: [
       { label: "Campaigns", href: `${WHATSAPP_CONSOLE_ROOT}/campaigns`, icon: "campaigns", description: "Opt-in template campaigns, audiences, scheduling, and delivery performance.", status: "live", roles: SUPERVISORS },
       { label: "Flows", href: `${WHATSAPP_CONSOLE_ROOT}/flows`, icon: "templates", description: "Build, publish, send, and track interactive WhatsApp Flows.", status: "live", roles: SUPERVISORS },
-      { label: "Automations", href: `${WHATSAPP_CONSOLE_ROOT}/automations`, icon: "automations", description: "Trigger, condition, and action workflows for WhatsApp operations.", status: "live", roles: SUPERVISORS },
+      { label: "Automations", href: `${WHATSAPP_CONSOLE_ROOT}/automations`, icon: "automations", description: "Workflows and AI Agents for rule-based and intelligent WhatsApp operations.", status: "live", roles: SUPERVISORS },
       { label: "Analytics", href: `${WHATSAPP_CONSOLE_ROOT}/analytics`, icon: "analytics", description: "Response times, volumes, and lead quality.", status: "live", roles: OWNER },
     ],
   },
@@ -34,9 +34,9 @@ export const WHATSAPP_NAV_SECTIONS: WhatsAppNavSection[] = [
     label: "Configuration",
     items: [
       { label: "Team", href: `${WHATSAPP_CONSOLE_ROOT}/team`, icon: "contacts", description: "Team members, roles, availability, and access.", status: "live", roles: SUPERVISORS },
-      { label: "Settings", href: `${WHATSAPP_CONSOLE_ROOT}/account`, icon: "settings", description: "Manage your workspace account and sign-in preferences.", status: "live" },
+      { label: "Settings", href: `${WHATSAPP_CONSOLE_ROOT}/settings`, icon: "settings", description: "Business, messaging, AI, connection, diagnostics and workspace safety settings.", status: "live", roles: OWNER },
       { label: "Phone Numbers", href: `${WHATSAPP_CONSOLE_ROOT}/phone-numbers`, icon: "phoneNumbers", description: "Connected senders, quality rating, and limits.", status: "live", roles: OWNER },
-      { label: "Business Settings", href: `${WHATSAPP_CONSOLE_ROOT}/settings`, icon: "settings", description: "Integration configuration and connection readiness reporting.", status: "live", roles: OWNER },
+      { label: "Account", href: `${WHATSAPP_CONSOLE_ROOT}/account`, icon: "settings", description: "Workspace sign-in and personal account preferences.", status: "live" },
     ],
   },
 ];

@@ -19,6 +19,9 @@ import {
   readRequestedWhatsAppWorkspaceIdFromRequest,
 } from "@/lib/whatsapp/workspaces";
 
+const LEGACY_AI_KNOWLEDGE_RPC = "rpc/search_whatsapp_ai_knowledge";
+const SCOPED_AI_KNOWLEDGE_RPC = "rpc/search_whatsapp_ai_knowledge_scoped";
+
 export function getWhatsAppSupabaseConfig() {
   const url = process.env.SUPABASE_URL?.trim();
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
@@ -125,6 +128,13 @@ export type WhatsAppMutationResult =
   | { ok: true; rows: Array<Record<string, unknown>> }
   | { ok: false; status: number; code?: string; message: string };
 
+export function bindWhatsAppScopedRpc(input: { pathAndQuery: string; body?: unknown; workspaceId?: string | null; unscoped?: boolean }) {
+  if (input.unscoped || input.pathAndQuery !== LEGACY_AI_KNOWLEDGE_RPC) return { pathAndQuery: input.pathAndQuery, body: input.body };
+  if (!isWhatsAppWorkspaceId(input.workspaceId)) return null;
+  const base = input.body && typeof input.body === "object" && !Array.isArray(input.body) ? input.body as Record<string, unknown> : {};
+  return { pathAndQuery: SCOPED_AI_KNOWLEDGE_RPC, body: { ...base, workspace_id_arg: input.workspaceId } };
+}
+
 /**
  * Service-role write against PostgREST. The server owns workspace_id: a browser body
  * can never move a row into another tenant because this function overwrites it.
@@ -140,10 +150,12 @@ export async function mutateWhatsAppRest(input: {
   if (!config) return { ok: false, status: 503, message: "WhatsApp storage is not configured." };
 
   const workspaceId = await resolveDataWorkspaceId({ workspaceId: input.workspaceId, unscoped: input.unscoped });
-  const table = getWhatsAppRestTable(input.pathAndQuery);
+  const rpc = bindWhatsAppScopedRpc({ pathAndQuery: input.pathAndQuery, body: input.body, workspaceId, unscoped: input.unscoped });
+  if (!rpc) return { ok: false, status: 503, message: "A trusted WhatsApp workspace is required." };
+  const table = getWhatsAppRestTable(rpc.pathAndQuery);
   const tenantOwned = WHATSAPP_TENANT_TABLES.has(table) && !input.unscoped;
-  const scopedPath = tenantOwned ? scopeWhatsAppRestPath(input.pathAndQuery, workspaceId) : input.pathAndQuery;
-  const scopedBody = tenantOwned ? applyWhatsAppWorkspaceToBody(input.body, workspaceId) : input.body;
+  const scopedPath = tenantOwned ? scopeWhatsAppRestPath(rpc.pathAndQuery, workspaceId) : rpc.pathAndQuery;
+  const scopedBody = tenantOwned ? applyWhatsAppWorkspaceToBody(rpc.body, workspaceId) : rpc.body;
 
   try {
     const response = await fetch(`${config.url}/rest/v1/${scopedPath}`, {
