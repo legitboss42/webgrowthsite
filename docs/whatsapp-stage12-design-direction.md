@@ -8,9 +8,26 @@ Stage 12 is the final product-experience redesign of the Web Growth WhatsApp Bus
 
 All functionality already built in Stages 1–11 must retain a clear place in the redesigned application. Stage 12 is primarily an application-shell, information-architecture, density, consistency, responsiveness and interaction redesign. It must not casually remove or rebuild working backend behavior.
 
-## Approved visual direction
+## Execution lock for this redesign
 
-The current mockup direction is approved as the basis for continued Stage 12 exploration:
+The user supplied the Web Growth logo plus the full 13-page mockup set as the visual reference for implementation. Those references are the approved design direction for the entire WhatsApp application, including every existing routed page and mobile view.
+
+Non-negotiable implementation rules:
+
+- Frontend redesign only. Do not remove, rename, replace or silently alter working backend features, APIs, database behavior, tenancy boundaries, permissions, Meta integration, automation runtime, campaign runtime, Flow runtime, AI runtime or Supabase schema unless a pre-existing defect makes a minimal compatible frontend fix impossible.
+- Preserve every existing feature and expose it in the redesigned application.
+- Every visible interactive control must either perform its existing action or route to the correct existing destination. No decorative dead buttons, fake tabs, placeholder links or broken feature controls.
+- Every existing WhatsApp route must remain reachable and correctly governed.
+- Build responsive layouts deliberately. Mobile is not a scaled-down desktop screenshot.
+- Use the uploaded Web Growth logo in the application shell. Do not substitute a generated or older site mark.
+- Mockup sample names, counts, dates, metrics and fictional content must never replace live application data.
+- Maintain semantic structure, keyboard operability, focus visibility, labels, dialogs/drawers, contrast and touch targets.
+- Fix the known desktop refresh width/layout instability at the application-shell boundary.
+- Do not deploy Stage 12 to Vercel production until the redesign is complete and production release is explicitly authorized.
+
+Stage 12 implementation branch: `stage12-app-redesign`.
+
+## Approved visual direction
 
 - dark application UI
 - near-black / very dark navy application background
@@ -22,152 +39,67 @@ The current mockup direction is approved as the basis for continued Stage 12 exp
 - persistent application navigation
 - full-screen application workspaces where appropriate
 - clear selected, active, success and online states using green
-- secondary semantic colours may be used sparingly where required for warnings, errors, information, charts or workflow differentiation
-- PURPLE IS NOT PART OF THE APPROVED STAGE 12 VISUAL DIRECTION and should not be used as a recurring brand/accent colour
-- avoid the generic purple-gradient SaaS-template appearance
+- secondary semantic colours only where required for warnings, errors, information, charts or workflow differentiation
+- PURPLE IS NOT PART OF THE APPROVED STAGE 12 VISUAL DIRECTION and is not a recurring brand/accent colour
+- avoid generic purple-gradient SaaS-template styling
 - design should feel like a messaging + marketing operations application
 
-## Mockup presentation rule
+## Product areas covered
 
-Mockups are to be generated and reviewed as individual, bold, full-size page images. Do not combine multiple platform pages into a single collage/design board when reviewing individual page designs.
-
-The mockups are design references, not literal implementation specifications. Generated labels, example data, colours or duplicated screens must not override the actual product architecture or existing functionality.
-
-## Platform areas that must have a place in the redesign
-
-The Stage 12 application architecture must accommodate the functionality already built across the project, including:
+The completed application architecture covers:
 
 1. Conversations / Inbox
-   - conversation list
-   - live chat workspace
-   - customer/contact context
-   - assignment and status controls
-   - tags and CRM information
-   - internal notes
-   - attachments / media / voice-note capable composer
-   - typing/read/delivery/service-window states where supported
-   - AI Assist and human/AI handling controls
-
 2. Contacts / CRM
-   - contacts
-   - CRM stages
-   - tags
-   - custom fields
-   - contact history
-   - segmentation and relevant campaign/automation context
-
 3. Automations Hub
-   - workflow list and lifecycle states
-   - runtime information
-   - AI Agent visibility/integration where appropriate
-
 4. Automation Builder
-   - visual workflow canvas
-   - triggers, conditions and actions
-   - configuration panels
-   - run/test/history controls
-
-5. Campaigns & Broadcasts
-   - campaign list
-   - audiences/segments
-   - lifecycle/status
-   - delivery/read/click/failure performance
-   - campaign creation and reporting
-
-6. WhatsApp Flows
-   - Flow management
-   - Meta Flow state/version information
-   - Flow launch/submission/runtime information
-   - Flow editing/builder experience where supported
-
+5. Campaigns / Broadcasts
+6. WhatsApp Flows and Flow Builder
 7. Message Templates
-   - Meta template list
-   - category/language/status/quality information
-   - drafts and creation/editing
-   - submission/status refresh
-   - test-send and duplication where supported
-
 8. AI Agents
-   - AI Agent definitions
-   - active/draft/paused states
-   - knowledge and instructions
-   - action permissions
-   - testing/sandbox
-   - usage and handoff information
-
 9. Analytics & Reports
-   - executive KPIs
-   - conversations/backlog/response metrics
-   - message/call analytics
-   - team attribution
-   - CRM distributions
-   - automation performance/failures
-   - campaign funnel analytics
-   - Flow analytics
-   - AI usage/performance where available
-   - operational drill-downs
-
 10. Team Management
-    - members
-    - workspace roles and permissions
-    - assignment/activity/availability information where supported
-    - invitations/password access flows
-
 11. Workspace Settings
-    - General / Business Profile
-    - WhatsApp connection
-    - Inbox & Messaging
-    - Business Hours
-    - Lead & CRM
-    - Team & Assignment
-    - Notifications
-    - Automation
-    - AI
-    - Campaigns
-    - Templates & Flows
-    - Integrations & API
-    - Data & Privacy
-    - Security
-    - Danger Zone
-
 12. Platform Administration / Multi-Business SaaS
-    - workspace management
-    - platform identities
-    - workspace switching/context
-    - plans/entitlements
-    - Meta connection infrastructure
-    - platform-level email/AI/security/system/audit/feature controls as implemented or introduced during commercialisation
+13. Responsive/mobile application experience
+14. Calls
+15. Saved Replies
+16. Phone Numbers
+17. Account and Overview
 
-13. Responsive / mobile application experience
-    - especially Inbox and conversation handling
-    - deliberate mobile navigation rather than a shrunk desktop website
-    - preserve essential CRM, assignment and messaging actions
+The supplied mockup references map to the real product rather than replacing it with fictional mockup content.
 
-## Current mockup exploration checkpoint
+## Full redesign completion — 2026-09-03
 
-A sequence of numbered dark-theme mockups has been generated during Stage 12 design exploration. The useful visual direction includes concepts for:
+The original Stage 12 theme-first implementation was rejected by the user because changing colours around the old presentation did not constitute a full redesign. The corrective pass is now complete on `stage12-app-redesign`.
 
-- Conversations / Inbox
-- Contacts / CRM
-- Automations Hub
-- Automation Builder
-- Campaigns / Broadcasts
-- Analytics
-- WhatsApp Flows
-- Message Templates
-- AI Agents
-- Team Management
-- Settings
-- supporting automation/reporting/template views
+Completed corrective implementation:
 
-Some generated images drifted in numbering, duplicated existing areas, or accidentally introduced purple accents. Those mistakes are NOT product requirements. The approved direction is the consistent dark Web Growth application shell described in this document.
+- Rebuilt the shared WhatsApp application shell with fixed desktop navigation, compact top bar, real workspace/user/sender context, supplied Stage 12 Web Growth logo, role-aware routes, mobile drawer and mobile bottom navigation.
+- Added route-specific app workspace frames for Inbox, CRM, Automations, Campaigns, Flows, Templates, Analytics, Team, Settings, Calls, Saved Replies, Phone Numbers and Account.
+- Rebuilt Contacts around a CRM pipeline rail and dense operational records area.
+- Rebuilt Analytics around a reporting workspace with Messages, Advanced and Calls views plus reporting/drill-down rails.
+- Preserved and integrated the real three-pane Inbox rather than replacing it with a mockup-only shell.
+- Preserved and integrated the real Automation Builder with draggable nodes, branches, zoom/canvas controls and the Properties inspector.
+- Preserved and integrated the real WhatsApp Flow multi-pane builder with screen/component editing and Meta lifecycle actions.
+- Reworked Campaigns, Templates, Team, Calls, Saved Replies, Phone Numbers, Account, Workspace Settings and Platform Settings into the same application composition and control system.
+- Standardized actual buttons, forms, tabs, filters, tables, badges, menus, dialogs, builder surfaces and mobile touch states across the WhatsApp application scope.
+- Kept green as the recurring brand accent and removed recurring purple/indigo/violet treatment inside the application.
+- Removed the obsolete logo workaround and render the exact supplied asset from `public/images/brand/stage12-app-logo.svg`.
+- Added structural regression tests for route resolution, internal links, placeholder/javascript URLs, supplied-logo usage, workspace frames and Automation/Flow builder structures.
+- Preserved Stage 1–11 runtime behavior, tenant isolation, auth/roles, Meta integration and Supabase schema.
 
-## Stage 12 implementation principle
+Corrective redesign code head `ada792cfa8b3b84bba6e768585ac7a55431fca17` passed Stage 12 validation run 67:
 
-Before implementing the redesign, use the approved mockups to settle the shared application shell and design system first. Then migrate existing modules into that system without changing proven APIs, tenancy boundaries, permissions or backend behavior unless a specific functional defect requires it.
+- **209/209 WhatsApp tests passed**
+- **TypeScript passed**
+- **Scoped ESLint passed with 0 errors**
+- **Sitemap/route governance passed**
+- **Next.js production build passed**
 
-Stage 11 tenant isolation remains authoritative and must be preserved throughout Stage 12.
+The final documentation commits are also required to re-run the same branch workflow; only the exact final branch head should be treated as the release candidate.
 
-## Current implementation issue to retain in Stage 12 backlog
+## Production hold
 
-Desktop WhatsApp pages currently have a refresh-related width/layout issue: after refreshing a WhatsApp page, content can widen until the browser window is minimized/maximized or otherwise resized. A first shell width guard did not fully resolve the issue. Treat this as a global application-shell defect and verify the final Stage 12 shell against repeated reload/hard-refresh behavior on multiple WhatsApp pages and desktop viewport sizes.
+Stage 12 remains deliberately off `main`. No Supabase changes and no production promotion are part of the frontend completion work. Production merge/deployment remains a separate explicit release action.
+
+The historical refresh-width problem now has stronger shell-level containment (`min-width: 0`, viewport max-width constraints, full-width workspace roots and clipped accidental shell overflow). Its final repeated hard-refresh verification is necessarily a production/browser smoke check after deployment and is not falsely marked as production-verified before release.

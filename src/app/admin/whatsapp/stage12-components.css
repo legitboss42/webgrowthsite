@@ -1,0 +1,258 @@
+/* Stage 12 component rebuild.
+   This is intentionally scoped to .wg-whatsapp-app and changes presentation only. */
+
+.wg-whatsapp-app {
+  --wg-panel: #0a1118;
+  --wg-panel-2: #0d161f;
+  --wg-panel-3: #101b24;
+  --wg-border: #1b2933;
+  --wg-border-strong: #2b3b46;
+  --wg-green: #16c65a;
+  --wg-green-dark: #0b8f45;
+  --wg-green-soft: rgba(22, 198, 90, .11);
+  --wg-danger: #f87171;
+  --wg-warning: #f0b95a;
+  --wg-info: #5aa7f0;
+  --wg-radius: 10px;
+  --wg-radius-lg: 14px;
+}
+
+/* Full application workspace instead of centered website sections. */
+.wg-whatsapp-app .wg-app-content :where(.max-w-7xl,.max-w-6xl,.max-w-5xl,.max-w-4xl,.max-w-3xl) {
+  max-width: none !important;
+}
+
+.wg-whatsapp-app .wg-app-content :where(.container) {
+  width: 100% !important;
+  max-width: none !important;
+}
+
+.wg-whatsapp-app .wg-app-content :where(section, article)[class*="rounded"] {
+  border-radius: var(--wg-radius-lg) !important;
+}
+
+/* Primary application buttons. */
+.wg-whatsapp-app :where(button,a)[class*="bg-ledger"],
+.wg-whatsapp-app :where(button,a)[class*="bg-emerald-"],
+.wg-whatsapp-app :where(button,a)[class*="bg-green-"],
+.wg-whatsapp-app :where(button,a)[class*="bg-purple-"],
+.wg-whatsapp-app :where(button,a)[class*="bg-indigo-"] {
+  min-height: 2.5rem;
+  border-radius: 9px !important;
+  border: 1px solid rgba(49, 225, 112, .28) !important;
+  background: linear-gradient(180deg, #19cb5e, #0fa449) !important;
+  color: #031108 !important;
+  font-weight: 700 !important;
+  letter-spacing: -.01em;
+  box-shadow: 0 6px 18px rgba(22,198,90,.13), inset 0 1px 0 rgba(255,255,255,.18);
+}
+
+.wg-whatsapp-app :where(button,a)[class*="bg-ledger"]:hover,
+.wg-whatsapp-app :where(button,a)[class*="bg-emerald-"]:hover,
+.wg-whatsapp-app :where(button,a)[class*="bg-green-"]:hover,
+.wg-whatsapp-app :where(button,a)[class*="bg-purple-"]:hover,
+.wg-whatsapp-app :where(button,a)[class*="bg-indigo-"]:hover {
+  filter: brightness(1.07);
+  transform: translateY(-1px);
+}
+
+/* Secondary/ghost buttons become real app controls rather than pale website pills. */
+.wg-whatsapp-app :where(button,a)[class*="border-rule"],
+.wg-whatsapp-app :where(button,a)[class*="border-slate-"],
+.wg-whatsapp-app :where(button,a)[class*="border-gray-"] {
+  border-radius: 9px !important;
+  border-color: var(--wg-border-strong) !important;
+  background-color: #0d161f !important;
+  color: #dbe2e6 !important;
+  font-weight: 600;
+}
+
+.wg-whatsapp-app :where(button,a)[class*="border-rule"]:hover,
+.wg-whatsapp-app :where(button,a)[class*="border-slate-"]:hover,
+.wg-whatsapp-app :where(button,a)[class*="border-gray-"]:hover {
+  border-color: #3a4d59 !important;
+  background-color: #13202a !important;
+  color: #fff !important;
+}
+
+/* Destructive controls remain visibly destructive. */
+.wg-whatsapp-app :where(button,a)[class*="bg-red-"],
+.wg-whatsapp-app :where(button,a)[class*="bg-rose-"] {
+  border-radius: 9px !important;
+  border: 1px solid rgba(248,113,113,.34) !important;
+  background: #321417 !important;
+  color: #fecaca !important;
+  font-weight: 700;
+}
+
+/* Form controls: consistent 40px app fields, inset surface, stronger focus. */
+.wg-whatsapp-app :where(input:not([type="checkbox"]):not([type="radio"]), select, textarea) {
+  border-radius: 9px !important;
+  border-color: var(--wg-border-strong) !important;
+  background: #081018 !important;
+  color: #f5f7f8 !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.018);
+}
+
+.wg-whatsapp-app :where(input:not([type="checkbox"]):not([type="radio"]), select) {
+  min-height: 2.5rem;
+}
+
+.wg-whatsapp-app :where(input,select,textarea):focus {
+  border-color: rgba(22,198,90,.72) !important;
+  box-shadow: 0 0 0 3px rgba(22,198,90,.09) !important;
+}
+
+.wg-whatsapp-app input[type="checkbox"],
+.wg-whatsapp-app input[type="radio"] {
+  accent-color: var(--wg-green);
+}
+
+/* KPI cards and operational panels. */
+.wg-whatsapp-app :where(.rounded-2xl,.rounded-xl)[class*="border"][class*="bg-"] {
+  border-color: var(--wg-border) !important;
+}
+
+.wg-whatsapp-app :where(.rounded-2xl)[class*="border"][class*="bg-paper"],
+.wg-whatsapp-app :where(.rounded-2xl)[class*="border"][class*="bg-slate"],
+.wg-whatsapp-app :where(.rounded-2xl)[class*="border"][class*="bg-white"] {
+  border-radius: var(--wg-radius-lg) !important;
+  background: linear-gradient(180deg, rgba(15,25,34,.98), rgba(9,16,23,.98)) !important;
+  box-shadow: 0 12px 32px rgba(0,0,0,.12) !important;
+}
+
+/* Tabs: flat app tabs with a green active rail instead of marketing pills. */
+.wg-whatsapp-app :where(button,a)[aria-current="page"],
+.wg-whatsapp-app :where(button)[aria-selected="true"] {
+  font-weight: 700;
+}
+
+.wg-whatsapp-app :where([role="tablist"]) {
+  gap: .25rem;
+  border-bottom: 1px solid var(--wg-border);
+}
+
+.wg-whatsapp-app :where([role="tab"]) {
+  border-radius: 8px 8px 0 0 !important;
+  color: #8f9ba4;
+}
+
+.wg-whatsapp-app :where([role="tab"])[aria-selected="true"] {
+  color: #fff;
+  background: rgba(22,198,90,.08) !important;
+  box-shadow: inset 0 -2px 0 var(--wg-green);
+}
+
+/* Data tables: desktop software density and clear interactive rows. */
+.wg-whatsapp-app table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  overflow: hidden;
+  border: 1px solid var(--wg-border);
+  border-radius: var(--wg-radius-lg);
+  background: #091017;
+}
+
+.wg-whatsapp-app thead th {
+  height: 2.75rem;
+  border-bottom: 1px solid var(--wg-border) !important;
+  background: #0d161f !important;
+  color: #7f8b95 !important;
+  font-size: .68rem !important;
+  font-weight: 700 !important;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+
+.wg-whatsapp-app tbody td {
+  border-bottom-color: #152129 !important;
+}
+
+.wg-whatsapp-app tbody tr:last-child td {
+  border-bottom: 0 !important;
+}
+
+.wg-whatsapp-app tbody tr:hover td {
+  background: rgba(22,198,90,.025);
+}
+
+/* Status badges / chips. */
+.wg-whatsapp-app :where(span,div)[class*="rounded-full"][class*="px-2"] {
+  border-width: 1px;
+  font-weight: 650;
+}
+
+/* Dropdowns, menus and modal surfaces. */
+.wg-whatsapp-app :where([role="menu"],[role="listbox"]) {
+  border: 1px solid var(--wg-border-strong) !important;
+  border-radius: 10px !important;
+  background: #0a1118 !important;
+  box-shadow: 0 22px 55px rgba(0,0,0,.42) !important;
+}
+
+.wg-whatsapp-app :where([role="dialog"]) {
+  border-color: var(--wg-border-strong) !important;
+}
+
+.wg-whatsapp-app :where([role="dialog"]) > :where(div,section,article) {
+  background-color: #091118 !important;
+}
+
+/* Builder canvases: visibly separate tool rail, canvas, and inspector zones. */
+.wg-whatsapp-app :where([class*="canvas" i]) {
+  background-color: #070d12;
+  background-image:
+    radial-gradient(circle, rgba(138,157,169,.18) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+
+.wg-whatsapp-app :where([class*="sidebar" i],[class*="inspector" i],[class*="panel" i])[class*="border"] {
+  border-color: var(--wg-border) !important;
+}
+
+/* Conversation/CRM split panes should read as app columns rather than floating cards. */
+.wg-whatsapp-app :where([class*="divide-x"]) > * {
+  border-color: var(--wg-border) !important;
+}
+
+/* Search bars receive a quieter, wide command-bar treatment. */
+.wg-whatsapp-app input[type="search"],
+.wg-whatsapp-app input[placeholder*="Search" i] {
+  background-image: linear-gradient(180deg, rgba(255,255,255,.012), rgba(255,255,255,0));
+}
+
+/* Scrollbars are deliberately slim throughout operational workspaces. */
+.wg-whatsapp-app * {
+  scrollbar-width: thin;
+  scrollbar-color: #293842 transparent;
+}
+
+/* Mobile rebuild: controls become touch sized, cards flatten, tables scroll rather than explode width. */
+@media (max-width: 1023px) {
+  .wg-whatsapp-app :where(button,a)[class*="px-"] {
+    min-height: 2.75rem;
+  }
+
+  .wg-whatsapp-app table {
+    min-width: 44rem;
+  }
+
+  .wg-whatsapp-app :where(.overflow-x-auto) {
+    border-radius: var(--wg-radius-lg);
+  }
+}
+
+@media (max-width: 639px) {
+  .wg-whatsapp-app .wg-app-content :where(.rounded-2xl)[class*="border"] {
+    border-radius: 12px !important;
+  }
+
+  .wg-whatsapp-app :where(button,a)[class*="rounded-full"] {
+    min-height: 2.5rem;
+  }
+
+  .wg-whatsapp-app :where(h1) {
+    letter-spacing: -.025em;
+  }
+}

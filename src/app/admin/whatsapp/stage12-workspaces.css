@@ -1,0 +1,259 @@
+/* Stage 12 full workspace rebuild.
+   Route-level workspace classes convert the operational screens into a dense app layout
+   without changing data, API calls, permissions, or feature behaviour. */
+
+.wg-whatsapp-app .wg-inbox-workspace,
+.wg-whatsapp-app .wg-crm-workspace,
+.wg-whatsapp-app .wg-automation-workspace,
+.wg-whatsapp-app .wg-flow-workspace,
+.wg-whatsapp-app .wg-campaign-workspace,
+.wg-whatsapp-app .wg-template-workspace,
+.wg-whatsapp-app .wg-analytics-workspace,
+.wg-whatsapp-app .wg-team-workspace,
+.wg-whatsapp-app .wg-settings-workspace,
+.wg-whatsapp-app .wg-calls-workspace,
+.wg-whatsapp-app .wg-replies-workspace,
+.wg-whatsapp-app .wg-numbers-workspace,
+.wg-whatsapp-app .wg-account-workspace {
+  width: 100%;
+  min-width: 0;
+}
+
+/* Inbox: true three-pane support workspace. */
+.wg-whatsapp-app .wg-inbox-workspace {
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  background: #070c11;
+}
+
+.wg-whatsapp-app .wg-inbox-workspace > div {
+  height: 100%;
+  min-height: 0;
+  background: #070c11;
+}
+
+.wg-whatsapp-app .wg-inbox-workspace > div > section:first-of-type {
+  background: #0a1118;
+}
+
+.wg-whatsapp-app .wg-inbox-workspace > div > section:nth-of-type(2) {
+  background: #070d12;
+}
+
+.wg-whatsapp-app .wg-inbox-workspace > div > aside:last-child {
+  background: #0a1118;
+}
+
+.wg-whatsapp-app .wg-inbox-workspace ul > li > a {
+  position: relative;
+}
+
+.wg-whatsapp-app .wg-inbox-workspace ul > li > a[aria-current="true"]::before {
+  content: "";
+  position: absolute;
+  inset-block: .55rem;
+  left: 0;
+  width: 2px;
+  border-radius: 999px;
+  background: #16c65a;
+}
+
+.wg-whatsapp-app .wg-inbox-workspace article[class*="rounded-2xl"] {
+  border-radius: 14px !important;
+  box-shadow: 0 8px 26px rgba(0,0,0,.16) !important;
+}
+
+.wg-whatsapp-app .wg-inbox-workspace article[class*="bg-ledger"] {
+  border: 1px solid rgba(22,198,90,.24);
+  background: #0f713a !important;
+  color: #fff !important;
+}
+
+.wg-whatsapp-app .wg-inbox-workspace article[class*="bg-paper-raised"] {
+  border-color: #1d2b34 !important;
+  background: #101820 !important;
+}
+
+.wg-whatsapp-app .wg-inbox-workspace form textarea {
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* CRM: stable left pipeline rail + dense records surface. */
+.wg-whatsapp-app .wg-crm-workspace {
+  min-height: calc(100dvh - 4.4rem);
+  background: #070c11;
+}
+
+.wg-whatsapp-app .wg-crm-workspace main {
+  background: #091017 !important;
+}
+
+.wg-whatsapp-app .wg-crm-workspace table {
+  border: 0;
+  border-radius: 0;
+}
+
+.wg-whatsapp-app .wg-crm-workspace table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.wg-whatsapp-app .wg-crm-workspace tbody tr {
+  height: 4.25rem;
+}
+
+.wg-whatsapp-app .wg-crm-workspace tbody tr:hover td {
+  background: rgba(22,198,90,.035);
+}
+
+/* Automation and Flow builders: tool rail / canvas / inspector feel. */
+.wg-whatsapp-app .wg-automation-workspace,
+.wg-whatsapp-app .wg-flow-workspace {
+  min-height: calc(100dvh - 4.4rem);
+  background: #070c11;
+}
+
+.wg-whatsapp-app .wg-automation-workspace [style*="radial-gradient"],
+.wg-whatsapp-app .wg-flow-workspace [style*="radial-gradient"] {
+  background-color: #060c11 !important;
+}
+
+.wg-whatsapp-app .wg-automation-workspace [data-automation-action-path],
+.wg-whatsapp-app .wg-flow-workspace button[class*="w-[270px]"] {
+  border-color: #26353f !important;
+  background: #101922 !important;
+  color: #eef3f5 !important;
+  box-shadow: 0 10px 26px rgba(0,0,0,.18) !important;
+}
+
+.wg-whatsapp-app .wg-automation-workspace [data-automation-action-path]:hover {
+  border-color: rgba(22,198,90,.55) !important;
+}
+
+.wg-whatsapp-app .wg-automation-workspace main[class*="overflow-auto"],
+.wg-whatsapp-app .wg-flow-workspace main[class*="overflow-auto"] {
+  min-height: 46rem;
+  border-color: #1b2933 !important;
+}
+
+.wg-whatsapp-app .wg-automation-workspace aside[class*="sticky"],
+.wg-whatsapp-app .wg-flow-workspace aside[class*="sticky"] {
+  border-left: 1px solid #1b2933;
+  background: #0a1118 !important;
+}
+
+/* Campaigns / templates: operational tables and details instead of floating marketing cards. */
+.wg-whatsapp-app .wg-campaign-workspace,
+.wg-whatsapp-app .wg-template-workspace {
+  min-height: calc(100dvh - 4.4rem);
+  background: #070c11;
+}
+
+.wg-whatsapp-app .wg-campaign-workspace main,
+.wg-whatsapp-app .wg-template-workspace main {
+  min-width: 0;
+}
+
+.wg-whatsapp-app .wg-campaign-workspace table,
+.wg-whatsapp-app .wg-template-workspace table {
+  border: 0;
+  border-radius: 0;
+}
+
+/* Analytics: dashboard grid should feel like a reporting console. */
+.wg-whatsapp-app .wg-analytics-workspace {
+  min-height: calc(100dvh - 4.4rem);
+  background: #070c11;
+}
+
+.wg-whatsapp-app .wg-analytics-workspace svg {
+  overflow: visible;
+}
+
+.wg-whatsapp-app .wg-analytics-workspace [role="tablist"] {
+  background: transparent !important;
+  border: 0 !important;
+  border-bottom: 1px solid #1b2933 !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+}
+
+.wg-whatsapp-app .wg-analytics-workspace [role="tab"] {
+  min-height: 2.9rem;
+  padding-inline: 1rem;
+}
+
+/* Team, settings and secondary operational areas share the same software density. */
+.wg-whatsapp-app .wg-team-workspace,
+.wg-whatsapp-app .wg-settings-workspace,
+.wg-whatsapp-app .wg-calls-workspace,
+.wg-whatsapp-app .wg-replies-workspace,
+.wg-whatsapp-app .wg-numbers-workspace,
+.wg-whatsapp-app .wg-account-workspace {
+  min-height: calc(100dvh - 4.4rem);
+  background: #070c11;
+}
+
+.wg-whatsapp-app .wg-settings-workspace nav a[aria-current="page"] {
+  box-shadow: inset 2px 0 #16c65a;
+}
+
+.wg-whatsapp-app .wg-team-workspace table,
+.wg-whatsapp-app .wg-calls-workspace table,
+.wg-whatsapp-app .wg-numbers-workspace table {
+  background: #091017;
+}
+
+/* Buttons: distinguish primary app actions from navigation and small icon controls. */
+.wg-whatsapp-app :where(.wg-inbox-workspace,.wg-crm-workspace,.wg-automation-workspace,.wg-flow-workspace,.wg-campaign-workspace,.wg-template-workspace,.wg-analytics-workspace,.wg-team-workspace,.wg-settings-workspace,.wg-calls-workspace,.wg-replies-workspace,.wg-numbers-workspace,.wg-account-workspace) button {
+  transition: border-color 120ms ease, background-color 120ms ease, color 120ms ease, transform 120ms ease, opacity 120ms ease;
+}
+
+.wg-whatsapp-app :where(.wg-inbox-workspace,.wg-crm-workspace,.wg-automation-workspace,.wg-flow-workspace,.wg-campaign-workspace,.wg-template-workspace,.wg-analytics-workspace,.wg-team-workspace,.wg-settings-workspace,.wg-calls-workspace,.wg-replies-workspace,.wg-numbers-workspace,.wg-account-workspace) button:focus-visible,
+.wg-whatsapp-app :where(.wg-inbox-workspace,.wg-crm-workspace,.wg-automation-workspace,.wg-flow-workspace,.wg-campaign-workspace,.wg-template-workspace,.wg-analytics-workspace,.wg-team-workspace,.wg-settings-workspace,.wg-calls-workspace,.wg-replies-workspace,.wg-numbers-workspace,.wg-account-workspace) a:focus-visible {
+  outline: 2px solid rgba(22,198,90,.85);
+  outline-offset: 2px;
+}
+
+@media (max-width: 1023px) {
+  .wg-whatsapp-app .wg-inbox-workspace {
+    height: calc(100dvh - 7.6rem);
+  }
+
+  .wg-whatsapp-app .wg-crm-workspace,
+  .wg-whatsapp-app .wg-automation-workspace,
+  .wg-whatsapp-app .wg-flow-workspace,
+  .wg-whatsapp-app .wg-campaign-workspace,
+  .wg-whatsapp-app .wg-template-workspace,
+  .wg-whatsapp-app .wg-analytics-workspace,
+  .wg-whatsapp-app .wg-team-workspace,
+  .wg-whatsapp-app .wg-settings-workspace,
+  .wg-whatsapp-app .wg-calls-workspace,
+  .wg-whatsapp-app .wg-replies-workspace,
+  .wg-whatsapp-app .wg-numbers-workspace,
+  .wg-whatsapp-app .wg-account-workspace {
+    min-height: auto;
+    padding-bottom: 5rem;
+  }
+}
+
+@media (max-width: 639px) {
+  .wg-whatsapp-app .wg-inbox-workspace article[class*="rounded-2xl"] {
+    max-width: 88% !important;
+  }
+
+  .wg-whatsapp-app .wg-crm-workspace main,
+  .wg-whatsapp-app .wg-campaign-workspace main,
+  .wg-whatsapp-app .wg-template-workspace main {
+    border-inline: 0 !important;
+    border-radius: 12px !important;
+  }
+
+  .wg-whatsapp-app .wg-automation-workspace [data-automation-action-path] {
+    width: min(16rem, calc(100vw - 5rem)) !important;
+  }
+}
