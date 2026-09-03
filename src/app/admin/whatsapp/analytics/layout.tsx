@@ -17,7 +17,7 @@ function LoadingCards() { return <section className="p-4 sm:p-5"><div className=
 
 export default function WhatsAppAnalyticsLayout({ children }: { children: ReactNode }) {
   const [view, setView] = useState<AnalyticsView>("messages");
-  return <div className="w-full p-3 sm:p-5 lg:p-6">
+  return <div className="wg-analytics-workspace w-full p-3 sm:p-5 lg:p-6">
     <header className="mb-5 flex flex-col gap-4 border-b border-rule pb-5 xl:flex-row xl:items-end xl:justify-between"><div><div className="mb-2 flex items-center gap-2 text-[0.65rem] font-semibold uppercase tracking-[.16em] text-ledger-bright"><span className="h-1.5 w-1.5 rounded-full bg-ledger-bright" />Performance intelligence</div><h1 className="text-2xl font-semibold text-ink sm:text-3xl">Analytics & reports</h1><p className="mt-1 max-w-2xl text-sm leading-6 text-ink-faint">Monitor messaging, conversations, automations and calls from a single reporting workspace.</p></div><div className="flex flex-wrap gap-2"><Link href="/admin/whatsapp/conversations/" className="inline-flex items-center gap-2 rounded-xl border border-rule bg-paper-raised px-3.5 py-2.5 text-xs font-semibold text-ink-soft hover:border-rule-strong hover:text-ink"><WhatsAppIcon name="conversations" className="h-4 w-4" />Inbox</Link><Link href="/admin/whatsapp/campaigns/" className="inline-flex items-center gap-2 rounded-xl border border-ledger-bright/25 bg-ledger-tint px-3.5 py-2.5 text-xs font-semibold text-ledger-bright"><WhatsAppIcon name="campaigns" className="h-4 w-4" />Campaigns</Link></div></header>
     <div className="grid min-w-0 gap-4 xl:grid-cols-[minmax(0,1fr)_17rem] xl:gap-5">
       <main className="min-w-0 overflow-hidden rounded-2xl border border-rule bg-paper-raised">
