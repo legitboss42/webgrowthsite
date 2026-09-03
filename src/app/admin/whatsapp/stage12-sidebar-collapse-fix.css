@@ -1,0 +1,29 @@
+/* True desktop sidebar collapse.
+   The Chatwoot foundation sets .wg-app-sidebar to 15rem !important, which previously
+   overrode the shell's w-[4.5rem] collapsed utility. Keep the desktop rail narrow
+   so the released width is actually returned to the application workspace. */
+
+@media (min-width: 1024px) {
+  .wg-whatsapp-app > .wg-app-sidebar[class~="w-[14.5rem]"] {
+    width: 14.5rem !important;
+    min-width: 14.5rem !important;
+    max-width: 14.5rem !important;
+  }
+
+  .wg-whatsapp-app > .wg-app-sidebar[class~="w-[4.5rem]"] {
+    width: 4.5rem !important;
+    min-width: 4.5rem !important;
+    max-width: 4.5rem !important;
+  }
+
+  .wg-whatsapp-app > .wg-app-sidebar[class~="w-[4.5rem]"] .wg-sidebar-brand,
+  .wg-whatsapp-app > .wg-app-sidebar[class~="w-[4.5rem]"] .wg-workspace-switcher,
+  .wg-whatsapp-app > .wg-app-sidebar[class~="w-[4.5rem]"] .wg-sidebar-footer {
+    width: 100%;
+  }
+
+  .wg-whatsapp-app > .wg-app-sidebar[class~="w-[4.5rem]"] .wg-nav-row {
+    width: 100%;
+    justify-content: center;
+  }
+}

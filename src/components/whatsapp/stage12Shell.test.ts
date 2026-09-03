@@ -72,12 +72,14 @@ test("WhatsApp frontend contains no exact placeholder links or javascript URLs",
 
 test("Stage 12 shell keeps the redesign scoped to WhatsApp and uses a real raster app logo", () => {
   const shell = readFileSync(path.join(ROOT, "src/components/whatsapp/WhatsAppShell.tsx"), "utf8");
+  const layout = readFileSync(path.join(ROOT, "src/app/admin/whatsapp/layout.tsx"), "utf8");
   const css = readFileSync(path.join(ROOT, "src/app/admin/whatsapp/stage12.css"), "utf8");
   const overrides = readFileSync(path.join(ROOT, "src/app/admin/whatsapp/stage12-overrides.css"), "utf8");
   const workspaces = readFileSync(path.join(ROOT, "src/app/admin/whatsapp/stage12-workspaces.css"), "utf8");
   const chatwoot = readFileSync(path.join(ROOT, "src/app/admin/whatsapp/stage12-chatwoot.css"), "utf8");
   const polish = readFileSync(path.join(ROOT, "src/app/admin/whatsapp/stage12-chatwoot-polish.css"), "utf8");
   const overlapFixes = readFileSync(path.join(ROOT, "src/app/admin/whatsapp/stage12-overlap-fixes.css"), "utf8");
+  const sidebarCollapseFix = readFileSync(path.join(ROOT, "src/app/admin/whatsapp/stage12-sidebar-collapse-fix.css"), "utf8");
   assert.match(shell, /\/images\/logo\.webp/);
   assert.equal(existsSync(path.join(ROOT, "public/images/logo.webp")), true);
   assert.match(shell, /Mobile WhatsApp navigation/);
@@ -88,6 +90,11 @@ test("Stage 12 shell keeps the redesign scoped to WhatsApp and uses a real raste
   assert.match(polish, /^\.wg-whatsapp-app/m);
   assert.match(overlapFixes, /^\.wg-whatsapp-app/m);
   assert.match(overlapFixes, /section:has\(#whatsapp-composer-editor\)/);
+  assert.match(layout, /stage12-sidebar-collapse-fix\.css/);
+  assert.match(sidebarCollapseFix, /w-\[4\.5rem\]/);
+  assert.match(sidebarCollapseFix, /width:\s*4\.5rem\s*!important/);
+  assert.match(sidebarCollapseFix, /min-width:\s*4\.5rem\s*!important/);
+  assert.match(sidebarCollapseFix, /max-width:\s*4\.5rem\s*!important/);
   assert.match(workspaces, /wg-inbox-workspace > div > section:first-of-type/);
   assert.match(chatwoot, /wg-inspector-rail/);
   assert.match(polish, /wg-report-tab/);
