@@ -129,6 +129,23 @@
   color: #66737d;
 }
 
+.wg-whatsapp-app :where(button, [role="button"], a[class*="rounded"]) {
+  transition-property: color, background-color, border-color, opacity, transform;
+  transition-duration: 140ms;
+}
+
+.wg-whatsapp-app :where(button:not(:disabled)):active,
+.wg-whatsapp-app :where([role="button"]):active {
+  transform: translateY(1px);
+}
+
+/* The mockups are an application, not an editorial site. Older WhatsApp screens
+   used the public-site serif display face; Stage 12 deliberately normalizes it. */
+.wg-whatsapp-app .font-serif,
+.wg-whatsapp-app .font-display {
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif !important;
+}
+
 /* Hard-coded light utilities left in older modules are normalized here. */
 .wg-whatsapp-app .bg-white {
   background-color: #0a1118 !important;
@@ -182,6 +199,13 @@
   max-width: 100%;
 }
 
+/* Page roots should use the workspace, not float in a website-width island. */
+.wg-whatsapp-app .wg-app-content > .mx-auto,
+.wg-whatsapp-app .wg-app-content > div > .mx-auto:first-child {
+  width: 100%;
+  max-width: none;
+}
+
 .wg-whatsapp-app .wg-sidebar-scroll {
   scrollbar-width: thin;
   scrollbar-color: #25323b transparent;
@@ -207,6 +231,20 @@
   min-height: 3.25rem;
 }
 
+/* Dense, operational surfaces. Cards stay subtle and square enough to feel like
+   software rather than a stack of marketing feature cards. */
+.wg-whatsapp-app :where(.rounded-2xl, .rounded-xl)[class*="border-rule"][class*="bg-paper-raised"] {
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.08);
+}
+
+.wg-whatsapp-app :where(input, select, textarea)[class*="border-rule"] {
+  border-color: #263640;
+}
+
+.wg-whatsapp-app :where(input, select, textarea)[class*="bg-paper"] {
+  background-color: #070d13;
+}
+
 /* Tables and data grids keep app-like density instead of website spacing. */
 .wg-whatsapp-app table {
   border-color: #18242d;
@@ -220,9 +258,23 @@
   border-color: #18242d;
 }
 
+.wg-whatsapp-app tbody tr:hover {
+  background-color: rgba(255, 255, 255, 0.018);
+}
+
+/* WhatsApp-style message preview backgrounds that were light in Stage 5/7 must
+   remain legible inside the dark application. */
+.wg-whatsapp-app .bg-\[\#e8f5ef\] {
+  background-color: #0d2919 !important;
+}
+
 @media (max-width: 1023px) {
   .wg-whatsapp-app .wg-app-content {
     padding-bottom: calc(4rem + env(safe-area-inset-bottom));
+  }
+
+  .wg-whatsapp-app :where(button, a, input, select) {
+    min-height: 2.75rem;
   }
 }
 
@@ -233,6 +285,11 @@
 
   .wg-whatsapp-app .wg-app-topbar {
     min-height: 3.5rem;
+  }
+
+  .wg-whatsapp-app .wg-app-content > :where(div, main, section):not([class*="h-full"]) {
+    padding-left: max(0.75rem, env(safe-area-inset-left));
+    padding-right: max(0.75rem, env(safe-area-inset-right));
   }
 }
 
