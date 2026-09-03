@@ -82,7 +82,7 @@ export default function WhatsAppShell({ children, senderConnected, senderNumber,
   }, [drawerOpen]);
 
   return (
-    <div className={`flex w-full max-w-full overflow-x-hidden bg-paper text-ink ${fillsViewport ? "h-dvh overflow-y-hidden" : "min-h-dvh"}`}>
+    <div className={`flex w-full max-w-full overflow-x-hidden bg-paper text-ink lg:fixed lg:inset-0 lg:max-w-none ${fillsViewport ? "h-dvh overflow-y-hidden" : "min-h-dvh lg:min-h-0 lg:overflow-y-auto"}`}>
       <aside className="sticky top-0 hidden h-dvh w-64 flex-none flex-col bg-ledger-deep px-3 py-4 lg:flex"><SidebarContent senderConnected={senderConnected} senderNumber={senderNumber} role={role} memberName={memberName} workspaceControl={workspaceControl} /></aside>
       {drawerOpen ? <div className="fixed inset-0 z-50 lg:hidden"><button type="button" aria-label="Close navigation" onClick={() => setDrawerOpen(false)} className="absolute inset-0 h-full w-full bg-ink/50 backdrop-blur-[2px]" /><div id={drawerId} role="dialog" aria-modal="true" aria-label="WhatsApp console navigation" className="absolute inset-y-0 left-0 flex w-[17rem] max-w-[85vw] flex-col bg-ledger-deep px-3 py-4 shadow-2xl"><div className="mb-1 flex justify-end"><button type="button" onClick={() => setDrawerOpen(false)} className="rounded-lg p-2 text-white/70 transition hover:bg-white/10 hover:text-white"><WhatsAppIcon name="close" /><span className="sr-only">Close navigation</span></button></div><SidebarContent senderConnected={senderConnected} senderNumber={senderNumber} role={role} memberName={memberName} workspaceControl={workspaceControl} onNavigate={() => setDrawerOpen(false)} /></div></div> : null}
       <div className={`flex w-0 min-w-0 max-w-full flex-1 flex-col ${fillsViewport ? "overflow-hidden" : ""}`}>
