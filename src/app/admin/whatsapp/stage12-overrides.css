@@ -67,8 +67,9 @@
   --color-orange-800: #fed7aa;
 }
 
-/* Old Flow-builder canvas and template preview literals. */
-.wg-whatsapp-app .bg-\[\#f6f7f4\] {
+/* Old visual-builder canvas and preview literals. */
+.wg-whatsapp-app .bg-\[\#f6f7f4\],
+.wg-whatsapp-app .bg-\[\#f7f8f5\] {
   background-color: #070b10 !important;
 }
 
