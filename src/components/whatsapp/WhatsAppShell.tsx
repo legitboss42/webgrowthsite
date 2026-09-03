@@ -43,7 +43,7 @@ function Brand({ href, compact = false, onNavigate }: { href: string; compact?: 
   return (
     <Link href={href} onClick={onNavigate} aria-label="Web Growth WhatsApp platform" className={`wg-brand flex min-w-0 items-center ${compact ? "gap-2" : "gap-2.5"}`}>
       <span className="wg-brand-mark relative grid h-9 w-9 flex-none place-items-center overflow-hidden rounded-xl">
-        <img src="/images/brand/stage12-app-logo.svg" alt="Web Growth" width="36" height="36" className="h-full w-full object-cover" />
+        <img src="/images/logo.webp" alt="Web Growth" width="36" height="36" className="h-full w-full object-cover" />
       </span>
       {!compact ? (
         <span className="min-w-0">

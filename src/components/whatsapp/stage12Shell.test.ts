@@ -70,22 +70,24 @@ test("WhatsApp frontend contains no exact placeholder links or javascript URLs",
   assert.deepEqual(violations, []);
 });
 
-test("Stage 12 shell keeps the redesign scoped to WhatsApp and uses the supplied app logo", () => {
+test("Stage 12 shell keeps the redesign scoped to WhatsApp and uses a real raster app logo", () => {
   const shell = readFileSync(path.join(ROOT, "src/components/whatsapp/WhatsAppShell.tsx"), "utf8");
   const css = readFileSync(path.join(ROOT, "src/app/admin/whatsapp/stage12.css"), "utf8");
   const overrides = readFileSync(path.join(ROOT, "src/app/admin/whatsapp/stage12-overrides.css"), "utf8");
   const workspaces = readFileSync(path.join(ROOT, "src/app/admin/whatsapp/stage12-workspaces.css"), "utf8");
   const chatwoot = readFileSync(path.join(ROOT, "src/app/admin/whatsapp/stage12-chatwoot.css"), "utf8");
   const polish = readFileSync(path.join(ROOT, "src/app/admin/whatsapp/stage12-chatwoot-polish.css"), "utf8");
-  assert.match(shell, /wg-whatsapp-app/);
-  assert.match(shell, /\/images\/brand\/stage12-app-logo\.svg/);
-  assert.equal(existsSync(path.join(ROOT, "public/images/brand/stage12-app-logo.svg")), true);
+  const overlapFixes = readFileSync(path.join(ROOT, "src/app/admin/whatsapp/stage12-overlap-fixes.css"), "utf8");
+  assert.match(shell, /\/images\/logo\.webp/);
+  assert.equal(existsSync(path.join(ROOT, "public/images/logo.webp")), true);
   assert.match(shell, /Mobile WhatsApp navigation/);
   assert.match(css, /^\.wg-whatsapp-app/m);
   assert.match(overrides, /^\.wg-whatsapp-app/m);
   assert.match(workspaces, /^\.wg-whatsapp-app/m);
   assert.match(chatwoot, /^\.wg-whatsapp-app/m);
   assert.match(polish, /^\.wg-whatsapp-app/m);
+  assert.match(overlapFixes, /^\.wg-whatsapp-app/m);
+  assert.match(overlapFixes, /section:has\(#whatsapp-composer-editor\)/);
   assert.match(workspaces, /wg-inbox-workspace > div > section:first-of-type/);
   assert.match(chatwoot, /wg-inspector-rail/);
   assert.match(polish, /wg-report-tab/);
