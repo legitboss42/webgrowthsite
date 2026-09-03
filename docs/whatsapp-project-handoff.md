@@ -1,6 +1,6 @@
 # WhatsApp BSP for WebGrowth — Project Handoff
 
-Last updated: 2026-09-02
+Last updated: 2026-09-03
 
 ## Standing execution rules
 
@@ -41,11 +41,11 @@ Last updated: 2026-09-02
 8. WhatsApp Flows — BUILT / OWNER PRODUCTION TESTING PENDING
 9. Advanced Analytics — BUILT + DEPLOYED / OWNER UI VERIFICATION PENDING
 10. AI Layer — IMPLEMENTATION ASSEMBLED ON `stage10-ai-layer`; VALIDATION / MIGRATION / PRODUCTION GATE PENDING
-11. Multi-Business / SaaS — NOT BUILT
+11. Multi-Business / SaaS — 100% COMPLETE / PRODUCTION VERIFIED 2026-09-03
 12. App Experience Redesign — NOT BUILT; final pre-launch frontend overhaul so the workspace feels like a cohesive application rather than a website/admin portal
 13. Client Onboarding & Commercial Launch — NOT BUILT
 
-Implementation has therefore reached Stage 10. Do not describe Stages 7, 8, 9 or 10 as unimplemented. The verification backlog remains separate from feature construction: finish Stage 6 No Reply, Stage 7 Owner production gate, Stage 8 Owner production gate, Stage 9 Owner UI gate, and Stage 10 Owner gate when AI spending is explicitly authorized.
+Implementation has reached Stage 11. Stage 11 is production-complete. The earlier verification backlog remains separate from feature construction: finish Stage 6 No Reply, Stage 7 Owner production gate, Stage 8 Owner production gate, Stage 9 Owner UI gate, and Stage 10 Owner gate when AI spending is explicitly authorized.
 
 The Flow-completion follow-up automation discussed after the first Web Growth project-enquiry Flow is explicitly DEFERRED for later. Do not silently fold it into another stage.
 
@@ -247,7 +247,78 @@ Real paid/credit-backed model output testing is deliberately separate and must n
 
 ## Stage 11 — Multi-Business / SaaS
 
-Not built. Stage 10 AI persistence already carries a `workspace_scope` boundary so Stage 11 can replace the single-workspace resolver with real tenant IDs without rewriting AI service contracts.
+**Status: 100% COMPLETE / PRODUCTION VERIFIED 2026-09-03.**
+
+Stage 11 converts the WhatsApp console from a single-business deployment into a tenant-safe SaaS foundation while preserving the existing Web Growth workspace and official Meta Cloud API connection.
+
+Production merge:
+- PR #2: `Stage 11: multi-business SaaS tenancy`
+- production commit: `eaf6714d65a99394cee6e0e212f5923565ec8a12`
+- source branch final validated commit: `60093a4917c0cdff0930213187d7af768cc5b033`
+
+Production deployment:
+- Vercel deployment: `dpl_44NVeXHKnGnKeF8YTsntE6s3CWcU`
+- state: READY
+- aliases: `webgrowth.info`, `www.webgrowth.info`
+- alias error: none
+
+Implemented:
+- real `whatsapp_workspaces` tenant registry
+- platform identities separated from per-workspace team memberships
+- active-workspace cookie/context and workspace switcher
+- platform-admin workspace management at `/admin/whatsapp/workspaces/`
+- central workspace scoping for ordinary server-side WhatsApp reads and writes
+- webhook/background routing by workspace/Meta connection instead of a single global sender
+- per-workspace Meta connection metadata with Web Growth's existing ENV credentials preserved
+- workspace-scoped settings, push state, calls, CRM, conversations/messages, templates, automations, campaigns, Flows and AI persistence
+- workspace-specific uniqueness for contacts/team/settings/calls/push state
+- composite tenant foreign keys preventing cross-workspace parent/child links
+- database-enforced team, automation, campaign-recipient and AI daily limits
+- INTERNAL Web Growth entitlements seeded without enabling paid infrastructure
+- tenant-aware inbox-state view and covering indexes for Stage 11 composite foreign keys
+- SECURITY DEFINER trigger function locked away from anonymous/authenticated RPC execution
+
+Production data/backfill proof:
+- 156 messages preserved
+- 7 contacts preserved
+- 6 conversations preserved
+- 3 team memberships preserved and linked to platform identities
+- 14 automations and 12 automation runs preserved
+- 1 Flow and 1 Flow submission preserved
+- 3 calls preserved
+- zero checked tenant rows with `workspace_id IS NULL`
+- zero checked pre-existing rows assigned outside the Web Growth workspace
+- inbox-state view: 6 rows, zero null workspace, zero non-Web-Growth rows
+
+Web Growth workspace after migration:
+- slug: `web-growth`
+- status: ACTIVE
+- plan: INTERNAL
+- platform-owned: true
+- Meta connection: CONNECTED
+- credential source: ENV
+- WABA ID: `987693860957754`
+- Phone Number ID: `1192139290658384`
+- Graph API: v26.0
+
+Validation/gates passed:
+- final GitHub Stage 11 CI: 195 passed / 0 failed
+- final preview Vercel build: READY
+- production Vercel build: 195 passed / 0 failed
+- sitemap validation passed
+- optimized Next.js production compile passed
+- TypeScript/lint validity passed; only pre-existing nonblocking warnings remain
+- all six primary Stage 11 production migrations applied in order
+- post-migration backfill/isolation checks passed
+- Supabase security advisor rerun: no Stage 11 WARN findings after privilege hardening
+- Supabase performance advisor rerun: Stage 11 composite-FK missing-index findings fixed; remaining notices are INFO-only legacy/unused-index advisories
+- unauthenticated `/api/admin/whatsapp/workspaces/` returns HTTP 401 `Authentication required.`
+- unauthenticated `/admin/whatsapp/workspaces/` resolves to the protected workspace login flow
+- `/admin/whatsapp/` returns HTTP 200 with the private workspace login UI
+- production runtime error scan after deployment: no runtime error clusters
+- production deployment 5xx scan: none
+
+Stage 11 is therefore closed at 100%. Do not rebuild it during Stage 12; Stage 12 should preserve these tenant boundaries and focus on application experience/UI architecture.
 
 ## Stage 12 — App Experience Redesign
 
@@ -278,6 +349,20 @@ Applied before Stage 10:
 
 Stage 10 pending validation/application:
 - `20260902233000_whatsapp_stage10_ai_layer.sql`
+
+Stage 11 source migration package on `main`:
+- `20260902234450_whatsapp_stage11_inbox_view_preflight.sql` — fresh-install safeguard; production itself had already crossed this point
+- `20260902234500_whatsapp_stage11_multi_workspace.sql`
+- `20260902234600_whatsapp_stage11_settings_multirow.sql`
+- `20260902234700_whatsapp_stage11_tenant_hardening.sql`
+- `20260902234800_whatsapp_stage11_push_isolation.sql`
+- `20260902234900_whatsapp_stage11_entitlement_enforcement.sql`
+- `20260902235000_whatsapp_stage11_connection_states.sql`
+- `20260903030633_whatsapp_stage11_inbox_view_workspace.sql`
+- `20260903030722_whatsapp_stage11_trigger_function_privileges.sql`
+- `20260903030758_whatsapp_stage11_composite_fk_indexes.sql`
+
+Stage 11 production migration registry contains the six primary migrations plus the three validation-driven hardening migrations. The preflight source migration exists so a fresh database can reproduce the same final schema safely.
 
 ## Platform facts / safety
 
