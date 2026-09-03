@@ -8,7 +8,7 @@ import {
   type WhatsAppTeamMember,
   type WhatsAppTeamRole,
 } from "@/lib/whatsapp/teamModel";
-import { WhatsAppIcon } from "@/components/whatsapp/icons";
+import { WhatsAppIcon, type WhatsAppIconName } from "@/components/whatsapp/icons";
 
 type TeamResponse = {
   members?: WhatsAppTeamMember[];
@@ -36,7 +36,7 @@ function presenceDot(member: WhatsAppTeamMember) {
   return "bg-rose-600";
 }
 
-function SummaryCard({ label: title, value, note, icon }: { label: string; value: number; note: string; icon: "team" | "shield" | "person" }) {
+function SummaryCard({ label: title, value, note, icon }: { label: string; value: number; note: string; icon: WhatsAppIconName }) {
   return (
     <div className="rounded-xl border border-rule bg-paper-raised p-4">
       <div className="flex items-start justify-between gap-3">
@@ -172,16 +172,16 @@ export default function TeamSettingsPanel({
           disabled={loading}
           className="inline-flex items-center gap-2 rounded-lg border border-rule bg-paper-raised px-3 py-2 text-xs font-semibold text-ink-soft hover:border-rule-strong hover:text-ink disabled:opacity-50"
         >
-          <WhatsAppIcon name="refresh" className="h-4 w-4" />
+          <WhatsAppIcon name="statusPending" className="h-4 w-4" />
           {loading ? "Refreshing…" : "Refresh"}
         </button>
       </div>
 
       <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <SummaryCard label="Total members" value={members.length} note={`${active} active`} icon="team" />
-        <SummaryCard label="Supervisors" value={supervisors} note="Owner and managers" icon="shield" />
-        <SummaryCard label="Agents" value={agents} note="Conversation access" icon="person" />
-        <SummaryCard label="Online now" value={online} note="Available for assignment" icon="team" />
+        <SummaryCard label="Total members" value={members.length} note={`${active} active`} icon="contacts" />
+        <SummaryCard label="Supervisors" value={supervisors} note="Owner and managers" icon="settings" />
+        <SummaryCard label="Agents" value={agents} note="Conversation access" icon="conversations" />
+        <SummaryCard label="Online now" value={online} note="Available for assignment" icon="statusDelivered" />
       </div>
 
       {error ? (
