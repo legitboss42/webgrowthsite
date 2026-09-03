@@ -32,7 +32,7 @@ export default function NewPostComposer({ owner, articles = [] }: { owner: boole
       const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
       let supabase: ReturnType<typeof createClient> | null = null;
       const uploadFile = createSchedulerMediaUploadAdapter({
-        request: fetch,
+        request: (url, init) => fetch(url, init),
         async uploadSigned({ path, token, file, contentType }) {
           if (!url || !key) throw new Error("Upload service is not configured.");
           supabase ||= createClient(url, key);

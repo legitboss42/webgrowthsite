@@ -1,0 +1,1446 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>WhatsApp Console Handoff</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+
+<style>
+  /* ── Growth Ledger tokens. The console this document describes is built on this
+     palette, so the document is set in it too. Light is the base; dark redefines
+     only the token values. ───────────────────────────────────────────────────── */
+  :root {
+    --paper:        #eff1ec;
+    --raised:       #f7f8f4;
+    --sunk:         #e4e7de;
+    --ink:          #14140f;
+    --ink-soft:     #454a3f;
+    --ink-faint:    #737868;
+    --ledger:       #124a38;
+    --ledger-brt:   #1c7a54;
+    --ledger-tint:  #dbe7de;
+    --brass:        #92661f;
+    --brass-tint:   #f0e6cf;
+    --brick:        #97372a;
+    --brick-tint:   #f4e2de;
+    --rule:         #d2d6cb;
+    --rule-strong:  #b7bbae;
+    --shadow:       0 1px 2px rgba(20, 20, 15, .05), 0 8px 24px -18px rgba(20, 20, 15, .28);
+
+    --display: "Fraunces", "Iowan Old Style", Georgia, serif;
+    --body:    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --mono:    "IBM Plex Mono", ui-monospace, "SFMono-Regular", Consolas, monospace;
+
+    --measure: 69ch;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper:       #0e1a14;
+      --raised:      #16241d;
+      --sunk:        #1d2f25;
+      --ink:         #e8eae1;
+      --ink-soft:    #b3bcaa;
+      --ink-faint:   #87907e;
+      --ledger:      #9fd3ba;
+      --ledger-brt:  #4fb586;
+      --ledger-tint: #1c3a2c;
+      --brass:       #d3a862;
+      --brass-tint:  #33291a;
+      --brick:       #e2867a;
+      --brick-tint:  #3a211d;
+      --rule:        #2a3b31;
+      --rule-strong: #3d5145;
+      --shadow:      0 1px 2px rgba(0,0,0,.3), 0 10px 30px -20px rgba(0,0,0,.7);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --paper:       #0e1a14;
+    --raised:      #16241d;
+    --sunk:        #1d2f25;
+    --ink:         #e8eae1;
+    --ink-soft:    #b3bcaa;
+    --ink-faint:   #87907e;
+    --ledger:      #9fd3ba;
+    --ledger-brt:  #4fb586;
+    --ledger-tint: #1c3a2c;
+    --brass:       #d3a862;
+    --brass-tint:  #33291a;
+    --brick:       #e2867a;
+    --brick-tint:  #3a211d;
+    --rule:        #2a3b31;
+    --rule-strong: #3d5145;
+    --shadow:      0 1px 2px rgba(0,0,0,.3), 0 10px 30px -20px rgba(0,0,0,.7);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--body);
+    font-size: 16px;
+    line-height: 1.62;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Shell ─────────────────────────────────────────────────────────────── */
+  .wrap {
+    max-width: 1220px;
+    margin: 0 auto;
+    padding: 0 clamp(18px, 4vw, 44px) 96px;
+  }
+
+  .masthead {
+    padding: clamp(40px, 7vw, 88px) 0 clamp(26px, 4vw, 40px);
+    border-bottom: 2px solid var(--ink);
+  }
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    font-weight: 500;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--brass);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 18px;
+    margin: 0 0 20px;
+  }
+  h1 {
+    font-family: var(--display);
+    font-optical-sizing: auto;
+    font-weight: 600;
+    font-size: clamp(2.4rem, 6.4vw, 4.1rem);
+    line-height: 1.02;
+    letter-spacing: -.022em;
+    text-wrap: balance;
+    margin: 0 0 .5em;
+    max-width: 22ch;
+  }
+  h1 em {
+    font-style: italic;
+    font-weight: 400;
+    color: var(--ledger);
+  }
+  .standfirst {
+    font-size: clamp(1.02rem, 2vw, 1.16rem);
+    line-height: 1.58;
+    color: var(--ink-soft);
+    max-width: 58ch;
+    margin: 0;
+  }
+
+  /* Gate strip — the document is largely about verified state, so the state
+     that is actually verified goes at the top as data. */
+  .gates {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(128px, 1fr));
+    gap: 1px;
+    background: var(--rule);
+    border: 1px solid var(--rule);
+    margin: clamp(26px, 4vw, 38px) 0 0;
+  }
+  .gate {
+    background: var(--raised);
+    padding: 13px 15px 14px;
+  }
+  .gate dt {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: 0 0 5px;
+  }
+  .gate dd {
+    margin: 0;
+    font-family: var(--mono);
+    font-size: 15px;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    color: var(--ledger);
+  }
+
+  /* ── Two-column body with a contents rail ──────────────────────────────── */
+  .cols {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: clamp(32px, 5vw, 56px);
+    padding-top: clamp(34px, 5vw, 54px);
+  }
+  @media (min-width: 980px) {
+    .cols { grid-template-columns: 218px minmax(0, 1fr); }
+  }
+
+  nav.toc {
+    align-self: start;
+    font-size: 13.5px;
+  }
+  @media (min-width: 980px) {
+    nav.toc { position: sticky; top: 26px; max-height: calc(100vh - 52px); overflow-y: auto; }
+  }
+  .toc h2 {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    font-weight: 500;
+    letter-spacing: .13em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: 0 0 12px;
+    padding-bottom: 9px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .toc ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    counter-reset: toc;
+  }
+  .toc a {
+    display: grid;
+    grid-template-columns: 2.1em 1fr;
+    gap: 2px;
+    padding: 5px 8px 5px 4px;
+    color: var(--ink-soft);
+    text-decoration: none;
+    border-radius: 3px;
+    line-height: 1.35;
+  }
+  .toc a::before {
+    counter-increment: toc;
+    content: counter(toc, decimal-leading-zero);
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink-faint);
+    padding-top: 2px;
+  }
+  .toc a:hover { background: var(--sunk); color: var(--ink); }
+  .toc a:focus-visible { outline: 2px solid var(--ledger-brt); outline-offset: 1px; }
+  .toc a[aria-current="true"] { color: var(--ledger); font-weight: 600; }
+  .toc a[aria-current="true"]::before { color: var(--brass); }
+
+  main { min-width: 0; }
+
+  /* ── Sections ──────────────────────────────────────────────────────────── */
+  section {
+    padding-top: 8px;
+    margin-bottom: clamp(46px, 6vw, 68px);
+    scroll-margin-top: 22px;
+  }
+  section > * { max-width: var(--measure); }
+  section > .wide, section > .scroller, section > .grid2, section > .gates { max-width: none; }
+
+  h2.sec {
+    font-family: var(--display);
+    font-optical-sizing: auto;
+    font-weight: 600;
+    font-size: clamp(1.45rem, 3.1vw, 1.92rem);
+    line-height: 1.14;
+    letter-spacing: -.014em;
+    text-wrap: balance;
+    margin: 0 0 .62em;
+    padding-bottom: .34em;
+    border-bottom: 1px solid var(--rule-strong);
+    max-width: none;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: .62em;
+    align-items: baseline;
+  }
+  h2.sec .num {
+    font-family: var(--mono);
+    font-size: .58em;
+    font-weight: 500;
+    color: var(--brass);
+    letter-spacing: .02em;
+  }
+  h3 {
+    font-family: var(--body);
+    font-size: 1.02rem;
+    font-weight: 600;
+    letter-spacing: -.005em;
+    margin: 2.1em 0 .5em;
+    color: var(--ink);
+  }
+  h4 {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    font-weight: 500;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: 1.9em 0 .55em;
+  }
+  p { margin: 0 0 1.02em; }
+  a { color: var(--ledger); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+  a:focus-visible { outline: 2px solid var(--ledger-brt); outline-offset: 2px; border-radius: 2px; }
+  strong { font-weight: 600; }
+  em { font-style: italic; }
+
+  ul, ol.body { padding-left: 1.25em; margin: 0 0 1.05em; }
+  li { margin-bottom: .42em; }
+  li::marker { color: var(--ink-faint); }
+
+  code {
+    font-family: var(--mono);
+    font-size: .875em;
+    background: var(--sunk);
+    padding: .1em .34em;
+    border-radius: 3px;
+    word-break: break-word;
+  }
+
+  .scroller { overflow-x: auto; margin: 0 0 1.15em; }
+
+  pre {
+    font-family: var(--mono);
+    font-size: 12.8px;
+    line-height: 1.62;
+    background: var(--raised);
+    border: 1px solid var(--rule);
+    border-left: 3px solid var(--ledger-brt);
+    padding: 15px 17px;
+    margin: 0 0 1.15em;
+    overflow-x: auto;
+    white-space: pre;
+    tab-size: 2;
+  }
+  pre code { background: none; padding: 0; font-size: inherit; word-break: normal; }
+
+  /* ── Tables ────────────────────────────────────────────────────────────── */
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    min-width: 480px;
+    font-size: 14.2px;
+    line-height: 1.48;
+  }
+  caption {
+    text-align: left;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    padding-bottom: 8px;
+  }
+  th {
+    text-align: left;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    font-weight: 500;
+    letter-spacing: .09em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    border-bottom: 1px solid var(--rule-strong);
+    padding: 0 14px 7px 0;
+    vertical-align: bottom;
+  }
+  td {
+    padding: 9px 14px 9px 0;
+    border-bottom: 1px solid var(--rule);
+    vertical-align: top;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  td:last-child, th:last-child { padding-right: 0; }
+  .num-col { font-family: var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+  /* ── State chips. The subject is mostly about state, so state gets a form,
+     not just a word. ─────────────────────────────────────────────────────── */
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: .42em;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    font-weight: 500;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+    padding: .24em .55em .24em .48em;
+    border-radius: 3px;
+    white-space: nowrap;
+  }
+  .chip::before { content: ""; width: 6px; height: 6px; border-radius: 1px; background: currentColor; }
+  .chip.done    { color: var(--ledger); background: var(--ledger-tint); }
+  .chip.blocked { color: var(--brick);  background: var(--brick-tint); }
+  .chip.none    { color: var(--ink-faint); background: var(--sunk); }
+  .chip.partial { color: var(--brass);  background: var(--brass-tint); }
+
+  /* ── Callouts ──────────────────────────────────────────────────────────── */
+  .call {
+    background: var(--raised);
+    border: 1px solid var(--rule);
+    border-left: 3px solid var(--rule-strong);
+    padding: 15px 18px 4px;
+    margin: 0 0 1.2em;
+    box-shadow: var(--shadow);
+  }
+  .call > :last-child { margin-bottom: 15px; }
+  .call .lede {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    font-weight: 500;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    margin: 0 0 .6em;
+    color: var(--ink-faint);
+  }
+  .call.trap { border-left-color: var(--brass); }
+  .call.trap .lede { color: var(--brass); }
+  .call.danger { border-left-color: var(--brick); }
+  .call.danger .lede { color: var(--brick); }
+  .call.key { border-left-color: var(--ledger-brt); }
+  .call.key .lede { color: var(--ledger); }
+
+  /* ── Copy block for the primer ─────────────────────────────────────────── */
+  .primer {
+    border: 1px solid var(--rule-strong);
+    background: var(--raised);
+    box-shadow: var(--shadow);
+    margin-bottom: 1.2em;
+  }
+  .primer-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 12px 10px 15px;
+    border-bottom: 1px solid var(--rule);
+    background: var(--sunk);
+  }
+  .primer-bar span {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    font-weight: 500;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+  button.copy {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--raised);
+    background: var(--ledger);
+    border: 1px solid var(--ledger);
+    border-radius: 3px;
+    padding: 6px 12px;
+    cursor: pointer;
+    transition: background .15s ease, transform .1s ease;
+  }
+  button.copy:hover { background: var(--ledger-brt); border-color: var(--ledger-brt); }
+  button.copy:active { transform: translateY(1px); }
+  button.copy:focus-visible { outline: 2px solid var(--ledger-brt); outline-offset: 2px; }
+  .primer pre {
+    border: none;
+    border-left: none;
+    background: none;
+    margin: 0;
+    max-height: 420px;
+    overflow: auto;
+    white-space: pre-wrap;
+    font-size: 12.4px;
+  }
+
+  /* ── Grids ─────────────────────────────────────────────────────────────── */
+  .grid2 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(268px, 1fr));
+    gap: 16px;
+    margin-bottom: 1.2em;
+  }
+  .card {
+    background: var(--raised);
+    border: 1px solid var(--rule);
+    padding: 16px 18px;
+  }
+  .card h4 { margin-top: 0; }
+  .card > :last-child { margin-bottom: 0; }
+
+  .swatches {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(146px, 1fr));
+    gap: 10px;
+    margin-bottom: 1.2em;
+  }
+  .sw {
+    border: 1px solid var(--rule);
+    background: var(--raised);
+    display: grid;
+    grid-template-columns: 26px 1fr;
+    align-items: stretch;
+    font-family: var(--mono);
+    font-size: 11px;
+    line-height: 1.3;
+  }
+  .sw i { display: block; }
+  .sw span { padding: 7px 8px; color: var(--ink-soft); }
+  .sw b { display: block; color: var(--ink); font-weight: 500; }
+
+  footer.doc {
+    border-top: 2px solid var(--ink);
+    margin-top: clamp(40px, 6vw, 64px);
+    padding-top: 20px;
+    font-size: 13.6px;
+    color: var(--ink-faint);
+    max-width: var(--measure);
+  }
+  footer.doc p { margin-bottom: .6em; }
+
+  .skip {
+    position: absolute;
+    left: -9999px;
+  }
+  .skip:focus {
+    left: 12px; top: 12px;
+    position: fixed;
+    z-index: 20;
+    background: var(--ledger);
+    color: var(--raised);
+    padding: 10px 14px;
+    border-radius: 3px;
+    font-family: var(--mono);
+    font-size: 12px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+  }
+  html { scroll-behavior: smooth; }
+</style>
+</head>
+<body>
+
+<a class="skip" href="#s1">Skip to contents</a>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <p class="eyebrow">
+      <span>Web&nbsp;Growth</span>
+      <span>Internal console</span>
+      <span>branch&nbsp;main · 82aa9fb</span>
+      <span>28&nbsp;Aug&nbsp;2026</span>
+    </p>
+    <h1>WhatsApp Console <em>Handoff</em></h1>
+    <p class="standfirst">
+      Everything built, everything deliberately left unbuilt, and every trap worth knowing —
+      written so someone with no prior context can pick this up and give useful advice.
+    </p>
+
+    <dl class="gates">
+      <div class="gate"><dt>Tests</dt><dd>621 / 621</dd></div>
+      <div class="gate"><dt>Typecheck</dt><dd>clean</dd></div>
+      <div class="gate"><dt>Lint (scoped)</dt><dd>0 / 0</dd></div>
+      <div class="gate"><dt>Build</dt><dd>exit 0</dd></div>
+      <div class="gate"><dt>Governed routes</dt><dd>94</dd></div>
+      <div class="gate"><dt>Static pages</dt><dd>136 / 136</dd></div>
+    </dl>
+  </header>
+
+  <div class="cols">
+
+    <nav class="toc" aria-label="Contents">
+      <h2>Contents</h2>
+      <ol>
+        <li><a href="#s1">What this is</a></li>
+        <li><a href="#s2">Four architectural truths</a></li>
+        <li><a href="#s3">The Meta API specifics</a></li>
+        <li><a href="#s4">What is built</a></li>
+        <li><a href="#s5">The 15-stage map</a></li>
+        <li><a href="#s6">File map</a></li>
+        <li><a href="#s7">Database &amp; migrations</a></li>
+        <li><a href="#s8">Environment variables</a></li>
+        <li><a href="#s9">Commands &amp; traps</a></li>
+        <li><a href="#s10">Conventions</a></li>
+        <li><a href="#s11">Security rules</a></li>
+        <li><a href="#s12">Do not touch</a></li>
+        <li><a href="#s13">Unverified gaps</a></li>
+        <li><a href="#s14">What to do next</a></li>
+        <li><a href="#s15">Primer to paste</a></li>
+        <li><a href="#s16">Where detail lives</a></li>
+      </ol>
+    </nav>
+
+    <main>
+
+      <!-- 1 ───────────────────────────────────────────────────────────── -->
+      <section id="s1">
+        <h2 class="sec"><span class="num">01</span><span>What this is</span></h2>
+        <p>
+          A WhatsApp Business communication console at <code>/admin/whatsapp</code>, inside the Web
+          Growth marketing site. Internal, password-gated, <code>NOINDEX</code>, never public.
+        </p>
+        <p>It does three things:</p>
+        <ol class="body">
+          <li><strong>Receives</strong> customer messages through Meta's webhook, classifies them into
+            lead intents, and stores them in Supabase.</li>
+          <li><strong>Displays</strong> them across eight console pages.</li>
+          <li><strong>Sends</strong> replies back — text, attachments, voice notes — through the Meta
+            WhatsApp Cloud API, respecting the 24-hour service window.</li>
+        </ol>
+        <div class="call key">
+          <p class="lede">Read this before changing anything</p>
+          <p>
+            The backend integration existed and worked <em>before</em> this project started. Almost all
+            of the work has been a reskin, an app shell, and a composer rebuild <em>on top of</em> a
+            working integration — not new plumbing. When in doubt: preserve, don't rewrite.
+          </p>
+        </div>
+      </section>
+
+      <!-- 2 ───────────────────────────────────────────────────────────── -->
+      <section id="s2">
+        <h2 class="sec"><span class="num">02</span><span>Stack, and four truths that surprise people</span></h2>
+        <p>
+          <strong>Stack:</strong> Next.js 15.5.14 (App Router, <code>src/</code> layout), React 18.3.1,
+          TypeScript 5, Tailwind&nbsp;v4, Node&nbsp;24. Deployed on Vercel. Developed on Windows 11
+          (PowerShell + Git Bash).
+        </p>
+        <p>Four things are non-obvious, and not knowing them produces confidently wrong advice.</p>
+
+        <h3>a. Tailwind v4 has no config file</h3>
+        <p>
+          Design tokens live in an <code>@theme</code> block in <code>src/app/globals.css</code>. There
+          is <strong>no <code>tailwind.config.js</code></strong>. Don't add one; don't suggest editing one.
+        </p>
+
+        <h3>b. There is no Supabase client library in use</h3>
+        <p>
+          Database access is <strong>raw <code>fetch</code> against PostgREST</strong> with the
+          service-role key, server-side only — <code>src/app/admin/whatsapp/data.ts</code> and
+          <code>src/lib/whatsapp/store.ts</code>. <code>createClient</code> from
+          <code>@supabase/supabase-js</code> is <em>not</em> used. RLS is enabled on the tables with
+          <strong>zero policies</strong>, so the anon key can read nothing. That is deliberate, and it is
+          why no browser database client exists.
+        </p>
+
+        <h3>c. There is no realtime — "realtime" is a poll</h3>
+        <p>
+          Because of (b), Supabase Realtime is unavailable. Instead <code>AutoRefresh.tsx</code> polls
+          <code>/api/admin/whatsapp/notifications/</code> for a cheap digest and calls
+          <code>router.refresh()</code> when the fingerprint changes. It also listens on
+          <code>focus</code>, <code>online</code>, and <code>visibilitychange</code>, and reconciles every
+          60&nbsp;seconds so a missed poll can't strand the view. Outgoing messages get an optimistic
+          bubble (<code>OutboundQueue.tsx</code>) reconciled against the stored row by
+          <code>whatsapp_message_id</code>.
+        </p>
+        <p>
+          If anyone proposes Supabase channels or a websocket, they have missed this.
+        </p>
+
+        <h3>d. The webhook is the only source of truth for delivery status</h3>
+        <p>
+          Sent / Delivered / Read / Failed all arrive from Meta's status webhook and are written to the
+          database — nothing is manufactured client-side. A monotonic rank is applied inside the PATCH
+          itself, so a late or out-of-order webhook can never walk a status backwards:
+        </p>
+        <pre><code>null 0 → accepted|queued|sending 1 → sent 2 → delivered 3 → read 4 → failed 5</code></pre>
+      </section>
+
+      <!-- 3 ───────────────────────────────────────────────────────────── -->
+      <section id="s3">
+        <h2 class="sec"><span class="num">03</span><span>The Meta Cloud API specifics already encoded</span></h2>
+        <p>
+          Graph version resolves <code>WHATSAPP_API_VERSION</code> →
+          <code>WHATSAPP_GRAPH_API_VERSION</code> → <code>v26.0</code>.
+        </p>
+        <p>
+          <strong>Text</strong> is one call: <code>POST /{phone-number-id}/messages</code>.
+          <strong>Media is two</strong>, which is the part people get wrong:
+        </p>
+        <pre><code>1.  POST /{phone-number-id}/media      (multipart)  → { id }
+2.  POST /{phone-number-id}/messages  with  type: &lt;kind&gt;, &lt;kind&gt;: { id: mediaId }</code></pre>
+        <p>Quoting a message adds <code>context: { message_id: &lt;wamid&gt; }</code>.</p>
+
+        <div class="scroller">
+          <table>
+            <caption>Media kinds, limits and quirks — encoded in src/lib/whatsapp/media.ts, with tests</caption>
+            <thead>
+              <tr><th>Kind</th><th>Accepted types</th><th class="num-col">Max</th><th>Caption</th><th>filename</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>image</td><td>jpeg, png</td><td class="num-col">5 MB</td><td>yes</td><td>no</td></tr>
+              <tr><td>video</td><td>mp4, 3gp</td><td class="num-col">16 MB</td><td>yes</td><td>no</td></tr>
+              <tr><td>document</td><td>pdf, txt, doc(x), xls(x), ppt(x)</td><td class="num-col">16 MB</td><td>yes</td><td><strong>yes</strong></td></tr>
+              <tr><td>audio</td><td>ogg, mp4, mpeg, aac, amr</td><td class="num-col">16 MB</td><td><strong>no</strong></td><td>no</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>
+          Meta silently drops a caption on audio, so the code refuses to attach one rather than
+          pretending. Only <code>document</code> carries a <code>filename</code>.
+        </p>
+
+        <h3>The typing indicator rides on the read receipt</h3>
+        <pre><code>{ "messaging_product": "whatsapp",
+  "status": "read",
+  "message_id": "&lt;a REAL inbound wamid&gt;",
+  "typing_indicator": { "type": "text" } }</code></pre>
+        <p>
+          It needs a genuine inbound message id, and it is throttled to one signal every 8&nbsp;seconds
+          (<code>shouldSendWhatsAppTypingSignal</code>, <code>WHATSAPP_TYPING_REFRESH_MS = 8000</code>).
+          A typing failure must <strong>never</strong> block a send — it is wired fire-and-forget.
+        </p>
+
+        <div class="call danger">
+          <p class="lede">The 24-hour service window</p>
+          <p>
+            Outside it, Meta refuses free-form messages and only an approved template will go through.
+            The code detects this and surfaces <code>SERVICE_WINDOW_CLOSED</code> → “The 24-hour customer
+            service window is closed. An approved template is required.” Do not engineer around it —
+            abusing the window is how a WhatsApp Business account gets restricted.
+          </p>
+        </div>
+      </section>
+
+      <!-- 4 ───────────────────────────────────────────────────────────── -->
+      <section id="s4">
+        <h2 class="sec"><span class="num">04</span><span>What is built, page by page</span></h2>
+        <p>
+          All eight pages are live and registered. Nav status lives in
+          <code>src/components/whatsapp/nav.ts</code> — <code>live</code> renders a link,
+          <code>soon</code> renders disabled with a “Soon” chip, so the shell never links to a 404.
+        </p>
+
+        <div class="scroller">
+          <table>
+            <thead><tr><th>Route</th><th>What it does</th></tr></thead>
+            <tbody>
+              <tr><td><code>/admin/whatsapp</code></td><td>Overview — counts, lead temperature, hand-rolled inline SVG activity chart over a configurable window</td></tr>
+              <tr><td><code>/conversations</code></td><td>The inbox. Three columns on desktop, card list on mobile. Seven filters with counts, full thread, and the composer</td></tr>
+              <tr><td><code>/contacts</code></td><td>Contact directory with injection-safe search</td></tr>
+              <tr><td><code>/quick-replies</code></td><td>Create, edit, delete saved replies (Supabase-backed)</td></tr>
+              <tr><td><code>/templates</code></td><td>Approved Meta templates, read live from the Graph API</td></tr>
+              <tr><td><code>/phone-numbers</code></td><td>Sender numbers with verification and quality state, from Meta</td></tr>
+              <tr><td><code>/analytics</code></td><td>Delivery breakdown, response times, totals, whitelisted ranges</td></tr>
+              <tr><td><code>/settings</code></td><td><strong>Editable</strong> operator settings plus a connection-readiness report</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>
+          Settings genuinely writes, to a single-row <code>whatsapp_settings</code> table: lead keywords
+          (an additive scoring override), timezone-aware business hours, a response-time target, the
+          inbox refresh interval (clamped 5–300&nbsp;s), and the activity window in days. The webhook
+          reads these through a 60-second cache and applies keyword overrides <em>after</em> the built-in
+          classifier, so absent settings change nothing.
+        </p>
+
+        <h3>The composer — the most recent work, commit <code>82aa9fb</code></h3>
+        <p>Rebuilt to an approved mockup. <code>ReplyComposer.tsx</code> plus four collaborators:</p>
+        <div class="grid2">
+          <div class="card">
+            <h4>Editor pill</h4>
+            <p>Auto-resizes one line to four, then scrolls internally. <code>Enter</code> sends,
+            <code>Shift + Enter</code> breaks the line, and it won't steal an IME composition commit.
+            Emoji, paperclip and mic sit <em>inside</em> the pill; the green send button and the
+            <code>+</code> sit <em>outside</em>.</p>
+          </div>
+          <div class="card">
+            <h4>+ → AttachmentMenu</h4>
+            <p>A four-across tile grid (Document, Image, Video, Audio): floating panel on desktop, bottom
+            sheet on mobile. Quick Replies and Templates keep a row below the divider.</p>
+          </div>
+          <div class="card">
+            <h4>EmojiPicker</h4>
+            <p>Tab strip led by a recents tab, green underline on the active tab (emoji glyphs ignore
+            <code>color</code>, so the rule has to carry the state), insertion at the caret, closes on
+            outside click and Escape. Recents persist. No new dependency.</p>
+          </div>
+          <div class="card">
+            <h4>Voice notes</h4>
+            <p>Permission → record → timer → live waveform → cancel / delete / send. The blob posts to
+            <code>/reply/audio/</code>, uploads server-side, and arrives as a real playable WhatsApp audio
+            message.</p>
+          </div>
+          <div class="card">
+            <h4>Reply Mode</h4>
+            <p><code>ReplyTarget.tsx</code>. A quoted panel above the editor — green rule, author name,
+            truncated excerpt, <code>X</code> — and Escape to leave. A per-bubble reply button reaches the
+            composer through a React context nested inside the outbound-queue provider.</p>
+          </div>
+          <div class="card">
+            <h4>Deliberately not built</h4>
+            <p>The mockup also showed Contact, Location and Camera tiles. The send path cannot produce
+            those message types, so they were left out rather than shipped as dead UI.</p>
+          </div>
+        </div>
+
+        <div class="call key">
+          <p class="lede">The pattern to copy</p>
+          <p>
+            The quoted <code>wamid</code> originates in a browser, so it is untrusted. Passing it straight
+            into Meta's <code>context</code> would let an authenticated admin quote
+            <em>another conversation's</em> message and leak its content into this customer's chat.
+            <code>resolveSupabaseWhatsAppQuotedMessageId</code> re-checks server-side that the id belongs
+            to this conversation; anything unrecognised falls back silently to the conversation's own
+            latest inbound message. Both reply routes go through it.
+          </p>
+        </div>
+
+        <p>
+          Also live: the six “live messaging” features — dashboard logo, WhatsApp business profile
+          picture, customer fallback avatars, agent→customer typing indicator, near-real-time message
+          updates, and delivery statuses.
+        </p>
+      </section>
+
+      <!-- 5 ───────────────────────────────────────────────────────────── -->
+      <section id="s5">
+        <h2 class="sec"><span class="num">05</span><span>The 15-stage plan, and where it stands</span></h2>
+        <div class="scroller">
+          <table>
+            <thead><tr><th class="num-col">#</th><th>Requirement</th><th>State</th></tr></thead>
+            <tbody>
+              <tr><td class="num-col">1</td><td>Audit repo &amp; existing architecture</td><td><span class="chip done">Done</span></td></tr>
+              <tr><td class="num-col">2</td><td>WhatsApp application shell</td><td><span class="chip done">Done</span></td></tr>
+              <tr><td class="num-col">3</td><td>Responsive overview dashboard</td><td><span class="chip done">Done</span></td></tr>
+              <tr><td class="num-col">4</td><td>Conversation list</td><td><span class="chip done">Done</span></td></tr>
+              <tr><td class="num-col">5</td><td>Active chat interface</td><td><span class="chip done">Done</span></td></tr>
+              <tr><td class="num-col">6</td><td>Contact details panel</td><td><span class="chip done">Done</span></td></tr>
+              <tr><td class="num-col">7</td><td>Connect UI to live WhatsApp data</td><td><span class="chip done">Done</span></td></tr>
+              <tr><td class="num-col">8</td><td>Reliable message statuses</td><td><span class="chip done">Done</span></td></tr>
+              <tr><td class="num-col">9</td><td>Notes, labels, assignment</td><td><span class="chip blocked">Blocked</span></td></tr>
+              <tr><td class="num-col">10</td><td>Contacts page</td><td><span class="chip done">Done</span></td></tr>
+              <tr><td class="num-col">11</td><td>Quick Replies</td><td><span class="chip done">Done</span></td></tr>
+              <tr><td class="num-col">12</td><td>Templates</td><td><span class="chip done">Done</span></td></tr>
+              <tr><td class="num-col">13</td><td>Analytics</td><td><span class="chip done">Done</span></td></tr>
+              <tr><td class="num-col">14</td><td>Campaign foundation</td><td><span class="chip none">Not started</span></td></tr>
+              <tr><td class="num-col">15</td><td>Automation architecture</td><td><span class="chip none">Not started</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>
+          <strong>Stage 9 is the one genuinely unfinished earlier stage.</strong>
+          <code>assigned_to</code> exists and shows read-only; <code>notes</code> and <code>labels</code>
+          have <em>no columns</em> on <code>whatsapp_conversations</code>, so the panel says so rather
+          than rendering inputs that cannot save. It needs an additive migration first — it is blocked on
+          schema, not on code.
+        </p>
+        <p>
+          Plus a Settings page, which is not one of the fifteen. It was built because it makes the
+          migration blockers visible in the UI instead of only in a document. And then the composer
+          redesign, which was a separate approved task.
+        </p>
+      </section>
+
+      <!-- 6 ───────────────────────────────────────────────────────────── -->
+      <section id="s6">
+        <h2 class="sec"><span class="num">06</span><span>File map</span></h2>
+        <pre><code>src/app/admin/whatsapp/
+  layout.tsx              auth-aware console layout; mounts the shell
+  page.tsx                Overview dashboard
+  conversations/page.tsx  the inbox (thread + composer)
+  contacts/  quick-replies/  templates/  phone-numbers/  analytics/  settings/
+  auth.ts                 hasWhatsAppAdminAccess
+  data.ts                 service-role PostgREST reads, exact-count, probeWhatsAppTable
+
+  ── client components ──
+  ReplyComposer.tsx       the composer
+  AttachmentMenu.tsx      the + grid / bottom sheet
+  EmojiPicker.tsx         emoji panel
+  ReplyTarget.tsx         Reply Mode context + per-bubble button
+  MessageMedia.tsx        renders media inside a bubble
+  OutboundQueue.tsx       optimistic bubbles + reconciliation
+  AutoRefresh.tsx         the polling "realtime"
+  QuickReplyManager.tsx   quick-reply CRUD UI
+  SettingsEditor.tsx      the settings form
+
+  ── pure models, each with a .test.ts beside it ──
+  composerModel  emojiModel  outboundQueueModel  dashboard  overview
+  contactsModel  quickRepliesModel  analyticsModel  integrationModel
+
+src/app/api/admin/whatsapp/        (all admin-gated)
+  reply/route.ts            text reply
+  reply/media/route.ts      attachment reply
+  reply/audio/route.ts      voice note
+  typing/route.ts           typing indicator
+  notifications/route.ts    the polling digest
+  media/[mediaId]/route.ts  media proxy — never exposes the token
+  profile-photo/route.ts    business profile picture
+  quick-replies/route.ts    POST / PATCH / DELETE
+  settings/route.ts         PUT
+src/app/api/whatsapp/webhook/route.ts   Meta inbound webhook, signature-verified
+
+src/lib/whatsapp/          (server-only; no "use client" anywhere in here)
+  store.ts          Supabase reads/writes, dedup on wamid, status rank
+  send.ts           Meta send calls, error mapping
+  inboxReply.ts     orchestrates a reply: window check → send → store
+  media.ts          kinds, limits, validation
+  audio.ts          voice-note handling
+  typing.ts         typing payload + throttle
+  webhook.ts        payload normalization + processing
+  classify.ts       lead intent classification + keyword overrides
+  messageStatus.ts  status rank, sanitized failure reasons
+  settings.ts  settingsStore.ts    operator settings model + cached store
+  templates  phoneNumbers  businessProfile  avatar  notifications  types
+
+src/components/whatsapp/
+  WhatsAppShell.tsx   responsive shell: deep-green sidebar, sticky top bar, mobile drawer
+  nav.ts              nav model, live/soon  (nav.test.ts asserts the EXACT ordered list)
+  icons.tsx           local inline SVG icon set, ~25 glyphs
+  MessageStatus.tsx  ContactAvatar.tsx  shellBranding.test.ts</code></pre>
+
+        <div class="call trap">
+          <p class="lede">A real trap in icons.tsx</p>
+          <p>
+            It evaluates JSX at module level, so any <code>*.test.ts</code> that imports it — directly or
+            transitively — <strong>crashes the test runner</strong>. That is why every piece of pure logic
+            lives in a separate <code>.ts</code> model module, and why
+            <code>buildWhatsAppReplyQuote</code> takes a structural type instead of importing the page's
+            row type. Keep that separation.
+          </p>
+        </div>
+      </section>
+
+      <!-- 7 ───────────────────────────────────────────────────────────── -->
+      <section id="s7">
+        <h2 class="sec"><span class="num">07</span><span>Database and migrations</span></h2>
+        <p>
+          A Supabase project reached over PostgREST. Tables: <code>whatsapp_events</code>,
+          <code>whatsapp_contacts</code>, <code>whatsapp_conversations</code>,
+          <code>whatsapp_messages</code>, <code>whatsapp_quick_replies</code>,
+          <code>whatsapp_settings</code>.
+        </p>
+        <div class="scroller">
+          <table>
+            <caption>WhatsApp migrations — the others in that folder belong to the TikTok scheduler</caption>
+            <thead><tr><th>File</th><th>State</th></tr></thead>
+            <tbody>
+              <tr><td><code>202608130001_whatsapp_crm.sql</code></td><td><span class="chip done">Applied</span></td></tr>
+              <tr><td><code>202608240001_whatsapp_audio_messages.sql</code></td><td><span class="chip done">Applied</span></td></tr>
+              <tr><td><code>202608250001_whatsapp_quick_replies.sql</code></td><td><span class="chip done">Applied</span></td></tr>
+              <tr><td><code>202608260001_whatsapp_settings.sql</code></td><td><span class="chip done">Applied</span></td></tr>
+              <tr><td><code>202608260002_whatsapp_delivery_error.sql</code></td><td><span class="chip done">Applied</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Three migration rules that matter</h3>
+        <ol class="body">
+          <li><strong>There is no migration runner.</strong> Writing the <code>.sql</code> file does
+            nothing. It has to be pasted into the <strong>Supabase SQL editor</strong> and run by hand.
+            Always make the code degrade to a documented default until the column exists.</li>
+          <li><strong>Never run <code>supabase db push</code>.</strong> The same folder holds five TikTok
+            scheduler migrations, one of which creates cron jobs. The remote has no CLI migration
+            history, so a push would try to apply those too and cross the do-not-touch boundary.</li>
+          <li><strong><code>DATABASE_URL</code> / <code>POSTGRES_URL</code> / <code>PGHOST</code> point at
+            <code>neon.tech</code>, not Supabase.</strong> There are two databases in this project.
+            Running a WhatsApp migration against <code>DATABASE_URL</code> creates the table in the
+            <em>wrong database</em>.</li>
+        </ol>
+
+        <div class="call trap">
+          <p class="lede">A defensive pattern worth knowing</p>
+          <p>
+            PostgREST rejects an <em>entire</em> select that names a column the table lacks, and
+            <code>readWhatsAppRows</code> collapses that to <code>null</code> — which once would have
+            blanked every thread. <code>readConversationMessageRows</code> now retries without the
+            optional column, so an unapplied migration costs a <em>sentence</em>, never the messages.
+          </p>
+        </div>
+      </section>
+
+      <!-- 8 ───────────────────────────────────────────────────────────── -->
+      <section id="s8">
+        <h2 class="sec"><span class="num">08</span><span>Environment variables — names only</span></h2>
+        <pre><code>SUPABASE_URL
+SUPABASE_SERVICE_ROLE_KEY        ← Sensitive in Vercel: env pull returns "[SENSITIVE]"
+WHATSAPP_ACCESS_TOKEN
+WHATSAPP_PHONE_NUMBER_ID
+WHATSAPP_BUSINESS_ACCOUNT_ID
+WHATSAPP_API_VERSION             ← optional, falls back to v26.0
+META_APP_SECRET                  ← webhook signature verification
+WHATSAPP_VERIFY_TOKEN            ← webhook handshake
+INTERNAL_TOOL_SESSION_SECRET     ← the admin gate; also Sensitive in Vercel</code></pre>
+        <p>
+          Vercel marks some variables Sensitive by design, which makes them write-only:
+          <code>vercel env pull</code> writes the literal string <code>[SENSITIVE]</code> and no CLI call
+          can recover the real value. Get the service-role key from the Supabase dashboard →
+          Project&nbsp;Settings&nbsp;→&nbsp;API instead.
+        </p>
+
+        <div class="call danger">
+          <p class="lede">Two are missing on this machine entirely</p>
+          <p>
+            <code>SUPABASE_SERVICE_ROLE_KEY</code> and <code>META_APP_SECRET</code>. This explains a lot
+            of “it looks broken locally”:
+          </p>
+          <ul>
+            <li>Every Supabase read returns null, so every data page renders its empty state (“—”)
+              locally. Meta-backed pages — Templates, Phone Numbers — <em>do</em> show real data, because
+              the access token is present.</li>
+            <li>The webhook would reject Meta's signature, and a localhost webhook is unreachable from
+              the internet anyway.</li>
+            <li><strong>No send, delivery status, or realtime behaviour can be exercised end-to-end from
+              this machine.</strong> Those paths have unit tests and were checked against a production
+              build, but never observed on a handset. Test them in production, one of each, after any
+              change.</li>
+          </ul>
+        </div>
+        <p><code>.env.example</code> carries names only. Never commit a real value.</p>
+      </section>
+
+      <!-- 9 ───────────────────────────────────────────────────────────── -->
+      <section id="s9">
+        <h2 class="sec"><span class="num">09</span><span>Commands, and the traps inside them</span></h2>
+        <pre><code># Tests — there is NO `npm test` script
+npx tsx --test $(find src -name '*.test.ts' -o -name '*.test.tsx')
+
+# Typecheck — there is NO `typecheck` script
+npx tsc --noEmit
+
+# Lint — scope it. Bare `npm run lint` walks .codex-temp/ (~814 pre-existing findings)
+npx next lint --dir src/app/admin/whatsapp --dir src/components/whatsapp \
+              --dir src/lib/whatsapp --dir src/app/api/admin/whatsapp
+
+# Build  =  prepare-build.mjs && validate-sitemap.mjs && next build
+npm run build
+
+# Dev
+npm run dev</code></pre>
+
+        <div class="call trap">
+          <p class="lede">Trap 1 — never build while dev is running</p>
+          <p>
+            Both write <code>.next/</code>. A production build clobbers the dev server's chunks and every
+            dev request then 500s with <code>Cannot find module './383.js'</code>. It is not a code bug.
+            Fix: stop dev, <code>rm -rf .next</code>, restart. Working order —
+            tests → tsc → lint → <strong>stop dev</strong> → build → restart dev.
+          </p>
+        </div>
+
+        <div class="call trap">
+          <p class="lede">Trap 2 — every new page must be registered</p>
+          <p>
+            <code>scripts/validate-sitemap.mjs</code> runs inside <code>npm run build</code> and fails on
+            any <code>src/app/**/page.tsx</code> missing from <code>src/lib/route-governance.json</code>.
+            Console pages use:
+          </p>
+          <pre><code>{ "path": "/admin/whatsapp/&lt;name&gt;/", "status": "NOINDEX",
+  "sitemap": false, "reason": "..." }</code></pre>
+          <p>
+            API routes and plain components are exempt. Adding WhatsApp entries is safe —
+            <code>publicPages.test.ts</code> asserts only the scheduler entries, which must not be touched.
+          </p>
+        </div>
+
+        <div class="call trap">
+          <p class="lede">Traps 3 and 4 — smaller, still sharp</p>
+          <p>
+            <code>nav.test.ts</code> asserts the <em>exact ordered list</em> of live routes, so promoting
+            a route from <code>soon</code> to <code>live</code> means updating that assertion in the same
+            commit. Nav order is Workspace → Growth → Configuration. And API fetches need
+            <strong>trailing slashes</strong>: <code>/api/admin/whatsapp/reply/</code>, not
+            <code>…/reply</code>.
+          </p>
+        </div>
+
+        <div class="call danger">
+          <p class="lede">Trap 5 — the most important lesson of the whole project</p>
+          <p>
+            <strong>A green build says nothing about whether a dynamic page renders.</strong> The shell
+            rendered the wordmark with <code>quality={80}</code>, but <code>next.config.mjs</code> allows
+            only <code>[60, 65, 68, 75]</code>. An unlisted quality makes <code>next/image</code>
+            <em>throw during render</em>. Console pages are server-rendered on demand, so
+            <code>next build</code> never executed that path, and React swallowed the throw into the
+            Suspense fallback. Result: <strong>all eight console pages served nothing but the loading
+            screen</strong> while build, typecheck, and 572 tests stayed green.
+          </p>
+          <p>
+            It is now pinned by <code>src/components/whatsapp/shellBranding.test.ts</code>. The moral:
+            after any change to these pages, actually load them and read the HTML.
+          </p>
+        </div>
+      </section>
+
+      <!-- 10 ──────────────────────────────────────────────────────────── -->
+      <section id="s10">
+        <h2 class="sec"><span class="num">10</span><span>Conventions to follow</span></h2>
+
+        <h3>The Growth Ledger palette — reuse, don't invent</h3>
+        <div class="swatches">
+          <div class="sw"><i style="background:#0c3327"></i><span><b>ledger-deep</b>#0c3327</span></div>
+          <div class="sw"><i style="background:#124a38"></i><span><b>ledger</b>#124a38</span></div>
+          <div class="sw"><i style="background:#1c7a54"></i><span><b>ledger-bright</b>#1c7a54</span></div>
+          <div class="sw"><i style="background:#b4802f"></i><span><b>brass</b>#b4802f</span></div>
+          <div class="sw"><i style="background:#eff1ec"></i><span><b>paper</b>#eff1ec</span></div>
+          <div class="sw"><i style="background:#f7f8f4"></i><span><b>paper-raised</b>#f7f8f4</span></div>
+          <div class="sw"><i style="background:#e4e7de"></i><span><b>paper-sunk</b>#e4e7de</span></div>
+          <div class="sw"><i style="background:#14140f"></i><span><b>ink</b>#14140f</span></div>
+          <div class="sw"><i style="background:#454a3f"></i><span><b>ink-soft</b>#454a3f</span></div>
+          <div class="sw"><i style="background:#737868"></i><span><b>ink-faint</b>#737868</span></div>
+          <div class="sw"><i style="background:#d2d6cb"></i><span><b>rule</b>#d2d6cb</span></div>
+          <div class="sw"><i style="background:#0e1a14"></i><span><b>ink-ground</b>#0e1a14</span></div>
+        </div>
+        <p>
+          Also: <code>on-dark #eaebe4</code>, <code>on-dark-soft #9aa292</code>,
+          <code>ledger-tint</code>, <code>brass-tint</code>, <code>rule-strong #b7bbae</code>.
+          Fonts are <code>font-sans</code> Inter, <code>font-display</code> Fraunces,
+          <code>font-mono</code> IBM Plex Mono. Utilities: <code>.wg-card</code>,
+          <code>.wg-btn</code>/<code>-primary</code>/<code>-secondary</code>/<code>-ghost</code>,
+          <code>.wg-eyebrow</code>, <code>.wg-rule</code>.
+        </p>
+        <p>
+          Stock Tailwind slate / blue / indigo / violet / purple / sky / cyan are
+          <strong>remapped</strong> onto ledger green, and amber onto brass.
+          <strong><code>rose-*</code> is not remapped</strong> — which makes it the honest colour for
+          alerts, failures, and HOT states. Arbitrary values like <code>text-[#6f4f16]</code> and
+          <code>h-[1.05rem]</code> are idiomatic here.
+        </p>
+
+        <h3>Icons are local inline SVG</h3>
+        <p>
+          <code>src/components/whatsapp/icons.tsx</code>, not <code>lucide-react</code>. Zero dependency,
+          one stroke weight, one 24×24 box. Add a glyph to <strong>both</strong> the
+          <code>WhatsAppIconName</code> union <strong>and</strong> the <code>ICON_PATHS</code> record —
+          forgetting the union is a real typecheck error.
+        </p>
+
+        <h3>Every mutation follows one shape</h3>
+        <pre><code>client → fetch("/api/admin/whatsapp/&lt;x&gt;/", …)
+       → route:  hasWhatsAppAdminAccess(cookieStore)  → 401
+                 isSameOriginMutation(origin, url)    → 403
+       → store
+       → router.refresh()</code></pre>
+        <p>
+          Both guards run <strong>before</strong> the body is parsed. Copy this for any new write.
+        </p>
+
+        <h3>Server components fetch; client components poll</h3>
+        <p>
+          Secrets never cross the boundary — the layout passes a <code>senderConnected</code>
+          <strong>boolean</strong> to the client shell, never a credential.
+        </p>
+
+        <h3>Errors are sanitized before an operator sees them</h3>
+        <p>
+          Meta error codes map to fixed sentences (131026, 131047, 131049, 131051, 131053, 132000,
+          132001, 133010, 470 and 368 are all handled). Raw provider payloads and stack traces are never
+          displayed. <code>console.error</code> logs a status and a Postgres error code — never a token,
+          never the document.
+        </p>
+      </section>
+
+      <!-- 11 ──────────────────────────────────────────────────────────── -->
+      <section id="s11">
+        <h2 class="sec"><span class="num">11</span><span>Security rules — do not break these</span></h2>
+        <ul>
+          <li><strong>Meta credentials stay server-side.</strong> No access token, app secret, verify
+            token, or service-role key in a client component, and nothing sensitive behind
+            <code>NEXT_PUBLIC_*</code>.</li>
+          <li><strong>Never log a full secret</strong>, and never print one into a report or a commit
+            message.</li>
+          <li>The media proxy <code>/api/admin/whatsapp/media/[mediaId]/</code> exists precisely so the
+            browser can display media <em>without</em> ever seeing the token.</li>
+          <li><strong>Treat every id coming from a browser as untrusted</strong>, even from an
+            authenticated admin, and re-check server-side that it belongs to the conversation in hand.
+            <code>resolveSupabaseWhatsAppQuotedMessageId</code> is the pattern.</li>
+          <li><strong>Internal notes must never be sent to WhatsApp.</strong> If you extend the composer,
+            keep that mode boundary loud.</li>
+          <li><strong>Do not bypass the 24-hour window.</strong> Meta can restrict the business
+            account.</li>
+        </ul>
+        <div class="call">
+          <p class="lede">Checked, and not a leak</p>
+          <p>
+            The Settings page shows the configured <code>WHATSAPP_BUSINESS_ACCOUNT_ID</code> and
+            <code>WHATSAPP_PHONE_NUMBER_ID</code> <em>values</em> to an authenticated admin. Those are
+            identifiers, not secrets — useless without the token, which never leaves the server — and
+            displaying them is the readiness console's whole purpose. Leave it alone.
+          </p>
+        </div>
+      </section>
+
+      <!-- 12 ──────────────────────────────────────────────────────────── -->
+      <section id="s12">
+        <h2 class="sec"><span class="num">12</span><span>Do not touch — the TikTok scheduler boundary</span></h2>
+        <p>
+          This repo also contains an unrelated TikTok scheduler owned by a different workstream.
+          <strong>Never modify:</strong>
+        </p>
+        <pre><code>src/lib/scheduler/**            src/app/scheduler/**
+src/app/api/scheduler/**        src/components/scheduler/**
+src/app/api/tiktok/**           src/app/connect/tiktok/**
+src/app/tiktok-media/[...path]/route.ts
+src/lib/tiktokWorkflowStore.ts  src/lib/internalWorkflowAuth.ts
+.codex-temp/**
+migrations 202608210001, 202608210002, 202608210003, 202608230001, 202608240002</code></pre>
+        <p>
+          <strong>Shared — read-only use is fine, but make a WhatsApp-specific version rather than
+          editing:</strong> <code>src/lib/scheduler/config.ts</code>, <code>session.ts</code>,
+          <code>src/lib/secureCookie.ts</code>, <code>src/lib/tiktok.ts</code>,
+          <code>tiktokPublishing.ts</code>, <code>src/lib/site.ts</code>, <code>posts.ts</code>,
+          <code>internalUtilityAuth.ts</code>,
+          <code>src/components/internal/InternalUtilityUnlockForm.tsx</code>.
+        </p>
+        <p>
+          Also off-limits: the automation advertising landing page
+          (<code>/services/business-automation/</code>). Verify shared changes don't break it; don't
+          redesign it.
+        </p>
+        <div class="call danger">
+          <p class="lede">Git hygiene used throughout</p>
+          <p>
+            Never <code>reset --hard</code>, <code>checkout .</code>, or any global discard. Stage only
+            WhatsApp files by explicit path. Never <code>git add -A</code> or <code>commit -am</code>.
+          </p>
+        </div>
+        <p>
+          One known pre-existing lint warning is deliberately left alone because it is scheduler code:
+          <code>src/components/scheduler/PostStatusPanel.tsx:68</code>
+          <code>react-hooks/exhaustive-deps</code>.
+        </p>
+      </section>
+
+      <!-- 13 ──────────────────────────────────────────────────────────── -->
+      <section id="s13">
+        <h2 class="sec"><span class="num">13</span><span>Known gaps — what has never been verified</span></h2>
+        <p>Be honest about these when asking for advice; they change what good advice looks like.</p>
+        <div class="grid2">
+          <div class="card">
+            <h4><span class="chip blocked">Gap 1</span></h4>
+            <p><strong>No page has ever been opened in a real browser at multiple breakpoints, and no
+            accessibility audit has been run.</strong> Everything is structurally responsive and
+            semantically marked up by inspection — that is not observation. This is the recorded next
+            task.</p>
+          </div>
+          <div class="card">
+            <h4><span class="chip blocked">Gap 2</span></h4>
+            <p><strong>No send has been observed arriving on a handset.</strong> Attachment upload, a
+            voice note playing as WhatsApp audio, the typing indicator reaching Meta, and
+            Sent/Delivered/Read coming back are unit-tested and checked against a production build — but
+            the customer-side half has never been watched.</p>
+          </div>
+          <div class="card">
+            <h4><span class="chip partial">Gap 3</span></h4>
+            <p>Stage 9 — conversation notes and labels — is blocked on an additive migration, not on
+            code.</p>
+          </div>
+          <div class="card">
+            <h4><span class="chip none">Gap 4</span></h4>
+            <p>Stages 14 and 15 do not exist. No files, no routes, no nav entries beyond the “Soon”
+            chips.</p>
+          </div>
+          <div class="card">
+            <h4>Cosmetic, pre-existing</h4>
+            <p>The locked screen says “Unlock the voice tool”, because
+            <code>InternalUtilityUnlockForm</code> is shared with a text-to-speech utility. Fixing it
+            properly means a per-utility copy prop on a shared component.</p>
+          </div>
+          <div class="card">
+            <h4>Deliberate</h4>
+            <p>Old inbox bookmarks (<code>/admin/whatsapp/?filter=HOT&amp;lead=…</code>) now land on the
+            Overview and the params are ignored. Add a redirect only if it becomes annoying in
+            practice.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 14 ──────────────────────────────────────────────────────────── -->
+      <section id="s14">
+        <h2 class="sec"><span class="num">14</span><span>What to do next</span></h2>
+
+        <h3>The recorded next task, and the cheapest real win</h3>
+        <p>
+          <strong>A browser and accessibility pass over the eight console pages, starting with
+          <code>/admin/whatsapp/settings</code>.</strong>
+        </p>
+        <pre><code>npm run dev      # then open /admin/whatsapp</code></pre>
+        <p>Open each page at <strong>375 / 390 / 430 / 768 / 1440&nbsp;px</strong> and exercise:</p>
+        <ul>
+          <li>the mobile drawer — open, Escape to close, scroll lock</li>
+          <li>the lead card list on narrow viewports, and the overview chart</li>
+          <li>the three-column conversations layout at each breakpoint</li>
+          <li>the composer: type, <code>Enter</code>, <code>Shift + Enter</code>, grow to four lines then
+            scroll, emoji insert at caret, the <code>+</code> panel as a bottom sheet, record a voice
+            note, enter and leave Reply Mode</li>
+          <li>the settings form's keyboard path — the business-day pills are <code>sr-only</code>
+            checkboxes with the focus ring on the <em>label</em>; verify the ring is actually visible</li>
+          <li>touch targets at roughly 44×44&nbsp;px</li>
+        </ul>
+        <p>Then run Lighthouse or axe DevTools. This closes Gap&nbsp;1 and costs less than either feature.</p>
+        <div class="call key">
+          <p class="lede">Do this in production too, once</p>
+          <p>
+            Send yourself one text, one image, one document and one voice note, and watch the status ticks
+            progress. That closes Gap&nbsp;2, and no amount of local testing substitutes for it.
+          </p>
+        </div>
+
+        <h3>Then one of two features — a real decision, not a default</h3>
+        <div class="grid2">
+          <div class="card">
+            <h4>Automations · Stage 15 · lighter</h4>
+            <p>Auto-replies and routing rules. Needs a new table plus a decision about <em>where rules
+            execute</em>: inline in the webhook path (simple, but it puts your logic in front of every
+            inbound message, and a bug there loses messages) or in a job/queue (safer, more moving
+            parts). Read <code>src/lib/whatsapp/store.ts</code> end to end before designing anything.</p>
+          </div>
+          <div class="card">
+            <h4>Campaigns · Stage 14 · heaviest</h4>
+            <p>Sends approved templates outbound. Needs a new send path, recipient selection, rate
+            limiting, and consent/opt-out handling. <strong>This is the one remaining piece that can get
+            the WhatsApp Business account restricted if done carelessly.</strong> Think about opt-out
+            before you think about UI.</p>
+          </div>
+        </div>
+        <p>
+          <strong>Or a quick win instead:</strong> unblock Stage 9. Write an additive migration adding
+          <code>notes</code> and <code>labels</code> to <code>whatsapp_conversations</code>, run it in the
+          Supabase SQL editor, then build the panel inputs — keeping the code degrading gracefully until
+          the columns exist.
+        </p>
+
+        <h3>Checklist for any new page</h3>
+        <ol class="body">
+          <li>Create <code>src/app/admin/whatsapp/&lt;name&gt;/page.tsx</code></li>
+          <li>Add the entry to <code>src/lib/route-governance.json</code> — <strong>the build fails
+            without it</strong></li>
+          <li>Flip <code>status</code> to <code>"live"</code> in <code>nav.ts</code></li>
+          <li>Update the ordered live-routes assertion in <code>nav.test.ts</code></li>
+          <li>Put pure logic in a <code>&lt;name&gt;Model.ts</code> with a <code>.test.ts</code> beside
+            it — never import <code>icons.tsx</code> from a test</li>
+          <li>tests → tsc → scoped lint → stop dev → build → restart dev → <strong>load the page and read
+            the HTML</strong></li>
+          <li>Update <code>docs/whatsapp-platform-progress.md</code></li>
+          <li>Commit only WhatsApp paths, by explicit path</li>
+        </ol>
+      </section>
+
+      <!-- 15 ──────────────────────────────────────────────────────────── -->
+      <section id="s15">
+        <h2 class="sec"><span class="num">15</span><span>A context primer to paste into another assistant</span></h2>
+        <p>
+          Paste this first, then your question. It is the minimum that prevents confidently wrong advice
+          about this codebase.
+        </p>
+        <div class="primer">
+          <div class="primer-bar">
+            <span>Context primer</span>
+            <button class="copy" type="button" id="copyBtn" data-target="primerText">Copy</button>
+          </div>
+          <pre id="primerText"><code>I'm working on an internal WhatsApp Business console inside a Next.js 15 App Router marketing site (src/ layout, React 18, TypeScript 5, Tailwind v4, Node 24, deployed on Vercel). It lives at /admin/whatsapp and is password-gated and NOINDEX. Please respect these facts about the codebase — they are unusual and they invalidate a lot of default advice:
+
+1. Tailwind v4 with NO tailwind.config.js. Design tokens are in an @theme block in src/app/globals.css. Custom palette ("Growth Ledger"): ledger-deep #0c3327, ledger #124a38, ledger-bright #1c7a54, paper #eff1ec, paper-raised #f7f8f4, ink #14140f, ink-soft #454a3f, ink-faint #737868, rule #d2d6cb, brass #b4802f. Stock Tailwind blues/slates are remapped to green; rose-* is not remapped and is the alert colour.
+2. Supabase is accessed by RAW fetch against PostgREST with the service-role key, SERVER-SIDE ONLY. @supabase/supabase-js is not used. RLS is on with zero policies, so there is no browser database client and Supabase Realtime is NOT available. Do not suggest it.
+3. "Realtime" is a poll: a client component polls an API digest route and calls router.refresh(), plus focus/online/visibilitychange listeners and a 60s reconcile. Outgoing messages get optimistic bubbles reconciled by WhatsApp message id (wamid).
+4. Messages send through the Meta WhatsApp Cloud API. Media is a TWO-call flow: POST /{phone-number-id}/media (multipart) to get an id, then POST /{phone-number-id}/messages with type + {id}. Quoting uses context: {message_id}. Delivery status comes only from Meta's webhook and is stored with a monotonic rank so late webhooks can't walk it backwards.
+5. Icons are a local inline-SVG set (src/components/whatsapp/icons.tsx), not lucide. That file evaluates JSX at module level, so no *.test.ts may import it, directly or transitively — pure logic lives in separate .ts model modules with tests beside them.
+6. Every mutation goes: client fetch to /api/admin/whatsapp/&lt;x&gt;/ (trailing slash matters) → route checks hasWhatsAppAdminAccess (401) then isSameOriginMutation (403) BEFORE parsing the body → store → router.refresh().
+7. Tests run with `npx tsx --test &lt;files&gt;` (node:test) — there is no `npm test` and no `typecheck` script (use npx tsc --noEmit). Every new page MUST be added to src/lib/route-governance.json or `npm run build` fails. Never run a build while the dev server is running.
+8. Secrets stay server-side always: no Meta access token, app secret, verify token, or Supabase service-role key in client code or behind NEXT_PUBLIC_*. Never log a secret. IDs arriving from a browser are untrusted even from an authenticated admin and must be re-validated server-side.
+9. The repo also contains an unrelated TikTok scheduler (src/**/scheduler/**, src/**/tiktok*) that must never be modified.
+10. Do not bypass WhatsApp's 24-hour customer service window; outside it, only approved templates can be sent.
+
+Eight console pages are live (Overview, Conversations, Contacts, Quick Replies, Templates, Phone Numbers, Analytics, Settings). The message composer was just rebuilt: auto-resizing editor, emoji picker with recents, attachment grid (image/video/document/audio only), functional voice notes, and a reply-quote mode. Not started: Campaigns and Automations. Blocked on a migration: conversation notes and labels.
+
+My question is:</code></pre>
+        </div>
+      </section>
+
+      <!-- 16 ──────────────────────────────────────────────────────────── -->
+      <section id="s16">
+        <h2 class="sec"><span class="num">16</span><span>Where the detail lives</span></h2>
+        <div class="scroller">
+          <table>
+            <thead><tr><th>File</th><th>What it holds</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><code>docs/whatsapp-platform-progress.md</code></td>
+                <td>The authoritative 1,268-line record: every increment's notes, every architectural
+                  decision <em>and its reasoning</em>, the full verification history, and the exact resume
+                  point. Read it before making a design decision — it usually explains why something is
+                  the way it is.</td>
+              </tr>
+              <tr>
+                <td><code>docs/whatsapp-handoff-guide.md</code></td>
+                <td>The markdown twin of this page. Use it when you want to paste context somewhere.</td>
+              </tr>
+              <tr>
+                <td><code>docs/WHATSAPP-INTEGRATION.md</code></td>
+                <td>Integration and operations notes.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p>
+          Keep the progress doc updated as you go. Its <em>Interface Resume Point</em> section at the end
+          should always be current, because it is the first thing a future session reads.
+        </p>
+      </section>
+
+      <footer class="doc">
+        <p>
+          <strong>Commit history for this work:</strong> <code>5f25651</code> shell →
+          <code>96226b0</code> overview → <code>ef9929b</code> three-column inbox →
+          <code>260927f</code> contacts → <code>d913818</code> quick replies →
+          <code>34026c7</code> templates → <code>475d3b0</code> analytics →
+          <code>b5ac807</code> settings → <code>311520b</code> live messaging →
+          <code>82aa9fb</code> composer.
+        </p>
+        <p>All gates green at <code>82aa9fb</code>. Interface work is paused at the browser and accessibility pass.</p>
+      </footer>
+
+    </main>
+  </div>
+</div>
+
+<script>
+  // Contents rail follows the reader.
+  (function () {
+    var links = Array.prototype.slice.call(document.querySelectorAll('nav.toc a'));
+    var byId = {};
+    links.forEach(function (a) { byId[a.getAttribute('href').slice(1)] = a; });
+
+    var sections = Array.prototype.slice.call(document.querySelectorAll('main section'));
+    if (!('IntersectionObserver' in window) || !sections.length) return;
+
+    var visible = {};
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) { visible[entry.target.id] = entry.isIntersecting; });
+      var current = null;
+      for (var i = 0; i < sections.length; i++) {
+        if (visible[sections[i].id]) { current = sections[i].id; break; }
+      }
+      links.forEach(function (a) { a.removeAttribute('aria-current'); });
+      if (current && byId[current]) byId[current].setAttribute('aria-current', 'true');
+    }, { rootMargin: '-12% 0px -70% 0px' });
+
+    sections.forEach(function (s) { observer.observe(s); });
+  })();
+
+  // Copy the primer. The whole point of that block is pasting it elsewhere.
+  (function () {
+    var button = document.getElementById('copyBtn');
+    if (!button) return;
+    button.addEventListener('click', function () {
+      var source = document.getElementById('primerText');
+      if (!source) return;
+      var text = source.innerText;
+      var done = function (ok) {
+        button.textContent = ok ? 'Copied' : 'Select and copy';
+        window.setTimeout(function () { button.textContent = 'Copy'; }, 2200);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function () { done(true); }, function () { done(false); });
+      } else {
+        done(false);
+      }
+    });
+  })();
+</script>
+</body>
+</html>
