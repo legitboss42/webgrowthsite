@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import type { FormEvent } from "react";
+import TopbarActionPortal from "@/components/whatsapp/TopbarActionPortal";
 import type { WhatsAppTeamMember } from "@/lib/whatsapp/teamModel";
 
 type CollaborationNote = {
@@ -226,22 +227,24 @@ export default function ConversationCollaborationWidget() {
   return (
     <>
       {otherViewers.length > 0 ? (
-        <div className="pointer-events-none fixed left-1/2 top-[4.8rem] z-[54] -translate-x-1/2 rounded-full border border-brass/25 bg-brass-tint px-3 py-1.5 text-xs font-semibold text-[#6f4f16] shadow-md">
+        <div className="pointer-events-none fixed left-1/2 top-[7.5rem] z-[54] -translate-x-1/2 rounded-full border border-brass/25 bg-brass-tint px-3 py-1.5 text-xs font-semibold text-[#6f4f16] shadow-md lg:top-[4.8rem]">
           {typingViewer
             ? `${typingViewer.displayName} is replying…`
             : `${otherViewers.map((viewer) => viewer.displayName).join(", ")} ${otherViewers.length === 1 ? "is" : "are"} viewing this conversation`}
         </div>
       ) : null}
 
-      <div className="fixed right-3 top-[8.25rem] z-[54] sm:right-5">
+      <TopbarActionPortal>
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="rounded-full border border-ledger/20 bg-ledger-tint px-3 py-2 text-xs font-semibold text-ledger shadow-lg shadow-ink/10"
+          aria-expanded={open}
+          className="inline-flex h-8 flex-none items-center rounded-lg border border-ledger/25 bg-ledger-tint px-2.5 text-[0.68rem] font-semibold text-ledger shadow-sm"
         >
-          Internal · {data?.notes?.length || 0}
+          <span className="hidden sm:inline">Internal · {data?.notes?.length || 0}</span>
+          <span className="sm:hidden">Notes · {data?.notes?.length || 0}</span>
         </button>
-      </div>
+      </TopbarActionPortal>
 
       {open ? (
         <div className="fixed inset-0 z-[70] bg-ink/35 backdrop-blur-[1px]" role="dialog" aria-modal="true" aria-label="Internal conversation collaboration">

@@ -41,7 +41,7 @@ function initials(value: string) {
 
 function Brand({ href, compact = false, onNavigate }: { href: string; compact?: boolean; onNavigate?: () => void }) {
   return (
-    <Link href={href} onClick={onNavigate} aria-label="Web Growth WhatsApp platform" className={`wg-brand flex min-w-0 items-center ${compact ? "gap-2" : "gap-2.5"}`}>
+    <Link href={href} onClick={onNavigate} aria-label="Web Growth WhatsApp platform" className={`wg-brand flex min-w-0 items-center ${compact ? "justify-center" : "gap-2.5"}`}>
       <span className="wg-brand-mark relative grid h-9 w-9 flex-none place-items-center overflow-hidden rounded-xl">
         <img src="/images/logo.webp" alt="Web Growth" width="36" height="36" className="h-full w-full object-cover" />
       </span>
@@ -55,30 +55,31 @@ function Brand({ href, compact = false, onNavigate }: { href: string; compact?: 
   );
 }
 
-function NavRow({ item, onNavigate }: { item: WhatsAppNavItem; onNavigate?: () => void }) {
+function NavRow({ item, onNavigate, compact = false }: { item: WhatsAppNavItem; onNavigate?: () => void; compact?: boolean }) {
   const pathname = usePathname();
   const active = isWhatsAppNavItemActive(pathname, item.href);
+  const title = compact ? `${item.label} · ${item.description}` : undefined;
 
   if (item.status === "soon") {
     return (
-      <span aria-disabled="true" title={`${item.description} Coming in a later stage.`} className="wg-nav-row flex cursor-not-allowed items-center gap-2.5 px-2.5 py-2 text-sm text-white/24">
+      <span aria-disabled="true" title={compact ? `${item.label}. ${item.description} Coming in a later stage.` : `${item.description} Coming in a later stage.`} className={`wg-nav-row flex cursor-not-allowed items-center px-2.5 py-2 text-sm text-white/24 ${compact ? "justify-center" : "gap-2.5"}`}>
         <WhatsAppIcon name={item.icon} className="h-[1.05rem] w-[1.05rem] flex-none" />
-        <span className="truncate">{item.label}</span>
-        <span className="ml-auto text-[0.55rem] font-semibold uppercase tracking-[.12em] text-white/22">Soon</span>
+        {!compact ? <span className="truncate">{item.label}</span> : null}
+        {!compact ? <span className="ml-auto text-[0.55rem] font-semibold uppercase tracking-[.12em] text-white/22">Soon</span> : null}
       </span>
     );
   }
 
   return (
-    <Link href={item.href} onClick={onNavigate} aria-current={active ? "page" : undefined} data-active={active ? "true" : "false"} className="wg-nav-row group relative flex items-center gap-2.5 px-2.5 py-2 text-sm font-medium">
+    <Link href={item.href} onClick={onNavigate} title={title} aria-label={compact ? item.label : undefined} aria-current={active ? "page" : undefined} data-active={active ? "true" : "false"} className={`wg-nav-row group relative flex items-center px-2.5 py-2 text-sm font-medium ${compact ? "justify-center" : "gap-2.5"}`}>
       <span className="wg-nav-active-bar absolute inset-y-1.5 left-0 w-0.5 rounded-full" aria-hidden="true" />
       <WhatsAppIcon name={item.icon} className="h-[1.05rem] w-[1.05rem] flex-none" />
-      <span className="truncate">{item.label}</span>
+      {!compact ? <span className="truncate">{item.label}</span> : null}
     </Link>
   );
 }
 
-function SidebarContent({ senderConnected, senderNumber, role, memberName, workspaceName, workspaceControl, onNavigate }: {
+function SidebarContent({ senderConnected, senderNumber, role, memberName, workspaceName, workspaceControl, onNavigate, compact = false }: {
   senderConnected: boolean;
   senderNumber?: string;
   role: WhatsAppTeamRole;
@@ -86,17 +87,22 @@ function SidebarContent({ senderConnected, senderNumber, role, memberName, works
   workspaceName?: string;
   workspaceControl?: ReactNode;
   onNavigate?: () => void;
+  compact?: boolean;
 }) {
   const sections = getWhatsAppNavSectionsForRole(role);
 
   return (
     <div className="flex h-full min-h-0 flex-col">
-      <div className="wg-sidebar-brand flex-none px-2 pb-3 pt-1">
-        <Brand href={workspaceHome(role)} onNavigate={onNavigate} />
+      <div className={`wg-sidebar-brand flex-none pb-3 pt-1 ${compact ? "px-3" : "px-2"}`}>
+        <Brand href={workspaceHome(role)} compact={compact} onNavigate={onNavigate} />
       </div>
 
-      <div className="wg-workspace-switcher flex-none px-2 pb-2">
-        {workspaceControl ?? (
+      <div className={`wg-workspace-switcher flex-none pb-2 ${compact ? "px-3" : "px-2"}`}>
+        {compact ? (
+          <div title="Expand the sidebar to switch workspace" aria-label="Current workspace" className="grid h-9 w-9 place-items-center rounded-lg border border-white/[.06] bg-white/[.025] text-[0.62rem] font-bold text-white/74">
+            WG
+          </div>
+        ) : workspaceControl ?? (
           <div className="flex min-w-0 items-center gap-2 rounded-lg border border-white/[.06] bg-white/[.025] px-2.5 py-2">
             <span className="grid h-7 w-7 flex-none place-items-center rounded-md bg-white/[.05] text-[0.62rem] font-bold text-white/74">WG</span>
             <span className="min-w-0 flex-1 truncate text-xs font-medium text-white/78">{workspaceName || "Web Growth"}</span>
@@ -105,23 +111,30 @@ function SidebarContent({ senderConnected, senderNumber, role, memberName, works
         )}
       </div>
 
-      <nav aria-label="WhatsApp console" className="wg-sidebar-scroll min-h-0 flex-1 overflow-y-auto px-2 pb-3">
+      <nav aria-label="WhatsApp console" className={`wg-sidebar-scroll min-h-0 flex-1 overflow-y-auto pb-3 ${compact ? "px-2" : "px-2"}`}>
         {sections.map((section) => (
           <div key={section.label} className="wg-nav-section mb-3">
-            <p className="px-2.5 pb-1.5 pt-2 text-[0.57rem] font-semibold uppercase tracking-[.16em] text-white/24">{section.label}</p>
-            <div className="space-y-0.5">{section.items.map((item) => <NavRow key={item.label} item={item} onNavigate={onNavigate} />)}</div>
+            {!compact ? <p className="px-2.5 pb-1.5 pt-2 text-[0.57rem] font-semibold uppercase tracking-[.16em] text-white/24">{section.label}</p> : <div className="h-2" aria-hidden="true" />}
+            <div className="space-y-0.5">{section.items.map((item) => <NavRow key={item.label} item={item} compact={compact} onNavigate={onNavigate} />)}</div>
           </div>
         ))}
       </nav>
 
-      <div className="wg-sidebar-footer flex-none border-t border-white/[.055] px-2 pb-1 pt-2.5">
-        <div className="flex items-center gap-2.5 rounded-lg px-2 py-2">
-          <span className="grid h-8 w-8 flex-none place-items-center rounded-full bg-[#143423] text-[0.65rem] font-bold text-[#55dc8d]">{initials(memberName)}</span>
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-xs font-medium text-white/82">{memberName}</p>
-            <p className="mt-0.5 truncate text-[0.6rem] text-white/32">{role} · {getWhatsAppSenderStatusText(senderConnected)}{senderNumber ? ` · ${senderNumber}` : ""}</p>
-          </div>
-          <span aria-label={senderConnected ? "Sender connected" : "Sender offline"} className={`h-2 w-2 flex-none rounded-full ${senderConnected ? "bg-[#22c55e] shadow-[0_0_0_3px_rgba(34,197,94,.1)]" : "bg-white/20"}`} />
+      <div className={`wg-sidebar-footer flex-none border-t border-white/[.055] pb-1 pt-2.5 ${compact ? "px-3" : "px-2"}`}>
+        <div className={`flex items-center rounded-lg py-2 ${compact ? "justify-center" : "gap-2.5 px-2"}`} title={compact ? `${memberName} · ${getWhatsAppSenderStatusText(senderConnected)}` : undefined}>
+          <span className="relative grid h-8 w-8 flex-none place-items-center rounded-full bg-[#143423] text-[0.65rem] font-bold text-[#55dc8d]">
+            {initials(memberName)}
+            {compact ? <span aria-label={senderConnected ? "Sender connected" : "Sender offline"} className={`absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full ring-2 ring-[#07110d] ${senderConnected ? "bg-[#22c55e]" : "bg-white/20"}`} /> : null}
+          </span>
+          {!compact ? (
+            <>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-xs font-medium text-white/82">{memberName}</p>
+                <p className="mt-0.5 truncate text-[0.6rem] text-white/32">{role} · {getWhatsAppSenderStatusText(senderConnected)}{senderNumber ? ` · ${senderNumber}` : ""}</p>
+              </div>
+              <span aria-label={senderConnected ? "Sender connected" : "Sender offline"} className={`h-2 w-2 flex-none rounded-full ${senderConnected ? "bg-[#22c55e] shadow-[0_0_0_3px_rgba(34,197,94,.1)]" : "bg-white/20"}`} />
+            </>
+          ) : null}
         </div>
       </div>
     </div>
@@ -156,6 +169,7 @@ function MobileNav({ role, onMore }: { role: WhatsAppTeamRole; onMore: () => voi
 export default function WhatsAppShell({ children, senderConnected, senderNumber, role, memberName, workspaceName, workspaceControl, presenceControl, toolbar }: WhatsAppShellProps) {
   const pathname = usePathname();
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const drawerId = useId();
   const pageMeta = useMemo(() => getWhatsAppPageMeta(pathname), [pathname]);
   const fillsViewport = getWhatsAppLayoutMode(pathname) === "fill";
@@ -175,8 +189,17 @@ export default function WhatsAppShell({ children, senderConnected, senderNumber,
 
   return (
     <div className={`wg-whatsapp-app flex min-w-0 text-ink ${fillsViewport ? "h-dvh overflow-hidden" : "min-h-dvh"}`}>
-      <aside className="wg-app-sidebar sticky top-0 hidden h-dvh w-[14.5rem] flex-none flex-col py-3 lg:flex">
-        <SidebarContent senderConnected={senderConnected} senderNumber={senderNumber} role={role} memberName={memberName} workspaceName={workspaceName} workspaceControl={workspaceControl} />
+      <aside className={`wg-app-sidebar relative sticky top-0 hidden h-dvh flex-none flex-col py-3 transition-[width] duration-200 lg:flex ${sidebarCollapsed ? "w-[4.5rem]" : "w-[14.5rem]"}`}>
+        <button
+          type="button"
+          onClick={() => setSidebarCollapsed((value) => !value)}
+          aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          className="absolute -right-3 top-4 z-20 grid h-7 w-7 place-items-center rounded-full border border-white/[.09] bg-[#0b1511] text-white/55 shadow-lg transition hover:bg-[#12231b] hover:text-white"
+        >
+          <WhatsAppIcon name="chevronLeft" className={`h-3.5 w-3.5 transition-transform ${sidebarCollapsed ? "rotate-180" : ""}`} />
+        </button>
+        <SidebarContent compact={sidebarCollapsed} senderConnected={senderConnected} senderNumber={senderNumber} role={role} memberName={memberName} workspaceName={workspaceName} workspaceControl={workspaceControl} />
       </aside>
 
       {drawerOpen ? (
@@ -194,7 +217,7 @@ export default function WhatsAppShell({ children, senderConnected, senderNumber,
 
       <div className={`flex min-w-0 max-w-full flex-1 flex-col ${fillsViewport ? "overflow-hidden" : ""}`}>
         <header className="wg-app-topbar sticky top-0 z-30 flex-none">
-          <div className="flex min-h-[3.65rem] items-center gap-3 px-3 sm:px-4 lg:px-5">
+          <div className="flex min-h-[3.65rem] flex-wrap items-center gap-2 px-3 py-2 sm:px-4 lg:flex-nowrap lg:gap-3 lg:px-5">
             <button type="button" onClick={() => setDrawerOpen(true)} aria-expanded={drawerOpen} aria-controls={drawerId} className="grid h-9 w-9 place-items-center rounded-lg border border-white/[.07] bg-white/[.025] text-white/60 lg:hidden">
               <WhatsAppIcon name="menu" className="h-4.5 w-4.5" />
               <span className="sr-only">Open navigation</span>
@@ -211,6 +234,7 @@ export default function WhatsAppShell({ children, senderConnected, senderNumber,
               {presenceControl ?? <span className={`hidden items-center gap-1.5 rounded-md border px-2 py-1 text-[0.65rem] sm:inline-flex ${senderConnected ? "border-[#1d5f3a] bg-[#0d2919] text-[#67e59b]" : "border-white/[.07] bg-white/[.025] text-white/35"}`}><span className={`h-1.5 w-1.5 rounded-full ${senderConnected ? "bg-[#22c55e]" : "bg-white/25"}`} />{senderConnected ? "Active" : "Offline"}</span>}
               {toolbar ? <div className="min-w-0 flex-none">{toolbar}</div> : null}
             </div>
+            <div id="wg-whatsapp-topbar-actions" className="order-4 flex min-w-0 basis-full items-center justify-end gap-1.5 overflow-x-auto border-t border-white/[.06] pt-2 empty:hidden lg:order-none lg:basis-auto lg:border-0 lg:pt-0" aria-label="Conversation actions" />
           </div>
         </header>
         <main className={`wg-app-content min-w-0 flex-1 ${fillsViewport ? "min-h-0 overflow-hidden" : ""}`}>{children}</main>

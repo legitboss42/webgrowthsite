@@ -1,5 +1,5 @@
-/* Conversation collision fixes verified against the desktop and mobile screenshots.
-   Keep utility actions out of the thread header/composer and let the header wrap deliberately. */
+/* Conversation collision fixes.
+   Conversation utilities now live in the app topbar instead of floating above the composer. */
 
 .wg-whatsapp-app .wg-inbox-workspace section:has(#whatsapp-composer-editor) > div:first-child {
   min-height: 4.15rem;
@@ -19,125 +19,29 @@
   max-width: 12.5rem;
 }
 
-/* Reserve a clean strip at the bottom of the thread for desktop utility actions. */
-.wg-whatsapp-app .wg-inbox-workspace section:has(#whatsapp-composer-editor) > div:nth-child(2) {
-  padding-bottom: 5.75rem !important;
-}
+/* Keep the conversation action dock in the free topbar space immediately before sender/presence controls. */
+@media (min-width: 1024px) {
+  .wg-whatsapp-app .wg-app-topbar #wg-whatsapp-topbar-actions {
+    order: 10 !important;
+    flex: 0 1 auto;
+    max-width: min(42rem, 55vw);
+  }
 
-/* Internal notes launcher. */
-.wg-whatsapp-app div[class~="fixed"][class*="top-[8.25rem]"][class*="z-[54]"] {
-  top: auto !important;
-  bottom: 8.25rem !important;
-  right: 34rem !important;
-}
-
-/* AI Assist launcher + open panel. */
-.wg-whatsapp-app button[class~="fixed"][class*="bottom-[5.6rem]"][class*="z-[62]"] {
-  bottom: 8.25rem !important;
-  right: 27rem !important;
-}
-.wg-whatsapp-app div[class~="fixed"][class*="bottom-[8.8rem]"][class*="z-[70]"] {
-  bottom: 11.5rem !important;
-  right: 19rem !important;
-  max-height: calc(100dvh - 15rem);
-  overflow-y: auto;
-}
-
-/* Published Flow launcher. */
-.wg-whatsapp-app div[class~="fixed"][class*="bottom-[5.35rem]"][class*="z-40"] {
-  bottom: 8.25rem !important;
-  right: 20rem !important;
-}
-
-/* Background-notification bell. */
-.wg-whatsapp-app button[aria-label*="Open notification settings"] {
-  bottom: 8.25rem !important;
-  right: 16rem !important;
-}
-
-@media (min-width: 1280px) {
-  .wg-whatsapp-app div[class~="fixed"][class*="top-[8.25rem]"][class*="z-[54]"] { right: 36rem !important; }
-  .wg-whatsapp-app button[class~="fixed"][class*="bottom-[5.6rem]"][class*="z-[62]"] { right: 29rem !important; }
-  .wg-whatsapp-app div[class~="fixed"][class*="bottom-[8.8rem]"][class*="z-[70]"] { right: 21rem !important; }
-  .wg-whatsapp-app div[class~="fixed"][class*="bottom-[5.35rem]"][class*="z-40"] { right: 22rem !important; }
-  .wg-whatsapp-app button[aria-label*="Open notification settings"] { right: 18rem !important; }
+  .wg-whatsapp-app .wg-app-topbar > div > div:has(+ #wg-whatsapp-topbar-actions) {
+    order: 20;
+  }
 }
 
 @media (max-width: 1023px) {
-  /* On phones/tablets, utilities become a compact right-edge dock instead of sitting on the composer. */
-  .wg-whatsapp-app .wg-inbox-workspace section:has(#whatsapp-composer-editor) > div:nth-child(2) {
-    padding-right: 4.15rem !important;
-    padding-bottom: 1rem !important;
+  .wg-whatsapp-app .wg-app-topbar #wg-whatsapp-topbar-actions {
+    order: 40 !important;
+    width: 100%;
+    flex-basis: 100%;
+    scrollbar-width: none;
   }
 
-  .wg-whatsapp-app div[class~="fixed"][class*="top-[8.25rem]"][class*="z-[54]"] {
-    top: 9.25rem !important;
-    bottom: auto !important;
-    right: .55rem !important;
-  }
-  .wg-whatsapp-app div[class~="fixed"][class*="top-[8.25rem]"][class*="z-[54]"] > button {
-    width: 2.75rem;
-    height: 2.75rem;
-    padding: 0 !important;
-    font-size: 0 !important;
-    display: grid;
-    place-items: center;
-  }
-  .wg-whatsapp-app div[class~="fixed"][class*="top-[8.25rem]"][class*="z-[54]"] > button::before {
-    content: "N";
-    font-size: .72rem;
-    font-weight: 800;
-  }
-
-  .wg-whatsapp-app button[class~="fixed"][class*="bottom-[5.6rem]"][class*="z-[62]"] {
-    top: 12.55rem !important;
-    bottom: auto !important;
-    right: .55rem !important;
-    width: 2.75rem;
-    height: 2.75rem;
-    padding: 0 !important;
-    font-size: 0 !important;
-  }
-  .wg-whatsapp-app button[class~="fixed"][class*="bottom-[5.6rem]"][class*="z-[62]"]::before {
-    content: "✦";
-    font-size: 1rem;
-  }
-  .wg-whatsapp-app div[class~="fixed"][class*="bottom-[8.8rem]"][class*="z-[70]"] {
-    top: 7.75rem !important;
-    bottom: auto !important;
-    right: .5rem !important;
-    width: min(27rem, calc(100vw - 1rem)) !important;
-    max-height: calc(100dvh - 9rem);
-    overflow-y: auto;
-  }
-
-  .wg-whatsapp-app div[class~="fixed"][class*="bottom-[5.35rem]"][class*="z-40"] {
-    top: 15.85rem !important;
-    bottom: auto !important;
-    right: .55rem !important;
-    max-width: calc(100vw - 1.1rem) !important;
-  }
-  .wg-whatsapp-app div[class~="fixed"][class*="bottom-[5.35rem]"][class*="z-40"] > button {
-    width: 2.75rem;
-    height: 2.75rem;
-    padding: 0 !important;
-    font-size: 0 !important;
-    display: grid;
-    place-items: center;
-  }
-  .wg-whatsapp-app div[class~="fixed"][class*="bottom-[5.35rem]"][class*="z-40"] > button::before {
-    content: "F";
-    font-size: .72rem;
-    font-weight: 800;
-  }
-  .wg-whatsapp-app div[class~="fixed"][class*="bottom-[5.35rem]"][class*="z-40"]:has(> div) {
-    top: 8.25rem !important;
-  }
-
-  .wg-whatsapp-app button[aria-label*="Open notification settings"] {
-    top: 19.15rem !important;
-    bottom: auto !important;
-    right: .55rem !important;
+  .wg-whatsapp-app .wg-app-topbar #wg-whatsapp-topbar-actions::-webkit-scrollbar {
+    display: none;
   }
 }
 

@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import TopbarActionPortal from "@/components/whatsapp/TopbarActionPortal";
 import {
   shouldShowWhatsAppInboxNotification,
   type WhatsAppInboxNotification,
@@ -92,7 +93,7 @@ function NotificationBellIcon() {
       strokeWidth={1.8}
       strokeLinecap="round"
       strokeLinejoin="round"
-      className="h-5 w-5"
+      className="h-4 w-4"
       aria-hidden="true"
       focusable="false"
     >
@@ -216,8 +217,6 @@ export default function WhatsAppInboxAutoRefresh({
 
       const latest = enabled ? payload.latest || null : null;
       const shouldNotify = shouldShowWhatsAppInboxNotification(latestMessageIdRef.current, latest);
-      // When Web Push is subscribed the service worker owns system notifications, which
-      // prevents a foreground poll and a background push from showing the same message twice.
       if (latest && shouldNotify && permission === "granted" && pushStatus !== "subscribed") {
         new Notification(latest.title, { body: latest.body, tag: latest.id });
       }
@@ -270,25 +269,27 @@ export default function WhatsAppInboxAutoRefresh({
   if (pushStatus === "subscribed" && permission === "granted") {
     const statusText = live ? "Background WhatsApp alerts are on" : reconnectingText;
     return (
-      <button
-        type="button"
-        onClick={() => router.push("/admin/whatsapp/settings/")}
-        aria-label={`${statusText}. Open notification settings.`}
-        title={`${statusText}. Open notification settings.`}
-        className={`fixed bottom-4 right-4 z-40 grid h-11 w-11 place-items-center rounded-full border shadow-lg shadow-ink/10 transition hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ledger-bright/40 ${
-          live
-            ? "border-ledger/20 bg-ledger-bright text-white hover:bg-ledger"
-            : "border-brass/30 bg-brass-tint text-[#6f4f16]"
-        }`}
-      >
-        <NotificationBellIcon />
-        <span
-          aria-hidden="true"
-          className={`absolute right-1.5 top-1.5 h-2 w-2 rounded-full ring-2 ring-paper-raised ${
-            live ? "bg-emerald-300" : "bg-brass"
+      <TopbarActionPortal>
+        <button
+          type="button"
+          onClick={() => router.push("/admin/whatsapp/settings/")}
+          aria-label={`${statusText}. Open notification settings.`}
+          title={`${statusText}. Open notification settings.`}
+          className={`relative inline-grid h-8 w-8 flex-none place-items-center rounded-lg border shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ledger-bright/40 ${
+            live
+              ? "border-ledger/25 bg-ledger-bright text-white hover:bg-ledger"
+              : "border-brass/30 bg-brass-tint text-[#6f4f16]"
           }`}
-        />
-      </button>
+        >
+          <NotificationBellIcon />
+          <span
+            aria-hidden="true"
+            className={`absolute right-1 top-1 h-1.5 w-1.5 rounded-full ring-1 ring-paper-raised ${
+              live ? "bg-emerald-300" : "bg-brass"
+            }`}
+          />
+        </button>
+      </TopbarActionPortal>
     );
   }
 
