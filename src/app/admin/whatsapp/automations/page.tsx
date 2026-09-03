@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { WhatsAppIcon } from "@/components/whatsapp/icons";
-import { canWhatsAppRoleSuperviseTeam, normalizeWhatsAppTeamMember } from "@/lib/whatsapp/teamModel";
+import { canWhatsAppRoleSuperviseTeam, normalizeWhatsAppTeamMember, type WhatsAppTeamRole } from "@/lib/whatsapp/teamModel";
 import { normalizeWhatsAppAutomationJobRow, normalizeWhatsAppAutomationRow, normalizeWhatsAppAutomationRunRow, type WhatsAppAutomation, type WhatsAppAutomationJob, type WhatsAppAutomationRun } from "@/lib/whatsapp/automationModel";
 import { fetchWhatsAppTemplates } from "@/lib/whatsapp/templates";
 import { getWhatsAppWorkspaceAccess } from "../auth";
@@ -37,11 +37,11 @@ export default async function WhatsAppAutomationsPage({ searchParams }: { search
         <Link href="/admin/whatsapp/automations/?section=ai" className={`rounded-md px-3 py-2 text-xs font-semibold ${section === "ai" ? "bg-ledger-tint text-ledger-bright" : "text-ink-faint hover:text-ink"}`}>AI Agents</Link>
       </nav>
     </div>
-    {section === "ai" ? <AIAutomationManager /> : <WorkflowSection />}
+    {section === "ai" ? <AIAutomationManager /> : <WorkflowSection role={access.role} />}
   </div>;
 }
 
-async function WorkflowSection() {
+async function WorkflowSection({ role }: { role: WhatsAppTeamRole }) {
   const [automationResult, runs, jobs, team, savedReplies, templatesResult] = await Promise.all([getAutomations(), getRuns(), getJobs(), getTeam(), getSavedReplies(), fetchWhatsAppTemplates()]);
   const templates = templatesResult.ok ? templatesResult.templates.filter((template) => template.status === "APPROVED").map((template) => ({ name: template.name, language: template.language || "en_US" })) : [];
   const active = automationResult.automations.filter((automation) => automation.status === "ACTIVE").length;
@@ -54,6 +54,6 @@ async function WorkflowSection() {
       <HubMetric label="Paused" value={paused} note="Held from execution" icon="statusPending" />
       <HubMetric label="Recent failures" value={failedRuns} note={`${jobs.length} queued or waiting`} icon="statusFailed" />
     </div>
-    <AutomationManager automations={automationResult.automations} storageReady={automationResult.ready} role="owner" runs={runs} jobs={jobs} teamMembers={team.map((member) => ({ id: member.id, name: member.displayName, availability: member.availability }))} templates={templates} savedReplies={savedReplies} />
+    <AutomationManager automations={automationResult.automations} storageReady={automationResult.ready} role={role} runs={runs} jobs={jobs} teamMembers={team.map((member) => ({ id: member.id, name: member.displayName, availability: member.availability }))} templates={templates} savedReplies={savedReplies} />
   </>;
 }
