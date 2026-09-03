@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import path from "node:path";
 import test from "node:test";
+import { WHATSAPP_PLATFORM_SETTINGS_ROUTES, WHATSAPP_WORKSPACE_SETTINGS_ROUTES } from "@/lib/whatsapp/settingsNavigation";
 import { WHATSAPP_NAV_ITEMS } from "./nav";
 
 const ROOT = process.cwd();
@@ -30,6 +31,13 @@ function whatsappSourceFiles() {
 test("every live WhatsApp navigation item resolves to an App Router page", () => {
   const missing = WHATSAPP_NAV_ITEMS
     .filter((item) => item.status === "live")
+    .map((item) => ({ label: item.label, href: item.href, file: routeToPage(item.href) }))
+    .filter((item) => !existsSync(item.file));
+  assert.deepEqual(missing, []);
+});
+
+test("workspace and platform settings navigation resolves to real pages", () => {
+  const missing = [...WHATSAPP_WORKSPACE_SETTINGS_ROUTES, ...WHATSAPP_PLATFORM_SETTINGS_ROUTES]
     .map((item) => ({ label: item.label, href: item.href, file: routeToPage(item.href) }))
     .filter((item) => !existsSync(item.file));
   assert.deepEqual(missing, []);
