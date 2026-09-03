@@ -8,6 +8,26 @@ Stage 12 is the final product-experience redesign of the Web Growth WhatsApp Bus
 
 All functionality already built in Stages 1–11 must retain a clear place in the redesigned application. Stage 12 is primarily an application-shell, information-architecture, density, consistency, responsiveness and interaction redesign. It must not casually remove or rebuild working backend behavior.
 
+## Execution lock for this redesign
+
+The user has now supplied the Web Growth logo plus the full 13-page mockup set as the visual reference for implementation. Treat those references as the approved design direction for the entire WhatsApp application, including every existing routed page and mobile view.
+
+Non-negotiable implementation rules:
+
+- Frontend redesign only. Do not remove, rename, replace or silently alter working backend features, APIs, database behavior, tenancy boundaries, permissions, Meta integration, automation runtime, campaign runtime, Flow runtime, AI runtime or Supabase schema unless a pre-existing defect makes a minimal compatible frontend fix impossible.
+- Preserve every existing feature and expose it in the redesigned application.
+- Every visible interactive control must either perform its existing action or route to the correct existing destination. No decorative dead buttons, fake tabs, placeholder links or broken feature controls.
+- Every existing WhatsApp route must remain reachable and correctly governed. New frontend routes introduced only for UX composition must be registered in route governance where required.
+- Build responsive layouts deliberately. Mobile is not a scaled-down desktop screenshot. Navigation, Inbox, chat, CRM, builders, tables, detail panels and settings must each have intentional small-screen behavior.
+- Use the uploaded Web Growth logo in the application shell where appropriate. Do not substitute the mockup's generated WG mark when the real supplied logo is available.
+- The mockups guide composition, density, hierarchy, visual language and interaction placement. Mockup sample names, counts, dates, metrics and fictional content must never replace live application data.
+- Maintain accessibility: semantic structure, keyboard operability, focus visibility, labels, dialogs/drawers, contrast and touch targets.
+- Preserve Core Web Vitals and avoid unnecessary heavy animation. CSS-first interactions are preferred.
+- Fix the known desktop refresh width/layout instability as part of the shared shell work.
+- Do not deploy any Stage 12 implementation to Vercel production until the entire redesign is completed, route-checked, regression-tested, responsive-tested and explicitly ready as one finished stage. Development work must stay off `main` until that gate.
+
+Stage 12 implementation branch: `stage12-app-redesign`.
+
 ## Approved visual direction
 
 The current mockup direction is approved as the basis for continued Stage 12 exploration:
@@ -143,6 +163,26 @@ The Stage 12 application architecture must accommodate the functionality already
     - deliberate mobile navigation rather than a shrunk desktop website
     - preserve essential CRM, assignment and messaging actions
 
+## Full-page reference set supplied by user
+
+The uploaded reference set covers these visual areas and should be mapped to the real routed product rather than copied literally:
+
+1. Conversations / Inbox
+2. Contacts / CRM
+3. Automations Hub
+4. Automation Builder
+5. Campaigns / Broadcasts
+6. Analytics & Reports
+7. WhatsApp Flows
+8. Message Templates
+9. Team Management
+10. Business / Workspace Settings
+11. Analytics & Reports secondary reference
+12. Automations & Flows secondary reference
+13. Templates secondary reference
+
+Where the mockups duplicate an area, use the strongest patterns from both while preserving the real product's current feature set. AI Agents and platform administration must still receive the same shell/design treatment even where a unique uploaded page is not present.
+
 ## Current mockup exploration checkpoint
 
 A sequence of numbered dark-theme mockups has been generated during Stage 12 design exploration. The useful visual direction includes concepts for:
@@ -161,6 +201,19 @@ A sequence of numbered dark-theme mockups has been generated during Stage 12 des
 - supporting automation/reporting/template views
 
 Some generated images drifted in numbering, duplicated existing areas, or accidentally introduced purple accents. Those mistakes are NOT product requirements. The approved direction is the consistent dark Web Growth application shell described in this document.
+
+## Stage 12 implementation sequence
+
+1. Inventory every existing WhatsApp page, nested route, action, tab, dialog, drawer and navigation target on `main`.
+2. Establish shared design tokens and the fixed responsive application shell first.
+3. Integrate the real Web Growth logo and workspace/user navigation.
+4. Migrate each routed area into the new shell without changing feature contracts.
+5. Rebuild desktop and mobile layouts together, not as separate late passes.
+6. Audit every visible button/link/control against a real route or existing action.
+7. Run route governance, unit/integration tests, TypeScript, eslint and production build checks.
+8. Regression-test all Stage 1–11 functionality impacted by changed frontend components.
+9. Test responsive widths and repeated hard refreshes, including the known width instability.
+10. Only when the whole Stage 12 frontend is complete and verified should it be eligible to merge to `main` and deploy once.
 
 ## Stage 12 implementation principle
 
