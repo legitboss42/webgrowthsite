@@ -1,0 +1,179 @@
+/* Corrective V2 polish: page-level behavior and responsive app composition. */
+
+.wg-whatsapp-app .wg-report-tab {
+  display: inline-flex;
+  min-height: 2rem;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  padding: .35rem .65rem;
+  border: 1px solid transparent;
+  border-radius: .48rem;
+  color: #7e8c98;
+  font-size: .68rem;
+  font-weight: 650;
+}
+.wg-whatsapp-app .wg-report-tab:hover { background: rgba(255,255,255,.035); color: #f5f7f8; }
+.wg-whatsapp-app .wg-report-tab[data-active="true"] { border-color: rgba(24,201,100,.18); background: #0d2d1c; color: #71e6a2; }
+
+/* Overview remains a dashboard, but uses the same compact product language. */
+.wg-whatsapp-app .wg-app-content > div[class*="px-4"][class*="py-5"] { max-width: none; }
+.wg-whatsapp-app .wg-app-content > div[class*="px-4"][class*="py-5"] > div.grid:first-child > div {
+  border-radius: .7rem;
+  background: linear-gradient(180deg,#0c131a,#090f15);
+  border-color: #14202a;
+  box-shadow: none;
+}
+.wg-whatsapp-app .wg-app-content > div[class*="px-4"][class*="py-5"] section {
+  border-radius: .75rem;
+  border-color: #14202a;
+  background: #0b1118;
+}
+
+/* Contact CRM child page slots naturally into the new left rail. */
+.wg-whatsapp-app .wg-crm-workspace main > div {
+  padding: .85rem !important;
+}
+.wg-whatsapp-app .wg-crm-workspace main > div > div:first-child {
+  min-height: 3.65rem;
+  align-items: center;
+  padding-bottom: .75rem;
+  border-bottom: 1px solid #14202a;
+}
+.wg-whatsapp-app .wg-crm-workspace main > div > div:first-child h1 { font-size: .95rem; }
+.wg-whatsapp-app .wg-crm-workspace main > div > div:first-child p { font-size: .7rem; }
+.wg-whatsapp-app .wg-crm-workspace main > div > div:nth-of-type(2) { margin-top: .75rem; }
+.wg-whatsapp-app .wg-crm-workspace main section { margin-top: .75rem; border-radius: .65rem; }
+.wg-whatsapp-app .wg-crm-workspace main table th,
+.wg-whatsapp-app .wg-crm-workspace main table td { padding-top: .65rem; padding-bottom: .65rem; }
+
+/* Team panel sits beneath the route command bar, so suppress its old page-sized title treatment. */
+.wg-whatsapp-app .wg-team-workspace main > section { padding: .8rem; }
+.wg-whatsapp-app .wg-team-workspace main > section > div:first-child {
+  min-height: 2.75rem;
+  padding-bottom: .65rem;
+}
+.wg-whatsapp-app .wg-team-workspace main > section > div:first-child h2 { font-size: .95rem; }
+.wg-whatsapp-app .wg-team-workspace main > section > div:first-child p { font-size: .68rem; }
+.wg-whatsapp-app .wg-team-workspace main > section > div:nth-of-type(2) { margin-top: .7rem; gap: .5rem; }
+.wg-whatsapp-app .wg-team-workspace main > section > div:nth-of-type(2) > div { padding: .7rem; border-radius: .65rem; }
+.wg-whatsapp-app .wg-team-workspace form { margin-top: .7rem; border-radius: .65rem; }
+.wg-whatsapp-app .wg-team-workspace main > section > div:last-child { margin-top: .7rem; border-radius: .65rem; }
+
+/* Settings: dark desktop category rail + focused content rather than a long website page. */
+.wg-whatsapp-app .wg-settings-workspace > div:has(> header) {
+  max-width: none !important;
+  padding: .8rem !important;
+}
+.wg-whatsapp-app .wg-settings-workspace > div:has(> header) > header {
+  min-height: 3.7rem;
+  margin-bottom: .75rem;
+  padding: 0 0 .7rem;
+  border-bottom: 1px solid #14202a;
+}
+.wg-whatsapp-app .wg-settings-workspace > div:has(> header) > header h1 { font-size: 1rem; }
+.wg-whatsapp-app .wg-settings-workspace > div:has(> header) > header p { font-size: .68rem; }
+.wg-whatsapp-app .wg-settings-workspace nav:has(a[href="#business"]) {
+  border-color: #14202a;
+  background: #080d13;
+  box-shadow: none;
+}
+.wg-whatsapp-app .wg-settings-workspace nav:has(a[href="#business"]) a {
+  min-height: 2.35rem;
+  color: #8b98a3;
+}
+.wg-whatsapp-app .wg-settings-workspace section[id] > div:first-child h2 { font-size: .9rem; }
+.wg-whatsapp-app .wg-settings-workspace section[id] > section,
+.wg-whatsapp-app .wg-settings-workspace section[id] > div[class*="grid"] > section,
+.wg-whatsapp-app .wg-settings-workspace details {
+  border-radius: .7rem;
+  border-color: #14202a;
+  background: #0b1118;
+}
+.wg-whatsapp-app .wg-settings-workspace section[id] > section { padding: 1rem; }
+
+/* Manager internals inherit a tighter dark control system without changing handlers. */
+.wg-whatsapp-app :where(.wg-automation-workspace,.wg-flow-workspace,.wg-campaign-workspace,.wg-template-workspace,.wg-replies-workspace) :where(button, a)[class*="rounded-xl"] {
+  border-radius: .55rem;
+}
+.wg-whatsapp-app :where(.wg-automation-workspace,.wg-flow-workspace) [class*="grid-cols-[240px"] {
+  min-height: 36rem;
+}
+.wg-whatsapp-app :where(.wg-automation-workspace,.wg-flow-workspace) [class*="overflow-auto"] {
+  scrollbar-width: thin;
+  scrollbar-color: #25333e transparent;
+}
+.wg-whatsapp-app :where(.wg-campaign-workspace,.wg-template-workspace,.wg-replies-workspace) [role="dialog"],
+.wg-whatsapp-app :where(.wg-campaign-workspace,.wg-template-workspace,.wg-replies-workspace) dialog {
+  border: 1px solid #1b2732;
+  background: #0a1118;
+  box-shadow: 0 28px 80px rgba(0,0,0,.55);
+}
+
+/* Inputs and interactive controls are consistently app-dense. */
+.wg-whatsapp-app :where(input:not([type="checkbox"]):not([type="radio"]),select,textarea) {
+  min-height: 2.35rem;
+  border-radius: .55rem;
+}
+.wg-whatsapp-app textarea { min-height: 5rem; }
+.wg-whatsapp-app button:disabled,
+.wg-whatsapp-app [aria-disabled="true"] { cursor: not-allowed; }
+
+/* Scrollbars are subtle across dense workspaces. */
+.wg-whatsapp-app :where(.wg-cw-inbox-list,.wg-cw-message-stream,.wg-cw-contact-panel,.wg-inspector-rail,.wg-cw-section-rail,main) {
+  scrollbar-width: thin;
+  scrollbar-color: #25333e transparent;
+}
+
+/* Mobile: secondary rails become horizontal category strips, not giant stacks above content. */
+@media (max-width: 1023px) {
+  .wg-whatsapp-app .wg-cw-section-rail {
+    padding: .45rem .6rem;
+    border-right: 0 !important;
+    border-bottom: 1px solid #14202a;
+    overflow: hidden;
+  }
+  .wg-whatsapp-app .wg-cw-section-rail .wg-cw-rail-label { display: none; }
+  .wg-whatsapp-app .wg-cw-section-rail .wg-cw-rail-nav {
+    display: flex;
+    gap: .35rem;
+    overflow-x: auto;
+    padding-bottom: .1rem;
+    scrollbar-width: none;
+  }
+  .wg-whatsapp-app .wg-cw-section-rail .wg-cw-rail-nav::-webkit-scrollbar { display: none; }
+  .wg-whatsapp-app .wg-cw-section-rail .wg-cw-rail-link {
+    min-height: 2.4rem;
+    flex: none;
+    padding: .4rem .65rem;
+    border: 1px solid #14202a;
+    background: #0b1118;
+  }
+  .wg-whatsapp-app .wg-cw-section-rail .wg-cw-rail-link[data-active="true"] { border-color: rgba(24,201,100,.22); }
+  .wg-whatsapp-app .wg-cw-section-rail .wg-cw-rail-icon { width: 1.55rem; height: 1.55rem; }
+  .wg-whatsapp-app .wg-cw-section-rail .wg-cw-rail-link span:nth-child(2) > span:last-child { display: none; }
+  .wg-whatsapp-app .wg-cw-section-rail .wg-cw-rail-footer { display: none; }
+
+  .wg-whatsapp-app .wg-context-rail {
+    overflow-x: auto;
+    white-space: nowrap;
+    scrollbar-width: none;
+  }
+  .wg-whatsapp-app .wg-context-rail::-webkit-scrollbar { display: none; }
+}
+
+@media (max-width: 767px) {
+  .wg-whatsapp-app .wg-cw-stat { padding: .7rem; }
+  .wg-whatsapp-app .wg-cw-stat-value { font-size: 1.1rem; }
+  .wg-whatsapp-app .wg-cw-stat-note { display: none; }
+  .wg-whatsapp-app .wg-cw-stat-icon { width: 1.75rem; height: 1.75rem; }
+  .wg-whatsapp-app .wg-team-workspace main > section { padding: .65rem; }
+  .wg-whatsapp-app .wg-settings-workspace > div:has(> header) { padding: .65rem !important; }
+  .wg-whatsapp-app .wg-settings-workspace nav:has(a[href="#business"]) { margin-bottom: .75rem; }
+}
+
+@media (max-width: 479px) {
+  .wg-whatsapp-app .wg-cw-workspace-actions .wg-cw-action { min-height: 2.15rem; padding: .4rem .6rem; font-size: .66rem; }
+  .wg-whatsapp-app .wg-cw-inbox-list li > a { min-height: 4.55rem; padding-left: .75rem; padding-right: .75rem; }
+  .wg-whatsapp-app .wg-cw-composer { padding: .4rem .5rem; }
+}

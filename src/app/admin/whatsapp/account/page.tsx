@@ -1,14 +1,11 @@
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { WorkspaceSurface, WorkspaceToolbar } from "@/components/whatsapp/WorkspaceChrome";
 import { getWhatsAppWorkspaceAccess } from "../auth";
 import ChangePasswordPanel from "./ChangePasswordPanel";
 
-export const metadata: Metadata = {
-  title: "Workspace Settings | Web Growth",
-  robots: { index: false, follow: false },
-};
-
+export const metadata: Metadata = { title: "Workspace Settings | Web Growth", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
 
 export default async function WhatsAppAccountSettingsPage() {
@@ -16,51 +13,30 @@ export default async function WhatsAppAccountSettingsPage() {
   if (!access) redirect("/admin/whatsapp/");
 
   return (
-    <div className="w-full px-3 py-4 sm:px-5 sm:py-5 lg:px-6">
-      <header className="mb-5 border-b border-rule pb-4">
-        <p className="text-[0.65rem] font-semibold uppercase tracking-[.16em] text-ledger-bright">Workspace account</p>
-        <h1 className="mt-1 text-xl font-semibold tracking-tight text-ink sm:text-2xl">Account & sign-in</h1>
-        <p className="mt-1 text-sm text-ink-faint">Manage your identity, role and sign-in preferences without leaving the application.</p>
-      </header>
-
-      <div className="grid gap-4 xl:grid-cols-[minmax(280px,.75fr)_minmax(0,1.25fr)]">
-        <section className="rounded-xl border border-rule bg-paper-raised p-4 sm:p-5">
-          <div className="flex items-center gap-3 border-b border-rule pb-4">
-            <span className="grid h-11 w-11 flex-none place-items-center rounded-full bg-ledger-tint text-sm font-bold text-ledger-bright">{access.displayName.trim().slice(0, 2).toUpperCase()}</span>
-            <div className="min-w-0"><h2 className="truncate text-base font-semibold text-ink">{access.displayName}</h2><p className="truncate text-xs text-ink-faint">{access.email}</p></div>
-          </div>
-          <dl className="divide-y divide-rule text-sm">
-            <div className="flex items-start justify-between gap-4 py-3">
-              <dt className="text-ink-faint">Workspace</dt>
-              <dd className="max-w-[65%] text-right font-medium text-ink">{access.workspaceName}</dd>
+    <div className="flex min-h-full min-w-0 flex-col">
+      <WorkspaceToolbar eyebrow="Personal settings" title="Account & sign-in" description="Your workspace identity, role and authentication controls." />
+      <main className="min-w-0 bg-[#060a0e] p-3 sm:p-4">
+        <div className="grid gap-3 xl:grid-cols-[18rem_minmax(0,1fr)]">
+          <WorkspaceSurface className="self-start">
+            <div className="flex items-center gap-3 border-b border-rule p-4">
+              <span className="grid h-10 w-10 flex-none place-items-center rounded-full border border-ledger-bright/15 bg-ledger-tint text-xs font-bold text-ledger-bright">{access.displayName.trim().slice(0, 2).toUpperCase()}</span>
+              <div className="min-w-0"><h2 className="truncate text-sm font-semibold text-ink">{access.displayName}</h2><p className="truncate text-xs text-ink-faint">{access.email}</p></div>
             </div>
-            <div className="flex items-start justify-between gap-4 py-3">
-              <dt className="text-ink-faint">Email</dt>
-              <dd className="max-w-[70%] break-all text-right text-ink">{access.email}</dd>
+            <dl className="divide-y divide-rule px-4 text-xs">
+              <div className="flex items-start justify-between gap-4 py-3"><dt className="text-ink-faint">Workspace</dt><dd className="max-w-[65%] text-right font-medium text-ink">{access.workspaceName}</dd></div>
+              <div className="flex items-start justify-between gap-4 py-3"><dt className="text-ink-faint">Role</dt><dd className="rounded-full border border-ledger-bright/20 bg-ledger-tint px-2 py-0.5 text-[0.6rem] font-semibold uppercase tracking-[.08em] text-ledger-bright">{access.role}</dd></div>
+            </dl>
+            <div className="border-t border-rule p-4">
+              <form action="/api/auth/workspace/logout/" method="post"><button type="submit" className="inline-flex min-h-10 w-full items-center justify-center rounded-lg border border-rose-900/40 bg-rose-950/30 px-4 text-xs font-semibold text-rose-300 hover:bg-rose-950/50">Log out</button></form>
             </div>
-            <div className="flex items-start justify-between gap-4 py-3">
-              <dt className="text-ink-faint">Role</dt>
-              <dd className="rounded-full border border-ledger-bright/20 bg-ledger-tint px-2.5 py-1 text-[0.65rem] font-semibold uppercase tracking-[.08em] text-ledger-bright">{access.role}</dd>
-            </div>
-          </dl>
-          <p className="mt-2 rounded-lg border border-rule bg-paper-sunk p-3 text-xs leading-5 text-ink-faint">Google sign-in remains available after creating a workspace password.</p>
+          </WorkspaceSurface>
 
-          <div className="mt-5 border-t border-rule pt-4">
-            <form action="/api/auth/workspace/logout/" method="post">
-              <button type="submit" className="inline-flex min-h-11 w-full items-center justify-center rounded-lg border border-rose-200 bg-rose-50 px-4 text-sm font-semibold text-rose-700 hover:bg-rose-100">Log out</button>
-            </form>
-            <p className="mt-2 text-center text-[11px] leading-5 text-ink-faint">Ends this workspace session and returns you to sign in.</p>
-          </div>
-        </section>
-
-        <section className="min-w-0 rounded-xl border border-rule bg-paper-raised p-4 sm:p-5">
-          <div className="mb-5 border-b border-rule pb-4">
-            <h2 className="text-base font-semibold text-ink">Password & security</h2>
-            <p className="mt-1 text-xs leading-5 text-ink-faint">Change your email sign-in password, or request a secure setup/reset link if you normally sign in with Google.</p>
-          </div>
-          <ChangePasswordPanel email={access.email} />
-        </section>
-      </div>
+          <WorkspaceSurface>
+            <div className="border-b border-rule px-4 py-3"><h2 className="text-sm font-semibold text-ink">Password & security</h2><p className="mt-1 text-[0.68rem] leading-5 text-ink-faint">Change your email password or request a secure setup/reset link. Google sign-in remains available.</p></div>
+            <div className="p-4"><ChangePasswordPanel email={access.email} /></div>
+          </WorkspaceSurface>
+        </div>
+      </main>
     </div>
   );
 }

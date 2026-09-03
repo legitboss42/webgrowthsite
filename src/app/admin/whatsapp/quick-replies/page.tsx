@@ -1,19 +1,13 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { cookies } from "next/headers";
 import GoogleAdminPrompt from "@/components/auth/GoogleAdminPrompt";
 import { getDefaultAdminGoogleEmail, getGoogleClientId, isGoogleAuthConfigured } from "@/lib/googleAuth";
-import { WhatsAppIcon } from "@/components/whatsapp/icons";
+import { WorkspaceActionLink, WorkspaceRail, WorkspaceStat, WorkspaceSurface, WorkspaceToolbar } from "@/components/whatsapp/WorkspaceChrome";
 import { canWhatsAppRoleSuperviseTeam } from "@/lib/whatsapp/teamModel";
 import { getWhatsAppWorkspaceAccess } from "../auth";
 import { readWhatsAppRows } from "../data";
 import QuickReplyManager from "../QuickReplyManager";
-import {
-  canUseWhatsAppQuickReply,
-  normalizeWhatsAppQuickReplyRow,
-  sortWhatsAppQuickReplies,
-  type WhatsAppQuickReply,
-} from "../quickRepliesModel";
+import { canUseWhatsAppQuickReply, normalizeWhatsAppQuickReplyRow, sortWhatsAppQuickReplies, type WhatsAppQuickReply } from "../quickRepliesModel";
 
 export const metadata: Metadata = { title: "WhatsApp Saved Replies | Web Growth", robots: { index: false, follow: false } };
 type SavedReplyLoad = { replies: WhatsAppQuickReply[]; stage4Ready: boolean; mediaReady: boolean };
@@ -35,9 +29,25 @@ export default async function WhatsAppQuickRepliesPage() {
   const personalReplies = loaded.replies.filter((reply) => reply.scope !== "TEAM").length;
   const mediaReplies = loaded.replies.filter((reply) => Boolean(reply.media_kind)).length;
 
-  return <div className="w-full p-3 sm:p-5 lg:p-6">
-    <header className="mb-5 flex flex-col gap-4 border-b border-rule pb-5 xl:flex-row xl:items-end xl:justify-between"><div><div className="mb-2 flex items-center gap-2 text-[0.65rem] font-semibold uppercase tracking-[.16em] text-ledger-bright"><span className="h-1.5 w-1.5 rounded-full bg-ledger-bright" />Agent productivity</div><h1 className="text-2xl font-semibold text-ink sm:text-3xl">Saved replies</h1><p className="mt-1 max-w-2xl text-sm leading-6 text-ink-faint">Build reusable answers, shortcuts and media responses for faster support conversations.</p></div><div className="flex flex-wrap gap-2"><Link href="/admin/whatsapp/conversations/" className="inline-flex items-center gap-2 rounded-xl border border-rule bg-paper-raised px-3.5 py-2.5 text-xs font-semibold text-ink-soft hover:border-rule-strong hover:text-ink"><WhatsAppIcon name="conversations" className="h-4 w-4" />Open inbox</Link><Link href="/admin/whatsapp/team/" className="inline-flex items-center gap-2 rounded-xl border border-ledger-bright/25 bg-ledger-tint px-3.5 py-2.5 text-xs font-semibold text-ledger-bright"><WhatsAppIcon name="contacts" className="h-4 w-4" />Team</Link></div></header>
-    <section className="mb-4 grid gap-3 sm:grid-cols-3"><div className="rounded-2xl border border-rule bg-paper-raised p-4"><p className="text-[0.62rem] font-semibold uppercase tracking-[.14em] text-ink-faint">Team replies</p><p className="mt-2 text-2xl font-semibold tabular-nums text-ink">{teamReplies}</p></div><div className="rounded-2xl border border-rule bg-paper-raised p-4"><p className="text-[0.62rem] font-semibold uppercase tracking-[.14em] text-ink-faint">Personal replies</p><p className="mt-2 text-2xl font-semibold tabular-nums text-ink">{personalReplies}</p></div><div className="rounded-2xl border border-rule bg-paper-raised p-4"><p className="text-[0.62rem] font-semibold uppercase tracking-[.14em] text-ink-faint">With media</p><p className="mt-2 text-2xl font-semibold tabular-nums text-ink">{mediaReplies}</p></div></section>
-    <section className="min-w-0 overflow-hidden rounded-2xl border border-rule bg-paper-raised"><QuickReplyManager quickReplies={loaded.replies} stage4Ready={loaded.stage4Ready} mediaReady={loaded.mediaReady} currentMemberId={access.memberId} canManageTeam={canWhatsAppRoleSuperviseTeam(access.role)} role={access.role} /></section>
-  </div>;
+  return (
+    <div className="flex min-h-full min-w-0 flex-col">
+      <WorkspaceToolbar eyebrow="Agent productivity" title="Saved replies" description="Reusable text and media responses for faster, consistent conversations." actions={<><WorkspaceActionLink href="/admin/whatsapp/conversations/" icon="conversations" primary>Open inbox</WorkspaceActionLink><WorkspaceActionLink href="/admin/whatsapp/team/" icon="contacts">Team</WorkspaceActionLink></>} />
+      <div className="grid min-h-0 min-w-0 flex-1 lg:grid-cols-[13.5rem_minmax(0,1fr)]">
+        <WorkspaceRail label="Reply workspace" items={[
+          { label: "Saved replies", href: "/admin/whatsapp/quick-replies/", icon: "quickReplies", note: `${loaded.replies.length} available`, active: true },
+          { label: "Inbox", href: "/admin/whatsapp/conversations/", icon: "conversations", note: "Use shortcuts" },
+          { label: "Templates", href: "/admin/whatsapp/templates/", icon: "templates", note: "Meta-approved messages" },
+          { label: "Team", href: "/admin/whatsapp/team/", icon: "contacts", note: "Agent access" },
+        ]} />
+        <main className="min-w-0 bg-[#060a0e] p-3 sm:p-4">
+          <section className="mb-3 grid gap-2 sm:grid-cols-3">
+            <WorkspaceStat label="Team" value={teamReplies} note="Shared replies" icon="contacts" />
+            <WorkspaceStat label="Personal" value={personalReplies} note="Private shortcuts" icon="quickReplies" />
+            <WorkspaceStat label="With media" value={mediaReplies} note={loaded.mediaReady ? "Media enabled" : "Media storage unavailable"} icon="templates" tone={loaded.mediaReady ? "good" : "warn"} />
+          </section>
+          <WorkspaceSurface><QuickReplyManager quickReplies={loaded.replies} stage4Ready={loaded.stage4Ready} mediaReady={loaded.mediaReady} currentMemberId={access.memberId} canManageTeam={canWhatsAppRoleSuperviseTeam(access.role)} role={access.role} /></WorkspaceSurface>
+        </main>
+      </div>
+    </div>
+  );
 }
