@@ -26,12 +26,103 @@ export default async function WhatsAppSettingsLayout({ children }: { children: R
   ]);
 
   return (
-    <>
-      <QuickSettingsPanel settings={settings} quickSettings={quickSettings} />
-      <TeamSettingsPanel viewerRole={access.role} />
-      <MessageVisibilitySettingsPanel quickSettings={quickSettings} />
-      <CallingSettingsPanel businessHours={settings.businessHours} />
+    <div className="whatsapp-settings-tabs-root">
+      <style>{`
+        .whatsapp-settings-tabs-root #business,
+        .whatsapp-settings-tabs-root #messaging,
+        .whatsapp-settings-tabs-root #ai-automation,
+        .whatsapp-settings-tabs-root #connection,
+        .whatsapp-settings-tabs-root #advanced {
+          display: none;
+          margin-top: 0;
+        }
+
+        .whatsapp-settings-tabs-root #business {
+          display: block;
+        }
+
+        .whatsapp-settings-tabs-root:has(#messaging:target) #business,
+        .whatsapp-settings-tabs-root:has(#ai-automation:target) #business,
+        .whatsapp-settings-tabs-root:has(#connection:target) #business,
+        .whatsapp-settings-tabs-root:has(#advanced:target) #business {
+          display: none;
+        }
+
+        .whatsapp-settings-tabs-root #business:target,
+        .whatsapp-settings-tabs-root #messaging:target,
+        .whatsapp-settings-tabs-root #ai-automation:target,
+        .whatsapp-settings-tabs-root #connection:target,
+        .whatsapp-settings-tabs-root #advanced:target {
+          display: block;
+        }
+
+        .whatsapp-settings-messaging-extra,
+        .whatsapp-settings-advanced-extra {
+          display: none;
+        }
+
+        .whatsapp-settings-tabs-root:has(#messaging:target) .whatsapp-settings-messaging-extra,
+        .whatsapp-settings-tabs-root:has(#advanced:target) .whatsapp-settings-advanced-extra {
+          display: block;
+        }
+
+        .whatsapp-settings-tabs-root nav:has(a[href="#business"]) {
+          display: flex;
+          flex-wrap: nowrap;
+          overflow-x: auto;
+          scrollbar-width: none;
+        }
+
+        .whatsapp-settings-tabs-root nav:has(a[href="#business"])::-webkit-scrollbar {
+          display: none;
+        }
+
+        .whatsapp-settings-tabs-root nav:has(a[href="#business"]) a {
+          flex: none;
+          white-space: nowrap;
+          transition: background-color 160ms ease, color 160ms ease, box-shadow 160ms ease;
+        }
+
+        .whatsapp-settings-tabs-root nav a[href="#business"] {
+          background: rgba(18, 74, 56, 0.09);
+          box-shadow: inset 0 0 0 1px rgba(18, 74, 56, 0.14);
+        }
+
+        .whatsapp-settings-tabs-root:has(#messaging:target) nav a[href="#business"],
+        .whatsapp-settings-tabs-root:has(#ai-automation:target) nav a[href="#business"],
+        .whatsapp-settings-tabs-root:has(#connection:target) nav a[href="#business"],
+        .whatsapp-settings-tabs-root:has(#advanced:target) nav a[href="#business"] {
+          background: transparent;
+          box-shadow: none;
+        }
+
+        .whatsapp-settings-tabs-root:has(#business:target) nav a[href="#business"],
+        .whatsapp-settings-tabs-root:has(#messaging:target) nav a[href="#messaging"],
+        .whatsapp-settings-tabs-root:has(#ai-automation:target) nav a[href="#ai-automation"],
+        .whatsapp-settings-tabs-root:has(#connection:target) nav a[href="#connection"],
+        .whatsapp-settings-tabs-root:has(#advanced:target) nav a[href="#advanced"] {
+          background: rgba(18, 74, 56, 0.09);
+          box-shadow: inset 0 0 0 1px rgba(18, 74, 56, 0.14);
+        }
+
+        .whatsapp-settings-messaging-extra,
+        .whatsapp-settings-advanced-extra {
+          margin: 1.25rem auto 0;
+          max-width: 72rem;
+        }
+      `}</style>
+
       {children}
-    </>
+
+      <div className="whatsapp-settings-messaging-extra" aria-label="Messaging settings">
+        <QuickSettingsPanel settings={settings} quickSettings={quickSettings} />
+        <MessageVisibilitySettingsPanel quickSettings={quickSettings} />
+        <CallingSettingsPanel businessHours={settings.businessHours} />
+      </div>
+
+      <div className="whatsapp-settings-advanced-extra" aria-label="Team and access settings">
+        <TeamSettingsPanel viewerRole={access.role} />
+      </div>
+    </div>
   );
 }
