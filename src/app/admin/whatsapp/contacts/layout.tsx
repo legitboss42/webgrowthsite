@@ -12,7 +12,7 @@ const pipeline = [
 
 export default function ContactsWorkspaceLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="w-full p-3 sm:p-5 lg:p-6">
+    <div className="wg-crm-workspace w-full p-3 sm:p-5 lg:p-6">
       <header className="mb-5 flex flex-col gap-4 border-b border-rule pb-5 xl:flex-row xl:items-end xl:justify-between">
         <div>
           <div className="mb-2 flex items-center gap-2 text-[0.65rem] font-semibold uppercase tracking-[.16em] text-ledger-bright"><span className="h-1.5 w-1.5 rounded-full bg-ledger-bright" />Customer workspace</div>
