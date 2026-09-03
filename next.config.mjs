@@ -1,8 +1,12 @@
 import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 const routeGovernance = JSON.parse(
   fs.readFileSync(new URL("./src/lib/route-governance.json", import.meta.url), "utf8")
 );
+
+const projectRoot = path.dirname(fileURLToPath(import.meta.url));
 
 const governanceRedirects = [
   ...routeGovernance.routes
@@ -51,6 +55,15 @@ const nextConfig = {
   },
   distDir: ".next",
   images: { qualities: [60, 65, 68, 75] },
+  webpack(config, { isServer }) {
+    if (!isServer) {
+      config.resolve.alias = {
+        ...(config.resolve.alias || {}),
+        "@/lib/whatsapp/templates": path.join(projectRoot, "src/lib/whatsapp/templateClient.ts"),
+      };
+    }
+    return config;
+  },
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },
