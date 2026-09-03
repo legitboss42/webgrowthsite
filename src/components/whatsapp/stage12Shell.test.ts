@@ -45,12 +45,12 @@ test("workspace and platform settings navigation resolves to real pages", () => 
 
 test("literal internal WhatsApp links resolve to real pages", () => {
   const missing: Array<{ source: string; href: string }> = [];
-  const hrefPattern = /href=(?:"|')(?<href>\/admin\/whatsapp\/[^"'#?]*\/?(?:\?[^"']*)?)(?:"|')/g;
+  const hrefPattern = /href=(?:"|')(\/admin\/whatsapp\/[^"'#?]*\/?(?:\?[^"']*)?)(?:"|')/g;
 
   for (const file of whatsappSourceFiles()) {
     const source = readFileSync(file, "utf8");
     for (const match of source.matchAll(hrefPattern)) {
-      const href = match.groups?.href;
+      const href = match[1];
       if (!href || href.includes("${")) continue;
       if (!existsSync(routeToPage(href))) missing.push({ source: path.relative(ROOT, file), href });
     }
