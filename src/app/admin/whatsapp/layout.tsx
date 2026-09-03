@@ -21,6 +21,7 @@ import "./stage12-overrides.css";
 import "./stage12-components.css";
 import "./stage12-workspaces.css";
 import "./stage12-chatwoot.css";
+import "./stage12-chatwoot-polish.css";
 
 export default async function WhatsAppConsoleLayout({ children }: { children: ReactNode }) {
   const cookieStore = await cookies();
