@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
+import TopbarActionPortal from "@/components/whatsapp/TopbarActionPortal";
 
 type FlowOption = {
   id: string;
@@ -60,10 +61,17 @@ export default function ConversationFlowLauncher() {
   }
 
   return (
-    <div className="pointer-events-none fixed bottom-[5.35rem] right-3 z-40 flex max-w-[calc(100vw-1.5rem)] flex-col items-end gap-2 sm:bottom-6 sm:right-6">
-      {notice ? <div role="status" className={`pointer-events-auto max-w-sm rounded-xl border px-3 py-2 text-xs shadow-lg ${notice.tone === "ok" ? "border-emerald-200 bg-emerald-50 text-emerald-800" : "border-rose-200 bg-rose-50 text-rose-800"}`}>{notice.text}</div> : null}
+    <>
+      <TopbarActionPortal>
+        <button type="button" onClick={() => { setOpen(true); setNotice(null); }} aria-expanded={open} className="inline-flex h-8 flex-none items-center rounded-lg border border-ledger/30 bg-ledger px-2.5 text-[0.68rem] font-semibold text-white shadow-sm hover:bg-ledger-bright">
+          <span className="hidden sm:inline">Send Flow</span><span className="sm:hidden">Flow</span>
+        </button>
+      </TopbarActionPortal>
+
+      {notice ? <div role="status" className={`fixed right-3 top-[7.65rem] z-[72] max-w-sm rounded-xl border px-3 py-2 text-xs shadow-lg sm:right-5 lg:top-[4.5rem] ${notice.tone === "ok" ? "border-emerald-200 bg-emerald-50 text-emerald-800" : "border-rose-200 bg-rose-50 text-rose-800"}`}>{notice.text}</div> : null}
+
       {open ? (
-        <div className="pointer-events-auto w-[min(22rem,calc(100vw-1.5rem))] rounded-2xl border border-rule bg-paper p-3 shadow-xl">
+        <div className="fixed right-3 top-[7.65rem] z-[70] w-[min(22rem,calc(100vw-1.5rem))] rounded-2xl border border-rule bg-paper p-3 shadow-xl sm:right-5 lg:top-[4.5rem]">
           <div className="flex items-center justify-between gap-3">
             <div><p className="text-[0.62rem] font-semibold uppercase tracking-[.12em] text-ledger">WhatsApp Flow</p><p className="mt-0.5 text-sm font-semibold text-ink">Send a published Flow</p></div>
             <button type="button" onClick={() => setOpen(false)} className="rounded-lg px-2 py-1 text-sm text-ink-faint hover:bg-paper-sunk">Close</button>
@@ -77,9 +85,7 @@ export default function ConversationFlowLauncher() {
           {selected ? <p className="mt-2 text-xs leading-5 text-ink-faint">{selected.categories.join(" · ") || "OTHER"}. A tracked submission is created automatically and Flow Started automations can run immediately.</p> : null}
           <button type="button" disabled={!flowId || pending} onClick={send} className="mt-3 w-full rounded-xl bg-ledger px-3 py-2.5 text-sm font-semibold text-white disabled:opacity-40">{pending ? "Sending…" : "Send Flow"}</button>
         </div>
-      ) : (
-        <button type="button" onClick={() => { setOpen(true); setNotice(null); }} className="pointer-events-auto rounded-full border border-ledger/20 bg-ledger px-4 py-2.5 text-sm font-semibold text-white shadow-lg hover:bg-ledger-bright">Send Flow</button>
-      )}
-    </div>
+      ) : null}
+    </>
   );
 }
