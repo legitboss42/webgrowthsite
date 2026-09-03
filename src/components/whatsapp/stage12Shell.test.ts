@@ -114,6 +114,7 @@ test("automation and Flow builders retain their functional multi-pane editing st
   const flow = readFileSync(path.join(ROOT, "src/app/admin/whatsapp/FlowManager.tsx"), "utf8");
   assert.ok(automation.includes("data-automation-action-path"));
   assert.ok(automation.includes("Properties"));
-  assert.ok(flow.includes("WhatsApp Preview"));
-  assert.ok(flow.includes("lg:grid-cols-[220px_minmax(0,1fr)_280px]"));
+  assert.ok(flow.includes("lg:grid-cols-[240px_minmax(360px,1fr)_340px]"));
+  assert.ok(flow.includes("Screens"));
+  assert.ok(flow.includes("Sync Meta"));
 });
