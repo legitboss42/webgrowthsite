@@ -22,7 +22,9 @@ function walk(directory: string): string[] {
 }
 
 function whatsappSourceFiles() {
-  return [...walk(WHATSAPP_APP_ROOT), ...walk(WHATSAPP_COMPONENT_ROOT)].filter((file) => /\.(?:tsx|ts)$/.test(file));
+  return [...walk(WHATSAPP_APP_ROOT), ...walk(WHATSAPP_COMPONENT_ROOT)]
+    .filter((file) => /\.(?:tsx|ts)$/.test(file))
+    .filter((file) => !/\.test\.(?:tsx|ts)$/.test(file));
 }
 
 test("every live WhatsApp navigation item resolves to an App Router page", () => {
