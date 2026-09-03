@@ -1,0 +1,122 @@
+/* Stage 12 compatibility layer for feature components built before the dark app shell.
+   Presentation only. No selectors here alter visibility, routing, data or interaction state. */
+
+.wg-whatsapp-app {
+  --color-emerald-50: #0b2418;
+  --color-emerald-100: #0d3320;
+  --color-emerald-200: #14532d;
+  --color-emerald-300: #22c55e;
+  --color-emerald-400: #34d399;
+  --color-emerald-500: #22c55e;
+  --color-emerald-600: #16a34a;
+  --color-emerald-700: #86efac;
+  --color-emerald-800: #bbf7d0;
+  --color-amber-50: #2a2111;
+  --color-amber-100: #3a2d12;
+  --color-amber-200: #5d4515;
+  --color-amber-300: #d9a928;
+  --color-amber-400: #fbbf24;
+  --color-amber-500: #f59e0b;
+  --color-amber-600: #d97706;
+  --color-amber-700: #fcd34d;
+  --color-amber-800: #fde68a;
+  --color-rose-50: #2b1118;
+  --color-rose-100: #3b121c;
+  --color-rose-200: #5f1c2d;
+  --color-rose-300: #fb7185;
+  --color-rose-400: #fb7185;
+  --color-rose-500: #f43f5e;
+  --color-rose-600: #e11d48;
+  --color-rose-700: #fda4af;
+  --color-rose-800: #fecdd3;
+  --color-red-50: #2b1111;
+  --color-red-100: #3c1414;
+  --color-red-200: #651d1d;
+  --color-red-300: #f87171;
+  --color-red-400: #f87171;
+  --color-red-500: #ef4444;
+  --color-red-600: #dc2626;
+  --color-red-700: #fca5a5;
+  --color-red-800: #fecaca;
+  --color-blue-50: #0d1d31;
+  --color-blue-100: #102745;
+  --color-blue-200: #153c68;
+  --color-blue-300: #60a5fa;
+  --color-blue-400: #60a5fa;
+  --color-blue-500: #3b82f6;
+  --color-blue-600: #2563eb;
+  --color-blue-700: #93c5fd;
+  --color-blue-800: #bfdbfe;
+  --color-cyan-50: #09252a;
+  --color-cyan-100: #0b343b;
+  --color-cyan-200: #155e75;
+  --color-cyan-300: #67e8f9;
+  --color-cyan-400: #22d3ee;
+  --color-cyan-500: #06b6d4;
+  --color-cyan-600: #0891b2;
+  --color-cyan-700: #67e8f9;
+  --color-cyan-800: #a5f3fc;
+  --color-orange-50: #2d1b0c;
+  --color-orange-100: #40250d;
+  --color-orange-200: #65380f;
+  --color-orange-300: #fdba74;
+  --color-orange-400: #fb923c;
+  --color-orange-500: #f97316;
+  --color-orange-600: #ea580c;
+  --color-orange-700: #fdba74;
+  --color-orange-800: #fed7aa;
+}
+
+/* Old Flow-builder canvas and template preview literals. */
+.wg-whatsapp-app .bg-\[\#f6f7f4\] {
+  background-color: #070b10 !important;
+}
+
+.wg-whatsapp-app .text-\[\#6f4f16\] {
+  color: #fcd34d !important;
+}
+
+/* Some components compile semantic utilities before scoped variables can win.
+   Explicit declarations keep chips legible in dark mode. */
+.wg-whatsapp-app .bg-emerald-50 { background-color: #0b2418 !important; }
+.wg-whatsapp-app .bg-amber-50 { background-color: #2a2111 !important; }
+.wg-whatsapp-app .bg-rose-50 { background-color: #2b1118 !important; }
+.wg-whatsapp-app .bg-red-50 { background-color: #2b1111 !important; }
+.wg-whatsapp-app .bg-blue-50 { background-color: #0d1d31 !important; }
+.wg-whatsapp-app .bg-cyan-50 { background-color: #09252a !important; }
+.wg-whatsapp-app .bg-orange-50 { background-color: #2d1b0c !important; }
+.wg-whatsapp-app .border-emerald-200 { border-color: #14532d !important; }
+.wg-whatsapp-app .border-amber-200 { border-color: #5d4515 !important; }
+.wg-whatsapp-app .border-rose-200 { border-color: #5f1c2d !important; }
+.wg-whatsapp-app .border-red-200 { border-color: #651d1d !important; }
+.wg-whatsapp-app .border-blue-200 { border-color: #153c68 !important; }
+.wg-whatsapp-app .text-emerald-700,
+.wg-whatsapp-app .text-emerald-800 { color: #86efac !important; }
+.wg-whatsapp-app .text-amber-700,
+.wg-whatsapp-app .text-amber-800 { color: #fcd34d !important; }
+.wg-whatsapp-app .text-rose-700,
+.wg-whatsapp-app .text-rose-800 { color: #fda4af !important; }
+.wg-whatsapp-app .text-red-700,
+.wg-whatsapp-app .text-red-800 { color: #fca5a5 !important; }
+.wg-whatsapp-app .text-blue-700,
+.wg-whatsapp-app .text-blue-800 { color: #93c5fd !important; }
+
+/* App-like drawers, details and dialogs should never reveal a white browser-default surface. */
+.wg-whatsapp-app :where(dialog, [role="dialog"], details) {
+  color: #f5f7f8;
+}
+
+.wg-whatsapp-app :where(dialog, [role="dialog"]) {
+  background-color: #0a1118;
+}
+
+/* Wide operational tables remain usable on mobile instead of crushing columns. */
+@media (max-width: 767px) {
+  .wg-whatsapp-app table {
+    font-size: 0.75rem;
+  }
+
+  .wg-whatsapp-app :where(table, [role="table"]) {
+    max-width: none;
+  }
+}
