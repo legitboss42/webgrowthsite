@@ -1,0 +1,135 @@
+/* Stage 12 — WhatsApp application experience
+   Scoped to the WhatsApp console so the public Web Growth website is untouched. */
+
+.wg-whatsapp-app {
+  --color-paper: #070b10;
+  --color-paper-raised: #0a1118;
+  --color-paper-sunk: #0d161f;
+  --color-ink: #f5f7f8;
+  --color-ink-soft: #c4ccd2;
+  --color-ink-faint: #7f8b95;
+  --color-ledger: #0b8f45;
+  --color-ledger-deep: #05090d;
+  --color-ledger-bright: #16c65a;
+  --color-ledger-tint: #0d2919;
+  --color-brass: #c79a48;
+  --color-brass-tint: #2a2111;
+  --color-rule: #18242d;
+  --color-rule-strong: #263640;
+  --color-ink-ground: #030609;
+  --color-on-dark: #f5f7f8;
+  --color-on-dark-soft: #8d99a3;
+  --color-bg-ink: #030609;
+  --color-bg-midnight: #05090d;
+  --color-bg-canvas: #070b10;
+  --color-bg-editorial: #0a1118;
+  --color-accent-gold: #c79a48;
+  --color-accent-teal: #0b8f45;
+  --color-accent-electric: #16c65a;
+  --color-text-primary: #f5f7f8;
+  --color-text-muted: #8d99a3;
+  --color-text-ink: #f5f7f8;
+  --color-border-hairline: #18242d;
+  color-scheme: dark;
+  min-width: 0;
+  width: 100%;
+  max-width: 100vw;
+  background:
+    radial-gradient(circle at 78% -20%, rgba(22, 198, 90, 0.07), transparent 32rem),
+    #070b10;
+}
+
+.wg-whatsapp-app *,
+.wg-whatsapp-app *::before,
+.wg-whatsapp-app *::after {
+  box-sizing: border-box;
+}
+
+.wg-whatsapp-app :where(button, a, input, textarea, select) {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.wg-whatsapp-app :where(button, a, input, textarea, select):focus-visible {
+  outline: 2px solid #16c65a;
+  outline-offset: 2px;
+}
+
+.wg-whatsapp-app :where(input, textarea, select) {
+  color-scheme: dark;
+}
+
+.wg-whatsapp-app :where(input, textarea)::placeholder {
+  color: #66737d;
+}
+
+.wg-whatsapp-app .wg-app-sidebar {
+  background:
+    linear-gradient(180deg, rgba(13, 41, 25, 0.24), transparent 16rem),
+    #05090d;
+  border-right: 1px solid #152129;
+}
+
+.wg-whatsapp-app .wg-app-topbar {
+  background: rgba(7, 11, 16, 0.92);
+  border-bottom: 1px solid #18242d;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.16);
+}
+
+.wg-whatsapp-app .wg-app-content {
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
+}
+
+.wg-whatsapp-app .wg-sidebar-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #25323b transparent;
+}
+
+.wg-whatsapp-app .wg-nav-row {
+  min-height: 2.75rem;
+}
+
+.wg-whatsapp-app .wg-nav-row[data-active="true"] {
+  box-shadow: inset 3px 0 0 #16c65a;
+}
+
+.wg-whatsapp-app .wg-mobile-nav {
+  padding-bottom: max(0.45rem, env(safe-area-inset-bottom));
+  background: rgba(5, 9, 13, 0.96);
+  border-top: 1px solid #18242d;
+  backdrop-filter: blur(16px);
+}
+
+.wg-whatsapp-app .wg-mobile-nav a,
+.wg-whatsapp-app .wg-mobile-nav button {
+  min-height: 3.25rem;
+}
+
+@media (max-width: 1023px) {
+  .wg-whatsapp-app .wg-app-content {
+    padding-bottom: calc(4rem + env(safe-area-inset-bottom));
+  }
+}
+
+@media (max-width: 639px) {
+  .wg-whatsapp-app {
+    background: #070b10;
+  }
+
+  .wg-whatsapp-app .wg-app-topbar {
+    min-height: 3.5rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wg-whatsapp-app *,
+  .wg-whatsapp-app *::before,
+  .wg-whatsapp-app *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
