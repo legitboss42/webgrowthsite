@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useId, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
@@ -62,7 +63,7 @@ function NavRow({ item, onNavigate }: { item: WhatsAppNavItem; onNavigate?: () =
 function Brand({ href, compact = false, onNavigate }: { href: string; compact?: boolean; onNavigate?: () => void }) {
   return (
     <Link href={href} onClick={onNavigate} aria-label="Web Growth WhatsApp platform" className={`flex items-center rounded-xl transition hover:bg-white/[.045] ${compact ? "gap-2 p-1" : "gap-3 px-2 py-2"}`}>
-      <img src="/images/brand/stage12-app-logo.svg" alt="" aria-hidden="true" className="h-9 w-9 flex-none rounded-xl border border-white/10 object-cover" />
+      <Image src="/images/brand/stage12-app-logo.svg" alt="" aria-hidden width={36} height={36} className="h-9 w-9 flex-none rounded-xl border border-white/10 object-cover" priority />
       {!compact ? <span className="min-w-0"><span className="block truncate text-sm font-bold text-white">Web Growth</span><span className="block truncate text-[0.61rem] font-medium text-ledger-bright">WhatsApp Business Platform</span></span> : null}
     </Link>
   );
@@ -109,8 +110,9 @@ function MobileNav({ role, onMore }: { role: WhatsAppTeamRole; onMore: () => voi
   const pathname = usePathname();
   const preferred = ["Conversations", "Contacts", "Automations", "Campaigns"];
   const allowed = WHATSAPP_NAV_ITEMS.filter((item) => preferred.includes(item.label) && (!item.roles || item.roles.includes(role)));
+  const columns = Math.max(1, allowed.length + 1);
   return (
-    <nav aria-label="Mobile WhatsApp navigation" className="wg-mobile-nav fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 px-1 lg:hidden">
+    <nav aria-label="Mobile WhatsApp navigation" className="wg-mobile-nav fixed inset-x-0 bottom-0 z-40 grid px-1 lg:hidden" style={{ gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` }}>
       {allowed.map((item) => {
         const active = isWhatsAppNavItemActive(pathname, item.href);
         return <Link key={item.label} href={item.href} aria-current={active ? "page" : undefined} className={`flex flex-col items-center justify-center gap-1 rounded-lg px-1 py-1.5 text-[0.62rem] font-medium ${active ? "text-ledger-bright" : "text-ink-faint"}`}><WhatsAppIcon name={item.icon} /><span className="max-w-full truncate">{item.label === "Conversations" ? "Inbox" : item.label}</span></Link>;
