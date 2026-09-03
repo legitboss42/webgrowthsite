@@ -33,7 +33,7 @@ export default async function WhatsAppQuickRepliesPage() {
   const loaded = await getSavedReplies(access.memberId);
   const teamReplies = loaded.replies.filter((reply) => reply.scope === "TEAM").length;
   const personalReplies = loaded.replies.filter((reply) => reply.scope !== "TEAM").length;
-  const mediaReplies = loaded.replies.filter((reply) => Boolean(reply.mediaKind)).length;
+  const mediaReplies = loaded.replies.filter((reply) => Boolean(reply.media_kind)).length;
 
   return <div className="w-full p-3 sm:p-5 lg:p-6">
     <header className="mb-5 flex flex-col gap-4 border-b border-rule pb-5 xl:flex-row xl:items-end xl:justify-between"><div><div className="mb-2 flex items-center gap-2 text-[0.65rem] font-semibold uppercase tracking-[.16em] text-ledger-bright"><span className="h-1.5 w-1.5 rounded-full bg-ledger-bright" />Agent productivity</div><h1 className="text-2xl font-semibold text-ink sm:text-3xl">Saved replies</h1><p className="mt-1 max-w-2xl text-sm leading-6 text-ink-faint">Build reusable answers, shortcuts and media responses for faster support conversations.</p></div><div className="flex flex-wrap gap-2"><Link href="/admin/whatsapp/conversations/" className="inline-flex items-center gap-2 rounded-xl border border-rule bg-paper-raised px-3.5 py-2.5 text-xs font-semibold text-ink-soft hover:border-rule-strong hover:text-ink"><WhatsAppIcon name="conversations" className="h-4 w-4" />Open inbox</Link><Link href="/admin/whatsapp/team/" className="inline-flex items-center gap-2 rounded-xl border border-ledger-bright/25 bg-ledger-tint px-3.5 py-2.5 text-xs font-semibold text-ledger-bright"><WhatsAppIcon name="contacts" className="h-4 w-4" />Team</Link></div></header>
