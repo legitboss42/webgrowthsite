@@ -1,0 +1,196 @@
+/* Conversation-space corrections: compact filters, deliberate topbar grouping, and mobile-first thread density. */
+.wg-whatsapp-app .wg-inbox-workspace form[action="/admin/whatsapp/conversations/"]:has(select[name="lifecycle"]),
+.wg-whatsapp-app .wg-inbox-workspace nav[aria-label="Lead filters"] {
+  display: none !important;
+}
+
+.wg-whatsapp-app [data-wg-conversation-filter-dock] {
+  width: 100%;
+  min-width: 0;
+}
+
+.wg-whatsapp-app .wg-conversation-filter-menu > summary {
+  user-select: none;
+}
+
+.wg-whatsapp-app .wg-logo-workspace-switcher[open] > summary {
+  background: rgba(255,255,255,.055);
+  color: rgba(255,255,255,.9);
+}
+
+@media (min-width: 1024px) {
+  .wg-whatsapp-app .wg-topbar-inner {
+    display: grid !important;
+    grid-template-columns: minmax(13rem, 1fr) auto auto;
+    align-items: center;
+    gap: .5rem !important;
+  }
+
+  .wg-whatsapp-app .wg-topbar-title { grid-column: 1; min-width: 0; }
+  .wg-whatsapp-app .wg-topbar-actions {
+    grid-column: 2;
+    order: initial !important;
+    display: flex;
+    width: auto !important;
+    max-width: none !important;
+    flex-basis: auto !important;
+    justify-content: flex-end !important;
+    gap: .3rem !important;
+    overflow: visible !important;
+    border: 1px solid rgba(255,255,255,.055) !important;
+    border-radius: .65rem;
+    background: rgba(255,255,255,.018);
+    padding: .2rem !important;
+  }
+  .wg-whatsapp-app .wg-topbar-status { grid-column: 3; }
+  .wg-whatsapp-app .wg-topbar-status > div > button { min-height: 2.15rem; }
+
+  .wg-whatsapp-app > .wg-app-sidebar[class~="w-[4.5rem]"] .wg-sidebar-brand {
+    padding-left: .25rem !important;
+    padding-right: .25rem !important;
+  }
+  .wg-whatsapp-app > .wg-app-sidebar[class~="w-[4.5rem]"] .wg-brand-row {
+    width: 100%;
+    justify-content: center;
+    gap: 0 !important;
+  }
+  .wg-whatsapp-app > .wg-app-sidebar[class~="w-[4.5rem]"] .wg-brand-mark {
+    width: 2.1rem;
+    height: 2.1rem;
+  }
+  .wg-whatsapp-app > .wg-app-sidebar[class~="w-[4.5rem]"] .wg-logo-workspace-switcher > summary {
+    width: 1.15rem;
+  }
+}
+
+@media (max-width: 1023px) {
+  .wg-whatsapp-app .wg-topbar-inner {
+    display: grid !important;
+    grid-template-columns: auto auto minmax(0,1fr) auto;
+    align-items: center;
+    gap: .3rem !important;
+    min-height: 0 !important;
+    padding: .3rem .5rem !important;
+  }
+  .wg-whatsapp-app .wg-topbar-menu { grid-column: 1; width: 2.15rem; height: 2.15rem; }
+  .wg-whatsapp-app .wg-topbar-mobile-brand { grid-column: 2; }
+  .wg-whatsapp-app .wg-topbar-mobile-brand .wg-brand-mark { width: 2rem; height: 2rem; }
+  .wg-whatsapp-app .wg-topbar-title { grid-column: 3; min-width: 0; }
+  .wg-whatsapp-app .wg-topbar-title p { display: none !important; }
+  .wg-whatsapp-app .wg-topbar-title h1 { font-size: .82rem !important; }
+  .wg-whatsapp-app .wg-topbar-status { grid-column: 4; }
+  .wg-whatsapp-app .wg-topbar-status > div > button {
+    min-height: 2rem !important;
+    height: 2rem !important;
+    min-width: 2rem;
+    padding: .3rem .45rem !important;
+  }
+  .wg-whatsapp-app .wg-topbar-actions {
+    grid-column: 1 / -1;
+    order: initial !important;
+    width: 100% !important;
+    flex-basis: auto !important;
+    min-height: 2rem;
+    justify-content: flex-start !important;
+    gap: .3rem !important;
+    overflow-x: auto !important;
+    border: 0 !important;
+    padding: 0 !important;
+    scrollbar-width: none;
+  }
+  .wg-whatsapp-app .wg-topbar-actions::-webkit-scrollbar { display: none; }
+  .wg-whatsapp-app .wg-topbar-actions > * { flex: none; }
+  .wg-whatsapp-app .wg-topbar-actions button {
+    min-height: 1.9rem !important;
+    height: 1.9rem !important;
+    padding-left: .55rem !important;
+    padding-right: .55rem !important;
+    font-size: .64rem !important;
+  }
+
+  .wg-whatsapp-app .wg-app-content {
+    padding-bottom: calc(3rem + env(safe-area-inset-bottom)) !important;
+  }
+  .wg-whatsapp-app .wg-mobile-nav a,
+  .wg-whatsapp-app .wg-mobile-nav button {
+    min-height: 2.85rem !important;
+    padding-top: .2rem !important;
+    padding-bottom: .2rem !important;
+  }
+  .wg-whatsapp-app .wg-inbox-workspace {
+    height: 100% !important;
+    min-height: 0 !important;
+  }
+
+  .wg-whatsapp-app .wg-inbox-workspace section:has(#whatsapp-composer-editor) > div:first-child {
+    min-height: 3.15rem !important;
+    flex-wrap: nowrap !important;
+    gap: .38rem !important;
+    padding: .35rem .5rem !important;
+  }
+  .wg-whatsapp-app .wg-inbox-workspace section:has(#whatsapp-composer-editor) > div:first-child > div:has(button[title*="conversation session"]) {
+    flex: none !important;
+    gap: 0 !important;
+  }
+  .wg-whatsapp-app .wg-inbox-workspace section:has(#whatsapp-composer-editor) > div:first-child > div:has(button[title*="conversation session"]) > div:first-child {
+    display: none !important;
+  }
+  .wg-whatsapp-app .wg-inbox-workspace section:has(#whatsapp-composer-editor) button[title*="conversation session"],
+  .wg-whatsapp-app .wg-inbox-workspace section:has(#whatsapp-composer-editor) > div:first-child a[href*="panel=contact"] {
+    min-height: 2rem !important;
+    padding: .3rem .5rem !important;
+    font-size: .64rem !important;
+    white-space: nowrap;
+  }
+  .wg-whatsapp-app .wg-inbox-workspace section:has(#whatsapp-composer-editor) > div:nth-child(2) {
+    padding: .6rem .65rem !important;
+  }
+  .wg-whatsapp-app .wg-inbox-workspace section:has(#whatsapp-composer-editor) > div:nth-child(2) article {
+    max-width: 90% !important;
+  }
+
+  .wg-whatsapp-app .wg-inbox-workspace form:has(#whatsapp-composer-editor) {
+    padding: .4rem .5rem !important;
+  }
+  .wg-whatsapp-app .wg-inbox-workspace form:has(#whatsapp-composer-editor) > div[class*="bg-brass"] {
+    margin-bottom: .35rem !important;
+    padding: .35rem .55rem !important;
+    font-size: .68rem !important;
+    line-height: 1rem !important;
+  }
+  .wg-whatsapp-app #whatsapp-composer-editor {
+    min-height: 2.2rem !important;
+    max-height: 4rem !important;
+    padding-top: .25rem !important;
+    padding-bottom: .25rem !important;
+    line-height: 1.25rem !important;
+  }
+  .wg-whatsapp-app #whatsapp-composer-hint { display: none !important; }
+  .wg-whatsapp-app form:has(#whatsapp-composer-editor) > div:has(button[aria-label="Discard recording"]) {
+    gap: .25rem !important;
+    padding: .25rem !important;
+  }
+  .wg-whatsapp-app form:has(#whatsapp-composer-editor) button[aria-label="Cancel recording"],
+  .wg-whatsapp-app form:has(#whatsapp-composer-editor) button[aria-label="Discard recording"],
+  .wg-whatsapp-app form:has(#whatsapp-composer-editor) button[aria-label*="voice note"] {
+    width: 2.25rem !important;
+    height: 2.25rem !important;
+    min-height: 2.25rem !important;
+  }
+}
+
+@media (max-width: 639px) {
+  .wg-whatsapp-app .wg-inbox-workspace section:has(#whatsapp-composer-editor) > div:first-child .font-mono {
+    font-size: .62rem !important;
+  }
+  .wg-whatsapp-app .wg-inbox-workspace section:has(#whatsapp-composer-editor) > div:first-child h2 {
+    font-size: .78rem !important;
+  }
+  .wg-whatsapp-app .wg-conversation-filter-menu > form {
+    position: fixed !important;
+    left: .65rem !important;
+    right: .65rem !important;
+    top: auto !important;
+    bottom: calc(3.35rem + env(safe-area-inset-bottom));
+  }
+}
