@@ -2,14 +2,14 @@ name: Stage 12 validation
 
 on:
   push:
-    branches: [stage12-app-redesign]
+    branches: [stage12-app-redesign, stage12-visual-redesign-v2]
   workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: stage12-app-redesign
+  group: stage12-${{ github.ref_name }}
   cancel-in-progress: true
 
 jobs:
