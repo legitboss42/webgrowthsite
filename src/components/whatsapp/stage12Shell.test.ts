@@ -86,7 +86,7 @@ test("Stage 12 shell keeps the redesign scoped to WhatsApp and uses the supplied
   assert.match(workspaces, /^\.wg-whatsapp-app/m);
   assert.match(chatwoot, /^\.wg-whatsapp-app/m);
   assert.match(polish, /^\.wg-whatsapp-app/m);
-  assert.match(chatwoot, /wg-cw-inbox-list/);
+  assert.match(workspaces, /wg-inbox-workspace > div > section:first-of-type/);
   assert.match(chatwoot, /wg-inspector-rail/);
   assert.match(polish, /wg-report-tab/);
   assert.match(css, /max-width:\s*100vw/);
@@ -101,7 +101,7 @@ test("corrective redesign uses shared app chrome across operational routes", () 
   assert.match(chrome, /WorkspaceSurface/);
 
   const structuralMarkers = [
-    ["src/app/admin/whatsapp/conversations/page.tsx", "wg-cw-inbox"],
+    ["src/app/admin/whatsapp/conversations/page.tsx", "ReplyComposer"],
     ["src/app/admin/whatsapp/contacts/layout.tsx", "WorkspaceRail"],
     ["src/app/admin/whatsapp/automations/page.tsx", "WorkspaceToolbar"],
     ["src/app/admin/whatsapp/campaigns/page.tsx", "WorkspaceToolbar"],
