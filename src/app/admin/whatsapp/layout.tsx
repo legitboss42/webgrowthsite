@@ -18,6 +18,8 @@ import TeamPresenceWidget from "./TeamPresenceWidget";
 import WorkspaceCollaborationLayer from "./WorkspaceCollaborationLayer";
 import "./stage12.css";
 import "./stage12-overrides.css";
+import "./stage12-components.css";
+import "./stage12-logo-fix.css";
 
 export default async function WhatsAppConsoleLayout({ children }: { children: ReactNode }) {
   const cookieStore = await cookies();
