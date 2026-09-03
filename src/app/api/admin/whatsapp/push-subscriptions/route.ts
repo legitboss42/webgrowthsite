@@ -29,7 +29,7 @@ export async function POST(request: Request) {
   const p256dh = keys?.p256dh;
   const auth = keys?.auth;
   if (!validEndpoint(endpoint) || typeof p256dh !== "string" || typeof auth !== "string" || !p256dh || !auth) return NextResponse.json({ error: "Invalid push subscription." }, { status: 400 });
-  const result = await saveWhatsAppPushSubscription({ endpoint, p256dh: p256dh.slice(0, 512), auth: auth.slice(0, 512), userAgent: request.headers.get("user-agent") || undefined });
+  const result = await saveWhatsAppPushSubscription({ workspaceId: guarded.access.workspaceId, endpoint, p256dh: p256dh.slice(0, 512), auth: auth.slice(0, 512), userAgent: request.headers.get("user-agent") || undefined });
   if (!result.ok) return NextResponse.json({ error: result.error }, { status: 502 });
   return NextResponse.json({ ok: true });
 }
@@ -41,6 +41,6 @@ export async function DELETE(request: Request) {
   try { body = (await request.json()) as Record<string, unknown>; }
   catch { return NextResponse.json({ error: "Invalid request payload." }, { status: 400 }); }
   if (!validEndpoint(body.endpoint)) return NextResponse.json({ error: "Invalid push subscription." }, { status: 400 });
-  await deleteWhatsAppPushSubscription(body.endpoint);
+  await deleteWhatsAppPushSubscription(body.endpoint, guarded.access.workspaceId);
   return NextResponse.json({ ok: true });
 }

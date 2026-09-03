@@ -1,5 +1,6 @@
 import { createECDH } from "node:crypto";
 import * as webPush from "web-push";
+import { isWhatsAppWorkspaceId } from "./workspaceModel";
 import { readRequestedWhatsAppWorkspaceIdFromRequest } from "./workspaces";
 
 type StoredSubscription = { endpoint: string; p256dh: string; auth: string };
@@ -13,13 +14,21 @@ export async function ensureWhatsAppVapidKeys(): Promise<VapidKeys | null> {
   const generated = generateVapidKeys(); const response = await fetch(`${resolved.url}/rest/v1/whatsapp_push_config?on_conflict=id`, { method: "POST", headers: { ...headers(resolved.key), Prefer: "resolution=ignore-duplicates,return=minimal" }, body: JSON.stringify({ id: "default", public_key: generated.publicKey, private_key: generated.privateKey, updated_at: new Date().toISOString() }), cache: "no-store" });
   if (!response.ok) return null; return await readVapidKeys(resolved) || generated;
 }
-async function workspaceId() { return readRequestedWhatsAppWorkspaceIdFromRequest(); }
-export async function saveWhatsAppPushSubscription(input: { endpoint: string; p256dh: string; auth: string; userAgent?: string }) {
-  const resolved = config(); const scope = await workspaceId(); if (!resolved || !scope) return { ok: false as const, error: "WhatsApp storage is not configured." };
-  const response = await fetch(`${resolved.url}/rest/v1/whatsapp_push_subscriptions?on_conflict=workspace_id,endpoint`, { method: "POST", headers: { ...headers(resolved.key), Prefer: "resolution=merge-duplicates,return=minimal" }, body: JSON.stringify({ workspace_id: scope, endpoint: input.endpoint, p256dh: input.p256dh, auth: input.auth, user_agent: input.userAgent?.slice(0, 500) || null, updated_at: new Date().toISOString() }), cache: "no-store" });
-  return response.ok ? { ok: true as const } : { ok: false as const, error: "Push subscription could not be saved." };
+async function workspaceId(explicitWorkspaceId?: string | null) {
+  if (isWhatsAppWorkspaceId(explicitWorkspaceId)) return explicitWorkspaceId;
+  return readRequestedWhatsAppWorkspaceIdFromRequest();
 }
-export async function deleteWhatsAppPushSubscription(endpoint: string) { const resolved = config(); const scope = await workspaceId(); if (!resolved || !scope) return; await fetch(`${resolved.url}/rest/v1/whatsapp_push_subscriptions?workspace_id=eq.${encodeURIComponent(scope)}&endpoint=eq.${encodeURIComponent(endpoint)}`, { method: "DELETE", headers: headers(resolved.key), cache: "no-store" }).catch(() => undefined); }
+export async function saveWhatsAppPushSubscription(input: { workspaceId?: string | null; endpoint: string; p256dh: string; auth: string; userAgent?: string }) {
+  const resolved = config(); const scope = await workspaceId(input.workspaceId); if (!resolved || !scope) return { ok: false as const, error: "WhatsApp storage is not configured." };
+  const response = await fetch(`${resolved.url}/rest/v1/whatsapp_push_subscriptions?on_conflict=workspace_id,endpoint`, { method: "POST", headers: { ...headers(resolved.key), Prefer: "resolution=merge-duplicates,return=minimal" }, body: JSON.stringify({ workspace_id: scope, endpoint: input.endpoint, p256dh: input.p256dh, auth: input.auth, user_agent: input.userAgent?.slice(0, 500) || null, updated_at: new Date().toISOString() }), cache: "no-store" });
+  if (!response.ok) {
+    const payload = await response.json().catch(() => null) as { code?: unknown; message?: unknown } | null;
+    console.error("WhatsApp push subscription save failed", { status: response.status, code: typeof payload?.code === "string" ? payload.code : undefined, message: typeof payload?.message === "string" ? payload.message : undefined, workspaceId: scope });
+    return { ok: false as const, error: "Push subscription could not be saved." };
+  }
+  return { ok: true as const };
+}
+export async function deleteWhatsAppPushSubscription(endpoint: string, explicitWorkspaceId?: string | null) { const resolved = config(); const scope = await workspaceId(explicitWorkspaceId); if (!resolved || !scope) return; await fetch(`${resolved.url}/rest/v1/whatsapp_push_subscriptions?workspace_id=eq.${encodeURIComponent(scope)}&endpoint=eq.${encodeURIComponent(endpoint)}`, { method: "DELETE", headers: headers(resolved.key), cache: "no-store" }).catch(() => undefined); }
 async function listSubscriptions(): Promise<StoredSubscription[]> { const resolved = config(); const scope = await workspaceId(); if (!resolved || !scope) return []; const response = await fetch(`${resolved.url}/rest/v1/whatsapp_push_subscriptions?workspace_id=eq.${encodeURIComponent(scope)}&select=endpoint,p256dh,auth`, { headers: headers(resolved.key), cache: "no-store" }); return response.ok ? await response.json() as StoredSubscription[] : []; }
 export async function claimWhatsAppPushDelivery(messageId: string): Promise<boolean> { const resolved = config(); const scope = await workspaceId(); if (!resolved || !scope || !messageId) return false; const response = await fetch(`${resolved.url}/rest/v1/whatsapp_push_deliveries?on_conflict=workspace_id,message_id`, { method: "POST", headers: { ...headers(resolved.key), Prefer: "resolution=ignore-duplicates,return=representation" }, body: JSON.stringify({ workspace_id: scope, message_id: messageId }), cache: "no-store" }); if (!response.ok) return false; const rows = await response.json() as Array<{ message_id?: string }>; return rows.some((row) => row.message_id === messageId); }
 export async function sendWhatsAppPushNotification(input: { id: string; title: string; body: string; url?: string }) {
