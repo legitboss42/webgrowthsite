@@ -111,26 +111,25 @@
   background-color: #0a1118;
 }
 
-/* Settings becomes a two-pane application workspace on desktop. The existing
-   anchor links and section IDs stay untouched, so every category keeps working. */
+/* Settings becomes a two-pane application workspace on desktop. */
 @media (min-width: 1024px) {
-  .wg-whatsapp-app .wg-app-content > div:has(> nav a[href="#business"]) {
+  .wg-whatsapp-app .whatsapp-settings-tabs-root > div:has(> nav a[href="#business"]) {
     display: grid;
     grid-template-columns: 15rem minmax(0, 1fr);
     column-gap: 1.25rem;
     align-items: start;
   }
 
-  .wg-whatsapp-app .wg-app-content > div:has(> nav a[href="#business"]) > header {
+  .wg-whatsapp-app .whatsapp-settings-tabs-root > div:has(> nav a[href="#business"]) > header {
     grid-column: 1 / -1;
   }
 
-  .wg-whatsapp-app .wg-app-content > div:has(> nav a[href="#business"]) > nav {
+  .wg-whatsapp-app .whatsapp-settings-tabs-root > div:has(> nav a[href="#business"]) > nav {
     position: sticky;
     top: 5.25rem;
     grid-column: 1;
     grid-row: 2 / span 6;
-    display: flex;
+    display: flex !important;
     flex-direction: column;
     align-items: stretch;
     gap: 0.25rem;
@@ -138,9 +137,10 @@
     padding: 0.5rem;
     border-radius: 0.75rem;
     background: #0a1118;
+    overflow: visible;
   }
 
-  .wg-whatsapp-app .wg-app-content > div:has(> nav a[href="#business"]) > nav a {
+  .wg-whatsapp-app .whatsapp-settings-tabs-root > div:has(> nav a[href="#business"]) > nav a {
     width: 100%;
     justify-content: flex-start;
     border-radius: 0.5rem;
@@ -148,14 +148,14 @@
     color: #8d99a3;
   }
 
-  .wg-whatsapp-app .wg-app-content > div:has(> nav a[href="#business"]) > nav a:hover,
-  .wg-whatsapp-app .wg-app-content > div:has(> nav a[href="#business"]) > nav a:focus-visible {
+  .wg-whatsapp-app .whatsapp-settings-tabs-root > div:has(> nav a[href="#business"]) > nav a:hover,
+  .wg-whatsapp-app .whatsapp-settings-tabs-root > div:has(> nav a[href="#business"]) > nav a:focus-visible {
     border-left-color: #16c65a;
     background: #0d2919;
     color: #f5f7f8;
   }
 
-  .wg-whatsapp-app .wg-app-content > div:has(> nav a[href="#business"]) > section {
+  .wg-whatsapp-app .whatsapp-settings-tabs-root > div:has(> nav a[href="#business"]) > section {
     grid-column: 2;
     margin-top: 0;
     margin-bottom: 1.5rem;
@@ -163,7 +163,7 @@
 }
 
 @media (max-width: 1023px) {
-  .wg-whatsapp-app .wg-app-content > div:has(> nav a[href="#business"]) > nav {
+  .wg-whatsapp-app .whatsapp-settings-tabs-root > div:has(> nav a[href="#business"]) > nav {
     position: sticky;
     top: 3.5rem;
     z-index: 20;
@@ -176,7 +176,7 @@
     backdrop-filter: blur(14px);
   }
 
-  .wg-whatsapp-app .wg-app-content > div:has(> nav a[href="#business"]) > nav a {
+  .wg-whatsapp-app .whatsapp-settings-tabs-root > div:has(> nav a[href="#business"]) > nav a {
     flex: none;
     white-space: nowrap;
   }
