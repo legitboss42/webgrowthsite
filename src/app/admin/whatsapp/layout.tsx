@@ -4,6 +4,7 @@ import GoogleAdminPrompt from "@/components/auth/GoogleAdminPrompt";
 import { getDefaultAdminGoogleEmail, getGoogleClientId, isGoogleAuthConfigured } from "@/lib/googleAuth";
 import WhatsAppShell from "@/components/whatsapp/WhatsAppShell";
 import WorkspaceSwitcher from "@/components/whatsapp/WorkspaceSwitcher";
+import ConversationFilterDock from "@/components/whatsapp/ConversationFilterDock";
 import { MessageStatusVisibilityProvider } from "@/components/whatsapp/MessageStatusVisibility";
 import { loadWhatsAppQuickSettings } from "@/lib/whatsapp/quickSettings";
 import { fetchWhatsAppPhoneNumbers, findConfiguredWhatsAppSender } from "@/lib/whatsapp/phoneNumbers";
@@ -24,6 +25,7 @@ import "./stage12-chatwoot.css";
 import "./stage12-chatwoot-polish.css";
 import "./stage12-overlap-fixes.css";
 import "./stage12-sidebar-collapse-fix.css";
+import "./stage12-conversation-compact.css";
 
 export default async function WhatsAppConsoleLayout({ children }: { children: ReactNode }) {
   const cookieStore = await cookies();
@@ -43,17 +45,12 @@ export default async function WhatsAppConsoleLayout({ children }: { children: Re
     if (phoneResult.ok) senderNumber = findConfiguredWhatsAppSender(phoneResult.phoneNumbers, meta.phoneNumberId)?.displayPhoneNumber;
   }
 
+  const workspaceControl = <WorkspaceSwitcher currentWorkspaceId={access.workspaceId} workspaces={access.availableWorkspaces} platformAdmin={access.platformAdmin} />;
+
   return (
-    <WhatsAppShell
-      senderConnected={senderConnected}
-      senderNumber={senderNumber}
-      role={access.role}
-      memberName={access.displayName}
-      workspaceName={access.workspaceName}
-      workspaceControl={<WorkspaceSwitcher currentWorkspaceId={access.workspaceId} workspaces={access.availableWorkspaces} platformAdmin={access.platformAdmin} />}
-      presenceControl={<TeamPresenceWidget senderConnected={senderConnected} />}
-    >
+    <WhatsAppShell senderConnected={senderConnected} senderNumber={senderNumber} role={access.role} memberName={access.displayName} workspaceName={access.workspaceName} workspaceControl={workspaceControl} presenceControl={<TeamPresenceWidget senderConnected={senderConnected} />}>
       <MessageStatusVisibilityProvider deliveryStatusVisible={quickSettings.deliveryStatusVisible} readStatusVisible={quickSettings.readStatusVisible}>
+        <ConversationFilterDock />
         <InstantInteractionLayer />
         <IncomingCallOverlay />
         <WorkspaceCollaborationLayer />
