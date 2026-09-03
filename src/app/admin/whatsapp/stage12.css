@@ -30,6 +30,73 @@
   --color-text-muted: #8d99a3;
   --color-text-ink: #f5f7f8;
   --color-border-hairline: #18242d;
+
+  /* Existing modules still use stock Tailwind ramps. Re-scope those ramps here
+     instead of touching working feature components one by one. */
+  --color-slate-50: #0a1118;
+  --color-slate-100: #0d161f;
+  --color-slate-200: #18242d;
+  --color-slate-300: #263640;
+  --color-slate-400: #687680;
+  --color-slate-500: #7f8b95;
+  --color-slate-600: #9aa5ad;
+  --color-slate-700: #c4ccd2;
+  --color-slate-800: #e0e5e8;
+  --color-slate-900: #f5f7f8;
+  --color-slate-950: #ffffff;
+  --color-gray-50: #0a1118;
+  --color-gray-100: #0d161f;
+  --color-gray-200: #18242d;
+  --color-gray-300: #263640;
+  --color-gray-400: #687680;
+  --color-gray-500: #7f8b95;
+  --color-gray-600: #9aa5ad;
+  --color-gray-700: #c4ccd2;
+  --color-gray-800: #e0e5e8;
+  --color-gray-900: #f5f7f8;
+  --color-zinc-50: #0a1118;
+  --color-zinc-100: #0d161f;
+  --color-zinc-200: #18242d;
+  --color-zinc-300: #263640;
+  --color-zinc-400: #687680;
+  --color-zinc-500: #7f8b95;
+  --color-zinc-600: #9aa5ad;
+  --color-zinc-700: #c4ccd2;
+  --color-zinc-800: #e0e5e8;
+  --color-zinc-900: #f5f7f8;
+
+  /* Purple/indigo/violet are deliberately not recurring brand accents in Stage 12. */
+  --color-purple-50: #0d2919;
+  --color-purple-100: #0d2919;
+  --color-purple-200: #12452a;
+  --color-purple-300: #0f7d3e;
+  --color-purple-400: #12a94d;
+  --color-purple-500: #16c65a;
+  --color-purple-600: #13ae4e;
+  --color-purple-700: #0b8f45;
+  --color-purple-800: #086c34;
+  --color-purple-900: #064c26;
+  --color-indigo-50: #0d2919;
+  --color-indigo-100: #0d2919;
+  --color-indigo-200: #12452a;
+  --color-indigo-300: #0f7d3e;
+  --color-indigo-400: #12a94d;
+  --color-indigo-500: #16c65a;
+  --color-indigo-600: #13ae4e;
+  --color-indigo-700: #0b8f45;
+  --color-indigo-800: #086c34;
+  --color-indigo-900: #064c26;
+  --color-violet-50: #0d2919;
+  --color-violet-100: #0d2919;
+  --color-violet-200: #12452a;
+  --color-violet-300: #0f7d3e;
+  --color-violet-400: #12a94d;
+  --color-violet-500: #16c65a;
+  --color-violet-600: #13ae4e;
+  --color-violet-700: #0b8f45;
+  --color-violet-800: #086c34;
+  --color-violet-900: #064c26;
+
   color-scheme: dark;
   min-width: 0;
   width: 100%;
@@ -62,6 +129,34 @@
   color: #66737d;
 }
 
+/* Hard-coded light utilities left in older modules are normalized here. */
+.wg-whatsapp-app .bg-white {
+  background-color: #0a1118 !important;
+}
+
+.wg-whatsapp-app .bg-white\/90,
+.wg-whatsapp-app .bg-white\/95,
+.wg-whatsapp-app .bg-white\/80 {
+  background-color: rgba(10, 17, 24, 0.94) !important;
+}
+
+.wg-whatsapp-app .text-black {
+  color: #f5f7f8 !important;
+}
+
+.wg-whatsapp-app .border-white {
+  border-color: #263640 !important;
+}
+
+.wg-whatsapp-app .shadow-sm,
+.wg-whatsapp-app .shadow,
+.wg-whatsapp-app .shadow-md,
+.wg-whatsapp-app .shadow-lg,
+.wg-whatsapp-app .shadow-xl,
+.wg-whatsapp-app .shadow-2xl {
+  --tw-shadow-color: rgba(0, 0, 0, 0.28);
+}
+
 .wg-whatsapp-app .wg-app-sidebar {
   background:
     linear-gradient(180deg, rgba(13, 41, 25, 0.24), transparent 16rem),
@@ -80,6 +175,11 @@
   width: 100%;
   max-width: 100%;
   overflow-x: clip;
+}
+
+.wg-whatsapp-app .wg-app-content > * {
+  min-width: 0;
+  max-width: 100%;
 }
 
 .wg-whatsapp-app .wg-sidebar-scroll {
@@ -105,6 +205,19 @@
 .wg-whatsapp-app .wg-mobile-nav a,
 .wg-whatsapp-app .wg-mobile-nav button {
   min-height: 3.25rem;
+}
+
+/* Tables and data grids keep app-like density instead of website spacing. */
+.wg-whatsapp-app table {
+  border-color: #18242d;
+}
+
+.wg-whatsapp-app thead {
+  background: #0a1118;
+}
+
+.wg-whatsapp-app tbody tr {
+  border-color: #18242d;
 }
 
 @media (max-width: 1023px) {
