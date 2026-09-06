@@ -1,0 +1,83 @@
+name: Repair optional article assets
+
+on:
+  push:
+    branches: [feature/blog-social-automation]
+    paths:
+      - .github/workflows/repair-optional-article-assets.yml
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/blog-social-automation
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Make article screenshots optional
+        shell: python
+        run: |
+          from pathlib import Path
+
+          component_path = Path('src/remotion/components/WebGrowthArticleVideo.tsx')
+          component = component_path.read_text()
+          replacements = [
+              (
+                  '  previewMode?: boolean;\n};',
+                  '  previewMode?: boolean;\n  articleAssetsAvailable?: boolean;\n};'
+              ),
+              (
+                  '  slug,\n  isFinalScene,\n}: {\n  sceneIndex: number;\n  sceneFrame: number;\n  slug?: string;\n  isFinalScene: boolean;\n}) {',
+                  '  slug,\n  isFinalScene,\n  articleAssetsAvailable,\n}: {\n  sceneIndex: number;\n  sceneFrame: number;\n  slug?: string;\n  isFinalScene: boolean;\n  articleAssetsAvailable: boolean;\n}) {'
+              ),
+              (
+                  '      {!isFinalScene ? (\n        <ScreenshotBackground slug={slug} sceneIndex={sceneIndex} sceneFrame={sceneFrame} />\n      ) : null}',
+                  '      {!isFinalScene && articleAssetsAvailable && slug ? (\n        <ScreenshotBackground slug={slug} sceneIndex={sceneIndex} sceneFrame={sceneFrame} />\n      ) : null}'
+              ),
+              (
+                  '      {!slug || isFinalScene ? (',
+                  '      {!slug || !articleAssetsAvailable || isFinalScene ? ('
+              ),
+              (
+                  '  slug,\n  previewMode = false,\n}) => {',
+                  '  slug,\n  previewMode = false,\n  articleAssetsAvailable = false,\n}) => {'
+              ),
+              (
+                  '          slug={slug}\n          isFinalScene={isFinalScene}\n        />',
+                  '          slug={slug}\n          isFinalScene={isFinalScene}\n          articleAssetsAvailable={articleAssetsAvailable}\n        />'
+              ),
+          ]
+          for old, new in replacements:
+              if old not in component:
+                  raise SystemExit(f'component patch target missing: {old[:80]}')
+              component = component.replace(old, new, 1)
+          component_path.write_text(component)
+
+          renderer_path = Path('scripts/render-article-video.mjs')
+          renderer = renderer_path.read_text()
+          old = '''  const props = {\n    ...script,\n    audioSrc: "article-voice.mp3",'''
+          new = '''  const articleAssetNames = ["hero.png", "problem.png", "solution.png", "result.png"];\n  const articleAssetsAvailable = (\n    await Promise.all(\n      articleAssetNames.map(async (assetName) => {\n        try {\n          await fs.access(path.join(publicDir, "article-assets", slug, assetName));\n          return true;\n        } catch {\n          return false;\n        }\n      })\n    )\n  ).every(Boolean);\n\n  const props = {\n    ...script,\n    audioSrc: "article-voice.mp3",\n    articleAssetsAvailable,'''
+          if old not in renderer:
+              raise SystemExit('renderer props patch target missing')
+          renderer_path.write_text(renderer.replace(old, new, 1))
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Verify focused social tests
+        run: npm run test:social
+      - name: Prove screenshot-free article render
+        run: npm run social:render -- 01-why-we-rebuilt-not-redesigned
+      - name: Commit renderer fix
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/remotion/components/WebGrowthArticleVideo.tsx scripts/render-article-video.mjs
+          git commit -m "fix: render articles without optional screenshots"
+          git push origin HEAD:feature/blog-social-automation
