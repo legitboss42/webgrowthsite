@@ -13,10 +13,869 @@
       "reason": "Ownership and trust page"
     },
     {
+      "path": "/admin/content-automation/",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Internal blog-to-social automation administration"
+    },
+    {
+      "path": "/admin/waitlist/",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Internal automation waitlist administration"
+    },
+    {
+      "path": "/admin/whatsapp/",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Internal WhatsApp console overview"
+    },
+    {
+      "path": "/admin/whatsapp/account/",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/admin/whatsapp/analytics/",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Internal WhatsApp volume, delivery, and response-time reporting"
+    },
+    {
+      "path": "/admin/whatsapp/automations/",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Internal WhatsApp automation workflow builder"
+    },
+    {
+      "path": "/admin/whatsapp/calls/",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/admin/whatsapp/campaigns/",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Internal WhatsApp opt-in campaign manager"
+    },
+    {
+      "path": "/admin/whatsapp/contacts/",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Internal WhatsApp contact directory"
+    },
+    {
+      "path": "/admin/whatsapp/conversations/",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Internal WhatsApp lead inbox"
+    },
+    {
+      "path": "/admin/whatsapp/flows/",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/admin/whatsapp/phone-numbers/",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Internal WhatsApp sender status and limits"
+    },
+    {
+      "path": "/admin/whatsapp/platform/settings/",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/admin/whatsapp/platform/settings/ai/",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/admin/whatsapp/platform/settings/audit/",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/admin/whatsapp/platform/settings/commercial/",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/admin/whatsapp/platform/settings/email/",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/admin/whatsapp/platform/settings/features/",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/admin/whatsapp/platform/settings/meta/",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/admin/whatsapp/platform/settings/plans/",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/admin/whatsapp/platform/settings/security/",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/admin/whatsapp/platform/settings/system/",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/admin/whatsapp/platform/settings/workspaces/",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/admin/whatsapp/quick-replies/",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Internal WhatsApp saved reply snippets"
+    },
+    {
+      "path": "/admin/whatsapp/settings/",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Internal WhatsApp integration configuration and readiness reporting"
+    },
+    {
+      "path": "/admin/whatsapp/settings/ai/",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/admin/whatsapp/settings/automations/",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/admin/whatsapp/settings/campaigns/",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/admin/whatsapp/settings/crm/",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/admin/whatsapp/settings/data/",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/admin/whatsapp/settings/inbox/",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/admin/whatsapp/settings/integrations/",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/admin/whatsapp/settings/notifications/",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/admin/whatsapp/settings/security/",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/admin/whatsapp/settings/team/",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/admin/whatsapp/settings/whatsapp/",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/admin/whatsapp/team/",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/admin/whatsapp/templates/",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Internal WhatsApp message template list"
+    },
+    {
+      "path": "/admin/whatsapp/workspaces/",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/admin/content-automation/jobs/[id]/retry",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/admin/content-automation/meta/callback",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/admin/content-automation/meta/connect",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/admin/content-automation/settings",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/admin/whatsapp/advanced-analytics",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/admin/whatsapp/ai",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/admin/whatsapp/automations",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/admin/whatsapp/automations/runs",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/admin/whatsapp/business-profile",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/admin/whatsapp/call-analytics",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/admin/whatsapp/calling-settings",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/admin/whatsapp/calls/action",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/admin/whatsapp/calls/active",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/admin/whatsapp/campaigns",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/admin/whatsapp/campaigns/segments",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/admin/whatsapp/campaigns/test-send",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/admin/whatsapp/contacts",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/admin/whatsapp/contacts/export",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/admin/whatsapp/contacts/import",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/admin/whatsapp/contacts/timeline",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/admin/whatsapp/conversations/assignment",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/admin/whatsapp/conversations/collaboration",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/admin/whatsapp/conversations/read",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/admin/whatsapp/conversations/reply-actors",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/admin/whatsapp/conversations/status",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/admin/whatsapp/flows",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/admin/whatsapp/flows/encryption",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/admin/whatsapp/flows/send",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/admin/whatsapp/flows/test-send",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/admin/whatsapp/media/[mediaId]",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/admin/whatsapp/mentions",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/admin/whatsapp/notifications",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/admin/whatsapp/presence",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/admin/whatsapp/profile-photo",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/admin/whatsapp/push-public-key",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/admin/whatsapp/push-subscriptions",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/admin/whatsapp/push-test",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/admin/whatsapp/quick-replies",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/admin/whatsapp/quick-replies/media",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/admin/whatsapp/quick-settings",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/admin/whatsapp/reply",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/admin/whatsapp/reply/audio",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/admin/whatsapp/reply/media",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/admin/whatsapp/reply/saved-reply",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/admin/whatsapp/service-window",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/admin/whatsapp/settings",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/admin/whatsapp/team",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/admin/whatsapp/templates/drafts",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/admin/whatsapp/templates/submit",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/admin/whatsapp/templates/test-send",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/admin/whatsapp/typing",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/admin/whatsapp/workspaces",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/admin/whatsapp/workspaces/select",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/ai",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "API endpoint"
+    },
+    {
+      "path": "/api/auth/google/callback",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/auth/google/session",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/auth/google/start",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/auth/password/change",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/auth/password/changed",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/auth/password/reset",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/auth/password/session",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/auth/workspace/logout",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/automation-waitlist",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/contact",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "API endpoint"
+    },
+    {
+      "path": "/api/forms/notify",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "API endpoint"
+    },
+    {
+      "path": "/api/get-started",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "API endpoint"
+    },
+    {
+      "path": "/api/health/db",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Health-check endpoint"
+    },
+    {
+      "path": "/api/internal/session",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Internal utility session endpoint"
+    },
+    {
+      "path": "/api/internal/social-automation/assets",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/internal/social-automation/cleanup",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/internal/social-automation/jobs",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/internal/social-automation/publish",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/internal/text-to-speech",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Internal text-to-speech API endpoint"
+    },
+    {
+      "path": "/api/internal/whatsapp/automations/process",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/internal/whatsapp/campaigns/process",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/scheduler/account/delete",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/scheduler/admin/restore-user",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/scheduler/admin/suspend-user",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/scheduler/articles",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/scheduler/auth/authorize",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/scheduler/auth/callback",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/scheduler/auth/sign-out",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/scheduler/creator",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/scheduler/cron/cleanup",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/scheduler/cron/publish",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/scheduler/disconnect",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/scheduler/legal/accept",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/scheduler/posts",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/scheduler/posts/[id]/retry",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/scheduler/posts/[id]/schedule",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/scheduler/posts/[id]/status",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/scheduler/uploads",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/tiktok/authorize",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "TikTok OAuth start endpoint"
+    },
+    {
+      "path": "/api/tiktok/slides/[slug]",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Internal TikTok draft slide image endpoint"
+    },
+    {
+      "path": "/api/tools/page-audit",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Public tools API endpoint"
+    },
+    {
+      "path": "/api/tools/sitemap-validator",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Public sitemap validation utility"
+    },
+    {
+      "path": "/api/whatsapp/automation-webhook/[key]",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/whatsapp/flows/data",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/whatsapp/webhook",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/auth/google/callback/",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Supabase Google OAuth callback page for admin and waitlist access"
+    },
+    {
+      "path": "/automation/",
+      "status": "INDEX",
+      "sitemap": true,
+      "reason": "Web Growth Automation early-access waitlist page for the WhatsApp and TikTok products"
+    },
+    {
       "path": "/blog/",
       "status": "INDEX",
       "sitemap": true,
       "reason": "Editorial resource hub"
+    },
+    {
+      "path": "/blog/07-launch-week-checklist-and-first-7-days-image-prompts/",
+      "status": "REDIRECT",
+      "sitemap": false,
+      "destination": "/blog/07-launch-week-checklist-and-first-7-days/",
+      "reason": "Obsolete internal image-prompt URL"
+    },
+    {
+      "path": "/connect/tiktok/",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Internal TikTok authorization utility page"
+    },
+    {
+      "path": "/connect/tiktok/callback/",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "TikTok OAuth callback route"
     },
     {
       "path": "/contact/",
@@ -25,10 +884,29 @@
       "reason": "Public contact and website review page"
     },
     {
+      "path": "/contact/thanks/",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Form completion utility"
+    },
+    {
       "path": "/disclaimer/",
       "status": "INDEX",
       "sitemap": true,
       "reason": "Public disclaimer and trust page"
+    },
+    {
+      "path": "/domain-offer/",
+      "status": "REDIRECT",
+      "sitemap": false,
+      "destination": "/hosting-offer/",
+      "reason": "Legacy offer alias"
+    },
+    {
+      "path": "/ecommerce/",
+      "status": "INDEX",
+      "sitemap": true,
+      "reason": "Small-business ecommerce solution page"
     },
     {
       "path": "/editorial-policy/",
@@ -41,6 +919,63 @@
       "status": "INDEX",
       "sitemap": true,
       "reason": "Public service questions"
+    },
+    {
+      "path": "/get-started/",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Lead-intake utility page"
+    },
+    {
+      "path": "/google-business-profile-optimization-lagos/",
+      "status": "REDIRECT",
+      "sitemap": false,
+      "destination": "/services/google-my-business-setup-optimisation/",
+      "reason": "Legacy service alias"
+    },
+    {
+      "path": "/home",
+      "status": "REDIRECT",
+      "sitemap": false,
+      "destination": "/",
+      "reason": "Legacy homepage alias"
+    },
+    {
+      "path": "/hosting-offer/",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Promotional offer page"
+    },
+    {
+      "path": "/internal/text-to-speech/",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Internal voice generation utility"
+    },
+    {
+      "path": "/landing-page-design-lagos/",
+      "status": "REDIRECT",
+      "sitemap": false,
+      "destination": "/services/landing-page-design/",
+      "reason": "Legacy service alias"
+    },
+    {
+      "path": "/launch/",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Campaign landing page"
+    },
+    {
+      "path": "/local-business/",
+      "status": "INDEX",
+      "sitemap": true,
+      "reason": "Small local-business solution page"
+    },
+    {
+      "path": "/mockup/",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private mockup utility"
     },
     {
       "path": "/portfolio/",
@@ -61,106 +996,58 @@
       "reason": "Privacy and data-use disclosure"
     },
     {
+      "path": "/scheduler/",
+      "status": "INDEX",
+      "sitemap": true,
+      "reason": "Public TikTok scheduler product and rollout page"
+    },
+    {
+      "path": "/scheduler/admin/",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Owner-only TikTok scheduler administration"
+    },
+    {
+      "path": "/scheduler/dashboard/",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Authenticated TikTok scheduler dashboard"
+    },
+    {
+      "path": "/scheduler/new/",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Authenticated TikTok post composer"
+    },
+    {
+      "path": "/scheduler/posts/[id]/",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Authenticated TikTok post workflow"
+    },
+    {
+      "path": "/scheduler/settings/",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Authenticated TikTok scheduler settings"
+    },
+    {
+      "path": "/scheduler/sign-in/",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "TikTok scheduler sign-in"
+    },
+    {
+      "path": "/scheduler/terms/",
+      "status": "INDEX",
+      "sitemap": true,
+      "reason": "Public TikTok scheduler terms and privacy summary"
+    },
+    {
       "path": "/services/",
       "status": "INDEX",
       "sitemap": true,
       "reason": "Service hub"
-    },
-    {
-      "path": "/terms/",
-      "status": "INDEX",
-      "sitemap": true,
-      "reason": "Public terms of service"
-    },
-    {
-      "path": "/victorious/",
-      "status": "INDEX",
-      "sitemap": true,
-      "reason": "Founder profile and first-hand experience page"
-    },
-    {
-      "path": "/tools/",
-      "status": "INDEX",
-      "sitemap": true,
-      "reason": "Public tools hub with live and planned utilities"
-    },
-    {
-      "path": "/tools/[slug]/",
-      "status": "NOINDEX",
-      "sitemap": false,
-      "reason": "Dynamic tools route template"
-    },
-    {
-      "path": "/tools/adsense-readiness-checker/",
-      "status": "INDEX",
-      "sitemap": true,
-      "reason": "Public AdSense readiness utility"
-    },
-    {
-      "path": "/tools/website-cost-calculator/",
-      "status": "INDEX",
-      "sitemap": true,
-      "reason": "Public website planning utility"
-    },
-    {
-      "path": "/tools/homepage-checklist/",
-      "status": "INDEX",
-      "sitemap": true,
-      "reason": "Public homepage quality utility"
-    },
-    {
-      "path": "/tools/meta-description-generator/",
-      "status": "INDEX",
-      "sitemap": true,
-      "reason": "Public SEO writing utility"
-    },
-    {
-      "path": "/tools/sitemap-validator/",
-      "status": "INDEX",
-      "sitemap": true,
-      "reason": "Public sitemap validation utility"
-    },
-    {
-      "path": "/tools/website-launch-checklist/",
-      "status": "INDEX",
-      "sitemap": true,
-      "reason": "Public launch QA utility"
-    },
-    {
-      "path": "/automation/",
-      "status": "INDEX",
-      "sitemap": true,
-      "reason": "Web Growth Automation early-access waitlist page for the WhatsApp and TikTok products"
-    },
-    {
-      "path": "/local-business/",
-      "status": "INDEX",
-      "sitemap": true,
-      "reason": "Small local-business solution page"
-    },
-    {
-      "path": "/ecommerce/",
-      "status": "INDEX",
-      "sitemap": true,
-      "reason": "Small-business ecommerce solution page"
-    },
-    {
-      "path": "/website-design-lagos/",
-      "status": "INDEX",
-      "sitemap": true,
-      "reason": "Lagos local-intent service page"
-    },
-    {
-      "path": "/website-design-united-kingdom/",
-      "status": "INDEX",
-      "sitemap": true,
-      "reason": "UK remote-service page supported by client work"
-    },
-    {
-      "path": "/web-design-for-real-estate-lagos/",
-      "status": "INDEX",
-      "sitemap": true,
-      "reason": "Real-estate industry service page"
     },
     {
       "path": "/services/analytics-tracking-setup/",
@@ -247,10 +1134,31 @@
       "reason": "Active SEO service page"
     },
     {
+      "path": "/services/speed-and-performance-optimization/",
+      "status": "REDIRECT",
+      "sitemap": false,
+      "destination": "/services/performance-optimisation/",
+      "reason": "Legacy service slug"
+    },
+    {
+      "path": "/services/website-audit-and-consultation/",
+      "status": "REDIRECT",
+      "sitemap": false,
+      "destination": "/services/website-audit/",
+      "reason": "Legacy service slug"
+    },
+    {
       "path": "/services/website-audit/",
       "status": "INDEX",
       "sitemap": true,
       "reason": "Active core service page"
+    },
+    {
+      "path": "/services/website-maintenance-and-support/",
+      "status": "REDIRECT",
+      "sitemap": false,
+      "destination": "/services/website-maintenance/",
+      "reason": "Legacy service slug"
     },
     {
       "path": "/services/website-maintenance/",
@@ -265,184 +1173,17 @@
       "reason": "Active core service page"
     },
     {
-      "path": "/get-started/",
-      "status": "NOINDEX",
+      "path": "/sitemap.xml",
+      "status": "REDIRECT",
       "sitemap": false,
-      "reason": "Lead-intake utility page"
+      "destination": "/sitemap-index.xml",
+      "reason": "Legacy sitemap alias"
     },
     {
-      "path": "/hosting-offer/",
-      "status": "NOINDEX",
-      "sitemap": false,
-      "reason": "Promotional offer page"
-    },
-    {
-      "path": "/launch/",
-      "status": "NOINDEX",
-      "sitemap": false,
-      "reason": "Campaign landing page"
-    },
-    {
-      "path": "/website-build/",
-      "status": "NOINDEX",
-      "sitemap": false,
-      "reason": "Campaign landing page overlapping core service intent"
-    },
-    {
-      "path": "/mockup/",
-      "status": "NOINDEX",
-      "sitemap": false,
-      "reason": "Private mockup utility"
-    },
-    {
-      "path": "/internal/text-to-speech/",
-      "status": "NOINDEX",
-      "sitemap": false,
-      "reason": "Internal voice generation utility"
-    },
-    {
-      "path": "/admin/waitlist/",
-      "status": "NOINDEX",
-      "sitemap": false,
-      "reason": "Internal automation waitlist administration"
-    },
-    {
-      "path": "/admin/content-automation/",
-      "status": "NOINDEX",
-      "sitemap": false,
-      "reason": "Internal blog-to-social automation administration"
-    },
-    {
-      "path": "/auth/google/callback/",
-      "status": "NOINDEX",
-      "sitemap": false,
-      "reason": "Supabase Google OAuth callback page for admin and waitlist access"
-    },
-    {
-      "path": "/admin/whatsapp/",
-      "status": "NOINDEX",
-      "sitemap": false,
-      "reason": "Internal WhatsApp console overview"
-    },
-    {
-      "path": "/admin/whatsapp/conversations/",
-      "status": "NOINDEX",
-      "sitemap": false,
-      "reason": "Internal WhatsApp lead inbox"
-    },
-    {
-      "path": "/admin/whatsapp/contacts/",
-      "status": "NOINDEX",
-      "sitemap": false,
-      "reason": "Internal WhatsApp contact directory"
-    },
-    {
-      "path": "/admin/whatsapp/campaigns/",
-      "status": "NOINDEX",
-      "sitemap": false,
-      "reason": "Internal WhatsApp opt-in campaign manager"
-    },
-    {
-      "path": "/admin/whatsapp/automations/",
-      "status": "NOINDEX",
-      "sitemap": false,
-      "reason": "Internal WhatsApp automation workflow builder"
-    },
-    {
-      "path": "/admin/whatsapp/quick-replies/",
-      "status": "NOINDEX",
-      "sitemap": false,
-      "reason": "Internal WhatsApp saved reply snippets"
-    },
-    {
-      "path": "/admin/whatsapp/templates/",
-      "status": "NOINDEX",
-      "sitemap": false,
-      "reason": "Internal WhatsApp message template list"
-    },
-    {
-      "path": "/admin/whatsapp/phone-numbers/",
-      "status": "NOINDEX",
-      "sitemap": false,
-      "reason": "Internal WhatsApp sender status and limits"
-    },
-    {
-      "path": "/admin/whatsapp/analytics/",
-      "status": "NOINDEX",
-      "sitemap": false,
-      "reason": "Internal WhatsApp volume, delivery, and response-time reporting"
-    },
-    {
-      "path": "/admin/whatsapp/settings/",
-      "status": "NOINDEX",
-      "sitemap": false,
-      "reason": "Internal WhatsApp integration configuration and readiness reporting"
-    },
-    {
-      "path": "/connect/tiktok/",
-      "status": "NOINDEX",
-      "sitemap": false,
-      "reason": "Internal TikTok authorization utility page"
-    },
-    {
-      "path": "/connect/tiktok/callback/",
-      "status": "NOINDEX",
-      "sitemap": false,
-      "reason": "TikTok OAuth callback route"
-    },
-    {
-      "path": "/scheduler/",
+      "path": "/terms/",
       "status": "INDEX",
       "sitemap": true,
-      "reason": "Public TikTok scheduler product and rollout page"
-    },
-    {
-      "path": "/scheduler/admin/",
-      "status": "NOINDEX",
-      "sitemap": false,
-      "reason": "Owner-only TikTok scheduler administration"
-    },
-    {
-      "path": "/scheduler/dashboard/",
-      "status": "NOINDEX",
-      "sitemap": false,
-      "reason": "Authenticated TikTok scheduler dashboard"
-    },
-    {
-      "path": "/scheduler/new/",
-      "status": "NOINDEX",
-      "sitemap": false,
-      "reason": "Authenticated TikTok post composer"
-    },
-    {
-      "path": "/scheduler/posts/[id]/",
-      "status": "NOINDEX",
-      "sitemap": false,
-      "reason": "Authenticated TikTok post workflow"
-    },
-    {
-      "path": "/scheduler/settings/",
-      "status": "NOINDEX",
-      "sitemap": false,
-      "reason": "Authenticated TikTok scheduler settings"
-    },
-    {
-      "path": "/scheduler/sign-in/",
-      "status": "NOINDEX",
-      "sitemap": false,
-      "reason": "TikTok scheduler sign-in"
-    },
-    {
-      "path": "/scheduler/terms/",
-      "status": "INDEX",
-      "sitemap": true,
-      "reason": "Public TikTok scheduler terms and privacy summary"
-    },
-    {
-      "path": "/contact/thanks/",
-      "status": "NOINDEX",
-      "sitemap": false,
-      "reason": "Form completion utility"
+      "reason": "Public terms of service"
     },
     {
       "path": "/thank-you/",
@@ -457,105 +1198,88 @@
       "reason": "Dynamic form completion utility"
     },
     {
-      "path": "/api/ai",
+      "path": "/tiktok-media/[...path]",
       "status": "NOINDEX",
       "sitemap": false,
-      "reason": "API endpoint"
+      "reason": "Private application, account utility, media proxy, or API route"
     },
     {
-      "path": "/api/contact",
-      "status": "NOINDEX",
-      "sitemap": false,
-      "reason": "API endpoint"
+      "path": "/tools/",
+      "status": "INDEX",
+      "sitemap": true,
+      "reason": "Public tools hub with live and planned utilities"
     },
     {
-      "path": "/api/forms/notify",
+      "path": "/tools/[slug]/",
       "status": "NOINDEX",
       "sitemap": false,
-      "reason": "API endpoint"
+      "reason": "Dynamic tools route template"
     },
     {
-      "path": "/api/get-started",
-      "status": "NOINDEX",
-      "sitemap": false,
-      "reason": "API endpoint"
+      "path": "/tools/adsense-readiness-checker/",
+      "status": "INDEX",
+      "sitemap": true,
+      "reason": "Public AdSense readiness utility"
     },
     {
-      "path": "/api/internal/session",
-      "status": "NOINDEX",
-      "sitemap": false,
-      "reason": "Internal utility session endpoint"
+      "path": "/tools/homepage-checklist/",
+      "status": "INDEX",
+      "sitemap": true,
+      "reason": "Public homepage quality utility"
     },
     {
-      "path": "/api/internal/text-to-speech",
-      "status": "NOINDEX",
-      "sitemap": false,
-      "reason": "Internal text-to-speech API endpoint"
+      "path": "/tools/meta-description-generator/",
+      "status": "INDEX",
+      "sitemap": true,
+      "reason": "Public SEO writing utility"
     },
     {
-      "path": "/api/tiktok/authorize",
-      "status": "NOINDEX",
-      "sitemap": false,
-      "reason": "TikTok OAuth start endpoint"
-    },
-    {
-      "path": "/api/tiktok/slides/[slug]",
-      "status": "NOINDEX",
-      "sitemap": false,
-      "reason": "Internal TikTok draft slide image endpoint"
-    },
-    {
-      "path": "/api/tools/page-audit",
-      "status": "NOINDEX",
-      "sitemap": false,
-      "reason": "Public tools API endpoint"
-    },
-    {
-      "path": "/api/tools/sitemap-validator",
-      "status": "NOINDEX",
-      "sitemap": false,
+      "path": "/tools/sitemap-validator/",
+      "status": "INDEX",
+      "sitemap": true,
       "reason": "Public sitemap validation utility"
     },
     {
-      "path": "/api/health/db",
+      "path": "/tools/website-cost-calculator/",
+      "status": "INDEX",
+      "sitemap": true,
+      "reason": "Public website planning utility"
+    },
+    {
+      "path": "/tools/website-launch-checklist/",
+      "status": "INDEX",
+      "sitemap": true,
+      "reason": "Public launch QA utility"
+    },
+    {
+      "path": "/victorious/",
+      "status": "INDEX",
+      "sitemap": true,
+      "reason": "Founder profile and first-hand experience page"
+    },
+    {
+      "path": "/web-design-for-real-estate-lagos/",
+      "status": "INDEX",
+      "sitemap": true,
+      "reason": "Real-estate industry service page"
+    },
+    {
+      "path": "/website-build/",
       "status": "NOINDEX",
       "sitemap": false,
-      "reason": "Health-check endpoint"
+      "reason": "Campaign landing page overlapping core service intent"
     },
     {
-      "path": "/home",
-      "status": "REDIRECT",
-      "sitemap": false,
-      "destination": "/",
-      "reason": "Legacy homepage alias"
+      "path": "/website-design-lagos/",
+      "status": "INDEX",
+      "sitemap": true,
+      "reason": "Lagos local-intent service page"
     },
     {
-      "path": "/sitemap.xml",
-      "status": "REDIRECT",
-      "sitemap": false,
-      "destination": "/sitemap-index.xml",
-      "reason": "Legacy sitemap alias"
-    },
-    {
-      "path": "/domain-offer/",
-      "status": "REDIRECT",
-      "sitemap": false,
-      "destination": "/hosting-offer/",
-      "reason": "Legacy offer alias"
-    },
-    {
-      "path": "/google-business-profile-optimization-lagos/",
-      "status": "REDIRECT",
-      "sitemap": false,
-      "destination": "/services/google-my-business-setup-optimisation/",
-      "reason": "Legacy service alias"
-    },
-    {
-      "path": "/landing-page-design-lagos/",
-      "status": "REDIRECT",
-      "sitemap": false,
-      "destination": "/services/landing-page-design/",
-      "reason": "Legacy service alias"
+      "path": "/website-design-united-kingdom/",
+      "status": "INDEX",
+      "sitemap": true,
+      "reason": "UK remote-service page supported by client work"
     },
     {
       "path": "/website-redesign-lagos/",
@@ -572,32 +1296,10 @@
       "reason": "Legacy service alias"
     },
     {
-      "path": "/services/website-maintenance-and-support/",
-      "status": "REDIRECT",
+      "path": "/whatsapp/set-password/",
+      "status": "NOINDEX",
       "sitemap": false,
-      "destination": "/services/website-maintenance/",
-      "reason": "Legacy service slug"
-    },
-    {
-      "path": "/services/speed-and-performance-optimization/",
-      "status": "REDIRECT",
-      "sitemap": false,
-      "destination": "/services/performance-optimisation/",
-      "reason": "Legacy service slug"
-    },
-    {
-      "path": "/services/website-audit-and-consultation/",
-      "status": "REDIRECT",
-      "sitemap": false,
-      "destination": "/services/website-audit/",
-      "reason": "Legacy service slug"
-    },
-    {
-      "path": "/blog/07-launch-week-checklist-and-first-7-days-image-prompts/",
-      "status": "REDIRECT",
-      "sitemap": false,
-      "destination": "/blog/07-launch-week-checklist-and-first-7-days/",
-      "reason": "Obsolete internal image-prompt URL"
+      "reason": "Private application, account utility, media proxy, or API route"
     }
   ],
   "articles": [
