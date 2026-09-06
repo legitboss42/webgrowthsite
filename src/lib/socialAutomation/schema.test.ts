@@ -5,7 +5,7 @@ import path from "node:path";
 
 const migrationPath = path.join(
   process.cwd(),
-  "supabase/migrations/20260906011750_blog_social_automation.sql"
+  "supabase/migrations/20260906105535_blog_social_automation.sql"
 );
 
 function migrationSql() {
