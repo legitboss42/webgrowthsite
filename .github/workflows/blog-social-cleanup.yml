@@ -1,0 +1,29 @@
+name: Blog social asset cleanup
+
+on:
+  schedule:
+    - cron: "17 4 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: blog-social-cleanup
+  cancel-in-progress: false
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Run signed cleanup
+        env:
+          SOCIAL_AUTOMATION_BASE_URL: https://webgrowth.info
+          SOCIAL_AUTOMATION_WEBHOOK_SECRET: ${{ secrets.SOCIAL_AUTOMATION_WEBHOOK_SECRET }}
+          SOCIAL_AUTOMATION_CLEANUP_LIMIT: "100"
+        run: node scripts/run-social-cleanup.mjs
