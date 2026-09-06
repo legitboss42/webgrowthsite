@@ -10,12 +10,12 @@ function jsonResponse(body: unknown, status = 200) {
   });
 }
 
-test("exchanges a Meta OAuth code for a user token", async () => {
-  const calls: string[] = [];
+test("exchanges a Meta OAuth code for a user token without putting secrets in the URL", async () => {
+  const calls: Array<{ url: string; init?: RequestInit }> = [];
   const client = createMetaClient({
     graphVersion: "v99.0",
-    fetcher: async (url) => {
-      calls.push(String(url));
+    fetcher: async (url, init) => {
+      calls.push({ url: String(url), init });
       return jsonResponse({ access_token: "user-token", token_type: "bearer", expires_in: 3600 });
     },
   });
@@ -28,9 +28,13 @@ test("exchanges a Meta OAuth code for a user token", async () => {
   });
   assert.equal(token.userAccessToken, "user-token");
   assert.equal(token.expiresAt, "2026-09-06T02:00:00.000Z");
-  assert.match(calls[0], /oauth\/access_token/);
-  assert.match(calls[0], /client_id=app-1/);
-  assert.match(calls[0], /code=auth-code/);
+  assert.match(calls[0].url, /oauth\/access_token/);
+  assert.equal(calls[0].init?.method, "POST");
+  assert.doesNotMatch(calls[0].url, /app-secret|auth-code/);
+  const body = String(calls[0].init?.body || "");
+  assert.match(body, /client_id=app-1/);
+  assert.match(body, /client_secret=app-secret/);
+  assert.match(body, /code=auth-code/);
 });
 
 test("exchanges the short-lived user token for a long-lived token without putting secrets in the URL", async () => {
