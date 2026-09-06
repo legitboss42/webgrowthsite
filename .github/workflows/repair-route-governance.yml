@@ -20,7 +20,7 @@ jobs:
         with:
           node-version: 24
           cache: npm
-      - name: Classify private application and social API routes
+      - name: Classify every missing private physical route
         shell: python
         run: |
           import json
@@ -31,38 +31,55 @@ jobs:
           routes = data['routes']
           known = {item.get('path') for item in routes}
           discovered = []
+          public_missing = []
+          private_prefixes = ('/api/', '/admin/', '/internal/', '/auth/', '/connect/')
 
-          def add(route, reason):
-              if route not in known:
+          def app_file_to_route(file):
+              relative = file.relative_to(Path('src/app')).as_posix()
+              if relative in ('page.tsx', 'page.ts'):
+                  return '/'
+              is_page = relative.endswith('/page.tsx') or relative.endswith('/page.ts')
+              for leaf in ('/page.tsx', '/page.ts', '/route.tsx', '/route.ts'):
+                  if relative.endswith(leaf):
+                      relative = relative[:-len(leaf)]
+                      break
+              route = '/' + relative.strip('/')
+              return route + '/' if is_page else route
+
+          files = []
+          for pattern in ('page.tsx', 'page.ts', 'route.tsx', 'route.ts'):
+              files.extend(Path('src/app').rglob(pattern))
+
+          for file in sorted(set(files)):
+              posix = file.as_posix()
+              if '/sitemap-' in posix or posix.endswith('/llms.txt/route.ts'):
+                  continue
+              route = app_file_to_route(file)
+              if route == '/blog/[slug]/':
+                  continue
+              alternate = route[:-1] if route.endswith('/') else route + '/'
+              if route in known or alternate in known:
+                  continue
+              if route.startswith(private_prefixes):
                   discovered.append({
                       'path': route,
                       'status': 'NOINDEX',
                       'sitemap': False,
-                      'reason': reason,
+                      'reason': 'Private application or API route',
                   })
                   known.add(route)
+              else:
+                  public_missing.append(route)
 
-          for page in sorted(Path('src/app/admin/whatsapp').rglob('page.tsx')):
-              relative = page.parent.relative_to(Path('src/app'))
-              add('/' + '/'.join(relative.parts) + '/', 'Internal WhatsApp application route')
-
-          api_roots = [
-              Path('src/app/api/admin/content-automation'),
-              Path('src/app/api/internal/social-automation'),
-          ]
-          for root in api_roots:
-              if not root.exists():
-                  continue
-              for route_file in sorted(root.rglob('route.ts')):
-                  relative = route_file.parent.relative_to(Path('src/app'))
-                  add('/' + '/'.join(relative.parts), 'Internal blog-to-social automation API endpoint')
+          if public_missing:
+              raise SystemExit('Unclassified public routes require review: ' + ', '.join(public_missing))
 
           if discovered:
-              insert_at = next((i for i, item in enumerate(routes) if item.get('path') == '/connect/tiktok/'), len(routes))
-              routes[insert_at:insert_at] = discovered
-              print('Added governance for:', ', '.join(item['path'] for item in discovered))
+              routes.extend(discovered)
+              routes.sort(key=lambda item: item.get('path', ''))
+              print('Added private governance for:', ', '.join(item['path'] for item in discovered))
           else:
-              print('All targeted private routes are already governed')
+              print('All physical routes are already governed')
 
           governance_path.write_text(json.dumps(data, indent=2) + '\n')
       - name: Verify SEO governance
@@ -80,5 +97,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add src/lib/route-governance.json
-          git commit -m "fix: govern private WhatsApp and social automation routes"
+          git commit -m "fix: complete private route governance"
           git push origin HEAD:feature/blog-social-automation
