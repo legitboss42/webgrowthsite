@@ -93,6 +93,23 @@ function stringArray(value: unknown) {
   return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : [];
 }
 
+function parseTokenEnvelope(body: Record<string, unknown>, nowMs: number): MetaOAuthToken {
+  const userAccessToken = typeof body.access_token === "string" ? body.access_token : "";
+  if (!userAccessToken) {
+    throw new MetaApiError("Meta OAuth exchange did not return an access token.", {
+      retryable: false,
+      status: 502,
+    });
+  }
+  const expiresIn = Number(body.expires_in);
+  return {
+    userAccessToken,
+    ...(Number.isFinite(expiresIn) && expiresIn > 0
+      ? { expiresAt: new Date(nowMs + expiresIn * 1000).toISOString() }
+      : {}),
+  };
+}
+
 export function createMetaClient({ graphVersion, fetcher = fetch }: MetaClientOptions) {
   const version = cleanVersion(graphVersion);
   const graphRoot = `https://graph.facebook.com/${version}`;
@@ -112,21 +129,27 @@ export function createMetaClient({ graphVersion, fetcher = fetch }: MetaClientOp
         redirect_uri: input.redirectUri,
       });
       const body = await requestJson(fetcher, url);
-      const userAccessToken = typeof body.access_token === "string" ? body.access_token : "";
-      if (!userAccessToken) {
-        throw new MetaApiError("Meta OAuth exchange did not return an access token.", {
-          retryable: false,
-          status: 502,
-        });
-      }
-      const expiresIn = Number(body.expires_in);
-      const nowMs = input.nowMs ?? Date.now();
-      return {
-        userAccessToken,
-        ...(Number.isFinite(expiresIn) && expiresIn > 0
-          ? { expiresAt: new Date(nowMs + expiresIn * 1000).toISOString() }
-          : {}),
-      };
+      return parseTokenEnvelope(body, input.nowMs ?? Date.now());
+    },
+
+    async exchangeLongLivedUserToken(input: {
+      appId: string;
+      appSecret: string;
+      shortLivedUserAccessToken: string;
+      nowMs?: number;
+    }): Promise<MetaOAuthToken> {
+      const form = new URLSearchParams({
+        grant_type: "fb_exchange_token",
+        client_id: input.appId,
+        client_secret: input.appSecret,
+        fb_exchange_token: input.shortLivedUserAccessToken,
+      });
+      const body = await requestJson(fetcher, `${graphRoot}/oauth/access_token`, {
+        method: "POST",
+        headers: { "content-type": "application/x-www-form-urlencoded" },
+        body: form.toString(),
+      });
+      return parseTokenEnvelope(body, input.nowMs ?? Date.now());
     },
 
     async resolveManagedPage(input: {
