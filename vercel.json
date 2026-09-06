@@ -2,7 +2,8 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "git": {
     "deploymentEnabled": {
-      "stage12-visual-redesign-v2": false
+      "stage12-visual-redesign-v2": false,
+      "feature/blog-social-automation": false
     }
   }
 }
