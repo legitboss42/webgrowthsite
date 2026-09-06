@@ -20,7 +20,7 @@ jobs:
         with:
           node-version: 24
           cache: npm
-      - name: Classify every physical WhatsApp admin page
+      - name: Classify private application and social API routes
         shell: python
         run: |
           import json
@@ -30,28 +30,39 @@ jobs:
           data = json.loads(governance_path.read_text())
           routes = data['routes']
           known = {item.get('path') for item in routes}
-
           discovered = []
-          root = Path('src/app/admin/whatsapp')
-          for page in sorted(root.rglob('page.tsx')):
-              relative = page.parent.relative_to(Path('src/app'))
-              parts = list(relative.parts)
-              route = '/' + '/'.join(parts) + '/'
+
+          def add(route, reason):
               if route not in known:
                   discovered.append({
                       'path': route,
                       'status': 'NOINDEX',
                       'sitemap': False,
-                      'reason': 'Internal WhatsApp application route'
+                      'reason': reason,
                   })
                   known.add(route)
+
+          for page in sorted(Path('src/app/admin/whatsapp').rglob('page.tsx')):
+              relative = page.parent.relative_to(Path('src/app'))
+              add('/' + '/'.join(relative.parts) + '/', 'Internal WhatsApp application route')
+
+          api_roots = [
+              Path('src/app/api/admin/content-automation'),
+              Path('src/app/api/internal/social-automation'),
+          ]
+          for root in api_roots:
+              if not root.exists():
+                  continue
+              for route_file in sorted(root.rglob('route.ts')):
+                  relative = route_file.parent.relative_to(Path('src/app'))
+                  add('/' + '/'.join(relative.parts), 'Internal blog-to-social automation API endpoint')
 
           if discovered:
               insert_at = next((i for i, item in enumerate(routes) if item.get('path') == '/connect/tiktok/'), len(routes))
               routes[insert_at:insert_at] = discovered
-              print('Added private governance for:', ', '.join(item['path'] for item in discovered))
+              print('Added governance for:', ', '.join(item['path'] for item in discovered))
           else:
-              print('All WhatsApp admin pages are already governed')
+              print('All targeted private routes are already governed')
 
           governance_path.write_text(json.dumps(data, indent=2) + '\n')
       - name: Verify SEO governance
@@ -69,5 +80,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add src/lib/route-governance.json
-          git commit -m "fix: govern private WhatsApp application routes"
+          git commit -m "fix: govern private WhatsApp and social automation routes"
           git push origin HEAD:feature/blog-social-automation
