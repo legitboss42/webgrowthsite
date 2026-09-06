@@ -1,4 +1,3 @@
-import { createSchedulerSupabaseClient } from "@/lib/scheduler/supabase";
 import { decryptMetaTokens, type MetaTokenPayload } from "./crypto";
 import type { SocialPlatform, SocialRenderProfile } from "./types";
 
@@ -33,7 +32,7 @@ export type SocialConnectionSummary = {
 
 type DbResult<T> = Promise<{ data: T | null; error: { message?: string; code?: string } | null }>;
 
-type SocialDatabaseClient = {
+export type SocialDatabaseClient = {
   from(table: string): any;
 };
 
@@ -303,8 +302,4 @@ export function createSocialAutomationStoreFromClient(client: SocialDatabaseClie
       if (result.error) databaseError("Unable to write social automation audit event", result.error);
     },
   };
-}
-
-export function createSocialAutomationStore() {
-  return createSocialAutomationStoreFromClient(createSchedulerSupabaseClient());
 }
