@@ -10,6 +10,77 @@ function jsonResponse(body: unknown, status = 200) {
   });
 }
 
+test("exchanges a Meta OAuth code for a user token", async () => {
+  const calls: string[] = [];
+  const client = createMetaClient({
+    graphVersion: "v99.0",
+    fetcher: async (url) => {
+      calls.push(String(url));
+      return jsonResponse({ access_token: "user-token", token_type: "bearer", expires_in: 3600 });
+    },
+  });
+  const token = await client.exchangeCode({
+    appId: "app-1",
+    appSecret: "app-secret",
+    code: "auth-code",
+    redirectUri: "https://webgrowth.info/api/admin/content-automation/meta/callback/",
+    nowMs: Date.parse("2026-09-06T01:00:00.000Z"),
+  });
+  assert.equal(token.userAccessToken, "user-token");
+  assert.equal(token.expiresAt, "2026-09-06T02:00:00.000Z");
+  assert.match(calls[0], /oauth\/access_token/);
+  assert.match(calls[0], /client_id=app-1/);
+  assert.match(calls[0], /code=auth-code/);
+});
+
+test("resolves the only Facebook Page linked to an Instagram professional account", async () => {
+  const calls: string[] = [];
+  const client = createMetaClient({
+    graphVersion: "v99.0",
+    fetcher: async (url) => {
+      calls.push(String(url));
+      return jsonResponse({
+        data: [
+          { id: "page-without-ig", name: "Other", access_token: "other-token", tasks: ["CREATE_CONTENT"] },
+          {
+            id: "page-1",
+            name: "Web Growth",
+            access_token: "page-token",
+            tasks: ["CREATE_CONTENT", "MANAGE"],
+            instagram_business_account: { id: "ig-1", username: "web.growth", name: "Web Growth" },
+          },
+        ],
+      });
+    },
+  });
+  const connection = await client.resolveManagedPage({ userAccessToken: "user-token" });
+  assert.equal(connection.facebookPageId, "page-1");
+  assert.equal(connection.pageAccessToken, "page-token");
+  assert.equal(connection.instagramAccountId, "ig-1");
+  assert.equal(connection.instagramAccountName, "web.growth");
+  assert.match(calls[0], /\/me\/accounts/);
+  assert.match(calls[0], /instagram_business_account/);
+});
+
+test("requires an explicit Page choice when multiple Instagram-linked Pages exist", async () => {
+  const client = createMetaClient({
+    graphVersion: "v99.0",
+    fetcher: async () =>
+      jsonResponse({
+        data: [
+          { id: "page-1", name: "One", access_token: "token-1", instagram_business_account: { id: "ig-1" } },
+          { id: "page-2", name: "Two", access_token: "token-2", instagram_business_account: { id: "ig-2" } },
+        ],
+      }),
+  });
+  await assert.rejects(
+    () => client.resolveManagedPage({ userAccessToken: "user-token" }),
+    /More than one Instagram-linked Facebook Page/
+  );
+  const selected = await client.resolveManagedPage({ userAccessToken: "user-token", preferredPageId: "page-2" });
+  assert.equal(selected.facebookPageId, "page-2");
+});
+
 test("creates and publishes an Instagram Reel through a media container", async () => {
   const calls: Array<{ url: string; init?: RequestInit }> = [];
   const replies = [
