@@ -1,5 +1,3 @@
-import "server-only";
-
 import { createSchedulerSupabaseClient } from "@/lib/scheduler/supabase";
 import { decryptMetaTokens, type MetaTokenPayload } from "./crypto";
 import type { SocialPlatform, SocialRenderProfile } from "./types";
