@@ -102,6 +102,26 @@ test("upsertPublication keeps one row per job and platform", async () => {
   assert.equal(rows[0].status, "PROCESSING");
 });
 
+test("upsertPublication persists opaque provider state for retry-safe staged APIs", async () => {
+  const client = fakeClient();
+  const store = createSocialAutomationStoreFromClient(client as any);
+
+  await store.upsertPublication({
+    jobId: "job-1",
+    platform: "FACEBOOK",
+    caption: "Caption",
+    status: "PROCESSING",
+    providerState: { videoId: "video-1", uploadUrl: "https://rupload.facebook.com/upload/video-1", uploaded: true },
+  });
+
+  const row = client.dump("social_publications")[0];
+  assert.deepEqual(row.provider_state, {
+    videoId: "video-1",
+    uploadUrl: "https://rupload.facebook.com/upload/video-1",
+    uploaded: true,
+  });
+});
+
 test("listAssets returns only assets belonging to the requested job", async () => {
   const client = fakeClient({
     social_media_assets: [
