@@ -32,7 +32,10 @@ jobs:
           known = {item.get('path') for item in routes}
           discovered = []
           public_missing = []
-          private_prefixes = ('/api/', '/admin/', '/internal/', '/auth/', '/connect/')
+          private_prefixes = (
+              '/api/', '/admin/', '/internal/', '/auth/', '/connect/',
+              '/tiktok-media/', '/whatsapp/set-password/'
+          )
 
           def app_file_to_route(file):
               relative = file.relative_to(Path('src/app')).as_posix()
@@ -65,7 +68,7 @@ jobs:
                       'path': route,
                       'status': 'NOINDEX',
                       'sitemap': False,
-                      'reason': 'Private application or API route',
+                      'reason': 'Private application, account utility, media proxy, or API route',
                   })
                   known.add(route)
               else:
