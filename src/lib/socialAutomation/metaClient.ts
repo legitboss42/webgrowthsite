@@ -14,6 +14,20 @@ type ErrorEnvelope = {
   };
 };
 
+export type MetaOAuthToken = {
+  userAccessToken: string;
+  expiresAt?: string;
+};
+
+export type MetaManagedPage = {
+  facebookPageId: string;
+  facebookPageName: string;
+  pageAccessToken: string;
+  instagramAccountId: string;
+  instagramAccountName: string | null;
+  tasks: string[];
+};
+
 export class MetaApiError extends Error {
   readonly retryable: boolean;
   readonly status: number;
@@ -70,11 +84,111 @@ function appendQuery(base: string, values: Record<string, string | boolean | und
   return url.toString();
 }
 
+function stringArray(value: unknown) {
+  return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : [];
+}
+
 export function createMetaClient({ graphVersion, fetcher = fetch }: MetaClientOptions) {
   const version = cleanVersion(graphVersion);
   const graphRoot = `https://graph.facebook.com/${version}`;
 
   return {
+    async exchangeCode(input: {
+      appId: string;
+      appSecret: string;
+      code: string;
+      redirectUri: string;
+      nowMs?: number;
+    }): Promise<MetaOAuthToken> {
+      const url = appendQuery(`${graphRoot}/oauth/access_token`, {
+        client_id: input.appId,
+        client_secret: input.appSecret,
+        code: input.code,
+        redirect_uri: input.redirectUri,
+      });
+      const body = await requestJson(fetcher, url);
+      const userAccessToken = typeof body.access_token === "string" ? body.access_token : "";
+      if (!userAccessToken) {
+        throw new MetaApiError("Meta OAuth exchange did not return an access token.", {
+          retryable: false,
+          status: 502,
+        });
+      }
+      const expiresIn = Number(body.expires_in);
+      const nowMs = input.nowMs ?? Date.now();
+      return {
+        userAccessToken,
+        ...(Number.isFinite(expiresIn) && expiresIn > 0
+          ? { expiresAt: new Date(nowMs + expiresIn * 1000).toISOString() }
+          : {}),
+      };
+    },
+
+    async resolveManagedPage(input: {
+      userAccessToken: string;
+      preferredPageId?: string;
+    }): Promise<MetaManagedPage> {
+      const url = appendQuery(`${graphRoot}/me/accounts`, {
+        fields: "id,name,access_token,tasks,instagram_business_account{id,username,name}",
+      });
+      const body = await requestJson(fetcher, url, { headers: authHeaders(input.userAccessToken) });
+      const data = Array.isArray(body.data) ? body.data : [];
+      const candidates = data
+        .filter((item): item is Record<string, unknown> => Boolean(item && typeof item === "object"))
+        .map((item) => {
+          const instagram =
+            item.instagram_business_account && typeof item.instagram_business_account === "object"
+              ? (item.instagram_business_account as Record<string, unknown>)
+              : null;
+          return {
+            facebookPageId: typeof item.id === "string" ? item.id : "",
+            facebookPageName: typeof item.name === "string" ? item.name : "",
+            pageAccessToken: typeof item.access_token === "string" ? item.access_token : "",
+            instagramAccountId: typeof instagram?.id === "string" ? instagram.id : "",
+            instagramAccountName:
+              typeof instagram?.username === "string"
+                ? instagram.username
+                : typeof instagram?.name === "string"
+                  ? instagram.name
+                  : null,
+            tasks: stringArray(item.tasks),
+          } satisfies MetaManagedPage;
+        })
+        .filter(
+          (item) =>
+            Boolean(item.facebookPageId) &&
+            Boolean(item.pageAccessToken) &&
+            Boolean(item.instagramAccountId)
+        );
+
+      if (candidates.length === 0) {
+        throw new MetaApiError("No Instagram-linked Facebook Page is available for this Meta account.", {
+          retryable: false,
+          status: 422,
+        });
+      }
+
+      if (input.preferredPageId) {
+        const selected = candidates.find((item) => item.facebookPageId === input.preferredPageId);
+        if (!selected) {
+          throw new MetaApiError("The selected Instagram-linked Facebook Page is unavailable.", {
+            retryable: false,
+            status: 422,
+          });
+        }
+        return selected;
+      }
+
+      if (candidates.length > 1) {
+        throw new MetaApiError("More than one Instagram-linked Facebook Page is available. Choose a Page explicitly.", {
+          retryable: false,
+          status: 409,
+        });
+      }
+
+      return candidates[0];
+    },
+
     async createInstagramReel(input: {
       accessToken: string;
       igUserId: string;
