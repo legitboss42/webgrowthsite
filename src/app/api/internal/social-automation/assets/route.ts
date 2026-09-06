@@ -17,6 +17,15 @@ function actionOf(body: unknown) {
     : "";
 }
 
+function publicStorageConfig() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() || process.env.SUPABASE_URL?.trim() || "";
+  const publishableKey =
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim() ||
+    process.env.SUPABASE_ANON_KEY?.trim() ||
+    "";
+  return supabaseUrl && publishableKey ? { supabaseUrl, publishableKey } : null;
+}
+
 export async function POST(request: Request) {
   const signed = await readSignedJsonRequest(request);
   if (!signed.ok) {
@@ -35,6 +44,10 @@ export async function POST(request: Request) {
     if (!job) {
       return NextResponse.json({ ok: false, code: "JOB_NOT_FOUND" }, { status: 404 });
     }
+    const publicConfig = publicStorageConfig();
+    if (!publicConfig) {
+      return NextResponse.json({ ok: false, code: "PUBLIC_STORAGE_CONFIG_MISSING" }, { status: 503 });
+    }
 
     const supabase = createSchedulerSupabaseClient();
     const { data, error } = await supabase.storage
@@ -51,6 +64,7 @@ export async function POST(request: Request) {
       filename: input.filename,
       signedUrl: data.signedUrl,
       token: data.token,
+      ...publicConfig,
     });
   }
 
