@@ -18,6 +18,12 @@ test("Instagram reuses an existing processing container instead of creating anot
   );
 });
 
+test("automatic publication never retries a needs-attention platform", () => {
+  assert.equal(planInstagramAction({ enabled: true, status: "NEEDS_ATTENTION" }), "DONE");
+  assert.equal(planFacebookAction({ enabled: true, status: "NEEDS_ATTENTION" }), "DONE");
+  assert.equal(planTikTokAction({ enabled: true, status: "NEEDS_ATTENTION" }), "DONE");
+});
+
 test("disabled Meta platforms skip and published Facebook work is idempotent", () => {
   assert.equal(planFacebookAction({ enabled: false, status: "PENDING" }), "SKIP");
   assert.equal(planFacebookAction({ enabled: true, status: "PUBLISHED" }), "DONE");
