@@ -122,13 +122,17 @@ export function createMetaClient({ graphVersion, fetcher = fetch }: MetaClientOp
       redirectUri: string;
       nowMs?: number;
     }): Promise<MetaOAuthToken> {
-      const url = appendQuery(`${graphRoot}/oauth/access_token`, {
+      const form = new URLSearchParams({
         client_id: input.appId,
         client_secret: input.appSecret,
         code: input.code,
         redirect_uri: input.redirectUri,
       });
-      const body = await requestJson(fetcher, url);
+      const body = await requestJson(fetcher, `${graphRoot}/oauth/access_token`, {
+        method: "POST",
+        headers: { "content-type": "application/x-www-form-urlencoded" },
+        body: form.toString(),
+      });
       return parseTokenEnvelope(body, input.nowMs ?? Date.now());
     },
 
