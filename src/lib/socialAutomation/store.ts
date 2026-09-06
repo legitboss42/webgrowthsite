@@ -115,6 +115,7 @@ export function createSocialAutomationStoreFromClient(client: SocialDatabaseClie
       mediaId?: string | null;
       externalPublicationId?: string | null;
       externalUrl?: string | null;
+      providerState?: Record<string, unknown> | null;
       lastErrorCode?: string | null;
       lastErrorMessage?: string | null;
       nextRetryAt?: string | null;
@@ -129,6 +130,7 @@ export function createSocialAutomationStoreFromClient(client: SocialDatabaseClie
         media_id: input.mediaId ?? null,
         external_publication_id: input.externalPublicationId ?? null,
         external_url: input.externalUrl ?? null,
+        provider_state: input.providerState ?? {},
         last_error_code: input.lastErrorCode ?? null,
         last_error_message: input.lastErrorMessage ?? null,
         next_retry_at: input.nextRetryAt ?? null,
