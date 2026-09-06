@@ -5,6 +5,7 @@ import {
   WebGrowthArticleVideo,
   type WebGrowthArticleVideoProps,
 } from "./components/WebGrowthArticleVideo";
+import { TikTokArticleVideo } from "./components/TikTokArticleVideo";
 
 const VIDEO_FPS = 30;
 const VIDEO_WIDTH = 1080;
@@ -36,6 +37,12 @@ const defaultProps: WebGrowthArticleVideoProps = {
   durationInFrames: Math.ceil(4.4 * VIDEO_FPS),
   scenes: defaultScenes,
   subtitles: [],
+};
+
+const tiktokDefaultProps: WebGrowthArticleVideoProps = {
+  ...defaultProps,
+  caption: "",
+  hashtags: [],
 };
 
 const calculateMetadata: CalculateMetadataFunction<WebGrowthArticleVideoProps> = async ({
@@ -131,6 +138,28 @@ export function RemotionRoot() {
           durationInFrames: Math.ceil(PREVIEW_DURATION_SECONDS * VIDEO_FPS),
         }}
         calculateMetadata={calculatePreviewMetadata}
+      />
+
+      <Composition
+        id="WebGrowthSocialMeta"
+        component={WebGrowthArticleVideo}
+        durationInFrames={defaultProps.durationInFrames!}
+        fps={VIDEO_FPS}
+        width={VIDEO_WIDTH}
+        height={VIDEO_HEIGHT}
+        defaultProps={defaultProps}
+        calculateMetadata={calculateMetadata}
+      />
+
+      <Composition
+        id="WebGrowthSocialTikTok"
+        component={TikTokArticleVideo}
+        durationInFrames={tiktokDefaultProps.durationInFrames!}
+        fps={VIDEO_FPS}
+        width={VIDEO_WIDTH}
+        height={VIDEO_HEIGHT}
+        defaultProps={tiktokDefaultProps}
+        calculateMetadata={calculateMetadata}
       />
 
       <Composition

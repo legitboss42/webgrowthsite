@@ -1,0 +1,34 @@
+name: Blog social feature validation
+
+on:
+  push:
+    branches: [feature/blog-social-automation]
+  pull_request:
+    branches: [main]
+    paths:
+      - "src/lib/socialAutomation/**"
+      - "src/remotion/**"
+      - "scripts/**social**"
+      - ".github/workflows/blog-social-feature-validation.yml"
+      - "package.json"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: blog-social-feature-${{ github.event.pull_request.number || github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  red-green:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm install --no-audit --no-fund
+      - run: npm run test:social
