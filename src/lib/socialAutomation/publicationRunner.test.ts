@@ -2,8 +2,15 @@ import test from "node:test";
 import assert from "node:assert/strict";
 
 import { runSocialPublication } from "./publicationRunner";
+import type { SocialPublicationStatus } from "./store";
 
 type Call = { name: string; value?: unknown };
+type TestPublication = {
+  status: SocialPublicationStatus;
+  caption: string;
+  externalPublicationId?: string | null;
+  providerState?: Record<string, unknown> | null;
+};
 
 function baseState() {
   return {
@@ -28,9 +35,9 @@ function baseState() {
       },
     },
     publications: {
-      INSTAGRAM: { status: "PENDING" as const, caption: "IG caption", externalPublicationId: null },
-      FACEBOOK: { status: "PENDING" as const, caption: "FB caption", providerState: {} },
-      TIKTOK: { status: "PENDING" as const, caption: "TT caption", externalPublicationId: null },
+      INSTAGRAM: { status: "PENDING", caption: "IG caption", externalPublicationId: null } as TestPublication,
+      FACEBOOK: { status: "PENDING", caption: "FB caption", providerState: {} } as TestPublication,
+      TIKTOK: { status: "PENDING", caption: "TT caption", externalPublicationId: null } as TestPublication,
     },
   };
 }
@@ -51,7 +58,9 @@ function deps(calls: Call[], options: { live?: boolean } = {}) {
       calls.push({ name: "fb-start" });
       return { videoId: "fb-video", uploadUrl: "https://rupload.facebook.com/fb-video" };
     },
-    uploadFacebookReel: async () => calls.push({ name: "fb-upload" }),
+    uploadFacebookReel: async () => {
+      calls.push({ name: "fb-upload" });
+    },
     finishFacebookReel: async () => {
       calls.push({ name: "fb-finish" });
       return "fb-video";
@@ -63,8 +72,12 @@ function deps(calls: Call[], options: { live?: boolean } = {}) {
     savePublication: async (platform: string, patch: Record<string, unknown>) => {
       calls.push({ name: `save-${platform}`, value: patch });
     },
-    saveJob: async (patch: Record<string, unknown>) => calls.push({ name: "save-job", value: patch }),
-    setAssetRetention: async (retainedUntil: string) => calls.push({ name: "retention", value: retainedUntil }),
+    saveJob: async (patch: Record<string, unknown>) => {
+      calls.push({ name: "save-job", value: patch });
+    },
+    setAssetRetention: async (retainedUntil: string) => {
+      calls.push({ name: "retention", value: retainedUntil });
+    },
   };
 }
 
