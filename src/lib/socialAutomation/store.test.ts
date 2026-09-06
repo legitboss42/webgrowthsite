@@ -15,7 +15,8 @@ function fakeClient(seed: Record<string, Row[]> = {}) {
     const query: any = {
       select() { return query; },
       eq(column: string, value: unknown) {
-        query._filtered = rows.filter((row) => row[column] === value);
+        const source = query._filtered ?? rows;
+        query._filtered = source.filter((row: Row) => row[column] === value);
         return query;
       },
       single: async () => ({ data: (query._filtered ?? rows)[0] ?? null, error: null }),
@@ -99,6 +100,20 @@ test("upsertPublication keeps one row per job and platform", async () => {
   assert.equal(rows.length, 1);
   assert.equal(rows[0].caption, "Two");
   assert.equal(rows[0].status, "PROCESSING");
+});
+
+test("listAssets returns only assets belonging to the requested job", async () => {
+  const client = fakeClient({
+    social_media_assets: [
+      { id: "a1", job_id: "job-1", profile: "META", storage_path: "one/meta.mp4" },
+      { id: "a2", job_id: "job-1", profile: "TIKTOK", storage_path: "one/tiktok.mp4" },
+      { id: "a3", job_id: "job-2", profile: "META", storage_path: "two/meta.mp4" },
+    ],
+  });
+  const store = createSocialAutomationStoreFromClient(client as any);
+
+  const assets = await store.listAssets("job-1");
+  assert.deepEqual(assets.map((asset) => asset.id), ["a1", "a2"]);
 });
 
 test("connection summaries never expose encrypted tokens", async () => {
