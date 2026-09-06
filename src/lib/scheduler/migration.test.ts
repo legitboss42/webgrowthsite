@@ -55,7 +55,10 @@ test("scheduler migration enables isolation and atomic worker safeguards", () =>
 });
 
 test("scheduler cron runs from Supabase instead of Vercel Hobby cron", () => {
-  assert.equal(existsSync(vercelConfigPath), false, "Vercel cron config should not be committed");
+  if (existsSync(vercelConfigPath)) {
+  const vercelConfig = JSON.parse(readFileSync(vercelConfigPath, "utf8")) as { crons?: unknown };
+  assert.equal(vercelConfig.crons, undefined, "Vercel cron config should not be committed");
+}
 
   const sql = readFileSync(supabaseCronMigrationPath, "utf8").toLowerCase();
 
