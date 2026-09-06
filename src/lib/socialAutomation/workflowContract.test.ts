@@ -31,6 +31,14 @@ test("detector uses Git name-status instead of article dates", () => {
   assert.match(detector, /detectAddedBlogPaths/);
 });
 
+test("social runner retries job creation while the new article deployment is not available", () => {
+  const runner = source("scripts/run-blog-social-automation.mjs");
+  assert.match(runner, /ARTICLE_NOT_AVAILABLE/);
+  assert.match(runner, /status\s*===\s*425/);
+  assert.match(runner, /15\s*\*\s*60_000/);
+  assert.match(runner, /await\s+sleep\(/);
+});
+
 test("scheduled cleanup uses the signed cleanup endpoint", () => {
   const workflow = source(".github/workflows/blog-social-cleanup.yml");
   const runner = source("scripts/run-social-cleanup.mjs");
