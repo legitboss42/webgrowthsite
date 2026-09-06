@@ -58,7 +58,7 @@ create table if not exists public.social_publications (
 create table if not exists public.social_connections (
   id uuid primary key default gen_random_uuid(),
   owner_user_id uuid,
-  provider text not null default 'META' check (provider in ('META')),
+  provider text not null default 'META' unique check (provider in ('META')),
   encrypted_tokens text not null,
   facebook_page_id text,
   facebook_page_name text,
@@ -68,8 +68,7 @@ create table if not exists public.social_connections (
   access_expires_at timestamptz,
   reconnect_required boolean not null default false,
   created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now(),
-  unique (owner_user_id, provider)
+  updated_at timestamptz not null default now()
 );
 
 create table if not exists public.social_automation_settings (
