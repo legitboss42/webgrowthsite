@@ -1,7 +1,10 @@
 import type { ReadonlyRequestCookies } from "next/dist/server/web/spec-extension/adapters/request-cookies";
 
-import { isGoogleAdminSession } from "@/lib/googleAdminSession";
+import {
+  isGoogleAdminSession,
+  readGoogleAuthSessionFromCookieStore,
+} from "@/lib/googleAuth";
 
 export async function hasContentAutomationAdminAccess(cookies: ReadonlyRequestCookies) {
-  return isGoogleAdminSession(cookies);
+  return isGoogleAdminSession(readGoogleAuthSessionFromCookieStore(cookies));
 }
