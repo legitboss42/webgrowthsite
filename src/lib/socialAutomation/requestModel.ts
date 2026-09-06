@@ -37,6 +37,30 @@ export function parseCreateJobRequest(value: unknown): CreateJobRequest | null {
   return { slug, sourceCommitSha, automationVersion };
 }
 
+export type AssetPrepareRequest = {
+  jobId: string;
+  profile: SocialRenderProfile;
+  bucket: "social-automation" | "tiktok-scheduler-media";
+  storagePath: string;
+  filename: "meta.mp4" | "tiktok.mp4";
+};
+
+export function parseAssetPrepareRequest(value: unknown): AssetPrepareRequest | null {
+  const input = record(value);
+  if (!input) return null;
+  const jobId = text(input.jobId);
+  const profile = text(input.profile).toUpperCase();
+  if (!UUID.test(jobId) || (profile !== "META" && profile !== "TIKTOK")) return null;
+  const filename = profile === "META" ? "meta.mp4" : "tiktok.mp4";
+  return {
+    jobId,
+    profile: profile as SocialRenderProfile,
+    bucket: profile === "META" ? "social-automation" : "tiktok-scheduler-media",
+    storagePath: `social/${jobId}/${filename}`,
+    filename,
+  };
+}
+
 export type AssetRegistrationRequest = {
   jobId: string;
   profile: SocialRenderProfile;
