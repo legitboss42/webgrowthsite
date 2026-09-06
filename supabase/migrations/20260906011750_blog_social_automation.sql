@@ -44,6 +44,7 @@ create table if not exists public.social_publications (
   media_id uuid references public.social_media_assets(id) on delete set null,
   external_publication_id text,
   external_url text,
+  provider_state jsonb not null default '{}'::jsonb,
   attempt_count integer not null default 0 check (attempt_count >= 0),
   next_retry_at timestamptz,
   last_error_code text,
