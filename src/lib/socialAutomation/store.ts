@@ -260,7 +260,7 @@ export function createSocialAutomationStoreFromClient(client: SocialDatabaseClie
             reconnect_required: false,
             updated_at: new Date().toISOString(),
           },
-          { onConflict: "owner_user_id,provider" }
+          { onConflict: "provider" }
         )
         .select("*")
         .single()) as Awaited<DbResult<Record<string, unknown>>>;
