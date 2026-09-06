@@ -10,12 +10,14 @@ function candidate(overrides: Partial<{
   retainedUntil: string | null;
   deletedAt: string | null;
   publicationStatuses: string[];
+  schedulerTerminalAt: string | null;
 }> = {}) {
   return {
     profile: "META" as const,
     retainedUntil: "2026-09-13T12:00:00.000Z",
     deletedAt: null,
     publicationStatuses: ["PUBLISHED", "PUBLISHED"],
+    schedulerTerminalAt: null,
     ...overrides,
   };
 }
@@ -53,6 +55,45 @@ test("TikTok consent-pending media is never cleaned up", () => {
   assert.equal(
     isRetentionCleanupEligible(
       candidate({ profile: "TIKTOK", publicationStatuses: ["NEEDS_APPROVAL"] }),
+      now
+    ),
+    false
+  );
+});
+
+test("TikTok media keeps the scheduler's seven-day post-terminal retention window", () => {
+  assert.equal(
+    isRetentionCleanupEligible(
+      candidate({
+        profile: "TIKTOK",
+        publicationStatuses: ["PUBLISHED"],
+        schedulerTerminalAt: "2026-09-13T12:00:00.000Z",
+      }),
+      now
+    ),
+    false
+  );
+  assert.equal(
+    isRetentionCleanupEligible(
+      candidate({
+        profile: "TIKTOK",
+        publicationStatuses: ["PUBLISHED"],
+        schedulerTerminalAt: "2026-09-07T12:00:00.000Z",
+      }),
+      now
+    ),
+    true
+  );
+});
+
+test("TikTok terminal cleanup requires a real scheduler terminal timestamp", () => {
+  assert.equal(
+    isRetentionCleanupEligible(
+      candidate({
+        profile: "TIKTOK",
+        publicationStatuses: ["PUBLISHED"],
+        schedulerTerminalAt: null,
+      }),
       now
     ),
     false
