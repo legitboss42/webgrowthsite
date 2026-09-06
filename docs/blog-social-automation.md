@@ -2,7 +2,14 @@
 
 ## Current status
 
-Development remains isolated on `feature/blog-social-automation` and PR #15 remains a draft. The production Supabase schema has been applied by explicit approval, but the Next.js application changes have not been merged to `main` or deployed.
+Implementation is complete on `feature/blog-social-automation`. PR #15 remains isolated from `main` pending the project's separate deployment approval. The production Supabase schema has already been applied by explicit approval, but the Next.js application changes have **not** been merged to `main` or deployed to Vercel production.
+
+Final verified code head before this documentation-only update:
+
+- Commit: `f88c5fb88cbe28e6ad5b525c73b8f01693c355e2`
+- Strict release workflow: `34041023779` - GREEN
+- Blog social feature validation: `34041023844` - GREEN
+- Stage 11 validation: `34041026297` - GREEN
 
 ## What the feature does
 
@@ -15,10 +22,10 @@ A genuinely new Markdown article added under `content/blog/*.md` is converted in
    - `TIKTOK`: Web Growth logo, website overlay, promotional CTA, presenter branding and promotional narration are removed.
 4. GitHub creates an idempotent job through signed internal API routes.
 5. Rendered videos are uploaded with short-lived Supabase signed upload URLs. GitHub never receives `SUPABASE_SERVICE_ROLE_KEY`.
-6. The application waits for the production article URL for at most 15 minutes.
+6. If GitHub starts before the new production article is available, job creation retries only `425 ARTICLE_NOT_AVAILABLE` responses for a maximum of 15 minutes. Other job-creation errors fail immediately.
 7. Instagram and Facebook publish automatically when a usable Meta connection exists.
 8. TikTok is queued into the existing scheduler as `NEEDS_APPROVAL`; creator consent/settings remain mandatory before Direct Post.
-9. Terminal assets receive the configured retention deadline. Expired media is removed by the signed cleanup workflow only when no active publication/consent state still needs it.
+9. Terminal assets receive the configured retention deadline. Expired media is removed by the signed cleanup workflow only when no active publication/consent state still needs it. TikTok media also remains stored for at least seven days after the scheduler's actual terminal timestamp.
 
 ## Production database
 
@@ -73,6 +80,8 @@ Configure these in the production application environment before the application
 
 `META_APP_SECRET`, `META_OAUTH_STATE_SECRET`, `META_TOKEN_ENCRYPTION_KEY`, `SOCIAL_AUTOMATION_WEBHOOK_SECRET` and `SUPABASE_SERVICE_ROLE_KEY` are secrets and must never use a `NEXT_PUBLIC_` prefix.
 
+The connector can verify code references and infrastructure state, but it cannot inspect or prove the values of protected environment secrets. Before production release, the required variables must exist in the intended environment and the GitHub/Vercel `SOCIAL_AUTOMATION_WEBHOOK_SECRET` values must match. Secret values must never be pasted into project documentation or chat.
+
 ## GitHub Actions configuration
 
 The repository requires one Actions secret for this feature:
@@ -84,7 +93,7 @@ The production publication workflow is `.github/workflows/blog-social-automation
 - Automatic publishing runs only on pushes to `main` that touch `content/blog/**`.
 - `scripts/detect-new-blog-posts.mjs` uses `git diff --name-status` and selects only newly added publishable Markdown files.
 - Focused social and scheduler tests run before rendering/publishing.
-- `scripts/run-blog-social-automation.mjs` creates the job, renders, validates, uploads, registers and invokes publication.
+- `scripts/run-blog-social-automation.mjs` creates the job, waits through the bounded production-article deployment race when necessary, renders, validates, uploads, registers and invokes publication.
 - `workflow_dispatch` is intentionally dry-run only. It renders an existing article and uploads the generated output as a one-day GitHub artifact; it does not call publication APIs.
 
 The retention workflow is `.github/workflows/blog-social-cleanup.yml`.
@@ -92,7 +101,7 @@ The retention workflow is `.github/workflows/blog-social-cleanup.yml`.
 - It runs daily at `04:17 UTC` and may also be manually dispatched.
 - `scripts/run-social-cleanup.mjs` signs a request to `/api/internal/social-automation/cleanup/`.
 - Meta media is deleted from the private `social-automation` bucket only after its Instagram/Facebook states are terminal.
-- TikTok media is deleted from `tiktok-scheduler-media` only after the real scheduler post is published or cancelled. TikTok `NEEDS_APPROVAL`, processing, scheduled, retryable and attention states remain protected.
+- TikTok media is deleted from `tiktok-scheduler-media` only after the real scheduler post is terminal and its actual `terminal_at` is at least seven days old. TikTok `NEEDS_APPROVAL`, processing, scheduled, retryable and attention states remain protected.
 - Database deletion state is recorded only after Storage confirms removal.
 
 ## Meta OAuth setup
@@ -109,6 +118,7 @@ TikTok generation is automatic, but TikTok `NEEDS_APPROVAL` is a successful prep
 
 - Job identity is deterministic for article slug + source commit + automation version.
 - Duplicate job requests return/reuse the existing job.
+- New-article job creation tolerates the GitHub/Vercel deployment race by retrying only `425 ARTICLE_NOT_AVAILABLE` for at most 15 minutes.
 - Instagram reuses an existing processing container on retry.
 - Facebook persists its upload session state and resumes start/upload/finish without blindly starting a second Reel.
 - TikTok draft persistence reuses an existing media/post link.
@@ -125,23 +135,48 @@ The Supabase performance advisor reports informational missing covering indexes 
 
 These are non-blocking INFO findings and are deliberately not being turned into an unrequested second production migration during this application build.
 
-## Verification record
+## Final verification record
 
-Verified during feature development so far:
+The exact code head `f88c5fb88cbe28e6ad5b525c73b8f01693c355e2` completed the strict release workflow `34041023779` successfully.
 
-- Social domain tests have repeatedly returned green after each completed RED/GREEN cycle.
-- Stage 11 validation returned green after `/admin/content-automation/` was registered as `NOINDEX` and excluded from the sitemap.
-- The WhatsApp suite returned 211/211 passing in the Stage 11 build gate after the route-governance fix.
-- Vercel preview deployment remains disabled for `feature/blog-social-automation`.
-- Production Supabase tables, RLS state, default settings, private bucket and migration history were verified after migration application.
+Verified release gates:
 
-The final release gate still requires a fresh full test/build/render/advisor/branch review after all feature files are committed. Actual final command results are appended here when that gate completes.
+- `npm ci` reproducible install: GREEN
+- Social automation suite: **79/79** passing
+- Scheduler suite: **280/280** passing
+- WhatsApp suite: **211/211** passing
+- TypeScript: GREEN
+- Lint: GREEN, with only existing non-blocking warnings
+- SEO governance: GREEN
+- Sitemap governance: GREEN
+- Next.js production build: GREEN
+- Real branded Meta Remotion render: GREEN
+- Real neutral TikTok Remotion render: GREEN
+- ffprobe metadata/dimension validation: GREEN for both outputs at **1080x1920**
+- Blog social feature validation `34041023844`: GREEN
+- Stage 11 validation `34041026297`: GREEN
+
+Render evidence:
+
+- Artifact name: `blog-social-release-render`
+- Artifact ID: `5682756349`
+- Artifact size: approximately 4.79 MB
+- Artifact SHA-256 digest: `fc0055cb8713cabb8128f51e67e272d9b34735fb9e2c264f6db7b7185ee107f4`
+
+Final verification also caught and resolved three launch-critical edge cases before release:
+
+1. Articles without optional `public/article-assets/<slug>/` screenshots now render using built-in motion/gradient visuals instead of failing.
+2. The GitHub/Vercel new-article race now performs bounded retry on `425 ARTICLE_NOT_AVAILABLE` instead of failing the automation prematurely.
+3. Social-generated TikTok media now honors seven days from the scheduler's real terminal timestamp before deletion, rather than counting only from social-job completion.
+
+Supabase production migration history and advisors were rechecked after implementation. Vercel feature-branch preview blocking was also rechecked during finalization and no current feature commits produced a deployment.
 
 ## Deployment boundary
 
-The database migration is live, but the application release remains intentionally blocked.
+Implementation is complete and release-verified, but application deployment remains intentionally blocked by project policy.
 
-- Do not merge `feature/blog-social-automation` to `main` yet.
-- Do not trigger a production Vercel deployment yet.
+- Do not merge `feature/blog-social-automation` to `main` without separate deployment approval.
+- Do not trigger a production Vercel deployment without separate deployment approval.
 - Keep Vercel preview deployment disabled for this feature branch.
-- Complete final verification and present the result before any application release.
+- Confirm protected production environment variables/secrets are configured before the release.
+- PR #15 may be marked release-ready after the documentation-only final head also passes the release gate, but it must remain unmerged until explicit approval.
