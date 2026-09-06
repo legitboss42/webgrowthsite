@@ -154,6 +154,15 @@ export function createSocialAutomationStoreFromClient(client: SocialDatabaseClie
       return (result.data ?? []) as Record<string, unknown>[];
     },
 
+    async listAssets(jobId: string) {
+      const result = await client
+        .from("social_media_assets")
+        .select("*")
+        .eq("job_id", jobId);
+      if (result.error) databaseError("Unable to read social media assets", result.error);
+      return (result.data ?? []) as Record<string, unknown>[];
+    },
+
     async registerAsset(input: {
       jobId: string;
       profile: SocialRenderProfile;
