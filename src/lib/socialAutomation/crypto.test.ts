@@ -24,7 +24,10 @@ test("Meta token envelope round trips", () => {
 test("tampered Meta token ciphertext is rejected", () => {
   process.env.META_TOKEN_ENCRYPTION_KEY = "test-meta-key";
   const encrypted = encryptMetaTokens({ userAccessToken: "secret", connectedAt: "now" });
-  assert.equal(decryptMetaTokens(`${encrypted}x`), null);
+  const [iv, tag, ciphertext] = encrypted.split(".");
+  const first = ciphertext[0] === "A" ? "B" : "A";
+  const tampered = `${iv}.${tag}.${first}${ciphertext.slice(1)}`;
+  assert.equal(decryptMetaTokens(tampered), null);
 });
 
 test("encryption fails closed when key is missing", () => {
