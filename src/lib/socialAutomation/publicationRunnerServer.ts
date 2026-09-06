@@ -1,6 +1,7 @@
 import "server-only";
 
 import { createSchedulerSupabaseClient } from "@/lib/scheduler/supabase";
+import { isMetaConnectionUsable } from "./adminModel";
 import { createBlogTikTokDraft } from "./tiktokBridgeServer";
 import { createMetaClient } from "./metaClient";
 import { runSocialPublication } from "./publicationRunner";
@@ -189,11 +190,20 @@ export async function runSocialPublicationJob(jobId: string) {
     async getMetaConnection() {
       const { data, error } = await supabase
         .from("social_connections")
-        .select("encrypted_tokens,instagram_account_id,reconnect_required")
+        .select("encrypted_tokens,instagram_account_id,reconnect_required,access_expires_at")
         .eq("provider", "META")
         .maybeSingle();
       if (error) dbError("Unable to load Meta connection", error);
-      if (!data || data.reconnect_required === true) return null;
+      if (!data) return null;
+      const accessExpiresAt = typeof data.access_expires_at === "string" ? data.access_expires_at : null;
+      if (
+        !isMetaConnectionUsable({
+          reconnectRequired: data.reconnect_required === true,
+          accessExpiresAt,
+        })
+      ) {
+        return null;
+      }
       const { decryptMetaTokens } = await import("./crypto");
       const tokens = decryptMetaTokens(typeof data.encrypted_tokens === "string" ? data.encrypted_tokens : undefined);
       const instagramAccountId = text(data.instagram_account_id);
