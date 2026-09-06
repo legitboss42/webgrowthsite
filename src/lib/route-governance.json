@@ -307,6 +307,12 @@
       "reason": "Internal automation waitlist administration"
     },
     {
+      "path": "/admin/content-automation/",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Internal blog-to-social automation administration"
+    },
+    {
       "path": "/auth/google/callback/",
       "status": "NOINDEX",
       "sitemap": false,
