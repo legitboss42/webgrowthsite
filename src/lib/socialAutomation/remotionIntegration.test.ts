@@ -4,7 +4,9 @@ import fs from "node:fs";
 import path from "node:path";
 
 const rootSource = fs.readFileSync(path.join(process.cwd(), "src/remotion/Root.tsx"), "utf8");
+const metaPath = path.join(process.cwd(), "src/remotion/components/WebGrowthArticleVideo.tsx");
 const tiktokPath = path.join(process.cwd(), "src/remotion/components/TikTokArticleVideo.tsx");
+const articleRenderPath = path.join(process.cwd(), "scripts/render-article-video.mjs");
 const socialRenderPath = path.join(process.cwd(), "scripts/render-social-article.mjs");
 
 test("registers dedicated Meta and TikTok social compositions", () => {
@@ -31,4 +33,13 @@ test("social renderer synthesizes a separate neutral TikTok voice track and outp
   assert.match(source, /meta\.mp4/);
   assert.match(source, /caption:\s*""/);
   assert.match(source, /hashtags:\s*\[\]/);
+});
+
+test("Meta renderer treats per-article screenshot assets as optional", () => {
+  const componentSource = fs.readFileSync(metaPath, "utf8");
+  const rendererSource = fs.readFileSync(articleRenderPath, "utf8");
+  assert.match(componentSource, /articleAssetsAvailable\??:\s*boolean/);
+  assert.match(componentSource, /articleAssetsAvailable\s*&&\s*slug/);
+  assert.match(rendererSource, /articleAssetsAvailable/);
+  assert.match(rendererSource, /fs\.access/);
 });
