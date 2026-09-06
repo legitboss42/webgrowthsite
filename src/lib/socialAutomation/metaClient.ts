@@ -28,6 +28,11 @@ export type MetaManagedPage = {
   tasks: string[];
 };
 
+export type FacebookReelUploadSession = {
+  videoId: string;
+  uploadUrl: string;
+};
+
 export class MetaApiError extends Error {
   readonly retryable: boolean;
   readonly status: number;
@@ -92,7 +97,7 @@ export function createMetaClient({ graphVersion, fetcher = fetch }: MetaClientOp
   const version = cleanVersion(graphVersion);
   const graphRoot = `https://graph.facebook.com/${version}`;
 
-  return {
+  const client = {
     async exchangeCode(input: {
       appId: string;
       appSecret: string;
@@ -240,12 +245,7 @@ export function createMetaClient({ graphVersion, fetcher = fetch }: MetaClientOp
       return id;
     },
 
-    async publishFacebookReel(input: {
-      pageAccessToken: string;
-      videoUrl: string;
-      description: string;
-      title: string;
-    }) {
+    async startFacebookReel(input: { pageAccessToken: string }): Promise<FacebookReelUploadSession> {
       const startUrl = appendQuery(`${graphRoot}/me/video_reels`, { upload_phase: "start" });
       const start = await requestJson(fetcher, startUrl, {
         method: "POST",
@@ -254,19 +254,42 @@ export function createMetaClient({ graphVersion, fetcher = fetch }: MetaClientOp
       const videoId = typeof start.video_id === "string" ? start.video_id : "";
       const uploadUrl = typeof start.upload_url === "string" ? start.upload_url : "";
       if (!videoId || !uploadUrl) {
-        throw new MetaApiError("Meta API did not return a Facebook Reel upload session.", { retryable: false, status: 502 });
+        throw new MetaApiError("Meta API did not return a Facebook Reel upload session.", {
+          retryable: false,
+          status: 502,
+        });
       }
+      return { videoId, uploadUrl };
+    },
 
-      await requestJson(fetcher, uploadUrl, {
+    async uploadFacebookReel(input: {
+      pageAccessToken: string;
+      uploadUrl: string;
+      videoUrl: string;
+    }) {
+      if (!input.uploadUrl.startsWith("https://")) {
+        throw new MetaApiError("Meta API returned an invalid Facebook Reel upload URL.", {
+          retryable: false,
+          status: 502,
+        });
+      }
+      await requestJson(fetcher, input.uploadUrl, {
         method: "POST",
         headers: {
           Authorization: `OAuth ${input.pageAccessToken}`,
           file_url: input.videoUrl,
         },
       });
+    },
 
+    async finishFacebookReel(input: {
+      pageAccessToken: string;
+      videoId: string;
+      description: string;
+      title: string;
+    }) {
       const finishUrl = appendQuery(`${graphRoot}/me/video_reels`, {
-        video_id: videoId,
+        video_id: input.videoId,
         upload_phase: "finish",
         video_state: "PUBLISHED",
         description: input.description,
@@ -276,7 +299,30 @@ export function createMetaClient({ graphVersion, fetcher = fetch }: MetaClientOp
         method: "POST",
         headers: authHeaders(input.pageAccessToken),
       });
-      return videoId;
+      return input.videoId;
+    },
+
+    async publishFacebookReel(input: {
+      pageAccessToken: string;
+      videoUrl: string;
+      description: string;
+      title: string;
+    }) {
+      const session = await client.startFacebookReel({ pageAccessToken: input.pageAccessToken });
+      await client.uploadFacebookReel({
+        pageAccessToken: input.pageAccessToken,
+        uploadUrl: session.uploadUrl,
+        videoUrl: input.videoUrl,
+      });
+      await client.finishFacebookReel({
+        pageAccessToken: input.pageAccessToken,
+        videoId: session.videoId,
+        description: input.description,
+        title: input.title,
+      });
+      return session.videoId;
     },
   };
+
+  return client;
 }
