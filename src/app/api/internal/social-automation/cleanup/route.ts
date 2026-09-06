@@ -91,11 +91,11 @@ export async function POST(request: Request) {
         .filter(Boolean)
     ),
   ];
-  const schedulerStatus = new Map<string, string>();
+  const schedulerState = new Map<string, { status: string; terminalAt: string | null }>();
   if (tiktokPostIds.length > 0) {
     const { data: posts, error: postError } = await supabase
       .from("scheduled_posts")
-      .select("id,status")
+      .select("id,status,terminal_at")
       .in("id", tiktokPostIds);
     if (postError) {
       return NextResponse.json(
@@ -104,7 +104,10 @@ export async function POST(request: Request) {
       );
     }
     for (const post of posts ?? []) {
-      schedulerStatus.set(String(post.id), String(post.status));
+      schedulerState.set(String(post.id), {
+        status: String(post.status),
+        terminalAt: post.terminal_at ? String(post.terminal_at) : null,
+      });
     }
   }
 
@@ -116,6 +119,7 @@ export async function POST(request: Request) {
     const profile = asset.profile === "TIKTOK" ? "TIKTOK" : "META";
     const jobPublications = byJob.get(String(asset.job_id)) ?? [];
     let publicationStatuses: string[];
+    let schedulerTerminalAt: string | null = null;
 
     if (profile === "META") {
       publicationStatuses = jobPublications
@@ -125,7 +129,9 @@ export async function POST(request: Request) {
     } else {
       const tiktok = jobPublications.find((row) => row.platform === "TIKTOK");
       const postId = safeText(tiktok?.external_publication_id);
-      const liveSchedulerStatus = postId ? effectiveTikTokStatus(schedulerStatus.get(postId)) : null;
+      const scheduler = postId ? schedulerState.get(postId) : undefined;
+      const liveSchedulerStatus = effectiveTikTokStatus(scheduler?.status);
+      schedulerTerminalAt = scheduler?.terminalAt ?? null;
       publicationStatuses = [liveSchedulerStatus || safeText(tiktok?.status)].filter(Boolean);
     }
 
@@ -135,6 +141,7 @@ export async function POST(request: Request) {
         retainedUntil: asset.retained_until ? String(asset.retained_until) : null,
         deletedAt: asset.deleted_at ? String(asset.deleted_at) : null,
         publicationStatuses,
+        schedulerTerminalAt,
       },
       Date.now()
     );
