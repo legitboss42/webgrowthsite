@@ -33,6 +33,33 @@ test("exchanges a Meta OAuth code for a user token", async () => {
   assert.match(calls[0], /code=auth-code/);
 });
 
+test("exchanges the short-lived user token for a long-lived token without putting secrets in the URL", async () => {
+  const calls: Array<{ url: string; init?: RequestInit }> = [];
+  const client = createMetaClient({
+    graphVersion: "v99.0",
+    fetcher: async (url, init) => {
+      calls.push({ url: String(url), init });
+      return jsonResponse({ access_token: "long-user-token", token_type: "bearer", expires_in: 5_184_000 });
+    },
+  });
+
+  const token = await client.exchangeLongLivedUserToken({
+    appId: "app-1",
+    appSecret: "app-secret",
+    shortLivedUserAccessToken: "short-user-token",
+    nowMs: Date.parse("2026-09-06T01:00:00.000Z"),
+  });
+
+  assert.equal(token.userAccessToken, "long-user-token");
+  assert.equal(token.expiresAt, "2026-11-05T01:00:00.000Z");
+  assert.equal(calls[0].init?.method, "POST");
+  assert.doesNotMatch(calls[0].url, /app-secret|short-user-token/);
+  const body = String(calls[0].init?.body || "");
+  assert.match(body, /grant_type=fb_exchange_token/);
+  assert.match(body, /client_secret=app-secret/);
+  assert.match(body, /fb_exchange_token=short-user-token/);
+});
+
 test("resolves the only Facebook Page linked to an Instagram professional account", async () => {
   const calls: string[] = [];
   const client = createMetaClient({
