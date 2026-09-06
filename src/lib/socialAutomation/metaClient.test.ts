@@ -114,7 +114,7 @@ test("creates and publishes an Instagram Reel through a media container", async 
   assert.doesNotMatch(calls[0].url, /page-token/);
 });
 
-test("publishes a hosted Facebook Page Reel using start, upload, finish", async () => {
+test("exposes Facebook start, upload, and finish as retry-safe stages", async () => {
   const calls: Array<{ url: string; init?: RequestInit }> = [];
   const replies = [
     jsonResponse({ video_id: "video-1", upload_url: "https://rupload.facebook.com/upload/video-1" }),
@@ -129,18 +129,49 @@ test("publishes a hosted Facebook Page Reel using start, upload, finish", async 
     },
   });
 
-  const videoId = await client.publishFacebookReel({
+  const session = await client.startFacebookReel({ pageAccessToken: "page-token" });
+  assert.deepEqual(session, {
+    videoId: "video-1",
+    uploadUrl: "https://rupload.facebook.com/upload/video-1",
+  });
+  await client.uploadFacebookReel({
     pageAccessToken: "page-token",
+    uploadUrl: session.uploadUrl,
     videoUrl: "https://cdn.example/meta.mp4",
+  });
+  await client.finishFacebookReel({
+    pageAccessToken: "page-token",
+    videoId: session.videoId,
     description: "Facebook description",
     title: "Article title",
   });
-  assert.equal(videoId, "video-1");
+
   assert.match(calls[0].url, /\/me\/video_reels/);
   assert.equal(new Headers(calls[1].init?.headers).get("file_url"), "https://cdn.example/meta.mp4");
   assert.equal(new Headers(calls[1].init?.headers).get("Authorization"), "OAuth page-token");
   assert.match(calls[2].url, /upload_phase=finish/);
   assert.match(calls[2].url, /video_state=PUBLISHED/);
+});
+
+test("publishes a hosted Facebook Page Reel using the staged methods", async () => {
+  const replies = [
+    jsonResponse({ video_id: "video-1", upload_url: "https://rupload.facebook.com/upload/video-1" }),
+    jsonResponse({ success: true }),
+    jsonResponse({ success: true }),
+  ];
+  const client = createMetaClient({
+    graphVersion: "v99.0",
+    fetcher: async () => replies.shift()!,
+  });
+  assert.equal(
+    await client.publishFacebookReel({
+      pageAccessToken: "page-token",
+      videoUrl: "https://cdn.example/meta.mp4",
+      description: "Facebook description",
+      title: "Article title",
+    }),
+    "video-1"
+  );
 });
 
 test("classifies provider 5xx as retryable without leaking a token", async () => {
