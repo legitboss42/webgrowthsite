@@ -35,6 +35,11 @@ test("migration enforces idempotency and one publication per platform", () => {
   assert.match(sql, /unique\s*\(job_id\s*,\s*platform\s*\)/i);
 });
 
+test("migration enforces exactly one owner Meta connection", () => {
+  const sql = migrationSql();
+  assert.match(sql, /provider\s+text\s+not\s+null\s+default\s+'META'[^,]+unique/i);
+});
+
 test("migration exposes social tables only to service_role", () => {
   const sql = migrationSql();
   for (const table of tables) {
