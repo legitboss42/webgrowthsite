@@ -1,0 +1,22 @@
+name: Generate social migration name
+
+on:
+  push:
+    branches: [feature/blog-social-automation]
+    paths: [.github/workflows/social-migration-name.yml]
+
+permissions:
+  contents: read
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Generate migration filename with Supabase CLI
+        run: |
+          npx --yes supabase@latest migration new blog_social_automation
+          echo "GENERATED_MIGRATION=$(ls -1t supabase/migrations/*_blog_social_automation.sql | head -n 1)"
