@@ -56,13 +56,41 @@ async function signedPost(endpoint, payload) {
   });
   const data = await response.json().catch(() => ({}));
   if (!response.ok && response.status !== 202) {
-    const code = data?.code ? ` (${data.code})` : "";
-    throw Object.assign(new Error(`${endpoint} failed with HTTP ${response.status}${code}`), {
+    const code = typeof data?.code === "string" ? data.code : "";
+    const codeSuffix = code ? ` (${code})` : "";
+    throw Object.assign(new Error(`${endpoint} failed with HTTP ${response.status}${codeSuffix}`), {
       status: response.status,
+      code,
       retryAfter: Number(response.headers.get("retry-after") || 0),
     });
   }
   return { response, data };
+}
+
+async function createJobWithDeploymentRetry() {
+  const deadline = Date.now() + 15 * 60_000;
+
+  while (true) {
+    try {
+      return await signedPost("/api/internal/social-automation/jobs/", {
+        slug,
+        sourceCommitSha,
+        automationVersion,
+      });
+    } catch (error) {
+      const status = Number(error?.status || 0);
+      const code = String(error?.code || "");
+      if (status === 425 && code === "ARTICLE_NOT_AVAILABLE" && Date.now() < deadline) {
+        const retrySeconds = Math.max(5, Math.min(60, Number(error?.retryAfter || 15)));
+        console.log(
+          `[social-automation] ${slug} is not available in production yet; retrying job creation in ${retrySeconds}s.`
+        );
+        await sleep(retrySeconds * 1000);
+        continue;
+      }
+      throw error;
+    }
+  }
 }
 
 async function sha256(filePath) {
@@ -138,11 +166,7 @@ async function uploadProfile(jobId, profile) {
 }
 
 console.log(`[social-automation] Creating idempotent job for ${slug}`);
-const { data: created } = await signedPost("/api/internal/social-automation/jobs/", {
-  slug,
-  sourceCommitSha,
-  automationVersion,
-});
+const { data: created } = await createJobWithDeploymentRetry();
 const jobId = String(created?.jobId || "");
 if (!jobId) throw new Error("Job creation did not return a job ID.");
 
