@@ -35,6 +35,24 @@ function safeReturnTo(value: string) {
   return candidate;
 }
 
+function isCanonicalBase64UrlPart(value: string) {
+  if (!value || !/^[A-Za-z0-9_-]+$/.test(value)) return false;
+  const normalized = value.replace(/-/g, "+").replace(/_/g, "/");
+  const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, "=");
+  const canonical = Buffer.from(padded, "base64")
+    .toString("base64")
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/g, "");
+  return canonical === value;
+}
+
+function isCanonicalSealedCookie(value: string | undefined) {
+  if (!value) return false;
+  const parts = value.split(".");
+  return parts.length === 3 && parts.every(isCanonicalBase64UrlPart);
+}
+
 export function createMetaOAuthState(secret: string, returnTo: string, nowMs = Date.now()) {
   const payload: MetaOAuthStatePayload = {
     state: randomUUID(),
@@ -52,6 +70,7 @@ export function readMetaOAuthState(
   secret: string,
   nowMs = Date.now()
 ): MetaOAuthStatePayload | null {
+  if (!isCanonicalSealedCookie(cookieValue)) return null;
   const payload = openCookiePayload<MetaOAuthStatePayload>(cookieValue, secret);
   if (!payload) return null;
   if (typeof payload.state !== "string" || payload.state.length < 16) return null;
@@ -85,6 +104,7 @@ export function readMetaPendingConnection(
   secret: string,
   nowMs = Date.now()
 ): MetaPendingConnectionPayload | null {
+  if (!isCanonicalSealedCookie(cookieValue)) return null;
   const payload = openCookiePayload<MetaPendingConnectionPayload>(cookieValue, secret);
   if (!payload) return null;
   if (typeof payload.userAccessToken !== "string" || !payload.userAccessToken.trim()) return null;
