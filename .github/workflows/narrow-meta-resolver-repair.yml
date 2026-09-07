@@ -1,0 +1,121 @@
+name: Narrow Meta resolver repair
+
+on:
+  push:
+    branches:
+      - feature/blog-social-automation
+    paths:
+      - .github/workflows/narrow-meta-resolver-repair.yml
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/blog-social-automation
+      - name: Narrow resolver to connected_instagram_account
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path('src/lib/socialAutomation/metaClient.ts')
+          text = path.read_text()
+          start = text.index('    async resolveManagedPage(input: {')
+          end = text.index('    async createInstagramReel(input: {', start)
+          replacement = '''    async resolveManagedPage(input: {
+      userAccessToken: string;
+      preferredPageId?: string;
+    }): Promise<MetaManagedPage> {
+      const url = appendQuery(`${graphRoot}/me/accounts`, {
+        fields:
+          "id,name,access_token,tasks,instagram_business_account{id,username,name},connected_instagram_account{id,username,name}",
+      });
+      const body = await requestJson(fetcher, url, { headers: authHeaders(input.userAccessToken) });
+      const data = Array.isArray(body.data) ? body.data : [];
+      const candidates = data
+        .filter((item): item is Record<string, unknown> => Boolean(item && typeof item === "object"))
+        .map((item) => {
+          const businessInstagram =
+            item.instagram_business_account && typeof item.instagram_business_account === "object"
+              ? (item.instagram_business_account as Record<string, unknown>)
+              : null;
+          const connectedInstagram =
+            item.connected_instagram_account && typeof item.connected_instagram_account === "object"
+              ? (item.connected_instagram_account as Record<string, unknown>)
+              : null;
+          const instagram = businessInstagram || connectedInstagram;
+          return {
+            facebookPageId: typeof item.id === "string" ? item.id : "",
+            facebookPageName: typeof item.name === "string" ? item.name : "",
+            pageAccessToken: typeof item.access_token === "string" ? item.access_token : "",
+            instagramAccountId: typeof instagram?.id === "string" ? instagram.id : "",
+            instagramAccountName:
+              typeof instagram?.username === "string"
+                ? instagram.username
+                : typeof instagram?.name === "string"
+                  ? instagram.name
+                  : null,
+            tasks: stringArray(item.tasks),
+          } satisfies MetaManagedPage;
+        })
+        .filter(
+          (item) =>
+            Boolean(item.facebookPageId) &&
+            Boolean(item.pageAccessToken) &&
+            Boolean(item.instagramAccountId)
+        );
+
+      if (candidates.length === 0) {
+        throw new MetaApiError("No Instagram-linked Facebook Page is available for this Meta account.", {
+          retryable: false,
+          status: 422,
+        });
+      }
+
+      if (input.preferredPageId) {
+        const selected = candidates.find((item) => item.facebookPageId === input.preferredPageId);
+        if (!selected) {
+          throw new MetaApiError("The selected Instagram-linked Facebook Page is unavailable.", {
+            retryable: false,
+            status: 422,
+          });
+        }
+        return selected;
+      }
+
+      if (candidates.length > 1) {
+        throw new MetaApiError("More than one Instagram-linked Facebook Page is available. Choose a Page explicitly.", {
+          retryable: false,
+          status: 409,
+        });
+      }
+
+      return candidates[0];
+    },
+
+'''
+          path.write_text(text[:start] + replacement + text[end:])
+
+          docs = Path('docs/blog-social-meta-connection-bugfix-2026-09-07.md')
+          d = docs.read_text()
+          d = d.replace(
+            'A valid Page/Instagram link may instead be represented through `connected_instagram_account` or require resolving the Page `instagram_accounts` edge. Those valid shapes were being discarded, causing the callback to report that no linked Instagram account existed.',
+            'A valid Page/Instagram link created through Facebook Page Settings may instead be represented through `connected_instagram_account`. That valid shape was being discarded, causing the callback to report that no linked Instagram account existed.'
+          )
+          d = d.replace('- Added regression coverage for the Page `instagram_accounts` edge fallback.\n', '')
+          d = d.replace('- Result: 85 social tests, 83 passing, 2 failing. Both new tests failed with the same `No Instagram-linked Facebook Page...` error seen in production.\n', '- Result: the new `connected_instagram_account` regression reproduced the same `No Instagram-linked Facebook Page...` error seen in production while the existing suite remained green.\n')
+          d = d.replace('- When neither inline field is present, the resolver queries `/{page-id}/instagram_accounts` with the Page access token.\n', '')
+          docs.write_text(d)
+          PY
+      - name: Commit repair
+        run: |
+          git config user.name "Victorious"
+          git config user.email "vickysaintbrown02@gmail.com"
+          git add src/lib/socialAutomation/metaClient.ts docs/blog-social-meta-connection-bugfix-2026-09-07.md
+          git diff --cached --check
+          git commit -m "fix: narrow Meta resolver to Page-settings connection"
+          git push origin HEAD:feature/blog-social-automation
