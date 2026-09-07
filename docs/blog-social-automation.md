@@ -122,7 +122,7 @@ After Meta returns an authorization code:
 7. Selecting a Page POSTs only its Facebook Page ID to `/api/admin/content-automation/meta/select/`.
 8. The server decrypts the pending credential, re-queries Meta, validates the selected Page, encrypts the final user/Page token pair, saves the existing connection row and clears the pending cookie.
 
-This removes the two brittle assumptions in the previous primary flow: that mobile must survive a full-page Meta round trip and that one Meta user necessarily manages only one eligible Instagram-linked Page.
+This removes the brittle assumptions that one Meta user necessarily manages only one eligible Instagram-linked Page and that SDK-issued codes can be exchanged without the SDK dialog's generated redirect URI. Mobile and coarse-pointer browsers now use the full-page fallback directly because Meta can change JavaScript SDK popup behavior on phones.
 
 ### Fallback callback flow
 
@@ -132,6 +132,8 @@ The existing routes remain available as a secondary fallback when the Meta SDK i
 - `/api/admin/content-automation/meta/callback/`
 
 The fallback retains sealed OAuth state, `auth_type=rerequest`, Business Login `config_id` support when configured, and the older scope-based compatibility path when no configuration ID exists. Unlike SDK-issued codes, callback-issued codes continue to be exchanged with the matching `META_REDIRECT_URI`.
+
+The dashboard Connect/Reconnect button uses this fallback directly on mobile and coarse-pointer browsers, while desktop keeps the in-dashboard SDK popup flow.
 
 The Meta app must include the exact callback URL in Valid OAuth Redirect URIs. The Facebook Login for Business configuration must include the Page and Instagram publishing permissions required by this feature.
 

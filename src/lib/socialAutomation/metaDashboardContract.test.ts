@@ -83,6 +83,9 @@ test("Content Automation uses Facebook Login for Business in-dashboard with Page
   assert.match(client, /\.FB\.init/);
   assert.match(client, /\.FB\.login/);
   assert.match(client, /window\.open/);
+  assert.match(client, /shouldUseMetaRedirectFallback/);
+  assert.match(client, /metaFallbackConnectionUrl/);
+  assert.match(client, /window\.location\.assign/);
   assert.match(client, /extractMetaSdkRedirectUriFromDialogUrl/);
   assert.match(client, /sdkRedirectUri/);
   assert.match(client, /onClick=\{connectMeta\}/);
@@ -92,10 +95,7 @@ test("Content Automation uses Facebook Login for Business in-dashboard with Page
   assert.match(client, /facebookPageName/);
   assert.match(client, /instagramAccountName/);
   assert.match(client, /Meta SDK/);
-  assert.match(
-    client,
-    /\/api\/admin\/content-automation\/meta\/connect\/\?returnTo=\/admin\/content-automation\//
-  );
+  assert.match(client, /metaFallbackConnectionUrl\("\/admin\/content-automation\/"\)/);
   assert.doesNotMatch(client, /META_APP_SECRET|META_TOKEN_ENCRYPTION_KEY|META_OAUTH_STATE_SECRET/);
 });
 

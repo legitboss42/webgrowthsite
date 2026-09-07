@@ -88,7 +88,7 @@
 
 **Interfaces:**
 - `ContentAutomationClient` receives only safe public Meta configuration and login options.
-- Browser calls `FB.login` synchronously from the Connect/Reconnect click handler.
+- Desktop browser calls `FB.login` synchronously from the Connect/Reconnect click handler. Mobile and coarse-pointer browsers use the existing full-page redirect fallback from the same button because Meta's JavaScript SDK popup behavior differs on mobile.
 
 - [x] Extend the failing contract test for SDK load/init/login, code exchange, Page selector, explicit selection and fallback preservation.
 - [x] Verify RED: commit `0a22dc5ea7ae4fc5733af0799ba31db77b8bcd7d`, run `34110996107` (91 existing tests passed; only the new UI assertion failed).

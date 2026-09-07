@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
 
+import { metaFallbackConnectionUrl, shouldUseMetaRedirectFallback } from "@/lib/socialAutomation/metaLoginFlow";
 import { extractMetaSdkRedirectUriFromDialogUrl } from "@/lib/socialAutomation/metaSdkRedirect";
 
 type Settings = {
@@ -324,6 +325,17 @@ export default function ContentAutomationClient({ initialSettings, connection, j
     setMessage(null);
     setMetaCandidates([]);
 
+    const useRedirectFallback = shouldUseMetaRedirectFallback({
+      userAgent: navigator.userAgent,
+      maxTouchPoints: navigator.maxTouchPoints,
+      coarsePointer: window.matchMedia?.("(pointer: coarse)").matches ?? false,
+      viewportWidth: window.innerWidth,
+    });
+    if (useRedirectFallback) {
+      window.location.assign(metaFallbackConnectionUrl("/admin/content-automation/"));
+      return;
+    }
+
     const metaWindow = window as MetaWindow;
     if (!metaLogin.configured || !metaLogin.loginOptions || !metaSdkReady || !metaWindow.FB) {
       setMessage("Meta SDK is not ready. Use the fallback connection below if this continues.");
@@ -488,6 +500,9 @@ export default function ContentAutomationClient({ initialSettings, connection, j
           {metaLogin.configured && !metaSdkReady && !metaSdkFailed ? (
             <p className="mt-3 text-xs leading-5 text-white/45">Loading Meta SDK for the secure in-dashboard connection…</p>
           ) : null}
+          {metaLogin.configured && metaSdkReady ? (
+            <p className="mt-3 text-xs leading-5 text-white/45">On phones and touch browsers, Meta may open the secure full-page connection method.</p>
+          ) : null}
           {!metaLogin.configured ? (
             <p className="mt-3 text-xs leading-5 text-amber-200/70">Meta SDK connection is not configured in this environment.</p>
           ) : null}
@@ -527,7 +542,7 @@ export default function ContentAutomationClient({ initialSettings, connection, j
 
           {showMetaFallback ? (
             <a
-              href="/api/admin/content-automation/meta/connect/?returnTo=/admin/content-automation/"
+              href={metaFallbackConnectionUrl("/admin/content-automation/")}
               className="mt-4 inline-flex text-xs font-semibold text-white/55 underline decoration-white/20 underline-offset-4 hover:text-white/75"
             >
               Use fallback Meta connection

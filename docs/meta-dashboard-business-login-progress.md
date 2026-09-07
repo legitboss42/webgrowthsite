@@ -26,8 +26,9 @@ Replace the full-page Meta connection redirect as the primary flow with Facebook
 - SDK authorization codes are exchanged server-side without forcing the full-page callback URI. The old redirect callback continues using its matching redirect URI.
 - `POST /api/admin/content-automation/meta/exchange/` is admin-authenticated and same-origin protected. It receives the authorization code plus the public Meta SDK dialog `redirect_uri`, validates that URI as Meta's `xd_arbiter` URL for `webgrowth.info`, upgrades the user token, discovers Pages, auto-connects one candidate, or returns only safe Page/Instagram IDs and names while sealing the pending long-lived user token server-side.
 - `POST /api/admin/content-automation/meta/select/` is admin-authenticated and same-origin protected. It decrypts the pending credential, re-queries Meta, validates the selected Page, encrypts final user/Page tokens, saves the existing `social_connections` record, audits the connection, and clears the pending cookie.
-- The Content Automation dashboard now loads `https://connect.facebook.net/en_US/sdk.js`, initializes the Meta SDK using only public App ID / Graph version / configuration ID values, and calls `FB.login` directly from the Connect/Reconnect button.
+- The Content Automation dashboard now loads `https://connect.facebook.net/en_US/sdk.js`, initializes the Meta SDK using only public App ID / Graph version / configuration ID values, and calls `FB.login` directly from the Connect/Reconnect button on desktop browsers.
 - The browser sends only the returned authorization code to the protected exchange route. It never receives user tokens, Page tokens, encrypted token payloads, app secrets, OAuth-state secrets, or the token-encryption key.
+- Mobile and coarse-pointer browsers use the existing full-page redirect fallback from the same Connect/Reconnect button because Meta's JavaScript SDK popup behavior differs on mobile.
 - When Meta returns several eligible Facebook Page / Instagram pairs, the same dashboard renders touch-friendly selection controls on mobile and desktop. The selected Page is revalidated server-side before storage.
 - The existing full-page `/meta/connect/` + `/meta/callback/` flow remains available only as a fallback when the Meta SDK is unavailable or not configured.
 - No Supabase migration was added. TikTok, WhatsApp, blog rendering, scheduler, and publication logic are unchanged.
@@ -39,4 +40,4 @@ Replace the full-page Meta connection redirect as the primary flow with Facebook
 - Request explicit approval before the single production deployment.
 
 ### Deployment status
-Merged to `main` and deployed to production after explicit approval. Live Chrome verification on `webgrowth.info` confirmed the SDK Business Login flow connects Facebook Page `Web Growth` and Instagram account `@web.growth`, and the dashboard remains connected after refresh.
+Merged to `main` and deployed to production after explicit approval. Live Chrome verification on `webgrowth.info` confirmed the desktop SDK Business Login flow connects Facebook Page `Web Growth` and Instagram account `@web.growth`, and the dashboard remains connected after refresh. Mobile fallback routing is being patched after the remaining phone-specific failure report.
