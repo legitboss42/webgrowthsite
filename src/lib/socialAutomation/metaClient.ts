@@ -37,13 +37,26 @@ export class MetaApiError extends Error {
   readonly retryable: boolean;
   readonly status: number;
   readonly providerCode?: number;
+  readonly providerSubcode?: number;
+  readonly providerType?: string;
+  readonly providerMessage?: string;
 
-  constructor(message: string, options: { retryable: boolean; status: number; providerCode?: number }) {
+  constructor(message: string, options: {
+    retryable: boolean;
+    status: number;
+    providerCode?: number;
+    providerSubcode?: number;
+    providerType?: string;
+    providerMessage?: string;
+  }) {
     super(message);
     this.name = "MetaApiError";
     this.retryable = options.retryable;
     this.status = options.status;
     this.providerCode = options.providerCode;
+    this.providerSubcode = options.providerSubcode;
+    this.providerType = options.providerType;
+    this.providerMessage = options.providerMessage;
   }
 }
 
@@ -72,9 +85,22 @@ async function requestJson(fetcher: Fetcher, url: string, init?: RequestInit) {
   const body = await readJson(response);
   if (!response.ok || body.error) {
     const code = body.error?.code;
+    const subcode = body.error?.error_subcode;
+    const type = typeof body.error?.type === "string" ? body.error.type.slice(0, 80) : undefined;
+    const providerMessage =
+      typeof body.error?.message === "string"
+        ? body.error.message.replace(/[\r\n\t]+/g, " ").slice(0, 500)
+        : undefined;
     throw new MetaApiError(
       `Meta API request failed with HTTP ${response.status}${code ? ` (code ${code})` : ""}.`,
-      { retryable: retryableStatus(response.status), status: response.status, providerCode: code }
+      {
+        retryable: retryableStatus(response.status),
+        status: response.status,
+        providerCode: code,
+        providerSubcode: subcode,
+        providerType: type,
+        providerMessage,
+      }
     );
   }
   return body;

@@ -165,6 +165,9 @@ function metaErrorMessage(code: unknown) {
   if (code === "META_PAGE_UNAVAILABLE") {
     return "That Facebook Page is no longer available. Connect Meta again.";
   }
+  if (code === "META_CODE_REJECTED") {
+    return "Meta rejected the authorization code. Start the connection again and complete the Facebook prompt without reusing an older popup.";
+  }
   return "Meta could not be connected. You can retry or use the fallback connection.";
 }
 

@@ -300,3 +300,39 @@ test("classifies provider 5xx as retryable without leaking a token", async () =>
     }
   );
 });
+
+test("preserves safe Meta error diagnostics without exposing request credentials", async () => {
+  const client = createMetaClient({
+    graphVersion: "v99.0",
+    fetcher: async () =>
+      jsonResponse(
+        {
+          error: {
+            message: "Invalid verification code format.",
+            type: "OAuthException",
+            code: 100,
+            error_subcode: 36008,
+          },
+        },
+        400
+      ),
+  });
+
+  await assert.rejects(
+    () =>
+      client.exchangeCode({
+        appId: "public-app-id",
+        appSecret: "server-app-secret",
+        code: "browser-authorization-code",
+      }),
+    (error: unknown) => {
+      assert.ok(error instanceof MetaApiError);
+      assert.equal(error.providerCode, 100);
+      assert.equal(error.providerSubcode, 36008);
+      assert.equal(error.providerType, "OAuthException");
+      assert.equal(error.providerMessage, "Invalid verification code format.");
+      assert.doesNotMatch(JSON.stringify(error), /server-app-secret|browser-authorization-code/);
+      return true;
+    }
+  );
+});

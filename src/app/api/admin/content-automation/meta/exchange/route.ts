@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 import { hasContentAutomationAdminAccess } from "@/app/admin/content-automation/auth";
 import { isSameOriginMutation } from "@/lib/scheduler/policy";
 import { encryptMetaTokens } from "@/lib/socialAutomation/crypto";
-import { createMetaClient, type MetaManagedPage } from "@/lib/socialAutomation/metaClient";
+import { createMetaClient, MetaApiError, type MetaManagedPage } from "@/lib/socialAutomation/metaClient";
 import {
   createMetaPendingConnection,
   META_PENDING_CONNECTION_COOKIE,
@@ -160,10 +160,20 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("[social-automation] Meta dashboard code exchange failed", {
       message: error instanceof Error ? error.message : "unknown error",
+      ...(error instanceof MetaApiError
+        ? {
+            providerCode: error.providerCode,
+            providerSubcode: error.providerSubcode,
+            providerType: error.providerType,
+            providerMessage: error.providerMessage,
+          }
+        : {}),
     });
+    const rejectedCode =
+      error instanceof MetaApiError && error.status >= 400 && error.status < 500;
     return NextResponse.json(
-      { ok: false, code: "META_EXCHANGE_FAILED" },
-      { status: 502, headers: { "Cache-Control": "no-store" } }
+      { ok: false, code: rejectedCode ? "META_CODE_REJECTED" : "META_EXCHANGE_FAILED" },
+      { status: rejectedCode ? 422 : 502, headers: { "Cache-Control": "no-store" } }
     );
   }
 }
