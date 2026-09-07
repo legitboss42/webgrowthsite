@@ -1,0 +1,48 @@
+name: Temporary govern social e2e test article
+
+on:
+  push:
+    branches:
+      - test/blog-social-e2e-governed
+    paths:
+      - .github/workflows/temp-govern-social-test.yml
+
+permissions:
+  contents: write
+
+jobs:
+  govern:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: test/blog-social-e2e-governed
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Add temporary article to governance
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+          const path = 'src/lib/route-governance.json';
+          const governance = JSON.parse(fs.readFileSync(path, 'utf8'));
+          const slug = 'temporary-social-automation-e2e-test';
+          if (!governance.articles.some((article) => article.slug === slug)) {
+            const firstRedirect = governance.articles.findIndex((article) => article.status === 'REDIRECT');
+            const entry = { slug, status: 'INDEX', sitemap: true };
+            if (firstRedirect === -1) governance.articles.push(entry);
+            else governance.articles.splice(firstRedirect, 0, entry);
+            fs.writeFileSync(path, JSON.stringify(governance, null, 2) + '\n');
+          }
+          NODE
+      - name: Commit governance entry
+        run: |
+          if git diff --quiet -- src/lib/route-governance.json; then
+            echo "Governance entry already present."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/lib/route-governance.json
+          git commit -m "test: govern temporary social automation article"
+          git push origin HEAD:test/blog-social-e2e-governed
