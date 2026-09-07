@@ -37,6 +37,31 @@ test("exchanges a Meta OAuth code for a user token without putting secrets in th
   assert.match(body, /code=auth-code/);
 });
 
+test("exchanges a Business Login SDK code without inventing a callback redirect URI", async () => {
+  const calls: Array<{ url: string; init?: RequestInit }> = [];
+  const client = createMetaClient({
+    graphVersion: "v99.0",
+    fetcher: async (url, init) => {
+      calls.push({ url: String(url), init });
+      return jsonResponse({ access_token: "sdk-user-token", token_type: "bearer", expires_in: 3600 });
+    },
+  });
+
+  const token = await client.exchangeCode({
+    appId: "app-1",
+    appSecret: "app-secret",
+    code: "sdk-auth-code",
+    nowMs: Date.parse("2026-09-07T09:00:00.000Z"),
+  });
+
+  assert.equal(token.userAccessToken, "sdk-user-token");
+  const body = new URLSearchParams(String(calls[0].init?.body || ""));
+  assert.equal(body.get("client_id"), "app-1");
+  assert.equal(body.get("client_secret"), "app-secret");
+  assert.equal(body.get("code"), "sdk-auth-code");
+  assert.equal(body.has("redirect_uri"), false);
+});
+
 test("exchanges the short-lived user token for a long-lived token without putting secrets in the URL", async () => {
   const calls: Array<{ url: string; init?: RequestInit }> = [];
   const client = createMetaClient({
