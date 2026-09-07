@@ -4,8 +4,11 @@ import assert from "node:assert/strict";
 import { createMetaClient } from "./metaClient";
 import {
   buildMetaAuthorizeUrl,
+  buildMetaSdkLoginOptions,
   createMetaOAuthState,
+  createMetaPendingConnection,
   readMetaOAuthState,
+  readMetaPendingConnection,
 } from "./metaOAuth";
 
 test("Meta OAuth state is sealed, expires, and preserves only a safe return path", () => {
@@ -21,6 +24,38 @@ test("Meta OAuth state is sealed, expires, and preserves only a safe return path
 
   const unsafe = createMetaOAuthState("test-secret", "https://evil.example/steal", now);
   assert.equal(readMetaOAuthState(unsafe.cookieValue, "test-secret", now)?.returnTo, "/admin/content-automation/");
+});
+
+test("Meta pending selection state is encrypted, tamper-resistant, and expires", () => {
+  const now = Date.parse("2026-09-07T09:00:00.000Z");
+  const pending = createMetaPendingConnection(
+    "pending-secret",
+    {
+      userAccessToken: "long-lived-user-token",
+      expiresAt: "2026-11-06T09:00:00.000Z",
+    },
+    now
+  );
+
+  assert.equal(pending.cookieValue.includes("long-lived-user-token"), false);
+  const parsed = readMetaPendingConnection(pending.cookieValue, "pending-secret", now + 60_000);
+  assert.deepEqual(parsed, {
+    userAccessToken: "long-lived-user-token",
+    expiresAt: "2026-11-06T09:00:00.000Z",
+    createdAt: now,
+  });
+  assert.equal(readMetaPendingConnection(`${pending.cookieValue}x`, "pending-secret", now + 60_000), null);
+  assert.equal(readMetaPendingConnection(pending.cookieValue, "pending-secret", now + 11 * 60_000), null);
+});
+
+test("Meta SDK Business Login options use config_id and authorization-code response", () => {
+  const options = buildMetaSdkLoginOptions("config-123");
+  assert.deepEqual(options, {
+    config_id: "config-123",
+    response_type: "code",
+    override_default_response_type: true,
+  });
+  assert.equal("scope" in options, false);
 });
 
 test("Meta authorize URL requests only the publishing permissions used by the feature", () => {
