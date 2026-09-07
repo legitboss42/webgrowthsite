@@ -161,17 +161,23 @@ export function createMetaClient({ graphVersion, fetcher = fetch }: MetaClientOp
       preferredPageId?: string;
     }): Promise<MetaManagedPage> {
       const url = appendQuery(`${graphRoot}/me/accounts`, {
-        fields: "id,name,access_token,tasks,instagram_business_account{id,username,name}",
+        fields:
+          "id,name,access_token,tasks,instagram_business_account{id,username,name},connected_instagram_account{id,username,name}",
       });
       const body = await requestJson(fetcher, url, { headers: authHeaders(input.userAccessToken) });
       const data = Array.isArray(body.data) ? body.data : [];
       const candidates = data
         .filter((item): item is Record<string, unknown> => Boolean(item && typeof item === "object"))
         .map((item) => {
-          const instagram =
+          const businessInstagram =
             item.instagram_business_account && typeof item.instagram_business_account === "object"
               ? (item.instagram_business_account as Record<string, unknown>)
               : null;
+          const connectedInstagram =
+            item.connected_instagram_account && typeof item.connected_instagram_account === "object"
+              ? (item.connected_instagram_account as Record<string, unknown>)
+              : null;
+          const instagram = businessInstagram || connectedInstagram;
           return {
             facebookPageId: typeof item.id === "string" ? item.id : "",
             facebookPageName: typeof item.name === "string" ? item.name : "",
