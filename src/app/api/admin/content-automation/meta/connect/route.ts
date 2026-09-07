@@ -30,6 +30,7 @@ export async function GET(request: Request) {
     const redirectUri =
       process.env.META_REDIRECT_URI?.trim() ||
       new URL("/api/admin/content-automation/meta/callback/", request.url).toString();
+    const configId = process.env.META_LOGIN_CONFIG_ID?.trim() || undefined;
     const requestUrl = new URL(request.url);
     const returnTo = requestUrl.searchParams.get("returnTo") || "/admin/content-automation/";
     const sealed = createMetaOAuthState(stateSecret, returnTo);
@@ -38,6 +39,7 @@ export async function GET(request: Request) {
       appId,
       redirectUri,
       state: sealed.state,
+      configId,
     });
 
     const response = NextResponse.redirect(authorizeUrl);
