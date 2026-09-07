@@ -14,15 +14,15 @@ test("automation builder and Properties inspector remain independently scrollabl
 
   assert.match(
     css,
-    /\.wg-whatsapp-app \.wg-automation-workspace \.wg-cw-surface\s*\{[^}]*overflow:\s*visible\s*!important/s,
+    /\.wg-whatsapp-app \.wg-automation-workspace \.wg-cw-surface\s*\{[\s\S]*?overflow:\s*visible\s*!important/,
   );
   assert.match(
     css,
-    /\.wg-whatsapp-app \.wg-automation-workspace \.wg-cw-surface > div\[class\*="min-h-\[calc\(100vh-5rem\)\]"\]\s*\{[^}]*overflow:\s*visible\s*!important/s,
+    /\.wg-whatsapp-app \.wg-automation-workspace \.wg-cw-surface > div\[class\*="min-h-\[calc\(100vh-5rem\)\]"\]\s*\{[\s\S]*?overflow:\s*visible\s*!important/,
   );
   assert.match(
     css,
-    /\.wg-whatsapp-app \.wg-automation-workspace[^}]*aside\[class\*="overflow-auto"\][^{]*\{[^}]*overflow-y:\s*auto\s*!important/s,
+    /\.wg-whatsapp-app \.wg-automation-workspace[^\{]*aside\[class\*="overflow-auto"\][^\{]*\{[\s\S]*?overflow-y:\s*auto\s*!important/,
   );
 });
 
@@ -32,11 +32,11 @@ test("WhatsApp Flow builder does not clip its editor or Properties inspector", (
 
   assert.match(
     css,
-    /\.wg-whatsapp-app \.wg-flow-workspace \.wg-editor-surface\s*\{[^}]*overflow:\s*visible\s*!important/s,
+    /\.wg-whatsapp-app \.wg-flow-workspace \.wg-editor-surface\s*\{[\s\S]*?overflow:\s*visible\s*!important/,
   );
   assert.match(
     css,
-    /\.wg-whatsapp-app \.wg-flow-workspace[^}]*aside:last-child\s*\{[^}]*overflow-y:\s*auto\s*!important/s,
+    /\.wg-whatsapp-app \.wg-flow-workspace[^\{]*aside:last-child\s*\{[\s\S]*?overflow-y:\s*auto\s*!important/,
   );
   assert.match(flowPage, /wg-editor-surface/);
 });
