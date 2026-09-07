@@ -4,6 +4,8 @@ import { openCookiePayload, sealCookiePayload } from "../secureCookie";
 
 export const META_OAUTH_STATE_COOKIE = "webgrowth_meta_oauth_state";
 export const META_OAUTH_STATE_MAX_AGE_SECONDS = 10 * 60;
+export const META_PENDING_CONNECTION_COOKIE = "webgrowth_meta_pending_connection";
+export const META_PENDING_CONNECTION_MAX_AGE_SECONDS = 10 * 60;
 
 export const META_PUBLISH_SCOPES = [
   "pages_show_list",
@@ -19,12 +21,36 @@ type MetaOAuthStatePayload = {
   returnTo: string;
 };
 
+type MetaPendingConnectionPayload = {
+  userAccessToken: string;
+  expiresAt: string | null;
+  createdAt: number;
+};
+
 function safeReturnTo(value: string) {
   const candidate = value.trim();
   if (!candidate.startsWith("/") || candidate.startsWith("//") || candidate.includes("\\")) {
     return "/admin/content-automation/";
   }
   return candidate;
+}
+
+function isCanonicalBase64UrlPart(value: string) {
+  if (!value || !/^[A-Za-z0-9_-]+$/.test(value)) return false;
+  const normalized = value.replace(/-/g, "+").replace(/_/g, "/");
+  const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, "=");
+  const canonical = Buffer.from(padded, "base64")
+    .toString("base64")
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/g, "");
+  return canonical === value;
+}
+
+function isCanonicalSealedCookie(value: string | undefined) {
+  if (!value) return false;
+  const parts = value.split(".");
+  return parts.length === 3 && parts.every(isCanonicalBase64UrlPart);
 }
 
 export function createMetaOAuthState(secret: string, returnTo: string, nowMs = Date.now()) {
@@ -44,6 +70,7 @@ export function readMetaOAuthState(
   secret: string,
   nowMs = Date.now()
 ): MetaOAuthStatePayload | null {
+  if (!isCanonicalSealedCookie(cookieValue)) return null;
   const payload = openCookiePayload<MetaOAuthStatePayload>(cookieValue, secret);
   if (!payload) return null;
   if (typeof payload.state !== "string" || payload.state.length < 16) return null;
@@ -54,6 +81,52 @@ export function readMetaOAuthState(
     state: payload.state,
     createdAt: payload.createdAt,
     returnTo: safeReturnTo(payload.returnTo),
+  };
+}
+
+export function createMetaPendingConnection(
+  secret: string,
+  input: { userAccessToken: string; expiresAt?: string | null },
+  nowMs = Date.now()
+) {
+  const token = input.userAccessToken.trim();
+  if (!token) throw new Error("Meta pending user access token is missing.");
+  const payload: MetaPendingConnectionPayload = {
+    userAccessToken: token,
+    expiresAt: input.expiresAt?.trim() || null,
+    createdAt: nowMs,
+  };
+  return { cookieValue: sealCookiePayload(payload, secret) };
+}
+
+export function readMetaPendingConnection(
+  cookieValue: string | undefined,
+  secret: string,
+  nowMs = Date.now()
+): MetaPendingConnectionPayload | null {
+  if (!isCanonicalSealedCookie(cookieValue)) return null;
+  const payload = openCookiePayload<MetaPendingConnectionPayload>(cookieValue, secret);
+  if (!payload) return null;
+  if (typeof payload.userAccessToken !== "string" || !payload.userAccessToken.trim()) return null;
+  if (payload.expiresAt !== null && typeof payload.expiresAt !== "string") return null;
+  if (!Number.isFinite(payload.createdAt)) return null;
+  const age = nowMs - payload.createdAt;
+  if (age < -60_000 || age > META_PENDING_CONNECTION_MAX_AGE_SECONDS * 1000) return null;
+  return {
+    userAccessToken: payload.userAccessToken,
+    expiresAt: payload.expiresAt,
+    createdAt: payload.createdAt,
+  };
+}
+
+export function buildMetaSdkLoginOptions(configId: string) {
+  const value = configId.trim();
+  if (!value) throw new Error("META_LOGIN_CONFIG_ID is not configured.");
+  return {
+    config_id: value,
+    auth_type: "rerequest" as const,
+    response_type: "code" as const,
+    override_default_response_type: true as const,
   };
 }
 

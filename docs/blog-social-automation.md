@@ -2,18 +2,21 @@
 
 ## Current status
 
-The core blog-to-social feature is live in production.
+The core blog-to-social feature is live in production. The Meta connection correction described below is implemented on draft PR #18 (`fix/meta-dashboard-business-login`) but is **not merged or deployed**. Production therefore remains on the existing connection flow until the final release matrix is green and explicit deployment approval is received.
 
-Production release history:
+Production release history before PR #18:
 
 - Main release commit: `01fbb959920eb9130334f414bb0e4144f3cbfada`
 - Meta linked-account compatibility bugfix: `cc4dc0fd47249e46f428716fea23229f56072f06`
 - Production Vercel deployment for the linked-account bugfix: `dpl_4vk7FCfhP4KHagZVhtR4TdvS7vfX` - READY
 - Supabase migration: `20260906105535_blog_social_automation` - applied
 
-The remaining production blocker is Meta OAuth reconnection. After the first successful Meta authorization round-trip failed during linked-Instagram discovery, subsequent Connect Meta attempts reach `/api/admin/content-automation/meta/connect/` and receive a 307 to Meta, but Meta does not return to our callback.
+The production Meta incident had two distinct symptoms:
 
-A follow-up patch is being verified on the preview-blocked `feature/blog-social-automation` branch. It adds explicit permission re-request semantics and current Facebook Login for Business `config_id` support. It is not yet merged or deployed.
+1. Desktop could complete the authorization round trip, but an account with several Instagram-linked Facebook Pages reached `resolveManagedPage()` and was rejected as ambiguous. No connection row was saved, so the dashboard stayed `Not connected`.
+2. Mobile depended on the full-page cross-site redirect. Production requests left Web Growth for Meta but did not reliably return to the callback.
+
+PR #18 replaces that redirect as the primary connection mechanism with Facebook Login for Business inside the Content Automation dashboard and adds explicit Page selection.
 
 ## What the feature does
 
@@ -50,11 +53,23 @@ Production tables:
 
 RLS is enabled. Browser grants are revoked and required access is service-role-only. The `social-automation` Storage bucket is private. Default automation settings enable Instagram, Facebook and TikTok generation, use 7-day retention, and default to `Africa/Lagos`.
 
+PR #18 requires **no database migration** and reuses the existing `social_connections` schema.
+
 ## Security model
 
 Internal GitHub-to-application requests use HMAC-SHA256 over `${timestamp}.${body}` with `SOCIAL_AUTOMATION_WEBHOOK_SECRET`. Invalid signatures and requests outside the timestamp window are rejected.
 
-Meta tokens are encrypted before storage using `META_TOKEN_ENCRYPTION_KEY`. The browser receives only safe connection metadata. Runtime publishing rejects Meta connections marked for reconnect or with expired access credentials before decrypting provider tokens.
+Meta tokens are encrypted before storage using `META_TOKEN_ENCRYPTION_KEY`. Runtime publishing rejects Meta connections marked for reconnect or with expired access credentials before decrypting provider tokens.
+
+The dashboard Business Login flow adds these boundaries:
+
+- Only the Meta App ID, Graph version and Business Login configuration ID are exposed to browser JavaScript. They are identifiers required by the Meta SDK, not secret credentials.
+- `META_APP_SECRET`, `META_OAUTH_STATE_SECRET`, `META_TOKEN_ENCRYPTION_KEY`, user access tokens, Page access tokens and encrypted token payloads remain server-side.
+- The browser receives only the authorization code returned by Meta and safe Page/Instagram candidate metadata: IDs and names.
+- `POST /api/admin/content-automation/meta/exchange/` and `POST /api/admin/content-automation/meta/select/` both require the existing Content Automation admin session and a same-origin mutation.
+- When several Pages are available, the long-lived user token is stored only in a short-lived AES-GCM-sealed HttpOnly cookie. The pending cookie expires after ten minutes and rejects tampered, non-canonical or expired values.
+- The selection route re-queries Meta using the sealed pending user token before accepting the requested Page. A stale or fabricated Page ID is not trusted from the browser.
+- Final user/Page tokens are encrypted before the existing `social_connections` row is saved.
 
 Supabase security advisors report informational `RLS Enabled No Policy` notices for the social tables because they are intentionally service-role-only. Supabase Auth separately reports leaked-password protection as disabled; that is a project-level warning unrelated to this feature.
 
@@ -67,7 +82,7 @@ Never commit real values.
 - `META_GRAPH_VERSION`
 - `META_REDIRECT_URI=https://webgrowth.info/api/admin/content-automation/meta/callback/`
 - `META_LOGIN_CONFIG_ID` - Facebook Login for Business configuration ID
-- `META_PAGE_ID` - optional preferred Facebook Page when multiple eligible Pages exist
+- `META_PAGE_ID` - optional preferred Facebook Page used by the legacy callback fallback
 - `META_OAUTH_STATE_SECRET`
 - `META_TOKEN_ENCRYPTION_KEY`
 - `SOCIAL_AUTOMATION_WEBHOOK_SECRET`
@@ -79,25 +94,46 @@ Never commit real values.
 - existing `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 - existing `OWNER_TIKTOK_OPEN_IDS`
 
-`META_APP_SECRET`, `META_OAUTH_STATE_SECRET`, `META_TOKEN_ENCRYPTION_KEY`, `SOCIAL_AUTOMATION_WEBHOOK_SECRET` and `SUPABASE_SERVICE_ROLE_KEY` remain server-only secrets.
+`META_APP_SECRET`, `META_OAUTH_STATE_SECRET`, `META_TOKEN_ENCRYPTION_KEY`, `SOCIAL_AUTOMATION_WEBHOOK_SECRET` and `SUPABASE_SERVICE_ROLE_KEY` remain server-only secrets and must never use a `NEXT_PUBLIC_` prefix.
 
-## Meta OAuth setup
+## Meta OAuth / Business Login setup
 
-The Content Automation dashboard starts Meta OAuth. The callback exchanges the authorization code, upgrades the user token to a longer-lived token, discovers the managed Facebook Page and linked Instagram professional account, encrypts the tokens, and stores safe connection metadata.
+### Primary dashboard flow
 
-The production resolver supports both Meta Page representations used by the account-linking flow:
+The Content Automation dashboard loads Meta's JavaScript SDK from `https://connect.facebook.net/en_US/sdk.js` and initializes it with the configured App ID and Graph version. Clicking Connect/Reconnect calls `FB.login` directly from the button interaction with:
 
-- `instagram_business_account`
-- `connected_instagram_account`
+- `config_id=META_LOGIN_CONFIG_ID`
+- `auth_type=rerequest`
+- `response_type=code`
+- `override_default_response_type=true`
 
-The follow-up reconnect patch adds two OAuth compatibility behaviors:
+The Business Login configuration owns the Page/Instagram permissions, so the SDK call does not send a second raw `scope` bundle.
 
-1. `auth_type=rerequest` is always sent so a prior failed/partial authorization does not silently reuse stale permission state.
-2. When `META_LOGIN_CONFIG_ID` is configured, OAuth uses Meta's Facebook Login for Business `config_id` flow and does not send the legacy raw `scope` parameter. `override_default_response_type=true` keeps the callback on authorization-code flow.
+After Meta returns an authorization code:
 
-If `META_LOGIN_CONFIG_ID` is absent, the implementation preserves the existing scope-based fallback for compatibility, but production should use a Business Login configuration for the Web Growth Meta app.
+1. The browser POSTs only `{ code }` to `/api/admin/content-automation/meta/exchange/`.
+2. The server exchanges the SDK code without inventing the legacy callback `redirect_uri` and upgrades the result to a longer-lived user token.
+3. The server calls `/me/accounts` and accepts both linked-Instagram representations used by Meta:
+   - `instagram_business_account`
+   - `connected_instagram_account`
+4. If exactly one eligible Page exists, it is connected automatically.
+5. If several eligible Pages exist, the server seals the pending user token in an HttpOnly cookie and returns only safe Page/Instagram IDs and names.
+6. The dashboard renders the candidate pairs as touch-friendly controls on both mobile and desktop.
+7. Selecting a Page POSTs only its Facebook Page ID to `/api/admin/content-automation/meta/select/`.
+8. The server decrypts the pending credential, re-queries Meta, validates the selected Page, encrypts the final user/Page token pair, saves the existing connection row and clears the pending cookie.
 
-The Meta app must include the exact callback URL in Valid OAuth Redirect URIs and the Business Login configuration must contain the Page/Instagram publishing permissions needed by this feature.
+This removes the two brittle assumptions in the previous primary flow: that mobile must survive a full-page Meta round trip and that one Meta user necessarily manages only one eligible Instagram-linked Page.
+
+### Fallback callback flow
+
+The existing routes remain available as a secondary fallback when the Meta SDK is unavailable or the SDK configuration is missing:
+
+- `/api/admin/content-automation/meta/connect/`
+- `/api/admin/content-automation/meta/callback/`
+
+The fallback retains sealed OAuth state, `auth_type=rerequest`, Business Login `config_id` support when configured, and the older scope-based compatibility path when no configuration ID exists. Unlike SDK-issued codes, callback-issued codes continue to be exchanged with the matching `META_REDIRECT_URI`.
+
+The Meta app must include the exact callback URL in Valid OAuth Redirect URIs. The Facebook Login for Business configuration must include the Page and Instagram publishing permissions required by this feature.
 
 ## GitHub Actions
 
@@ -143,16 +179,22 @@ These were intentionally not turned into an unrelated production migration durin
 
 The original release and linked-account resolver bugfix both passed the strict release matrix: social, scheduler, WhatsApp, TypeScript, lint, SEO, sitemap, Next.js production build, real branded Meta render, real neutral TikTok render, and 1080x1920 ffprobe verification.
 
-Reconnect incident TDD evidence:
+PR #18 TDD evidence before final release validation:
 
-- `85f5606a289f722e547454c2140779e1107422fe` added the `auth_type=rerequest` regression contract. Run `34084858720` failed only on that new assertion while the other 83 social tests passed.
-- `2a55780217f6ebb6cb1bbe71e31800105b0e76e0` added the Facebook Login for Business `config_id` contract. Run `34084959918` failed on both intentionally missing OAuth behaviors while the other 83 tests passed.
-- `80686d7d7d57f2d5f05cfd8fdc68f6161f85f6c1` implemented the reconnect and Business Login URL support. Focused feature validation returned GREEN.
+- RED `2ed701b0b28fc857127ca528e6396297c8032286` / run `34103978127`: required multi-Page discovery; failed only on the missing `listManagedPages` behavior.
+- RED `bcd795f1f1b9e46e218011dd4baba1bf2c35d36c` / run `34109563997`: required encrypted pending state and SDK Business Login options.
+- Security follow-up `ce92cc2a41e9c282dbb5342eb09213ff947b2f71` / run `34109833584`: rejected non-canonical sealed-cookie tampering and returned GREEN.
+- RED `fdc699544b9d2b8a75bf23f4bc0ca0a2642b28ea` / run `34110219049`: required SDK code exchange without the legacy callback URI and reconnect `rerequest` semantics. GREEN run: `34110446586`.
+- RED `0dcad12dc7e15e8b6fbb2de12ed3a3885e3de0d3` / run `34110564820`: required protected exchange/select endpoints. GREEN run after implementation/test correction: `34110847886`.
+- RED `0a22dc5ea7ae4fc5733af0799ba31db77b8bcd7d` / run `34110996107`: 91 existing social tests passed and only the intentionally missing dashboard-flow assertion failed.
+- Dashboard implementation `d411365de7cc5f26292d76668cc4afabccf36498` + `4f3fc3d3c0e64dd133aa3cec31f9d06f3d92128c`: focused social validation run `34111340060` returned GREEN.
 
-## Deployment boundary for the reconnect patch
+## Deployment boundary for PR #18
 
-The reconnect patch is not yet in production.
+PR #18 remains draft and must not be merged or deployed until:
 
-- Keep `feature/blog-social-automation` preview deployment disabled.
-- Do not merge the reconnect patch into `main` until `META_LOGIN_CONFIG_ID` is configured in the intended production environment and the final branch validation is green.
-- Do not trigger another production Vercel deployment without explicit approval.
+1. The exact final head passes the focused social suite and the repository's full release validation.
+2. The final diff confirms there is no Supabase migration, no token-bearing browser response, and no unrelated TikTok/WhatsApp/publishing change.
+3. Explicit user approval is received for the single production deployment.
+
+Do not merge unfinished Meta connection work to `main` or trigger a production Vercel deployment merely because environment variables or documentation changed. Both actions require explicit user approval.

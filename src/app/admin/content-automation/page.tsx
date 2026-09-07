@@ -9,6 +9,7 @@ import {
   isGoogleAuthConfigured,
 } from "@/lib/googleAuth";
 import { isMetaConnectionUsable } from "@/lib/socialAutomation/adminModel";
+import { buildMetaSdkLoginOptions } from "@/lib/socialAutomation/metaOAuth";
 import { createSocialAutomationStore } from "@/lib/socialAutomation/storeServer";
 import { hasContentAutomationAdminAccess } from "./auth";
 import ContentAutomationClient, { type ContentAutomationJob } from "./ContentAutomationClient";
@@ -28,6 +29,21 @@ function record(value: unknown): Record<string, unknown> | null {
 
 function text(value: unknown) {
   return typeof value === "string" ? value : "";
+}
+
+function loadMetaLoginConfig() {
+  const appId = process.env.META_APP_ID?.trim() || "";
+  const graphVersion = process.env.META_GRAPH_VERSION?.trim() || "";
+  const configId = process.env.META_LOGIN_CONFIG_ID?.trim() || "";
+  const configured = Boolean(appId && /^v\d+(?:\.\d+)?$/.test(graphVersion) && configId);
+
+  return {
+    appId,
+    graphVersion,
+    configId,
+    configured,
+    loginOptions: configured ? buildMetaSdkLoginOptions(configId) : null,
+  };
 }
 
 async function loadDashboardData() {
@@ -119,6 +135,7 @@ export default async function ContentAutomationAdminPage() {
     );
   }
 
+  const metaLogin = loadMetaLoginConfig();
   let data: Awaited<ReturnType<typeof loadDashboardData>> | null = null;
   let loadFailed = false;
   try {
@@ -152,6 +169,7 @@ export default async function ContentAutomationAdminPage() {
             initialSettings={data.settings}
             connection={data.connection}
             jobs={data.jobs}
+            metaLogin={metaLogin}
           />
         )}
       </div>

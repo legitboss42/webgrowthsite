@@ -265,6 +265,18 @@
       "reason": "Private application, account utility, media proxy, or API route"
     },
     {
+      "path": "/api/admin/content-automation/meta/exchange",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
+      "path": "/api/admin/content-automation/meta/select",
+      "status": "NOINDEX",
+      "sitemap": false,
+      "reason": "Private application, account utility, media proxy, or API route"
+    },
+    {
       "path": "/api/admin/content-automation/settings",
       "status": "NOINDEX",
       "sitemap": false,
