@@ -64,6 +64,55 @@ test("exchanges the short-lived user token for a long-lived token without puttin
   assert.match(body, /fb_exchange_token=short-user-token/);
 });
 
+test("lists every Facebook Page linked to an Instagram professional account for explicit selection", async () => {
+  const client = createMetaClient({
+    graphVersion: "v99.0",
+    fetcher: async () =>
+      jsonResponse({
+        data: [
+          {
+            id: "page-1",
+            name: "Web Growth",
+            access_token: "page-token-1",
+            tasks: ["CREATE_CONTENT"],
+            instagram_business_account: { id: "ig-1", username: "web.growth" },
+          },
+          {
+            id: "page-2",
+            name: "Second Brand",
+            access_token: "page-token-2",
+            tasks: ["CREATE_CONTENT"],
+            connected_instagram_account: { id: "ig-2", username: "second.brand" },
+          },
+        ],
+      }),
+  });
+
+  const pages = await client.listManagedPages({ userAccessToken: "user-token" });
+  assert.deepEqual(
+    pages.map((page) => ({
+      facebookPageId: page.facebookPageId,
+      facebookPageName: page.facebookPageName,
+      instagramAccountId: page.instagramAccountId,
+      instagramAccountName: page.instagramAccountName,
+    })),
+    [
+      {
+        facebookPageId: "page-1",
+        facebookPageName: "Web Growth",
+        instagramAccountId: "ig-1",
+        instagramAccountName: "web.growth",
+      },
+      {
+        facebookPageId: "page-2",
+        facebookPageName: "Second Brand",
+        instagramAccountId: "ig-2",
+        instagramAccountName: "second.brand",
+      },
+    ]
+  );
+});
+
 test("resolves the only Facebook Page linked to an Instagram professional account", async () => {
   const calls: string[] = [];
   const client = createMetaClient({
