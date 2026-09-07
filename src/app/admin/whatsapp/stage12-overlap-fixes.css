@@ -19,6 +19,39 @@
   max-width: 12.5rem;
 }
 
+/* Builder regression repair.
+   Stage 12 surfaces normally clip their contents, but the Automation and Flow editors
+   contain their own scrolling canvases/inspectors. Clipping those hosts traps the
+   Properties panels and makes lower settings unreachable. */
+.wg-whatsapp-app .wg-automation-workspace .wg-cw-surface {
+  overflow: visible !important;
+}
+
+.wg-whatsapp-app .wg-automation-workspace .wg-cw-surface > div[class*="min-h-[calc(100vh-5rem)]"] {
+  overflow: visible !important;
+}
+
+.wg-whatsapp-app .wg-flow-workspace .wg-editor-surface {
+  overflow: visible !important;
+}
+
+@media (min-width: 1024px) {
+  .wg-whatsapp-app .wg-automation-workspace .wg-cw-surface > div[class*="min-h-[calc(100vh-5rem)]"] aside[class*="overflow-auto"] {
+    max-height: calc(100dvh - 69px) !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain;
+  }
+
+  .wg-whatsapp-app .wg-flow-workspace .wg-editor-surface div[class*="lg:grid-cols-[240px_minmax(360px,1fr)_340px]"] > aside:last-child {
+    position: sticky;
+    top: 69px;
+    align-self: start;
+    max-height: calc(100dvh - 69px);
+    overflow-y: auto !important;
+    overscroll-behavior: contain;
+  }
+}
+
 /* Keep the conversation action dock in the free topbar space immediately before sender/presence controls. */
 @media (min-width: 1024px) {
   .wg-whatsapp-app .wg-app-topbar #wg-whatsapp-topbar-actions {
