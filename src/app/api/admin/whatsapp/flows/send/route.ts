@@ -52,7 +52,7 @@ export async function POST(request: Request) {
 
   const config = getWhatsAppSupabaseConfig();
   if (config) {
-    try { await createSupabaseWhatsAppStore({ url: config.url, serviceRoleKey: config.key }).recordOutbound({ messageId: sent.messageId, waId, conversationId, text: `[Flow: ${flow.name}]`, type: "interactive", timestamp: Math.floor(Date.now() / 1000) }); }
+    try { await createSupabaseWhatsAppStore({ url: config.url, serviceRoleKey: config.key, workspaceId: access.workspaceId }).recordOutbound({ messageId: sent.messageId, waId, conversationId, text: `[Flow: ${flow.name}]`, type: "interactive", timestamp: Math.floor(Date.now() / 1000) }); }
     catch (error) { console.error("Flow outbound history write failed", error); }
   }
   await recordWhatsAppConversationActivity({ conversationId, actorMemberId: access.memberId, actorEmail: access.email, eventType: "flow_sent", metadata: { flowId: flow.id, metaFlowId: flow.metaFlowId, flowName: flow.name, submissionId: started.submissionId, messageId: sent.messageId } });
