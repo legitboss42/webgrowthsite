@@ -17,6 +17,12 @@ function source(file: string) {
   return readFileSync(file, "utf8");
 }
 
+function candidateMapper(exchange: string) {
+  const match = exchange.match(/function candidate\(page: MetaManagedPage\) \{[\s\S]*?\n\}/);
+  assert.ok(match, "Expected a dedicated safe Meta candidate mapper");
+  return match[0];
+}
+
 test("Meta dashboard exchange route keeps the code exchange and pending token server-side", () => {
   const exchange = source(exchangePath);
   assert.match(exchange, /export async function POST/);
@@ -29,10 +35,14 @@ test("Meta dashboard exchange route keeps the code exchange and pending token se
   assert.match(exchange, /META_PENDING_CONNECTION_COOKIE/);
   assert.match(exchange, /httpOnly:\s*true/);
   assert.match(exchange, /status:\s*"selection-required"/);
-  assert.match(exchange, /facebookPageId/);
-  assert.match(exchange, /instagramAccountId/);
-  assert.doesNotMatch(exchange, /NextResponse\.json\([\s\S]{0,1200}userAccessToken\s*:/);
-  assert.doesNotMatch(exchange, /NextResponse\.json\([\s\S]{0,1200}pageAccessToken\s*:/);
+  assert.match(exchange, /candidates:\s*candidates\.map\(candidate\)/);
+
+  const mapper = candidateMapper(exchange);
+  assert.match(mapper, /facebookPageId/);
+  assert.match(mapper, /facebookPageName/);
+  assert.match(mapper, /instagramAccountId/);
+  assert.match(mapper, /instagramAccountName/);
+  assert.doesNotMatch(mapper, /userAccessToken|pageAccessToken|encryptedTokens/);
 });
 
 test("Meta dashboard selection route revalidates pending state before saving the selected Page", () => {
@@ -47,6 +57,5 @@ test("Meta dashboard selection route revalidates pending state before saving the
   assert.match(select, /saveMetaConnection/);
   assert.match(select, /META_CONNECTED/);
   assert.match(select, /maxAge:\s*0/);
-  assert.doesNotMatch(select, /NextResponse\.json\([\s\S]{0,1000}userAccessToken\s*:/);
-  assert.doesNotMatch(select, /NextResponse\.json\([\s\S]{0,1000}pageAccessToken\s*:/);
+  assert.match(select, /NextResponse\.json\(\{ ok: true, status: "connected" \}\)/);
 });
