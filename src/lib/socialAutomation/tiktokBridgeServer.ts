@@ -1,6 +1,8 @@
 import "server-only";
 
+import { finalizeStoredSchedulerMedia } from "@/lib/scheduler/uploadFinalizationServer";
 import { createSchedulerSupabaseClient } from "@/lib/scheduler/supabase";
+import { VIDEO_VALIDATION_VERSION } from "@/lib/scheduler/videoValidation";
 import { persistTikTokDraft } from "./tiktokBridgeStore";
 import { parseOwnerOpenIds, selectOwnerSchedulerUser } from "./tiktokOwner";
 
@@ -71,6 +73,39 @@ export async function createBlogTikTokDraft(input: {
         const { data, error } = await client.from("media_assets").insert(row).select("id").single();
         if (error || !data?.id) fail("Unable to create TikTok media asset", error);
         return { id: String(data.id) };
+      },
+      async finalizeMedia(mediaId, checksum) {
+        const { data, error } = await client
+          .from("media_assets")
+          .select("validation_status,validation_version,article_slug")
+          .eq("id", mediaId)
+          .eq("user_id", userId)
+          .maybeSingle();
+        if (error) fail("Unable to read TikTok media validation state", error);
+        if (!data) throw new Error("TikTok media asset is unavailable for validation.");
+
+        if (
+          data.validation_status === "VALID" &&
+          data.validation_version === VIDEO_VALIDATION_VERSION &&
+          data.article_slug == null
+        ) {
+          return;
+        }
+        if (data.article_slug != null) {
+          throw new Error("TikTok automated video media is incorrectly marked as virtual article media.");
+        }
+        if (data.validation_status !== "PENDING") {
+          throw new Error("TikTok automated video media does not have reusable validation state.");
+        }
+
+        const result = await finalizeStoredSchedulerMedia({
+          userId,
+          assetId: mediaId,
+          checksum,
+        });
+        if (!result.ok) {
+          throw new Error(`TikTok automated video validation failed: ${result.error}`);
+        }
       },
       async insertPost(row) {
         const { data, error } = await client.from("scheduled_posts").insert(row).select("id").single();

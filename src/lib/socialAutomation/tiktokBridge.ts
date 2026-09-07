@@ -20,8 +20,7 @@ export function buildTikTokSchedulerRecords(input: TikTokRecordInput) {
       byte_size: input.byteSize,
       checksum: input.checksum,
       duration_seconds: input.durationSeconds,
-      validation_status: "VALID" as const,
-      article_slug: input.articleSlug,
+      validation_status: "PENDING" as const,
       cleanup_state: "PENDING" as const,
     },
     post: {
