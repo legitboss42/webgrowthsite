@@ -48,10 +48,11 @@ test("Meta pending selection state is encrypted, tamper-resistant, and expires",
   assert.equal(readMetaPendingConnection(pending.cookieValue, "pending-secret", now + 11 * 60_000), null);
 });
 
-test("Meta SDK Business Login options use config_id and authorization-code response", () => {
+test("Meta SDK Business Login options use config_id, rerequest, and authorization-code response", () => {
   const options = buildMetaSdkLoginOptions("config-123");
   assert.deepEqual(options, {
     config_id: "config-123",
+    auth_type: "rerequest",
     response_type: "code",
     override_default_response_type: true,
   });
