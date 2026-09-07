@@ -16,6 +16,28 @@ test("automation and Flow builders use normal page scrolling instead of the inbo
   assert.equal(getWhatsAppLayoutMode("/admin/whatsapp/flows"), "scroll");
 });
 
+test("interactive outbound routes pass the authenticated workspace explicitly to Supabase storage", () => {
+  const replyRoutes = [
+    "src/app/api/admin/whatsapp/reply/route.ts",
+    "src/app/api/admin/whatsapp/reply/audio/route.ts",
+    "src/app/api/admin/whatsapp/reply/media/route.ts",
+    "src/app/api/admin/whatsapp/reply/saved-reply/route.ts",
+  ];
+
+  for (const route of replyRoutes) {
+    assert.match(
+      source(route),
+      /const storeOptions = \{ url: supabaseUrl, serviceRoleKey, workspaceId: access\.workspaceId \};/,
+      `${route} must not rely on AsyncLocalStorage surviving the auth await boundary`,
+    );
+  }
+
+  assert.match(
+    source("src/app/api/admin/whatsapp/flows/send/route.ts"),
+    /createSupabaseWhatsAppStore\(\{ url: config\.url, serviceRoleKey: config\.key, workspaceId: access\.workspaceId \}\)/,
+  );
+});
+
 test("automation builder and Properties inspector remain independently scrollable", () => {
   const css = source("src/app/admin/whatsapp/stage12-overlap-fixes.css");
 
