@@ -35,6 +35,7 @@ test("Meta authorize URL requests only the publishing permissions used by the fe
   assert.equal(url.hostname, "www.facebook.com");
   assert.equal(url.searchParams.get("client_id"), "app-1");
   assert.equal(url.searchParams.get("state"), "state-1");
+  assert.equal(url.searchParams.get("auth_type"), "rerequest");
   const scopes = new Set((url.searchParams.get("scope") || "").split(","));
   for (const scope of [
     "pages_show_list",
