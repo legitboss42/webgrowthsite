@@ -2,12 +2,19 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import test from "node:test";
+import { getWhatsAppLayoutMode } from "./nav";
 
 const ROOT = process.cwd();
 
 function source(file: string) {
   return readFileSync(path.join(ROOT, file), "utf8");
 }
+
+test("automation and Flow builders use normal page scrolling instead of the inbox-only fill shell", () => {
+  assert.equal(getWhatsAppLayoutMode("/admin/whatsapp/conversations"), "fill");
+  assert.equal(getWhatsAppLayoutMode("/admin/whatsapp/automations"), "scroll");
+  assert.equal(getWhatsAppLayoutMode("/admin/whatsapp/flows"), "scroll");
+});
 
 test("automation builder and Properties inspector remain independently scrollable", () => {
   const css = source("src/app/admin/whatsapp/stage12-overlap-fixes.css");
