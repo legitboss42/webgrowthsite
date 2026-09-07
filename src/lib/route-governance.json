@@ -1486,6 +1486,11 @@
       "sitemap": true
     },
     {
+      "slug": "temporary-social-automation-e2e-test",
+      "status": "INDEX",
+      "sitemap": true
+    },
+    {
       "slug": "ga4-meta-tiktok-clarity-setup-guide",
       "status": "REDIRECT",
       "sitemap": false,
