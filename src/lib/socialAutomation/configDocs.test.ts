@@ -8,6 +8,7 @@ const requiredNames = [
   "META_APP_SECRET",
   "META_GRAPH_VERSION",
   "META_REDIRECT_URI",
+  "META_LOGIN_CONFIG_ID",
   "META_OAUTH_STATE_SECRET",
   "META_TOKEN_ENCRYPTION_KEY",
   "SOCIAL_AUTOMATION_WEBHOOK_SECRET",
@@ -34,6 +35,7 @@ test("operations guide documents workflows, live migration, Meta consent, and Ti
   assert.match(source, /blog-social-automation\.yml/);
   assert.match(source, /blog-social-cleanup\.yml/);
   assert.match(source, /Meta.*OAuth/i);
+  assert.match(source, /META_LOGIN_CONFIG_ID/);
   assert.match(source, /TikTok.*NEEDS_APPROVAL/i);
   assert.match(source, /do not merge.*main/i);
 });

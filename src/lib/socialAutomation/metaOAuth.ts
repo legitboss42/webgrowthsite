@@ -62,6 +62,7 @@ export function buildMetaAuthorizeUrl(input: {
   appId: string;
   redirectUri: string;
   state: string;
+  configId?: string;
 }) {
   const version = input.graphVersion.trim();
   if (!/^v\d+(?:\.\d+)?$/.test(version)) throw new Error("Invalid Meta Graph API version.");
@@ -70,6 +71,15 @@ export function buildMetaAuthorizeUrl(input: {
   url.searchParams.set("redirect_uri", input.redirectUri);
   url.searchParams.set("state", input.state);
   url.searchParams.set("response_type", "code");
-  url.searchParams.set("scope", META_PUBLISH_SCOPES.join(","));
+  url.searchParams.set("auth_type", "rerequest");
+
+  const configId = input.configId?.trim();
+  if (configId) {
+    url.searchParams.set("config_id", configId);
+    url.searchParams.set("override_default_response_type", "true");
+  } else {
+    url.searchParams.set("scope", META_PUBLISH_SCOPES.join(","));
+  }
+
   return url.toString();
 }

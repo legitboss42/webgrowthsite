@@ -35,6 +35,7 @@ test("Meta authorize URL requests only the publishing permissions used by the fe
   assert.equal(url.hostname, "www.facebook.com");
   assert.equal(url.searchParams.get("client_id"), "app-1");
   assert.equal(url.searchParams.get("state"), "state-1");
+  assert.equal(url.searchParams.get("auth_type"), "rerequest");
   const scopes = new Set((url.searchParams.get("scope") || "").split(","));
   for (const scope of [
     "pages_show_list",
@@ -45,6 +46,24 @@ test("Meta authorize URL requests only the publishing permissions used by the fe
   ]) {
     assert.equal(scopes.has(scope), true);
   }
+});
+
+test("Meta Business Login uses config_id instead of a raw scope bundle", () => {
+  const url = new URL(
+    buildMetaAuthorizeUrl({
+      graphVersion: "v99.0",
+      appId: "app-1",
+      redirectUri: "https://webgrowth.info/api/admin/content-automation/meta/callback/",
+      state: "state-1",
+      configId: "config-123",
+    })
+  );
+
+  assert.equal(url.searchParams.get("config_id"), "config-123");
+  assert.equal(url.searchParams.get("override_default_response_type"), "true");
+  assert.equal(url.searchParams.get("response_type"), "code");
+  assert.equal(url.searchParams.get("auth_type"), "rerequest");
+  assert.equal(url.searchParams.get("scope"), null);
 });
 
 test("initial Meta code exchange keeps the app secret and authorization code out of the URL", async () => {
