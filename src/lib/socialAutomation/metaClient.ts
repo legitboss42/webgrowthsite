@@ -156,17 +156,14 @@ export function createMetaClient({ graphVersion, fetcher = fetch }: MetaClientOp
       return parseTokenEnvelope(body, input.nowMs ?? Date.now());
     },
 
-    async resolveManagedPage(input: {
-      userAccessToken: string;
-      preferredPageId?: string;
-    }): Promise<MetaManagedPage> {
+    async listManagedPages(input: { userAccessToken: string }): Promise<MetaManagedPage[]> {
       const url = appendQuery(`${graphRoot}/me/accounts`, {
         fields:
           "id,name,access_token,tasks,instagram_business_account{id,username,name},connected_instagram_account{id,username,name}",
       });
       const body = await requestJson(fetcher, url, { headers: authHeaders(input.userAccessToken) });
       const data = Array.isArray(body.data) ? body.data : [];
-      const candidates = data
+      return data
         .filter((item): item is Record<string, unknown> => Boolean(item && typeof item === "object"))
         .map((item) => {
           const businessInstagram =
@@ -198,6 +195,13 @@ export function createMetaClient({ graphVersion, fetcher = fetch }: MetaClientOp
             Boolean(item.pageAccessToken) &&
             Boolean(item.instagramAccountId)
         );
+    },
+
+    async resolveManagedPage(input: {
+      userAccessToken: string;
+      preferredPageId?: string;
+    }): Promise<MetaManagedPage> {
+      const candidates = await client.listManagedPages({ userAccessToken: input.userAccessToken });
 
       if (candidates.length === 0) {
         throw new MetaApiError("No Instagram-linked Facebook Page is available for this Meta account.", {
