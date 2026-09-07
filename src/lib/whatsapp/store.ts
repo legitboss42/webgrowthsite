@@ -2,6 +2,7 @@ import { classifyWhatsAppIntent } from "./classify";
 import { getWhatsAppStatusesBelow, shouldApplyWhatsAppStatus } from "./messageStatus";
 import { normalizeWhatsAppRecipient } from "./send";
 import type { WhatsAppLeadKeywordRules } from "./settings";
+import { getWhatsAppRuntimeWorkspaceId } from "./workspaceContext";
 import { isWhatsAppWorkspaceId } from "./workspaceModel";
 
 export type InboundMessageRecord = { messageId: string; waId: string; displayName?: string; text?: string; timestamp: number; type?: string; mediaId?: string; mediaMimeType?: string; mediaSha256?: string; mediaVoice?: boolean; mediaFilename?: string };
@@ -14,13 +15,16 @@ export type WhatsAppStore = { recordInbound(input: InboundMessageRecord): Promis
 type SupabaseStoreOptions = { url: string; serviceRoleKey: string; workspaceId?: string | null; fetch?: typeof globalThis.fetch; leadKeywords?: WhatsAppLeadKeywordRules };
 export type WhatsAppReplyContext = { conversationId: string; waId: string; customerMessageTimestamp: number; replyToMessageId: string };
 
+function resolveWorkspaceId(options: SupabaseStoreOptions) {
+  return isWhatsAppWorkspaceId(options.workspaceId) ? options.workspaceId : getWhatsAppRuntimeWorkspaceId();
+}
 function scopeFilter(workspaceId: string | null | undefined) { return isWhatsAppWorkspaceId(workspaceId) ? `&workspace_id=eq.${encodeURIComponent(workspaceId)}` : ""; }
 function tenantBody(body: Record<string, unknown>, workspaceId: string | null | undefined) { return isWhatsAppWorkspaceId(workspaceId) ? { ...body, workspace_id: workspaceId } : body; }
 
 export async function getSupabaseWhatsAppReplyContext(options: SupabaseStoreOptions, conversationId: string, suppliedWaId: string): Promise<WhatsAppReplyContext | null> {
   const fetcher = options.fetch || globalThis.fetch; const baseUrl = options.url.replace(/\/$/, ""); const headers = { apikey: options.serviceRoleKey, Authorization: `Bearer ${options.serviceRoleKey}` }; const suppliedRecipient = normalizeWhatsAppRecipient(suppliedWaId);
   if (!suppliedRecipient || !conversationId.trim()) return null;
-  const scope = scopeFilter(options.workspaceId);
+  const workspaceId = resolveWorkspaceId(options); const scope = scopeFilter(workspaceId);
   const conversationResponse = await fetcher(`${baseUrl}/rest/v1/whatsapp_conversations?id=eq.${encodeURIComponent(conversationId)}${scope}&select=id,status,whatsapp_contacts!inner(wa_id)&limit=1`, { headers });
   if (!conversationResponse.ok) throw new Error(`Supabase WhatsApp conversation request failed: ${conversationResponse.status}`);
   const conversations = await conversationResponse.json() as Array<{ id?: string; status?: string; whatsapp_contacts?: { wa_id?: string } | Array<{ wa_id?: string }> }>;
@@ -37,26 +41,26 @@ export async function getSupabaseWhatsAppReplyContext(options: SupabaseStoreOpti
 type SupabaseRow = { id: string };
 export async function resolveSupabaseWhatsAppQuotedMessageId(options: SupabaseStoreOptions, conversationId: string, candidateMessageId: string | undefined): Promise<string | null> {
   const candidate = candidateMessageId?.trim(); if (!candidate || !conversationId.trim()) return null;
-  const fetcher = options.fetch || globalThis.fetch;
-  const response = await fetcher(`${options.url.replace(/\/$/, "")}/rest/v1/whatsapp_messages?conversation_id=eq.${encodeURIComponent(conversationId)}${scopeFilter(options.workspaceId)}&whatsapp_message_id=eq.${encodeURIComponent(candidate)}&select=whatsapp_message_id&limit=1`, { headers: { apikey: options.serviceRoleKey, Authorization: `Bearer ${options.serviceRoleKey}` } });
+  const fetcher = options.fetch || globalThis.fetch; const workspaceId = resolveWorkspaceId(options);
+  const response = await fetcher(`${options.url.replace(/\/$/, "")}/rest/v1/whatsapp_messages?conversation_id=eq.${encodeURIComponent(conversationId)}${scopeFilter(workspaceId)}&whatsapp_message_id=eq.${encodeURIComponent(candidate)}&select=whatsapp_message_id&limit=1`, { headers: { apikey: options.serviceRoleKey, Authorization: `Bearer ${options.serviceRoleKey}` } });
   if (!response.ok) throw new Error(`Supabase WhatsApp quoted message request failed: ${response.status}`);
   const rows = await response.json() as Array<{ whatsapp_message_id?: string }>;
   const stored = rows[0]?.whatsapp_message_id; return typeof stored === "string" && stored === candidate ? stored : null;
 }
 
 export function createSupabaseWhatsAppStore(options: SupabaseStoreOptions): WhatsAppStore {
-  const fetcher = options.fetch || globalThis.fetch;
+  const fetcher = options.fetch || globalThis.fetch; const workspaceId = resolveWorkspaceId(options);
   const request = async <T extends SupabaseRow>(path: string, init: RequestInit) => {
     const response = await fetcher(`${options.url.replace(/\/$/, "")}/rest/v1/${path}`, { ...init, headers: { apikey: options.serviceRoleKey, Authorization: `Bearer ${options.serviceRoleKey}`, "Content-Type": "application/json", Prefer: "return=representation", ...init.headers } });
     if (!response.ok) throw new Error(`Supabase WhatsApp store request failed: ${response.status}`);
     return await response.json() as T[];
   };
-  const scoped = (path: string) => `${path}${path.includes("?") ? "&" : "?"}${isWhatsAppWorkspaceId(options.workspaceId) ? `workspace_id=eq.${encodeURIComponent(options.workspaceId)}` : ""}`.replace(/[?&]$/, "");
-  const body = (value: Record<string, unknown>) => tenantBody(value, options.workspaceId);
+  const scoped = (path: string) => `${path}${path.includes("?") ? "&" : "?"}${isWhatsAppWorkspaceId(workspaceId) ? `workspace_id=eq.${encodeURIComponent(workspaceId)}` : ""}`.replace(/[?&]$/, "");
+  const body = (value: Record<string, unknown>) => tenantBody(value, workspaceId);
 
   const getConversation = async (input: InboundMessageRecord) => {
     const classification = classifyWhatsAppIntent(input.text || "", options.leadKeywords); const nowIso = new Date().toISOString();
-    const contactConflict = isWhatsAppWorkspaceId(options.workspaceId) ? "workspace_id,wa_id" : "wa_id";
+    const contactConflict = isWhatsAppWorkspaceId(workspaceId) ? "workspace_id,wa_id" : "wa_id";
     const contacts = await request<{ id: string }>(`whatsapp_contacts?on_conflict=${contactConflict}`, {
       method: "POST", headers: { Prefer: "resolution=merge-duplicates,return=representation" },
       body: JSON.stringify(body({ wa_id: input.waId, phone: input.waId, display_name: input.displayName, lead_temperature: classification.temperature, updated_at: nowIso })),
