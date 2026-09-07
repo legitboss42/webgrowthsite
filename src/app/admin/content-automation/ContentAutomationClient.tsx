@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 
 type Settings = {
   enabled: boolean;
@@ -28,6 +28,50 @@ type Publication = {
   lastErrorMessage: string | null;
 };
 
+type MetaLoginOptions = {
+  config_id: string;
+  auth_type: "rerequest";
+  response_type: "code";
+  override_default_response_type: true;
+};
+
+type MetaLogin = {
+  appId: string;
+  graphVersion: string;
+  configId: string;
+  configured: boolean;
+  loginOptions: MetaLoginOptions | null;
+};
+
+type MetaCandidate = {
+  facebookPageId: string;
+  facebookPageName: string;
+  instagramAccountId: string;
+  instagramAccountName: string | null;
+};
+
+type MetaSdkResponse = {
+  status?: string;
+  authResponse?: {
+    code?: string;
+  } | null;
+};
+
+type MetaSdk = {
+  init(input: {
+    appId: string;
+    cookie: boolean;
+    xfbml: boolean;
+    version: string;
+  }): void;
+  login(callback: (response: MetaSdkResponse) => void, options: MetaLoginOptions): void;
+};
+
+type MetaWindow = Window & {
+  FB?: MetaSdk;
+  fbAsyncInit?: () => void;
+};
+
 export type ContentAutomationJob = {
   id: string;
   articleSlug: string;
@@ -41,6 +85,7 @@ type Props = {
   initialSettings: Settings;
   connection: Connection;
   jobs: ContentAutomationJob[];
+  metaLogin: MetaLogin;
 };
 
 function Toggle({
@@ -91,12 +136,106 @@ function formatDate(value: string | null) {
   return Number.isFinite(date.getTime()) ? date.toLocaleString() : "Not available";
 }
 
-export default function ContentAutomationClient({ initialSettings, connection, jobs }: Props) {
+function stringValue(value: unknown) {
+  return typeof value === "string" ? value : "";
+}
+
+function parseMetaCandidates(candidates: unknown): MetaCandidate[] {
+  if (!Array.isArray(candidates)) return [];
+  return candidates.map((candidate) => {
+    const value = candidate && typeof candidate === "object"
+      ? (candidate as Record<string, unknown>)
+      : {};
+    return {
+      facebookPageId: stringValue(value.facebookPageId),
+      facebookPageName: stringValue(value.facebookPageName),
+      instagramAccountId: stringValue(value.instagramAccountId),
+      instagramAccountName: stringValue(value.instagramAccountName) || null,
+    };
+  }).filter((candidate) => Boolean(candidate.facebookPageId && candidate.instagramAccountId));
+}
+
+function metaErrorMessage(code: unknown) {
+  if (code === "META_NO_ELIGIBLE_PAGE") {
+    return "Meta did not return an Instagram-linked Facebook Page for this account.";
+  }
+  if (code === "META_SELECTION_EXPIRED") {
+    return "The Meta connection session expired. Connect Meta again.";
+  }
+  if (code === "META_PAGE_UNAVAILABLE") {
+    return "That Facebook Page is no longer available. Connect Meta again.";
+  }
+  return "Meta could not be connected. You can retry or use the fallback connection.";
+}
+
+export default function ContentAutomationClient({ initialSettings, connection, jobs, metaLogin }: Props) {
   const router = useRouter();
   const [settings, setSettings] = useState(initialSettings);
   const [message, setMessage] = useState<string | null>(null);
   const [isSaving, startSaving] = useTransition();
   const [retrying, setRetrying] = useState<string | null>(null);
+  const [metaSdkReady, setMetaSdkReady] = useState(false);
+  const [metaSdkFailed, setMetaSdkFailed] = useState(false);
+  const [metaConnecting, setMetaConnecting] = useState(false);
+  const [metaCandidates, setMetaCandidates] = useState<MetaCandidate[]>([]);
+  const [selectingPageId, setSelectingPageId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!metaLogin.configured || !metaLogin.loginOptions) return;
+
+    let active = true;
+    const metaWindow = window as MetaWindow;
+
+    const initializeMetaSdk = () => {
+      if (!active || !metaWindow.FB) return;
+      try {
+        metaWindow.FB.init({
+          appId: metaLogin.appId,
+          cookie: true,
+          xfbml: false,
+          version: metaLogin.graphVersion,
+        });
+        setMetaSdkReady(true);
+        setMetaSdkFailed(false);
+      } catch {
+        setMetaSdkReady(false);
+        setMetaSdkFailed(true);
+      }
+    };
+
+    metaWindow.fbAsyncInit = initializeMetaSdk;
+    if (metaWindow.FB) {
+      initializeMetaSdk();
+      return () => {
+        active = false;
+      };
+    }
+
+    let script = document.getElementById("facebook-jssdk") as HTMLScriptElement | null;
+    if (!script) {
+      script = document.createElement("script");
+      script.id = "facebook-jssdk";
+      script.async = true;
+      script.defer = true;
+      script.src = "https://connect.facebook.net/en_US/sdk.js";
+      script.onerror = () => {
+        if (!active) return;
+        setMetaSdkReady(false);
+        setMetaSdkFailed(true);
+      };
+      document.body.appendChild(script);
+    } else {
+      script.addEventListener("error", () => {
+        if (!active) return;
+        setMetaSdkReady(false);
+        setMetaSdkFailed(true);
+      }, { once: true });
+    }
+
+    return () => {
+      active = false;
+    };
+  }, [metaLogin.appId, metaLogin.configured, metaLogin.graphVersion, metaLogin.loginOptions]);
 
   function saveSettings() {
     setMessage(null);
@@ -133,6 +272,93 @@ export default function ContentAutomationClient({ initialSettings, connection, j
       setRetrying(null);
     }
   }
+
+  async function exchangeMetaCode(code: string) {
+    try {
+      const response = await fetch("/api/admin/content-automation/meta/exchange/", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ code }),
+      });
+      const body = await response.json().catch(() => ({}));
+      if (!response.ok || body?.ok !== true) {
+        setMessage(metaErrorMessage(body?.code));
+        return;
+      }
+
+      if (body.status === "selection-required") {
+        const candidates = parseMetaCandidates(body.candidates);
+        if (candidates.length === 0) {
+          setMessage("Meta returned Pages, but none could be selected safely. Retry the connection.");
+          return;
+        }
+        setMetaCandidates(candidates);
+        setMessage("Choose the Facebook Page and Instagram account to connect.");
+        return;
+      }
+
+      if (body.status === "connected") {
+        setMetaCandidates([]);
+        setMessage("Meta connected successfully.");
+        router.refresh();
+        return;
+      }
+
+      setMessage("Meta returned an unexpected connection result. Retry the connection.");
+    } catch {
+      setMessage("Meta could not be connected. Check your connection and retry.");
+    } finally {
+      setMetaConnecting(false);
+    }
+  }
+
+  function connectMeta() {
+    setMessage(null);
+    setMetaCandidates([]);
+
+    const metaWindow = window as MetaWindow;
+    if (!metaLogin.configured || !metaLogin.loginOptions || !metaSdkReady || !metaWindow.FB) {
+      setMessage("Meta SDK is not ready. Use the fallback connection below if this continues.");
+      return;
+    }
+
+    setMetaConnecting(true);
+    metaWindow.FB.login((response) => {
+      const code = response.authResponse?.code?.trim() || "";
+      if (!code) {
+        setMetaConnecting(false);
+        setMessage("Meta login was cancelled or did not return an authorization code.");
+        return;
+      }
+      void exchangeMetaCode(code);
+    }, metaLogin.loginOptions);
+  }
+
+  async function selectMetaPage(facebookPageId: string) {
+    setMessage(null);
+    setSelectingPageId(facebookPageId);
+    try {
+      const response = await fetch("/api/admin/content-automation/meta/select/", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ facebookPageId }),
+      });
+      const body = await response.json().catch(() => ({}));
+      if (!response.ok || body?.ok !== true || body.status !== "connected") {
+        setMessage(metaErrorMessage(body?.code));
+        return;
+      }
+      setMetaCandidates([]);
+      setMessage("Meta connected successfully.");
+      router.refresh();
+    } catch {
+      setMessage("The selected Meta Page could not be connected. Retry the connection.");
+    } finally {
+      setSelectingPageId(null);
+    }
+  }
+
+  const showMetaFallback = !metaLogin.configured || metaSdkFailed;
 
   return (
     <div className="space-y-8">
@@ -220,12 +446,68 @@ export default function ContentAutomationClient({ initialSettings, connection, j
               <dd className="mt-1 text-white/80">{formatDate(connection.accessExpiresAt)}</dd>
             </div>
           </dl>
-          <a
-            href="/api/admin/content-automation/meta/connect/?returnTo=/admin/content-automation/"
-            className="mt-6 inline-flex rounded-xl border border-emerald-300/30 bg-emerald-300/10 px-4 py-2 text-sm font-semibold text-emerald-200 hover:bg-emerald-300/15"
+
+          <button
+            type="button"
+            onClick={connectMeta}
+            disabled={!metaLogin.configured || !metaSdkReady || metaConnecting}
+            className="mt-6 inline-flex min-h-11 items-center justify-center rounded-xl border border-emerald-300/30 bg-emerald-300/10 px-4 py-2 text-sm font-semibold text-emerald-200 transition hover:bg-emerald-300/15 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {connection.connected ? "Reconnect Meta" : "Connect Meta"}
-          </a>
+            {metaConnecting
+              ? "Connecting Meta..."
+              : connection.connected
+                ? "Reconnect Meta"
+                : "Connect Meta"}
+          </button>
+
+          {metaLogin.configured && !metaSdkReady && !metaSdkFailed ? (
+            <p className="mt-3 text-xs leading-5 text-white/45">Loading Meta SDK for the secure in-dashboard connection…</p>
+          ) : null}
+          {!metaLogin.configured ? (
+            <p className="mt-3 text-xs leading-5 text-amber-200/70">Meta SDK connection is not configured in this environment.</p>
+          ) : null}
+          {metaSdkFailed ? (
+            <p className="mt-3 text-xs leading-5 text-amber-200/70">Meta SDK could not load in this browser. Use the fallback connection below.</p>
+          ) : null}
+
+          {metaCandidates.length > 0 ? (
+            <div className="mt-5 rounded-2xl border border-emerald-300/20 bg-emerald-300/[0.04] p-4">
+              <p className="text-sm font-semibold text-white">Choose the Page to connect</p>
+              <p className="mt-1 text-xs leading-5 text-white/45">Each choice shows the Facebook Page and its linked Instagram professional account.</p>
+              <div className="mt-3 grid gap-2">
+                {metaCandidates.map((candidate) => (
+                  <button
+                    key={candidate.facebookPageId}
+                    type="button"
+                    onClick={() => selectMetaPage(candidate.facebookPageId)}
+                    disabled={Boolean(selectingPageId)}
+                    className="flex min-h-14 w-full items-center justify-between gap-4 rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-left transition hover:border-emerald-300/30 hover:bg-emerald-300/[0.04] disabled:cursor-wait disabled:opacity-60"
+                  >
+                    <span className="min-w-0">
+                      <span className="block truncate text-sm font-semibold text-white">{candidate.facebookPageName || candidate.facebookPageId}</span>
+                      <span className="mt-1 block truncate text-xs text-white/45">
+                        {candidate.instagramAccountName
+                          ? `@${candidate.instagramAccountName.replace(/^@/, "")}`
+                          : `Instagram ${candidate.instagramAccountId}`}
+                      </span>
+                    </span>
+                    <span className="shrink-0 text-xs font-semibold text-emerald-300">
+                      {selectingPageId === candidate.facebookPageId ? "Connecting..." : "Select"}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : null}
+
+          {showMetaFallback ? (
+            <a
+              href="/api/admin/content-automation/meta/connect/?returnTo=/admin/content-automation/"
+              className="mt-4 inline-flex text-xs font-semibold text-white/55 underline decoration-white/20 underline-offset-4 hover:text-white/75"
+            >
+              Use fallback Meta connection
+            </a>
+          ) : null}
         </div>
       </section>
 
