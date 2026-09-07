@@ -10,12 +10,27 @@ Replace the full-page Meta connection redirect as the primary flow with Facebook
 - Mobile currently relies on the same full-page cross-site redirect. Production evidence showed the request leaves Web Growth for Meta but does not return to the callback, so the primary mobile flow must stop depending on that navigation boundary.
 
 ### TDD evidence
-- RED commit `2ed701b0b28fc857127ca528e6396297c8032286` added a test requiring `listManagedPages()` to return all eligible Page/Instagram pairs.
-- GitHub Actions run `34103978127` failed in `npm run test:social` as expected before implementation.
+- RED commit `2ed701b0b28fc857127ca528e6396297c8032286` required `listManagedPages()` to return all eligible Page/Instagram pairs. GitHub Actions run `34103978127` failed as expected before implementation.
+- RED commit `bcd795f1f1b9e46e218011dd4baba1bf2c35d36c` required encrypted pending-selection state and Facebook SDK Business Login options. Run `34109563997` failed as expected.
+- The first pending-cookie GREEN attempt exposed a non-canonical Base64URL tampering edge case. Commit `ce92cc2a41e9c282dbb5342eb09213ff947b2f71` tightened sealed-cookie validation; run `34109833584` passed.
+- RED commit `fdc699544b9d2b8a75bf23f4bc0ca0a2642b28ea` required SDK authorization-code exchange without inventing the old callback `redirect_uri` and required `auth_type=rerequest`. Run `34110219049` failed for exactly those two missing behaviors; commit `66dd19b80645abe5872c35785ce29b1e4c6a1318` made the focused suite GREEN in run `34110446586`.
+- RED commit `0dcad12dc7e15e8b6fbb2de12ed3a3885e3de0d3` required protected `/meta/exchange/` and `/meta/select/` routes. Run `34110564820` failed only because both routes were absent.
+- The first route implementation revealed an over-broad static token-leak assertion, not a browser token leak. Commit `ae3c970c8508b0b7607820f820d733d17f250de4` narrowed the assertion to the actual browser candidate mapper; run `34110847886` passed the complete social suite.
 
 ### Implementation completed so far
-- Commit `ec8a41f607f7a79a3d7f9e02761f37c10328f2c6` adds `client.listManagedPages({ userAccessToken })` to Meta client discovery.
-- Existing `resolveManagedPage()` now reuses that list while preserving zero-page, preferred-page, and ambiguous-page behavior for the fallback callback.
+- `client.listManagedPages({ userAccessToken })` returns every eligible Facebook Page/Instagram professional account pair while `resolveManagedPage()` preserves callback compatibility.
+- Pending multi-Page credentials are AES-GCM sealed in a short-lived HttpOnly cookie. Non-canonical/tampered/expired values are rejected.
+- Facebook SDK Business Login options use the configured `config_id`, `auth_type=rerequest`, `response_type=code`, and `override_default_response_type=true` without a raw scope bundle.
+- SDK authorization codes are exchanged server-side without forcing the full-page callback URI. The old redirect callback continues using its matching redirect URI.
+- `POST /api/admin/content-automation/meta/exchange/` is admin-authenticated and same-origin protected. It upgrades the user token, discovers Pages, auto-connects one candidate, or returns only safe Page/Instagram IDs and names while sealing the pending long-lived user token server-side.
+- `POST /api/admin/content-automation/meta/select/` is admin-authenticated and same-origin protected. It decrypts the pending credential, re-queries Meta, validates the selected Page, encrypts final user/Page tokens, saves the existing `social_connections` record, audits the connection, and clears the pending cookie.
+- No Supabase migration was added. TikTok, WhatsApp, blog rendering, scheduler, and publication logic are unchanged.
+
+### Remaining work
+- Replace the dashboard's primary full-page Meta anchor with Facebook SDK Business Login.
+- Render explicit Page/Instagram selection in the dashboard when several eligible pairs are returned.
+- Keep the old redirect flow as a secondary fallback.
+- Complete documentation, focused tests, full release validation, and final diff review.
 
 ### Deployment status
 No merge and no production deployment.
