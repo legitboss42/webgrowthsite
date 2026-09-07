@@ -39,4 +39,4 @@ Replace the full-page Meta connection redirect as the primary flow with Facebook
 - Request explicit approval before the single production deployment.
 
 ### Deployment status
-No merge and no production deployment.
+Merged to `main` and deployed to production after explicit approval. Live Chrome verification on `webgrowth.info` confirmed the SDK Business Login flow connects Facebook Page `Web Growth` and Instagram account `@web.growth`, and the dashboard remains connected after refresh.
