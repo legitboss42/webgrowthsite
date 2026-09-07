@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 
 import { buildTikTokSchedulerRecords } from "./tiktokBridge";
 
-test("automated TikTok video enters existing consent flow", () => {
+test("automated TikTok video enters existing consent flow only after stored-media validation", () => {
   const records = buildTikTokSchedulerRecords({
     userId: "00000000-0000-0000-0000-000000000001",
     articleSlug: "seo-checklist",
@@ -16,8 +16,8 @@ test("automated TikTok video enters existing consent flow", () => {
   });
 
   assert.equal(records.media.kind, "VIDEO");
-  assert.equal(records.media.validation_status, "VALID");
-  assert.equal(records.media.article_slug, "seo-checklist");
+  assert.equal(records.media.validation_status, "PENDING");
+  assert.equal(Object.prototype.hasOwnProperty.call(records.media, "article_slug"), false);
   assert.equal(records.post.kind, "VIDEO");
   assert.equal(records.post.status, "NEEDS_APPROVAL");
   assert.equal(records.postMedia.position, 0);

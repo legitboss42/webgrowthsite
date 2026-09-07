@@ -6,6 +6,7 @@ type TikTokDraftAdapter = {
   findMediaByPath(storagePath: string): Promise<{ id: string } | null>;
   findPostIdByMedia(mediaId: string): Promise<string | null>;
   insertMedia(row: Record<string, unknown>): Promise<{ id: string }>;
+  finalizeMedia(mediaId: string, checksum: string): Promise<void>;
   insertPost(row: Record<string, unknown>): Promise<{ id: string }>;
   linkPostMedia(postId: string, mediaId: string, position: number): Promise<void>;
 };
@@ -21,6 +22,7 @@ export async function persistTikTokDraft(adapter: TikTokDraftAdapter, input: Dra
     media = await adapter.insertMedia(records.media);
   }
 
+  await adapter.finalizeMedia(media.id, input.checksum);
   const post = await adapter.insertPost(records.post);
   await adapter.linkPostMedia(post.id, media.id, records.postMedia.position);
   return { postId: post.id, mediaId: media.id };
