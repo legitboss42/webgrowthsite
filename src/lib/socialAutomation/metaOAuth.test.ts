@@ -48,6 +48,24 @@ test("Meta authorize URL requests only the publishing permissions used by the fe
   }
 });
 
+test("Meta Business Login uses config_id instead of a raw scope bundle", () => {
+  const url = new URL(
+    buildMetaAuthorizeUrl({
+      graphVersion: "v99.0",
+      appId: "app-1",
+      redirectUri: "https://webgrowth.info/api/admin/content-automation/meta/callback/",
+      state: "state-1",
+      configId: "config-123",
+    })
+  );
+
+  assert.equal(url.searchParams.get("config_id"), "config-123");
+  assert.equal(url.searchParams.get("override_default_response_type"), "true");
+  assert.equal(url.searchParams.get("response_type"), "code");
+  assert.equal(url.searchParams.get("auth_type"), "rerequest");
+  assert.equal(url.searchParams.get("scope"), null);
+});
+
 test("initial Meta code exchange keeps the app secret and authorization code out of the URL", async () => {
   const calls: Array<{ url: string; init?: RequestInit }> = [];
   const client = createMetaClient({
