@@ -111,7 +111,7 @@ The Business Login configuration owns the Page/Instagram permissions, so the SDK
 
 After Meta returns an authorization code:
 
-1. The browser POSTs only `{ code }` to `/api/admin/content-automation/meta/exchange/`.
+1. The browser captures the Meta SDK dialog's generated `redirect_uri` from the public `window.open` URL and POSTs `{ code, sdkRedirectUri }` to `/api/admin/content-automation/meta/exchange/`. The server validates that URI as Meta's JS SDK `xd_arbiter` URL for `webgrowth.info` before using it for the token exchange.
 2. The server exchanges the SDK code without inventing the legacy callback `redirect_uri` and upgrades the result to a longer-lived user token.
 3. The server calls `/me/accounts` and accepts both linked-Instagram representations used by Meta:
    - `instagram_business_account`

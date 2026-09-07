@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
 
+import { extractMetaSdkRedirectUriFromDialogUrl } from "@/lib/socialAutomation/metaSdkRedirect";
+
 type Settings = {
   enabled: boolean;
   instagramEnabled: boolean;
@@ -168,6 +170,9 @@ function metaErrorMessage(code: unknown) {
   if (code === "META_CODE_REJECTED") {
     return "Meta rejected the authorization code. Start the connection again and complete the Facebook prompt without reusing an older popup.";
   }
+  if (code === "META_SDK_REDIRECT_URI_REQUIRED") {
+    return "Meta opened without a verifiable SDK redirect URI. Retry or use the fallback connection.";
+  }
   return "Meta could not be connected. You can retry or use the fallback connection.";
 }
 
@@ -276,12 +281,12 @@ export default function ContentAutomationClient({ initialSettings, connection, j
     }
   }
 
-  async function exchangeMetaCode(code: string) {
+  async function exchangeMetaCode(code: string, sdkRedirectUri: string) {
     try {
       const response = await fetch("/api/admin/content-automation/meta/exchange/", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ code }),
+        body: JSON.stringify({ code, sdkRedirectUri }),
       });
       const body = await response.json().catch(() => ({}));
       if (!response.ok || body?.ok !== true) {
@@ -326,15 +331,32 @@ export default function ContentAutomationClient({ initialSettings, connection, j
     }
 
     setMetaConnecting(true);
-    metaWindow.FB.login((response) => {
-      const code = response.authResponse?.code?.trim() || "";
-      if (!code) {
-        setMetaConnecting(false);
-        setMessage("Meta login was cancelled or did not return an authorization code.");
-        return;
+    let sdkRedirectUri = "";
+    const originalOpen = window.open.bind(window);
+    window.open = ((url?: string | URL, target?: string, features?: string) => {
+      if (url) {
+        sdkRedirectUri = extractMetaSdkRedirectUriFromDialogUrl(String(url)) || sdkRedirectUri;
       }
-      void exchangeMetaCode(code);
-    }, metaLogin.loginOptions);
+      return originalOpen(url, target, features);
+    }) as Window["open"];
+    try {
+      metaWindow.FB.login((response) => {
+        const code = response.authResponse?.code?.trim() || "";
+        if (!code) {
+          setMetaConnecting(false);
+          setMessage("Meta login was cancelled or did not return an authorization code.");
+          return;
+        }
+        if (!sdkRedirectUri) {
+          setMetaConnecting(false);
+          setMessage(metaErrorMessage("META_SDK_REDIRECT_URI_REQUIRED"));
+          return;
+        }
+        void exchangeMetaCode(code, sdkRedirectUri);
+      }, metaLogin.loginOptions);
+    } finally {
+      window.open = originalOpen as Window["open"];
+    }
   }
 
   async function selectMetaPage(facebookPageId: string) {

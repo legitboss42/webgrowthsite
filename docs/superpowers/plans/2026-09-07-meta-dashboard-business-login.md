@@ -66,7 +66,7 @@
 - `src/lib/socialAutomation/metaDashboardContract.test.ts`
 
 **Interfaces:**
-- `POST /api/admin/content-automation/meta/exchange/` consumes `{ code: string }`.
+- `POST /api/admin/content-automation/meta/exchange/` consumes `{ code: string, sdkRedirectUri: string }`, where `sdkRedirectUri` is the public `redirect_uri` generated inside the Meta SDK dialog URL and validated server-side before exchange.
 - Exchange returns `{ ok: true, status: "connected" }` or `{ ok: true, status: "selection-required", candidates: MetaConnectionCandidate[] }`.
 - `POST /api/admin/content-automation/meta/select/` consumes `{ facebookPageId: string }`.
 - Selection returns `{ ok: true, status: "connected" }`.

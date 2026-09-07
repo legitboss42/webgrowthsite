@@ -82,6 +82,9 @@ test("Content Automation uses Facebook Login for Business in-dashboard with Page
   assert.match(client, /connect\.facebook\.net\/en_US\/sdk\.js/);
   assert.match(client, /\.FB\.init/);
   assert.match(client, /\.FB\.login/);
+  assert.match(client, /window\.open/);
+  assert.match(client, /extractMetaSdkRedirectUriFromDialogUrl/);
+  assert.match(client, /sdkRedirectUri/);
   assert.match(client, /onClick=\{connectMeta\}/);
   assert.match(client, /\/api\/admin\/content-automation\/meta\/exchange\//);
   assert.match(client, /\/api\/admin\/content-automation\/meta\/select\//);
@@ -94,4 +97,13 @@ test("Content Automation uses Facebook Login for Business in-dashboard with Page
     /\/api\/admin\/content-automation\/meta\/connect\/\?returnTo=\/admin\/content-automation\//
   );
   assert.doesNotMatch(client, /META_APP_SECRET|META_TOKEN_ENCRYPTION_KEY|META_OAUTH_STATE_SECRET/);
+});
+
+test("Meta dashboard exchange route validates the SDK redirect URI before token exchange", () => {
+  const exchange = source(exchangePath);
+
+  assert.match(exchange, /validateMetaSdkRedirectUri/);
+  assert.match(exchange, /sdkRedirectUri/);
+  assert.match(exchange, /request\.url/);
+  assert.match(exchange, /redirectUri:\s*sdkRedirectUri/);
 });

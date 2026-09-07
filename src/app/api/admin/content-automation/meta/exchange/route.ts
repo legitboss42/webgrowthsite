@@ -11,6 +11,7 @@ import {
   META_PENDING_CONNECTION_MAX_AGE_SECONDS,
   META_PUBLISH_SCOPES,
 } from "@/lib/socialAutomation/metaOAuth";
+import { validateMetaSdkRedirectUri } from "@/lib/socialAutomation/metaSdkRedirect";
 import { createSocialAutomationStore } from "@/lib/socialAutomation/storeServer";
 
 export const runtime = "nodejs";
@@ -104,6 +105,19 @@ export async function POST(request: Request) {
   if (!code || code.length > 4096) {
     return NextResponse.json({ ok: false, code: "META_CODE_REQUIRED" }, { status: 400 });
   }
+  const rawSdkRedirectUri =
+    body && typeof body === "object" && typeof (body as { sdkRedirectUri?: unknown }).sdkRedirectUri === "string"
+      ? (body as { sdkRedirectUri: string }).sdkRedirectUri.trim()
+      : "";
+  const sdkRedirectUri = rawSdkRedirectUri
+    ? validateMetaSdkRedirectUri(rawSdkRedirectUri, new URL(request.url).origin)
+    : null;
+  if (!sdkRedirectUri) {
+    return NextResponse.json(
+      { ok: false, code: "META_SDK_REDIRECT_URI_REQUIRED" },
+      { status: 400, headers: { "Cache-Control": "no-store" } }
+    );
+  }
 
   try {
     const appId = required("META_APP_ID");
@@ -112,7 +126,7 @@ export async function POST(request: Request) {
     const pendingSecret = required("META_TOKEN_ENCRYPTION_KEY");
     const client = createMetaClient({ graphVersion });
 
-    const shortLived = await client.exchangeCode({ appId, appSecret, code });
+    const shortLived = await client.exchangeCode({ appId, appSecret, code, redirectUri: sdkRedirectUri });
     const longLived = await client.exchangeLongLivedUserToken({
       appId,
       appSecret,
