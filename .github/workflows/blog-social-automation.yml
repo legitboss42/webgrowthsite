@@ -1,0 +1,73 @@
+name: Blog social automation
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "content/blog/**"
+  workflow_dispatch:
+    inputs:
+      slug:
+        description: "Existing blog slug to render without publishing"
+        required: true
+        default: "01-why-we-rebuilt-not-redesigned"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: blog-social-${{ github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  automate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Verify social automation
+        run: |
+          npm run test:social
+          npm run test:scheduler
+      - name: Detect newly added articles
+        id: detect
+        if: github.event_name == 'push'
+        shell: bash
+        run: |
+          SLUGS="$(node --import tsx scripts/detect-new-blog-posts.mjs '${{ github.event.before }}' '${{ github.sha }}')"
+          {
+            echo 'slugs<<EOF'
+            echo "$SLUGS"
+            echo 'EOF'
+          } >> "$GITHUB_OUTPUT"
+      - name: Publish new articles
+        if: github.event_name == 'push' && steps.detect.outputs.slugs != ''
+        env:
+          SOCIAL_AUTOMATION_BASE_URL: https://webgrowth.info
+          SOCIAL_AUTOMATION_WEBHOOK_SECRET: ${{ secrets.SOCIAL_AUTOMATION_WEBHOOK_SECRET }}
+          SOCIAL_AUTOMATION_VERSION: v1
+        shell: bash
+        run: |
+          while IFS= read -r slug; do
+            [ -n "$slug" ] || continue
+            node scripts/run-blog-social-automation.mjs "$slug" "$GITHUB_SHA"
+          done <<< "${{ steps.detect.outputs.slugs }}"
+      - name: Dry-run render only
+        if: github.event_name == 'workflow_dispatch'
+        run: npm run social:render -- "${{ inputs.slug }}"
+      - name: Upload dry-run renders
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@v4
+        with:
+          name: social-render-${{ inputs.slug }}
+          path: out/social/${{ inputs.slug }}/
+          if-no-files-found: error
+          retention-days: 1

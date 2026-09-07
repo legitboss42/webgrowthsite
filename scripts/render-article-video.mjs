@@ -558,9 +558,24 @@ async function main() {
     ).toFixed(3)
   );
 
+  const articleAssetNames = ["hero.png", "problem.png", "solution.png", "result.png"];
+  const articleAssetsAvailable = (
+    await Promise.all(
+      articleAssetNames.map(async (assetName) => {
+        try {
+          await fs.access(path.join(publicDir, "article-assets", slug, assetName));
+          return true;
+        } catch {
+          return false;
+        }
+      })
+    )
+  ).every(Boolean);
+
   const props = {
     ...script,
     audioSrc: "article-voice.mp3",
+    articleAssetsAvailable,
     durationInSeconds,
     durationInFrames: Math.ceil(durationInSeconds * VIDEO_FPS),
     fps: VIDEO_FPS,

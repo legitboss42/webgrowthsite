@@ -39,6 +39,7 @@ export type WebGrowthArticleVideoProps = {
   durationInFrames?: number;
   slug?: string;
   previewMode?: boolean;
+  articleAssetsAvailable?: boolean;
 };
 
 type ResolvedScene = WebGrowthVideoScene & {
@@ -790,11 +791,13 @@ function SceneVisual({
   sceneFrame,
   slug,
   isFinalScene,
+  articleAssetsAvailable,
 }: {
   sceneIndex: number;
   sceneFrame: number;
   slug?: string;
   isFinalScene: boolean;
+  articleAssetsAvailable: boolean;
 }) {
   return (
     <div
@@ -809,11 +812,11 @@ function SceneVisual({
         background: "rgba(255,255,255,0.08)",
       }}
     >
-      {!isFinalScene ? (
+      {!isFinalScene && articleAssetsAvailable && slug ? (
         <ScreenshotBackground slug={slug} sceneIndex={sceneIndex} sceneFrame={sceneFrame} />
       ) : null}
 
-      {!slug || isFinalScene ? (
+      {!slug || !articleAssetsAvailable || isFinalScene ? (
         <div
           style={{
             position: "absolute",
@@ -867,6 +870,7 @@ export const WebGrowthArticleVideo: React.FC<WebGrowthArticleVideoProps> = ({
   durationInSeconds,
   slug,
   previewMode = false,
+  articleAssetsAvailable = false,
 }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
@@ -1113,6 +1117,7 @@ export const WebGrowthArticleVideo: React.FC<WebGrowthArticleVideoProps> = ({
           sceneFrame={sceneFrame}
           slug={slug}
           isFinalScene={isFinalScene}
+          articleAssetsAvailable={articleAssetsAvailable}
         />
       </div>
 
