@@ -161,17 +161,23 @@ export function createMetaClient({ graphVersion, fetcher = fetch }: MetaClientOp
       preferredPageId?: string;
     }): Promise<MetaManagedPage> {
       const url = appendQuery(`${graphRoot}/me/accounts`, {
-        fields: "id,name,access_token,tasks,instagram_business_account{id,username,name}",
+        fields:
+          "id,name,access_token,tasks,instagram_business_account{id,username,name},connected_instagram_account{id,username,name}",
       });
       const body = await requestJson(fetcher, url, { headers: authHeaders(input.userAccessToken) });
       const data = Array.isArray(body.data) ? body.data : [];
-      const candidates = data
+      const pages = data
         .filter((item): item is Record<string, unknown> => Boolean(item && typeof item === "object"))
         .map((item) => {
-          const instagram =
+          const businessInstagram =
             item.instagram_business_account && typeof item.instagram_business_account === "object"
               ? (item.instagram_business_account as Record<string, unknown>)
               : null;
+          const connectedInstagram =
+            item.connected_instagram_account && typeof item.connected_instagram_account === "object"
+              ? (item.connected_instagram_account as Record<string, unknown>)
+              : null;
+          const instagram = businessInstagram || connectedInstagram;
           return {
             facebookPageId: typeof item.id === "string" ? item.id : "",
             facebookPageName: typeof item.name === "string" ? item.name : "",
@@ -186,29 +192,66 @@ export function createMetaClient({ graphVersion, fetcher = fetch }: MetaClientOp
             tasks: stringArray(item.tasks),
           } satisfies MetaManagedPage;
         })
-        .filter(
-          (item) =>
-            Boolean(item.facebookPageId) &&
-            Boolean(item.pageAccessToken) &&
-            Boolean(item.instagramAccountId)
+        .filter((item) => Boolean(item.facebookPageId) && Boolean(item.pageAccessToken));
+
+      async function resolveFromInstagramAccountsEdge(page: MetaManagedPage) {
+        const edgeUrl = appendQuery(
+          `${graphRoot}/${encodeURIComponent(page.facebookPageId)}/instagram_accounts`,
+          { fields: "id,username,name" }
         );
+        const edgeBody = await requestJson(fetcher, edgeUrl, {
+          headers: authHeaders(page.pageAccessToken),
+        });
+        const accounts = Array.isArray(edgeBody.data) ? edgeBody.data : [];
+        const account = accounts.find(
+          (item): item is Record<string, unknown> =>
+            Boolean(item && typeof item === "object" && typeof (item as Record<string, unknown>).id === "string")
+        );
+        if (!account) return null;
+        return {
+          ...page,
+          instagramAccountId: String(account.id),
+          instagramAccountName:
+            typeof account.username === "string"
+              ? account.username
+              : typeof account.name === "string"
+                ? account.name
+                : null,
+        } satisfies MetaManagedPage;
+      }
+
+      if (input.preferredPageId) {
+        const preferred = pages.find((item) => item.facebookPageId === input.preferredPageId);
+        if (!preferred) {
+          throw new MetaApiError("The selected Instagram-linked Facebook Page is unavailable.", {
+            retryable: false,
+            status: 422,
+          });
+        }
+        if (preferred.instagramAccountId) return preferred;
+        const resolvedPreferred = await resolveFromInstagramAccountsEdge(preferred);
+        if (resolvedPreferred) return resolvedPreferred;
+        throw new MetaApiError("The selected Instagram-linked Facebook Page is unavailable.", {
+          retryable: false,
+          status: 422,
+        });
+      }
+
+      let candidates = pages.filter((item) => Boolean(item.instagramAccountId));
+      if (candidates.length === 0) {
+        const fallbackCandidates: MetaManagedPage[] = [];
+        for (const page of pages) {
+          const resolved = await resolveFromInstagramAccountsEdge(page);
+          if (resolved) fallbackCandidates.push(resolved);
+        }
+        candidates = fallbackCandidates;
+      }
 
       if (candidates.length === 0) {
         throw new MetaApiError("No Instagram-linked Facebook Page is available for this Meta account.", {
           retryable: false,
           status: 422,
         });
-      }
-
-      if (input.preferredPageId) {
-        const selected = candidates.find((item) => item.facebookPageId === input.preferredPageId);
-        if (!selected) {
-          throw new MetaApiError("The selected Instagram-linked Facebook Page is unavailable.", {
-            retryable: false,
-            status: 422,
-          });
-        }
-        return selected;
       }
 
       if (candidates.length > 1) {
