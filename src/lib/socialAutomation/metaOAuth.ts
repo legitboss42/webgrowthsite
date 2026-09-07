@@ -124,6 +124,7 @@ export function buildMetaSdkLoginOptions(configId: string) {
   if (!value) throw new Error("META_LOGIN_CONFIG_ID is not configured.");
   return {
     config_id: value,
+    auth_type: "rerequest" as const,
     response_type: "code" as const,
     override_default_response_type: true as const,
   };
