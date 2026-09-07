@@ -110,7 +110,7 @@ export async function POST(request: Request) {
   if (!supabaseUrl || !serviceRoleKey) {
     return NextResponse.json({ error: "WhatsApp storage is not configured." }, { status: 503 });
   }
-  const storeOptions = { url: supabaseUrl, serviceRoleKey };
+  const storeOptions = { url: supabaseUrl, serviceRoleKey, workspaceId: access.workspaceId };
   const replyContext = await getSupabaseWhatsAppReplyContext(storeOptions, conversationId, waId);
   if (!replyContext) {
     return NextResponse.json({ error: "This is not an active conversation with a valid inbound customer message." }, { status: 409 });
