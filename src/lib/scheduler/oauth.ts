@@ -21,7 +21,10 @@ export function schedulerRedirectUri() {
 }
 
 export function normalizeSchedulerReturnPath(value?: string | null) {
-  return value?.startsWith("/scheduler/") && !value.startsWith("//") ? value : "/scheduler/dashboard/";
+  const candidate = value?.trim() || "";
+  if (candidate.startsWith("//")) return "/scheduler/dashboard/";
+  if (candidate.startsWith("/scheduler/") || candidate.startsWith("/dashboard/")) return candidate;
+  return "/scheduler/dashboard/";
 }
 
 export function buildSchedulerAuthorizeUrl(state: string, mode: SchedulerAuthMode) {
