@@ -73,21 +73,18 @@ function assertLinkElement(source: string, href: string, label: string) {
   );
 }
 
-test("closed sign-in branch explains approval and cannot initiate TikTok OAuth", async () => {
+test("scheduler sign-in always enters through the unified Web Growth account", async () => {
   const source = await readFile(signInPage, "utf8");
-  const { falsy: closed } = ternaryBranches(source, "launch.publicEnrollment");
-
-  assert.match(closed, /TikTok access opening after approval/);
-  assert.doesNotMatch(closed, /\/api\/scheduler\/auth\/authorize/);
-  assert.doesNotMatch(closed, /Continue with TikTok/);
+  assert.match(source, /href="\/sign-in\/\?next=\/dashboard\/tiktok\/"/);
+  assert.match(source, />\s*Sign in to Web Growth\s*</);
 });
 
-test("open sign-in branch links the exact TikTok CTA to scheduler authorization", async () => {
+test("legacy TikTok creator access remains gated behind public enrollment", async () => {
   const source = await readFile(signInPage, "utf8");
-  const { truthy: open } = ternaryBranches(source, "launch.publicEnrollment");
-
-  assert.match(open, /href="\/api\/scheduler\/auth\/authorize\/\?mode=login&returnTo=\/scheduler\/dashboard\/"/);
-  assert.match(open, />\s*Continue with TikTok\s*</);
+  assert.match(source, /launch\.publicEnrollment\s*\?/);
+  assert.match(source, /href="\/api\/scheduler\/auth\/authorize\/\?mode=login&returnTo=\/dashboard\/tiktok\/"/);
+  assert.match(source, />\s*Continue with TikTok →\s*</);
+  assert.match(source, /:\s*null/);
 });
 
 test("landing enrollment CTA switches from terms to sign-in across launch branches", async () => {
