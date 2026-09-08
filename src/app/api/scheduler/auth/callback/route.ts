@@ -3,9 +3,17 @@ import { NextResponse } from "next/server";
 import { encryptTikTokTokens } from "@/lib/scheduler/crypto";
 import { shouldPersistSchedulerConnection } from "@/lib/scheduler/legal";
 import { readSchedulerOAuthState, schedulerRedirectUri, SCHEDULER_OAUTH_STATE_COOKIE } from "@/lib/scheduler/oauth";
-import { createSchedulerSession, SCHEDULER_SESSION_COOKIE } from "@/lib/scheduler/session";
+import { SCHEDULER_SESSION_COOKIE } from "@/lib/scheduler/session";
 import { createSupabaseSchedulerStore } from "@/lib/scheduler/store";
 import { exchangeTikTokCode } from "@/lib/tiktok";
+import {
+  WEB_GROWTH_SESSION_COOKIE,
+  createWebGrowthSessionValueFromSession,
+  createWebGrowthTikTokSessionValue,
+  getWebGrowthSessionTtlSeconds,
+  mergeWebGrowthSchedulerIdentity,
+  readWebGrowthSessionFromCookieStore,
+} from "@/lib/webGrowthSession";
 
 export const dynamic = "force-dynamic";
 
@@ -36,10 +44,24 @@ export async function GET(request: Request) {
       refreshExpiresAt: result.record.refreshExpiresAt,
     });
   }
+
+  const existingAccount = readWebGrowthSessionFromCookieStore(cookieStore);
+  const mergedAccount = existingAccount
+    ? mergeWebGrowthSchedulerIdentity(existingAccount, { userId, openId: result.record.openId })
+    : null;
   const response = NextResponse.redirect(new URL(state.returnTo, url.origin));
   response.cookies.delete(SCHEDULER_OAUTH_STATE_COOKIE);
-  response.cookies.set(SCHEDULER_SESSION_COOKIE, createSchedulerSession(userId, result.record.openId), {
-    httpOnly: true, secure: url.protocol === "https:", sameSite: "lax", path: "/", maxAge: 12 * 60 * 60,
+  response.cookies.delete(SCHEDULER_SESSION_COOKIE);
+  response.cookies.set({
+    name: WEB_GROWTH_SESSION_COOKIE,
+    value: mergedAccount
+      ? createWebGrowthSessionValueFromSession(mergedAccount)
+      : createWebGrowthTikTokSessionValue(userId, result.record.openId),
+    httpOnly: true,
+    secure: url.protocol === "https:",
+    sameSite: "lax",
+    path: "/",
+    maxAge: getWebGrowthSessionTtlSeconds(),
   });
   return response;
 }

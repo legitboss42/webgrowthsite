@@ -6,6 +6,7 @@ import {
 import { SCHEDULER_SESSION_COOKIE } from "@/lib/scheduler/session";
 import { getWorkspacePasswordCookieName } from "@/lib/whatsapp/passwordAuth";
 import { isAllowedOrigin } from "@/lib/security";
+import { WEB_GROWTH_SESSION_COOKIE } from "@/lib/webGrowthSession";
 
 export const runtime = "nodejs";
 
@@ -26,8 +27,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Forbidden origin." }, { status: 403 });
   }
 
-  const response = NextResponse.redirect(new URL("/admin/whatsapp/", request.url), 303);
+  const response = NextResponse.redirect(new URL("/sign-in/", request.url), 303);
 
+  clearCookie(response, WEB_GROWTH_SESSION_COOKIE);
   clearCookie(response, getGoogleAuthCookieName());
   clearCookie(response, getGoogleOAuthStateCookieName());
   clearCookie(response, getWorkspacePasswordCookieName());

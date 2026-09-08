@@ -33,6 +33,8 @@ export type CreateWebGrowthSessionInput = {
 
 type CookieStoreLike = { get(name: string): { value?: string } | undefined };
 
+type SchedulerIdentity = { userId: string; openId: string } | null | undefined;
+
 function secret() {
   const value =
     process.env.WEB_GROWTH_SESSION_SECRET?.trim() ||
@@ -64,6 +66,13 @@ function validSchedulerPair(session: Pick<WebGrowthSession, "schedulerUserId" | 
   return Boolean(session.schedulerUserId) === Boolean(session.tiktokOpenId);
 }
 
+function schedulerFields(scheduler: SchedulerIdentity) {
+  return {
+    schedulerUserId: scheduler?.userId?.trim() || null,
+    tiktokOpenId: scheduler?.openId?.trim() || null,
+  };
+}
+
 export function getWebGrowthSessionTtlSeconds() {
   return SESSION_TTL_SECONDS;
 }
@@ -92,9 +101,7 @@ export function createWebGrowthSessionValue(
     expiresAt: issuedAt + Math.max(1, ttlSeconds) * 1000,
   };
 
-  if (!validSchedulerPair(session)) {
-    throw new Error("Web Growth scheduler identity is incomplete.");
-  }
+  if (!validSchedulerPair(session)) throw new Error("Web Growth scheduler identity is incomplete.");
   if ((session.provider === "google" || session.provider === "password") && !session.email) {
     throw new Error("Web Growth account email is missing.");
   }
@@ -103,6 +110,60 @@ export function createWebGrowthSessionValue(
   }
 
   return sealCookiePayload(session, secret());
+}
+
+export function createWebGrowthGoogleSessionValue(
+  identity: { userId: string; email: string; fullName?: string | null },
+  scheduler?: SchedulerIdentity,
+  workspace?: { workspaceId?: string | null; workspaceRole?: WebGrowthWorkspaceRole | null },
+) {
+  return createWebGrowthSessionValue({
+    provider: "google",
+    userId: identity.userId,
+    email: identity.email,
+    fullName: identity.fullName,
+    workspaceId: workspace?.workspaceId,
+    workspaceRole: workspace?.workspaceRole,
+    ...schedulerFields(scheduler),
+  });
+}
+
+export function createWebGrowthPasswordSessionValue(
+  identity: {
+    userId: string;
+    email: string;
+    fullName?: string | null;
+    workspaceId?: string | null;
+    workspaceRole?: WebGrowthWorkspaceRole | null;
+  },
+  scheduler?: SchedulerIdentity,
+) {
+  return createWebGrowthSessionValue({
+    provider: "password",
+    ...identity,
+    ...schedulerFields(scheduler),
+  });
+}
+
+export function createWebGrowthTikTokSessionValue(userId: string, openId: string) {
+  return createWebGrowthSessionValue({
+    provider: "tiktok",
+    userId,
+    ...schedulerFields({ userId, openId }),
+  });
+}
+
+export function createWebGrowthSessionValueFromSession(session: WebGrowthSession) {
+  return createWebGrowthSessionValue({
+    provider: session.provider,
+    userId: session.userId,
+    email: session.email,
+    fullName: session.fullName,
+    workspaceId: session.workspaceId,
+    workspaceRole: session.workspaceRole,
+    schedulerUserId: session.schedulerUserId,
+    tiktokOpenId: session.tiktokOpenId,
+  });
 }
 
 export function readWebGrowthSession(value: string | undefined, now = Date.now()) {

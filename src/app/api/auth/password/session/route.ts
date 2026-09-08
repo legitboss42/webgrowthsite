@@ -1,9 +1,13 @@
 import { NextResponse } from "next/server";
 import { isAllowedGoogleAdminEmail, sanitizeGoogleAuthNext } from "@/lib/googleAuth";
 import {
-  createWorkspacePasswordSessionValue,
+  WEB_GROWTH_SESSION_COOKIE,
+  createWebGrowthPasswordSessionValue,
+  getWebGrowthSessionTtlSeconds,
+} from "@/lib/webGrowthSession";
+import { resolveOwnerSchedulerIdentity } from "@/lib/webGrowthSessionServer";
+import {
   getWorkspacePasswordCookieName,
-  getWorkspacePasswordTtlSeconds,
   isWorkspacePasswordAuthConfigured,
   signInWorkspaceWithPassword,
 } from "@/lib/whatsapp/passwordAuth";
@@ -49,12 +53,32 @@ export async function POST(request: Request) {
     : await findWhatsAppTeamMemberByEmail(signIn.user.email, { activeOnly: true, workspaceId: workspace.id });
   if (!member) return NextResponse.json({ error: "This account is not approved for this WhatsApp workspace." }, { status: 403 });
 
+  const scheduler = await resolveOwnerSchedulerIdentity(signIn.user.email);
   const response = NextResponse.json({ ok: true, redirectTo: next });
+  response.cookies.delete(getWorkspacePasswordCookieName());
   response.cookies.set({
-    name: getWorkspacePasswordCookieName(),
-    value: createWorkspacePasswordSessionValue({ userId: signIn.user.id, email: signIn.user.email, fullName: member.displayName || signIn.user.fullName, workspaceId: workspace.id, workspaceRole: member.role }),
-    httpOnly: true, sameSite: "lax", secure: secureCookieFlag(), path: "/", maxAge: getWorkspacePasswordTtlSeconds(),
+    name: WEB_GROWTH_SESSION_COOKIE,
+    value: createWebGrowthPasswordSessionValue({
+      userId: signIn.user.id,
+      email: signIn.user.email,
+      fullName: member.displayName || signIn.user.fullName,
+      workspaceId: workspace.id,
+      workspaceRole: member.role,
+    }, scheduler),
+    httpOnly: true,
+    sameSite: "lax",
+    secure: secureCookieFlag(),
+    path: "/",
+    maxAge: getWebGrowthSessionTtlSeconds(),
   });
-  response.cookies.set({ name: WHATSAPP_WORKSPACE_COOKIE, value: workspace.id, httpOnly: true, sameSite: "lax", secure: secureCookieFlag(), path: "/", maxAge: getWorkspacePasswordTtlSeconds() });
+  response.cookies.set({
+    name: WHATSAPP_WORKSPACE_COOKIE,
+    value: workspace.id,
+    httpOnly: true,
+    sameSite: "lax",
+    secure: secureCookieFlag(),
+    path: "/",
+    maxAge: getWebGrowthSessionTtlSeconds(),
+  });
   return response;
 }
