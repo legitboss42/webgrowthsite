@@ -18,9 +18,12 @@ test("scheduler publishing authorization requests Direct Post scope", () => {
   assert.equal(url.searchParams.get("redirect_uri"), "https://webgrowth.info/connect/tiktok/callback/");
 });
 
-test("scheduler redirects cannot escape scheduler routes", () => {
+test("scheduler redirects allow unified dashboard routes but cannot escape the app", () => {
   assert.equal(normalizeSchedulerReturnPath("/scheduler/dashboard/"), "/scheduler/dashboard/");
+  assert.equal(normalizeSchedulerReturnPath("/dashboard/tiktok/"), "/dashboard/tiktok/");
+  assert.equal(normalizeSchedulerReturnPath("/dashboard/connections/?provider=tiktok"), "/dashboard/connections/?provider=tiktok");
   assert.equal(normalizeSchedulerReturnPath("//evil.test"), "/scheduler/dashboard/");
+  assert.equal(normalizeSchedulerReturnPath("https://evil.test/"), "/scheduler/dashboard/");
   assert.equal(normalizeSchedulerReturnPath("/admin/whatsapp"), "/scheduler/dashboard/");
 });
 

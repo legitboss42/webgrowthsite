@@ -13,9 +13,9 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  session-red-green:
+  validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -24,3 +24,4 @@ jobs:
           cache: npm
       - run: npm install --no-audit --no-fund
       - run: npx tsx --test src/lib/webGrowthSession.test.ts src/lib/authSessionRoutes.test.ts
+      - run: npm run test:scheduler
