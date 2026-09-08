@@ -6,6 +6,8 @@ import {
 } from "@/lib/googleAuth";
 import { isOwnerOpenId } from "@/lib/scheduler/config";
 import { readSchedulerSession, SCHEDULER_SESSION_COOKIE } from "@/lib/scheduler/session";
+import { canonicalWhatsAppIdentity } from "@/lib/unifiedAuthorization";
+import { readWebGrowthSessionFromCookieStore } from "@/lib/webGrowthSession";
 import { readWorkspacePasswordSessionFromCookieStore } from "@/lib/whatsapp/passwordAuth";
 import { ensureWhatsAppOwnerTeamMember, findWhatsAppTeamMemberByEmail } from "@/lib/whatsapp/teamAccess";
 import { canWhatsAppRoleSuperviseTeam, type WhatsAppTeamRole } from "@/lib/whatsapp/teamModel";
@@ -33,10 +35,16 @@ export type WhatsAppWorkspaceAccess = {
 
 /**
  * Legacy synchronous Owner gate. New code should use getWhatsAppWorkspaceAccess.
- * A password Owner is accepted only when the signed workspace id exactly matches the
- * active workspace cookie, preventing a role from being carried across tenants.
+ * Canonical sessions are checked first; legacy cookies remain readable during migration.
  */
 export function hasWhatsAppAdminAccess(cookieStore: CookieStoreLike) {
+  try {
+    const canonical = readWebGrowthSessionFromCookieStore(cookieStore);
+    const identity = canonicalWhatsAppIdentity(canonical);
+    if (identity?.configuredPlatformAdmin) return true;
+    const selectedWorkspaceId = cookieStore.get(WHATSAPP_WORKSPACE_COOKIE)?.value?.trim() || "";
+    if (canonical?.workspaceRole === "owner" && isWhatsAppWorkspaceId(canonical.workspaceId) && canonical.workspaceId === selectedWorkspaceId) return true;
+  } catch {}
   try { if (isGoogleAdminSession(readGoogleAuthSessionFromCookieStore(cookieStore))) return true; } catch {}
   try {
     const passwordSession = readWorkspacePasswordSessionFromCookieStore(cookieStore);
@@ -69,6 +77,11 @@ async function resolveIdentityWorkspace(input: { email: string; displayName: str
 }
 
 export async function getWhatsAppWorkspaceAccess(cookieStore: CookieStoreLike): Promise<WhatsAppWorkspaceAccess | null> {
+  try {
+    const canonical = readWebGrowthSessionFromCookieStore(cookieStore);
+    const identity = canonicalWhatsAppIdentity(canonical);
+    if (identity) return await resolveIdentityWorkspace({ ...identity, cookieStore });
+  } catch {}
   try {
     const googleSession = readGoogleAuthSessionFromCookieStore(cookieStore);
     if (googleSession) return await resolveIdentityWorkspace({ email: googleSession.email, displayName: googleSession.fullName || googleSession.email, source: "google", cookieStore, configuredPlatformAdmin: isGoogleAdminSession(googleSession) });
