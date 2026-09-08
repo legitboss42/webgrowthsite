@@ -2,7 +2,7 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { CURRENT_SCHEDULER_PRIVACY_VERSION, CURRENT_SCHEDULER_TERMS_VERSION, isActiveSchedulerUser } from "@/lib/scheduler/legal";
 import { isSameOriginMutation } from "@/lib/scheduler/policy";
-import { readSchedulerSession, SCHEDULER_SESSION_COOKIE } from "@/lib/scheduler/session";
+import { readSchedulerSessionFromCookieStore } from "@/lib/scheduler/session";
 import { createSupabaseSchedulerStore } from "@/lib/scheduler/store";
 
 const ACCEPTANCE_KEYS = ["action", "termsVersion", "privacyVersion", "retentionAcknowledged", "contentResponsibilityAcknowledged"] as const;
@@ -15,7 +15,7 @@ function isExactAcceptanceBody(body: Record<string, unknown> | null): boolean {
 
 export async function POST(request: Request) {
   const cookieStore = await cookies();
-  const session = readSchedulerSession(cookieStore.get(SCHEDULER_SESSION_COOKIE)?.value);
+  const session = readSchedulerSessionFromCookieStore(cookieStore);
   if (!session) return NextResponse.json({ error: "Authentication required." }, { status: 401 });
   if (!isSameOriginMutation(request.headers.get("origin"), request.url)) return NextResponse.json({ error: "Invalid request origin." }, { status: 403 });
   const body = await request.json().catch(() => null) as Record<string, unknown> | null;
