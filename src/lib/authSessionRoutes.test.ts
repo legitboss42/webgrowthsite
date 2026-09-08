@@ -27,6 +27,11 @@ test("workspace password sign-in writes one canonical Web Growth session", () =>
   assert.doesNotMatch(text, /name:\s*getWorkspacePasswordCookieName\(\)/);
 });
 
+test("workspace password sign-in accepts the unified dashboard as a safe destination", () => {
+  const text = source("src/app/api/auth/password/session/route.ts");
+  assert.match(text, /path\.startsWith\("\/dashboard\/"\)/);
+});
+
 test("TikTok OAuth augments an existing canonical account session", () => {
   const text = source("src/app/api/scheduler/auth/callback/route.ts");
   assert.match(text, /readWebGrowthSessionFromCookieStore/);
