@@ -171,7 +171,7 @@ const jobId = String(created?.jobId || "");
 if (!jobId) throw new Error("Job creation did not return a job ID.");
 
 console.log(`[social-automation] Rendering ${slug}`);
-await run(process.execPath, [renderScript, slug]);
+await run(process.execPath, ["--import", "tsx", renderScript, slug]);
 await uploadProfile(jobId, "META");
 await uploadProfile(jobId, "TIKTOK");
 
