@@ -44,7 +44,7 @@ export default async function WhatsAppConsoleLayout({ children }: { children: Re
     if (phoneResult.ok) senderNumber = findConfiguredWhatsAppSender(phoneResult.phoneNumbers, meta.phoneNumberId)?.displayPhoneNumber;
   }
 
-  const workspaceControl = <WorkspaceSwitcher currentWorkspaceId={access.workspaceId} workspaces={access.availableWorkspaces} platformAdmin={access.platformAdmin} />;
+  const workspaceControl = <div className="flex items-center gap-2"><WorkspaceSwitcher currentWorkspaceId={access.workspaceId} workspaces={access.availableWorkspaces} platformAdmin={access.platformAdmin} /><Link href="/dashboard/" className="rounded-lg border border-white/10 px-2 py-1 text-[0.6rem] font-semibold text-white/55 hover:text-white">Automation</Link></div>;
 
   return (
     <WhatsAppShell senderConnected={senderConnected} senderNumber={senderNumber} role={access.role} memberName={access.displayName} workspaceName={access.workspaceName} workspaceControl={workspaceControl} presenceControl={<TeamPresenceWidget senderConnected={senderConnected} />}>
