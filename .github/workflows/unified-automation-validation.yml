@@ -15,13 +15,24 @@ concurrency:
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 35
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 24
           cache: npm
-      - run: npm install --no-audit --no-fund
-      - run: npx tsx --test src/lib/webGrowthSession.test.ts src/lib/authSessionRoutes.test.ts src/lib/unifiedAuthorization.test.ts src/lib/dashboardRoutes.test.ts src/lib/unifiedSignIn.test.ts
-      - run: npm run test:scheduler
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Unified session, authorization, routing and sign-in tests
+        run: npx tsx --test src/lib/webGrowthSession.test.ts src/lib/authSessionRoutes.test.ts src/lib/unifiedAuthorization.test.ts src/lib/dashboardRoutes.test.ts src/lib/unifiedSignIn.test.ts
+      - name: TikTok scheduler regression suite
+        run: npm run test:scheduler
+      - name: Content automation regression suite
+        run: npm run test:social
+      - name: WhatsApp Business regression suite
+        run: npm run test:whatsapp
+      - name: Lint
+        run: npm run lint
+      - name: Production build
+        run: npm run build
