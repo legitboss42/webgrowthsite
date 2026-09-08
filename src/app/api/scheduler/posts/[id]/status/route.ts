@@ -1,13 +1,13 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { readSchedulerSession, SCHEDULER_SESSION_COOKIE } from "@/lib/scheduler/session";
+import { readSchedulerSessionFromCookieStore } from "@/lib/scheduler/session";
 import { createSchedulerSupabaseClient } from "@/lib/scheduler/supabase";
 import { readOwnedPostStatus } from "@/lib/scheduler/statusAccess";
 import { createPublicStatusSnapshot } from "@/lib/scheduler/statusSnapshot";
 
 export async function GET(_request: Request, context: { params: Promise<{ id: string }> }) {
   const cookieStore = await cookies();
-  const session = readSchedulerSession(cookieStore.get(SCHEDULER_SESSION_COOKIE)?.value);
+  const session = readSchedulerSessionFromCookieStore(cookieStore);
   if (!session) return NextResponse.json({ error: "Authentication required." }, { status: 401 });
 
   const { id } = await context.params;
