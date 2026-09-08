@@ -46,3 +46,14 @@ After explicit approval to merge this test package to `main`, verify:
 ## Deployment boundary
 
 Preparing and validating this branch does not authorize another production deployment. The branch should be merged to `main` only after the entire atomic test package is validated and the owner approves that production test deployment.
+
+## Final production result — 2026-09-08
+
+- Production commit: `e7df60d8102632e68e4ec13bb0fbf6365f89edb3`.
+- GitHub blog-social automation completed successfully.
+- Facebook publication reached `PUBLISHED`.
+- Instagram publication reached `PUBLISHED`.
+- TikTok scheduler post `d51f902f-21d3-4789-bd4b-a2e849c3d443` passed stored-video validation, was owner-approved, scheduled, submitted, and reached `PUBLISHED` on the first publish attempt.
+- TikTok publish id: `v_pub_url~v2-1.7683037228876498964`.
+- The original parent `social_publications` TikTok row remained `NEEDS_APPROVAL` after scheduler completion; PR #24 adds terminal scheduler-to-blog-social status synchronization to prevent that stale dashboard state.
+- The controlled temporary article and its route-governance entry are removed by this cleanup commit.
