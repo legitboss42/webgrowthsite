@@ -1,9 +1,13 @@
 import { NextResponse } from "next/server";
 import { isAllowedGoogleAdminEmail, sanitizeGoogleAuthNext } from "@/lib/googleAuth";
 import {
-  createWorkspacePasswordSessionValue,
+  WEB_GROWTH_SESSION_COOKIE,
+  createWebGrowthPasswordSessionValue,
+  getWebGrowthSessionTtlSeconds,
+} from "@/lib/webGrowthSession";
+import { resolveOwnerSchedulerIdentity } from "@/lib/webGrowthSessionServer";
+import {
   getWorkspacePasswordCookieName,
-  getWorkspacePasswordTtlSeconds,
   isWorkspacePasswordAuthConfigured,
   signInWorkspaceWithPassword,
 } from "@/lib/whatsapp/passwordAuth";
@@ -14,7 +18,9 @@ import { checkRateLimit, getClientIp, getUserAgent, hasJsonContentType, isAllowe
 
 export const runtime = "nodejs";
 function secureCookieFlag() { return process.env.NODE_ENV === "production"; }
-function isWhatsAppWorkspacePath(path: string) { return path === "/admin/whatsapp" || path.startsWith("/admin/whatsapp/"); }
+function isAllowedPasswordNextPath(path: string) {
+  return path === "/admin/whatsapp" || path.startsWith("/admin/whatsapp/") || path.startsWith("/dashboard/");
+}
 function readPassword(value: unknown) { return typeof value === "string" ? value.slice(0, 256) : ""; }
 
 export async function POST(request: Request) {
@@ -29,8 +35,8 @@ export async function POST(request: Request) {
   catch { return NextResponse.json({ error: "Invalid request payload." }, { status: 400 }); }
   const email = sanitizeText(body.email, 254).trim().toLowerCase();
   const password = readPassword(body.password);
-  const next = sanitizeGoogleAuthNext(sanitizeText(body.next, 300), "/admin/whatsapp/");
-  if (!email || !password || !isWhatsAppWorkspacePath(next)) return NextResponse.json({ error: "Invalid email or password." }, { status: 400 });
+  const next = sanitizeGoogleAuthNext(sanitizeText(body.next, 300), "/dashboard/");
+  if (!email || !password || !isAllowedPasswordNextPath(next)) return NextResponse.json({ error: "Invalid email or password." }, { status: 400 });
 
   const signIn = await signInWorkspaceWithPassword(email, password);
   if (!signIn.ok) return NextResponse.json({ error: "Invalid email or password." }, { status: 401 });
@@ -49,12 +55,32 @@ export async function POST(request: Request) {
     : await findWhatsAppTeamMemberByEmail(signIn.user.email, { activeOnly: true, workspaceId: workspace.id });
   if (!member) return NextResponse.json({ error: "This account is not approved for this WhatsApp workspace." }, { status: 403 });
 
+  const scheduler = await resolveOwnerSchedulerIdentity(signIn.user.email);
   const response = NextResponse.json({ ok: true, redirectTo: next });
+  response.cookies.delete(getWorkspacePasswordCookieName());
   response.cookies.set({
-    name: getWorkspacePasswordCookieName(),
-    value: createWorkspacePasswordSessionValue({ userId: signIn.user.id, email: signIn.user.email, fullName: member.displayName || signIn.user.fullName, workspaceId: workspace.id, workspaceRole: member.role }),
-    httpOnly: true, sameSite: "lax", secure: secureCookieFlag(), path: "/", maxAge: getWorkspacePasswordTtlSeconds(),
+    name: WEB_GROWTH_SESSION_COOKIE,
+    value: createWebGrowthPasswordSessionValue({
+      userId: signIn.user.id,
+      email: signIn.user.email,
+      fullName: member.displayName || signIn.user.fullName,
+      workspaceId: workspace.id,
+      workspaceRole: member.role,
+    }, scheduler),
+    httpOnly: true,
+    sameSite: "lax",
+    secure: secureCookieFlag(),
+    path: "/",
+    maxAge: getWebGrowthSessionTtlSeconds(),
   });
-  response.cookies.set({ name: WHATSAPP_WORKSPACE_COOKIE, value: workspace.id, httpOnly: true, sameSite: "lax", secure: secureCookieFlag(), path: "/", maxAge: getWorkspacePasswordTtlSeconds() });
+  response.cookies.set({
+    name: WHATSAPP_WORKSPACE_COOKIE,
+    value: workspace.id,
+    httpOnly: true,
+    sameSite: "lax",
+    secure: secureCookieFlag(),
+    path: "/",
+    maxAge: getWebGrowthSessionTtlSeconds(),
+  });
   return response;
 }

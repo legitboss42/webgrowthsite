@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
+import Link from "next/link";
 import { cookies } from "next/headers";
-import GoogleAdminPrompt from "@/components/auth/GoogleAdminPrompt";
-import { getDefaultAdminGoogleEmail, getGoogleClientId, isGoogleAuthConfigured } from "@/lib/googleAuth";
 import WhatsAppShell from "@/components/whatsapp/WhatsAppShell";
 import WorkspaceSwitcher from "@/components/whatsapp/WorkspaceSwitcher";
 import ConversationFilterDock from "@/components/whatsapp/ConversationFilterDock";
@@ -31,7 +30,7 @@ export default async function WhatsAppConsoleLayout({ children }: { children: Re
   const cookieStore = await cookies();
   const access = await getWhatsAppWorkspaceAccess(cookieStore);
   if (!access) {
-    return <div className="flex min-h-screen items-center justify-center bg-[#050806] px-4 py-10 text-white sm:px-6 sm:py-14"><div className="w-full max-w-6xl"><GoogleAdminPrompt nextPath="/admin/whatsapp/" adminEmail={getDefaultAdminGoogleEmail()} clientId={getGoogleClientId()} googleReady={isGoogleAuthConfigured()} workspaceTeamAccess /></div></div>;
+    return <div className="flex min-h-screen items-center justify-center bg-[#050806] px-4 py-10 text-white sm:px-6 sm:py-14"><div className="w-full max-w-3xl rounded-3xl border border-white/10 bg-white/[0.025] p-8 sm:p-10"><p className="text-xs font-semibold uppercase tracking-[.2em] text-emerald-300">WhatsApp Business</p><h1 className="mt-3 text-3xl font-semibold">Sign in through Web Growth Automation</h1><p className="mt-3 max-w-2xl text-sm leading-6 text-white/55">The WhatsApp workspace now shares the Web Growth account session. Workspace membership and role permissions are still verified after sign-in.</p><Link href="/sign-in/?next=/dashboard/whatsapp/" className="mt-6 inline-flex rounded-full bg-emerald-300 px-5 py-2.5 text-sm font-bold text-[#07100c]">Sign in to Web Growth</Link></div></div>;
   }
 
   const [meta, quickSettings] = await Promise.all([
@@ -45,7 +44,7 @@ export default async function WhatsAppConsoleLayout({ children }: { children: Re
     if (phoneResult.ok) senderNumber = findConfiguredWhatsAppSender(phoneResult.phoneNumbers, meta.phoneNumberId)?.displayPhoneNumber;
   }
 
-  const workspaceControl = <WorkspaceSwitcher currentWorkspaceId={access.workspaceId} workspaces={access.availableWorkspaces} platformAdmin={access.platformAdmin} />;
+  const workspaceControl = <div className="flex items-center gap-2"><WorkspaceSwitcher currentWorkspaceId={access.workspaceId} workspaces={access.availableWorkspaces} platformAdmin={access.platformAdmin} /><Link href="/dashboard/" className="rounded-lg border border-white/10 px-2 py-1 text-[0.6rem] font-semibold text-white/55 hover:text-white">Automation</Link></div>;
 
   return (
     <WhatsAppShell senderConnected={senderConnected} senderNumber={senderNumber} role={access.role} memberName={access.displayName} workspaceName={access.workspaceName} workspaceControl={workspaceControl} presenceControl={<TeamPresenceWidget senderConnected={senderConnected} />}>

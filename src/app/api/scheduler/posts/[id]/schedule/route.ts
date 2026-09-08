@@ -4,14 +4,14 @@ import { canTransitionPost, isSameOriginMutation } from "@/lib/scheduler/policy"
 import { getSchedulerLaunchState } from "@/lib/scheduler/launch";
 import { schedulePublicPostAtBoundary } from "@/lib/scheduler/quotas";
 import { parseOffsetScheduleInstant } from "@/lib/scheduler/scheduleTime";
-import { readSchedulerSession, SCHEDULER_SESSION_COOKIE } from "@/lib/scheduler/session";
+import { readSchedulerSessionFromCookieStore } from "@/lib/scheduler/session";
 import { createSupabaseSchedulerStore } from "@/lib/scheduler/store";
 import { createSchedulerSupabaseClient } from "@/lib/scheduler/supabase";
 import type { PostStatus } from "@/lib/scheduler/types";
 
 export async function POST(request: Request, context: { params: Promise<{ id: string }> }) {
   const cookieStore = await cookies();
-  const session = readSchedulerSession(cookieStore.get(SCHEDULER_SESSION_COOKIE)?.value);
+  const session = readSchedulerSessionFromCookieStore(cookieStore);
   if (!session) return NextResponse.json({ error: "Authentication required." }, { status: 401 });
   if (!isSameOriginMutation(request.headers.get("origin"), request.url)) {
     return NextResponse.json({ error: "Invalid request origin." }, { status: 403 });
@@ -62,4 +62,3 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
 
   return NextResponse.json({ error: "Unsupported schedule action." }, { status: 400 });
 }
-

@@ -71,6 +71,9 @@ export function createSchedulerStore(client: SchedulerDatabaseClient) {
     getUser(userId: string) {
       return client.find("scheduler_users", "id", userId);
     },
+    getUserByTikTokOpenId(openId: string) {
+      return client.find("scheduler_users", "tiktok_open_id", openId);
+    },
     acceptLegalAcceptance(userId: string, input: SchedulerLegalAcceptanceInput) {
       const acceptedAt = new Date().toISOString();
       return client.update("scheduler_users", userId, {

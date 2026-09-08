@@ -1,14 +1,18 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import {
-  createGoogleAuthSessionValue,
   exchangeGoogleCodeForIdentity,
   getGoogleAuthCookieName,
-  getGoogleAuthTtlSeconds,
   getGoogleOAuthStateCookieName,
   isAllowedGoogleAdminEmail,
   readGoogleOAuthState,
 } from "@/lib/googleAuth";
+import {
+  WEB_GROWTH_SESSION_COOKIE,
+  createWebGrowthGoogleSessionValue,
+  getWebGrowthSessionTtlSeconds,
+} from "@/lib/webGrowthSession";
+import { resolveOwnerSchedulerIdentity } from "@/lib/webGrowthSessionServer";
 import {
   bindWhatsAppTeamGoogleIdentity,
   isWhatsAppTeamEmailAllowed,
@@ -82,16 +86,18 @@ export async function GET(request: Request) {
       });
     }
 
+    const scheduler = isAdmin ? await resolveOwnerSchedulerIdentity(identity.email) : null;
     const response = NextResponse.redirect(new URL(savedState.next, requestUrl.origin));
     response.cookies.delete(stateCookieName);
+    response.cookies.delete(getGoogleAuthCookieName());
     response.cookies.set({
-      name: getGoogleAuthCookieName(),
-      value: createGoogleAuthSessionValue(identity),
+      name: WEB_GROWTH_SESSION_COOKIE,
+      value: createWebGrowthGoogleSessionValue(identity, scheduler),
       httpOnly: true,
       sameSite: "lax",
       secure: secureCookieFlag(requestUrl),
       path: "/",
-      maxAge: getGoogleAuthTtlSeconds(),
+      maxAge: getWebGrowthSessionTtlSeconds(),
     });
     return response;
   } catch (error) {

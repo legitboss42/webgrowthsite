@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { isOwnerOpenId } from "@/lib/scheduler/config";
 import { getSchedulerLaunchState } from "@/lib/scheduler/launch";
 import { createSupabaseSchedulerOperations, formatWorkerHeartbeatAge, type SchedulerOwnerOverview } from "@/lib/scheduler/operations";
-import { readSchedulerSession, SCHEDULER_SESSION_COOKIE } from "@/lib/scheduler/session";
+import { readSchedulerSessionFromCookieStore } from "@/lib/scheduler/session";
 
 const gates = [
   ["Public enrollment", "publicEnrollment"], ["New scheduling", "newScheduling"], ["Video uploads", "video"],
@@ -16,7 +16,7 @@ function metric(label: string, value: number | string) {
 
 export default async function AdminPage() {
   const jar = await cookies();
-  const session = readSchedulerSession(jar.get(SCHEDULER_SESSION_COOKIE)?.value);
+  const session = readSchedulerSessionFromCookieStore(jar);
   if (!session || !isOwnerOpenId(session.openId)) notFound();
   let overview: SchedulerOwnerOverview | null = null;
   try { overview = await (await createSupabaseSchedulerOperations()).getOwnerOverview(); } catch { overview = null; }

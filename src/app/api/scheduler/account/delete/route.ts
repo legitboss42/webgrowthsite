@@ -5,14 +5,14 @@ import {
   readAccountDeletionConfirmation,
   requestAccountDeletionAtBoundary,
 } from "@/lib/scheduler/retention";
-import { readSchedulerSession, SCHEDULER_SESSION_COOKIE } from "@/lib/scheduler/session";
+import { LEGACY_SCHEDULER_SESSION_COOKIE, readSchedulerSessionFromCookieStore } from "@/lib/scheduler/session";
 import { createSupabaseSchedulerStore } from "@/lib/scheduler/store";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
   const cookieStore = await cookies();
-  const session = readSchedulerSession(cookieStore.get(SCHEDULER_SESSION_COOKIE)?.value);
+  const session = readSchedulerSessionFromCookieStore(cookieStore);
   const sameOrigin = isSameOriginMutation(request.headers.get("origin"), request.url);
   const result = await requestAccountDeletionAtBoundary({
     userId: session?.userId || null,
@@ -28,7 +28,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: result.error }, { status: result.status });
   }
 
-  const response = NextResponse.redirect(new URL("/scheduler/?account-deletion=requested", request.url), 303);
-  response.cookies.delete(SCHEDULER_SESSION_COOKIE);
+  const response = NextResponse.redirect(new URL("/dashboard/settings/?account-deletion=requested", request.url), 303);
+  response.cookies.delete(LEGACY_SCHEDULER_SESSION_COOKIE);
   return response;
 }

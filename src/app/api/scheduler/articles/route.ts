@@ -3,13 +3,13 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { isOwnerOpenId } from "@/lib/scheduler/config";
 import { isSameOriginMutation } from "@/lib/scheduler/policy";
-import { readSchedulerSession, SCHEDULER_SESSION_COOKIE } from "@/lib/scheduler/session";
+import { readSchedulerSessionFromCookieStore } from "@/lib/scheduler/session";
 import { createSchedulerSupabaseClient } from "@/lib/scheduler/supabase";
 import { getPost, isPublicBlogSlug } from "@/lib/posts";
 import { buildTikTokPhotoDraftContent } from "@/lib/tiktokPublishing";
 
 export async function POST(request: Request) {
-  const jar=await cookies(); const session=readSchedulerSession(jar.get(SCHEDULER_SESSION_COOKIE)?.value);
+  const jar=await cookies(); const session=readSchedulerSessionFromCookieStore(jar);
   if(!session) return NextResponse.json({error:"Authentication required."},{status:401});
   if(!isOwnerOpenId(session.openId)) return NextResponse.json({error:"Owner access required."},{status:403});
   if(!isSameOriginMutation(request.headers.get("origin"),request.url)) return NextResponse.json({error:"Invalid request origin."},{status:403});

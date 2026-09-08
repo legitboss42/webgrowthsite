@@ -2,7 +2,7 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { getSchedulerConfig } from "@/lib/scheduler/config";
 import { decryptTikTokTokens } from "@/lib/scheduler/crypto";
-import { readSchedulerSession, SCHEDULER_SESSION_COOKIE } from "@/lib/scheduler/session";
+import { readSchedulerSessionFromCookieStore } from "@/lib/scheduler/session";
 import { createSchedulerSupabaseClient } from "@/lib/scheduler/supabase";
 import { createTikTokSchedulerClient } from "@/lib/scheduler/tiktokClient";
 
@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 
 export async function GET() {
   const cookieStore = await cookies();
-  const session = readSchedulerSession(cookieStore.get(SCHEDULER_SESSION_COOKIE)?.value);
+  const session = readSchedulerSessionFromCookieStore(cookieStore);
   if (!session) return NextResponse.json({ error: "Authentication required." }, { status: 401 });
   const supabase = createSchedulerSupabaseClient();
   const { data: connection } = await supabase.from("tiktok_connections").select("encrypted_tokens,scopes")

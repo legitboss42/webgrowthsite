@@ -1,13 +1,17 @@
 import { NextResponse } from "next/server";
 import {
-  createGoogleAuthSessionValue,
   getGoogleAuthCookieName,
-  getGoogleAuthTtlSeconds,
   isAllowedGoogleAdminEmail,
   isGoogleAuthConfigured,
   sanitizeGoogleAuthNext,
   verifyGoogleIdToken,
 } from "@/lib/googleAuth";
+import {
+  WEB_GROWTH_SESSION_COOKIE,
+  createWebGrowthGoogleSessionValue,
+  getWebGrowthSessionTtlSeconds,
+} from "@/lib/webGrowthSession";
+import { resolveOwnerSchedulerIdentity } from "@/lib/webGrowthSessionServer";
 import {
   bindWhatsAppTeamGoogleIdentity,
   isWhatsAppTeamEmailAllowed,
@@ -76,18 +80,17 @@ export async function POST(request: Request) {
       });
     }
 
-    const response = NextResponse.json({
-      success: true,
-      redirectTo: next,
-    });
+    const scheduler = isAdmin ? await resolveOwnerSchedulerIdentity(identity.email) : null;
+    const response = NextResponse.json({ success: true, redirectTo: next });
+    response.cookies.delete(getGoogleAuthCookieName());
     response.cookies.set({
-      name: getGoogleAuthCookieName(),
-      value: createGoogleAuthSessionValue(identity),
+      name: WEB_GROWTH_SESSION_COOKIE,
+      value: createWebGrowthGoogleSessionValue(identity, scheduler),
       httpOnly: true,
       sameSite: "lax",
       secure: secureCookieFlag(),
       path: "/",
-      maxAge: getGoogleAuthTtlSeconds(),
+      maxAge: getWebGrowthSessionTtlSeconds(),
     });
     return response;
   } catch (error) {

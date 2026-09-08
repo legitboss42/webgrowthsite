@@ -10,13 +10,13 @@ import {
   createPostAtBoundary,
   isSchedulerPostMutationAction,
 } from "@/lib/scheduler/postMutations";
-import { readSchedulerSession, SCHEDULER_SESSION_COOKIE } from "@/lib/scheduler/session";
+import { readSchedulerSessionFromCookieStore } from "@/lib/scheduler/session";
 import { createSupabaseSchedulerStore } from "@/lib/scheduler/store";
 import { createSchedulerSupabaseClient } from "@/lib/scheduler/supabase";
 
 export async function POST(request: Request) {
   const cookieStore = await cookies();
-  const session = readSchedulerSession(cookieStore.get(SCHEDULER_SESSION_COOKIE)?.value);
+  const session = readSchedulerSessionFromCookieStore(cookieStore);
   if (!session) return NextResponse.json({ error: "Authentication required." }, { status: 401 });
   if (!isSameOriginMutation(request.headers.get("origin"), request.url)) {
     return NextResponse.json({ error: "Invalid request origin." }, { status: 403 });
@@ -102,4 +102,3 @@ export async function POST(request: Request) {
 
   return NextResponse.json({ error: "Unsupported post action." }, { status: 400 });
 }
-
