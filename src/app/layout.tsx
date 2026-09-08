@@ -4,7 +4,7 @@ import Script from "next/script";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { PublicChromeOnly, SiteMain } from "@/components/SiteChrome";
+import { PublicChromeOnly, SiteHeaderOnly, SiteMain } from "@/components/SiteChrome";
 import StructuredData from "@/components/StructuredData";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/react";
@@ -184,9 +184,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <a href="#main-content" className="skip-link">
           Skip to main content
         </a>
-        <PublicChromeOnly>
+        <SiteHeaderOnly>
           <Header />
-        </PublicChromeOnly>
+        </SiteHeaderOnly>
         <SiteMain>{children}</SiteMain>
         <PublicChromeOnly>
           <Footer />
