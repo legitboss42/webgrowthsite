@@ -2,7 +2,7 @@
 
 ## Current status
 
-The core blog-to-social feature is live in production. The Meta connection correction described below is implemented on draft PR #18 (`fix/meta-dashboard-business-login`) but is **not merged or deployed**. Production therefore remains on the existing connection flow until the final release matrix is green and explicit deployment approval is received.
+The core blog-to-social feature is live in production. The Meta connection correction formerly tracked in PR #18 has since been merged and released. A fresh production end-to-end run at commit `e7df60d` produced published Facebook and Instagram posts and an owner-approved TikTok post with a real provider `publish_id`. PR #24 then released scheduler-to-blog-social terminal status synchronization, so the parent TikTok publication now follows the scheduler's terminal result instead of remaining stale at `NEEDS_APPROVAL`.
 
 Production release history before PR #18:
 
@@ -16,7 +16,7 @@ The production Meta incident had two distinct symptoms:
 1. Desktop could complete the authorization round trip, but an account with several Instagram-linked Facebook Pages reached `resolveManagedPage()` and was rejected as ambiguous. No connection row was saved, so the dashboard stayed `Not connected`.
 2. Mobile depended on the full-page cross-site redirect. Production requests left Web Growth for Meta but did not reliably return to the callback.
 
-PR #18 replaces that redirect as the primary connection mechanism with Facebook Login for Business inside the Content Automation dashboard and adds explicit Page selection.
+The released PR #18 work replaced that redirect as the primary connection mechanism with Facebook Login for Business inside the Content Automation dashboard and added explicit Page selection.
 
 ## What the feature does
 
@@ -33,6 +33,27 @@ A genuinely new Markdown article added under `content/blog/*.md` is converted in
 7. Instagram and Facebook publish automatically when a usable Meta connection exists.
 8. TikTok enters the existing scheduler as `NEEDS_APPROVAL`, preserving creator consent and settings before Direct Post.
 9. Terminal media is cleaned up according to retention rules. TikTok media remains protected until at least seven days after the scheduler's real terminal timestamp.
+
+## Kinetic video template
+
+The local `feature/remotion-engaging-text-video` work replaces the card-heavy Remotion presentation with a shared kinetic text renderer while preserving the production composition IDs and output contracts. It has not been pushed or deployed.
+
+- `src/lib/socialAutomation/kineticVideo.ts` deterministically turns article metadata and prose into hook, problem, insight, action, takeaway and ending beats.
+- `src/remotion/components/KineticArticleVideo.tsx` owns shared sequencing and the platform boundary.
+- `KineticTypewriterText.tsx` provides frame-driven reveal, hold, transition and selective emphasis.
+- `AtmosphericBackground.tsx` provides a procedural moving background with no network or paid-media dependency.
+- `WebGrowthArticleVideo.tsx` and `TikTokArticleVideo.tsx` remain thin platform wrappers.
+- Voice is optional and production rendering defaults to `audioMode: "none"`; no TTS request, audio source or subtitle track is required.
+- Meta can render understated Web Growth branding and `webgrowth.info`. TikTok receives a neutral ending with no promotional branding, URL or narration.
+
+Local render commands:
+
+```powershell
+npm run social:render -- <existing-article-slug>
+npm run video:render -- <existing-article-slug>
+```
+
+The production social command continues to write `out/social/<slug>/meta.mp4`, `out/social/<slug>/tiktok.mp4` and `out/social/<slug>/manifest.json`. Change future visual styling in the shared Remotion components, and change timing/copy selection in `kineticVideo.ts`; keep platform wrappers, composition IDs and output paths stable unless the automation contract is deliberately migrated.
 
 ## Production database
 
@@ -191,9 +212,9 @@ PR #18 TDD evidence before final release validation:
 - RED `0a22dc5ea7ae4fc5733af0799ba31db77b8bcd7d` / run `34110996107`: 91 existing social tests passed and only the intentionally missing dashboard-flow assertion failed.
 - Dashboard implementation `d411365de7cc5f26292d76668cc4afabccf36498` + `4f3fc3d3c0e64dd133aa3cec31f9d06f3d92128c`: focused social validation run `34111340060` returned GREEN.
 
-## Deployment boundary for PR #18
+## Historical deployment boundary for PR #18
 
-PR #18 remains draft and must not be merged or deployed until:
+Before it was released, PR #18 remained draft and was not eligible to merge or deploy until:
 
 1. The exact final head passes the focused social suite and the repository's full release validation.
 2. The final diff confirms there is no Supabase migration, no token-bearing browser response, and no unrelated TikTok/WhatsApp/publishing change.
