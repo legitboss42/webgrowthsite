@@ -92,6 +92,21 @@ for (const article of indexedArticles) {
 
 const governedPageRoutes = new Set(routes.map((route) => route.path));
 const privateAppRoutes = new Set([
+  "/dashboard/",
+  "/dashboard/content/",
+  "/dashboard/content/articles/",
+  "/dashboard/content/history/",
+  "/dashboard/tiktok/",
+  "/dashboard/tiktok/new/",
+  "/dashboard/tiktok/drafts/",
+  "/dashboard/tiktok/scheduled/",
+  "/dashboard/tiktok/published/",
+  "/dashboard/tiktok/attention/",
+  "/dashboard/whatsapp/",
+  "/dashboard/media/",
+  "/dashboard/connections/",
+  "/dashboard/settings/",
+  "/sign-in/",
   "/admin/whatsapp/calls/",
   "/admin/whatsapp/team/",
   "/admin/whatsapp/flows/",
