@@ -8,7 +8,7 @@
 
 **Tech Stack:** Next.js App Router, React 18, Tailwind CSS 4, TypeScript, Supabase, existing secure-cookie helpers, Node `tsx --test` suites.
 
-**Spec:** `docs/superpowers/specs/2026-09-08-unified-web-growth-automation-dashboard-design.md`
+**Spec:** `docs/superpowers/specs/2026-09-08-unified-automation-dashboard-design.md`
 
 **Completion evidence:** `docs/unified-automation-dashboard-progress.md`
 
