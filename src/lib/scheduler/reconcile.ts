@@ -30,6 +30,25 @@ export async function reconcilePublishingAttempts() {
       const terminal = buildTerminalReconciliation(statusPayload, completion);
       const postWrite = await supabase.from("scheduled_posts").update(terminal.post).eq("id", attempt.post_id).select("id");
       if (!reconciliationWritesSucceeded([postWrite])) continue;
+
+      const socialStatus = terminal.outcome === "PUBLISHED"
+        ? "PUBLISHED"
+        : terminal.post.status === "FAILED_RETRYABLE"
+          ? "FAILED_RETRYABLE"
+          : "NEEDS_ATTENTION";
+      const socialWrite = await supabase.from("social_publications").update({
+        status: socialStatus,
+        published_at: terminal.outcome === "PUBLISHED" ? completion : null,
+        next_retry_at: null,
+        last_error_code: terminal.outcome === "PUBLISHED" ? null : terminal.attempt.error_code,
+        last_error_message: null,
+        updated_at: completion,
+      })
+        .eq("platform", "TIKTOK")
+        .eq("external_publication_id", attempt.post_id)
+        .select("id");
+      if (socialWrite.error) continue;
+
       const attemptWrite = await supabase.from("publish_attempts").update(terminal.attempt).eq("id", attempt.id).select("id");
       if (!reconciliationWritesSucceeded([attemptWrite])) continue;
       if (terminal.outcome === "PUBLISHED") completed += 1; else failed += 1;
