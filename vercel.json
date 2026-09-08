@@ -3,7 +3,8 @@
   "git": {
     "deploymentEnabled": {
       "stage12-visual-redesign-v2": false,
-      "feature/blog-social-automation": false
+      "feature/blog-social-automation": false,
+      "feature/unified-automation-dashboard": false
     }
   }
 }
