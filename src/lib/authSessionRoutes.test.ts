@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import test from "node:test";
 
 const root = process.cwd();
@@ -45,6 +45,14 @@ test("workspace logout clears canonical and legacy auth cookies", () => {
   assert.match(text, /clearCookie\(response, WEB_GROWTH_SESSION_COOKIE\)/);
   assert.match(text, /getGoogleAuthCookieName/);
   assert.match(text, /getWorkspacePasswordCookieName/);
+});
+
+test("canonical logout route exists and delegates to the shared logout handler", () => {
+  const routePath = `${root}/src/app/api/auth/logout/route.ts`;
+  assert.equal(existsSync(routePath), true, "expected /api/auth/logout/ route to exist");
+  const text = readFileSync(routePath, "utf8");
+  assert.match(text, /workspace\/logout\/route/);
+  assert.match(text, /POST/);
 });
 
 test("scheduler store can resolve the existing user by TikTok open id", () => {
