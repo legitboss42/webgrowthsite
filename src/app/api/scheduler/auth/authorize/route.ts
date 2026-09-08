@@ -8,7 +8,7 @@ import {
   type SchedulerAuthMode,
   SCHEDULER_OAUTH_STATE_COOKIE,
 } from "@/lib/scheduler/oauth";
-import { readSchedulerSession, SCHEDULER_SESSION_COOKIE } from "@/lib/scheduler/session";
+import { readSchedulerSessionFromCookieStore } from "@/lib/scheduler/session";
 import { createSupabaseSchedulerStore } from "@/lib/scheduler/store";
 
 export const dynamic = "force-dynamic";
@@ -18,7 +18,7 @@ export async function GET(request: Request) {
   let session = null;
   try {
     const cookieStore = await cookies();
-    session = readSchedulerSession(cookieStore.get(SCHEDULER_SESSION_COOKIE)?.value);
+    session = readSchedulerSessionFromCookieStore(cookieStore);
   } catch {
     session = null;
   }
