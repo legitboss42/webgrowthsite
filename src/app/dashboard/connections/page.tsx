@@ -1,19 +1,17 @@
 import Link from "next/link";
-import { cookies } from "next/headers";
 import { DashboardHeading } from "@/components/dashboard/DashboardShell";
 import { getWhatsAppWorkspaceAccess } from "@/app/admin/whatsapp/auth";
+import { requireWebGrowthDashboardSession } from "@/lib/dashboardSession";
 import { createSchedulerSupabaseClient } from "@/lib/scheduler/supabase";
 import { createSocialAutomationStore } from "@/lib/socialAutomation/storeServer";
 import { canonicalContentAutomationAccess } from "@/lib/unifiedAuthorization";
-import { readWebGrowthSessionFromCookieStore } from "@/lib/webGrowthSession";
 
 function ConnectionCard({ name, state, detail, children }: { name: string; state: string; detail: string; children?: React.ReactNode }) {
   return <article className="rounded-2xl border border-white/10 bg-white/[0.025] p-5"><div className="flex items-start justify-between gap-3"><h2 className="font-semibold">{name}</h2><span className="rounded-full border border-white/10 px-3 py-1 text-xs text-white/60">{state}</span></div><p className="mt-3 text-sm leading-6 text-white/50">{detail}</p>{children ? <div className="mt-5">{children}</div> : null}</article>;
 }
 
 export default async function DashboardConnectionsPage() {
-  const jar = await cookies();
-  const session = readWebGrowthSessionFromCookieStore(jar)!;
+  const { cookieStore: jar, session } = await requireWebGrowthDashboardSession();
   let tiktok: Record<string, unknown> | null = null;
   let meta: Awaited<ReturnType<ReturnType<typeof createSocialAutomationStore>["getConnectionSummary"]>> = null;
   let whatsapp: Awaited<ReturnType<typeof getWhatsAppWorkspaceAccess>> = null;

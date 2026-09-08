@@ -1,16 +1,14 @@
-import { cookies } from "next/headers";
 import { DashboardHeading, MetricCard } from "@/components/dashboard/DashboardShell";
+import { requireWebGrowthDashboardSession } from "@/lib/dashboardSession";
 import { createSchedulerSupabaseClient } from "@/lib/scheduler/supabase";
 import { canonicalContentAutomationAccess } from "@/lib/unifiedAuthorization";
-import { readWebGrowthSessionFromCookieStore } from "@/lib/webGrowthSession";
 
 function assetCard(asset: Record<string, unknown>, source: string) {
   return <article key={`${source}-${String(asset.id)}`} className="rounded-2xl border border-white/10 bg-white/[0.025] p-5"><div className="flex items-start justify-between gap-3"><div className="min-w-0"><h2 className="truncate font-medium">{String(asset.original_filename || asset.storage_path || "Media asset")}</h2><p className="mt-1 text-xs text-white/40">{source}</p></div><span className="rounded-full border border-white/10 px-2.5 py-1 text-[11px] text-white/55">{String(asset.kind || asset.profile || "MEDIA")}</span></div><dl className="mt-4 grid grid-cols-2 gap-3 text-xs"><div><dt className="text-white/35">Type</dt><dd className="mt-1 text-white/65">{String(asset.mime_type || "Unknown")}</dd></div><div><dt className="text-white/35">Size</dt><dd className="mt-1 text-white/65">{asset.byte_size ? `${Math.max(1, Math.round(Number(asset.byte_size) / 1024))} KB` : "—"}</dd></div></dl></article>;
 }
 
 export default async function DashboardMediaPage() {
-  const jar = await cookies();
-  const session = readWebGrowthSessionFromCookieStore(jar)!;
+  const { session } = await requireWebGrowthDashboardSession();
   const db = createSchedulerSupabaseClient();
   let schedulerAssets: Record<string, unknown>[] = [];
   let automationAssets: Record<string, unknown>[] = [];

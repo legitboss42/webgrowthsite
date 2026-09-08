@@ -1,8 +1,10 @@
 import { DashboardHeading } from "@/components/dashboard/DashboardShell";
+import { requireContentAutomationDashboardAdmin } from "@/lib/dashboardSession";
 import { createSchedulerSupabaseClient } from "@/lib/scheduler/supabase";
 import { createSocialAutomationStore } from "@/lib/socialAutomation/storeServer";
 
 export default async function DashboardContentHistoryPage() {
+  await requireContentAutomationDashboardAdmin();
   let jobs: Record<string, unknown>[] = [];
   let publications: Record<string, unknown>[] = [];
   try {

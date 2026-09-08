@@ -1,12 +1,10 @@
 import Link from "next/link";
-import { cookies } from "next/headers";
 import { DashboardHeading, MetricCard } from "@/components/dashboard/DashboardShell";
 import TikTokQueue, { loadTikTokQueue } from "@/components/dashboard/TikTokQueue";
-import { readWebGrowthSessionFromCookieStore } from "@/lib/webGrowthSession";
+import { requireWebGrowthDashboardSession } from "@/lib/dashboardSession";
 
 export default async function DashboardTikTokPage() {
-  const jar = await cookies();
-  const session = readWebGrowthSessionFromCookieStore(jar)!;
+  const { session } = await requireWebGrowthDashboardSession();
   if (!session.schedulerUserId) return <main><DashboardHeading eyebrow="TikTok Publishing" title="Connect TikTok to activate publishing" description="Your Web Growth account is valid, but it does not yet have a linked scheduler identity." actions={<Link href="/api/scheduler/auth/authorize/?mode=login&returnTo=/dashboard/tiktok/" className="rounded-full bg-emerald-300 px-5 py-2.5 text-sm font-bold text-[#07100c]">Connect TikTok</Link>} /><div className="mt-8 rounded-2xl border border-white/10 bg-white/[0.025] p-6 text-sm text-white/55">Connecting TikTok adds publishing identity to this same Web Growth session. It does not create a second dashboard account.</div></main>;
 
   let posts: Array<Record<string, unknown>> = [];

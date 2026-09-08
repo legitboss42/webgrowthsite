@@ -51,8 +51,8 @@ test("dashboard shell exposes all approved top-level modules", async () => {
 test("private dashboard server surfaces enforce auth before reading child data", async () => {
   await Promise.all(directlyRenderedPrivateSurfaces.map(async (file) => {
     const text = await readFile(path.resolve(sourceRoot, file), "utf8");
-    assert.match(text, /requireWebGrowthDashboardSession/,
-      `${file} must enforce the canonical session inside the rendered child boundary`);
+    assert.match(text, /require(?:WebGrowthDashboardSession|ContentAutomationDashboardAdmin)/,
+      `${file} must enforce a canonical dashboard auth guard inside the rendered child boundary`);
     assert.doesNotMatch(text, /readWebGrowthSessionFromCookieStore\([^\n]+\)!/,
       `${file} must not rely on a parent layout plus a non-null assertion`);
   }));

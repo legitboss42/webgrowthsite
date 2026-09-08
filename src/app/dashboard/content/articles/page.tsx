@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { DashboardHeading } from "@/components/dashboard/DashboardShell";
+import { requireContentAutomationDashboardAdmin } from "@/lib/dashboardSession";
 import { getPublicPosts } from "@/lib/posts";
 
-export default function DashboardContentArticlesPage() {
+export default async function DashboardContentArticlesPage() {
+  await requireContentAutomationDashboardAdmin();
   const posts = getPublicPosts();
   return <main>
     <DashboardHeading eyebrow="Content Automation / Articles" title="Published article sources" description="These Web Growth articles are eligible source content for the automation pipeline. The publishing engine remains separate from the dashboard." />
