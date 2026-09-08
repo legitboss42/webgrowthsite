@@ -3,13 +3,13 @@ import { notFound, redirect } from "next/navigation";
 import PostApprovalPanel from "@/components/scheduler/PostApprovalPanel";
 import PostStatusPanel from "@/components/scheduler/PostStatusPanel";
 import { getSchedulerConfig } from "@/lib/scheduler/config";
-import { readSchedulerSession, SCHEDULER_SESSION_COOKIE } from "@/lib/scheduler/session";
+import { readSchedulerSessionFromCookieStore } from "@/lib/scheduler/session";
 import { createPostPageClientProps } from "@/lib/scheduler/postPageProps";
 import { createSchedulerSupabaseClient } from "@/lib/scheduler/supabase";
 
 export default async function PostPage({ params }: { params: Promise<{ id: string }> }) {
   const jar = await cookies();
-  const session = readSchedulerSession(jar.get(SCHEDULER_SESSION_COOKIE)?.value);
+  const session = readSchedulerSessionFromCookieStore(jar);
   if (!session) redirect("/scheduler/sign-in/");
 
   const { id } = await params;
