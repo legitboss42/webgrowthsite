@@ -1,13 +1,11 @@
 import Link from "next/link";
-import { cookies } from "next/headers";
 import { DashboardHeading, MetricCard } from "@/components/dashboard/DashboardShell";
+import { requireWebGrowthDashboardSession } from "@/lib/dashboardSession";
 import { createSocialAutomationStore } from "@/lib/socialAutomation/storeServer";
 import { canonicalContentAutomationAccess } from "@/lib/unifiedAuthorization";
-import { readWebGrowthSessionFromCookieStore } from "@/lib/webGrowthSession";
 
 export default async function DashboardContentPage() {
-  const jar = await cookies();
-  const session = readWebGrowthSessionFromCookieStore(jar)!;
+  const { session } = await requireWebGrowthDashboardSession();
   const allowed = canonicalContentAutomationAccess(session);
   if (!allowed) return <main><DashboardHeading eyebrow="Content Automation" title="Admin access required" description="The unified login identifies you, but Content Automation retains its existing admin-only permission boundary." /><div className="mt-8 rounded-2xl border border-amber-300/20 bg-amber-300/5 p-6 text-sm text-amber-100/80">This account is not configured as a Content Automation administrator.</div></main>;
 

@@ -1,8 +1,7 @@
-import { cookies } from "next/headers";
 import Link from "next/link";
 import { DashboardHeading } from "@/components/dashboard/DashboardShell";
 import TikTokQueue, { loadTikTokQueue, type TikTokQueueFilter } from "@/components/dashboard/TikTokQueue";
-import { readWebGrowthSessionFromCookieStore } from "@/lib/webGrowthSession";
+import { requireWebGrowthDashboardSession } from "@/lib/dashboardSession";
 
 const descriptions: Record<Exclude<TikTokQueueFilter, "all">, string> = {
   drafts: "Draft, approval and connection-gated posts waiting for a publishing decision.",
@@ -12,8 +11,7 @@ const descriptions: Record<Exclude<TikTokQueueFilter, "all">, string> = {
 };
 
 export default async function TikTokQueueView({ filter, title }: { filter: Exclude<TikTokQueueFilter, "all">; title: string }) {
-  const jar = await cookies();
-  const session = readWebGrowthSessionFromCookieStore(jar)!;
+  const { session } = await requireWebGrowthDashboardSession();
   let posts: Array<Record<string, unknown>> = [];
   if (session.schedulerUserId) {
     try { posts = await loadTikTokQueue(session.schedulerUserId, filter); } catch {}

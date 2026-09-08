@@ -1,11 +1,11 @@
 import Link from "next/link";
-import { cookies } from "next/headers";
 import { DashboardHeading, MetricCard } from "@/components/dashboard/DashboardShell";
 import { getWhatsAppWorkspaceAccess } from "@/app/admin/whatsapp/auth";
+import { requireWebGrowthDashboardSession } from "@/lib/dashboardSession";
 import { createSchedulerSupabaseClient } from "@/lib/scheduler/supabase";
 
 export default async function DashboardWhatsAppPage() {
-  const jar = await cookies();
+  const { cookieStore: jar } = await requireWebGrowthDashboardSession();
   let access: Awaited<ReturnType<typeof getWhatsAppWorkspaceAccess>> = null;
   try { access = await getWhatsAppWorkspaceAccess(jar); } catch {}
   if (!access) return <main><DashboardHeading eyebrow="WhatsApp Business" title="No WhatsApp workspace access" description="Your Web Growth session is valid, but this identity does not currently resolve to an active WhatsApp workspace membership." /><div className="mt-8 rounded-2xl border border-white/10 bg-white/[0.025] p-6 text-sm text-white/55">Workspace roles remain enforced separately from the shared login.</div></main>;

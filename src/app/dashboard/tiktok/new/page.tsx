@@ -1,14 +1,12 @@
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import NewPostComposer from "@/components/scheduler/NewPostComposer";
 import { DashboardHeading } from "@/components/dashboard/DashboardShell";
+import { requireWebGrowthDashboardSession } from "@/lib/dashboardSession";
 import { isOwnerOpenId } from "@/lib/scheduler/config";
 import { getPublicPosts } from "@/lib/posts";
-import { readWebGrowthSessionFromCookieStore } from "@/lib/webGrowthSession";
 
 export default async function DashboardTikTokNewPage() {
-  const jar = await cookies();
-  const session = readWebGrowthSessionFromCookieStore(jar)!;
+  const { session } = await requireWebGrowthDashboardSession();
   if (!session.schedulerUserId || !session.tiktokOpenId) redirect("/dashboard/tiktok/");
   const owner = isOwnerOpenId(session.tiktokOpenId);
   const articles = owner ? getPublicPosts().map(({ slug, title }) => ({ slug, title })) : [];

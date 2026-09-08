@@ -1,14 +1,12 @@
-import { cookies } from "next/headers";
 import { DashboardHeading, MetricCard, ModuleCard } from "@/components/dashboard/DashboardShell";
 import { getWhatsAppWorkspaceAccess } from "@/app/admin/whatsapp/auth";
+import { requireWebGrowthDashboardSession } from "@/lib/dashboardSession";
 import { createSchedulerSupabaseClient } from "@/lib/scheduler/supabase";
 import { createSocialAutomationStore } from "@/lib/socialAutomation/storeServer";
 import { canonicalContentAutomationAccess } from "@/lib/unifiedAuthorization";
-import { readWebGrowthSessionFromCookieStore } from "@/lib/webGrowthSession";
 
 export default async function DashboardOverviewPage() {
-  const jar = await cookies();
-  const session = readWebGrowthSessionFromCookieStore(jar)!;
+  const { cookieStore: jar, session } = await requireWebGrowthDashboardSession();
   const contentAllowed = canonicalContentAutomationAccess(session);
   let tiktokTotal: number | null = null;
   let tiktokAttention: number | null = null;
