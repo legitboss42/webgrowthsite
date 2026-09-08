@@ -18,7 +18,9 @@ import { checkRateLimit, getClientIp, getUserAgent, hasJsonContentType, isAllowe
 
 export const runtime = "nodejs";
 function secureCookieFlag() { return process.env.NODE_ENV === "production"; }
-function isWhatsAppWorkspacePath(path: string) { return path === "/admin/whatsapp" || path.startsWith("/admin/whatsapp/"); }
+function isAllowedPasswordNextPath(path: string) {
+  return path === "/admin/whatsapp" || path.startsWith("/admin/whatsapp/") || path.startsWith("/dashboard/");
+}
 function readPassword(value: unknown) { return typeof value === "string" ? value.slice(0, 256) : ""; }
 
 export async function POST(request: Request) {
@@ -33,8 +35,8 @@ export async function POST(request: Request) {
   catch { return NextResponse.json({ error: "Invalid request payload." }, { status: 400 }); }
   const email = sanitizeText(body.email, 254).trim().toLowerCase();
   const password = readPassword(body.password);
-  const next = sanitizeGoogleAuthNext(sanitizeText(body.next, 300), "/admin/whatsapp/");
-  if (!email || !password || !isWhatsAppWorkspacePath(next)) return NextResponse.json({ error: "Invalid email or password." }, { status: 400 });
+  const next = sanitizeGoogleAuthNext(sanitizeText(body.next, 300), "/dashboard/");
+  if (!email || !password || !isAllowedPasswordNextPath(next)) return NextResponse.json({ error: "Invalid email or password." }, { status: 400 });
 
   const signIn = await signInWorkspaceWithPassword(email, password);
   if (!signIn.ok) return NextResponse.json({ error: "Invalid email or password." }, { status: 401 });
