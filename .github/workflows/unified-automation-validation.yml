@@ -23,4 +23,4 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm install --no-audit --no-fund
-      - run: npx tsx --test src/lib/webGrowthSession.test.ts
+      - run: npx tsx --test src/lib/webGrowthSession.test.ts src/lib/authSessionRoutes.test.ts
