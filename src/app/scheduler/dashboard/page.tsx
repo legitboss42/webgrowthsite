@@ -3,12 +3,12 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import TermsAcceptance from "@/components/scheduler/TermsAcceptance";
 import { hasCurrentLegalAcceptance, isActiveSchedulerUser } from "@/lib/scheduler/legal";
-import { readSchedulerSession, SCHEDULER_SESSION_COOKIE } from "@/lib/scheduler/session";
+import { readSchedulerSessionFromCookieStore } from "@/lib/scheduler/session";
 import { createSchedulerSupabaseClient } from "@/lib/scheduler/supabase";
 
 export default async function DashboardPage() {
   const jar = await cookies();
-  const session = readSchedulerSession(jar.get(SCHEDULER_SESSION_COOKIE)?.value);
+  const session = readSchedulerSessionFromCookieStore(jar);
   if (!session) redirect("/scheduler/sign-in/");
 
   const db = createSchedulerSupabaseClient();
