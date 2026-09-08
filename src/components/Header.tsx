@@ -12,6 +12,11 @@ type NavLink = {
   matchPrefix?: string;
 };
 
+type HeaderSessionState = {
+  authenticated: boolean;
+  displayName: string | null;
+};
+
 const primaryLinks: NavLink[] = [
   { href: "/blog/", label: "Academy", matchPrefix: "/blog" },
   { href: "/tools/", label: "Free Tools", matchPrefix: "/tools" },
@@ -44,6 +49,67 @@ function isActivePath(pathname: string, item: NavLink) {
 
   if (current === href) return true;
   return matchPrefix !== "/" && current.startsWith(`${matchPrefix}/`);
+}
+
+function HeaderAccountAction() {
+  const [session, setSession] = useState<HeaderSessionState | null>(null);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    async function loadSession() {
+      try {
+        const response = await fetch("/api/auth/session/", {
+          method: "GET",
+          cache: "no-store",
+          credentials: "same-origin",
+          signal: controller.signal,
+        });
+        if (!response.ok) throw new Error("Unable to read header session state.");
+        const payload = (await response.json()) as Partial<HeaderSessionState>;
+        if (controller.signal.aborted) return;
+        setSession({
+          authenticated: payload.authenticated === true,
+          displayName: typeof payload.displayName === "string" ? payload.displayName : null,
+        });
+      } catch {
+        if (!controller.signal.aborted) {
+          setSession({ authenticated: false, displayName: null });
+        }
+      }
+    }
+
+    void loadSession();
+    return () => controller.abort();
+  }, []);
+
+  if (!session) {
+    return (
+      <span
+        aria-hidden="true"
+        className="inline-flex h-11 w-[6.4rem] animate-pulse rounded-md border border-[var(--border-hairline)] bg-[var(--paper-raised)]/70"
+      />
+    );
+  }
+
+  if (session.authenticated) {
+    const label = session.displayName ? `Open account for ${session.displayName}` : "Open account";
+    return (
+      <Link
+        href="/dashboard/"
+        aria-label={label}
+        title={label}
+        className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-[var(--border-hairline)] bg-[var(--paper-raised)] text-[var(--accent-blue-strong)] shadow-sm transition hover:-translate-y-0.5 hover:border-[var(--accent-blue)] hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--focus-ring)]"
+      >
+        <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+          <circle cx="12" cy="8" r="3.25" />
+          <path d="M5.75 19c.7-3.3 2.8-5 6.25-5s5.55 1.7 6.25 5" strokeLinecap="round" />
+        </svg>
+      </Link>
+    );
+  }
+
+  return <Link href="/dashboard/" className="inline-flex min-h-11 items-center justify-center rounded-md border border-[var(--accent-blue)] bg-[var(--paper-raised)] px-4 text-sm font-bold text-[var(--accent-blue-strong)] transition hover:-translate-y-0.5 hover:bg-[var(--bg-surface-soft)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--focus-ring)]">Dashboard</Link>;
 }
 
 export default function Header() {
@@ -194,9 +260,11 @@ export default function Header() {
               </span>
             </button>
 
+            <HeaderAccountAction />
+
             <Link
               href="/contact/"
-              className="hidden min-h-11 items-center justify-center rounded-md bg-[var(--accent-blue)] px-5 text-sm font-bold text-white shadow-[var(--shadow-blue)] transition hover:-translate-y-0.5 hover:bg-[var(--accent-blue-strong)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--focus-ring)] sm:inline-flex"
+              className="hidden min-h-11 items-center justify-center rounded-md bg-[var(--accent-blue)] px-5 text-sm font-bold text-white shadow-[var(--shadow-blue)] transition hover:-translate-y-0.5 hover:bg-[var(--accent-blue-strong)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--focus-ring)] xl:inline-flex"
             >
               Work With Us <span aria-hidden="true" className="ml-2">-&gt;</span>
             </Link>
