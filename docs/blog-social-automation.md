@@ -36,7 +36,7 @@ A genuinely new Markdown article added under `content/blog/*.md` is converted in
 
 ## Kinetic video template
 
-The local `feature/remotion-engaging-text-video` work replaces the card-heavy Remotion presentation with a shared kinetic text renderer while preserving the production composition IDs and output contracts. It has not been pushed or deployed.
+The kinetic video work from `feature/remotion-engaging-text-video` was merged and pushed to `main` on 2026-09-08, replacing the card-heavy Remotion presentation with a shared kinetic text renderer while preserving the production composition IDs and output contracts. No direct deployment command was run; deployment state must be verified separately from the Git push.
 
 - `src/lib/socialAutomation/kineticVideo.ts` deterministically turns article metadata and prose into hook, problem, insight, action, takeaway and ending beats.
 - `src/remotion/components/KineticArticleVideo.tsx` owns shared sequencing and the platform boundary.

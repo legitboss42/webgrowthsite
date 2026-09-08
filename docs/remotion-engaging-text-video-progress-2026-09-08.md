@@ -2,10 +2,12 @@
 
 ## Status
 
-- Phase: complete and ready for owner review
-- Deployment status: **NOT DEPLOYED**
-- Push status: **NOT PUSHED**
-- Local branch: `feature/remotion-engaging-text-video`
+- Phase: complete, merged, and pushed by owner instruction
+- Deployment status: **NO DIRECT DEPLOYMENT COMMAND RUN**; the approved `main` push may trigger the repository's configured Vercel integration
+- Push status: **PUSHED TO `origin/main`**
+- Development branch: `feature/remotion-engaging-text-video`
+- Feature commit: `5067161e221010ea253e4249c878b2e5538f45aa`
+- Local merge commit pushed to `origin/main`: `f4651cbef493f28754372fc732f6477acb699486`
 - Starting main SHA: `6fea1823e822aa46367f504f902dfc33a08bf34e`
 - Local `main` and `origin/main`: confirmed equal before branch creation
 - Live remote heads: confirmed only `refs/heads/main`
@@ -94,11 +96,10 @@ Produced:
 
 ## Remaining Issues
 
-- The first version uses deterministic heuristics rather than semantic AI copy generation; some articles may repeat or closely paraphrase their title in a later beat.
 - Audio modes remain available in the component contract, but the local production renderer currently emits the validated default-off, video-only output.
 - Deterministic copy is intentionally heuristic. The inspected sample can repeat or closely paraphrase its title in a later beat; improving semantic beat selection is deferred rather than blocking this working first version.
 - Existing lint/build warnings in unrelated WhatsApp and scheduler components remain unchanged.
-- No deployment work is authorized.
+- No Vercel CLI or production deployment command was run as part of this work.
 
 ## Final Verification Matrix
 
@@ -117,5 +118,5 @@ Produced:
 | TikTok preview render | PASS | H.264 1080x1920 at 30 FPS, 17.033 seconds |
 | Production social-render smoke | PASS | Existing article generated both MP4s and manifest |
 | Visual frame inspection | PASS | Safe margins, readable type, subtle background, no cards/presenter/subtitles; TikTok neutral ending |
-| Remote push | PASS | No push performed |
-| Deployment | PASS | NOT DEPLOYED |
+| Remote push | PASS | Owner-authorized push moved `origin/main` from `6fea182` to merge commit `f4651cb` |
+| Direct deployment command | PASS | None run; any deployment triggered by GitHub is external to this local verification |
