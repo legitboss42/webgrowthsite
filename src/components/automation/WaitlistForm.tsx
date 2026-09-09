@@ -3,7 +3,7 @@
 import { useRef, useState } from "react";
 import Link from "next/link";
 import TurnstileWidget from "@/components/TurnstileWidget";
-import { trackAutomationEvent } from "@/components/automation/analytics";
+import { trackAutomationEvent, trackTikTokWaitlistLead } from "@/components/automation/analytics";
 import {
   WAITLIST_BUSINESS_SIZES,
   WAITLIST_INTERESTS,
@@ -181,6 +181,7 @@ export default function WaitlistForm({ sessionEmail, sessionFullName = "" }: Wai
         interest: validation.value.interest,
         confirmation_email_sent: data.emailSent === true,
       });
+      void trackTikTokWaitlistLead(sessionEmail);
 
       setValues({
         ...INITIAL_VALUES,
