@@ -77,7 +77,7 @@ export const metadata: Metadata = {
 };
 
 const GTM_ID = "GTM-TKSB7S75";
-const TIKTOK_PIXEL_ID = "D6NCMIRC77UDVRSELGE0";
+const TIKTOK_PIXEL_ID = "DAGIK6JC77UC8FLJU200";
 const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
 const CLARITY_ID = process.env.NEXT_PUBLIC_CLARITY_ID;
 const IS_PRODUCTION = process.env.NODE_ENV === "production";
