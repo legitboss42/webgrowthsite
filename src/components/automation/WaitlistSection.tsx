@@ -6,12 +6,16 @@ import {
   isGoogleAuthConfigured,
   readGoogleAuthSessionFromCookieStore,
 } from "@/lib/googleAuth";
+import { readWebGrowthSessionFromCookieStore } from "@/lib/webGrowthSession";
 
 /**
  * Waitlist section: the form plus the reassurance that belongs next to it.
  *
- * The trust points describe what we actually do. There are no invented
- * certifications, compliance badges, audit claims or signup counts.
+ * Google sign-in now writes the canonical Web Growth session. Read that first,
+ * while retaining the old Google cookie as a short migration fallback for
+ * visitors who already had a valid legacy session before the account unification.
+ * Only a Google-backed identity unlocks the waitlist form; password/TikTok
+ * sessions do not silently become waitlist consent.
  */
 
 const assurances = [
@@ -37,7 +41,25 @@ const assurances = [
 
 export default async function WaitlistSection() {
   const cookieStore = await cookies();
-  const session = readGoogleAuthSessionFromCookieStore(cookieStore);
+  const canonicalSession = readWebGrowthSessionFromCookieStore(cookieStore);
+  const canonicalGoogleSession =
+    canonicalSession?.provider === "google" && canonicalSession.email
+      ? canonicalSession
+      : null;
+  const legacyGoogleSession = canonicalGoogleSession
+    ? null
+    : readGoogleAuthSessionFromCookieStore(cookieStore);
+  const sessionIdentity = canonicalGoogleSession
+    ? {
+        email: canonicalGoogleSession.email as string,
+        fullName: canonicalGoogleSession.fullName || "",
+      }
+    : legacyGoogleSession
+      ? {
+          email: legacyGoogleSession.email,
+          fullName: legacyGoogleSession.fullName || "",
+        }
+      : null;
 
   return (
     <section
@@ -70,8 +92,20 @@ export default async function WaitlistSection() {
         </div>
 
         <div className="automation-waitlist-form">
-          {session ? (
-            <WaitlistForm sessionEmail={session.email} sessionFullName={session.fullName || ""} />
+          {sessionIdentity ? (
+            <div className="space-y-4">
+              <div
+                className="rounded-[20px] border border-emerald-300/20 bg-emerald-300/10 px-5 py-4 text-sm leading-6 text-emerald-50"
+                role="status"
+              >
+                <p className="font-semibold">Google account connected.</p>
+                <p className="text-emerald-50/75">Complete this short form to join the waitlist.</p>
+              </div>
+              <WaitlistForm
+                sessionEmail={sessionIdentity.email}
+                sessionFullName={sessionIdentity.fullName}
+              />
+            </div>
           ) : (
             <GoogleWaitlistGate clientId={getGoogleClientId()} googleReady={isGoogleAuthConfigured()} />
           )}

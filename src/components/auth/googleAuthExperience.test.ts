@@ -5,6 +5,8 @@ import test from "node:test";
 const signInButtonPath = new URL("./GoogleSignInButton.tsx", import.meta.url);
 const adminPromptPath = new URL("./GoogleAdminPrompt.tsx", import.meta.url);
 const waitlistGatePath = new URL("./GoogleWaitlistGate.tsx", import.meta.url);
+const waitlistSectionPath = new URL("../automation/WaitlistSection.tsx", import.meta.url);
+const waitlistRoutePath = new URL("../../app/api/automation-waitlist/route.ts", import.meta.url);
 
 test("Google sign-in button posts the Google credential to the website session endpoint", () => {
   const source = readFileSync(signInButtonPath, "utf8");
@@ -26,4 +28,21 @@ test("waitlist gate copy describes a real Google-backed waitlist flow", () => {
 
   assert.match(source, /real email account/i);
   assert.match(source, /Continue with Google/);
+});
+
+test("waitlist reads the canonical Web Growth Google session after Google sign-in", () => {
+  const section = readFileSync(waitlistSectionPath, "utf8");
+  const route = readFileSync(waitlistRoutePath, "utf8");
+
+  assert.match(section, /readWebGrowthSessionFromCookieStore/);
+  assert.match(route, /readWebGrowthSessionFromCookieStore/);
+  assert.match(section, /provider\s*===\s*["']google["']/);
+  assert.match(route, /provider\s*!==\s*["']google["']/);
+});
+
+test("waitlist clearly acknowledges Google sign-in before the final join form", () => {
+  const source = readFileSync(waitlistSectionPath, "utf8");
+
+  assert.match(source, /Google account connected/i);
+  assert.match(source, /Complete this short form to join the waitlist/i);
 });
