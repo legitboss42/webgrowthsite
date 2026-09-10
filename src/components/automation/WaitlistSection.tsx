@@ -49,7 +49,17 @@ export default async function WaitlistSection() {
   const legacyGoogleSession = canonicalGoogleSession
     ? null
     : readGoogleAuthSessionFromCookieStore(cookieStore);
-  const session = canonicalGoogleSession || legacyGoogleSession;
+  const sessionIdentity = canonicalGoogleSession
+    ? {
+        email: canonicalGoogleSession.email as string,
+        fullName: canonicalGoogleSession.fullName || "",
+      }
+    : legacyGoogleSession
+      ? {
+          email: legacyGoogleSession.email,
+          fullName: legacyGoogleSession.fullName || "",
+        }
+      : null;
 
   return (
     <section
@@ -82,7 +92,7 @@ export default async function WaitlistSection() {
         </div>
 
         <div className="automation-waitlist-form">
-          {session ? (
+          {sessionIdentity ? (
             <div className="space-y-4">
               <div
                 className="rounded-[20px] border border-emerald-300/20 bg-emerald-300/10 px-5 py-4 text-sm leading-6 text-emerald-50"
@@ -91,7 +101,10 @@ export default async function WaitlistSection() {
                 <p className="font-semibold">Google account connected.</p>
                 <p className="text-emerald-50/75">Complete this short form to join the waitlist.</p>
               </div>
-              <WaitlistForm sessionEmail={session.email} sessionFullName={session.fullName || ""} />
+              <WaitlistForm
+                sessionEmail={sessionIdentity.email}
+                sessionFullName={sessionIdentity.fullName}
+              />
             </div>
           ) : (
             <GoogleWaitlistGate clientId={getGoogleClientId()} googleReady={isGoogleAuthConfigured()} />
