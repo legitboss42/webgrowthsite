@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { ADMIN_EMAIL, sendTransactionalEmail } from "@/lib/email";
 import { readGoogleAuthSessionFromCookieStore } from "@/lib/googleAuth";
+import { readWebGrowthSessionFromCookieStore } from "@/lib/webGrowthSession";
 import {
   checkRateLimit,
   getClientIp,
@@ -25,11 +26,10 @@ export const runtime = "nodejs";
 /**
  * Waitlist intake for the /automation landing page.
  *
- * Deliberately NOT gated on LOW_CPU_EMERGENCY_MODE: that flag is currently true
- * and would 503 every signup, which would make the launch funnel collect
- * nothing. This route is a single cheap insert plus one outbound email, so it is
- * an approved exemption. src/lib/emergency.ts and its other consumers are
- * unchanged.
+ * Google sign-in now writes the canonical Web Growth session, so this route
+ * reads that identity first and retains the old Google session only as a
+ * migration fallback. Password and TikTok sessions are intentionally not
+ * accepted as Google waitlist consent.
  *
  * Order matters: the signup is persisted BEFORE the confirmation email is
  * attempted, so a provider outage can never lose a lead. The response reports
@@ -65,8 +65,17 @@ export async function POST(req: Request) {
 
     const body = (await req.json()) as Record<string, unknown>;
     const cookieStore = await cookies();
-    const googleSession = readGoogleAuthSessionFromCookieStore(cookieStore);
-    if (!googleSession?.email) {
+    const canonicalSession = readWebGrowthSessionFromCookieStore(cookieStore);
+    const canonicalGoogleSession =
+      canonicalSession?.provider === "google" && canonicalSession.email
+        ? canonicalSession
+        : null;
+    const legacyGoogleSession = canonicalGoogleSession
+      ? null
+      : readGoogleAuthSessionFromCookieStore(cookieStore);
+    const googleSession = canonicalGoogleSession || legacyGoogleSession;
+
+    if (!googleSession?.email || googleSession.provider !== "google") {
       return NextResponse.json(
         { error: "Please sign in with Google before joining the waitlist." },
         { status: 401 }
@@ -122,7 +131,7 @@ export async function POST(req: Request) {
     }
 
     // 2. Attempt the confirmation email. From here on the signup is safe, so no
-    //    failure below may turn into an error response.
+    // failure below may turn into an error response.
     let emailSent = false;
 
     try {
