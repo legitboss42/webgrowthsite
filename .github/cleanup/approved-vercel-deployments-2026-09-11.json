@@ -1,0 +1,12 @@
+{
+  "sourceRun": 34544162225,
+  "approvedAt": "2026-09-11",
+  "candidateCount": 281,
+  "candidates": [
+    {
+      "project": "ai-news",
+      "projectId": "prj_UEec81EmXLHPodBhxZHK3csYVR0a",
+      "deploymentId": "dpl_9TL4b8N7eLKLaygTdztcDTLbr7dn"
+    }
+  ]
+}
