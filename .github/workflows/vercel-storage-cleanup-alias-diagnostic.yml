@@ -1,0 +1,81 @@
+name: Vercel cleanup alias diagnostic
+
+on:
+  push:
+    branches: [feature/unified-automation-dashboard]
+    paths:
+      - .github/workflows/vercel-storage-cleanup-alias-diagnostic.yml
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      VERCEL_TEAM_ID: team_g8oZD9ZdfDQBw6MkheX0z2h4
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+    steps:
+      - name: Inspect the 16 verification alias records
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, os, urllib.parse, urllib.request
+
+          team = os.environ['VERCEL_TEAM_ID']
+          token = os.environ['VERCEL_TOKEN']
+          wanted = {
+            'dpl_3Az2TgCpRPddtiGTTHhtnY3mguAM','dpl_5sSxVAFmdd9Qgirj5fuwny2pe3om',
+            'dpl_64VZ24f6GhJpRrx8NCPiAbvimwrb','dpl_8dEzPADSajBV4xg9evc8GscUCmXC',
+            'dpl_9HpcKZ2eUSanPeSs7Td4J9hkL62y','dpl_9czj7Kh2P4PLKgtuMKStm7RL2Gya',
+            'dpl_AfArCCBa8nvoMhPM1HWMUMYAP8cZ','dpl_BaSR8Yc8p2kvnpMNPfcHGzc4BGxd',
+            'dpl_DE8ag2DpGbUNksuaMpU3PkWKjL9R','dpl_DKW2cYvdwKjQKN4YDmE4wYCNHCzo',
+            'dpl_DgZuFqk8vufshsRYqQiadigugXcf','dpl_ErYLek27SFUs5A6bFC319WaJeXHP',
+            'dpl_FikB8L8WQmhwE6b1Tbu4B6JrPymK','dpl_GHpnCNYNo7p6qYR1YmXYXeVNf6ZA',
+            'dpl_GLLnkbYgmNuUJtrvdmtBrwuRVC9H','dpl_HBSVRqYXtLb5HqnPeCxG596xspEN'
+          }
+
+          def get(path, params):
+              q = dict(params); q['teamId'] = team
+              req = urllib.request.Request('https://api.vercel.com'+path+'?'+urllib.parse.urlencode(q), headers={
+                  'Authorization': f'Bearer {token}', 'Accept':'application/json',
+                  'User-Agent':'webgrowth-cleanup-alias-diagnostic'})
+              with urllib.request.urlopen(req, timeout=30) as r:
+                  return json.load(r)
+
+          rows=[]; until=None; seen=set()
+          for _ in range(100):
+              p={'limit':100}
+              if until is not None: p['until']=until
+              data=get('/v4/aliases',p)
+              page=data.get('aliases',[])
+              if not page: break
+              rows.extend(page)
+              nxt=(data.get('pagination') or {}).get('next')
+              if nxt is None or str(nxt) in seen: break
+              seen.add(str(nxt)); until=nxt
+
+          matched=[]
+          for a in rows:
+              did=a.get('deploymentId') or (a.get('deployment') or {}).get('id')
+              if did in wanted:
+                  matched.append({
+                      'deploymentId':did,
+                      'alias':a.get('alias'),
+                      'projectId':a.get('projectId'),
+                      'createdAt':a.get('createdAt') or a.get('created'),
+                      'updatedAt':a.get('updatedAt'),
+                      'deletedAt':a.get('deletedAt'),
+                      'redirect':a.get('redirect')
+                  })
+
+          print(json.dumps(matched, indent=2))
+          print(f'MATCHED={len(matched)} WANTED={len(wanted)}')
+          print('NON_DELETED_MATCHES=' + str(sum(not x.get('deletedAt') for x in matched)))
+          missing = wanted - {x['deploymentId'] for x in matched}
+          print('MISSING_FROM_ALIAS_LIST=' + str(len(missing)))
+          if missing:
+              print('MISSING_IDS=' + ','.join(sorted(missing)))
+          PY
