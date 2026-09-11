@@ -1,0 +1,414 @@
+name: Vercel approved storage cleanup
+
+on:
+  push:
+    branches: [feature/unified-automation-dashboard]
+    paths:
+      - .github/workflows/vercel-storage-cleanup-execute.yml
+
+permissions:
+  actions: read
+  contents: write
+
+concurrency:
+  group: vercel-storage-cleanup-execute
+  cancel-in-progress: false
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      VERCEL_TEAM_ID: team_g8oZD9ZdfDQBw6MkheX0z2h4
+      CLEANUP_BRANCH: feature/unified-automation-dashboard
+      APPROVED_ARTIFACT_ID: "10178382224"
+      APPROVED_ARTIFACT_SHA256: 5f29446ee9c5919c7f0da7342697aea8d075fe6ca494ca5cb3b99e9c59edc5a9
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      GH_TOKEN: ${{ github.token }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Require approval-bound credentials and branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$VERCEL_TOKEN"
+          test "$GITHUB_REF_NAME" = "$CLEANUP_BRANCH"
+          echo "Approval-bound cleanup prerequisites passed."
+
+      - name: Download and verify approved dry-run artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p approved-report
+          curl -fsSL \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            -o /tmp/approved.zip \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/artifacts/${APPROVED_ARTIFACT_ID}/zip"
+          echo "${APPROVED_ARTIFACT_SHA256}  /tmp/approved.zip" | sha256sum -c -
+          unzip -q /tmp/approved.zip -d approved-report
+          test -f approved-report/vercel-cleanup-report.json
+          echo "Approved artifact integrity verified."
+
+      - name: Delete only still-safe approved deployments
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import csv
+          import datetime as dt
+          import json
+          import os
+          import time
+          import urllib.error
+          import urllib.parse
+          import urllib.request
+          from collections import Counter, defaultdict
+
+          TOKEN = os.environ["VERCEL_TOKEN"]
+          TEAM = os.environ["VERCEL_TEAM_ID"]
+          BASE = "https://api.vercel.com"
+          TERMINAL = {"READY", "ERROR", "CANCELED", "CANCELLED"}
+          NEVER_DELETE = {
+              "dpl_EGsc77BCTpSq4AnkPh5ziQBbTdTr",
+              "dpl_GjhvHRQxPRVwoAcKUDreSXRarCx6",
+          }
+          EXPECTED_DISTRIBUTION = {
+              "ai-news": 1,
+              "election": 2,
+              "hottasks": 18,
+              "i-fitness-preview": 4,
+              "jimtop-site": 7,
+              "marvellous": 5,
+              "nouncompass": 21,
+              "tlc-interiors-limited": 4,
+              "webgrowthsite": 219,
+          }
+
+          def api(method, path, params=None, *, tolerate_404=False, attempts=7):
+              query = dict(params or {})
+              query.setdefault("teamId", TEAM)
+              url = BASE + path
+              if query:
+                  url += "?" + urllib.parse.urlencode(query)
+              req = urllib.request.Request(
+                  url,
+                  method=method,
+                  headers={
+                      "Authorization": f"Bearer {TOKEN}",
+                      "Accept": "application/json",
+                      "Content-Type": "application/json",
+                      "User-Agent": "webgrowth-vercel-approved-cleanup",
+                  },
+              )
+              last = None
+              for attempt in range(attempts):
+                  try:
+                      with urllib.request.urlopen(req, timeout=45) as response:
+                          raw = response.read()
+                          payload = json.loads(raw.decode("utf-8")) if raw else {}
+                          return response.status, payload
+                  except urllib.error.HTTPError as exc:
+                      body = exc.read().decode("utf-8", "replace")
+                      if exc.code == 404 and tolerate_404:
+                          return 404, {}
+                      if exc.code in {408, 409, 425, 429, 500, 502, 503, 504} and attempt < attempts - 1:
+                          wait = min(20, 1.2 * (2 ** attempt))
+                          retry_after = exc.headers.get("Retry-After")
+                          if retry_after:
+                              try:
+                                  wait = max(wait, float(retry_after))
+                              except ValueError:
+                                  pass
+                          time.sleep(wait)
+                          last = f"HTTP {exc.code}: {body[:300]}"
+                          continue
+                      raise RuntimeError(f"{method} {path} failed HTTP {exc.code}: {body[:500]}") from exc
+                  except Exception as exc:
+                      last = repr(exc)
+                      if attempt < attempts - 1:
+                          time.sleep(min(20, 1.2 * (2 ** attempt)))
+                          continue
+                      raise
+              raise RuntimeError(f"{method} {path} failed after retries: {last}")
+
+          def dep_id(d):
+              return d.get("uid") or d.get("id")
+
+          def dep_state(d):
+              return (d.get("state") or d.get("readyState") or "UNKNOWN").upper()
+
+          def dep_created(d):
+              try:
+                  return int(d.get("created") or d.get("createdAt") or 0)
+              except Exception:
+                  return 0
+
+          def paginate(path, item_key, params=None):
+              rows = []
+              until = None
+              seen = set()
+              for _ in range(200):
+                  q = dict(params or {})
+                  q["limit"] = 100
+                  if until is not None:
+                      q["until"] = until
+                  _, data = api("GET", path, q)
+                  page = data.get(item_key, [])
+                  if not page:
+                      break
+                  rows.extend(page)
+                  nxt = (data.get("pagination") or {}).get("next")
+                  if nxt is None or str(nxt) in seen:
+                      break
+                  seen.add(str(nxt))
+                  until = nxt
+              return rows
+
+          def current_alias_ids():
+              aliases = paginate("/v4/aliases", "aliases")
+              ids = {
+                  a.get("deploymentId") or (a.get("deployment") or {}).get("id")
+                  for a in aliases
+                  if a.get("deploymentId") or (a.get("deployment") or {}).get("id")
+              }
+              return aliases, ids
+
+          def current_project_deployments(project_id):
+              rows = paginate("/v7/deployments", "deployments", {"projectId": project_id})
+              rows.sort(key=dep_created, reverse=True)
+              return rows
+
+          with open("approved-report/vercel-cleanup-report.json", "r", encoding="utf-8") as f:
+              approved = json.load(f)
+
+          candidates = approved.get("candidates") or []
+          candidate_ids = [c.get("deploymentId") for c in candidates]
+          if approved.get("candidateCount") != 281 or len(candidates) != 281:
+              raise RuntimeError("Approved report candidate count is not exactly 281")
+          if len(set(candidate_ids)) != 281 or None in candidate_ids:
+              raise RuntimeError("Approved report IDs are not 281 unique non-null deployment IDs")
+          distribution = Counter(c.get("project") for c in candidates)
+          if dict(distribution) != EXPECTED_DISTRIBUTION:
+              raise RuntimeError(f"Approved report project distribution changed: {dict(distribution)}")
+          if NEVER_DELETE & set(candidate_ids):
+              raise RuntimeError("Approved report unexpectedly contains an explicit never-delete deployment")
+
+          by_project = defaultdict(list)
+          for c in candidates:
+              by_project[c["projectId"]].append(c)
+
+          aliases_before, alias_ids = current_alias_ids()
+          protected_by_project = {}
+          protected_to_verify = set(NEVER_DELETE)
+
+          for project_id in by_project:
+              deps = current_project_deployments(project_id)
+              ready = [d for d in deps if dep_state(d) == "READY"]
+              ready_prod = [d for d in ready if d.get("target") == "production"]
+              latest_two = {dep_id(d) for d in ready[:2] if dep_id(d)}
+              latest_prod_two = {dep_id(d) for d in ready_prod[:2] if dep_id(d)}
+              explicit_rollback = {
+                  dep_id(d)
+                  for d in deps
+                  if dep_id(d)
+                  and (d.get("isRollbackCandidate") is True or d.get("rollbackCandidate") is True)
+              }
+              project_alias = {dep_id(d) for d in deps if dep_id(d) in alias_ids}
+              protected = latest_two | latest_prod_two | explicit_rollback | project_alias | NEVER_DELETE
+              protected_by_project[project_id] = protected
+              protected_to_verify |= protected
+
+          results = []
+          deleted_ids = []
+
+          for index, c in enumerate(candidates, 1):
+              did = c["deploymentId"]
+              pid = c["projectId"]
+              project = c["project"]
+              result = {
+                  "project": project,
+                  "projectId": pid,
+                  "deploymentId": did,
+                  "result": None,
+                  "reason": None,
+              }
+
+              status, detail = api("GET", f"/v13/deployments/{urllib.parse.quote(did)}", tolerate_404=True)
+              if status == 404:
+                  result.update(result="skipped", reason="already_missing_before_execution")
+                  results.append(result)
+                  continue
+
+              actual_pid = detail.get("projectId")
+              if actual_pid and actual_pid != pid:
+                  result.update(result="error", reason=f"project_mismatch:{actual_pid}")
+                  results.append(result)
+                  continue
+
+              state = dep_state(detail)
+              if state not in TERMINAL:
+                  result.update(result="skipped", reason=f"non_terminal:{state}")
+                  results.append(result)
+                  continue
+
+              if did in protected_by_project.get(pid, set()):
+                  result.update(result="skipped", reason="currently_protected")
+                  results.append(result)
+                  continue
+
+              if detail.get("isRollbackCandidate") is True or detail.get("rollbackCandidate") is True:
+                  result.update(result="skipped", reason="live_rollback_candidate")
+                  results.append(result)
+                  protected_to_verify.add(did)
+                  continue
+
+              _, alias_detail = api("GET", f"/v2/deployments/{urllib.parse.quote(did)}/aliases")
+              if alias_detail.get("aliases"):
+                  result.update(result="skipped", reason="live_alias")
+                  results.append(result)
+                  protected_to_verify.add(did)
+                  continue
+
+              delete_status, delete_payload = api("DELETE", f"/v13/deployments/{urllib.parse.quote(did)}")
+              if delete_status != 200:
+                  result.update(result="error", reason=f"delete_http_{delete_status}")
+                  results.append(result)
+                  continue
+              returned_id = delete_payload.get("uid")
+              returned_state = str(delete_payload.get("state") or "").upper()
+              if returned_id and returned_id != did:
+                  result.update(result="error", reason=f"delete_id_mismatch:{returned_id}")
+                  results.append(result)
+                  continue
+              if returned_state and returned_state not in {"DELETED", "READY", "ERROR", "CANCELED", "CANCELLED"}:
+                  result.update(result="error", reason=f"unexpected_delete_state:{returned_state}")
+                  results.append(result)
+                  continue
+
+              result.update(result="deleted", reason="approved_and_still_unprotected")
+              results.append(result)
+              deleted_ids.append(did)
+              if index % 25 == 0:
+                  print(f"Processed {index}/281; deleted so far: {len(deleted_ids)}")
+              time.sleep(0.08)
+
+          errors = [r for r in results if r["result"] == "error"]
+
+          aliases_after, alias_ids_after = current_alias_ids()
+          verification_failures = []
+          for did in sorted(alias_ids_after):
+              status, _ = api("GET", f"/v13/deployments/{urllib.parse.quote(did)}", tolerate_404=True)
+              if status == 404:
+                  verification_failures.append(f"active alias references missing deployment {did}")
+
+          for did in sorted(protected_to_verify):
+              status, _ = api("GET", f"/v13/deployments/{urllib.parse.quote(did)}", tolerate_404=True)
+              if status == 404:
+                  verification_failures.append(f"protected deployment missing after cleanup {did}")
+
+          live_after = set()
+          for project_id in by_project:
+              live_after |= {dep_id(d) for d in current_project_deployments(project_id) if dep_id(d)}
+          for did in deleted_ids:
+              if did in live_after:
+                  verification_failures.append(f"deleted deployment still listed as live {did}")
+
+          if NEVER_DELETE & set(deleted_ids):
+              verification_failures.append("explicit never-delete deployment was deleted")
+
+          summary = {
+              "completedAt": dt.datetime.now(dt.timezone.utc).isoformat(),
+              "approvedArtifactId": os.environ["APPROVED_ARTIFACT_ID"],
+              "approvedArtifactSha256": os.environ["APPROVED_ARTIFACT_SHA256"],
+              "approvedCount": 281,
+              "deletedCount": sum(r["result"] == "deleted" for r in results),
+              "skippedCount": sum(r["result"] == "skipped" for r in results),
+              "errorCount": len(errors),
+              "aliasCountBefore": len(aliases_before),
+              "aliasCountAfter": len(aliases_after),
+              "verificationFailureCount": len(verification_failures),
+              "verificationFailures": verification_failures,
+              "results": results,
+          }
+
+          with open("vercel-cleanup-execution.json", "w", encoding="utf-8") as f:
+              json.dump(summary, f, indent=2)
+
+          with open("vercel-cleanup-execution.csv", "w", newline="", encoding="utf-8") as f:
+              fields = ["project", "projectId", "deploymentId", "result", "reason"]
+              w = csv.DictWriter(f, fieldnames=fields)
+              w.writeheader()
+              w.writerows(results)
+
+          per_project = defaultdict(lambda: Counter())
+          for r in results:
+              per_project[r["project"]][r["result"]] += 1
+
+          with open("vercel-cleanup-execution.md", "w", encoding="utf-8") as f:
+              f.write("# Vercel approved storage cleanup execution\n\n")
+              f.write(f"- Approved IDs: **281**\n")
+              f.write(f"- Deleted: **{summary['deletedCount']}**\n")
+              f.write(f"- Skipped after live safety re-check: **{summary['skippedCount']}**\n")
+              f.write(f"- Errors: **{summary['errorCount']}**\n")
+              f.write(f"- Verification failures: **{summary['verificationFailureCount']}**\n\n")
+              f.write("| Project | Deleted | Skipped | Errors |\n")
+              f.write("|---|---:|---:|---:|\n")
+              for project in sorted(per_project):
+                  counts = per_project[project]
+                  f.write(f"| {project} | {counts['deleted']} | {counts['skipped']} | {counts['error']} |\n")
+              if verification_failures:
+                  f.write("\n## Verification failures\n\n")
+                  for item in verification_failures:
+                      f.write(f"- {item}\n")
+
+          print(
+              f"EXECUTION RESULT: deleted={summary['deletedCount']} "
+              f"skipped={summary['skippedCount']} errors={summary['errorCount']} "
+              f"verification_failures={summary['verificationFailureCount']}"
+          )
+
+          if errors or verification_failures:
+              raise SystemExit(1)
+          PY
+
+      - name: Publish cleanup summary
+        if: always()
+        shell: bash
+        run: |
+          if [ -f vercel-cleanup-execution.md ]; then
+            cat vercel-cleanup-execution.md >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "Cleanup execution did not produce a report." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload execution evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vercel-storage-cleanup-execution
+          path: |
+            vercel-cleanup-execution.json
+            vercel-cleanup-execution.csv
+            vercel-cleanup-execution.md
+          retention-days: 30
+          if-no-files-found: warn
+
+      - name: Delete temporary cleanup branch after successful verification
+        if: success()
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = "$CLEANUP_BRANCH"
+          api="https://api.github.com/repos/${GITHUB_REPOSITORY}"
+          auth=(-H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28")
+          main_sha=$(curl -fsSL "${auth[@]}" "$api/git/ref/heads/main" | jq -r '.object.sha')
+          test -n "$main_sha" && test "$main_sha" != "null"
+          cleanup_sha=$(curl -fsSL "${auth[@]}" "$api/git/ref/heads/${CLEANUP_BRANCH}" | jq -r '.object.sha')
+          test -n "$cleanup_sha" && test "$cleanup_sha" != "null"
+          status=$(curl -sS -o /tmp/delete-cleanup-ref.json -w '%{http_code}' -X DELETE "${auth[@]}" "$api/git/refs/heads/${CLEANUP_BRANCH}")
+          test "$status" = "204"
+          echo "Deleted temporary cleanup branch at ${cleanup_sha}; main remains ${main_sha}."
