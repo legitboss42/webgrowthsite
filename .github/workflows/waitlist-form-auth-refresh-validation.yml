@@ -1,0 +1,40 @@
+name: Waitlist form auth-refresh validation
+
+on:
+  push:
+    branches: [fix/waitlist-form-after-google-auth]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: waitlist-form-auth-refresh-${{ github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Google waitlist auth-refresh regression
+        run: npx tsx --test src/components/auth/googleAuthExperience.test.ts
+      - name: Unified session, authorization and routing regressions
+        run: npx tsx --test src/lib/webGrowthSession.test.ts src/lib/authSessionRoutes.test.ts src/lib/unifiedAuthorization.test.ts src/lib/dashboardRoutes.test.ts src/lib/unifiedSignIn.test.ts
+      - name: TikTok scheduler regression suite
+        run: npm run test:scheduler
+      - name: Content automation regression suite
+        run: npm run test:social
+      - name: WhatsApp Business regression suite
+        run: npm run test:whatsapp
+      - name: Lint
+        run: npm run lint
+      - name: Production build
+        run: npm run build
