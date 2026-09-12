@@ -6,6 +6,7 @@ const signInButtonPath = new URL("./GoogleSignInButton.tsx", import.meta.url);
 const adminPromptPath = new URL("./GoogleAdminPrompt.tsx", import.meta.url);
 const waitlistGatePath = new URL("./GoogleWaitlistGate.tsx", import.meta.url);
 const waitlistSectionPath = new URL("../automation/WaitlistSection.tsx", import.meta.url);
+const waitlistFormPath = new URL("../automation/WaitlistForm.tsx", import.meta.url);
 const waitlistRoutePath = new URL("../../app/api/automation-waitlist/route.ts", import.meta.url);
 
 test("Google sign-in button posts the Google credential to the website session endpoint", () => {
@@ -56,4 +57,10 @@ test("waitlist Google sign-in refreshes the current route in place after the ses
   assert.match(buttonSource, /refreshCurrentRouteOnSuccess/);
   assert.match(buttonSource, /router\.refresh\(\)/);
   assert.match(buttonSource, /if\s*\(refreshCurrentRouteOnSuccess\)[\s\S]*router\.refresh\(\)[\s\S]*return/);
+});
+
+test("waitlist form stays visible when inserted after the in-place Google auth refresh", () => {
+  const source = readFileSync(waitlistFormPath, "utf8");
+
+  assert.doesNotMatch(source, /data-automation-reveal/);
 });

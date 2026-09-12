@@ -202,7 +202,7 @@ export default function WaitlistForm({ sessionEmail, sessionFullName = "" }: Wai
 
   if (status === "success") {
     return (
-      <div className="automation-form-shell automation-form-success" data-automation-reveal>
+      <div className="automation-form-shell automation-form-success">
         <p className="automation-kicker">Waitlist confirmed</p>
         <h3 tabIndex={-1} ref={successHeadingRef} className="automation-success-title">
           You&rsquo;re on the list.
@@ -237,7 +237,7 @@ export default function WaitlistForm({ sessionEmail, sessionFullName = "" }: Wai
   const sending = status === "sending";
 
   return (
-    <div className="automation-form-shell" data-automation-reveal>
+    <div className="automation-form-shell">
       <p className="automation-kicker">Join the waitlist</p>
       <h3 className="automation-form-title">Be among the first to get access.</h3>
       <p className="automation-form-intro">
