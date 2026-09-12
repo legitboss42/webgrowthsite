@@ -2,7 +2,7 @@ name: Unified automation validation
 
 on:
   push:
-    branches: [feature/unified-automation-dashboard]
+    branches: [feature/unified-automation-dashboard, fix/dashboard-mobile-layout]
   workflow_dispatch:
 
 permissions:
