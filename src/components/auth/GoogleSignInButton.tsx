@@ -1,6 +1,7 @@
 "use client";
 
 import Script from "next/script";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 type GoogleCredentialResponse = {
@@ -14,6 +15,7 @@ type GoogleSignInButtonProps = {
   className: string;
   clientId?: string;
   loginHint?: string;
+  refreshCurrentRouteOnSuccess?: boolean;
 };
 
 declare global {
@@ -52,7 +54,9 @@ export default function GoogleSignInButton({
   className,
   clientId = "",
   loginHint,
+  refreshCurrentRouteOnSuccess = false,
 }: GoogleSignInButtonProps) {
+  const router = useRouter();
   const buttonRef = useRef<HTMLDivElement | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [scriptReady, setScriptReady] = useState(false);
@@ -99,6 +103,11 @@ export default function GoogleSignInButton({
             return;
           }
 
+          if (refreshCurrentRouteOnSuccess) {
+            router.refresh();
+            return;
+          }
+
           window.location.assign(payload.redirectTo);
         } catch {
           setError("Google sign-in could not be completed. Please try again.");
@@ -115,7 +124,7 @@ export default function GoogleSignInButton({
       width: 360,
       logo_alignment: "left",
     });
-  }, [clientId, loginHint, nextPath, scriptReady]);
+  }, [clientId, loginHint, nextPath, refreshCurrentRouteOnSuccess, router, scriptReady]);
 
   if (!clientId) {
     return <p className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm leading-5 text-amber-800">Google sign-in is not configured.</p>;
