@@ -13,6 +13,7 @@ const CONTENT_AUTOMATION_ROUTE = "/admin/content-automation";
 export function isConsoleRoute(pathname: string | null | undefined) {
   if (!pathname) return false;
   if (pathname === "/admin" || pathname.startsWith("/admin/")) return true;
+  if (pathname === "/dashboard" || pathname.startsWith("/dashboard/")) return true;
   return pathname === "/whatsapp/set-password" || pathname.startsWith("/whatsapp/set-password/");
 }
 
