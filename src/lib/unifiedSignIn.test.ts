@@ -44,6 +44,20 @@ test("Content Automation receives the shared site header without enabling public
   assert.match(layout, /<SiteHeaderOnly>[\s\S]*<Header\s*\/>[\s\S]*<\/SiteHeaderOnly>/);
 });
 
+test("dashboard routes use internal app chrome instead of the public site header and footer", async () => {
+  const chrome = await source("components/SiteChrome.tsx");
+  assert.match(chrome, /pathname === "\/dashboard" \|\| pathname\.startsWith\("\/dashboard\/"\)/);
+});
+
+test("dashboard shell constrains mobile width while keeping module navigation horizontally scrollable", async () => {
+  const shell = await source("components/dashboard/DashboardShell.tsx");
+  assert.match(shell, /overflow-x-hidden/);
+  assert.match(shell, /w-full min-w-0/);
+  assert.match(shell, /max-w-full/);
+  assert.match(shell, /overflow-x-auto/);
+  assert.match(shell, /break-words/);
+});
+
 test("public header links to the dashboard when signed out and replaces that CTA with an account icon after sign-in", async () => {
   const header = await source("components/Header.tsx");
   assert.match(header, /\/api\/auth\/session\//);
