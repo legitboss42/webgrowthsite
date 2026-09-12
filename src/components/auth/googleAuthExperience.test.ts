@@ -46,3 +46,14 @@ test("waitlist clearly acknowledges Google sign-in before the final join form", 
   assert.match(source, /Google account connected/i);
   assert.match(source, /Complete this short form to join the waitlist/i);
 });
+
+test("waitlist Google sign-in refreshes the current route in place after the session cookie is written", () => {
+  const buttonSource = readFileSync(signInButtonPath, "utf8");
+  const gateSource = readFileSync(waitlistGatePath, "utf8");
+
+  assert.match(gateSource, /refreshCurrentRouteOnSuccess/);
+  assert.match(buttonSource, /useRouter/);
+  assert.match(buttonSource, /refreshCurrentRouteOnSuccess/);
+  assert.match(buttonSource, /router\.refresh\(\)/);
+  assert.match(buttonSource, /if\s*\(refreshCurrentRouteOnSuccess\)[\s\S]*router\.refresh\(\)[\s\S]*return/);
+});
