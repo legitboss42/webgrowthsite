@@ -4,7 +4,8 @@
     "deploymentEnabled": {
       "stage12-visual-redesign-v2": false,
       "feature/blog-social-automation": false,
-      "feature/unified-automation-dashboard": false
+      "feature/unified-automation-dashboard": false,
+      "fix/waitlist-form-after-google-auth": false
     }
   }
 }
