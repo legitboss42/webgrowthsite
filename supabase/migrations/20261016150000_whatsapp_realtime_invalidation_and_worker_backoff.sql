@@ -85,6 +85,9 @@ insert into public.whatsapp_worker_backoff (worker_name)
 values ('automation'), ('campaign')
 on conflict (worker_name) do nothing;
 
+-- Only immediately runnable queue work bypasses backoff. Timer-trigger discovery is
+-- intentionally handled by the periodic automation health probe below, otherwise one
+-- active NO_REPLY automation would keep the entire worker hot forever.
 create or replace function public.whatsapp_worker_has_work(p_worker text)
 returns boolean
 language plpgsql
@@ -117,12 +120,6 @@ begin
       where j.status = 'PENDING'
         and j.due_at <= now()
       limit 1
-    ) or exists (
-      select 1
-      from public.whatsapp_automations a
-      where a.status = 'ACTIVE'
-        and a.trigger_type in ('NO_CUSTOMER_REPLY', 'NO_AGENT_REPLY', 'BUSINESS_HOURS')
-      limit 1
     );
   end if;
 
@@ -140,6 +137,7 @@ declare
   state public.whatsapp_worker_backoff%rowtype;
   has_work boolean;
   next_streak integer;
+  max_delay_minutes integer;
   delay_minutes integer;
 begin
   has_work := public.whatsapp_worker_has_work(p_worker);
@@ -168,14 +166,16 @@ begin
   end if;
 
   next_streak := least(state.idle_streak + 1, 5);
-  delay_minutes := least(15, power(2, greatest(next_streak - 1, 0))::integer);
+  max_delay_minutes := case when p_worker = 'automation' then 5 else 15 end;
+  delay_minutes := least(max_delay_minutes, power(2, greatest(next_streak - 1, 0))::integer);
   update public.whatsapp_worker_backoff
   set idle_streak = next_streak,
       next_probe_at = now() + make_interval(mins => delay_minutes),
       updated_at = now()
   where worker_name = p_worker;
 
-  -- Periodic health probe: 1m -> 2m -> 4m -> 8m -> 15m while idle.
+  -- Automation timer discovery: 1m -> 2m -> 4m -> 5m while queue-idle.
+  -- Campaign health recovery:     1m -> 2m -> 4m -> 8m -> 15m while queue-idle.
   return true;
 end;
 $$;
@@ -186,7 +186,7 @@ grant execute on function public.whatsapp_worker_has_work(text) to service_role;
 grant execute on function public.whatsapp_should_invoke_worker(text) to service_role;
 
 -- Reschedule the existing minute cron ticks. The cheap indexed work check still runs each
--- minute so newly due work wakes immediately, while external HTTP worker calls back off.
+-- minute so newly due queue work wakes immediately, while external HTTP worker calls back off.
 do $$
 begin
   if exists (select 1 from cron.job where jobname = 'webgrowth-whatsapp-automation-processor') then
