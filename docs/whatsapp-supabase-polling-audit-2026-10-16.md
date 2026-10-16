@@ -53,7 +53,7 @@ Both invoked their HTTP processors every minute even when there was no queue wor
 
 | Location | Old interval | What it did | Change |
 | --- | ---: | --- | --- |
-| `AutoRefresh.tsx` | default **10s**, configurable **5–300s** | checks inbox notification endpoint; router refreshes when fingerprint changes, with **60s** reconciliation guard | Realtime is now the fast inbox invalidation path. Migration changes the production setting to **300s** so this becomes a safety reconciliation instead of the primary refresh mechanism. |
+| `AutoRefresh.tsx` | default **10s**, configurable **5–300s**, with a **60s** reconciliation guard | checks inbox notification endpoint and refreshes when its fingerprint changes | Realtime now triggers the notification check immediately. Code fallback is now **300s** by default, clamped to **60–300s**, with a **300s** reconciliation guard; the migration also sets the production inbox setting to **300s**. |
 | `IncomingCallOverlay.tsx` | **2s** | reads active call | Replaced by Realtime `whatsapp_calls`; **30s** fallback reconciliation retained. |
 | `TeamPresenceWidget.tsx` | **15s** | reads team presence + unread mentions | Replaced by Realtime invalidations; **5 min** fallback retained. |
 | `ConversationCollaborationWidget.tsx` | **8s** | reads notes, activity, viewers, mentionable members | Replaced by Realtime invalidations; **60s** fallback retained. |
@@ -95,7 +95,7 @@ The production WhatsApp tables were not in `supabase_realtime`; the implementati
 
 ### Foreground behavior after change
 
-- Inbox: conversation/message changes call `router.refresh()` immediately.
+- Inbox: conversation/message changes refresh the server-rendered inbox immediately; the notification endpoint is also checked immediately for alert state.
 - Calls: `whatsapp_calls` changes refresh active-call state immediately.
 - Presence/mentions: team/member/note invalidations reload the widget immediately.
 - Collaboration: notes/activity/typing/viewer transitions reload immediately.
@@ -163,10 +163,23 @@ The existing idle system spends most of its API budget repeatedly discovering th
 
 The biggest expected reductions are the current ~106/hour duplicate runtime-config reads, ~106/hour active-workspace reads, ~51/hour empty campaign claim RPCs, and the automation/conversation scans caused by unconditional one-minute worker execution.
 
+## Verification
+
+Final branch validation run: GitHub Actions **38927668608**.
+
+- `npm run test:whatsapp` — **229 passed, 0 failed**
+- `npx tsc --noEmit` — passed
+- scoped WhatsApp/API ESLint — **0 errors**; four pre-existing warnings in the scoped paths
+- `npm run build` — passed; optimized Next.js production build compiled and generated successfully
+
+The temporary validation workflow was removed after the successful run and is not part of the intended merge.
+
 ## Files changed
 
 - `src/components/whatsapp/WhatsAppRealtimeProvider.tsx`
 - `src/app/admin/whatsapp/InboxRealtimeRefresh.tsx`
+- `src/app/admin/whatsapp/AutoRefresh.tsx`
+- `src/app/admin/whatsapp/AutoRefresh.test.ts`
 - `src/app/admin/whatsapp/layout.tsx`
 - `src/app/admin/whatsapp/IncomingCallOverlay.tsx`
 - `src/app/admin/whatsapp/TeamPresenceWidget.tsx`
