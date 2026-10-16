@@ -10,20 +10,28 @@ as $$
 declare
   workspace_id_value text;
 begin
-  workspace_id_value := coalesce(to_jsonb(new)->>'workspace_id', to_jsonb(old)->>'workspace_id');
-  if workspace_id_value is null or workspace_id_value = '' then
-    return coalesce(new, old);
+  workspace_id_value := case
+    when tg_op = 'DELETE' then to_jsonb(old)->>'workspace_id'
+    else to_jsonb(new)->>'workspace_id'
+  end;
+
+  if workspace_id_value is not null and workspace_id_value <> '' then
+    perform realtime.send(
+      jsonb_build_object('table', tg_table_name, 'operation', tg_op),
+      'changed',
+      'whatsapp:' || workspace_id_value,
+      false
+    );
   end if;
 
-  perform realtime.send(
-    jsonb_build_object('table', tg_table_name, 'operation', tg_op),
-    'changed',
-    'whatsapp:' || workspace_id_value,
-    false
-  );
-  return coalesce(new, old);
+  if tg_op = 'DELETE' then
+    return old;
+  end if;
+  return new;
 end;
 $$;
+
+revoke all on function public.broadcast_whatsapp_workspace_invalidation() from public, anon, authenticated;
 
 -- One trigger per user-facing table. No row values are broadcast.
 do $$
@@ -172,6 +180,8 @@ begin
 end;
 $$;
 
+revoke all on function public.whatsapp_worker_has_work(text) from public, anon, authenticated;
+revoke all on function public.whatsapp_should_invoke_worker(text) from public, anon, authenticated;
 grant execute on function public.whatsapp_worker_has_work(text) to service_role;
 grant execute on function public.whatsapp_should_invoke_worker(text) to service_role;
 
