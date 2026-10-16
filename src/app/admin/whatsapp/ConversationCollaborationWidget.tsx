@@ -4,6 +4,13 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import type { FormEvent } from "react";
 import TopbarActionPortal from "@/components/whatsapp/TopbarActionPortal";
+import {
+  WHATSAPP_COLLABORATION_FALLBACK_MS,
+  WHATSAPP_COLLABORATION_HEARTBEAT_MS,
+  WHATSAPP_REALTIME_EVENT,
+  matchesWhatsAppRealtimeScope,
+  type WhatsAppRealtimeInvalidation,
+} from "@/lib/whatsapp/pollingPolicy";
 import type { WhatsAppTeamMember } from "@/lib/whatsapp/teamModel";
 
 type CollaborationNote = {
@@ -39,6 +46,15 @@ type CollaborationResponse = {
   viewers?: CollaborationViewer[];
   error?: string;
 };
+
+const REALTIME_SCOPES = [
+  "whatsapp_internal_notes",
+  "whatsapp_note_mentions",
+  "whatsapp_team_activity",
+  "whatsapp_conversation_presence",
+  "whatsapp_team_members",
+  "whatsapp_conversations",
+] as const;
 
 function formatDateTime(value?: string | null) {
   if (!value) return "";
@@ -98,7 +114,7 @@ export default function ConversationCollaborationWidget() {
       setData(payload || {});
       setError(null);
     } catch {
-      // Background collaboration polling can retry on the next interval.
+      // Realtime plus slow reconciliation recovers transient misses without tight polling.
     }
   }, [conversationId]);
 
@@ -127,13 +143,27 @@ export default function ConversationCollaborationWidget() {
       setMentionIds([]);
       return;
     }
+
+    const handleRealtime = (event: Event) => {
+      const detail = (event as CustomEvent<WhatsAppRealtimeInvalidation>).detail;
+      if (matchesWhatsAppRealtimeScope(detail, REALTIME_SCOPES)) void load();
+    };
+    const handleFocus = () => {
+      void heartbeat(false);
+      void load();
+    };
+
     void load();
     void heartbeat(false);
-    const refreshTimer = window.setInterval(() => void load(), 8_000);
-    const heartbeatTimer = window.setInterval(() => void heartbeat(), 12_000);
+    const refreshTimer = window.setInterval(() => void load(), WHATSAPP_COLLABORATION_FALLBACK_MS);
+    const heartbeatTimer = window.setInterval(() => void heartbeat(), WHATSAPP_COLLABORATION_HEARTBEAT_MS);
+    window.addEventListener(WHATSAPP_REALTIME_EVENT, handleRealtime);
+    window.addEventListener("focus", handleFocus);
     return () => {
       window.clearInterval(refreshTimer);
       window.clearInterval(heartbeatTimer);
+      window.removeEventListener(WHATSAPP_REALTIME_EVENT, handleRealtime);
+      window.removeEventListener("focus", handleFocus);
       typingRef.current = false;
       void heartbeat(false);
     };
