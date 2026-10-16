@@ -10,6 +10,15 @@ as $$
 declare
   workspace_id_value text;
 begin
+  -- Conversation-presence heartbeats update last_seen_at every 12 seconds. Broadcasting
+  -- those no-op state refreshes would recreate read polling through Realtime. Only a
+  -- viewer entering/leaving or a typing-state transition needs immediate invalidation.
+  if tg_table_name = 'whatsapp_conversation_presence'
+     and tg_op = 'UPDATE'
+     and (to_jsonb(new)->>'is_typing') is not distinct from (to_jsonb(old)->>'is_typing') then
+    return new;
+  end if;
+
   workspace_id_value := case
     when tg_op = 'DELETE' then to_jsonb(old)->>'workspace_id'
     else to_jsonb(new)->>'workspace_id'
