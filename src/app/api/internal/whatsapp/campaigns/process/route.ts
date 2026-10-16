@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { mutateWhatsAppRest } from "@/app/admin/whatsapp/data";
 import { getWhatsAppCampaignProcessorSecret, processWhatsAppCampaignQueue, secureCampaignSecretEqual } from "@/lib/whatsapp/campaignRuntime";
 import { whatsappServerCache } from "@/lib/whatsapp/serverCache";
 import { getActiveWhatsAppWorkspaceIds } from "@/lib/whatsapp/workspaces";
@@ -19,5 +20,15 @@ export async function POST(request: Request) {
     for (const [key, value] of Object.entries(result)) if (typeof value === "number") aggregate[key] = (aggregate[key] || 0) + value;
     aggregate.workspacesProcessed += 1;
   }
-  return NextResponse.json({ ok: true, ...aggregate });
+
+  const workCount = (aggregate.claimed || 0) + (aggregate.failed || 0) + (aggregate.skipped || 0);
+  const backoff = await mutateWhatsAppRest({
+    method: "POST",
+    pathAndQuery: "rpc/record_whatsapp_worker_result",
+    body: { p_worker_name: "campaign", p_work_count: workCount },
+    unscoped: true,
+  });
+  if (!backoff.ok) console.error("Unable to record WhatsApp campaign worker backoff", { status: backoff.status });
+
+  return NextResponse.json({ ok: true, ...aggregate, workCount });
 }
