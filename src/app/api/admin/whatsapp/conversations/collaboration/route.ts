@@ -6,6 +6,7 @@ import {
 } from "@/app/admin/whatsapp/auth";
 import { mutateWhatsAppRest, readWhatsAppRows } from "@/app/admin/whatsapp/data";
 import { isSameOriginMutation } from "@/lib/scheduler/policy";
+import { WHATSAPP_COLLABORATION_STALE_MS } from "@/lib/whatsapp/pollingPolicy";
 import {
   canWhatsAppRoleSuperviseTeam,
   normalizeWhatsAppTeamMember,
@@ -27,6 +28,7 @@ async function getConversation(conversationId: string) {
 async function getTeamMembers() {
   const rows = await readWhatsAppRows<Record<string, unknown>>(
     "whatsapp_team_members?select=id,google_email,display_name,role,availability,active,google_user_id,last_seen_at,created_at,updated_at&order=display_name.asc",
+    { cacheTtlMs: 15_000 },
   );
   return (rows || []).map(normalizeWhatsAppTeamMember);
 }
@@ -84,7 +86,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Conversation was not found." }, { status: 404 });
   }
 
-  const recentCutoff = new Date(Date.now() - 45_000).toISOString();
+  const recentCutoff = new Date(Date.now() - WHATSAPP_COLLABORATION_STALE_MS).toISOString();
   const [noteRows, activityRows, presenceRows, members] = await Promise.all([
     readWhatsAppRows<Record<string, unknown>>(
       `whatsapp_internal_notes?conversation_id=eq.${encodeURIComponent(conversationId)}&select=id,conversation_id,author_member_id,author_email,body,created_at&order=created_at.asc&limit=100`,
