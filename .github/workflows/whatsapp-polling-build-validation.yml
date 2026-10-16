@@ -18,6 +18,9 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm install --no-audit --no-fund
+      - run: npm run test:whatsapp
+      - run: npx tsc --noEmit
+      - run: npx eslint src/app/admin/whatsapp src/app/api/internal/whatsapp src/components/whatsapp src/lib/whatsapp
       - run: npm run build
         env:
           NODE_ENV: production
