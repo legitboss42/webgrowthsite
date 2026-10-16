@@ -8,9 +8,17 @@ import {
   shouldShowWhatsAppInboxNotification,
   type WhatsAppInboxNotification,
 } from "@/lib/whatsapp/notifications";
+import {
+  WHATSAPP_REALTIME_EVENT,
+  getWhatsAppInboxFallbackMs,
+  matchesWhatsAppRealtimeScope,
+  type WhatsAppRealtimeInvalidation,
+} from "@/lib/whatsapp/pollingPolicy";
 
 export const WHATSAPP_INBOX_REFRESH_INTERVAL_MS = 10_000;
 export const WHATSAPP_INBOX_RECONCILE_INTERVAL_MS = 60_000;
+
+const REALTIME_SCOPES = ["whatsapp_messages", "whatsapp_conversations", "whatsapp_settings"] as const;
 
 type WhatsAppNotificationPermission = NotificationPermission | "unsupported";
 type PushStatus = "checking" | "available" | "subscribed" | "unsupported" | "ios-install-required" | "error";
@@ -109,7 +117,9 @@ export default function WhatsAppInboxAutoRefresh({
   refreshSeconds?: number;
 } = {}) {
   const router = useRouter();
-  const intervalMs = resolveWhatsAppInboxRefreshMs(refreshSeconds);
+  // Realtime handles normal inbox changes. The configured interval is now only a
+  // reconciliation fallback, clamped to at least one minute.
+  const intervalMs = getWhatsAppInboxFallbackMs(refreshSeconds);
   const latestMessageIdRef = useRef<string | undefined>(undefined);
   const fingerprintRef = useRef<string | undefined>(undefined);
   const lastRefreshAtRef = useRef<number | undefined>(undefined);
@@ -241,13 +251,20 @@ export default function WhatsAppInboxAutoRefresh({
       router.refresh();
     };
 
+    const handleRealtime = (event: Event) => {
+      const detail = (event as CustomEvent<WhatsAppRealtimeInvalidation>).detail;
+      if (matchesWhatsAppRealtimeScope(detail, REALTIME_SCOPES)) void check();
+    };
+
     void check();
     const intervalId = window.setInterval(check, intervalMs);
+    window.addEventListener(WHATSAPP_REALTIME_EVENT, handleRealtime);
     window.addEventListener("focus", check);
     window.addEventListener("online", check);
     document.addEventListener("visibilitychange", check);
     return () => {
       window.clearInterval(intervalId);
+      window.removeEventListener(WHATSAPP_REALTIME_EVENT, handleRealtime);
       window.removeEventListener("focus", check);
       window.removeEventListener("online", check);
       document.removeEventListener("visibilitychange", check);
