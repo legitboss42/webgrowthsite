@@ -13,6 +13,7 @@ import { getWhatsAppWorkspaceAccess } from "./auth";
 import AIWorkspaceDeepLink from "./AIWorkspaceDeepLink";
 import AIWorkspaceLayer from "./AIWorkspaceLayer";
 import ConversationFlowLauncher from "./ConversationFlowLauncher";
+import InboxRealtimeRefresh from "./InboxRealtimeRefresh";
 import InstantInteractionLayer from "./InstantInteractionLayer";
 import IncomingCallOverlay from "./IncomingCallOverlay";
 import TeamPresenceWidget from "./TeamPresenceWidget";
@@ -51,6 +52,7 @@ export default async function WhatsAppConsoleLayout({ children }: { children: Re
     <WhatsAppRealtimeProvider workspaceId={access.workspaceId}>
       <WhatsAppShell senderConnected={senderConnected} senderNumber={senderNumber} role={access.role} memberName={access.displayName} workspaceName={access.workspaceName} workspaceControl={workspaceControl} presenceControl={<TeamPresenceWidget senderConnected={senderConnected} />}>
         <MessageStatusVisibilityProvider deliveryStatusVisible={quickSettings.deliveryStatusVisible} readStatusVisible={quickSettings.readStatusVisible}>
+          <InboxRealtimeRefresh />
           <ConversationFilterDock />
           <InstantInteractionLayer />
           <IncomingCallOverlay />
