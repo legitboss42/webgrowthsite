@@ -4,6 +4,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import type { FormEvent } from "react";
 import TopbarActionPortal from "@/components/whatsapp/TopbarActionPortal";
+import { useWhatsAppRealtime } from "@/components/whatsapp/WhatsAppRealtimeProvider";
+import { WHATSAPP_COLLABORATION_FALLBACK_MS } from "@/lib/whatsapp/realtime";
 import type { WhatsAppTeamMember } from "@/lib/whatsapp/teamModel";
 
 type CollaborationNote = {
@@ -98,7 +100,7 @@ export default function ConversationCollaborationWidget() {
       setData(payload || {});
       setError(null);
     } catch {
-      // Background collaboration polling can retry on the next interval.
+      // Realtime or the slow reconciliation fallback will retry.
     }
   }, [conversationId]);
 
@@ -119,6 +121,8 @@ export default function ConversationCollaborationWidget() {
     [conversationId],
   );
 
+  useWhatsAppRealtime("collaboration", () => void load());
+
   useEffect(() => {
     if (!conversationId) {
       setOpen(false);
@@ -129,7 +133,7 @@ export default function ConversationCollaborationWidget() {
     }
     void load();
     void heartbeat(false);
-    const refreshTimer = window.setInterval(() => void load(), 8_000);
+    const refreshTimer = window.setInterval(() => void load(), WHATSAPP_COLLABORATION_FALLBACK_MS);
     const heartbeatTimer = window.setInterval(() => void heartbeat(), 12_000);
     return () => {
       window.clearInterval(refreshTimer);
