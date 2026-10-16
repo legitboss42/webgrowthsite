@@ -8,6 +8,7 @@ import { MessageStatusVisibilityProvider } from "@/components/whatsapp/MessageSt
 import { loadWhatsAppQuickSettings } from "@/lib/whatsapp/quickSettings";
 import { fetchWhatsAppPhoneNumbers, findConfiguredWhatsAppSender } from "@/lib/whatsapp/phoneNumbers";
 import { resolveWhatsAppMetaConfig } from "@/lib/whatsapp/workspaceCredentials";
+import { getWhatsAppWorkspaceRealtimeTopic } from "@/lib/whatsapp/workspaces";
 import { getWhatsAppWorkspaceAccess } from "./auth";
 import AIWorkspaceDeepLink from "./AIWorkspaceDeepLink";
 import AIWorkspaceLayer from "./AIWorkspaceLayer";
@@ -15,6 +16,7 @@ import ConversationFlowLauncher from "./ConversationFlowLauncher";
 import InstantInteractionLayer from "./InstantInteractionLayer";
 import IncomingCallOverlay from "./IncomingCallOverlay";
 import TeamPresenceWidget from "./TeamPresenceWidget";
+import WhatsAppRealtimeBridge from "./WhatsAppRealtimeBridge";
 import WorkspaceCollaborationLayer from "./WorkspaceCollaborationLayer";
 import "./stage12.css";
 import "./stage12-overrides.css";
@@ -33,9 +35,10 @@ export default async function WhatsAppConsoleLayout({ children }: { children: Re
     return <div className="flex min-h-screen items-center justify-center bg-[#050806] px-4 py-10 text-white sm:px-6 sm:py-14"><div className="w-full max-w-3xl rounded-3xl border border-white/10 bg-white/[0.025] p-8 sm:p-10"><p className="text-xs font-semibold uppercase tracking-[.2em] text-emerald-300">WhatsApp Business</p><h1 className="mt-3 text-3xl font-semibold">Sign in through Web Growth Automation</h1><p className="mt-3 max-w-2xl text-sm leading-6 text-white/55">The WhatsApp workspace now shares the Web Growth account session. Workspace membership and role permissions are still verified after sign-in.</p><Link href="/sign-in/?next=/dashboard/whatsapp/" className="mt-6 inline-flex rounded-full bg-emerald-300 px-5 py-2.5 text-sm font-bold text-[#07100c]">Sign in to Web Growth</Link></div></div>;
   }
 
-  const [meta, quickSettings] = await Promise.all([
+  const [meta, quickSettings, realtimeTopic] = await Promise.all([
     resolveWhatsAppMetaConfig({ workspaceId: access.workspaceId }),
     loadWhatsAppQuickSettings({ workspaceId: access.workspaceId }),
+    getWhatsAppWorkspaceRealtimeTopic(access.workspaceId),
   ]);
   const senderConnected = Boolean(meta?.token && meta.phoneNumberId);
   let senderNumber: string | undefined;
@@ -48,6 +51,7 @@ export default async function WhatsAppConsoleLayout({ children }: { children: Re
 
   return (
     <WhatsAppShell senderConnected={senderConnected} senderNumber={senderNumber} role={access.role} memberName={access.displayName} workspaceName={access.workspaceName} workspaceControl={workspaceControl} presenceControl={<TeamPresenceWidget senderConnected={senderConnected} />}>
+      <WhatsAppRealtimeBridge topic={realtimeTopic} />
       <MessageStatusVisibilityProvider deliveryStatusVisible={quickSettings.deliveryStatusVisible} readStatusVisible={quickSettings.readStatusVisible}>
         <ConversationFilterDock />
         <InstantInteractionLayer />
