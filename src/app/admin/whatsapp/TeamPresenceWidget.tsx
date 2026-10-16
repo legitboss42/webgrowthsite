@@ -3,6 +3,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
+  WHATSAPP_PRESENCE_FALLBACK_MS,
+  WHATSAPP_REALTIME_EVENT,
+  matchesWhatsAppRealtimeScope,
+  type WhatsAppRealtimeInvalidation,
+} from "@/lib/whatsapp/pollingPolicy";
+import {
   getWhatsAppPresenceLabel,
   type WhatsAppTeamAvailability,
   type WhatsAppTeamMember,
@@ -28,6 +34,7 @@ type MentionResponse = {
 };
 
 const states: WhatsAppTeamAvailability[] = ["available", "busy", "offline"];
+const REALTIME_SCOPES = ["whatsapp_team_members", "whatsapp_note_mentions", "whatsapp_internal_notes"] as const;
 
 function dotClass(availability: WhatsAppTeamAvailability) {
   if (availability === "available") return "bg-emerald-500";
@@ -72,14 +79,25 @@ export default function TeamPresenceWidget({ senderConnected }: { senderConnecte
       }
       if (mentionsResponse.ok) setMentions(mentionData?.notifications || []);
     } catch {
-      // Presence polling is supplemental. A transient miss should not disrupt the workspace.
+      // Realtime is advisory; the slow fallback and focus reconciliation recover transient misses.
     }
   }, []);
 
   useEffect(() => {
     void load();
-    const timer = window.setInterval(() => void load(), 15_000);
-    return () => window.clearInterval(timer);
+    const fallbackTimer = window.setInterval(() => void load(), WHATSAPP_PRESENCE_FALLBACK_MS);
+    const handleRealtime = (event: Event) => {
+      const detail = (event as CustomEvent<WhatsAppRealtimeInvalidation>).detail;
+      if (matchesWhatsAppRealtimeScope(detail, REALTIME_SCOPES)) void load();
+    };
+    const handleFocus = () => void load();
+    window.addEventListener(WHATSAPP_REALTIME_EVENT, handleRealtime);
+    window.addEventListener("focus", handleFocus);
+    return () => {
+      window.clearInterval(fallbackTimer);
+      window.removeEventListener(WHATSAPP_REALTIME_EVENT, handleRealtime);
+      window.removeEventListener("focus", handleFocus);
+    };
   }, [load]);
 
   useEffect(() => {

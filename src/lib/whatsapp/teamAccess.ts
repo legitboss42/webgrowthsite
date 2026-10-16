@@ -9,8 +9,10 @@ import {
   getDefaultWhatsAppWorkspace,
   readRequestedWhatsAppWorkspaceIdFromRequest,
 } from "./workspaces";
+import { whatsappServerCache } from "./serverCache";
 
 type SupabaseConfig = { url: string; key: string };
+const TEAM_ACCESS_CACHE_MS = 15_000;
 function getConfig(): SupabaseConfig | null {
   const url = process.env.SUPABASE_URL?.trim();
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
@@ -44,14 +46,17 @@ export async function findWhatsAppTeamMemberByEmail(
     limit: "1",
   });
   if (options.activeOnly !== false) query.set("active", "eq.true");
+  const cacheKey = `team-access:${workspaceId}:${normalizedEmail}:${options.activeOnly !== false ? "active" : "all"}`;
 
   try {
-    const response = await fetch(`${config.url}/rest/v1/whatsapp_team_members?${query.toString()}`, {
-      headers: headers(config), cache: "no-store",
+    return await whatsappServerCache.get(cacheKey, TEAM_ACCESS_CACHE_MS, async () => {
+      const response = await fetch(`${config.url}/rest/v1/whatsapp_team_members?${query.toString()}`, {
+        headers: headers(config), cache: "no-store",
+      });
+      if (!response.ok) return null;
+      const rows = await response.json() as Array<Record<string, unknown>>;
+      return rows[0] ? normalizeWhatsAppTeamMember(rows[0]) : null;
     });
-    if (!response.ok) return null;
-    const rows = await response.json() as Array<Record<string, unknown>>;
-    return rows[0] ? normalizeWhatsAppTeamMember(rows[0]) : null;
   } catch { return null; }
 }
 
@@ -77,6 +82,7 @@ export async function bindWhatsAppTeamGoogleIdentity(input: { email: string; goo
         body: JSON.stringify({ google_user_id: input.googleUserId.trim(), last_seen_at: now, updated_at: now }), cache: "no-store",
       }),
     ]);
+    if (usersResponse.ok && membersResponse.ok) whatsappServerCache.invalidate("team-access:");
     return usersResponse.ok && membersResponse.ok;
   } catch { return false; }
 }
@@ -99,5 +105,6 @@ export async function ensureWhatsAppOwnerTeamMember(input: {
     role: "owner",
     createdByEmail: email,
   });
+  whatsappServerCache.invalidate("team-access:");
   return row ? normalizeWhatsAppTeamMember(row) : null;
 }

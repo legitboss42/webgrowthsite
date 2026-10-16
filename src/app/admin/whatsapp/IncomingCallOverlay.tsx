@@ -2,6 +2,12 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import {
+  WHATSAPP_CALL_FALLBACK_MS,
+  WHATSAPP_REALTIME_EVENT,
+  matchesWhatsAppRealtimeScope,
+  type WhatsAppRealtimeInvalidation,
+} from "@/lib/whatsapp/pollingPolicy";
 
 type ActiveCall = {
   callId: string;
@@ -61,7 +67,7 @@ export default function IncomingCallOverlay() {
 
   useEffect(() => {
     let cancelled = false;
-    async function poll() {
+    async function reconcileCall() {
       if (phase === "active" || phase === "connecting" || phase === "ending") return;
       try {
         const response = await fetch("/api/admin/whatsapp/calls/active/", { cache: "no-store" });
@@ -80,12 +86,25 @@ export default function IncomingCallOverlay() {
           setCall(null);
         }
       } catch {
-        // A transient polling failure must not dismiss a call already visible.
+        // Realtime plus fallback reconciliation prevents a transient miss from dismissing a visible call.
       }
     }
-    void poll();
-    const timer = window.setInterval(poll, 2000);
-    return () => { cancelled = true; window.clearInterval(timer); };
+
+    const handleRealtime = (event: Event) => {
+      const detail = (event as CustomEvent<WhatsAppRealtimeInvalidation>).detail;
+      if (matchesWhatsAppRealtimeScope(detail, ["whatsapp_calls"])) void reconcileCall();
+    };
+
+    void reconcileCall();
+    const fallbackTimer = window.setInterval(reconcileCall, WHATSAPP_CALL_FALLBACK_MS);
+    window.addEventListener(WHATSAPP_REALTIME_EVENT, handleRealtime);
+    window.addEventListener("focus", reconcileCall);
+    return () => {
+      cancelled = true;
+      window.clearInterval(fallbackTimer);
+      window.removeEventListener(WHATSAPP_REALTIME_EVENT, handleRealtime);
+      window.removeEventListener("focus", reconcileCall);
+    };
   }, [phase]);
 
   useEffect(() => {

@@ -18,6 +18,7 @@ import {
   getDefaultWhatsAppWorkspace,
   readRequestedWhatsAppWorkspaceIdFromRequest,
 } from "@/lib/whatsapp/workspaces";
+import { whatsappServerCache } from "@/lib/whatsapp/serverCache";
 
 const LEGACY_AI_KNOWLEDGE_RPC = "rpc/search_whatsapp_ai_knowledge";
 const SCOPED_AI_KNOWLEDGE_RPC = "rpc/search_whatsapp_ai_knowledge_scoped";
@@ -33,6 +34,8 @@ type WorkspaceDataOptions = {
   workspaceId?: string | null;
   /** Platform-control-plane escape hatch. Never use this for client-facing data. */
   unscoped?: boolean;
+  /** Short process-local cache. Identical concurrent requests are always coalesced. */
+  cacheTtlMs?: number;
 };
 
 async function resolveDataWorkspaceId(options: WorkspaceDataOptions = {}) {
@@ -43,19 +46,31 @@ async function resolveDataWorkspaceId(options: WorkspaceDataOptions = {}) {
   return (await getDefaultWhatsAppWorkspace())?.id || null;
 }
 
+async function scopedRestPath(pathAndQuery: string, options: WorkspaceDataOptions) {
+  if (options.unscoped) return pathAndQuery;
+  const table = getWhatsAppRestTable(pathAndQuery);
+  if (!WHATSAPP_TENANT_TABLES.has(table)) return pathAndQuery;
+  const workspaceId = await resolveDataWorkspaceId(options);
+  return scopeWhatsAppRestPath(pathAndQuery, workspaceId);
+}
+
 export async function readWhatsAppRows<T>(pathAndQuery: string, options: WorkspaceDataOptions = {}): Promise<T[] | null> {
   const config = getWhatsAppSupabaseConfig();
   if (!config) return null;
-  const workspaceId = await resolveDataWorkspaceId(options);
-  const scopedPath = options.unscoped ? pathAndQuery : scopeWhatsAppRestPath(pathAndQuery, workspaceId);
+  const scopedPath = await scopedRestPath(pathAndQuery, options);
 
-  try {
+  const load = async () => {
     const response = await fetch(`${config.url}/rest/v1/${scopedPath}`, {
       headers: { apikey: config.key, Authorization: `Bearer ${config.key}` },
       cache: "no-store",
     });
     if (!response.ok) throw new Error(`WhatsApp admin fetch failed: ${response.status}`);
     return (await response.json()) as T[];
+  };
+
+  try {
+    // Even ttl=0 coalesces same-tick duplicate callers while the request is in flight.
+    return await whatsappServerCache.get(`rest:rows:${scopedPath}`, Math.max(0, options.cacheTtlMs || 0), load);
   } catch (error) {
     console.error("Unable to read WhatsApp rows", error);
     return null;
@@ -66,10 +81,9 @@ export async function readWhatsAppRows<T>(pathAndQuery: string, options: Workspa
 export async function countWhatsAppRows(pathAndQuery: string, options: WorkspaceDataOptions = {}): Promise<number | null> {
   const config = getWhatsAppSupabaseConfig();
   if (!config) return null;
-  const workspaceId = await resolveDataWorkspaceId(options);
-  const scopedPath = options.unscoped ? pathAndQuery : scopeWhatsAppRestPath(pathAndQuery, workspaceId);
+  const scopedPath = await scopedRestPath(pathAndQuery, options);
 
-  try {
+  const load = async () => {
     const response = await fetch(`${config.url}/rest/v1/${scopedPath}`, {
       headers: {
         apikey: config.key,
@@ -81,6 +95,10 @@ export async function countWhatsAppRows(pathAndQuery: string, options: Workspace
     });
     if (!response.ok) throw new Error(`WhatsApp admin count failed: ${response.status}`);
     return parseWhatsAppContentRangeTotal(response.headers.get("content-range"));
+  };
+
+  try {
+    return await whatsappServerCache.get(`rest:count:${scopedPath}`, Math.max(0, options.cacheTtlMs || 0), load);
   } catch (error) {
     console.error("Unable to count WhatsApp rows", error);
     return null;
@@ -149,7 +167,11 @@ export async function mutateWhatsAppRest(input: {
   const config = getWhatsAppSupabaseConfig();
   if (!config) return { ok: false, status: 503, message: "WhatsApp storage is not configured." };
 
-  const workspaceId = await resolveDataWorkspaceId({ workspaceId: input.workspaceId, unscoped: input.unscoped });
+  const originalTable = getWhatsAppRestTable(input.pathAndQuery);
+  const needsWorkspace = !input.unscoped && (WHATSAPP_TENANT_TABLES.has(originalTable) || input.pathAndQuery === LEGACY_AI_KNOWLEDGE_RPC);
+  const workspaceId = needsWorkspace
+    ? await resolveDataWorkspaceId({ workspaceId: input.workspaceId, unscoped: input.unscoped })
+    : null;
   const rpc = bindWhatsAppScopedRpc({ pathAndQuery: input.pathAndQuery, body: input.body, workspaceId, unscoped: input.unscoped });
   if (!rpc) return { ok: false, status: 503, message: "A trusted WhatsApp workspace is required." };
   const table = getWhatsAppRestTable(rpc.pathAndQuery);
@@ -176,6 +198,8 @@ export async function mutateWhatsAppRest(input: {
       console.error("WhatsApp write rejected", { status: response.status, code: error.code, message: error.message });
       return { ok: false, status: response.status, code: typeof error.code === "string" ? error.code : undefined, message: "The change could not be saved." };
     }
+    // A write may invalidate static lookups or a same-process follow-up read.
+    whatsappServerCache.invalidate("rest:");
     return { ok: true, rows: Array.isArray(payload) ? payload as Array<Record<string, unknown>> : [] };
   } catch (error) {
     console.error("Unable to write WhatsApp rows", error);
