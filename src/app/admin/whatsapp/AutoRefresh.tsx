@@ -4,20 +4,21 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import TopbarActionPortal from "@/components/whatsapp/TopbarActionPortal";
+import { useWhatsAppRealtime } from "@/components/whatsapp/WhatsAppRealtimeProvider";
 import {
   shouldShowWhatsAppInboxNotification,
   type WhatsAppInboxNotification,
 } from "@/lib/whatsapp/notifications";
 
-export const WHATSAPP_INBOX_REFRESH_INTERVAL_MS = 10_000;
-export const WHATSAPP_INBOX_RECONCILE_INTERVAL_MS = 60_000;
+export const WHATSAPP_INBOX_REFRESH_INTERVAL_MS = 300_000;
+export const WHATSAPP_INBOX_RECONCILE_INTERVAL_MS = 300_000;
 
 type WhatsAppNotificationPermission = NotificationPermission | "unsupported";
 type PushStatus = "checking" | "available" | "subscribed" | "unsupported" | "ios-install-required" | "error";
 
 export function resolveWhatsAppInboxRefreshMs(seconds?: number) {
   if (!Number.isFinite(seconds) || seconds === undefined) return WHATSAPP_INBOX_REFRESH_INTERVAL_MS;
-  return Math.min(300, Math.max(5, Math.round(seconds))) * 1000;
+  return Math.min(300, Math.max(60, Math.round(seconds))) * 1000;
 }
 
 export function shouldPauseWhatsAppInboxRefresh(input: {
@@ -114,12 +115,15 @@ export default function WhatsAppInboxAutoRefresh({
   const fingerprintRef = useRef<string | undefined>(undefined);
   const lastRefreshAtRef = useRef<number | undefined>(undefined);
   const originalTitleRef = useRef<string | undefined>(undefined);
+  const checkRef = useRef<() => void>(() => undefined);
   const [permission, setPermission] = useState<WhatsAppNotificationPermission>("unsupported");
   const [pushStatus, setPushStatus] = useState<PushStatus>("checking");
   const [alertsEnabled, setAlertsEnabled] = useState(true);
   const [live, setLive] = useState(true);
   const [inPageAlert, setInPageAlert] = useState<WhatsAppInboxNotification | null>(null);
   const [pushError, setPushError] = useState<string | null>(null);
+
+  useWhatsAppRealtime("inbox", () => checkRef.current());
 
   useEffect(() => {
     originalTitleRef.current = document.title;
@@ -241,12 +245,14 @@ export default function WhatsAppInboxAutoRefresh({
       router.refresh();
     };
 
+    checkRef.current = () => void check();
     void check();
     const intervalId = window.setInterval(check, intervalMs);
     window.addEventListener("focus", check);
     window.addEventListener("online", check);
     document.addEventListener("visibilitychange", check);
     return () => {
+      checkRef.current = () => undefined;
       window.clearInterval(intervalId);
       window.removeEventListener("focus", check);
       window.removeEventListener("online", check);
