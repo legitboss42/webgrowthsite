@@ -40,6 +40,14 @@ declare
   workspace_uuid uuid;
   topic_token text;
 begin
+  -- The 30-second collaboration heartbeat only refreshes last_seen_at. Do not turn
+  -- that liveness write into another read cycle unless typing state actually changed.
+  if tg_table_name = 'whatsapp_conversation_presence'
+     and tg_op = 'UPDATE'
+     and new.is_typing is not distinct from old.is_typing then
+    return null;
+  end if;
+
   workspace_uuid := case when tg_op = 'DELETE' then old.workspace_id else new.workspace_id end;
   if workspace_uuid is null then
     return null;
@@ -83,9 +91,7 @@ begin
     'whatsapp_note_mentions',
     'whatsapp_conversation_presence',
     'whatsapp_calls',
-    'whatsapp_settings',
-    'whatsapp_campaigns',
-    'whatsapp_campaign_recipients'
+    'whatsapp_settings'
   ]
   loop
     execute format(
