@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { useWhatsAppRealtime } from "@/components/whatsapp/WhatsAppRealtimeProvider";
 
 type WindowState = "open" | "closing" | "closed" | "unavailable";
 
@@ -22,42 +23,54 @@ function formatRemaining(milliseconds: number) {
   return `${minutes}m`;
 }
 
+function reconcileWindow(status: ServiceWindowStatus | null): ServiceWindowStatus | null {
+  if (!status?.expiresAt) return status;
+  const expiresAt = Date.parse(status.expiresAt);
+  if (!Number.isFinite(expiresAt)) return status;
+  const remainingMs = expiresAt - Date.now();
+  return {
+    ...status,
+    remainingMs: Math.max(0, remainingMs),
+    state: remainingMs <= 0 ? "closed" : remainingMs <= 2 * 60 * 60 * 1000 ? "closing" : "open",
+  };
+}
+
 export default function ServiceWindowWarning({ enabled }: { enabled: boolean }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const conversationId = searchParams.get("lead") || "";
   const [status, setStatus] = useState<ServiceWindowStatus | null>(null);
 
-  useEffect(() => {
+  const load = useCallback(async () => {
     if (!enabled || !pathname.includes("/admin/whatsapp/conversations") || !conversationId) {
       setStatus(null);
       return;
     }
-
-    let cancelled = false;
-    const controller = new AbortController();
-
-    async function load() {
-      try {
-        const response = await fetch(
-          `/api/admin/whatsapp/service-window/?conversationId=${encodeURIComponent(conversationId)}`,
-          { cache: "no-store", signal: controller.signal },
-        );
-        const payload = (await response.json().catch(() => ({}))) as ServiceWindowStatus;
-        if (!cancelled && response.ok && payload.ok) setStatus(payload);
-      } catch {
-        if (!cancelled) setStatus(null);
-      }
+    try {
+      const response = await fetch(
+        `/api/admin/whatsapp/service-window/?conversationId=${encodeURIComponent(conversationId)}`,
+        { cache: "no-store" },
+      );
+      const payload = (await response.json().catch(() => ({}))) as ServiceWindowStatus;
+      if (response.ok && payload.ok) setStatus(payload);
+    } catch {
+      // A later message invalidation can retry. Keep the last known window meanwhile.
     }
-
-    void load();
-    const timer = window.setInterval(load, 60000);
-    return () => {
-      cancelled = true;
-      controller.abort();
-      window.clearInterval(timer);
-    };
   }, [conversationId, enabled, pathname]);
+
+  useWhatsAppRealtime("inbox", (event) => {
+    if (event.table === "whatsapp_messages") void load();
+  });
+
+  useEffect(() => {
+    void load();
+  }, [load]);
+
+  useEffect(() => {
+    if (!status?.expiresAt) return;
+    const timer = window.setInterval(() => setStatus((current) => reconcileWindow(current)), 60_000);
+    return () => window.clearInterval(timer);
+  }, [status?.expiresAt]);
 
   if (!enabled || !status || status.state === "open" || status.state === "unavailable") return null;
 
