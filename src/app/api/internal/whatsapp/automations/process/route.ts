@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { mutateWhatsAppRest } from "@/app/admin/whatsapp/data";
 import { getWhatsAppAutomationProcessorSecret, processWhatsAppAutomationQueue, secureAutomationSecretEqual } from "@/lib/whatsapp/automationRuntime";
 import { closeInactiveWhatsAppConversations } from "@/lib/whatsapp/conversationLifecycle";
 import { whatsappServerCache } from "@/lib/whatsapp/serverCache";
@@ -30,5 +31,14 @@ export async function POST(request: Request) {
     total.workspacesProcessed += 1;
   }
 
-  return NextResponse.json({ ok: true, ...total });
+  const workCount = total.jobsProcessed + total.jobsFailed + total.timedRunsStarted + total.businessHoursRunsStarted + total.conversations;
+  const backoff = await mutateWhatsAppRest({
+    method: "POST",
+    pathAndQuery: "rpc/record_whatsapp_worker_result",
+    body: { p_worker_name: "automation", p_work_count: workCount },
+    unscoped: true,
+  });
+  if (!backoff.ok) console.error("Unable to record WhatsApp automation worker backoff", { status: backoff.status });
+
+  return NextResponse.json({ ok: true, ...total, workCount });
 }
