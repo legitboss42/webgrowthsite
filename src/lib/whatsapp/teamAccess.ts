@@ -9,17 +9,19 @@ import {
   getDefaultWhatsAppWorkspace,
   readRequestedWhatsAppWorkspaceIdFromRequest,
 } from "./workspaces";
+import { createWhatsAppTtlCache } from "./ttlCache";
 
 type SupabaseConfig = { url: string; key: string };
+const teamMemberCache = createWhatsAppTtlCache<string, WhatsAppTeamMember | null>({ ttlMs: 30_000 });
+
 function getConfig(): SupabaseConfig | null {
   const url = process.env.SUPABASE_URL?.trim();
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
   if (!url || !key) return null;
   return { url: url.replace(/\/$/, ""), key };
 }
-function headers(config: SupabaseConfig, extra: Record<string, string> = {}) {
-  return { apikey: config.key, Authorization: `Bearer ${config.key}`, ...extra };
-}
+function headers(config: SupabaseConfig, extra: Record<string, string> = {}) { return { apikey: config.key, Authorization: `Bearer ${config.key}`, ...extra }; }
+export function clearWhatsAppTeamAccessCache() { teamMemberCache.clear(); }
 
 async function resolveWorkspaceId(value?: string | null) {
   if (isWhatsAppWorkspaceId(value)) return value;
@@ -36,22 +38,23 @@ export async function findWhatsAppTeamMemberByEmail(
   const normalizedEmail = normalizeWhatsAppTeamEmail(email);
   const workspaceId = await resolveWorkspaceId(options.workspaceId);
   if (!config || !normalizedEmail || !workspaceId) return null;
-
-  const query = new URLSearchParams({
-    select: "id,workspace_id,user_id,google_email,display_name,role,availability,active,google_user_id,last_seen_at,created_at,updated_at",
-    google_email: `eq.${normalizedEmail}`,
-    workspace_id: `eq.${workspaceId}`,
-    limit: "1",
-  });
-  if (options.activeOnly !== false) query.set("active", "eq.true");
+  const activeOnly = options.activeOnly !== false;
+  const cacheKey = `${workspaceId}:${normalizedEmail}:${activeOnly ? "active" : "all"}`;
 
   try {
-    const response = await fetch(`${config.url}/rest/v1/whatsapp_team_members?${query.toString()}`, {
-      headers: headers(config), cache: "no-store",
+    return await teamMemberCache.get(cacheKey, async () => {
+      const query = new URLSearchParams({
+        select: "id,workspace_id,user_id,google_email,display_name,role,availability,active,google_user_id,last_seen_at,created_at,updated_at",
+        google_email: `eq.${normalizedEmail}`,
+        workspace_id: `eq.${workspaceId}`,
+        limit: "1",
+      });
+      if (activeOnly) query.set("active", "eq.true");
+      const response = await fetch(`${config.url}/rest/v1/whatsapp_team_members?${query.toString()}`, { headers: headers(config), cache: "no-store" });
+      if (!response.ok) throw new Error(`WhatsApp member read failed: ${response.status}`);
+      const rows = await response.json() as Array<Record<string, unknown>>;
+      return rows[0] ? normalizeWhatsAppTeamMember(rows[0]) : null;
     });
-    if (!response.ok) return null;
-    const rows = await response.json() as Array<Record<string, unknown>>;
-    return rows[0] ? normalizeWhatsAppTeamMember(rows[0]) : null;
   } catch { return null; }
 }
 
@@ -66,38 +69,21 @@ export async function bindWhatsAppTeamGoogleIdentity(input: { email: string; goo
   const now = new Date().toISOString();
   try {
     const [usersResponse, membersResponse] = await Promise.all([
-      fetch(`${config.url}/rest/v1/whatsapp_platform_users?email=eq.${encodeURIComponent(email)}`, {
-        method: "PATCH",
-        headers: headers(config, { "Content-Type": "application/json", Prefer: "return=minimal" }),
-        body: JSON.stringify({ google_user_id: input.googleUserId.trim(), updated_at: now }), cache: "no-store",
-      }),
-      fetch(`${config.url}/rest/v1/whatsapp_team_members?google_email=eq.${encodeURIComponent(email)}&active=eq.true`, {
-        method: "PATCH",
-        headers: headers(config, { "Content-Type": "application/json", Prefer: "return=minimal" }),
-        body: JSON.stringify({ google_user_id: input.googleUserId.trim(), last_seen_at: now, updated_at: now }), cache: "no-store",
-      }),
+      fetch(`${config.url}/rest/v1/whatsapp_platform_users?email=eq.${encodeURIComponent(email)}`, { method: "PATCH", headers: headers(config, { "Content-Type": "application/json", Prefer: "return=minimal" }), body: JSON.stringify({ google_user_id: input.googleUserId.trim(), updated_at: now }), cache: "no-store" }),
+      fetch(`${config.url}/rest/v1/whatsapp_team_members?google_email=eq.${encodeURIComponent(email)}&active=eq.true`, { method: "PATCH", headers: headers(config, { "Content-Type": "application/json", Prefer: "return=minimal" }), body: JSON.stringify({ google_user_id: input.googleUserId.trim(), last_seen_at: now, updated_at: now }), cache: "no-store" }),
     ]);
+    if (usersResponse.ok && membersResponse.ok) clearWhatsAppTeamAccessCache();
     return usersResponse.ok && membersResponse.ok;
   } catch { return false; }
 }
 
-export async function ensureWhatsAppOwnerTeamMember(input: {
-  email: string;
-  displayName?: string | null;
-  workspaceId?: string | null;
-}): Promise<WhatsAppTeamMember | null> {
+export async function ensureWhatsAppOwnerTeamMember(input: { email: string; displayName?: string | null; workspaceId?: string | null }): Promise<WhatsAppTeamMember | null> {
   const email = normalizeWhatsAppTeamEmail(input.email);
   const workspaceId = await resolveWorkspaceId(input.workspaceId);
   if (!email || !workspaceId) return null;
   const existing = await findWhatsAppTeamMemberByEmail(email, { activeOnly: false, workspaceId });
   if (existing?.active && existing.role === "owner") return existing;
-
-  const row = await ensureWhatsAppWorkspaceMembership({
-    workspaceId,
-    email,
-    displayName: input.displayName?.trim() || "Web Growth Owner",
-    role: "owner",
-    createdByEmail: email,
-  });
+  const row = await ensureWhatsAppWorkspaceMembership({ workspaceId, email, displayName: input.displayName?.trim() || "Web Growth Owner", role: "owner", createdByEmail: email });
+  if (row) clearWhatsAppTeamAccessCache();
   return row ? normalizeWhatsAppTeamMember(row) : null;
 }
