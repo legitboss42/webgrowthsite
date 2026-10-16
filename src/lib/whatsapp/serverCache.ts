@@ -1,6 +1,7 @@
 type CacheEntry<T> = {
   expiresAt: number;
   promise: Promise<T>;
+  pending: boolean;
 };
 
 type CacheOptions = {
@@ -13,17 +14,26 @@ export function createWhatsAppServerCache(options: CacheOptions = {}) {
 
   function get<T>(key: string, ttlMs: number, loader: () => Promise<T>): Promise<T> {
     const current = entries.get(key) as CacheEntry<T> | undefined;
-    if (current && current.expiresAt > now()) return current.promise;
+    if (current && (current.pending || current.expiresAt > now())) return current.promise;
 
-    const promise = loader().catch((error) => {
-      const active = entries.get(key);
-      if (active?.promise === promise) entries.delete(key);
-      throw error;
-    });
-    entries.set(key, {
+    const entry: CacheEntry<T> = {
       expiresAt: now() + Math.max(0, ttlMs),
-      promise,
-    });
+      promise: Promise.resolve(undefined as T),
+      pending: true,
+    };
+    const promise = loader()
+      .then((value) => {
+        const active = entries.get(key) as CacheEntry<T> | undefined;
+        if (active === entry) active.pending = false;
+        return value;
+      })
+      .catch((error) => {
+        const active = entries.get(key);
+        if (active === entry) entries.delete(key);
+        throw error;
+      });
+    entry.promise = promise;
+    entries.set(key, entry as CacheEntry<unknown>);
     return promise;
   }
 
@@ -39,7 +49,7 @@ export function createWhatsAppServerCache(options: CacheOptions = {}) {
 
   function has(key: string) {
     const current = entries.get(key);
-    return Boolean(current && current.expiresAt > now());
+    return Boolean(current && (current.pending || current.expiresAt > now()));
   }
 
   return { get, invalidate, has };
