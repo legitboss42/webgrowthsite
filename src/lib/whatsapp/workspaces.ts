@@ -11,15 +11,31 @@ import {
 } from "./workspaceModel";
 import { getWhatsAppRuntimeWorkspaceId } from "./workspaceContext";
 import { normalizeWhatsAppTeamEmail } from "./teamModel";
+import { createWhatsAppTtlCache } from "./ttlCache";
 
 type CookieStoreLike = { get(name: string): { value?: string } | undefined };
 type SupabaseConfig = { url: string; key: string };
+type Row = Record<string, unknown>;
+
+const workspaceQueryCache = createWhatsAppTtlCache<string, Row[]>({ ttlMs: 60_000 });
+
 function config(): SupabaseConfig | null { const url = process.env.SUPABASE_URL?.trim(); const key = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim(); if (!url || !key) return null; return { url: url.replace(/\/$/, ""), key }; }
 function headers(value: SupabaseConfig, extra: Record<string, string> = {}) { return { apikey: value.key, Authorization: `Bearer ${value.key}`, ...extra }; }
-async function getRows(pathAndQuery: string): Promise<Array<Record<string, unknown>>> {
+
+export function clearWhatsAppWorkspaceReadCache() { workspaceQueryCache.clear(); }
+
+async function getRows(pathAndQuery: string): Promise<Row[]> {
   const value = config(); if (!value) return [];
-  try { const response = await fetch(`${value.url}/rest/v1/${pathAndQuery}`, { headers: headers(value), cache: "no-store" }); if (!response.ok) return []; const body = await response.json(); return Array.isArray(body) ? body as Array<Record<string, unknown>> : []; } catch { return []; }
+  try {
+    return await workspaceQueryCache.get(pathAndQuery, async () => {
+      const response = await fetch(`${value.url}/rest/v1/${pathAndQuery}`, { headers: headers(value), cache: "no-store" });
+      if (!response.ok) throw new Error(`WhatsApp workspace read failed: ${response.status}`);
+      const body = await response.json();
+      return Array.isArray(body) ? body as Row[] : [];
+    });
+  } catch { return []; }
 }
+
 export function readRequestedWhatsAppWorkspaceId(cookieStore: CookieStoreLike) { const value = cookieStore.get(WHATSAPP_WORKSPACE_COOKIE)?.value?.trim(); return isWhatsAppWorkspaceId(value) ? value : null; }
 export async function readRequestedWhatsAppWorkspaceIdFromRequest() {
   const runtimeWorkspaceId = getWhatsAppRuntimeWorkspaceId();
@@ -52,8 +68,9 @@ export async function createWhatsAppWorkspace(input: { name: string; slug?: stri
   try {
     const response = await fetch(`${value.url}/rest/v1/whatsapp_workspaces`, { method: "POST", headers: headers(value, { "Content-Type": "application/json", Prefer: "return=representation" }), body: JSON.stringify({ name, slug, status: "ACTIVE", plan_code: "FREE", is_platform_owned: false, created_by_email: normalizeWhatsAppTeamEmail(input.createdByEmail) }), cache: "no-store" });
     if (!response.ok) return { ok: false as const, reason: response.status === 409 ? "DUPLICATE" as const : "FAILED" as const };
-    const rows = await response.json() as Array<Record<string, unknown>>; const workspace = rows[0] ? normalizeWhatsAppWorkspace(rows[0]) : null; if (!workspace) return { ok: false as const, reason: "FAILED" as const };
+    const rows = await response.json() as Row[]; const workspace = rows[0] ? normalizeWhatsAppWorkspace(rows[0]) : null; if (!workspace) return { ok: false as const, reason: "FAILED" as const };
     await fetch(`${value.url}/rest/v1/whatsapp_workspace_entitlements`, { method: "POST", headers: headers(value, { "Content-Type": "application/json", Prefer: "resolution=merge-duplicates,return=minimal" }), body: JSON.stringify({ workspace_id: workspace.id, plan_code: "FREE", max_team_members: 3, max_automations: 5, max_campaign_recipients_monthly: 500, max_ai_requests_daily: 0, features: {} }), cache: "no-store" });
+    clearWhatsAppWorkspaceReadCache();
     if (input.ownerEmail) await ensureWhatsAppWorkspaceMembership({ workspaceId: workspace.id, email: input.ownerEmail, role: "owner", createdByEmail: input.createdByEmail });
     return { ok: true as const, workspace };
   } catch { return { ok: false as const, reason: "FAILED" as const }; }
@@ -62,9 +79,11 @@ export async function ensureWhatsAppWorkspaceMembership(input: { workspaceId: st
   const value = config(); const email = normalizeWhatsAppTeamEmail(input.email); if (!value || !isWhatsAppWorkspaceId(input.workspaceId) || !email) return null;
   try {
     let users = await getRows(`whatsapp_platform_users?email=eq.${encodeURIComponent(email)}&select=id,display_name&limit=1`);
-    if (!users[0]) { const userResponse = await fetch(`${value.url}/rest/v1/whatsapp_platform_users`, { method: "POST", headers: headers(value, { "Content-Type": "application/json", Prefer: "return=representation" }), body: JSON.stringify({ email, display_name: input.displayName?.trim() || email, platform_role: "USER", active: true }), cache: "no-store" }); if (!userResponse.ok) return null; users = await userResponse.json() as Array<Record<string, unknown>>; }
+    if (!users[0]) { const userResponse = await fetch(`${value.url}/rest/v1/whatsapp_platform_users`, { method: "POST", headers: headers(value, { "Content-Type": "application/json", Prefer: "return=representation" }), body: JSON.stringify({ email, display_name: input.displayName?.trim() || email, platform_role: "USER", active: true }), cache: "no-store" }); if (!userResponse.ok) return null; users = await userResponse.json() as Row[]; }
     const userId = String(users[0]?.id || ""); if (!userId) return null;
     const response = await fetch(`${value.url}/rest/v1/whatsapp_team_members?on_conflict=workspace_id,google_email`, { method: "POST", headers: headers(value, { "Content-Type": "application/json", Prefer: "resolution=merge-duplicates,return=representation" }), body: JSON.stringify({ workspace_id: input.workspaceId, user_id: userId, google_email: email, display_name: input.displayName?.trim() || String(users[0]?.display_name || email), role: input.role, availability: "offline", active: true, created_by_email: normalizeWhatsAppTeamEmail(input.createdByEmail), updated_at: new Date().toISOString() }), cache: "no-store" });
-    if (!response.ok) return null; const rows = await response.json() as Array<Record<string, unknown>>; return rows[0] || null;
+    if (!response.ok) return null;
+    clearWhatsAppWorkspaceReadCache();
+    const rows = await response.json() as Row[]; return rows[0] || null;
   } catch { return null; }
 }
