@@ -17,6 +17,22 @@ test("coalesces identical in-flight requests", async () => {
   assert.equal(await second, "ok");
 });
 
+test("coalesces identical zero-ttl reads while they are still in flight", async () => {
+  let calls = 0;
+  const cache = createWhatsAppServerCache();
+  let release!: (value: number) => void;
+  const pending = new Promise<number>((resolve) => { release = resolve; });
+  const loader = async () => { calls += 1; return pending; };
+
+  const first = cache.get("rest:rows:dynamic", 0, loader);
+  const second = cache.get("rest:rows:dynamic", 0, loader);
+  assert.equal(calls, 1);
+  release(7);
+  assert.equal(await first, 7);
+  assert.equal(await second, 7);
+  assert.equal(await cache.get("rest:rows:dynamic", 0, async () => ++calls), 2);
+});
+
 test("serves cached values until ttl expiry", async () => {
   let now = 1_000;
   let calls = 0;
