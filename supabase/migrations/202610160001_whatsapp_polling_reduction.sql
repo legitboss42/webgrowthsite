@@ -66,6 +66,8 @@ begin
 end;
 $$;
 
+revoke all on function public.broadcast_whatsapp_workspace_invalidation() from public, anon, authenticated;
+
 -- Broadcast only tables that feed live user-facing WhatsApp surfaces. The payload
 -- contains table name + operation only; clients re-fetch through authorized routes.
 do $$
@@ -243,6 +245,9 @@ begin
 end;
 $$;
 
+revoke all on function public.whatsapp_worker_has_due_work(text) from public, anon, authenticated;
+revoke all on function public.whatsapp_worker_should_dispatch(text) from public, anon, authenticated;
+revoke all on function public.record_whatsapp_worker_result(text, integer) from public, anon, authenticated;
 grant execute on function public.whatsapp_worker_has_due_work(text) to service_role;
 grant execute on function public.whatsapp_worker_should_dispatch(text) to service_role;
 grant execute on function public.record_whatsapp_worker_result(text, integer) to service_role;
