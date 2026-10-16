@@ -5,6 +5,7 @@ import WhatsAppShell from "@/components/whatsapp/WhatsAppShell";
 import WorkspaceSwitcher from "@/components/whatsapp/WorkspaceSwitcher";
 import ConversationFilterDock from "@/components/whatsapp/ConversationFilterDock";
 import { MessageStatusVisibilityProvider } from "@/components/whatsapp/MessageStatusVisibility";
+import WhatsAppRealtimeProvider from "@/components/whatsapp/WhatsAppRealtimeProvider";
 import { loadWhatsAppQuickSettings } from "@/lib/whatsapp/quickSettings";
 import { fetchWhatsAppPhoneNumbers, findConfiguredWhatsAppSender } from "@/lib/whatsapp/phoneNumbers";
 import { resolveWhatsAppMetaConfig } from "@/lib/whatsapp/workspaceCredentials";
@@ -47,17 +48,19 @@ export default async function WhatsAppConsoleLayout({ children }: { children: Re
   const workspaceControl = <div className="flex items-center gap-2"><WorkspaceSwitcher currentWorkspaceId={access.workspaceId} workspaces={access.availableWorkspaces} platformAdmin={access.platformAdmin} /><Link href="/dashboard/" className="rounded-lg border border-white/10 px-2 py-1 text-[0.6rem] font-semibold text-white/55 hover:text-white">Automation</Link></div>;
 
   return (
-    <WhatsAppShell senderConnected={senderConnected} senderNumber={senderNumber} role={access.role} memberName={access.displayName} workspaceName={access.workspaceName} workspaceControl={workspaceControl} presenceControl={<TeamPresenceWidget senderConnected={senderConnected} />}>
-      <MessageStatusVisibilityProvider deliveryStatusVisible={quickSettings.deliveryStatusVisible} readStatusVisible={quickSettings.readStatusVisible}>
-        <ConversationFilterDock />
-        <InstantInteractionLayer />
-        <IncomingCallOverlay />
-        <WorkspaceCollaborationLayer />
-        <ConversationFlowLauncher />
-        <AIWorkspaceDeepLink />
-        <AIWorkspaceLayer role={access.role} />
-        {children}
-      </MessageStatusVisibilityProvider>
-    </WhatsAppShell>
+    <WhatsAppRealtimeProvider workspaceId={access.workspaceId}>
+      <WhatsAppShell senderConnected={senderConnected} senderNumber={senderNumber} role={access.role} memberName={access.displayName} workspaceName={access.workspaceName} workspaceControl={workspaceControl} presenceControl={<TeamPresenceWidget senderConnected={senderConnected} />}>
+        <MessageStatusVisibilityProvider deliveryStatusVisible={quickSettings.deliveryStatusVisible} readStatusVisible={quickSettings.readStatusVisible}>
+          <ConversationFilterDock />
+          <InstantInteractionLayer />
+          <IncomingCallOverlay />
+          <WorkspaceCollaborationLayer />
+          <ConversationFlowLauncher />
+          <AIWorkspaceDeepLink />
+          <AIWorkspaceLayer role={access.role} />
+          {children}
+        </MessageStatusVisibilityProvider>
+      </WhatsAppShell>
+    </WhatsAppRealtimeProvider>
   );
 }
