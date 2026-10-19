@@ -23,7 +23,8 @@
 - [x] Audit current workloads, storage and required publishing behavior.
 - [x] Design seven-day cron retention and six-hour HTTP response preservation.
 - [x] Implement one-time internal-table compact-and-restore in a single transaction.
-- [x] Configure low-threshold autovacuum on both internal tables.
+- [x] Confirm production table privileges: both internal tables are owned by `supabase_admin` (not `postgres`), so owner-only autovacuum ALTERs are avoided.
+- [x] Schedule permission-safe weekly size-triggered physical compaction (pg_net >32 MiB; cron history >48 MiB).
 - [x] Schedule daily automatic seven-day cron-history pruning.
 - [x] Merge the two one-minute WhatsApp CRON ticks into one minute tick, preserving separate exception handling, due-work checks, per-worker backoff and HTTP processor endpoints.
 - [x] Gate TikTok's five-minute HTTP callback by due posts / unresolved publish attempts, with hourly recovery + cleanup, retaining the existing five-minute schedule and daily cleanup job.
@@ -36,12 +37,12 @@
 ## Operational safety
 The migration temporarily obtains ACCESS EXCLUSIVE locks on `cron.job_run_details` and `net._http_response`, then copies and restores recent rows after TRUNCATE. This reclaims allocated relation pages; ordinary DELETE alone would not. It never modifies WhatsApp messages, customers, credentials, TikTok media, or published content. The operation may briefly block inserts into those two internal tables; schedule a quiet window. If any SQL fails, migration transaction must roll back as a unit. Never run the one-time compaction in fragments.
 
-The new daily job deletes old **completed** cron rows after seven days; ongoing jobs are exempt. The autovacuum tuning supports reuse of pages as new records arrive. TikTok still checks for due work every five minutes; hourly probe handles terminal staging cleanup/health and reconciliation. If user-facing scheduler health UI depends on a five-minute heartbeat, update that expectation accordingly (idle heartbeat can be up to ~65 minutes).
+The new daily job deletes old **completed** cron rows after seven days; ongoing jobs are exempt. A weekly 04:29 UTC Sunday maintenance job compacts `net._http_response` if larger than 32 MiB, or `cron.job_run_details` if larger than 48 MiB, preserving recent/running records under short exclusive locks. TikTok still checks for due work every five minutes; hourly probe handles terminal staging cleanup/health and reconciliation. If user-facing scheduler health UI depends on a five-minute heartbeat, update that expectation accordingly (idle heartbeat can be up to ~65 minutes).
 
 On release, ensure database migration happens at most once. This change has no Next.js code changes, so if none are needed an SQL-only deployment is sufficient; do not create an unnecessary Vercel deployment.
 
 ## Verification
-Run `supabase/tests/20261019_internal_usage_regression.sql` read-only post-migration. Monitor 60 minutes of post-release edge / Postgres events, after allowing the console's cumulative billing meter to catch up. The total Logs Ingest counter should **never** be expected to decrease within its current billing cycle.
+Run `supabase/tests/20261019_internal_usage_regression.sql` read-only post-migration. Verify the weekly size-threshold compaction job is active. Monitor 60 minutes of post-release edge / Postgres events, after allowing the console's cumulative billing meter to catch up. The total Logs Ingest counter should **never** be expected to decrease within its current billing cycle.
 
 ## Rollback
 1. Restore old separate one-minute WhatsApp cron schedules using the prior migration's stored SQL, if combined job fails.
