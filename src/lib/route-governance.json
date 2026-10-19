@@ -990,6 +990,12 @@
       "reason": "Private mockup utility"
     },
     {
+      "path": "/mr-web-social/privacy/",
+      "status": "INDEX",
+      "sitemap": true,
+      "reason": "Public app privacy policy for shared Web Growth and NOUNCompass Meta integration"
+    },
+    {
       "path": "/portfolio/",
       "status": "INDEX",
       "sitemap": true,
