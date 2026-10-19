@@ -34,7 +34,9 @@ select public.whatsapp_worker_has_work('automation') as automation_due,
        public.whatsapp_worker_has_work('campaign') as campaign_due,
        public.scheduler_publish_cron_should_invoke() as tiktok_should_invoke;
 
--- Strict invariants. Exception means release must be investigated.
+-- Strict invariants. The daily cron retention can lag by up to 24 hours,
+-- and pg_net's cleanup is asynchronous. Tolerate ordinary time-boundary rollover.
+-- Exception means release must be investigated.
 do $verify$
 begin
   if (select count(*) from cron.job
@@ -77,14 +79,14 @@ begin
   end if;
 
   if exists (select 1 from cron.job_run_details
-             where start_time < now() - interval '7 days'
+             where start_time < now() - interval '8 days'
                and status is distinct from 'running') then
-    raise exception 'Old cron history remains after compaction';
+    raise exception 'Cron history exceeded the daily retention grace window';
   end if;
 
   if exists (select 1 from net._http_response
-             where created < now() - interval '6 hours') then
-    raise exception 'Expired pg_net responses remain after compaction';
+             where created < now() - interval '7 hours') then
+    raise exception 'pg_net responses exceeded their cleanup grace window';
   end if;
 end
 $verify$;
