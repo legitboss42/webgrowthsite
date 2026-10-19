@@ -25,7 +25,8 @@ where jobname in (
   'webgrowth-whatsapp-processors',
   'webgrowth-tiktok-publish-5m',
   'webgrowth-tiktok-cleanup-daily',
-  'webgrowth-internal-log-retention'
+  'webgrowth-internal-log-retention',
+  'webgrowth-internal-log-compaction'
 )
 order by jobname;
 
@@ -67,6 +68,12 @@ begin
       where jobname = 'webgrowth-internal-log-retention'
         and schedule = '18 3 * * *' and active) <> 1 then
     raise exception 'Seven-day cron history retention is missing';
+  end if;
+
+  if (select count(*) from cron.job
+      where jobname = 'webgrowth-internal-log-compaction'
+        and schedule = '29 4 * * 0' and active) <> 1 then
+    raise exception 'Weekly thresholded internal compaction job is missing';
   end if;
 
   if exists (select 1 from cron.job_run_details
