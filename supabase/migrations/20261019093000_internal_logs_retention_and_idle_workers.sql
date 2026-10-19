@@ -6,18 +6,8 @@
 -- restoration under an ACCESS EXCLUSIVE lock. Schedule during a quiet period.
 -- The application deployment and migration are a SINGLE coordinated release.
 
--- A persistent minimum for autovacuum prevents churn from inflating these
--- internal tables again after the one-time compaction.
-alter table net._http_response set (
-  autovacuum_enabled = true,
-  autovacuum_vacuum_scale_factor = 0.02,
-  autovacuum_vacuum_threshold = 50
-);
-alter table cron.job_run_details set (
-  autovacuum_enabled = true,
-  autovacuum_vacuum_scale_factor = 0.05,
-  autovacuum_vacuum_threshold = 100
-);
+-- Maintenance uses TRUNCATE+restore instead of owner-only ALTER TABLE options.
+-- The connected postgres role can TRUNCATE/INSERT but does not own pg_net/pg_cron tables.
 
 -- Lock before copying to avoid losing pg_net responses or in-flight cron writes.
 -- Keep seven days of completed runs AND any running / timestamp-less runs.
@@ -77,6 +67,64 @@ select cron.schedule(
     delete from cron.job_run_details
     where start_time < now() - interval '7 days'
       and status is distinct from 'running';
+  $cron$
+);
+
+-- Weekly physical compaction only when internal-table storage has grown.
+-- Fast-path does nothing for small tables. The cron history is already pruned
+-- daily; compacting a swollen heap also returns its free pages to disk.
+-- Keep pg_net's six-hour response window and preserve running cron entries.
+do $maintenance_schedule$
+begin
+  if exists (select 1 from cron.job where jobname = 'webgrowth-internal-log-compaction') then
+    perform cron.unschedule('webgrowth-internal-log-compaction');
+  end if;
+end
+$maintenance_schedule$;
+
+select cron.schedule(
+  'webgrowth-internal-log-compaction',
+  '29 4 * * 0',
+  $cron$
+    do $compact$
+    begin
+      if pg_catalog.pg_total_relation_size('net._http_response'::regclass) > 33554432 then
+        lock table net._http_response in access exclusive mode;
+        create temporary table wg_weekly_net_responses on commit drop as
+          select id, status_code, content_type, headers, content,
+                 timed_out, error_msg, created
+          from net._http_response
+          where created >= now() - interval '6 hours';
+        truncate table net._http_response;
+        insert into net._http_response (
+          id, status_code, content_type, headers, content, timed_out,
+          error_msg, created
+        )
+        select id, status_code, content_type, headers, content, timed_out,
+               error_msg, created
+        from wg_weekly_net_responses;
+      end if;
+
+      if pg_catalog.pg_total_relation_size('cron.job_run_details'::regclass) > 50331648 then
+        lock table cron.job_run_details in access exclusive mode;
+        create temporary table wg_weekly_cron_runs on commit drop as
+          select jobid, runid, job_pid, database, username, command,
+                 status, return_message, start_time, end_time
+          from cron.job_run_details
+          where start_time >= now() - interval '7 days'
+             or start_time is null
+             or status = 'running';
+        truncate table cron.job_run_details;
+        insert into cron.job_run_details (
+          jobid, runid, job_pid, database, username, command,
+          status, return_message, start_time, end_time
+        )
+        select jobid, runid, job_pid, database, username, command,
+               status, return_message, start_time, end_time
+        from wg_weekly_cron_runs;
+      end if;
+    end
+    $compact$;
   $cron$
 );
 
