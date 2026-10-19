@@ -49,3 +49,15 @@ Run `supabase/tests/20261019_internal_usage_regression.sql` read-only post-migra
 2. Restore original unconditional TikTok five-minute schedule and reconfiguration function from the 2026-08-21 migration if gated reconciliation causes problems.
 3. Unschedule the new daily log-retention job if it interferes with support needs.
 4. Historical old diagnostic log rows are intentionally removed; they cannot be restored from a rollback. For this reason, verify that preserving seven days is acceptable before applying the migration.
+
+## Pre-release validation (completed; no production writes)
+- Read-only production schema inspection confirmed the exact columns copied/restored in both internal tables.
+- Verified `postgres` has TRUNCATE and INSERT privileges on both; because it is not their owner, removed owner-dependent autovacuum ALTER statements.
+- Confirmed no foreign keys point into either internal table.
+- Verified `configure_tiktok_scheduler_cron` is owned by `postgres` and can be replaced safely during migration.
+- Checked observed scheduler states: zero due TikTok posts, zero reconciliation-eligible publish attempts, and ongoing staging cleanup handled by the hourly probe.
+- Measured ~22,183 cron rows to preserve and ~130,139 historical rows eligible for removal at inspection time. Actual release-time counts will differ.
+- Static SQL lexer check passed for migration and read-only regression SQL: all dollar-quoted sections, strings, and parentheses balanced; expected cron names, schedule guards and cleanup operations present.
+- GitHub comparison: branch ahead of `main` with only the three intended SQL/docs files; `main` unchanged.
+- No production migration, data cleanup, or intentional Vercel deployment has been performed.
+- PostgreSQL integration execution is intentionally pending until the single approved production release; the committed regression SQL will be run immediately afterward.
