@@ -23,9 +23,8 @@ jobs:
         with:
           node-version: '22'
           cache: npm
-      - run: npm ci --ignore-scripts
       - name: Verify only the new agent bridge (no live WhatsApp calls)
-        run: npx tsx --test src/lib/whatsapp/mrwebAgentAuth.test.ts
+        run: npx --yes tsx@4.20.5 --test src/lib/whatsapp/mrwebAgentAuth.test.ts
       - name: Confirm endpoint contains no outbound message/CRM mutation
         shell: bash
         run: |
