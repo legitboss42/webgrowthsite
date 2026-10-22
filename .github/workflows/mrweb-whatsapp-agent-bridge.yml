@@ -1,0 +1,31 @@
+name: Mr Web WhatsApp Agent Bridge (GitHub only)
+on:
+  push:
+    branches: [codex/mrweb-whatsapp-agent-bridge-20261022]
+    paths:
+      - 'src/lib/whatsapp/mrwebAgentAuth.ts'
+      - 'src/lib/whatsapp/mrwebAgentAuth.test.ts'
+      - 'src/app/api/internal/mrweb/whatsapp/route.ts'
+      - '.github/workflows/mrweb-whatsapp-agent-bridge.yml'
+  pull_request:
+    paths:
+      - 'src/lib/whatsapp/mrwebAgentAuth.ts'
+      - 'src/lib/whatsapp/mrwebAgentAuth.test.ts'
+      - 'src/app/api/internal/mrweb/whatsapp/route.ts'
+jobs:
+  bridge-contracts:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Verify only the new agent bridge (no live WhatsApp calls)
+        run: npx --yes tsx@4.20.5 --test src/lib/whatsapp/mrwebAgentAuth.test.ts
+      - name: Confirm endpoint contains no outbound message/CRM mutation
+        shell: bash
+        run: |
+          ! grep -Eq 'sendWhatsAppText|sendWhatsAppMedia|mutateWhatsAppRest|processWhatsAppAutomationQueue' src/app/api/internal/mrweb/whatsapp/route.ts
