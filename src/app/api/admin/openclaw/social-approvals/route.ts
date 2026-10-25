@@ -6,6 +6,7 @@ import { getWhatsAppWorkspaceAccess } from "@/app/admin/whatsapp/auth";
 import { isSameOriginMutation } from "@/lib/scheduler/policy";
 import { createSchedulerSupabaseClient } from "@/lib/scheduler/supabase";
 import { ownerApprovalDigest, type DelegatedAction } from "@/lib/openclaw/socialIamDelegation";
+import { META_ACCOUNT_BINDINGS } from "@/lib/openclaw/socialMetaAccountBinding";
 
 export const runtime="nodejs";
 const HEADERS={"Cache-Control":"no-store,max-age=0"};
@@ -25,14 +26,27 @@ export async function POST(request:Request) {
     proposal=JSON.parse(raw);
   }catch{return reply({ok:false,error:"INVALID_REQUEST"},400);}
   const action=proposal?.action;
-  if(!action||action.business!=="webgrowth"||!AGENTS.has(action.agent)||
-     !OPS.has(action.operation)||typeof action.resource!=="string"||
+  if(!action||!["webgrowth","nouncompass"].includes(action.business)||
+     !AGENTS.has(action.agent)||!OPS.has(action.operation)||
+     (action.business==="nouncompass" &&
+       (!["mr-web","zara"].includes(action.agent) || !action.operation.startsWith("meta.")))||
+     (action.business==="webgrowth" && action.operation.startsWith("meta.") &&
+       !["mr-web","zara"].includes(action.agent))||
+     (action.business==="webgrowth" && action.operation.startsWith("whatsapp.") &&
+       !["mr-web","mercy"].includes(action.agent))||
+     typeof action.resource!=="string"||
      !/^[a-zA-Z0-9-]{4,60}$/.test(action.resource)||
      !/^ap_[a-zA-Z0-9_-]{8,100}$/.test(proposal.approvalId||"")||
      !action.data||typeof action.data!=="object"||Array.isArray(action.data)||
      Object.keys(action).some(k=>!["business","agent","operation","resource","data"].includes(k)))
     return reply({ok:false,error:"INVALID_PROPOSAL"},400);
 
+  if(action.operation.startsWith("meta.")) {
+    const page=action.operation.startsWith("meta.page.");
+    const exact=META_ACCOUNT_BINDINGS[action.business as "webgrowth"|"nouncompass"];
+    if(!exact || action.resource!==(page?exact.page:exact.instagram))
+      return reply({ok:false,error:"BUSINESS_RESOURCE_MISMATCH"},403);
+  }
   const store=await cookies();
   if(!(await hasContentAutomationAdminAccess(store)))
     return reply({ok:false,error:"ADMIN_AUTH_REQUIRED"},401);
