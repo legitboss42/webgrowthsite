@@ -4,7 +4,7 @@ import { createHash, randomUUID } from "node:crypto";
 import { createSchedulerSupabaseClient } from "@/lib/scheduler/supabase";
 
 export type DelegatedAction = {
-  business: "webgrowth";
+  business: "webgrowth" | "nouncompass";
   agent: string;
   operation: string;
   resource: string;
@@ -40,7 +40,7 @@ export async function verifyDelegatedOperation(
   let action: DelegatedAction;
   try { action = JSON.parse(e.body) as DelegatedAction; }
   catch { throw new DelegationDenied("INVALID_ACTION"); }
-  if (!action || action.business !== "webgrowth" || !SAFE.test(action.agent) ||
+  if (!action || !["webgrowth","nouncompass"].includes(action.business) || !SAFE.test(action.agent) ||
       !SAFE.test(action.operation) || !SAFE.test(action.resource) ||
       (action.approvalId !== undefined && !/^ap_[a-zA-Z0-9_-]{8,100}$/.test(action.approvalId)) ||
       (action.data !== undefined && (typeof action.data !== "object" || !action.data ||
@@ -105,6 +105,15 @@ export async function verifyDelegatedOperation(
 
 export function validateProviderApproval(action: DelegatedAction) {
   const mutating = new Set(["meta.page.post","meta.instagram.prepare","meta.instagram.publish","whatsapp.reply"]);
+  if(action.business==="nouncompass" && (action.operation.startsWith("whatsapp.") ||
+     !["mr-web","zara"].includes(action.agent)))
+    throw new DelegationDenied("BUSINESS_ROLE_OR_PROVIDER_DENIED");
+  if(action.business==="webgrowth" && action.operation.startsWith("meta.") &&
+     !["mr-web","zara"].includes(action.agent))
+    throw new DelegationDenied("SOCIAL_AGENT_ROLE_DENIED");
+  if(action.business==="webgrowth" && action.operation.startsWith("whatsapp.") &&
+     !["mr-web","mercy"].includes(action.agent))
+    throw new DelegationDenied("WHATSAPP_AGENT_ROLE_DENIED");
   if (mutating.has(action.operation) && !action.approvalId)
     throw new DelegationDenied("OWNER_APPROVAL_REQUIRED");
   if (!mutating.has(action.operation) && !new Set(["social.connection.status","meta.page.profile","meta.instagram.profile","whatsapp.phone.profile",...mutating]).has(action.operation))
