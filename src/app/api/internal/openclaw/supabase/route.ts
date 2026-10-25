@@ -1,7 +1,7 @@
 import "server-only";
 import { NextResponse } from "next/server";
 import { createSchedulerSupabaseClient } from "@/lib/scheduler/supabase";
-import { verifyDelegatedOperation, consumeSiteOwnerApproval, DelegationDenied, type DelegatedAction } from "@/lib/openclaw/socialIamDelegation";
+import { verifyDelegatedOperation, DelegationDenied, type DelegatedAction } from "@/lib/openclaw/socialIamDelegation";
 import { validateSupabaseDelegation, isSupabaseWrite, WEBGROWTH_SUPABASE_PROJECT, SupabaseDelegationDenied } from "@/lib/openclaw/supabaseDelegationPolicy";
 
 export const runtime="nodejs";
@@ -66,10 +66,11 @@ export async function POST(request:Request) {
     const action=await verifyDelegatedOperation(envelope);
     validateSupabaseDelegation(action);
     if(isSupabaseWrite(action.operation)) {
-      if(!action.approvalId)throw new DelegationDenied("OWNER_APPROVAL_REQUIRED");
-      // An independently authenticated Web Growth owner-session approval
-      // has to bind the same operation, project and exact payload digest.
-      await consumeSiteOwnerApproval(action);
+      // Fail closed until the original audited website approval gate explicitly
+      // supports and verifies supabase.audit.create exact-owner receipts.
+      // Capability and approved-action requests remain represented by the
+      // native agent, but provider execution MUST NOT proceed via this route.
+      throw new DelegationDenied("SUPABASE_WRITE_OWNER_GATE_NOT_ACTIVATED");
     }
     const result=await execute(action);
     return reply({ok:true,result});
