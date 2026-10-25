@@ -107,7 +107,7 @@ export function validateProviderApproval(action: DelegatedAction) {
   const mutating = new Set(["meta.page.post","meta.instagram.prepare","meta.instagram.publish","whatsapp.reply"]);
   if (mutating.has(action.operation) && !action.approvalId)
     throw new DelegationDenied("OWNER_APPROVAL_REQUIRED");
-  if (!mutating.has(action.operation) && !new Set(["meta.page.profile","meta.instagram.profile","whatsapp.phone.profile",...mutating]).has(action.operation))
+  if (!mutating.has(action.operation) && !new Set(["social.connection.status","meta.page.profile","meta.instagram.profile","whatsapp.phone.profile",...mutating]).has(action.operation))
     throw new DelegationDenied("OPERATION_NOT_ALLOWED");
 }
 
