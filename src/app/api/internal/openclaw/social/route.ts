@@ -3,6 +3,8 @@ import { NextResponse } from "next/server";
 import { createSocialAutomationStore } from "@/lib/socialAutomation/storeServer";
 import { createMetaClient } from "@/lib/socialAutomation/metaClient";
 import { selectManagedMetaAccount } from "@/lib/openclaw/socialMetaAccountBinding";
+import { META_ACCOUNT_BINDINGS } from "@/lib/openclaw/socialMetaAccountBinding";
+import { verifyMetaPageAndInstagram } from "@/lib/socialAutomation/metaReadOnlyVerifier";
 import { verifyDelegatedOperation, validateProviderApproval,
          consumeSiteOwnerApproval, DelegationDenied, type DelegatedAction } from "@/lib/openclaw/socialIamDelegation";
 import { resolveWhatsAppMetaConfig } from "@/lib/whatsapp/workspaceCredentials";
@@ -53,9 +55,34 @@ async function metaGraph(input:{
 }
 
 async function execute(action:DelegatedAction):Promise<Record<string,unknown>> {
-  if(action.operation==="social.connection.status")return {
-    roleValidated:true,business:action.business,writeMode:"OWNER_APPROVAL_GATED"
-  };
+  if(action.operation==="social.connection.status") {
+    const base={roleValidated:true,business:action.business,
+      writeMode:"OWNER_APPROVAL_GATED"};
+    if(action.business!=="nouncompass")return base;
+    // Signed non-mutating operational health check, never exposes tokens,
+    // account identifiers, account names, message bodies or Graph response.
+    const conn=await createSocialAutomationStore().getMetaConnectionWithTokens();
+    if(!conn||conn.summary.reconnectRequired||!conn.tokens.userAccessToken)
+      throw new DelegationDenied("NOUNCOMPASS_OAUTH_REQUIRED");
+    let pages;
+    try {
+      pages=await createMetaClient({graphVersion:process.env.META_GRAPH_VERSION||""})
+        .listManagedPages({userAccessToken:conn.tokens.userAccessToken});
+    }catch{throw new DelegationDenied("NOUNCOMPASS_PAGE_DISCOVERY_FAILED");}
+    const binding=META_ACCOUNT_BINDINGS.nouncompass;
+    const selected=selectManagedMetaAccount("nouncompass","meta.page.profile",binding.page,pages);
+    if(!selected)throw new DelegationDenied("NOUNCOMPASS_ACCOUNT_PAIR_UNAVAILABLE");
+    const check=await verifyMetaPageAndInstagram({
+      graphVersion:process.env.META_GRAPH_VERSION||"",
+      pageId:binding.page,instagramId:binding.instagram,
+      pageAccessToken:selected.pageToken
+    });
+    return {...base,meta:{
+      pageVerified:check.facebook.ok,instagramVerified:check.instagram.ok,
+      pageHttp:check.facebook.httpStatus,instagramHttp:check.instagram.httpStatus,
+      publishingRightsVerified:false
+    }};
+  }
   if(action.operation.startsWith("meta.")) {
     const conn=await createSocialAutomationStore().getMetaConnectionWithTokens();
     if(!conn||conn.summary.reconnectRequired)
