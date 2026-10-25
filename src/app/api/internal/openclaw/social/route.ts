@@ -1,6 +1,10 @@
 import "server-only";
 import { NextResponse } from "next/server";
 import { createSocialAutomationStore } from "@/lib/socialAutomation/storeServer";
+import { createMetaClient } from "@/lib/socialAutomation/metaClient";
+import { selectManagedMetaAccount } from "@/lib/openclaw/socialMetaAccountBinding";
+import { META_ACCOUNT_BINDINGS } from "@/lib/openclaw/socialMetaAccountBinding";
+import { verifyMetaPageAndInstagram } from "@/lib/socialAutomation/metaReadOnlyVerifier";
 import { verifyDelegatedOperation, validateProviderApproval,
          consumeSiteOwnerApproval, DelegationDenied, type DelegatedAction } from "@/lib/openclaw/socialIamDelegation";
 import { resolveWhatsAppMetaConfig } from "@/lib/whatsapp/workspaceCredentials";
@@ -51,16 +55,62 @@ async function metaGraph(input:{
 }
 
 async function execute(action:DelegatedAction):Promise<Record<string,unknown>> {
-  if(action.operation==="social.connection.status")return {roleValidated:true,business:"webgrowth",writeMode:"OWNER_APPROVAL_GATED"};
+  if(action.operation==="social.connection.status") {
+    const base={roleValidated:true,business:action.business,
+      writeMode:"OWNER_APPROVAL_GATED"};
+    if(action.business!=="nouncompass")return base;
+    // Signed non-mutating operational health check, never exposes tokens,
+    // account identifiers, account names, message bodies or Graph response.
+    const conn=await createSocialAutomationStore().getMetaConnectionWithTokens();
+    if(!conn||conn.summary.reconnectRequired||!conn.tokens.userAccessToken)
+      throw new DelegationDenied("NOUNCOMPASS_OAUTH_REQUIRED");
+    let pages;
+    try {
+      pages=await createMetaClient({graphVersion:process.env.META_GRAPH_VERSION||""})
+        .listManagedPages({userAccessToken:conn.tokens.userAccessToken});
+    }catch{throw new DelegationDenied("NOUNCOMPASS_PAGE_DISCOVERY_FAILED");}
+    const binding=META_ACCOUNT_BINDINGS.nouncompass;
+    const selected=selectManagedMetaAccount("nouncompass","meta.page.profile",binding.page,pages);
+    if(!selected)throw new DelegationDenied("NOUNCOMPASS_ACCOUNT_PAIR_UNAVAILABLE");
+    const check=await verifyMetaPageAndInstagram({
+      graphVersion:process.env.META_GRAPH_VERSION||"",
+      pageId:binding.page,instagramId:binding.instagram,
+      pageAccessToken:selected.pageToken
+    });
+    return {...base,meta:{
+      pageVerified:check.facebook.ok,instagramVerified:check.instagram.ok,
+      pageHttp:check.facebook.httpStatus,instagramHttp:check.instagram.httpStatus,
+      publishingRightsVerified:false
+    }};
+  }
   if(action.operation.startsWith("meta.")) {
     const conn=await createSocialAutomationStore().getMetaConnectionWithTokens();
-    if(!conn||conn.summary.reconnectRequired||!conn.tokens.pageAccessToken)
+    if(!conn||conn.summary.reconnectRequired)
       throw new DelegationDenied("META_AUTH_UNAVAILABLE");
-    const page=action.operation.startsWith("meta.page.");
-    const expected=page?conn.summary.facebookPageId:conn.summary.instagramAccountId;
-    if(!expected||expected!==action.resource)
-      throw new DelegationDenied("BUSINESS_RESOURCE_MISMATCH");
-    const core={version:process.env.META_GRAPH_VERSION||"",id:expected,token:conn.tokens.pageAccessToken};
+    const version=process.env.META_GRAPH_VERSION||"";
+    // Exactly one account pair is authorized for each registered business.
+    // Never send a NOUNCompass action using the Web Growth-selected Page token.
+    let account;
+    if(action.business==="webgrowth") {
+      account=selectManagedMetaAccount("webgrowth",action.operation,action.resource,[{
+        facebookPageId:conn.summary.facebookPageId||"",
+        instagramAccountId:conn.summary.instagramAccountId||"",
+        pageAccessToken:conn.tokens.pageAccessToken||""
+      }]);
+    } else {
+      if(!conn.tokens.userAccessToken)
+        throw new DelegationDenied("NOUNCOMPASS_OAUTH_REQUIRED");
+      let pages;
+      try {
+        pages=await createMetaClient({graphVersion:version}).listManagedPages({
+          userAccessToken:conn.tokens.userAccessToken
+        });
+      } catch {throw new DelegationDenied("NOUNCOMPASS_OAUTH_UNAVAILABLE");}
+      account=selectManagedMetaAccount("nouncompass",action.operation,action.resource,pages);
+    }
+    if(!account)throw new DelegationDenied("BUSINESS_RESOURCE_MISMATCH");
+    const expected=account.graphId;
+    const core={version,id:expected,token:account.pageToken};
     switch(action.operation) {
       case "meta.page.profile": {
         const response=await metaGraph({...core,fields:{fields:"id,name,followers_count"}});
