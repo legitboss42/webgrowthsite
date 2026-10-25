@@ -14,7 +14,7 @@ const HEADERS = {"Cache-Control":"no-store,max-age=0"};
 const NOUNCOMPASS_PAGE = "102469882650501";
 const NOUNCOMPASS_INSTAGRAM = "17841446869937750";
 
-export function summarizeNouncompassPageAccess(
+function summarizeNouncompassPageAccess(
   pages:Array<{
     facebookPageId:string;
     instagramAccountId:string;
