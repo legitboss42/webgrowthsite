@@ -51,6 +51,7 @@ async function metaGraph(input:{
 }
 
 async function execute(action:DelegatedAction):Promise<Record<string,unknown>> {
+  if(action.operation==="social.connection.status")return {roleValidated:true,business:"webgrowth",writeMode:"OWNER_APPROVAL_GATED"};
   if(action.operation.startsWith("meta.")) {
     const conn=await createSocialAutomationStore().getMetaConnectionWithTokens();
     if(!conn||conn.summary.reconnectRequired||!conn.tokens.pageAccessToken)
