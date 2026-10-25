@@ -110,3 +110,31 @@ export function validateProviderApproval(action: DelegatedAction) {
   if (!mutating.has(action.operation) && !new Set(["meta.page.profile","meta.instagram.profile","whatsapp.phone.profile",...mutating]).has(action.operation))
     throw new DelegationDenied("OPERATION_NOT_ALLOWED");
 }
+
+
+export function ownerApprovalDigest(action: DelegatedAction) {
+  return sha(JSON.stringify({
+    business:action.business,agent:action.agent,operation:action.operation,
+    resource:action.resource,data:action.data||{}
+  }));
+}
+
+export async function consumeSiteOwnerApproval(action: DelegatedAction) {
+  const mutating=new Set(["meta.page.post","meta.instagram.prepare","meta.instagram.publish","whatsapp.reply"]);
+  if(!mutating.has(action.operation))return;
+  if(!action.approvalId)throw new DelegationDenied("OWNER_APPROVAL_REQUIRED");
+  const db=createSchedulerSupabaseClient();
+  const {data:approval,error}=await db.from("openclaw_social_approvals")
+    .select("approval_id,business_id,agent_id,operation,resource_id,payload_digest,expires_at,used_at")
+    .eq("approval_id",action.approvalId).maybeSingle();
+  if(error||!approval||approval.business_id!==action.business||
+     approval.agent_id!==action.agent||approval.operation!==action.operation||
+     approval.resource_id!==action.resource||approval.payload_digest!==ownerApprovalDigest(action)||
+     Boolean(approval.used_at)||Date.parse(approval.expires_at)<Date.now())
+    throw new DelegationDenied("OWNER_APPROVAL_NOT_VERIFIED");
+  // CAS update guarantees exact approval cannot be used more than once.
+  const {data:consumed,error:updateError}=await db.from("openclaw_social_approvals")
+    .update({used_at:new Date().toISOString()}).eq("approval_id",action.approvalId)
+    .is("used_at",null).select("approval_id").maybeSingle();
+  if(updateError||!consumed)throw new DelegationDenied("OWNER_APPROVAL_ALREADY_USED");
+}
