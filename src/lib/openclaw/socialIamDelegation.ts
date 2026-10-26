@@ -10,6 +10,7 @@ export type DelegatedAction = {
   resource: string;
   data?: Record<string, unknown>;
   approvalId?: string;
+  telegramApproval?: { source: "telegram"; expiresAt: string };
 };
 export type StsEvidence = {
   headers: Record<string,string>;
@@ -25,6 +26,16 @@ const STS_BODY = "Action=GetCallerIdentity&Version=2011-06-15";
 const AUDIENCE = "webgrowth.info/openclaw-social-v1";
 const EXPECTED_ROLE = "arn:aws:sts::849662766503:assumed-role/mr-web-ai-ssm/";
 const SAFE = /^[a-zA-Z0-9_.:@/-]{1,128}$/;
+const verifiedActions = new WeakSet<object>();
+
+function validateTelegramReceipt(action: DelegatedAction) {
+  const receipt=action.telegramApproval;
+  if(!receipt || receipt.source!=="telegram" || !action.approvalId ||
+     Object.keys(receipt).some(k=>!["source","expiresAt"].includes(k)) ||
+     typeof receipt.expiresAt!=="string" ||
+     !Number.isFinite(Date.parse(receipt.expiresAt)) || Date.parse(receipt.expiresAt)<=Date.now())
+    throw new DelegationDenied("TELEGRAM_APPROVAL_INVALID");
+}
 
 function sha(text: string) { return createHash("sha256").update(text).digest("hex"); }
 
@@ -45,8 +56,9 @@ export async function verifyDelegatedOperation(
       (action.approvalId !== undefined && !/^ap_[a-zA-Z0-9_-]{8,100}$/.test(action.approvalId)) ||
       (action.data !== undefined && (typeof action.data !== "object" || !action.data ||
        Array.isArray(action.data))) ||
-      Object.keys(action).some(k=>!["business","agent","operation","resource","data","approvalId"].includes(k))
+      Object.keys(action).some(k=>!["business","agent","operation","resource","data","approvalId","telegramApproval"].includes(k))
   ) throw new DelegationDenied("INVALID_ACTION");
+  if(action.telegramApproval!==undefined) validateTelegramReceipt(action);
 
   const incoming:Record<string,string> = {};
   for (const [k,v] of Object.entries(e.headers)) {
@@ -100,6 +112,7 @@ export async function verifyDelegatedOperation(
   });
   if (!await reserve(e.nonce,action.approvalId||null))
     throw new DelegationDenied("DUPLICATE_OR_UNAVAILABLE_APPROVAL");
+  verifiedActions.add(action);
   return action;
 }
 
@@ -132,6 +145,14 @@ export async function consumeSiteOwnerApproval(action: DelegatedAction) {
   const mutating=new Set(["meta.page.post","meta.instagram.prepare","meta.instagram.publish","whatsapp.reply"]);
   if(!mutating.has(action.operation))return;
   if(!action.approvalId)throw new DelegationDenied("OWNER_APPROVAL_REQUIRED");
+  // Only the trusted broker adds this receipt AFTER atomic exact Telegram approval
+  // consumption. STS binds the receipt and complete action; reservation above
+  // enforces one-time approval ID and nonce use independently in this backend.
+  if(action.telegramApproval!==undefined) {
+    if(!verifiedActions.has(action))throw new DelegationDenied("OWNER_APPROVAL_NOT_VERIFIED");
+    validateTelegramReceipt(action);
+    return;
+  }
   const db=createSchedulerSupabaseClient();
   const {data:approval,error}=await db.from("openclaw_social_approvals")
     .select("approval_id,business_id,agent_id,operation,resource_id,payload_digest,expires_at,used_at")
@@ -147,3 +168,4 @@ export async function consumeSiteOwnerApproval(action: DelegatedAction) {
     .is("used_at",null).select("approval_id").maybeSingle();
   if(updateError||!consumed)throw new DelegationDenied("OWNER_APPROVAL_ALREADY_USED");
 }
+
