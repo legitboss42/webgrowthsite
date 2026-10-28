@@ -18,7 +18,22 @@ const projects = [
   { slug: "i-fitness", url: "https://i-fitness-preview.vercel.app/" },
   { slug: "tlc-interiors", url: "https://tlc-interiors-limited.vercel.app/" },
   { slug: "jluxe", url: "https://www.jluxemedicalaesthetics.com/" },
-] ;
+  { slug: "jimtop-site", url: "https://jimtop-site.vercel.app/" },
+  { slug: "noun-compass", url: "https://nouncompass.me/" },
+];
+
+const requestedProjectSlugs = process.argv.slice(2);
+const requestedProjectSlugSet = new Set(requestedProjectSlugs);
+const selectedProjects = requestedProjectSlugSet.size
+  ? projects.filter((project) => requestedProjectSlugSet.has(project.slug))
+  : projects;
+const unknownProjectSlugs = requestedProjectSlugs.filter(
+  (slug) => !projects.some((project) => project.slug === slug),
+);
+
+if (unknownProjectSlugs.length) {
+  throw new Error(`Unknown portfolio project slug(s): ${unknownProjectSlugs.join(", ")}`);
+}
 
 const viewports = [
   { key: "desktop", width: 1440, height: 1080 },
@@ -235,6 +250,7 @@ async function captureProject(browser, project) {
   return {
     slug: project.slug,
     url: project.url,
+    capturedAt: new Date().toISOString(),
     ...details,
     rawScreenshots: viewports.map((viewport) => `/images/portfolio/raw/${project.slug}-${viewport.key}.png`),
     coverImage: `/images/portfolio/${project.slug}-cover.webp`,
@@ -247,7 +263,7 @@ async function main() {
 
   try {
     const results = [];
-    for (const project of projects) {
+    for (const project of selectedProjects) {
       console.log(`Capturing ${project.slug}...`);
       const result = await captureProject(browser, project);
       results.push(result);

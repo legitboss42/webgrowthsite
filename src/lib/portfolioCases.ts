@@ -147,6 +147,64 @@ export const portfolioCases: PortfolioCase[] = [
     imageAlt: "Composite portfolio cover for BaseYield across desktop, tablet, and mobile",
     liveUrl: "https://base-yield-eight.vercel.app/",
   },
+  {
+    slug: "jimtop-site",
+    title: "JIMTOP Nigeria Ltd",
+    client: "JIMTOP Nigeria Ltd",
+    type: "Business Sites",
+    status: "Live",
+    industry: "Engineering and ICT infrastructure",
+    projectType: "Multi-page service business website",
+    purpose:
+      "A service website built to make JIMTOP's engineering and ICT capabilities easier to explore and contact the team about.",
+    summary:
+      "A multi-page business site that organises JIMTOP's capabilities, company information, and contact route for prospective clients.",
+    whatToNotice:
+      "Notice how visitors can move from the capability overview to detailed service pages and a direct contact path.",
+    deliveredImprovements: [
+      "Capability-led information structure",
+      "Dedicated service pages",
+      "Responsive contact path",
+    ],
+    stack: [
+      "Multi-page service architecture",
+      "Service-category navigation",
+      "Responsive mobile menu and contact links",
+    ],
+    tags: ["Business Website", "Engineering", "Responsive Build"],
+    imageUrl: "/images/portfolio/jimtop-site-cover.webp",
+    imageAlt: "JIMTOP Nigeria Ltd website shown across desktop, tablet, and mobile screens",
+    liveUrl: "https://jimtop-site.vercel.app/",
+  },
+  {
+    slug: "noun-compass",
+    title: "NOUN Compass",
+    client: "NOUN Compass",
+    type: "Product Sites",
+    status: "Live",
+    industry: "Student education resources",
+    projectType: "Student resource website",
+    purpose:
+      "A student resource website that groups NOUN admission, registration, academic, and study-centre guidance in one navigable place.",
+    summary:
+      "A guide and tools website that organises student resources, course materials, fee and portal guidance, and exam preparation.",
+    whatToNotice:
+      "Notice the navigation from main resource sections into student guides, course materials, and online tools.",
+    deliveredImprovements: [
+      "Resource-led navigation",
+      "Organised study and portal guides",
+      "Mobile-friendly content paths",
+    ],
+    stack: [
+      "Guide and category information architecture",
+      "Content and tool discovery",
+      "Responsive resource navigation",
+    ],
+    tags: ["Education", "Resource Website", "Content Platform"],
+    imageUrl: "/images/portfolio/noun-compass-cover.webp",
+    imageAlt: "NOUN Compass student resource website shown across desktop, tablet, and mobile screens",
+    liveUrl: "https://nouncompass.me/",
+  },
 ];
 
 export const featuredPortfolioCases = portfolioCases.filter((item) => item.featured);

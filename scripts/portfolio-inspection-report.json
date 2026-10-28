@@ -1,0 +1,106 @@
+[
+  {
+    "slug": "jimtop-site",
+    "url": "https://jimtop-site.vercel.app/",
+    "capturedAt": "2026-10-28T06:10:17.503Z",
+    "inspectedUrl": "https://jimtop-site.vercel.app/",
+    "finalUrl": "https://jimtop-site.vercel.app/",
+    "title": "JIMTOP Nigeria Ltd | Engineering & ICT Infrastructure in Nigeria",
+    "metaDescription": "JIMTOP Nigeria Ltd delivers telecommunications, IT, cybersecurity, security systems, electrical/mechanical engineering, networking, digital transformation, and project management for government and enterprise.",
+    "h1": [
+      "Engineering & ICT Infrastructure Built to Perform, Built to Last"
+    ],
+    "nav": [
+      "Capabilities",
+      "About",
+      "Contact",
+      "Talk to an Engineer"
+    ],
+    "headings": [
+      "Infrastructure that keeps operating",
+      "What you can expect",
+      "Capabilities",
+      "Telecommunications",
+      "Software & IT Solutions",
+      "Electronic Security",
+      "Electrical Engineering",
+      "Mechanical Engineering",
+      "Cybersecurity",
+      "Digital Transformation",
+      "Network & Connectivity",
+      "Project Management",
+      "Why top organisations choose JIMTOP",
+      "Proven Expertise"
+    ],
+    "paragraphs": [
+      "35+ Years • Government & Enterprise Delivery",
+      "JIMTOP Nigeria Ltd delivers telecommunications, power, security, and digital systems for organizations that demand reliability, safety, and disciplined execution (across Nigeria, Africa, and beyond).",
+      "In telecom, IT, power, and security projects, “completion” is not the goal; performance is. JIMTOP delivers infrastructure designed to remain stable under real operating conditions: harsh environments, complex sites, multi-stakeholder approvals, and tight delivery windows.",
+      "We execute projects for government and corporate clients across telecommunications and network infrastructure, cybersecurity solutions, electronic security systems, electrical engineering and renewables, mechanical systems, and structured project management.",
+      "Explore our core capabilities below. Each page outlines deliverables, typical use cases, and how we execute.",
+      "Tower, mast and monopole projects delivered with safe installation, inspections, corrosion protection, and lifecycle maintenance."
+    ],
+    "rawScreenshots": [
+      "/images/portfolio/raw/jimtop-site-desktop.png",
+      "/images/portfolio/raw/jimtop-site-tablet.png",
+      "/images/portfolio/raw/jimtop-site-mobile.png"
+    ],
+    "coverImage": "/images/portfolio/jimtop-site-cover.webp"
+  },
+  {
+    "slug": "noun-compass",
+    "url": "https://nouncompass.me/",
+    "capturedAt": "2026-10-28T06:10:26.831Z",
+    "inspectedUrl": "https://nouncompass.me/",
+    "finalUrl": "https://nouncompass.me/",
+    "title": "NOUN Student Guides for Admission, Fees, Portal, and Results",
+    "metaDescription": "Independent NOUN student guides for admission, school fees, portal tasks, results, study centres, GST courses, and student support.",
+    "h1": [
+      "Everything you need to succeed at NOUN"
+    ],
+    "nav": [
+      "Home",
+      "Admissions",
+      "Student guides",
+      "Course materials",
+      "GST guides",
+      "Study centres",
+      "Exam preparation",
+      "Examination guides",
+      "Results help",
+      "Tools",
+      "Portal help",
+      "School fees"
+    ],
+    "headings": [
+      "Quick access",
+      "Practice Exams",
+      "Course Materials",
+      "Student Tools",
+      "Updates & Guides",
+      "Powerful tools for smarter study",
+      "Identified course codes",
+      "Initial practice courses",
+      "Semester Pass access",
+      "Published student guides",
+      "Get more from your revision with the Semester Pass",
+      "Recently updated student guidance",
+      "Common NELFUND Problems NOUN Students Face",
+      "How NOUN Students Apply For NELFUND"
+    ],
+    "paragraphs": [
+      "Access exam preparation, course materials, student tools, fees information and practical guidance in one independent platform built for NOUN students.",
+      "Independent student support. NounCompass is not NOUN. Confirm final fees, dates and account details on official university pages.",
+      "Find the matching material and review current study guidance.",
+      "Open the part of NounCompass that matches what you need to do now.",
+      "Generate a private, source-grounded practice set from a matching course material.",
+      "Search the indexed NOUN course-material library by the code on your registration record."
+    ],
+    "rawScreenshots": [
+      "/images/portfolio/raw/noun-compass-desktop.png",
+      "/images/portfolio/raw/noun-compass-tablet.png",
+      "/images/portfolio/raw/noun-compass-mobile.png"
+    ],
+    "coverImage": "/images/portfolio/noun-compass-cover.webp"
+  }
+]
