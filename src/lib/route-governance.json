@@ -1531,6 +1531,16 @@
       "status": "REDIRECT",
       "sitemap": false,
       "destination": "/blog/website-launch-checklist-for-small-businesses/"
+    },
+    {
+      "slug": "small-business-seo-monthly-cost",
+      "status": "INDEX",
+      "sitemap": true
+    },
+    {
+      "slug": "small-business-website-maintenance-plan",
+      "status": "INDEX",
+      "sitemap": true
     }
   ]
 }
